@@ -27,6 +27,7 @@ impl [u8] {
     #[rustc_const_stable(feature = "const_slice_is_ascii", since = "1.74.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii(&self) -> bool {
         is_ascii(self)
     }
@@ -71,6 +72,7 @@ impl [u8] {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn eq_ignore_ascii_case(&self, other: &[u8]) -> bool {
         if self.len() != other.len() {
             return false;
@@ -94,6 +96,7 @@ impl [u8] {
     /// ASCII case-insensitive equality check without chunk-at-a-time
     /// optimization.
     #[inline]
+    #[ferrocene::prevalidated]
     const fn eq_ignore_ascii_case_simple(&self, other: &[u8]) -> bool {
         // FIXME(const-hack): This implementation can be reverted when
         // `core::iter::zip` is allowed in const. The original implementation:
@@ -231,6 +234,7 @@ impl [u8] {
     #[must_use = "this returns the escaped bytes as an iterator, \
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
+    #[ferrocene::prevalidated]
     pub fn escape_ascii(&self) -> EscapeAscii<'_> {
         EscapeAscii { inner: self.iter().flat_map(EscapeByte) }
     }
@@ -331,6 +335,7 @@ impl_fn_for_zst! {
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct EscapeAscii<'a> {
     inner: iter::FlatMap<super::Iter<'a, u8>, ascii::EscapeDefault, EscapeByte>,
 }
@@ -380,6 +385,7 @@ impl<'a> iter::DoubleEndedIterator for EscapeAscii<'a> {
 impl<'a> iter::FusedIterator for EscapeAscii<'a> {}
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Display for EscapeAscii<'a> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // disassemble iterator, including front/back parts of flatmap in case it has been partially consumed
         let (front, slice, back) = self.clone().inner.into_parts();
@@ -392,6 +398,7 @@ impl<'a> fmt::Display for EscapeAscii<'a> {
             f.write_char(byte as char)?;
         }
 
+        #[ferrocene::prevalidated]
         fn needs_escape(b: u8) -> bool {
             b > 0x7E || b < 0x20 || b == b'\\' || b == b'\'' || b == b'"'
         }
@@ -424,6 +431,7 @@ impl<'a> fmt::Display for EscapeAscii<'a> {
 }
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 impl<'a> fmt::Debug for EscapeAscii<'a> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EscapeAscii").finish_non_exhaustive()
     }
@@ -437,6 +445,7 @@ impl<'a> fmt::Debug for EscapeAscii<'a> {
 #[unstable(feature = "str_internals", issue = "none")]
 #[doc(hidden)]
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
     while let [rest @ .., last] = bytes {
         if !last.is_ascii() {
@@ -465,6 +474,7 @@ pub const fn is_ascii_simple(mut bytes: &[u8]) -> bool {
 )))]
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)] // fallback impl has same behavior
+#[ferrocene::prevalidated]
 const fn is_ascii(s: &[u8]) -> bool {
     // The runtime version behaves the same as the compiletime version, it's
     // just more optimized.
@@ -475,6 +485,7 @@ const fn is_ascii(s: &[u8]) -> bool {
         } else {
             /// Returns `true` if any byte in the word `v` is nonascii (>= 128). Snarfed
             /// from `../str/mod.rs`, which does something similar for utf8 validation.
+            #[ferrocene::prevalidated]
             const fn contains_nonascii(v: usize) -> bool {
                 const NONASCII_MASK: usize = usize::repeat_u8(0x80);
                 (NONASCII_MASK & v) != 0

@@ -110,6 +110,7 @@ use crate::{fmt, slice};
 // want `repr(transparent)` but we don't want it to show up in rustdoc, so we hide it under
 // `cfg(doc)`. This is an ad-hoc implementation of attribute privacy.
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 pub struct CStr {
     // FIXME: this should not be represented with a DST slice but rather with
     //        just a raw `c_char` along with some form of marker to make
@@ -135,6 +136,7 @@ pub struct CStr {
 /// ```
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[stable(feature = "core_c_str", since = "1.64.0")]
+#[ferrocene::prevalidated]
 pub enum FromBytesWithNulError {
     /// Data provided contains an interior nul byte at byte `position`.
     InteriorNul {
@@ -185,6 +187,7 @@ impl fmt::Display for FromBytesUntilNulError {
 /// presented as hex escape sequences.
 #[stable(feature = "cstr_debug", since = "1.3.0")]
 impl fmt::Debug for CStr {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(crate::bstr::ByteStr::from_bytes(self.to_bytes()), f)
     }
@@ -266,6 +269,7 @@ impl CStr {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_from_ptr", since = "1.81.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a CStr {
         // SAFETY: The caller has provided a pointer that points to a valid C
         // string with a NUL terminator less than `isize::MAX` from `ptr`.
@@ -365,6 +369,7 @@ impl CStr {
     /// ```
     #[stable(feature = "cstr_from_bytes", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[ferrocene::prevalidated]
     pub const fn from_bytes_with_nul(bytes: &[u8]) -> Result<&Self, FromBytesWithNulError> {
         let nul_pos = memchr::memchr(0, bytes);
         match nul_pos {
@@ -402,6 +407,7 @@ impl CStr {
     #[stable(feature = "cstr_from_bytes", since = "1.10.0")]
     #[rustc_const_stable(feature = "const_cstr_unchecked", since = "1.59.0")]
     #[rustc_allow_const_fn_unstable(const_eval_select)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_bytes_with_nul_unchecked(bytes: &[u8]) -> &CStr {
         const_eval_select!(
             @capture { bytes: &[u8] } -> &CStr:
@@ -573,6 +579,7 @@ impl CStr {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[ferrocene::prevalidated]
     pub const fn to_bytes(&self) -> &[u8] {
         let bytes = self.to_bytes_with_nul();
         // FIXME(const-hack) replace with range index
@@ -599,6 +606,7 @@ impl CStr {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cstr_methods", since = "1.72.0")]
+    #[ferrocene::prevalidated]
     pub const fn to_bytes_with_nul(&self) -> &[u8] {
         // SAFETY: Transmuting a slice of `c_char`s to a slice of `u8`s
         // is safe on all supported targets.
@@ -764,6 +772,7 @@ impl const AsRef<CStr> for CStr {
 #[inline]
 #[unstable(feature = "cstr_internals", issue = "none")]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 const unsafe fn strlen(ptr: *const c_char) -> usize {
     const_eval_select!(
         @capture { s: *const c_char = ptr } -> usize:

@@ -15,6 +15,7 @@ use crate::num::NonZero;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
+#[ferrocene::prevalidated]
 pub struct Zip<A, B> {
     a: A,
     b: B,
@@ -23,9 +24,11 @@ pub struct Zip<A, B> {
     len: usize,
 }
 impl<A: Iterator, B: Iterator> Zip<A, B> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(a: A, b: B) -> Zip<A, B> {
         ZipImpl::new(a, b)
     }
+    #[ferrocene::prevalidated]
     fn super_nth(&mut self, mut n: usize) -> Option<(A::Item, B::Item)> {
         while let Some(x) = Iterator::next(self) {
             if n == 0 {
@@ -67,6 +70,7 @@ impl<A: Iterator, B: Iterator> Zip<A, B> {
 /// assert!(iter.next().is_none());
 /// ```
 #[stable(feature = "iter_zip", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub fn zip<A, B>(a: A, b: B) -> Zip<A::IntoIter, B::IntoIter>
 where
     A: IntoIterator,
@@ -84,21 +88,25 @@ where
     type Item = (A::Item, B::Item);
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Self::Item> {
         ZipImpl::next(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         ZipImpl::size_hint(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         ZipImpl::nth(self, n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -158,6 +166,7 @@ trait ZipImpl<A, B> {
 // in intermediary impls.
 macro_rules! zip_impl_general_defaults {
     () => {
+        #[ferrocene::prevalidated]
         default fn new(a: A, b: B) -> Self {
             Zip {
                 a,
@@ -168,6 +177,7 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         default fn next(&mut self) -> Option<(A::Item, B::Item)> {
             let x = self.a.next()?;
             let y = self.b.next()?;
@@ -175,6 +185,7 @@ macro_rules! zip_impl_general_defaults {
         }
 
         #[inline]
+        #[ferrocene::prevalidated]
         default fn nth(&mut self, n: usize) -> Option<Self::Item> {
             self.super_nth(n)
         }
@@ -225,6 +236,7 @@ where
     zip_impl_general_defaults! {}
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn size_hint(&self) -> (usize, Option<usize>) {
         let (a_lower, a_upper) = self.a.size_hint();
         let (b_lower, b_upper) = self.b.size_hint();
@@ -250,6 +262,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     default fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -508,6 +521,7 @@ unsafe impl<A: InPlaceIterable, B> InPlaceIterable for Zip<A, B> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A: Debug, B: Debug> Debug for Zip<A, B> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ZipFmt::fmt(self, f)
     }
@@ -518,6 +532,7 @@ trait ZipFmt<A, B> {
 }
 
 impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
+    #[ferrocene::prevalidated]
     default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Zip").field("a", &self.a).field("b", &self.b).finish()
     }
@@ -526,6 +541,7 @@ impl<A: Debug, B: Debug> ZipFmt<A, B> for Zip<A, B> {
 impl<A: Debug + TrustedRandomAccessNoCoerce, B: Debug + TrustedRandomAccessNoCoerce> ZipFmt<A, B>
     for Zip<A, B>
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // It's *not safe* to call fmt on the contained iterators, since once
         // we start iterating they're in strange, potentially unsafe, states.
@@ -605,6 +621,7 @@ pub unsafe trait TrustedRandomAccess: TrustedRandomAccessNoCoerce {}
 #[rustc_specialization_trait]
 pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
     // Convenience method.
+    #[ferrocene::prevalidated]
     fn size(&self) -> usize
     where
         Self: Iterator,
@@ -668,6 +685,7 @@ trait SpecFold: Iterator {
 impl<A: Iterator, B: Iterator> SpecFold for Zip<A, B> {
     // Adapted from default impl from the Iterator trait
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

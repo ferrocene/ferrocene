@@ -8,10 +8,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_eq(self, other)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         SpecArrayEq::spec_ne(self, other)
     }
@@ -24,6 +26,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U]) -> bool {
         match other.as_array::<N>() {
             Some(b) => *self == *b,
@@ -31,6 +34,7 @@ where
         }
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U]) -> bool {
         match other.as_array::<N>() {
             Some(b) => *self != *b,
@@ -46,6 +50,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         match self.as_array::<N>() {
             Some(b) => *b == *other,
@@ -53,6 +58,7 @@ where
         }
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         match self.as_array::<N>() {
             Some(b) => *b != *other,
@@ -68,10 +74,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &&[U]) -> bool {
         *self == **other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &&[U]) -> bool {
         *self != **other
     }
@@ -84,10 +92,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }
@@ -100,10 +110,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &&mut [U]) -> bool {
         *self == **other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &&mut [U]) -> bool {
         *self != **other
     }
@@ -116,10 +128,12 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U; N]) -> bool {
         **self == *other
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &[U; N]) -> bool {
         **self != *other
     }
@@ -141,9 +155,11 @@ const trait SpecArrayEq<Other, const N: usize>: Sized {
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T: [const] PartialEq<Other>, Other, const N: usize> const SpecArrayEq<Other, N> for T {
+    #[ferrocene::prevalidated]
     default fn spec_eq(a: &[Self; N], b: &[Other; N]) -> bool {
         a[..] == b[..]
     }
+    #[ferrocene::prevalidated]
     default fn spec_ne(a: &[Self; N], b: &[Other; N]) -> bool {
         a[..] != b[..]
     }

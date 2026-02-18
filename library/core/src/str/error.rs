@@ -45,6 +45,7 @@ use crate::fmt;
 /// ```
 #[derive(Copy, Eq, PartialEq, Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Utf8Error {
     pub(super) valid_up_to: usize,
     pub(super) error_len: Option<u8>,
@@ -77,6 +78,7 @@ impl Utf8Error {
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn valid_up_to(&self) -> usize {
         self.valid_up_to
     }
@@ -100,6 +102,7 @@ impl Utf8Error {
     #[rustc_const_stable(feature = "const_str_from_utf8_shared", since = "1.63.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn error_len(&self) -> Option<usize> {
         // FIXME(const-hack): This should become `map` again, once it's `const`
         match self.error_len {
@@ -111,6 +114,7 @@ impl Utf8Error {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Display for Utf8Error {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(error_len) = self.error_len {
             write!(

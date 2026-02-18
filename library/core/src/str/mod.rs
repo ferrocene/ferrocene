@@ -103,6 +103,7 @@ use iter::SplitInternal;
 #[track_caller]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
 #[cfg(not(panic = "immediate-abort"))]
+#[ferrocene::prevalidated]
 const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
     crate::intrinsics::const_eval_select((s, begin, end), slice_error_fail_ct, slice_error_fail_rt)
 }
@@ -115,11 +116,13 @@ const fn slice_error_fail(s: &str, begin: usize, end: usize) -> ! {
 
 #[track_caller]
 #[ferrocene::annotation("Cannot be covered as this only runs during compilation.")]
+#[ferrocene::prevalidated]
 const fn slice_error_fail_ct(_: &str, _: usize, _: usize) -> ! {
     panic!("failed to slice string");
 }
 
 #[track_caller]
+#[ferrocene::prevalidated]
 fn slice_error_fail_rt(s: &str, begin: usize, end: usize) -> ! {
     const MAX_DISPLAY_LENGTH: usize = 256;
     let trunc_len = s.floor_char_boundary(MAX_DISPLAY_LENGTH);
@@ -194,6 +197,7 @@ impl str {
     #[rustc_no_implicit_autorefs]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn len(&self) -> usize {
         self.as_bytes().len()
     }
@@ -214,6 +218,7 @@ impl str {
     #[rustc_no_implicit_autorefs]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -292,6 +297,7 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8"]
+    #[ferrocene::prevalidated]
     pub const fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error> {
         converts::from_utf8(v)
     }
@@ -325,6 +331,7 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "const_str_from_utf8", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_mut"]
+    #[ferrocene::prevalidated]
     pub const fn from_utf8_mut(v: &mut [u8]) -> Result<&mut str, Utf8Error> {
         converts::from_utf8_mut(v)
     }
@@ -357,6 +364,7 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_unchecked"]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_utf8_unchecked(v: &[u8]) -> &str {
         // SAFETY: converts::from_utf8_unchecked has the same safety requirements as this function.
         unsafe { converts::from_utf8_unchecked(v) }
@@ -382,6 +390,7 @@ impl str {
     #[stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_const_stable(feature = "inherent_str_constructors", since = "1.87.0")]
     #[rustc_diagnostic_item = "str_inherent_from_utf8_unchecked_mut"]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_utf8_unchecked_mut(v: &mut [u8]) -> &mut str {
         // SAFETY: converts::from_utf8_unchecked_mut has the same safety requirements as this function.
         unsafe { converts::from_utf8_unchecked_mut(v) }
@@ -414,6 +423,7 @@ impl str {
     #[stable(feature = "is_char_boundary", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_is_char_boundary", since = "1.86.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_char_boundary(&self, index: usize) -> bool {
         // 0 is always ok.
         // Test for 0 explicitly so that it can optimize out the check
@@ -463,6 +473,7 @@ impl str {
     #[stable(feature = "round_char_boundary", since = "1.91.0")]
     #[rustc_const_stable(feature = "round_char_boundary", since = "1.91.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn floor_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
@@ -506,6 +517,7 @@ impl str {
     #[stable(feature = "round_char_boundary", since = "1.91.0")]
     #[rustc_const_stable(feature = "round_char_boundary", since = "1.91.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn ceil_char_boundary(&self, index: usize) -> usize {
         if index >= self.len() {
             self.len()
@@ -539,6 +551,7 @@ impl str {
     #[must_use]
     #[inline(always)]
     #[allow(unused_attributes)]
+    #[ferrocene::prevalidated]
     pub const fn as_bytes(&self) -> &[u8] {
         // SAFETY: const sound because we transmute two types with the same layout
         unsafe { mem::transmute(self) }
@@ -584,6 +597,7 @@ impl str {
     #[rustc_const_stable(feature = "const_str_as_mut", since = "1.83.0")]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         // SAFETY: the cast from `&str` to `&[u8]` is safe since `str`
         // has the same layout as `&[u8]` (only std can make this guarantee).
@@ -615,6 +629,7 @@ impl str {
     #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(&self) -> *const u8 {
         self as *const str as *const u8
     }
@@ -633,6 +648,7 @@ impl str {
     #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr(&mut self) -> *mut u8 {
         self as *mut str as *mut u8
     }
@@ -726,6 +742,7 @@ impl str {
     /// ```
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub unsafe fn get_unchecked<I: SliceIndex<str>>(&self, i: I) -> &I::Output {
         // SAFETY: the caller must uphold the safety contract for `get_unchecked`;
         // the slice is dereferenceable because `self` is a safe reference.
@@ -1114,6 +1131,7 @@ impl str {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[rustc_diagnostic_item = "str_chars"]
+    #[ferrocene::prevalidated]
     pub fn chars(&self) -> Chars<'_> {
         Chars { iter: self.as_bytes().iter() }
     }
@@ -1171,6 +1189,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn char_indices(&self) -> CharIndices<'_> {
         CharIndices { front_offset: 0, iter: self.chars() }
     }
@@ -1194,6 +1213,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn bytes(&self) -> Bytes<'_> {
         Bytes(self.as_bytes().iter().copied())
     }
@@ -1459,6 +1479,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_starts_with"]
+    #[ferrocene::prevalidated]
     pub fn starts_with<P: Pattern>(&self, pat: P) -> bool {
         pat.is_prefix_of(self)
     }
@@ -1484,6 +1505,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "str_ends_with"]
+    #[ferrocene::prevalidated]
     pub fn ends_with<P: Pattern>(&self, pat: P) -> bool
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -1535,6 +1557,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn find<P: Pattern>(&self, pat: P) -> Option<usize> {
         pat.into_searcher(self).next_match().map(|(i, _)| i)
     }
@@ -1752,6 +1775,7 @@ impl str {
     /// ```
     #[stable(feature = "split_inclusive", since = "1.51.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn split_inclusive<P: Pattern>(&self, pat: P) -> SplitInclusive<'_, P> {
         SplitInclusive(SplitInternal {
             start: 0,
@@ -2847,6 +2871,7 @@ impl str {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn parse<F: FromStr>(&self) -> Result<F, F::Err> {
         FromStr::from_str(self)
     }
@@ -2925,6 +2950,7 @@ impl str {
     #[rustc_const_stable(feature = "const_eq_ignore_ascii_case", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn eq_ignore_ascii_case(&self, other: &str) -> bool {
         self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
     }
@@ -3235,6 +3261,7 @@ impl str {
     /// for example references to `Box<str>` or `Arc<str>`.
     #[inline]
     #[unstable(feature = "str_as_str", issue = "130366")]
+    #[ferrocene::prevalidated]
     pub const fn as_str(&self) -> &str {
         self
     }
@@ -3244,6 +3271,7 @@ impl str {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<[u8]> for str {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
     }
@@ -3254,6 +3282,7 @@ impl const AsRef<[u8]> for str {
 impl const Default for &str {
     /// Creates an empty str
     #[inline]
+    #[ferrocene::prevalidated]
     fn default() -> Self {
         ""
     }

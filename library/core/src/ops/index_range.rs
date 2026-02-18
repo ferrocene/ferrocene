@@ -12,6 +12,7 @@ use crate::ub_checks;
 ///  which takes extra checks compared to only handling the canonical form.)
 #[derive(Debug)]
 #[derive_const(Clone, Eq, PartialEq)]
+#[ferrocene::prevalidated]
 pub(crate) struct IndexRange {
     start: usize,
     end: usize,
@@ -23,6 +24,7 @@ impl IndexRange {
     /// - `start <= end`
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub(crate) const unsafe fn new_unchecked(start: usize, end: usize) -> Self {
         ub_checks::assert_unsafe_precondition!(
             check_library_ub,
@@ -33,21 +35,25 @@ impl IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn zero_to(end: usize) -> Self {
         IndexRange { start: 0, end }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn start(&self) -> usize {
         self.start
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn end(&self) -> usize {
         self.end
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn len(&self) -> usize {
         // SAFETY: By invariant, this cannot wrap
         // Using the intrinsic because a UB check here impedes LLVM optimization. (#131563)
@@ -57,6 +63,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
+    #[ferrocene::prevalidated]
     const unsafe fn next_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -69,6 +76,7 @@ impl IndexRange {
     /// # Safety
     /// - Can only be called when `start < end`, aka when `len > 0`.
     #[inline]
+    #[ferrocene::prevalidated]
     const unsafe fn next_back_unchecked(&mut self) -> usize {
         debug_assert!(self.start < self.end);
 
@@ -84,6 +92,7 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_by`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn take_prefix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -104,6 +113,7 @@ impl IndexRange {
     ///
     /// This is designed to help implement `Iterator::advance_back_by`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn take_suffix(&mut self, n: usize) -> Self {
         let mid = if n <= self.len() {
             // SAFETY: We just checked that this will be between start and end,
@@ -119,6 +129,7 @@ impl IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn assume_range(&self) {
         // SAFETY: This is the type invariant
         unsafe { crate::hint::assert_unchecked(self.start <= self.end) }
@@ -129,6 +140,7 @@ impl Iterator for IndexRange {
     type Item = usize;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<usize> {
         if self.len() > 0 {
             // SAFETY: We just checked that the range is non-empty
@@ -139,23 +151,27 @@ impl Iterator for IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_prefix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn fold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,
@@ -177,6 +193,7 @@ impl Iterator for IndexRange {
 
 impl DoubleEndedIterator for IndexRange {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<usize> {
         if self.len() > 0 {
             // SAFETY: We just checked that the range is non-empty
@@ -187,17 +204,20 @@ impl DoubleEndedIterator for IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let taken = self.take_suffix(n);
         NonZero::new(n - taken.len()).map_or(Ok(()), Err)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn rfold<B, F: FnMut(B, usize) -> B>(mut self, init: B, f: F) -> B {
         self.try_rfold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R
     where
         Self: Sized,

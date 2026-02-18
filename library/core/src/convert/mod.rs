@@ -105,6 +105,7 @@ pub use num::FloatToInt;
 #[rustc_const_stable(feature = "const_identity", since = "1.33.0")]
 #[inline(always)]
 #[rustc_diagnostic_item = "convert_identity"]
+#[ferrocene::prevalidated]
 pub const fn identity<T>(x: T) -> T {
     x
 }
@@ -717,6 +718,7 @@ where
     T: [const] AsRef<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_ref(&self) -> &U {
         <T as AsRef<U>>::as_ref(*self)
     }
@@ -730,6 +732,7 @@ where
     T: [const] AsRef<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_ref(&self) -> &U {
         <T as AsRef<U>>::as_ref(*self)
     }
@@ -751,6 +754,7 @@ where
     T: [const] AsMut<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_mut(&mut self) -> &mut U {
         (*self).as_mut()
     }
@@ -777,6 +781,7 @@ where
     /// <code>[From]&lt;T&gt; for U</code> chooses to do.
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     fn into(self) -> U {
         U::from(self)
     }
@@ -788,6 +793,7 @@ where
 impl<T> const From<T> for T {
     /// Returns the argument unchanged.
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn from(t: T) -> T {
         t
     }
@@ -819,6 +825,7 @@ where
     type Error = U::Error;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_into(self) -> Result<U, U::Error> {
         U::try_from(self)
     }
@@ -835,6 +842,7 @@ where
     type Error = Infallible;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_from(value: U) -> Result<Self, Self::Error> {
         Ok(U::into(value))
     }
@@ -848,6 +856,7 @@ where
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T> const AsRef<[T]> for [T] {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn as_ref(&self) -> &[T] {
         self
     }
@@ -857,6 +866,7 @@ impl<T> const AsRef<[T]> for [T] {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl<T> const AsMut<[T]> for [T] {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn as_mut(&mut self) -> &mut [T] {
         self
     }
@@ -876,6 +886,7 @@ impl const AsRef<str> for str {
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsMut<str> for str {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn as_mut(&mut self) -> &mut str {
         self
     }
@@ -932,11 +943,13 @@ impl const AsMut<str> for str {
 /// and therefore will be disallowed by the language’s trait coherence rules.
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[derive(Copy)]
+#[ferrocene::prevalidated]
 pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
 impl const Clone for Infallible {
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Infallible {
         match *self {}
     }
@@ -944,6 +957,7 @@ impl const Clone for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 impl fmt::Debug for Infallible {
+    #[ferrocene::prevalidated]
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
     }
@@ -951,6 +965,7 @@ impl fmt::Debug for Infallible {
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 impl fmt::Display for Infallible {
+    #[ferrocene::prevalidated]
     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {}
     }
@@ -963,6 +978,7 @@ impl Error for Infallible {}
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl const PartialEq for Infallible {
+    #[ferrocene::prevalidated]
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
     }

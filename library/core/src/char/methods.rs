@@ -155,6 +155,7 @@ impl char {
     /// ```
     #[stable(feature = "assoc_char_funcs", since = "1.52.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn decode_utf16<I: IntoIterator<Item = u16>>(iter: I) -> DecodeUtf16<I::IntoIter> {
         super::decode::decode_utf16(iter)
     }
@@ -243,6 +244,7 @@ impl char {
     #[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "1.81.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn from_u32_unchecked(i: u32) -> char {
         // SAFETY: the safety contract must be upheld by the caller.
         unsafe { super::convert::from_u32_unchecked(i) }
@@ -410,6 +412,7 @@ impl char {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_digit(self, radix: u32) -> Option<u32> {
         assert!(
             radix >= 2 && radix <= 36,
@@ -483,6 +486,7 @@ impl char {
     /// at the start of a string, and allows escaping single quotes in
     /// characters, and double quotes in strings.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn escape_debug_ext(self, args: EscapeDebugExtArgs) -> EscapeDebug {
         match self {
             '\0' => EscapeDebug::backslash(ascii::Char::Digit0),
@@ -538,6 +542,7 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "char_escape_debug", since = "1.20.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_debug(self) -> EscapeDebug {
         self.escape_debug_ext(EscapeDebugExtArgs::ESCAPE_ALL)
     }
@@ -655,6 +660,7 @@ impl char {
     #[rustc_const_stable(feature = "const_char_len_utf", since = "1.52.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn len_utf8(self) -> usize {
         len_utf8(self as u32)
     }
@@ -725,6 +731,7 @@ impl char {
     #[stable(feature = "unicode_encode_char", since = "1.15.0")]
     #[rustc_const_stable(feature = "const_char_encode_utf8", since = "1.83.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn encode_utf8(self, dst: &mut [u8]) -> &mut str {
         // SAFETY: `char` is not a surrogate, so this is valid UTF-8.
         unsafe { from_utf8_unchecked_mut(encode_utf8_raw(self as u32, dst)) }
@@ -989,6 +996,7 @@ impl char {
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn is_grapheme_extended(self) -> bool {
         !self.is_ascii() && unicode::Grapheme_Extend(self)
     }
@@ -1253,6 +1261,7 @@ impl char {
     #[rustc_const_stable(feature = "const_char_is_ascii", since = "1.32.0")]
     #[rustc_diagnostic_item = "char_is_ascii"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii(&self) -> bool {
         *self as u32 <= 0x7F
     }
@@ -1863,6 +1872,7 @@ impl char {
     }
 }
 
+#[ferrocene::prevalidated]
 pub(crate) struct EscapeDebugExtArgs {
     /// Escape Extended Grapheme codepoints?
     pub(crate) escape_grapheme_extended: bool,
@@ -1884,6 +1894,7 @@ impl EscapeDebugExtArgs {
 
 #[inline]
 #[must_use]
+#[ferrocene::prevalidated]
 const fn len_utf8(code: u32) -> usize {
     match code {
         ..MAX_ONE_B => 1,
@@ -1916,6 +1927,7 @@ const fn len_utf16(code: u32) -> usize {
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 #[doc(hidden)]
 #[inline]
+#[ferrocene::prevalidated]
 pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {
     let len = len_utf8(code);
     if dst.len() < len {
@@ -1953,6 +1965,7 @@ pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
 #[doc(hidden)]
 #[inline]
+#[ferrocene::prevalidated]
 pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {
     let len = len_utf8(code);
     // SAFETY: The caller must guarantee that the buffer pointed to by `dst`

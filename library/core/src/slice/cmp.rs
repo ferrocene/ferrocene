@@ -25,6 +25,7 @@ where
     T: [const] PartialEq<U>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &[U]) -> bool {
         let len = self.len();
         if len == other.len() {
@@ -132,6 +133,7 @@ where
     // such as in `<str as PartialEq>::eq`.
     // The codegen backend can still inline it later if needed.
     #[rustc_no_mir_inline]
+    #[ferrocene::prevalidated]
     default unsafe fn equal_same_length(lhs: *const Self, rhs: *const B, len: usize) -> bool {
         // Implemented as explicit indexing rather
         // than zipped iterators for performance reasons.
@@ -158,6 +160,7 @@ where
     A: [const] BytewiseEq<B>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn equal_same_length(lhs: *const Self, rhs: *const B, len: usize) -> bool {
         // SAFETY: by our precondition, `lhs` and `rhs` are guaranteed to be valid
         // for reading `len` values, which also means the size is guaranteed

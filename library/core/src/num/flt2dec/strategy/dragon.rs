@@ -27,6 +27,7 @@ static POW5TO256: [Digit; 19] = [
 ];
 
 #[doc(hidden)]
+#[ferrocene::prevalidated]
 pub fn mul_pow10(x: &mut Big, n: usize) -> &mut Big {
     debug_assert!(n < 512);
     // Save ourself the left shift for the smallest cases.
@@ -59,6 +60,7 @@ pub fn mul_pow10(x: &mut Big, n: usize) -> &mut Big {
     x.mul_pow2(n)
 }
 
+#[ferrocene::prevalidated]
 fn div_2pow10(x: &mut Big, mut n: usize) -> &mut Big {
     let largest = POW10.len() - 1;
     while n > largest {
@@ -70,6 +72,7 @@ fn div_2pow10(x: &mut Big, mut n: usize) -> &mut Big {
 }
 
 // only usable when `x < 16 * scale`; `scaleN` should be `scale.mul_small(N)`
+#[ferrocene::prevalidated]
 fn div_rem_upto_16<'a>(
     x: &'a mut Big,
     scale: &Big,
@@ -99,6 +102,7 @@ fn div_rem_upto_16<'a>(
 }
 
 /// The shortest mode implementation for Dragon.
+#[ferrocene::prevalidated]
 pub fn format_shortest<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],
@@ -259,6 +263,7 @@ pub fn format_shortest<'a>(
 }
 
 /// The exact and fixed mode implementation for Dragon.
+#[ferrocene::prevalidated]
 pub fn format_exact<'a>(
     d: &Decoded,
     buf: &'a mut [MaybeUninit<u8>],

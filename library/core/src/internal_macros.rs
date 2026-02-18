@@ -7,6 +7,7 @@ macro_rules! forward_ref_unop {
             type Output = <$t as $imp>::Output;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn $method(self) -> <$t as $imp>::Output {
                 $imp::$method(*self)
             }
@@ -24,6 +25,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[ferrocene::prevalidated]
             fn $method(self, other: $u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, other)
             }
@@ -35,6 +37,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[ferrocene::prevalidated]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *other)
             }
@@ -46,6 +49,7 @@ macro_rules! forward_ref_binop {
 
             #[inline]
             #[track_caller]
+            #[ferrocene::prevalidated]
             fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *other)
             }
@@ -61,6 +65,7 @@ macro_rules! forward_ref_op_assign {
         impl const $imp<&$u> for $t {
             #[inline]
             #[track_caller]
+            #[ferrocene::prevalidated]
             fn $method(&mut self, other: &$u) {
                 $imp::$method(self, *other);
             }
@@ -78,10 +83,12 @@ macro_rules! impl_fn_for_zst {
     )+) => {
         $(
             $( #[$attr] )*
+            #[ferrocene::prevalidated]
             struct $Name;
 
             impl $( <$( $lifetime ),+> )? Fn<($( $ArgTy, )*)> for $Name {
                 #[inline]
+                #[ferrocene::prevalidated]
                 extern "rust-call" fn call(&self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     $body
                 }
@@ -89,6 +96,7 @@ macro_rules! impl_fn_for_zst {
 
             impl $( <$( $lifetime ),+> )? FnMut<($( $ArgTy, )*)> for $Name {
                 #[inline]
+                #[ferrocene::prevalidated]
                 extern "rust-call" fn call_mut(
                     &mut self,
                     ($( $arg, )*): ($( $ArgTy, )*)
@@ -101,6 +109,7 @@ macro_rules! impl_fn_for_zst {
                 type Output = $ReturnTy;
 
                 #[inline]
+                #[ferrocene::prevalidated]
                 extern "rust-call" fn call_once(self, ($( $arg, )*): ($( $ArgTy, )*)) -> $ReturnTy {
                     Fn::call(&self, ($( $arg, )*))
                 }

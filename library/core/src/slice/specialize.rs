@@ -6,6 +6,7 @@ pub(super) trait SpecFill<T> {
 }
 
 impl<T: Clone> SpecFill<T> for [T] {
+    #[ferrocene::prevalidated]
     default fn spec_fill(&mut self, value: T) {
         if let Some((last, elems)) = self.split_last_mut() {
             for el in elems {
@@ -18,6 +19,7 @@ impl<T: Clone> SpecFill<T> for [T] {
 }
 
 impl<T: TrivialClone> SpecFill<T> for [T] {
+    #[ferrocene::prevalidated]
     default fn spec_fill(&mut self, value: T) {
         for item in self.iter_mut() {
             // SAFETY: `TrivialClone` indicates that this is equivalent to

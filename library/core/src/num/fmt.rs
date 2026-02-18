@@ -8,6 +8,7 @@
 
 /// Formatted parts.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[ferrocene::prevalidated]
 pub enum Part<'a> {
     /// Given number of zero digits.
     Zero(usize),
@@ -19,6 +20,7 @@ pub enum Part<'a> {
 
 impl<'a> Part<'a> {
     /// Returns the exact byte length of given part.
+    #[ferrocene::prevalidated]
     pub fn len(&self) -> usize {
         match *self {
             Part::Zero(nzeroes) => nzeroes,
@@ -61,6 +63,7 @@ impl<'a> Part<'a> {
 /// This can be written to the byte buffer or converted to the allocated string.
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct Formatted<'a> {
     /// A byte slice representing a sign, either `""`, `"-"` or `"+"`.
     pub sign: &'static str,
@@ -70,6 +73,7 @@ pub struct Formatted<'a> {
 
 impl<'a> Formatted<'a> {
     /// Returns the exact byte length of combined formatted result.
+    #[ferrocene::prevalidated]
     pub fn len(&self) -> usize {
         self.sign.len() + self.parts.iter().map(|part| part.len()).sum::<usize>()
     }

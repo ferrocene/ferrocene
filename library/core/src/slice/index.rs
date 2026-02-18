@@ -22,6 +22,7 @@ where
     type Output = I::Output;
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn index(&self, index: I) -> &I::Output {
         index.index(self)
     }
@@ -34,6 +35,7 @@ where
     I: [const] SliceIndex<[T]>,
 {
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn index_mut(&mut self, index: I) -> &mut I::Output {
         index.index_mut(self)
     }
@@ -42,6 +44,7 @@ where
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
+#[ferrocene::prevalidated]
 const fn slice_index_fail(start: usize, end: usize, len: usize) -> ! {
     if start > len {
         const_panic!(
@@ -86,6 +89,7 @@ const fn slice_index_fail(start: usize, end: usize, len: usize) -> ! {
 // which use intrinsics directly to get *no* extra checks.
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const unsafe fn get_offset_len_noubcheck<T>(
     ptr: *const [T],
     offset: usize,
@@ -98,6 +102,7 @@ const unsafe fn get_offset_len_noubcheck<T>(
 }
 
 #[inline(always)]
+#[ferrocene::prevalidated]
 const unsafe fn get_offset_len_mut_noubcheck<T>(
     ptr: *mut [T],
     offset: usize,
@@ -234,6 +239,7 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
     type Output = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&T> {
         if self < slice.len() {
             // SAFETY: `self` is checked to be in bounds.
@@ -244,6 +250,7 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut T> {
         if self < slice.len() {
             // SAFETY: `self` is checked to be in bounds.
@@ -255,6 +262,7 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const T {
         assert_unsafe_precondition!(
             check_language_ub, // okay because of the `assume` below
@@ -275,6 +283,7 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut T {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -286,12 +295,14 @@ unsafe impl<T> const SliceIndex<[T]> for usize {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &T {
         // N.B., use intrinsic indexing
         &(*slice)[self]
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut T {
         // N.B., use intrinsic indexing
         &mut (*slice)[self]
@@ -305,6 +316,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         if self.end() <= slice.len() {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -315,6 +327,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         if self.end() <= slice.len() {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -326,6 +339,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -341,6 +355,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -353,6 +368,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         if self.end() <= slice.len() {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -363,6 +379,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::IndexRange {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         if self.end() <= slice.len() {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -382,6 +399,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         // Using checked_sub is a safe way to get `SubUnchecked` in MIR
         if let Some(new_len) = usize::checked_sub(self.end, self.start)
@@ -395,6 +413,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         if let Some(new_len) = usize::checked_sub(self.end, self.start)
             && self.end <= slice.len()
@@ -408,6 +427,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -433,6 +453,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
 
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -451,6 +472,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
     }
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         // Using checked_sub is a safe way to get `SubUnchecked` in MIR
         if let Some(new_len) = usize::checked_sub(self.end, self.start)
@@ -464,6 +486,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::Range<usize> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         // Using checked_sub is a safe way to get `SubUnchecked` in MIR
         if let Some(new_len) = usize::checked_sub(self.end, self.start)
@@ -523,33 +546,39 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeTo<usize> {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         (0..self.end).get(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         (0..self.end).get_mut(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { (0..self.end).get_unchecked(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { (0..self.end).get_unchecked_mut(slice) }
     }
 
     #[inline(always)]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         (0..self.end).index(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         (0..self.end).index_mut(slice)
     }
@@ -562,28 +591,33 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeFrom<usize> {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         (self.start..slice.len()).get(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         (self.start..slice.len()).get_mut(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { (self.start..slice.len()).get_unchecked(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { (self.start..slice.len()).get_unchecked_mut(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         if self.start > slice.len() {
             slice_index_fail(self.start, slice.len(), slice.len())
@@ -596,6 +630,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeFrom<usize> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         if self.start > slice.len() {
             slice_index_fail(self.start, slice.len(), slice.len())
@@ -653,31 +688,37 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeFull {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         Some(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         Some(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         slice
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         slice
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         slice
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         slice
     }
@@ -692,28 +733,33 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeInclusive<usize> {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         if *self.end() >= slice.len() { None } else { self.into_slice_range().get(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         if *self.end() >= slice.len() { None } else { self.into_slice_range().get_mut(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { self.into_slice_range().get_unchecked(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { self.into_slice_range().get_unchecked_mut(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         let Self { mut start, mut end, exhausted } = self;
         let len = slice.len();
@@ -729,6 +775,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeInclusive<usize> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         let Self { mut start, mut end, exhausted } = self;
         let len = slice.len();
@@ -790,33 +837,39 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeToInclusive<usize> {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&[T]> {
         (0..=self.end).get(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut [T]> {
         (0..=self.end).get_mut(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { (0..=self.end).get_unchecked(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { (0..=self.end).get_unchecked_mut(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &[T] {
         (0..=self.end).index(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut [T] {
         (0..=self.end).index_mut(slice)
     }
@@ -979,6 +1032,7 @@ where
 
 /// Converts a pair of `ops::Bound`s into `ops::Range` without performing any
 /// bounds checking or (in debug) overflow checking.
+#[ferrocene::prevalidated]
 pub(crate) const fn into_range_unchecked(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1001,6 +1055,7 @@ pub(crate) const fn into_range_unchecked(
 /// Returns `None` on overflowing indices.
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 #[inline]
+#[ferrocene::prevalidated]
 pub(crate) const fn try_into_slice_range(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1033,6 +1088,7 @@ pub(crate) const fn try_into_slice_range(
 /// Converts pair of `ops::Bound`s into `ops::Range`.
 /// Panics on overflowing indices.
 #[inline]
+#[ferrocene::prevalidated]
 pub(crate) const fn into_slice_range(
     len: usize,
     (start, end): (ops::Bound<usize>, ops::Bound<usize>),
@@ -1067,33 +1123,39 @@ unsafe impl<T> SliceIndex<[T]> for (ops::Bound<usize>, ops::Bound<usize>) {
     type Output = [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get(self, slice: &[T]) -> Option<&Self::Output> {
         try_into_slice_range(slice.len(), self)?.get(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut [T]) -> Option<&mut Self::Output> {
         try_into_slice_range(slice.len(), self)?.get_mut(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const Self::Output {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
         unsafe { into_range_unchecked(slice.len(), self).get_unchecked(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut Self::Output {
         // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
         unsafe { into_range_unchecked(slice.len(), self).get_unchecked_mut(slice) }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index(self, slice: &[T]) -> &Self::Output {
         into_slice_range(slice.len(), self).index(slice)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut [T]) -> &mut Self::Output {
         into_slice_range(slice.len(), self).index_mut(slice)
     }

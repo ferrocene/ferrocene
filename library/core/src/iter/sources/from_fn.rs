@@ -42,6 +42,7 @@ use crate::fmt;
 /// ```
 #[inline]
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
+#[ferrocene::prevalidated]
 pub fn from_fn<T, F>(f: F) -> FromFn<F>
 where
     F: FnMut() -> Option<T>,
@@ -57,6 +58,7 @@ where
 /// [`iter::from_fn()`]: from_fn
 #[derive(Clone)]
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
+#[ferrocene::prevalidated]
 pub struct FromFn<F>(F);
 
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
@@ -67,6 +69,7 @@ where
     type Item = T;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Self::Item> {
         (self.0)()
     }
@@ -74,6 +77,7 @@ where
 
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
 impl<F> fmt::Debug for FromFn<F> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FromFn").finish()
     }

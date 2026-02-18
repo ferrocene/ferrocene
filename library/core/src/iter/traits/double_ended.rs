@@ -135,6 +135,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// [`Err(k)`]: Err
     #[inline]
     #[unstable(feature = "iter_advance_by", issue = "77404")]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         for i in 0..n {
             if self.next_back().is_none() {
@@ -188,6 +189,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_nth_back", since = "1.37.0")]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         if self.advance_back_by(n).is_err() {
             return None;
@@ -227,6 +229,7 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -298,6 +301,7 @@ pub trait DoubleEndedIterator: Iterator {
     #[doc(alias = "foldr")]
     #[inline]
     #[stable(feature = "iter_rfold", since = "1.27.0")]
+    #[ferrocene::prevalidated]
     fn rfold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -363,12 +367,14 @@ pub trait DoubleEndedIterator: Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_rfind", since = "1.27.0")]
+    #[ferrocene::prevalidated]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
         P: FnMut(&Self::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
             move |(), x| {
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }

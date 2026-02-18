@@ -32,7 +32,7 @@ based on software engineering best practices.
 
    code-coverage
    test-variants
-   testing-other-targets
+   cross-compiling
 
 .. toctree::
    :maxdepth: 4

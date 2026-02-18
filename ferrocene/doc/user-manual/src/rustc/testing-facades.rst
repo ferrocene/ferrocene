@@ -23,12 +23,13 @@ Prerequisites
 
 Using a facade requires ``qemu`` and ``binfmt`` to be configured correctly for the target
 architecture. Setup instructions differ based on operating system and distribution. While
-developing Ferrocene, we use the instructions found in :doc:`internal-procedures:testing-other-targets`.
+developing Ferrocene, we use the instructions found in
+:doc:`internal-procedures:cross-compiling`.
 
 For coverage, you'll also need to install ``rustfilt``, as well as ``rust-profdata`` (from ``cargo-binutils``).
 
 .. code-block:: rust
-   
+
    cargo install rustfilt
    cargo install cargo-binutils
 
@@ -41,7 +42,7 @@ targets. Behind the scenes, a facade provides the equivalent of a Linux ``libc``
 The following configurations can be used to flag code to only run on the facade:
 
 .. code-block:: rust
-   
+
    #[cfg(target_os = "linux")]
    fn only_on_facade() { /* ... */ }
 
@@ -66,13 +67,13 @@ This is useful for things like test harnesses, extra instrumentation, and debug 
 The following configures code to not be run on facades (so, only on bare metal):
 
 .. code-block:: rust
-   
+
    #[cfg(not(target_os = "linux"))]
    fn only_on_bare_metal() {}
 
    #[cfg_attr(not(target_os = "linux"), must_use)]
    struct OnlyHasMustUseOnBareMetal {}
-   
+
    fn only_does_thing_on_bare_metal() {
       #[cfg(not(target_os = "linux"))]
       {
@@ -154,15 +155,15 @@ Next, we'll write a simple test suite using assertions that runs only on the fac
 Build with facade target:
 
 .. code-block:: bash
-   
+
    rustc --edition 2021 --target thumbv7em-ferrocene.facade-eabihf --test -Z panic-abort-tests -C instrument-coverage src/thing.rs --out-dir artifacts
 
 Then run it:
 
 .. code-block:: bash
-   
+
    $ ./artifacts/thing
-   
+
    running 1 test
    test it_works ... ok
 
@@ -204,7 +205,7 @@ as an executable on a facade.
 
 
 .. code-block:: rust
-   
+
    // src/thing.rs
 
    #![cfg_attr(not(target_os = "linux"), no_std)]
@@ -242,25 +243,25 @@ We can build for a bare metal target (:ref:`thumbv7em-none-eabihf`) by running:
 We can build for the equivalent facade, with instrumentation, by running:
 
 .. code-block:: bash
-   
+
    rustc --edition 2021 --target thumbv7em-ferrocene.facade-eabihf --test -Z panic-abort-tests -C instrument-coverage src/thing.rs --out-dir artifacts
 
 To create the ``profraw`` file:
 
 .. code-block::
-   
+
    LLVM_PROFILE_FILE="profiling/thing-%p-%m.profraw" artifacts/thing
 
 Then create the ``profdata``:
 
 .. code-block::
-   
+
    rust-profdata merge --sparse profiling/thing-*.profraw -o profiling/thing.profdata
 
 Then create the coverage report:
 
 .. code-block::
-   
+
    rust-cov report -Xdemangler=rustfilt artifacts/thing \
       --instr-profile=profiling/thing.profdata \
       --show-instantiation-summary
@@ -268,7 +269,7 @@ Then create the coverage report:
 That should output something like the following:
 
 .. code-block::
-   
+
    Filename              Regions    Missed Regions     Cover   Functions  Missed Functions  Executed  Instantiations   Missed Insts.  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
    ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    $CWD/src/thing.rs           9                 1    88.89%           2                 0   100.00%               2               0   100.00%           8                 1    87.50%           0                 0         -

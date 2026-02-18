@@ -1012,7 +1012,8 @@ pub const fn try_as_dyn<
 >(
     t: &T,
 ) -> Option<&U> {
-    let vtable: Option<ptr::DynMetadata<U>> = const { intrinsics::vtable_for::<T, U>() };
+    let vtable: Option<ptr::DynMetadata<U>> =
+        const { TypeId::of::<T>().trait_info_of::<U>().as_ref().map(TraitImpl::get_vtable) };
     match vtable {
         Some(dyn_metadata) => {
             let pointer = ptr::from_raw_parts(t, dyn_metadata);
@@ -1065,7 +1066,8 @@ pub const fn try_as_dyn_mut<
 >(
     t: &mut T,
 ) -> Option<&mut U> {
-    let vtable: Option<ptr::DynMetadata<U>> = const { intrinsics::vtable_for::<T, U>() };
+    let vtable: Option<ptr::DynMetadata<U>> =
+        const { TypeId::of::<T>().trait_info_of::<U>().as_ref().map(TraitImpl::get_vtable) };
     match vtable {
         Some(dyn_metadata) => {
             let pointer = ptr::from_raw_parts_mut(t, dyn_metadata);

@@ -26,7 +26,7 @@ pub struct TraitImpl<T: PointeeSized> {
 
 impl<T: PointeeSized> TraitImpl<T> {
     /// Gets the raw vtable for type reflection mapping
-    pub fn get_vtable(&self) -> DynMetadata<T> {
+    pub const fn get_vtable(&self) -> DynMetadata<T> {
         self.vtable
     }
 }

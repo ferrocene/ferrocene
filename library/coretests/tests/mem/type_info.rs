@@ -3,7 +3,6 @@
 use std::any::{Any, TypeId};
 use std::mem::offset_of;
 use std::mem::type_info::{Const, Generic, GenericType, Type, TypeKind};
-use std::ptr::DynMetadata;
 
 #[test]
 fn test_arrays() {

@@ -227,3 +227,27 @@ test_bool_try_from_int! {
     i64 => bool_try_from_i64,
     i128 => bool_try_from_i128,
 }
+
+// covers: `<core::num::niche_types::$T as core::fmt::Debug>::fmt`
+macro_rules! test_niche_types_debug_fmt {
+    ($($fn:ident => $T:ident : $val:literal == $str:literal,)*) => { $(
+        #[test]
+        fn $fn() {
+            let val = <core::num::niche_types::$T>::new($val).unwrap();
+
+            assert_eq!(format!("{val:?}"), $str);
+        }
+    )*};
+}
+test_niche_types_debug_fmt!(
+    non_zero_u8_inner_debug_fmt => NonZeroU8Inner: 5 == "5",
+    non_zero_u16_inner_debug_fmt => NonZeroU16Inner: 5 == "5",
+    non_zero_u32_inner_debug_fmt => NonZeroU32Inner: 5 == "5",
+    non_zero_u64_inner_debug_fmt => NonZeroU64Inner: 5 == "5",
+    non_zero_usize_inner_debug_fmt => NonZeroUsizeInner: 5 == "5",
+    non_zero_i8_inner_debug_fmt => NonZeroI8Inner: 5 == "5",
+    non_zero_i16_inner_debug_fmt => NonZeroI16Inner: 5 == "5",
+    non_zero_i32_inner_debug_fmt => NonZeroI32Inner: 5 == "5",
+    non_zero_i64_inner_debug_fmt => NonZeroI64Inner: 5 == "5",
+    non_zero_isize_inner_debug_fmt => NonZeroIsizeInner: 5 == "5",
+);

@@ -191,3 +191,39 @@ test_int_abs_diff! {
     i128 => i128_abs_diff,
     isize => isize_abs_diff,
 }
+
+// Covers
+// - `core::convert::num::<impl core::convert::TryFrom<i128> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i16> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i32> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i64> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i8> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u128> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u16> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u32> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u64> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u8> for bool>::try_from`
+macro_rules! test_bool_try_from_int {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(bool::try_from(0 as $T), Ok(false));
+                assert_eq!(bool::try_from(1 as $T), Ok(true));
+                assert!(bool::try_from(2 as $T).is_err());
+            }
+        )*
+    };
+}
+test_bool_try_from_int! {
+    u8 => bool_try_from_u8,
+    u16 => bool_try_from_u16,
+    u32 => bool_try_from_u32,
+    u64 => bool_try_from_u64,
+    u128 => bool_try_from_u128,
+    i8 => bool_try_from_i8,
+    i16 => bool_try_from_i16,
+    i32 => bool_try_from_i32,
+    i64 => bool_try_from_i64,
+    i128 => bool_try_from_i128,
+}

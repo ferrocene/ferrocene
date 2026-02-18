@@ -187,9 +187,31 @@ macro_rules! simd_masked_store {
     };
 }
 
+/// The first N even indices `[0, 2, 4, ...]`.
+pub(crate) const fn even<const N: usize>() -> [u32; N] {
+    let mut out = [0u32; N];
+    let mut i = 0usize;
+    while i < N {
+        out[i] = (2 * i) as u32;
+        i += 1;
+    }
+    out
+}
+
+/// The first N odd indices `[1, 3, 5, ...]`.
+pub(crate) const fn odd<const N: usize>() -> [u32; N] {
+    let mut out = [0u32; N];
+    let mut i = 0usize;
+    while i < N {
+        out[i] = (2 * i + 1) as u32;
+        i += 1;
+    }
+    out
+}
+
+/// Multiples of N offset by K `[K, K+N, K+2N, ...]`.
 pub(crate) const fn deinterleave_mask<const LANES: usize, const N: usize, const K: usize>()
 -> [u32; LANES] {
-    // Produces: [K, K+N, K+2N, ...]
     let mut out = [0u32; LANES];
     let mut i = 0usize;
     while i < LANES {

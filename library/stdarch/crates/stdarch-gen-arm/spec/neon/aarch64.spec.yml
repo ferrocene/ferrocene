@@ -6962,28 +6962,29 @@ intrinsics:
           - FnCall: [simd_shuffle!, [a, a, "{type[3]}"]]
       - FnCall: ["vmovl{neon_type[0].noq}", [a]]
 
-  - name: "vpadd{neon_type.no}"
-    doc: Floating-point add pairwise
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{type}"
+  - name: "vpadd{neon_type[0].no}"
+    doc: "Floating-point add pairwise"
+    arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
+    return_type: "{neon_type[0]}"
     attr: [*neon-stable]
     assert_instr: [faddp]
     safety: safe
     types:
-      - float32x4_t
-      - float64x2_t
+      - [float32x4_t, "4"]
+      - [float64x2_t, "2"]
     compose:
-      - LLVMLink:
-          name: "faddp.{neon_type}"
-          links:
-            - link: "llvm.aarch64.neon.faddp.{neon_type}"
-              arch: aarch64,arm64ec
+      - Let:
+        - even
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::even::<{type[1]}>()"]]
+      - Let:
+        - odd
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::odd::<{type[1]}>()"]]
+      - FnCall: [simd_add, [even, odd]]
 
-
-  - name: "vpadd{neon_type.no}"
+  - name: "vpadd{neon_type[0].no}"
     doc: Floating-point add pairwise
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{type}"
+    arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
+    return_type: "{neon_type[0]}"
     attr:
       - *neon-fp16
       - *neon-stable-fp16
@@ -6991,14 +6992,15 @@ intrinsics:
     assert_instr: [faddp]
     safety: safe
     types:
-      - float16x8_t
+      - [float16x8_t, "8"]
     compose:
-      - LLVMLink:
-          name: "faddp.{neon_type}"
-          links:
-            - link: "llvm.aarch64.neon.faddp.{neon_type}"
-              arch: aarch64,arm64ec
-
+      - Let:
+        - even
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::even::<{type[1]}>()"]]
+      - Let:
+        - odd
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::odd::<{type[1]}>()"]]
+      - FnCall: [simd_add, [even, odd]]
 
   - name: "vpmax{neon_type.no}"
     doc: Floating-point add pairwise
@@ -13236,26 +13238,6 @@ intrinsics:
             - link: "llvm.aarch64.neon.usqadd.{neon_type[1]}"
               arch: aarch64,arm64ec
 
-  - name: "vpadd{neon_type.no}"
-    doc: "Add Pairwise"
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{neon_type}"
-    attr:
-      - *neon-stable
-    assert_instr: [addp]
-    safety: safe
-    types:
-      - int8x16_t
-      - int16x8_t
-      - int32x4_t
-      - int64x2_t
-    compose:
-      - LLVMLink:
-          name: "vpadd{neon_type.no}"
-          links:
-            - link: "llvm.aarch64.neon.addp.{neon_type}"
-              arch: aarch64,arm64ec
-
   - name: "vpadd{neon_type[0].no}"
     doc: "Add Pairwise"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
@@ -13265,17 +13247,22 @@ intrinsics:
     assert_instr: [addp]
     safety: safe
     types:
-      - [uint8x16_t, int8x16_t]
-      - [uint16x8_t, int16x8_t]
-      - [uint32x4_t, int32x4_t]
-      - [uint64x2_t, int64x2_t]
+      - [int8x16_t, "16"]
+      - [int16x8_t, "8"]
+      - [int32x4_t, "4"]
+      - [int64x2_t, "2"]
+      - [uint8x16_t, "16"]
+      - [uint16x8_t, "8"]
+      - [uint32x4_t, "4"]
+      - [uint64x2_t, "2"]
     compose:
-      - FnCall:
-          - transmute
-          - - FnCall:
-                - 'vpadd{neon_type[1].no}'
-                - - FnCall: [transmute, [a]]
-                  - FnCall: [transmute, [b]]
+      - Let:
+        - even
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::even::<{type[1]}>()"]]
+      - Let:
+        - odd
+        - FnCall: ["simd_shuffle!", [a, b, "crate::core_arch::macros::odd::<{type[1]}>()"]]
+      - FnCall: [simd_add, [even, odd]]
 
   - name: "vpaddd_s64"
     doc: "Add pairwise"

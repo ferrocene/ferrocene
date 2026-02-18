@@ -86,7 +86,6 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, intrinsics, ptr};
 
 // Ferrocene addition: imports for certified subset
@@ -141,7 +140,6 @@ pub trait Any: 'static {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: 'static + ?Sized> Any for T {
     fn type_id(&self) -> TypeId {
         TypeId::of::<T>()
@@ -179,7 +177,6 @@ impl fmt::Debug for dyn Any + Send + Sync {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any {
     /// Returns `true` if the inner type is the same as `T`.
     ///
@@ -339,7 +336,6 @@ impl dyn Any {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send {
     /// Forwards to the method defined on the type `dyn Any`.
     ///
@@ -474,7 +470,6 @@ impl dyn Any + Send {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send + Sync {
     /// Forwards to the method defined on the type `Any`.
     ///
@@ -821,7 +816,6 @@ impl TypeId {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl hash::Hash for TypeId {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -963,7 +957,6 @@ pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
 /// let not_an_animal: Option<&dyn Animal> = try_as_dyn::<Rock, dyn Animal>(&rock);
 /// assert!(not_an_animal.is_none());
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn<
@@ -1017,7 +1010,6 @@ pub const fn try_as_dyn<
 /// let not_an_animal: Option<&mut dyn Animal> = try_as_dyn_mut::<Rock, dyn Animal>(&mut rock);
 /// assert!(not_an_animal.is_none());
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn_mut<

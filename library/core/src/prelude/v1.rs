@@ -16,7 +16,6 @@ pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
 pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
 #[stable(feature = "async_closure", since = "1.85.0")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::ops::{AsyncFn, AsyncFnMut, AsyncFnOnce};
 
 // Re-exported functions
@@ -61,7 +60,6 @@ pub use crate::hash::macros::Hash;
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
 #[expect(deprecated)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::{
     assert, assert_eq, assert_ne, cfg, column, compile_error, concat, debug_assert, debug_assert_eq,
     debug_assert_ne, file, format_args, include, include_bytes, include_str, line, matches,
@@ -100,7 +98,6 @@ pub use crate::cfg_select;
     reason = "`concat_bytes` is not stable enough for use and is subject to change"
 )]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::concat_bytes;
 
 #[unstable(feature = "const_format_args", issue = "none")]
@@ -117,7 +114,6 @@ pub use crate::log_syntax;
 
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
 #[doc(no_inline)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use crate::pattern_type;
 
 #[unstable(

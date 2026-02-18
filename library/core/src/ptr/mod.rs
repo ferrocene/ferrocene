@@ -403,11 +403,9 @@
 
 use crate::cmp::Ordering;
 use crate::intrinsics::const_eval_select;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, FnPtr, PointeeSized};
 use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, intrinsics, ub_checks};
 
 // Ferrocene addition: imports for certified subset
@@ -431,10 +429,8 @@ mod non_null;
 #[stable(feature = "nonnull", since = "1.25.0")]
 pub use non_null::NonNull;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod unique;
 #[unstable(feature = "ptr_internals", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use unique::Unique;
 
 mod const_ptr;
@@ -919,7 +915,6 @@ pub const fn without_provenance<T>(addr: usize) -> *const T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn dangling<T>() -> *const T {
     dangling_mut()
 }
@@ -966,7 +961,6 @@ pub const fn without_provenance_mut<T>(addr: usize) -> *mut T {
 #[must_use]
 #[stable(feature = "strict_provenance", since = "1.84.0")]
 #[rustc_const_stable(feature = "strict_provenance", since = "1.84.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn dangling_mut<T>() -> *mut T {
     NonNull::dangling().as_ptr()
 }
@@ -1008,7 +1002,6 @@ pub const fn dangling_mut<T>() -> *mut T {
 #[rustc_const_stable(feature = "const_exposed_provenance", since = "1.91.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn with_exposed_provenance<T>(addr: usize) -> *const T {
     addr as *const T
 }
@@ -1050,7 +1043,6 @@ pub const fn with_exposed_provenance<T>(addr: usize) -> *const T {
 #[rustc_const_stable(feature = "const_exposed_provenance", since = "1.91.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[allow(fuzzy_provenance_casts)] // this *is* the explicit provenance API one should use instead
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
     addr as *mut T
 }
@@ -1159,7 +1151,6 @@ pub const fn from_ref<T: PointeeSized>(r: &T) -> *const T {
 #[stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_const_stable(feature = "ptr_from_ref", since = "1.76.0")]
 #[rustc_never_returns_null_ptr]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn from_mut<T: PointeeSized>(r: &mut T) -> *mut T {
     r
 }
@@ -2458,7 +2449,6 @@ pub(crate) unsafe fn align_offset<T: Sized>(p: *const T, a: usize) -> usize {
 #[must_use = "pointer comparison produces a value"]
 #[rustc_diagnostic_item = "ptr_eq"]
 #[allow(ambiguous_wide_pointer_comparisons)] // it's actually clear here
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn eq<T: PointeeSized>(a: *const T, b: *const T) -> bool {
     a == b
 }
@@ -2483,7 +2473,6 @@ pub fn eq<T: PointeeSized>(a: *const T, b: *const T) -> bool {
 #[stable(feature = "ptr_addr_eq", since = "1.76.0")]
 #[inline(always)]
 #[must_use = "pointer comparison produces a value"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn addr_eq<T: PointeeSized, U: PointeeSized>(p: *const T, q: *const U) -> bool {
     (p as *const ()) == (q as *const ())
 }
@@ -2537,7 +2526,6 @@ pub fn addr_eq<T: PointeeSized, U: PointeeSized>(p: *const T, q: *const U) -> bo
 #[stable(feature = "ptr_fn_addr_eq", since = "1.85.0")]
 #[inline(always)]
 #[must_use = "function pointer comparison produces a value"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {
     f.addr() == g.addr()
 }
@@ -2568,13 +2556,11 @@ pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {
 /// assert_eq!(actual, expected);
 /// ```
 #[stable(feature = "ptr_hash", since = "1.35.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn hash<T: PointeeSized, S: hash::Hasher>(hashee: *const T, into: &mut S) {
     use crate::hash::Hash;
     hashee.hash(into);
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",
@@ -2586,7 +2572,6 @@ impl<F: FnPtr> PartialEq for F {
         self.addr() == other.addr()
     }
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",
@@ -2594,7 +2579,6 @@ impl<F: FnPtr> PartialEq for F {
 )]
 impl<F: FnPtr> Eq for F {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",
@@ -2606,7 +2590,6 @@ impl<F: FnPtr> PartialOrd for F {
         self.addr().partial_cmp(&other.addr())
     }
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 #[diagnostic::on_const(
     message = "pointers cannot be reliably compared during const eval",
@@ -2620,7 +2603,6 @@ impl<F: FnPtr> Ord for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F: FnPtr> hash::Hash for F {
     fn hash<HH: hash::Hasher>(&self, state: &mut HH) {
         state.write_usize(self.addr() as _)
@@ -2628,7 +2610,6 @@ impl<F: FnPtr> hash::Hash for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F: FnPtr> fmt::Pointer for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::pointer_fmt_inner(self.addr() as _, f)
@@ -2636,7 +2617,6 @@ impl<F: FnPtr> fmt::Pointer for F {
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<F: FnPtr> fmt::Debug for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::pointer_fmt_inner(self.addr() as _, f)

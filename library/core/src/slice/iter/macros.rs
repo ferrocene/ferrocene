@@ -151,7 +151,6 @@ fn len(&self) -> usize {
             }
 
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn is_empty(&self) -> bool {
                 is_empty!(self)
             }
@@ -200,7 +199,6 @@ fn next(&mut self) -> Option<$elem> {
                 }
             }
 
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn next_chunk<const N:usize>(&mut self) -> Result<[$elem; N], crate::array::IntoIter<$elem, N>> {
                 if T::IS_ZST {
                     return crate::array::iter_next_chunk(self);
@@ -225,7 +223,6 @@ fn next(&mut self) -> Option<$elem> {
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let exact = len!(self);
                 (exact, Some(exact))
@@ -377,7 +374,6 @@ fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
             // because this simple implementation generates less LLVM IR and is
             // faster to compile.
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             fn find_map<B, F>(&mut self, mut f: F) -> Option<B>
             where
                 Self: Sized,
@@ -438,7 +434,6 @@ fn rposition<P>(&mut self, mut predicate: P) -> Option<usize> where
             }
 
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: the caller must guarantee that `i` is in bounds of
                 // the underlying slice, so `i` cannot overflow an `isize`, and
@@ -503,7 +498,6 @@ fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         }
 
         #[stable(feature = "fused", since = "1.26.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl<T> FusedIterator for $name<'_, T> {}
 
         #[unstable(feature = "trusted_len", issue = "37572")]
@@ -537,7 +531,6 @@ fn default() -> Self {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! forward_iterator {
     ($name:ident: $elem:ident, $iter_of:ty) => {
         #[stable(feature = "rust1", since = "1.0.0")]

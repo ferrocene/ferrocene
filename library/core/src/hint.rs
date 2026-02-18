@@ -270,7 +270,6 @@ pub const unsafe fn assert_unchecked(cond: bool) {
 /// [`thread::yield_now`]: ../../std/thread/fn.yield_now.html
 #[inline(always)]
 #[stable(feature = "renamed_spin_loop", since = "1.49.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn spin_loop() {
     crate::cfg_select! {
         miri => {
@@ -491,7 +490,6 @@ pub fn spin_loop() {
 #[inline]
 #[stable(feature = "bench_black_box", since = "1.66.0")]
 #[rustc_const_stable(feature = "const_black_box", since = "1.86.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn black_box<T>(dummy: T) -> T {
     crate::intrinsics::black_box(dummy)
 }
@@ -615,7 +613,6 @@ pub const fn black_box<T>(dummy: T) -> T {
 #[unstable(feature = "hint_must_use", issue = "94745")]
 #[must_use] // <-- :)
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn must_use<T>(value: T) -> T {
     value
 }
@@ -666,7 +663,6 @@ pub const fn must_use<T>(value: T) -> T {
 /// ```
 #[unstable(feature = "likely_unlikely", issue = "151619")]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn likely(b: bool) -> bool {
     crate::intrinsics::likely(b)
 }
@@ -717,7 +713,6 @@ pub const fn likely(b: bool) -> bool {
 /// ```
 #[unstable(feature = "likely_unlikely", issue = "151619")]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn unlikely(b: bool) -> bool {
     crate::intrinsics::unlikely(b)
 }
@@ -786,7 +781,6 @@ pub const fn unlikely(b: bool) -> bool {
 #[stable(feature = "cold_path", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_stable(feature = "cold_path", since = "CURRENT_RUSTC_VERSION")]
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn cold_path() {
     crate::intrinsics::cold_path()
 }
@@ -900,7 +894,6 @@ where
 ///
 /// [`prefetch_read`]: crate::hint::prefetch_read
 /// [`prefetch_write`]: crate::hint::prefetch_write
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -919,7 +912,6 @@ pub enum Locality {
     L1,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Locality {
     /// Convert to the constant that LLVM associates with a locality.
     const fn to_llvm(self) -> i32 {
@@ -956,7 +948,6 @@ impl Locality {
 ///     }
 /// }
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read<T>(ptr: *const T, locality: Locality) {
@@ -977,7 +968,6 @@ pub const fn prefetch_read<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read_non_temporal<T>(ptr: *const T, locality: Locality) {
@@ -995,7 +985,6 @@ pub const fn prefetch_read_non_temporal<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_write<T>(ptr: *mut T, locality: Locality) {
@@ -1016,7 +1005,6 @@ pub const fn prefetch_write<T>(ptr: *mut T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_write_non_temporal<T>(ptr: *const T, locality: Locality) {
@@ -1034,7 +1022,6 @@ pub const fn prefetch_write_non_temporal<T>(ptr: *const T, locality: Locality) {
 ///
 /// Passing a dangling or invalid pointer is permitted: the memory will not
 /// actually be dereferenced, and no faults are raised.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline(always)]
 #[unstable(feature = "hint_prefetch", issue = "146941")]
 pub const fn prefetch_read_instruction<T>(ptr: *const T, locality: Locality) {

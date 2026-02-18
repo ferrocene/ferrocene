@@ -222,14 +222,11 @@
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod macros;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod raw_vec;
 
 // Heaps provided for low-level allocation strategies
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod alloc;
 
 // Primitive types using the heaps above
@@ -237,44 +234,29 @@ pub mod alloc;
 // Need to conditionally define the mod from `boxed.rs` to avoid
 // duplicating the lang-items when building in test cfg; but also need
 // to allow code to have `use boxed::Box;` declarations.
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod borrow;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod boxed;
 #[unstable(feature = "bstr", issue = "134915")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod bstr;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod collections;
 #[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ffi;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod fmt;
 #[cfg(not(no_rc))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod rc;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod slice;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod str;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod string;
 #[cfg(all(not(no_rc), not(no_sync), target_has_atomic = "ptr"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod sync;
 #[cfg(all(not(no_global_oom_handling), not(no_rc), not(no_sync)))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod task;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod vec;
 #[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod wtf8;
 
 #[doc(hidden)]
 #[unstable(feature = "liballoc_internals", issue = "none", reason = "implementation detail")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod __export {
     pub use core::format_args;
     pub use core::hint::must_use;

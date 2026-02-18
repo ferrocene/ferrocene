@@ -2,7 +2,6 @@
 //!
 //! In this module, a "vector" is any `repr(simd)` type.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::ConstParamTy;
 
 /// Inserts an element into a vector, returning the updated vector.
@@ -38,7 +37,6 @@ pub const unsafe fn simd_extract<T, U>(x: T, idx: u32) -> U;
 /// `idx` must be in-bounds of the vector.
 #[rustc_nounwind]
 #[rustc_intrinsic]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_insert_dyn<T, U>(x: T, idx: u32, val: U) -> T;
 
 /// Extracts an element from a vector.
@@ -91,7 +89,6 @@ pub const unsafe fn simd_mul<T>(x: T, y: T) -> T;
 /// Additionally for signed integers, `<int>::MIN / -1` is undefined behavior.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_div<T>(lhs: T, rhs: T) -> T;
 
 /// Returns remainder of two vectors elementwise.
@@ -103,7 +100,6 @@ pub const unsafe fn simd_div<T>(lhs: T, rhs: T) -> T;
 /// Additionally for signed integers, `<int>::MIN / -1` is undefined behavior.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_rem<T>(lhs: T, rhs: T) -> T;
 
 /// Shifts vector left elementwise, with UB on overflow.
@@ -117,7 +113,6 @@ pub const unsafe fn simd_rem<T>(lhs: T, rhs: T) -> T;
 /// Each element of `rhs` must be less than `<int>::BITS`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_shl<T>(lhs: T, rhs: T) -> T;
 
 /// Shifts vector right elementwise, with UB on overflow.
@@ -131,7 +126,6 @@ pub const unsafe fn simd_shl<T>(lhs: T, rhs: T) -> T;
 /// Each element of `rhs` must be less than `<int>::BITS`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_shr<T>(lhs: T, rhs: T) -> T;
 
 /// Funnel Shifts vector left elementwise, with UB on overflow.
@@ -149,7 +143,6 @@ pub const unsafe fn simd_shr<T>(lhs: T, rhs: T) -> T;
 /// Each element of `shift` must be less than `<int>::BITS`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_funnel_shl<T>(a: T, b: T, shift: T) -> T;
 
 /// Funnel Shifts vector right elementwise, with UB on overflow.
@@ -167,7 +160,6 @@ pub const unsafe fn simd_funnel_shl<T>(a: T, b: T, shift: T) -> T;
 /// Each element of `shift` must be less than `<int>::BITS`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_funnel_shr<T>(a: T, b: T, shift: T) -> T;
 
 /// "And"s vectors elementwise.
@@ -175,7 +167,6 @@ pub const unsafe fn simd_funnel_shr<T>(a: T, b: T, shift: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_and<T>(x: T, y: T) -> T;
 
 /// "Ors" vectors elementwise.
@@ -183,7 +174,6 @@ pub const unsafe fn simd_and<T>(x: T, y: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_or<T>(x: T, y: T) -> T;
 
 /// "Exclusive ors" vectors elementwise.
@@ -212,7 +202,6 @@ pub const unsafe fn simd_xor<T>(x: T, y: T) -> T;
 /// * Be representable in the return type, after truncating off its fractional part
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_cast<T, U>(x: T) -> U;
 
 /// Numerically casts a vector, elementwise.
@@ -227,7 +216,6 @@ pub const unsafe fn simd_cast<T, U>(x: T) -> U;
 /// Otherwise, truncates or extends the value, maintaining the sign for signed integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_as<T, U>(x: T) -> U;
 
 /// Negates a vector elementwise.
@@ -244,7 +232,6 @@ pub const unsafe fn simd_neg<T>(x: T) -> T;
 /// `T` must be a vector of floating-point primitive types.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_fabs<T>(x: T) -> T;
 
 /// Returns the minimum of two vectors, elementwise.
@@ -254,7 +241,6 @@ pub const unsafe fn simd_fabs<T>(x: T) -> T;
 /// Follows IEEE-754 `minNum` semantics.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_fmin<T>(x: T, y: T) -> T;
 
 /// Returns the maximum of two vectors, elementwise.
@@ -264,7 +250,6 @@ pub const unsafe fn simd_fmin<T>(x: T, y: T) -> T;
 /// Follows IEEE-754 `maxNum` semantics.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_fmax<T>(x: T, y: T) -> T;
 
 /// Tests elementwise equality of two vectors.
@@ -276,7 +261,6 @@ pub const unsafe fn simd_fmax<T>(x: T, y: T) -> T;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_eq<T, U>(x: T, y: T) -> U;
 
 /// Tests elementwise inequality equality of two vectors.
@@ -288,7 +272,6 @@ pub const unsafe fn simd_eq<T, U>(x: T, y: T) -> U;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_ne<T, U>(x: T, y: T) -> U;
 
 /// Tests if `x` is less than `y`, elementwise.
@@ -300,7 +283,6 @@ pub const unsafe fn simd_ne<T, U>(x: T, y: T) -> U;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_lt<T, U>(x: T, y: T) -> U;
 
 /// Tests if `x` is less than or equal to `y`, elementwise.
@@ -312,7 +294,6 @@ pub const unsafe fn simd_lt<T, U>(x: T, y: T) -> U;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_le<T, U>(x: T, y: T) -> U;
 
 /// Tests if `x` is greater than `y`, elementwise.
@@ -324,7 +305,6 @@ pub const unsafe fn simd_le<T, U>(x: T, y: T) -> U;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_gt<T, U>(x: T, y: T) -> U;
 
 /// Tests if `x` is greater than or equal to `y`, elementwise.
@@ -336,7 +316,6 @@ pub const unsafe fn simd_gt<T, U>(x: T, y: T) -> U;
 /// Returns `0` for false and `!0` for true.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_ge<T, U>(x: T, y: T) -> U;
 
 /// Shuffles two vectors by const indices.
@@ -374,7 +353,6 @@ pub const unsafe fn simd_shuffle<T, U, V>(x: T, y: T, idx: U) -> V;
 /// `mask` must only contain `0` or `!0` values.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_gather<T, U, V>(val: T, ptr: U, mask: V) -> T;
 
 /// Writes to a vector of pointers.
@@ -399,12 +377,10 @@ pub const unsafe fn simd_gather<T, U, V>(val: T, ptr: U, mask: V) -> T;
 /// `mask` must only contain `0` or `!0` values.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_scatter<T, U, V>(val: T, ptr: U, mask: V);
 
 /// A type for alignment options for SIMD masked load/store intrinsics.
 #[derive(Debug, ConstParamTy, PartialEq, Eq)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub enum SimdAlign {
     // These values must match the compiler's `SimdAlign` defined in
     // `rustc_middle/src/ty/consts/int.rs`!
@@ -436,7 +412,6 @@ pub enum SimdAlign {
 /// `mask` must only contain `0` or `!0` values.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_masked_load<V, U, T, const ALIGN: SimdAlign>(mask: V, ptr: U, val: T)
 -> T;
 
@@ -459,7 +434,6 @@ pub const unsafe fn simd_masked_load<V, U, T, const ALIGN: SimdAlign>(mask: V, p
 /// `mask` must only contain `0` or `!0` values.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_masked_store<V, U, T, const ALIGN: SimdAlign>(mask: V, ptr: U, val: T);
 
 /// Adds two simd vectors elementwise, with saturation.
@@ -467,7 +441,6 @@ pub const unsafe fn simd_masked_store<V, U, T, const ALIGN: SimdAlign>(mask: V, 
 /// `T` must be a vector of integer primitive types.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_saturating_add<T>(x: T, y: T) -> T;
 
 /// Subtracts two simd vectors elementwise, with saturation.
@@ -477,7 +450,6 @@ pub const unsafe fn simd_saturating_add<T>(x: T, y: T) -> T;
 /// Subtract `rhs` from `lhs`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_saturating_sub<T>(lhs: T, rhs: T) -> T;
 
 /// Adds elements within a vector from left to right.
@@ -489,7 +461,6 @@ pub const unsafe fn simd_saturating_sub<T>(lhs: T, rhs: T) -> T;
 /// Starting with the value `y`, add the elements of `x` and accumulate.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_add_ordered<T, U>(x: T, y: U) -> U;
 
 /// Adds elements within a vector in arbitrary order. May also be re-associated with
@@ -500,7 +471,6 @@ pub const unsafe fn simd_reduce_add_ordered<T, U>(x: T, y: U) -> U;
 /// `U` must be the element type of `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_reduce_add_unordered<T, U>(x: T) -> U;
 
 /// Multiplies elements within a vector from left to right.
@@ -512,7 +482,6 @@ pub unsafe fn simd_reduce_add_unordered<T, U>(x: T) -> U;
 /// Starting with the value `y`, multiply the elements of `x` and accumulate.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_mul_ordered<T, U>(x: T, y: U) -> U;
 
 /// Multiplies elements within a vector in arbitrary order. May also be re-associated with
@@ -523,7 +492,6 @@ pub const unsafe fn simd_reduce_mul_ordered<T, U>(x: T, y: U) -> U;
 /// `U` must be the element type of `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_reduce_mul_unordered<T, U>(x: T) -> U;
 
 /// Checks if all mask values are true.
@@ -534,7 +502,6 @@ pub unsafe fn simd_reduce_mul_unordered<T, U>(x: T) -> U;
 /// `x` must contain only `0` or `!0`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_all<T>(x: T) -> bool;
 
 /// Checks if any mask value is true.
@@ -545,7 +512,6 @@ pub const unsafe fn simd_reduce_all<T>(x: T) -> bool;
 /// `x` must contain only `0` or `!0`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_any<T>(x: T) -> bool;
 
 /// Returns the maximum element of a vector.
@@ -557,7 +523,6 @@ pub const unsafe fn simd_reduce_any<T>(x: T) -> bool;
 /// For floating-point values, uses IEEE-754 `maxNum`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_max<T, U>(x: T) -> U;
 
 /// Returns the minimum element of a vector.
@@ -569,7 +534,6 @@ pub const unsafe fn simd_reduce_max<T, U>(x: T) -> U;
 /// For floating-point values, uses IEEE-754 `minNum`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_min<T, U>(x: T) -> U;
 
 /// Logical "and"s all elements together.
@@ -579,7 +543,6 @@ pub const unsafe fn simd_reduce_min<T, U>(x: T) -> U;
 /// `U` must be the element type of `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_and<T, U>(x: T) -> U;
 
 /// Logical "ors" all elements together.
@@ -589,7 +552,6 @@ pub const unsafe fn simd_reduce_and<T, U>(x: T) -> U;
 /// `U` must be the element type of `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_or<T, U>(x: T) -> U;
 
 /// Logical "exclusive ors" all elements together.
@@ -599,7 +561,6 @@ pub const unsafe fn simd_reduce_or<T, U>(x: T) -> U;
 /// `U` must be the element type of `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_reduce_xor<T, U>(x: T) -> U;
 
 /// Truncates an integer vector to a bitmask.
@@ -637,7 +598,6 @@ pub const unsafe fn simd_reduce_xor<T, U>(x: T) -> U;
 /// `x` must contain only `0` and `!0`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_bitmask<T, U>(x: T) -> U;
 
 /// Selects elements from a mask.
@@ -654,7 +614,6 @@ pub const unsafe fn simd_bitmask<T, U>(x: T) -> U;
 /// `mask` must only contain `0` and `!0`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_select<M, T>(mask: M, if_true: T, if_false: T) -> T;
 
 /// Selects elements from a bitmask.
@@ -671,7 +630,6 @@ pub const unsafe fn simd_select<M, T>(mask: M, if_true: T, if_false: T) -> T;
 /// The bitmask bit order matches `simd_bitmask`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_select_bitmask<M, T>(m: M, yes: T, no: T) -> T;
 
 /// Calculates the offset from a pointer vector elementwise, potentially
@@ -684,7 +642,6 @@ pub const unsafe fn simd_select_bitmask<M, T>(m: M, yes: T, no: T) -> T;
 /// Operates as if by `<ptr>::wrapping_offset`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_arith_offset<T, U>(ptr: T, offset: U) -> T;
 
 /// Casts a vector of pointers.
@@ -692,7 +649,6 @@ pub const unsafe fn simd_arith_offset<T, U>(ptr: T, offset: U) -> T;
 /// `T` and `U` must be vectors of pointers with the same number of elements.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_cast_ptr<T, U>(ptr: T) -> U;
 
 /// Exposes a vector of pointers as a vector of addresses.
@@ -702,7 +658,6 @@ pub const unsafe fn simd_cast_ptr<T, U>(ptr: T) -> U;
 /// `U` must be a vector of `usize` with the same length as `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_expose_provenance<T, U>(ptr: T) -> U;
 
 /// Creates a vector of pointers from a vector of addresses.
@@ -712,7 +667,6 @@ pub unsafe fn simd_expose_provenance<T, U>(ptr: T) -> U;
 /// `U` must be a vector of pointers, with the same length as `T`.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_with_exposed_provenance<T, U>(addr: T) -> U;
 
 /// Swaps bytes of each element.
@@ -720,7 +674,6 @@ pub const unsafe fn simd_with_exposed_provenance<T, U>(addr: T) -> U;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_bswap<T>(x: T) -> T;
 
 /// Reverses bits of each element.
@@ -728,7 +681,6 @@ pub const unsafe fn simd_bswap<T>(x: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_bitreverse<T>(x: T) -> T;
 
 /// Counts the leading zeros of each element.
@@ -736,7 +688,6 @@ pub const unsafe fn simd_bitreverse<T>(x: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_ctlz<T>(x: T) -> T;
 
 /// Counts the number of ones in each element.
@@ -744,7 +695,6 @@ pub const unsafe fn simd_ctlz<T>(x: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_ctpop<T>(x: T) -> T;
 
 /// Counts the trailing zeros of each element.
@@ -752,7 +702,6 @@ pub const unsafe fn simd_ctpop<T>(x: T) -> T;
 /// `T` must be a vector of integers.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_cttz<T>(x: T) -> T;
 
 /// Rounds up each element to the next highest integer-valued float.
@@ -760,7 +709,6 @@ pub const unsafe fn simd_cttz<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_ceil<T>(x: T) -> T;
 
 /// Rounds down each element to the next lowest integer-valued float.
@@ -768,7 +716,6 @@ pub const unsafe fn simd_ceil<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_floor<T>(x: T) -> T;
 
 /// Rounds each element to the closest integer-valued float.
@@ -777,7 +724,6 @@ pub const unsafe fn simd_floor<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_round<T>(x: T) -> T;
 
 /// Rounds each element to the closest integer-valued float.
@@ -786,7 +732,6 @@ pub const unsafe fn simd_round<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_round_ties_even<T>(x: T) -> T;
 
 /// Returns the integer part of each element as an integer-valued float.
@@ -795,7 +740,6 @@ pub const unsafe fn simd_round_ties_even<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_trunc<T>(x: T) -> T;
 
 /// Takes the square root of each element.
@@ -803,7 +747,6 @@ pub const unsafe fn simd_trunc<T>(x: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fsqrt<T>(x: T) -> T;
 
 /// Computes `(x*y) + z` for each element, but without any intermediate rounding.
@@ -826,7 +769,6 @@ pub const unsafe fn simd_fma<T>(x: T, y: T, z: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const unsafe fn simd_relaxed_fma<T>(x: T, y: T, z: T) -> T;
 
 // Computes the sine of each element.
@@ -834,7 +776,6 @@ pub const unsafe fn simd_relaxed_fma<T>(x: T, y: T, z: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fsin<T>(a: T) -> T;
 
 // Computes the cosine of each element.
@@ -842,7 +783,6 @@ pub unsafe fn simd_fsin<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fcos<T>(a: T) -> T;
 
 // Computes the exponential function of each element.
@@ -850,7 +790,6 @@ pub unsafe fn simd_fcos<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fexp<T>(a: T) -> T;
 
 // Computes 2 raised to the power of each element.
@@ -858,7 +797,6 @@ pub unsafe fn simd_fexp<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_fexp2<T>(a: T) -> T;
 
 // Computes the base 10 logarithm of each element.
@@ -866,7 +804,6 @@ pub unsafe fn simd_fexp2<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_flog10<T>(a: T) -> T;
 
 // Computes the base 2 logarithm of each element.
@@ -874,7 +811,6 @@ pub unsafe fn simd_flog10<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_flog2<T>(a: T) -> T;
 
 // Computes the natural logarithm of each element.
@@ -882,5 +818,4 @@ pub unsafe fn simd_flog2<T>(a: T) -> T;
 /// `T` must be a vector of floats.
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub unsafe fn simd_flog<T>(a: T) -> T;

@@ -1,16 +1,10 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::array;
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::mem::MaybeUninit;
-#[cfg(not(feature = "ferrocene_subset"))]
 use core::ops::ControlFlow;
 
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -42,7 +36,6 @@ impl<I, P> Filter<I, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I, P> Filter<I, P>
 where
     I: Iterator,
@@ -116,7 +109,6 @@ where
         self.iter.find(&mut self.predicate)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     fn next_chunk<const N: usize>(
         &mut self,
@@ -190,7 +182,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I: DoubleEndedIterator, P> DoubleEndedIterator for Filter<I, P>
 where
@@ -220,15 +211,12 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<I: FusedIterator, P> FusedIterator for Filter<I, P> where P: FnMut(&I::Item) -> bool {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "trusted_fused")]
 unsafe impl<I: TrustedFused, F> TrustedFused for Filter<I, F> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<P, I> SourceIter for Filter<I, P>
 where
@@ -243,7 +231,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable, P> InPlaceIterable for Filter<I, P> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;

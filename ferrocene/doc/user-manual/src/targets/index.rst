@@ -193,11 +193,11 @@ Supported targets can often be qualified or quality managed upon request.
      - Full
      - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux.
 
-    * - :target:`aarch64r82-unknown-none`
-      - ``aarch64r82-unknown-none``
-      - Cross-compilation
-      - Bare-metal
-      - \-
+   * - :target:`aarch64r82-unknown-none`
+     - ``aarch64r82-unknown-none``
+     - Cross-compilation
+     - Bare-metal
+     - \-
 
    * - :target:`aarch64v8r-unknown-none`
      - ``aarch64v8r-unknown-none``

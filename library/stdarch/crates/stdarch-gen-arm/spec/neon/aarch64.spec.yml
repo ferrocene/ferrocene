@@ -3479,10 +3479,10 @@ intrinsics:
 
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
-    arguments: ["a: {type[0]}"]
+    arguments: ["ptr: {type[0]}"]
     return_type: "{neon_type[1]}"
     attr: [*neon-stable]
-    assert_instr: [ld1]
+    assert_instr: [ld]
     safety:
       unsafe: [neon]
     types:
@@ -3493,11 +3493,12 @@ intrinsics:
       - ["*const f64", float64x1x4_t]
       - ["*const f64", float64x2x4_t]
     compose:
-      - LLVMLink:
-          name: "vld1{neon_type[1].no}"
-          links:
-            - link: "llvm.aarch64.neon.ld1x{neon_type[1].tuple}.v{neon_type[1].lane}f{neon_type[1].base}.p0"
-              arch: aarch64,arm64ec
+      - FnCall:
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - ptr
+                - cast
+                - []
 
   - name: "vld2{neon_type[1].lane_nox}"
     doc: Load multiple 2-element structures to two registers

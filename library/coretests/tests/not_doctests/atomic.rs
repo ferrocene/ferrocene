@@ -1,5 +1,55 @@
 use core::sync::atomic;
 
+#[test]
+fn atomic_methods() {
+    use atomic::AtomicU32;
+    use atomic::Ordering::*;
+    let atomic = AtomicU32::new(0);
+
+    assert_eq!(unsafe { *atomic.as_ptr() }, 0);
+
+    assert!(atomic.try_update(Relaxed, Relaxed, |_| None).is_err());
+    assert!(atomic.try_update(Relaxed, Relaxed, |x| Some(x + 2)).is_ok());
+
+    let mut is_retry = false;
+    let result = atomic.try_update(Relaxed, Relaxed, |x| {
+        if is_retry {
+            Some(x + 1)
+        } else {
+            is_retry = true;
+            atomic.store(4, Relaxed);
+            Some(u32::MAX)
+        }
+    });
+
+    assert!(result.is_ok_and(|x| x == 4));
+    assert_eq!(atomic.load(Relaxed), 5);
+
+    assert_eq!(atomic.update(Relaxed, Relaxed, |x| x), 5);
+    assert_eq!(atomic.update(Relaxed, Relaxed, |x| x - 1), 5);
+
+    let mut is_retry = false;
+    let result = atomic.update(Relaxed, Relaxed, |x| {
+        if is_retry {
+            x + 1
+        } else {
+            is_retry = true;
+            atomic.store(7, Relaxed);
+            u32::MAX
+        }
+    });
+
+    assert_eq!(result, 7);
+    assert_eq!(atomic.into_inner(), 8);
+
+    let mut arr = [0, 1, 2];
+
+    let _ = atomic::AtomicU32::from_mut(arr.get_mut(0).unwrap()).get_mut();
+    let _ = AtomicU32::get_mut_slice(AtomicU32::from_mut_slice(arr.get_mut(0..1).unwrap()));
+
+    let _ = unsafe { AtomicU32::from_ptr(arr.get_mut(0).unwrap() as *mut u32) };
+}
+
 macro_rules! test_atomic_compare_and_swap {
     ($($fn:ident => $width:literal => $atomic_t:ty,)*) => { $(
         #[test]
@@ -103,3 +153,44 @@ fn atomic_fence() {
 fn atomic_fence_relaxed() {
     atomic::fence(atomic::Ordering::Relaxed);
 }
+
+// covers `core::sync::atomic::<$atomic_t>::fetch_update`
+macro_rules! test_atomic_fetch_update {
+    ($($fn:ident => $atomic_t:ty,)*) => { $(
+        #[test]
+        fn $fn() {
+            let atomic = <$atomic_t>::new(5);
+
+            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Ok(5)); // success
+            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Err(10)); // failure
+        }
+    )*};
+}
+test_atomic_fetch_update!(
+    atomic_u8_fetch_update => atomic::AtomicU8,
+    atomic_u16_fetch_update => atomic::AtomicU16,
+    atomic_u32_fetch_update => atomic::AtomicU32,
+    atomic_usize_fetch_update => atomic::AtomicUsize,
+);
+
+// covers `<core::sync::atomic::<$atomic_t>:: as core::fmt::Debug>::fmt`
+macro_rules! test_atomic_debug_fmt {
+    ($($(#[$attr:meta])* $fn:ident => $atomic_t:ty : $val:literal == $str:literal,)*) => { $(
+        #[test]
+        $(#[$attr])*
+        fn $fn() {
+            let atomic = <$atomic_t>::new($val);
+
+            assert_eq!(format!("{atomic:?}"), $str);
+        }
+    )*};
+}
+test_atomic_debug_fmt!(
+    atomic_u8_debug_fmt => atomic::AtomicU8: 5 == "5",
+    atomic_u16_debug_fmt => atomic::AtomicU16: 5 == "5",
+    atomic_u32_debug_fmt => atomic::AtomicU32: 5 == "5",
+    #[cfg(target_has_atomic = "64")]
+    atomic_u64_debug_fmt => atomic::AtomicU64: 5 == "5",
+    atomic_usize_debug_fmt => atomic::AtomicUsize: 5 == "5",
+    atomic_bool_debug_fmt => atomic::AtomicBool: true == "true",
+);

@@ -25,6 +25,31 @@ fn test_iterator_copied_nth() {
     assert_eq!(iter.nth(1), Some(2));
 }
 
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_back_by
+#[test]
+fn test_iterator_copied_advance_back_by() {
+    let first = vec![1, 2];
+    let mut iter = first.iter().copied();
+    iter.advance_back_by(1).ok();
+    assert_eq!(iter.next(), Some(1));
+}
+
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::rfold
+#[test]
+fn test_iterator_copied_rfold() {
+    let first = vec![1i8, 2];
+    let iter = first.iter().copied();
+    assert_eq!(iter.rfold(3, |x, acc| x - acc), 0);
+}
+
+// <core::iter::adapters::copied::Copied<I> as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
+#[test]
+fn test_iterator_copied_is_empty() {
+    let first = Vec::<u8>::new();
+    let iter = first.iter().copied();
+    assert!(iter.is_empty());
+}
+
 // <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfind
 #[test]
 fn test_iter_rev_double_ended_rfind() {

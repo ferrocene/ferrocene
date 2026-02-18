@@ -100,3 +100,61 @@ fn test_u128_fmt_inner() {
     fmt::Display::fmt(&n, &mut f).unwrap();
     assert_eq!(buffer, "10000000000000001");
 }
+
+struct UnsizedBuffer {
+    idx: usize,
+    buffer: [u8],
+}
+
+impl UnsizedBuffer {
+    pub fn new(slice: &mut [u8]) -> &mut Self {
+        let ptr = slice as *mut [u8] as *mut Self;
+        unsafe { (*ptr).idx = 0 };
+        unsafe { &mut *ptr }
+    }
+
+    fn as_str(&self) -> &str {
+        str::from_utf8(&self.buffer[..self.idx]).unwrap()
+    }
+}
+
+impl fmt::Write for UnsizedBuffer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        let bytes = s.as_bytes();
+
+        self.buffer[self.idx..self.idx + bytes.len()].copy_from_slice(bytes);
+        self.idx += bytes.len();
+
+        Ok(())
+    }
+}
+
+// Covers `core::fmt::Write::write_fmt`
+#[test]
+fn test_write_fmt_unsized() {
+    let mut array = [0u8; 210];
+    let buffer = UnsizedBuffer::new(&mut array);
+
+    fn how_dare_you() -> &'static str {
+        "How dare you!"
+    }
+    let args = format_args!(
+        "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. {}",
+        how_dare_you()
+    );
+    fmt::Write::write_fmt(buffer, args).unwrap();
+    assert_eq!(
+        buffer.as_str(),
+        "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. How dare you!"
+    )
+}
+
+// Covers `core::fmt::Write::write_fmt`
+#[test]
+fn test_write_fmt_unsized_statically_known() {
+    let mut array = [0u8; 16];
+    let buffer = UnsizedBuffer::new(&mut array);
+
+    fmt::Write::write_fmt(buffer, format_args!("Hello, world!")).unwrap();
+    assert_eq!(buffer.as_str(), "Hello, world!")
+}

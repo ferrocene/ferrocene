@@ -476,6 +476,8 @@ target | std | host | notes
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 `x86_64-unknown-ferrocene.subset` | * |  | Freestanding/bare-metal x86_64, softfloat (subset)
 `aarch64-unknown-ferrocene.subset` | * |  | Bare ARM64, hardfloat (subset)
+`aarch64r82-unknown-ferrocene.subset` | ✓ | ✓ | Arm Cortex-R82 bare metal, hardfloat (subset)
+`aarch64v8r-unknown-ferrocene.subset` | ✓ | ✓ | Bare Armv8-R in AArch64 mode, hardfloat (subset)
 `thumbv7em-ferrocene.subset-eabi` | * |  | Bare Armv7E-M (subset)
 `thumbv7em-ferrocene.subset-eabihf` | * |  | Bare Armv7E-M, hardfloat (subset)
 

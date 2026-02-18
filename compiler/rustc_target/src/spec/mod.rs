@@ -1798,6 +1798,8 @@ supported_targets! {
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
     ("x86_64-unknown-ferrocene.subset", x86_64_unknown_ferrocene_subset),
     ("aarch64-unknown-ferrocene.subset", aarch64_unknown_ferrocene_subset),
+    ("aarch64v8r-unknown-ferrocene.subset", aarch64v8r_unknown_ferrocene_subset),
+    ("aarch64r82-unknown-ferrocene.subset", aarch64r82_unknown_ferrocene_subset),
     ("thumbv7em-ferrocene.subset-eabi", thumbv7em_ferrocene_subset_eabi),
     ("thumbv7em-ferrocene.subset-eabihf", thumbv7em_ferrocene_subset_eabihf),
 

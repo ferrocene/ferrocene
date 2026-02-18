@@ -142,6 +142,12 @@ impl TargetSelection {
             "thumbv7em-none-eabihf" | "thumbv7em-ferrocene.facade-eabihf" => {
                 "thumbv7em-ferrocene.subset-eabihf"
             }
+
+            "aarch64r82-unknown-ferrocene.facade" => "aarch64r82-unknown-ferrocene.subset",
+            "aarch64v8r-unknown-ferrocene.facade" => "aarch64v8r-unknown-ferrocene.subset",
+            "aarch64v8r-unknown-ferrocene.facade_softfloat" => {
+                "aarch64v8r-unknown-ferrocene.subset_softfloat"
+            }
             target if target.contains("ferrocene.subset") => target,
             _ => return None,
         };

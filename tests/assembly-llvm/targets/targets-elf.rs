@@ -79,9 +79,6 @@
 //@ revisions: aarch64r82_unknown_none_softfloat
 //@ [aarch64r82_unknown_none_softfloat] compile-flags: --target aarch64r82-unknown-none-softfloat
 //@ [aarch64r82_unknown_none_softfloat] needs-llvm-components: aarch64
-//@ revisions: aarch64r82_unknown_ferrocene_facade
-//@ [aarch64r82_unknown_ferrocene_facade] compile-flags: --target aarch64r82-unknown-ferrocene.facade
-//@ [aarch64r82_unknown_ferrocene_facade] needs-llvm-components: aarch64
 //@ revisions: aarch64_unknown_nto_qnx700
 //@ [aarch64_unknown_nto_qnx700] compile-flags: --target aarch64-unknown-nto-qnx700
 //@ [aarch64_unknown_nto_qnx700] needs-llvm-components: aarch64
@@ -820,6 +817,9 @@
 //@ revisions: aarch64_unknown_ferrocene_facade
 //@ [aarch64_unknown_ferrocene_facade] compile-flags: --target aarch64-unknown-ferrocene.facade
 //@ [aarch64_unknown_ferrocene_facade] needs-llvm-components: aarch64
+//@ revisions: aarch64r82_unknown_ferrocene_facade
+//@ [aarch64r82_unknown_ferrocene_facade] compile-flags: --target aarch64r82-unknown-ferrocene.facade
+//@ [aarch64r82_unknown_ferrocene_facade] needs-llvm-components: aarch64
 //@ revisions: aarch64v8r_unknown_ferrocene_facade
 //@ [aarch64v8r_unknown_ferrocene_facade] compile-flags: --target aarch64v8r-unknown-ferrocene.facade
 //@ [aarch64v8r_unknown_ferrocene_facade] needs-llvm-components: aarch64
@@ -832,6 +832,12 @@
 //@ revisions: aarch64_unknown_ferrocene_subset
 //@ [aarch64_unknown_ferrocene_subset] compile-flags: --target aarch64-unknown-ferrocene.subset
 //@ [aarch64_unknown_ferrocene_subset] needs-llvm-components: aarch64
+//@ revisions: aarch64r82_unknown_ferrocene_subset
+//@ [aarch64r82_unknown_ferrocene_subset] compile-flags: --target aarch64r82-unknown-ferrocene.subset
+//@ [aarch64r82_unknown_ferrocene_subset] needs-llvm-components: aarch64
+//@ revisions: aarch64v8r_unknown_ferrocene_subset
+//@ [aarch64v8r_unknown_ferrocene_subset] compile-flags: --target aarch64v8r-unknown-ferrocene.subset
+//@ [aarch64v8r_unknown_ferrocene_subset] needs-llvm-components: aarch64
 //@ revisions: x86_64_unknown_ferrocene_subset
 //@ [x86_64_unknown_ferrocene_subset] compile-flags: --target x86_64-unknown-ferrocene.subset
 //@ [x86_64_unknown_ferrocene_subset] needs-llvm-components: x86

@@ -12,7 +12,7 @@ use rustc_middle::mir::mono::Visibility;
 use rustc_middle::ty::layout::{FnAbiOf, HasTypingEnv, LayoutOf};
 use rustc_middle::ty::{self, Instance, Ty, TypeVisitableExt};
 use rustc_session::config::CrateType;
-use rustc_target::callconv::FnAbi;
+use rustc_target::callconv::{FnAbi, PassMode};
 use rustc_target::spec::{Arch, RelocModel};
 use tracing::debug;
 
@@ -187,15 +187,22 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
                 args.push(llvm::get_param(alias_lldecl, index));
             }
 
-            start_bx.tail_call(
+            let call = start_bx.call(
                 fn_ty,
                 Some(attrs),
-                fn_abi,
+                Some(fn_abi),
                 aliasee,
                 &args,
                 None,
                 Some(aliasee_instance),
             );
+
+            match &fn_abi.ret.mode {
+                PassMode::Ignore | PassMode::Indirect { .. } => start_bx.ret_void(),
+                PassMode::Direct(_) | PassMode::Pair { .. } | PassMode::Cast { .. } => {
+                    start_bx.ret(call)
+                }
+            }
         }
     }
 

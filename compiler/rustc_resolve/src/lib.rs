@@ -9,6 +9,7 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![cfg_attr(bootstrap, feature(assert_matches))]
+#![cfg_attr(bootstrap, feature(if_let_guard))]
 #![cfg_attr(bootstrap, feature(ptr_as_ref_unchecked))]
 #![feature(arbitrary_self_types)]
 #![feature(box_patterns)]
@@ -16,7 +17,6 @@
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
 #![feature(default_field_values)]
-#![feature(if_let_guard)]
 #![feature(iter_intersperse)]
 #![feature(rustc_attrs)]
 #![feature(trim_prefix_suffix)]

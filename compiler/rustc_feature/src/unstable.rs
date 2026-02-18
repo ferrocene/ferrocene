@@ -518,8 +518,6 @@ declare_features! (
     (unstable, half_open_range_patterns_in_slices, "1.66.0", Some(67264)),
     /// Target features on hexagon.
     (unstable, hexagon_target_feature, "1.27.0", Some(150250)),
-    /// Allows `if let` guard in match arms.
-    (unstable, if_let_guard, "1.47.0", Some(51114)),
     /// Allows `impl Trait` to be used inside associated types (RFC 2515).
     (unstable, impl_trait_in_assoc_type, "1.70.0", Some(63063)),
     /// Allows `impl Trait` in bindings (`let`).

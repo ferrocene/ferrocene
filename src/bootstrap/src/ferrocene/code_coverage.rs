@@ -11,8 +11,8 @@ use crate::builder::Builder;
 use crate::core::builder::{Cargo, Kind, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
-use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
+use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::{BootstrapCommand, Compiler, DocTests, Mode};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
@@ -106,7 +106,9 @@ pub(super) fn instrumented_binaries(
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
             let collect_doctests = builder.doc_tests != DocTests::No
-                && (paths.doctests_bins_dir.exists() || !builder.was_invoked_explicitly::<ferrocene::run::CoverageReport>(Kind::Run));
+                && (paths.doctests_bins_dir.exists()
+                    || !builder
+                        .was_invoked_explicitly::<ferrocene::run::CoverageReport>(Kind::Run));
             let doctests_bins = collect_doctests
                 .then(|| builder.read_dir(&paths.doctests_bins_dir))
                 .into_iter()

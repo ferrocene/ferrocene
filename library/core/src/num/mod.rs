@@ -1343,6 +1343,7 @@ impl usize {
 
     /// Returns an `usize` where every byte pair is equal to `x`.
     #[inline]
+    #[ferrocene::annotation("This function is only being used in constants and cannot be covered")]
     pub(crate) const fn repeat_u16(x: u16) -> usize {
         let mut r = 0usize;
         let mut i = 0;

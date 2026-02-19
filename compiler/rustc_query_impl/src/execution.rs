@@ -5,17 +5,17 @@ use rustc_data_structures::hash_table::{Entry, HashTable};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::{outline, sharded, sync};
 use rustc_errors::{Diag, FatalError, StashKey};
-use rustc_middle::dep_graph::DepsType;
-use rustc_middle::ty::TyCtxt;
-use rustc_query_system::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
-use rustc_query_system::query::{
-    ActiveKeyStatus, CycleError, CycleErrorHandling, QueryCache, QueryContext, QueryJob,
-    QueryJobId, QueryJobInfo, QueryLatch, QueryMap, QueryMode, QueryStackDeferred, QueryStackFrame,
-    QueryState, incremental_verify_ich, report_cycle,
+use rustc_middle::dep_graph::{DepGraphData, DepNodeKey, HasDepContext};
+use rustc_middle::query::{
+    ActiveKeyStatus, CycleError, CycleErrorHandling, QueryCache, QueryJob, QueryJobId, QueryLatch,
+    QueryMode, QueryStackDeferred, QueryStackFrame, QueryState,
 };
+use rustc_middle::ty::TyCtxt;
+use rustc_middle::verify_ich::incremental_verify_ich;
 use rustc_span::{DUMMY_SP, Span};
 
-use crate::dep_graph::{DepContext, DepNode, DepNodeIndex};
+use crate::dep_graph::{DepNode, DepNodeIndex};
+use crate::job::{QueryJobInfo, QueryJobMap, find_cycle_in_stack, report_cycle};
 use crate::{QueryCtxt, QueryFlags, SemiDynamicQueryDispatcher};
 
 #[inline]
@@ -45,8 +45,8 @@ pub(crate) fn gather_active_jobs_inner<'tcx, K: Copy>(
     state: &QueryState<'tcx, K>,
     tcx: TyCtxt<'tcx>,
     make_frame: fn(TyCtxt<'tcx>, K) -> QueryStackFrame<QueryStackDeferred<'tcx>>,
-    jobs: &mut QueryMap<'tcx>,
     require_complete: bool,
+    job_map_out: &mut QueryJobMap<'tcx>, // Out-param; job info is gathered into this map
 ) -> Option<()> {
     let mut active = Vec::new();
 
@@ -77,7 +77,7 @@ pub(crate) fn gather_active_jobs_inner<'tcx, K: Copy>(
     // queries leading to a deadlock.
     for (key, job) in active {
         let frame = make_frame(tcx, key);
-        jobs.insert(job.id, QueryJobInfo { frame, job });
+        job_map_out.insert(job.id, QueryJobInfo { frame, job });
     }
 
     Some(())
@@ -213,12 +213,12 @@ fn cycle_error<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 ) -> (C::Value, Option<DepNodeIndex>) {
     // Ensure there was no errors collecting all active jobs.
     // We need the complete map to ensure we find a cycle to break.
-    let query_map = qcx
+    let job_map = qcx
         .collect_active_jobs_from_all_queries(false)
         .ok()
         .expect("failed to collect active queries");
 
-    let error = try_execute.find_cycle_in_stack(query_map, &qcx.current_query_job(), span);
+    let error = find_cycle_in_stack(try_execute, job_map, &qcx.current_query_job(), span);
     (mk_cycle(query, qcx, error.lift()), None)
 }
 
@@ -238,7 +238,7 @@ fn wait_for_query<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 
     // With parallel queries we might just have to wait on some other
     // thread.
-    let result = latch.wait_on(qcx, current, span);
+    let result = latch.wait_on(qcx.tcx, current, span);
 
     match result {
         Ok(()) => {
@@ -416,7 +416,8 @@ fn execute_job_non_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     }
 
     let prof_timer = qcx.tcx.prof.query_provider();
-    let result = qcx.start_query(job_id, query.depth_limit(), || query.compute(qcx, key));
+    // Call the query provider.
+    let result = qcx.start_query(job_id, query.depth_limit(), || query.invoke_provider(qcx, key));
     let dep_node_index = qcx.tcx.dep_graph.next_virtual_depnode_index();
     prof_timer.finish_with_query_invocation_id(dep_node_index.into());
 
@@ -437,7 +438,7 @@ fn execute_job_non_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
     qcx: QueryCtxt<'tcx>,
-    dep_graph_data: &DepGraphData<DepsType>,
+    dep_graph_data: &DepGraphData,
     key: C::Key,
     mut dep_node_opt: Option<DepNode>,
     job_id: QueryJobId,
@@ -459,18 +460,21 @@ fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 
     let (result, dep_node_index) = qcx.start_query(job_id, query.depth_limit(), || {
         if query.anon() {
-            return dep_graph_data
-                .with_anon_task_inner(qcx.tcx, query.dep_kind(), || query.compute(qcx, key));
+            // Call the query provider inside an anon task.
+            return dep_graph_data.with_anon_task_inner(qcx.tcx, query.dep_kind(), || {
+                query.invoke_provider(qcx, key)
+            });
         }
 
         // `to_dep_node` is expensive for some `DepKind`s.
         let dep_node = dep_node_opt.unwrap_or_else(|| query.construct_dep_node(qcx.tcx, &key));
 
+        // Call the query provider.
         dep_graph_data.with_task(
             dep_node,
             (qcx, query),
             key,
-            |(qcx, query), key| query.compute(qcx, key),
+            |(qcx, query), key| query.invoke_provider(qcx, key),
             query.hash_result(),
         )
     });
@@ -483,7 +487,7 @@ fn execute_job_incr<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
 #[inline(always)]
 fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
-    dep_graph_data: &DepGraphData<DepsType>,
+    dep_graph_data: &DepGraphData,
     qcx: QueryCtxt<'tcx>,
     key: &C::Key,
     dep_node: &DepNode,
@@ -491,7 +495,7 @@ fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: Quer
     // Note this function can be called concurrently from the same query
     // We must ensure that this is handled correctly.
 
-    let (prev_dep_node_index, dep_node_index) = dep_graph_data.try_mark_green(qcx, dep_node)?;
+    let (prev_dep_node_index, dep_node_index) = dep_graph_data.try_mark_green(qcx.tcx, dep_node)?;
 
     debug_assert!(dep_graph_data.is_index_green(prev_dep_node_index));
 
@@ -531,7 +535,7 @@ fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: Quer
     // can be forced from `DepNode`.
     debug_assert!(
         !query.will_cache_on_disk_for_key(qcx.tcx, key)
-            || !qcx.dep_context().fingerprint_style(dep_node.kind).reconstructible(),
+            || !qcx.tcx.fingerprint_style(dep_node.kind).reconstructible(),
         "missing on-disk cache entry for {dep_node:?}"
     );
 
@@ -547,7 +551,8 @@ fn try_load_from_disk_and_cache_in_memory<'tcx, C: QueryCache, const FLAGS: Quer
     let prof_timer = qcx.tcx.prof.query_provider();
 
     // The dep-graph for this computation is already in-place.
-    let result = qcx.tcx.dep_graph.with_ignore(|| query.compute(qcx, *key));
+    // Call the query provider.
+    let result = qcx.tcx.dep_graph.with_ignore(|| query.invoke_provider(qcx, *key));
 
     prof_timer.finish_with_query_invocation_id(dep_node_index.into());
 
@@ -597,7 +602,7 @@ fn ensure_must_run<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     let dep_node = query.construct_dep_node(qcx.tcx, key);
 
     let dep_graph = &qcx.tcx.dep_graph;
-    let serialized_dep_node_index = match dep_graph.try_mark_green(qcx, &dep_node) {
+    let serialized_dep_node_index = match dep_graph.try_mark_green(qcx.tcx, &dep_node) {
         None => {
             // A None return from `try_mark_green` means that this is either
             // a new dep node or that the dep node has already been marked red.

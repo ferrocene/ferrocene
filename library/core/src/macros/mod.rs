@@ -145,8 +145,6 @@ macro_rules! assert_ne {
 /// # Examples
 ///
 /// ```
-/// #![feature(assert_matches)]
-///
 /// use std::assert_matches;
 ///
 /// let a = Some(345);
@@ -164,7 +162,7 @@ macro_rules! assert_ne {
 /// assert_matches!(a, Some(x) if x > 100);
 /// // assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
-#[unstable(feature = "assert_matches", issue = "82775")]
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semiopaque"]
 pub macro assert_matches {
@@ -378,8 +376,6 @@ macro_rules! debug_assert_ne {
 /// # Examples
 ///
 /// ```
-/// #![feature(assert_matches)]
-///
 /// use std::debug_assert_matches;
 ///
 /// let a = Some(345);
@@ -397,7 +393,7 @@ macro_rules! debug_assert_ne {
 /// debug_assert_matches!(a, Some(x) if x > 100);
 /// // debug_assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
-#[unstable(feature = "assert_matches", issue = "82775")]
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
 #[allow_internal_unstable(assert_matches)]
 #[rustc_macro_transparency = "semiopaque"]
 pub macro debug_assert_matches($($arg:tt)*) {
@@ -610,6 +606,9 @@ macro_rules! write {
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args!($($arg)*))
     };
+    ($($arg:tt)*) => {
+        compile_error!("requires a destination and format arguments, like `write!(dest, \"format string\", args...)`")
+    };
 }
 
 /// Writes formatted data into a buffer, with a newline appended.
@@ -647,6 +646,9 @@ macro_rules! writeln {
     };
     ($dst:expr, $($arg:tt)*) => {
         $dst.write_fmt($crate::format_args_nl!($($arg)*))
+    };
+    ($($arg:tt)*) => {
+        compile_error!("requires a destination and format arguments, like `writeln!(dest, \"format string\", args...)`")
     };
 }
 
@@ -1782,7 +1784,7 @@ pub(crate) mod builtin {
     ///
     /// See also [`std::alloc::GlobalAlloc`](../../../std/alloc/trait.GlobalAlloc.html).
     #[stable(feature = "global_allocator", since = "1.28.0")]
-    #[allow_internal_unstable(rustc_attrs)]
+    #[allow_internal_unstable(rustc_attrs, ptr_alignment_type)]
     #[rustc_builtin_macro]
     pub macro global_allocator($item:item) {
         /* compiler built-in */

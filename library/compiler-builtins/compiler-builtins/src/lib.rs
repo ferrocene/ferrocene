@@ -11,11 +11,11 @@
 #![feature(repr_simd)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(rustc_attrs)]
-#![feature(float_bits_const)]
 #![cfg_attr(f16_enabled, feature(f16))]
 #![cfg_attr(f128_enabled, feature(f128))]
 #![no_builtins]
 #![no_std]
+#![allow(unstable_name_collisions)] // FIXME(float_bits_const): remove when stable
 #![allow(unused_features)]
 #![allow(internal_features)]
 // `mem::swap` cannot be used because it may generate references to memcpy in unoptimized code.
@@ -52,6 +52,7 @@ pub mod int;
 pub mod math;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod mem;
+pub mod sync;
 
 // `libm` expects its `support` module to be available in the crate root.
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -68,14 +69,6 @@ pub mod aarch64;
 #[cfg(all(target_arch = "aarch64", target_feature = "outline-atomics"))]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64_outline_atomics;
-
-#[cfg(all(
-    kernel_user_helpers,
-    any(target_os = "linux", target_os = "android"),
-    target_arch = "arm"
-))]
-#[cfg(not(feature = "ferrocene_subset"))]
-pub mod arm_linux;
 
 #[cfg(target_arch = "avr")]
 #[cfg(not(feature = "ferrocene_subset"))]

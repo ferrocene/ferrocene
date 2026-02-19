@@ -354,14 +354,71 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                         self.infcx.tcx.sess.source_map().span_to_snippet(source_info.span)
                     {
                         if snippet.starts_with("&mut ") {
-                            // We don't have access to the HIR to get accurate spans, but we can
-                            // give a best effort structured suggestion.
-                            err.span_suggestion_verbose(
-                                source_info.span.with_hi(source_info.span.lo() + BytePos(5)),
-                                "if there is only one mutable reborrow, remove the `&mut`",
-                                "",
-                                Applicability::MaybeIncorrect,
-                            );
+                            // In calls, `&mut &mut T` may be deref-coerced to `&mut T`, and
+                            // removing the extra `&mut` is the most direct suggestion. But for
+                            // pattern-matching expressions (`match`, `if let`, `while let`), that
+                            // can easily turn into a move, so prefer suggesting an explicit
+                            // reborrow via `&mut *x` instead.
+                            let mut in_pat_scrutinee = false;
+                            let mut is_deref_coerced = false;
+                            if let Some(expr) = self.find_expr(source_info.span) {
+                                let tcx = self.infcx.tcx;
+                                let span = expr.span.source_callsite();
+                                for (_, node) in tcx.hir_parent_iter(expr.hir_id) {
+                                    if let Node::Expr(parent_expr) = node {
+                                        match parent_expr.kind {
+                                            ExprKind::Match(scrutinee, ..)
+                                                if scrutinee
+                                                    .span
+                                                    .source_callsite()
+                                                    .contains(span) =>
+                                            {
+                                                in_pat_scrutinee = true;
+                                                break;
+                                            }
+                                            ExprKind::Let(let_expr)
+                                                if let_expr
+                                                    .init
+                                                    .span
+                                                    .source_callsite()
+                                                    .contains(span) =>
+                                            {
+                                                in_pat_scrutinee = true;
+                                                break;
+                                            }
+                                            _ => {}
+                                        }
+                                    }
+                                }
+
+                                let typeck = tcx.typeck(expr.hir_id.owner.def_id);
+                                is_deref_coerced =
+                                    typeck.expr_adjustments(expr).iter().any(|adj| {
+                                        matches!(adj.kind, ty::adjustment::Adjust::Deref(_))
+                                    });
+                            }
+
+                            if in_pat_scrutinee {
+                                // Best-effort structured suggestion: insert `*` after `&mut `.
+                                err.span_suggestion_verbose(
+                                    source_info
+                                        .span
+                                        .with_lo(source_info.span.lo() + BytePos(5))
+                                        .shrink_to_lo(),
+                                    "to reborrow the mutable reference, add `*`",
+                                    "*",
+                                    Applicability::MaybeIncorrect,
+                                );
+                            } else if is_deref_coerced {
+                                // We don't have access to the HIR to get accurate spans, but we
+                                // can give a best effort structured suggestion.
+                                err.span_suggestion_verbose(
+                                    source_info.span.with_hi(source_info.span.lo() + BytePos(5)),
+                                    "if there is only one mutable reborrow, remove the `&mut`",
+                                    "",
+                                    Applicability::MaybeIncorrect,
+                                );
+                            }
                         } else {
                             // This can occur with things like `(&mut self).foo()`.
                             err.span_help(source_info.span, "try removing `&mut` here");

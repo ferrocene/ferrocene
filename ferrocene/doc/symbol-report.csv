@@ -1375,7 +1375,6 @@
 <core::num::fmt::Part<'a> as core::cmp::PartialEq>::eq
 <core::num::fmt::Part<'a> as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
-<core::num::niche_types::Nanoseconds as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::Nanoseconds as core::cmp::Ord>::cmp
 <core::num::niche_types::Nanoseconds as core::cmp::PartialEq>::eq
 <core::num::niche_types::Nanoseconds as core::cmp::PartialOrd>::partial_cmp
@@ -1383,98 +1382,84 @@
 <core::num::niche_types::Nanoseconds as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroCharInner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroCharInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroCharInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroCharInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroCharInner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroCharInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroCharInner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI128Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroI128Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI128Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI128Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI128Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroI128Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI128Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI16Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroI16Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI16Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI16Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI16Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroI16Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI16Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI32Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroI32Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI32Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI32Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI32Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroI32Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI32Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI64Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroI64Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI64Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI64Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI64Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroI64Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI64Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroI8Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroI8Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroI8Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroI8Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroI8Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroI8Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroI8Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroIsizeInner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroIsizeInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroIsizeInner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroIsizeInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroIsizeInner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU128Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroU128Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU128Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU128Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU128Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroU128Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU128Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU16Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroU16Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU16Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU16Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU16Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroU16Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU16Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU32Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroU32Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU32Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU32Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU32Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroU32Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU32Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU64Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroU64Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU64Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU64Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU64Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroU64Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU64Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroU8Inner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroU8Inner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroU8Inner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroU8Inner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroU8Inner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroU8Inner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroU8Inner as core::hash::Hash>::hash
 <core::num::niche_types::NonZeroUsizeInner as core::clone::Clone>::clone
-<core::num::niche_types::NonZeroUsizeInner as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::Ord>::cmp
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::PartialEq>::eq
 <core::num::niche_types::NonZeroUsizeInner as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::NonZeroUsizeInner as core::fmt::Debug>::fmt
 <core::num::niche_types::NonZeroUsizeInner as core::hash::Hash>::hash
 <core::num::niche_types::UsizeNoHighBit as core::clone::Clone>::clone
-<core::num::niche_types::UsizeNoHighBit as core::cmp::Eq>::assert_receiver_is_total_eq
 <core::num::niche_types::UsizeNoHighBit as core::cmp::Ord>::cmp
 <core::num::niche_types::UsizeNoHighBit as core::cmp::PartialEq>::eq
 <core::num::niche_types::UsizeNoHighBit as core::cmp::PartialOrd>::partial_cmp
@@ -2167,6 +2152,7 @@
 <i128 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <i128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i128 as core::ops::bit::ShrAssign>::shr_assign
+<i128 as core::pat::RangePattern>::sub_one
 <i16 as core::default::Default>::default
 <i16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
@@ -2309,6 +2295,7 @@
 <i16 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <i16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i16 as core::ops::bit::ShrAssign>::shr_assign
+<i16 as core::pat::RangePattern>::sub_one
 <i32 as core::default::Default>::default
 <i32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
@@ -2451,6 +2438,7 @@
 <i32 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <i32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i32 as core::ops::bit::ShrAssign>::shr_assign
+<i32 as core::pat::RangePattern>::sub_one
 <i64 as core::default::Default>::default
 <i64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
@@ -2593,6 +2581,7 @@
 <i64 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <i64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i64 as core::ops::bit::ShrAssign>::shr_assign
+<i64 as core::pat::RangePattern>::sub_one
 <i8 as core::default::Default>::default
 <i8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <i8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
@@ -2735,6 +2724,7 @@
 <i8 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <i8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <i8 as core::ops::bit::ShrAssign>::shr_assign
+<i8 as core::pat::RangePattern>::sub_one
 <isize as core::default::Default>::default
 <isize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
 <isize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
@@ -2877,12 +2867,14 @@
 <isize as core::ops::bit::ShrAssign<u8>>::shr_assign
 <isize as core::ops::bit::ShrAssign<usize>>::shr_assign
 <isize as core::ops::bit::ShrAssign>::shr_assign
+<isize as core::pat::RangePattern>::sub_one
 <str as core::convert::AsMut<str>>::as_mut
 <str as core::fmt::Debug>::fmt
 <str as core::fmt::Debug>::fmt::needs_escape
 <str as core::fmt::Display>::fmt
 <u128 as core::default::Default>::default
 <u128 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<u128 as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <u128 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u128 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3024,8 +3016,10 @@
 <u128 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <u128 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u128 as core::ops::bit::ShrAssign>::shr_assign
+<u128 as core::pat::RangePattern>::sub_one
 <u16 as core::default::Default>::default
 <u16 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<u16 as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <u16 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u16 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3170,8 +3164,10 @@
 <u16 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <u16 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u16 as core::ops::bit::ShrAssign>::shr_assign
+<u16 as core::pat::RangePattern>::sub_one
 <u32 as core::default::Default>::default
 <u32 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<u32 as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <u32 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u32 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3316,8 +3312,10 @@
 <u32 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <u32 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u32 as core::ops::bit::ShrAssign>::shr_assign
+<u32 as core::pat::RangePattern>::sub_one
 <u64 as core::default::Default>::default
 <u64 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<u64 as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <u64 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u64 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3462,8 +3460,10 @@
 <u64 as core::ops::bit::ShrAssign<u8>>::shr_assign
 <u64 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u64 as core::ops::bit::ShrAssign>::shr_assign
+<u64 as core::pat::RangePattern>::sub_one
 <u8 as core::default::Default>::default
 <u8 as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<u8 as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <u8 as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <u8 as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3607,8 +3607,10 @@
 <u8 as core::ops::bit::ShrAssign<u64>>::shr_assign
 <u8 as core::ops::bit::ShrAssign<usize>>::shr_assign
 <u8 as core::ops::bit::ShrAssign>::shr_assign
+<u8 as core::pat::RangePattern>::sub_one
 <usize as core::default::Default>::default
 <usize as core::intrinsics::fallback::CarryingMulAdd>::carrying_mul_add
+<usize as core::intrinsics::fallback::CarrylessMul>::carryless_mul
 <usize as core::intrinsics::fallback::DisjointBitOr>::disjoint_bitor
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
 <usize as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
@@ -3750,6 +3752,7 @@
 <usize as core::ops::bit::ShrAssign<u64>>::shr_assign
 <usize as core::ops::bit::ShrAssign<u8>>::shr_assign
 <usize as core::ops::bit::ShrAssign>::shr_assign
+<usize as core::pat::RangePattern>::sub_one
 <usize as core::slice::index::SliceIndex<[T]>>::get
 <usize as core::slice::index::SliceIndex<[T]>>::get_mut
 <usize as core::slice::index::SliceIndex<[T]>>::get_unchecked
@@ -4653,6 +4656,7 @@ core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
 core::intrinsics::assume
 core::intrinsics::carrying_mul_add
+core::intrinsics::carryless_mul
 core::intrinsics::cold_path
 core::intrinsics::const_make_global
 core::intrinsics::disjoint_bitor
@@ -6000,7 +6004,6 @@ core::slice::index::<impl core::ops::index::Index<I> for [T]>::index
 core::slice::index::<impl core::ops::index::IndexMut<I> for [T]>::index_mut
 core::slice::index::get_offset_len_mut_noubcheck
 core::slice::index::get_offset_len_noubcheck
-core::slice::index::into_range
 core::slice::index::into_range_unchecked
 core::slice::index::into_slice_range
 core::slice::index::slice_index_fail
@@ -6016,6 +6019,7 @@ core::slice::index::slice_index_fail::do_panic::runtime
 core::slice::index::slice_index_fail::do_panic::runtime
 core::slice::index::slice_index_fail::do_panic::runtime
 core::slice::index::slice_index_fail::do_panic::runtime
+core::slice::index::try_into_slice_range
 core::slice::iter::<impl core::iter::traits::collect::IntoIterator for &'a [T]>::into_iter
 core::slice::iter::<impl core::iter::traits::collect::IntoIterator for &'a mut [T]>::into_iter
 core::slice::iter::Chunks::<'a, T>::new
@@ -6062,6 +6066,7 @@ core::str::<impl str>::as_mut_ptr
 core::str::<impl str>::as_ptr
 core::str::<impl str>::as_str
 core::str::<impl str>::bytes
+core::str::<impl str>::ceil_char_boundary
 core::str::<impl str>::char_indices
 core::str::<impl str>::chars
 core::str::<impl str>::ends_with

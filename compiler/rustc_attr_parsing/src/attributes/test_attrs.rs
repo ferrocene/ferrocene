@@ -228,3 +228,65 @@ impl<S: Stage> NoArgsAttributeParser<S> for RustcOutlivesParser {
     ]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcOutlives;
 }
+
+pub(crate) struct TestRunnerParser;
+
+impl<S: Stage> SingleAttributeParser<S> for TestRunnerParser {
+    const PATH: &[Symbol] = &[sym::test_runner];
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepOutermost;
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
+    const TEMPLATE: AttributeTemplate = template!(List: &["path"]);
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        let Some(list) = args.list() else {
+            cx.expected_list(cx.attr_span, args);
+            return None;
+        };
+
+        let Some(single) = list.single() else {
+            cx.expected_single_argument(list.span);
+            return None;
+        };
+
+        let Some(meta) = single.meta_item() else {
+            cx.unexpected_literal(single.span());
+            return None;
+        };
+
+        Some(AttributeKind::TestRunner(meta.path().0.clone()))
+    }
+}
+
+pub(crate) struct RustcTestMarkerParser;
+
+impl<S: Stage> SingleAttributeParser<S> for RustcTestMarkerParser {
+    const PATH: &[Symbol] = &[sym::rustc_test_marker];
+    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepOutermost;
+    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Warn;
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Const),
+        Allow(Target::Fn),
+        Allow(Target::Static),
+    ]);
+    const TEMPLATE: AttributeTemplate = template!(NameValueStr: "test_path");
+
+    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+        let Some(name_value) = args.name_value() else {
+            cx.expected_name_value(cx.attr_span, Some(sym::rustc_test_marker));
+            return None;
+        };
+
+        let Some(value_str) = name_value.value_as_str() else {
+            cx.expected_string_literal(name_value.value_span, None);
+            return None;
+        };
+
+        if value_str.as_str().trim().is_empty() {
+            cx.expected_non_empty_string_literal(name_value.value_span);
+            return None;
+        }
+
+        Some(AttributeKind::RustcTestMarker(value_str))
+    }
+}

@@ -13,7 +13,7 @@ use std::num::NonZero;
 use std::{fmt, io};
 
 use rustc_abi::{AddressSpace, Align, Endian, HasDataLayout, Size};
-use rustc_ast::{LitKind, Mutability};
+use rustc_ast::Mutability;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::sharded::ShardedHashMap;
 use rustc_data_structures::sync::{AtomicU64, Lock};
@@ -71,17 +71,6 @@ impl<'tcx> GlobalId<'tcx> {
             instance_name
         }
     }
-}
-
-/// Input argument for `tcx.lit_to_const`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, HashStable)]
-pub struct LitToConstInput<'tcx> {
-    /// The absolute value of the resultant constant.
-    pub lit: LitKind,
-    /// The type of the constant.
-    pub ty: Ty<'tcx>,
-    /// If the constant is negative.
-    pub neg: bool,
 }
 
 #[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -407,7 +396,7 @@ impl<'tcx> GlobalAlloc<'tcx> {
                 // No data to be accessed here. But vtables are pointer-aligned.
                 (Size::ZERO, tcx.data_layout.pointer_align().abi)
             }
-            // Fake allocation, there's nothing to access here
+            // Fake allocation, there's nothing to access here.
             GlobalAlloc::TypeId { .. } => (Size::ZERO, Align::ONE),
         }
     }

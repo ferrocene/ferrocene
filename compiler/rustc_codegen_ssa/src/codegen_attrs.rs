@@ -8,7 +8,7 @@ use rustc_hir::attrs::{
 };
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
-use rustc_hir::{self as hir, Attribute, LangItem, find_attr, lang_items};
+use rustc_hir::{self as hir, Attribute, find_attr};
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs,
 };
@@ -504,7 +504,7 @@ fn handle_lang_items(
     attrs: &[Attribute],
     codegen_fn_attrs: &mut CodegenFnAttrs,
 ) {
-    let lang_item = lang_items::extract(attrs).and_then(|(name, _)| LangItem::from_name(name));
+    let lang_item = find_attr!(attrs, AttributeKind::Lang(lang, _) => lang);
 
     // Weak lang items have the same semantics as "std internal" symbols in the
     // sense that they're preserved through all our LTO passes and only

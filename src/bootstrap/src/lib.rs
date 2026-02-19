@@ -354,17 +354,6 @@ pub enum Mode {
 }
 
 impl Mode {
-    pub fn is_tool(&self) -> bool {
-        match self {
-            Mode::ToolBootstrap
-            | Mode::ToolRustcPrivate
-            | Mode::ToolStd
-            | Mode::ToolTarget
-            | Mode::ToolCustom { .. } => true,
-            Mode::Std | Mode::Codegen | Mode::Rustc => false,
-        }
-    }
-
     pub fn must_support_dlopen(&self) -> bool {
         match self {
             Mode::Std | Mode::Codegen => true,

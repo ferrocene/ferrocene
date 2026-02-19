@@ -87,6 +87,7 @@
 #![allow(incomplete_features)]
 #![warn(multiple_supertrait_upcastable)]
 #![allow(internal_features)]
+#![allow(unused_features)]
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
 // Do not check link redundancy on bootstrapping phase
@@ -98,9 +99,7 @@
 //
 // Library features:
 // not-alphabetical-start
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(array_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
@@ -109,31 +108,15 @@
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
 #![feature(const_select_unpredictable)]
-#![feature(const_unsigned_bigint_helpers)]
 #![feature(core_intrinsics)]
 #![feature(coverage_attribute)]
 #![feature(disjoint_bitor)]
 #![feature(internal_impls_macro)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(ip))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(is_ascii_octdigit))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(link_cfg))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(offset_of_enum))]
 #![feature(panic_internals)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(pattern_type_macro))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_alignment_type))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(ptr_metadata))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(set_ptr_value))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(signed_bigint_helpers))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_ptr_get))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_inclusive_remainder))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_split_remainder))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(type_info))]
+#![feature(pattern_type_macro)]
 #![feature(ub_checks)]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(unsafe_pinned))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(utf16_extra))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(variant_count))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(widening_mul))]
 // not-alphabetical-end
 //
 // Language features:
@@ -178,7 +161,6 @@
 #![feature(optimize_attribute)]
 #![feature(pattern_types)]
 #![feature(prelude_import)]
-#![feature(reborrow)]
 #![feature(repr_simd)]
 #![feature(rustc_allow_const_fn_unstable)]
 #![feature(rustc_attrs)]
@@ -191,6 +173,7 @@
 #![feature(trait_alias)]
 #![feature(transparent_unions)]
 #![feature(try_blocks)]
+#![feature(uint_carryless_mul)]
 #![feature(unboxed_closures)]
 #![feature(unsized_fn_params)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(with_negative_coherence))]
@@ -244,7 +227,7 @@ mod macros;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
-#[unstable(feature = "assert_matches", issue = "82775")]
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]
@@ -351,7 +334,6 @@ pub mod os;
 pub mod panic;
 pub mod panicking;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod pat;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod pin;

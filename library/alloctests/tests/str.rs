@@ -613,7 +613,7 @@ mod slice_index {
             good: data[4..4] == "";
             bad: data[4..3];
             // Ferrocene addition: modified due to limitations of the certified runtime
-            message: "begin <= end";
+            message: "begin > end";
         }
 
         in mod rangeinclusive_neg_width {
@@ -621,7 +621,7 @@ mod slice_index {
             good: data[4..=3] == "";
             bad: data[4..=2];
             // Ferrocene addition: modified due to limitations of the certified runtime
-            message: "begin <= end";
+            message: "begin > end";
         }
     }
 
@@ -632,13 +632,13 @@ mod slice_index {
                 // note: using 0 specifically ensures that the result of overflowing is 0..0,
                 //       so that `get` doesn't simply return None for the wrong reason.
                 bad: data[0..=usize::MAX];
-                message: "maximum usize";
+                message: "out of bounds";
             }
 
             in mod rangetoinclusive {
                 data: "hello";
                 bad: data[..=usize::MAX];
-                message: "maximum usize";
+                message: "out of bounds";
             }
         }
     }

@@ -56,6 +56,7 @@
 //! [`Rc`]: rc
 //! [`RefCell`]: core::cell
 
+#![allow(unused_features)]
 #![allow(incomplete_features)]
 #![allow(unused_attributes)]
 #![stable(feature = "alloc", since = "1.36.0")]
@@ -88,17 +89,11 @@
 //
 // Library features:
 // tidy-alphabetical-start
-#![cfg_attr(
-    not(any(feature = "ferrocene_subset", no_global_oom_handling)),
-    feature(string_replace_in_place)
-)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(allocator_api))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(array_into_iter_constructors))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(ascii_char))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(assert_matches))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(async_fn_traits))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(async_iterator))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(box_vec_non_null))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(cast_maybe_uninit))]
@@ -155,7 +150,6 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_ptr_get))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_range))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(std_internals))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(str_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(temporary_niche_types))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(transmutability))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(trivial_clone))]
@@ -183,10 +177,8 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(const_trait_impl))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(coroutine_trait))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(decl_macro))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(derive_const))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(dropck_eyepatch))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(fundamental))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(hashmap_internals))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(intrinsics))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(lang_items))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(min_specialization))]

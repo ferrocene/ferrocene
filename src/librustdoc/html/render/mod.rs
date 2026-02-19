@@ -57,6 +57,7 @@ use rustc_hir::attrs::{AttributeKind, DeprecatedSince, Deprecation};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdSet};
 use rustc_hir::{ConstStability, Mutability, RustcVersion, StabilityLevel, StableSince};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::DUMMY_SP;
@@ -830,6 +831,26 @@ fn portability(item: &clean::Item, parent: Option<&clean::Item>) -> Option<Strin
     Some(cfg?.render_long_html())
 }
 
+// Ferrocene addition
+fn show_validated(cx: &Context<'_>, item: &clean::Item) -> bool {
+    if !cx.shared.note_validated_api {
+        return false;
+    }
+
+    let def_id = match item.item_id {
+        ItemId::DefId(id) => id,
+        // We don't allow annotating impl blocks, only individual functions.
+        ItemId::Blanket { .. } | ItemId::Auto { .. } => return false,
+    };
+
+    // FIXME: maybe allow marking whole modules as annotated?
+    if item.is_mod() {
+        return false;
+    }
+
+    item_is_validated(cx.tcx(), def_id).validated()
+}
+
 #[derive(Template)]
 #[template(path = "short_item_info.html")]
 enum ShortItemInfo {
@@ -845,6 +866,10 @@ enum ShortItemInfo {
     },
     Portability {
         message: String,
+    },
+    /// Whether the item is validated.
+    Validation {
+        message: &'static str,
     },
 }
 
@@ -905,6 +930,11 @@ fn short_item_info(
 
     if let Some(message) = portability(item, parent) {
         extra_info.push(ShortItemInfo::Portability { message });
+    }
+
+    if show_validated(cx, item) {
+        let message = "This item is <strong>validated</strong> for <em>IEC 61508 (SIL 2)</em> and <em>ISO 26262 (ASIL B)</em>.";
+        extra_info.push(ShortItemInfo::Validation { message });
     }
 
     extra_info

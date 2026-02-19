@@ -31,10 +31,8 @@ impl Step for CertifiedApiDocs {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        self.target.require_certified_subset();
-
-        // Build the docs for the certified target
-        let certified_target_doc_out = builder.ensure(
+        // Build the docs, noting which items are certified and which aren't.
+        builder.ensure(
             doc::Std::from_build_compiler(
                 builder.compiler(builder.top_stage, builder.host_target),
                 self.target,
@@ -42,16 +40,6 @@ impl Step for CertifiedApiDocs {
                 true,
             )
             .with_crates(certified_crates),
-        );
-
-        // Remove unwanted files/dirs
-        builder.remove(&certified_target_doc_out.join("index.html"));
-
-        // Copy the files from the certified target to the host target
-        let host_target_doc_out = builder.doc_out(self.target).join("certification/api-docs");
-        builder.create_dir(&host_target_doc_out);
-        builder.cp_link_r(&certified_target_doc_out, &host_target_doc_out);
-
-        host_target_doc_out
+        )
     }
 }

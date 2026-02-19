@@ -150,6 +150,9 @@ pub(crate) struct SharedContext<'tcx> {
     /// Controls whether we read / write to cci files in the doc root. Defaults read=true,
     /// write=true
     should_merge: ShouldMerge,
+
+    // Ferrocene addition
+    pub(super) note_validated_api: bool,
 }
 
 impl SharedContext<'_> {
@@ -498,6 +501,7 @@ impl<'tcx> Context<'tcx> {
             call_locations,
             no_emit_shared,
             html_no_source,
+            note_validated_api,
             ..
         } = options;
 
@@ -589,6 +593,8 @@ impl<'tcx> Context<'tcx> {
             call_locations,
             should_merge: options.should_merge,
             expanded_codes,
+
+            note_validated_api,
         };
 
         let dst = output;

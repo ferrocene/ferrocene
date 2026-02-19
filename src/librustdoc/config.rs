@@ -312,6 +312,10 @@ pub(crate) struct RenderOptions {
     pub(crate) disable_minification: bool,
     /// If `true`, HTML source pages will generate the possibility to expand macros.
     pub(crate) generate_macro_expansion: bool,
+
+    // Ferrocene addition.
+    /// If `true`, note which items are validated and which aren't.
+    pub(crate) note_validated_api: bool,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -809,6 +813,8 @@ impl Options {
         let merge_doctests = parse_merge_doctests(matches, edition, dcx);
         tracing::debug!("merge_doctests: {merge_doctests:?}");
 
+        let note_validated_api = matches.opt_present("note-validated-api");
+
         if generate_link_to_definition && (show_coverage || output_format != OutputFormat::Html) {
             dcx.struct_warn(
                 "`--generate-link-to-definition` option can only be used with HTML output format",
@@ -910,6 +916,7 @@ impl Options {
             include_parts_dir,
             parts_out_dir,
             disable_minification,
+            note_validated_api,
         };
         Some((input, options, render_options, loaded_paths))
     }

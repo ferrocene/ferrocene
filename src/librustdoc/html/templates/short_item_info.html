@@ -20,4 +20,6 @@
         </div>
     {% when Self::Portability with { message } %}
         <div class="stab portability">{{message|safe}}</div>
+    {% when Self::Validation with { message } %}
+        <div class="stab validation">{{message|safe}}</div>
 {% endmatch %}

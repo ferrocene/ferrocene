@@ -149,6 +149,24 @@ impl<'tcx> LintState<'tcx> {
             ty::Closure(def_id, args) => {
                 Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))
             }
+            ty::CoroutineClosure(def_id, args) => {
+                let coroutine_closure_def_id = *def_id;
+                // See comment in `rustc_ty_utils::instance::resolve_associated_item`.
+                let instance = if ty::ClosureKind::FnOnce == args.as_coroutine_closure().kind() {
+                    Instance::new_raw(coroutine_closure_def_id, args)
+                } else {
+                    let trait_id = fn_trait_ref.unwrap().def_id();
+                    let target_kind = tcx.fn_trait_kind_from_def_id(trait_id).unwrap();
+                    Instance {
+                        def: ty::InstanceKind::ConstructCoroutineInClosureShim {
+                            coroutine_closure_def_id,
+                            receiver_by_ref: target_kind != ty::ClosureKind::FnOnce,
+                        },
+                        args,
+                    }
+                };
+                Some(instance)
+            }
             // FIXME: `feature(unboxed_closures)`.
             // Right now we just ignore `fn_trait_ref`, but it's passed in here so that we can call
             // `find_trait_impl(fn_trait_ref.with_self_ty(ty)`.

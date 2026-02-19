@@ -699,10 +699,15 @@ impl Step for Std {
             self.crates
         };
 
-        let out = match self.format {
+        let mut out = match self.format {
             DocumentationFormat::Html => builder.doc_out(target),
             DocumentationFormat::Json => builder.json_doc_out(target),
         };
+
+        if self.certified_subset {
+            target.require_certified_subset();
+            out = out.join("certification/api-docs");
+        }
 
         t!(fs::create_dir_all(&out));
 
@@ -725,7 +730,7 @@ impl Step for Std {
 
         // Ferrocene addition
         if self.certified_subset {
-            extra_args.push("--certified-api");
+            extra_args.push("--note-validated-api");
         }
 
         if !builder.config.docs_minification {

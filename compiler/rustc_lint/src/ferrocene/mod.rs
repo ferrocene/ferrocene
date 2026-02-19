@@ -39,6 +39,7 @@
 //! having to ban function pointers altogether, so instead we force a decision of whether to lint at
 //! the time of the cast. Consider this program:
 //! ```rust
+//! # #![feature(register_tool)] #![register_tool(ferrocene)]
 //! fn unvalidated() {}
 //! #[ferrocene::prevalidated]
 //! fn returns_ptr() -> fn() { unvalidated } // not ok
@@ -57,7 +58,7 @@
 //! (and can't) have line-coverage.
 //!
 //! ```
-//! const PATH_MAX: i32 = 2048;
+//! const PATH_MAX: usize = 2048;
 //! let buffer = [0; PATH_MAX]; // totally fine
 //! ```
 //!
@@ -67,9 +68,11 @@
 //! walk the const body at the definition site.
 //!
 //! ```
-//! fn unvalidated_panic(_: &PanicInfo) -> ! { loop {} }
-//! const PANIC_HOOK: fn(&PanicInfo) -> ! = unvalidated_panic;
-//! set_panic(PANIC_HOOK); // not ok: unvalidated_panic called at runtime
+//! # use std::panic::{set_hook, PanicHookInfo};
+//! fn unvalidated_panic(_: &PanicHookInfo) {}
+//! const PANIC_HOOK: fn(&PanicHookInfo) = unvalidated_panic;
+//! // not ok: unvalidated_panic called at runtime
+//! set_hook(Box::new(PANIC_HOOK));
 //! ```
 //!
 //! ### trait object coercions
@@ -80,8 +83,11 @@
 //!
 //! ```
 //! struct Unvalidated;
-//! impl Clone for Unvalidated { fn clone(&self) {} }
-//! let x: &dyn Clone = &Unvalidated; // not ok: might call x.clone() later.
+//! impl PartialEq<()> for Unvalidated {
+//!     fn eq(&self, _: &()) -> bool { false }
+//! }
+//! // not ok: might call x.eq() later.
+//! let x: &dyn PartialEq<()> = &Unvalidated;
 //! ```
 //!
 //! ### THIR
@@ -130,8 +136,8 @@
 //! variables in scope. For example, in this program below, we cannot instantiate `inherent` unless
 //! we know the type of `T` from the impl:
 //! ```rust
-//! struct S;
-//! impl<T: Default> S { fn inherent() -> T { T::default() } }
+//! struct S<T>(T);
+//! impl<T: Default> S<T> { fn inherent() -> T { T::default() } }
 //! ```
 //! We get these type variables from a [`ParamEnv`].
 //!

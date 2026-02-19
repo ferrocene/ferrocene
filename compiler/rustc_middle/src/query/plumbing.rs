@@ -297,6 +297,8 @@ macro_rules! if_return_result_from_ensure_ok {
 
 macro_rules! define_callbacks {
     (
+        // You might expect the key to be `$K:ty`, but it needs to be `$($K:tt)*` so that
+        // `query_helper_param_ty!` can match on specific type names.
         $(
             $(#[$attr:meta])*
             [$($modifiers:tt)*]
@@ -314,8 +316,8 @@ macro_rules! define_callbacks {
 
                 pub type LocalKey<'tcx> = if_separate_provide_extern!(
                     [$($modifiers)*]
-                    (<$($K)* as $crate::query::AsLocalKey>::LocalKey)
-                    ($($K)*)
+                    (<Key<'tcx> as $crate::query::AsLocalKey>::LocalKey)
+                    (Key<'tcx>)
                 );
 
                 /// This type alias specifies the type returned from query providers and the type
@@ -323,8 +325,8 @@ macro_rules! define_callbacks {
                 /// but `arena_cache` will use `<V as ArenaCached>::Provided` instead.
                 pub type ProvidedValue<'tcx> = if_arena_cache!(
                     [$($modifiers)*]
-                    (<$V as $crate::query::arena_cached::ArenaCached<'tcx>>::Provided)
-                    ($V)
+                    (<Value<'tcx> as $crate::query::arena_cached::ArenaCached<'tcx>>::Provided)
+                    (Value<'tcx>)
                 );
 
                 /// This helper function takes a value returned by the query provider
@@ -341,7 +343,9 @@ macro_rules! define_callbacks {
                     let value: Value<'tcx> = if_arena_cache!(
                         [$($modifiers)*]
                         {
-                            <$V as $crate::query::arena_cached::ArenaCached>::alloc_in_arena(
+                            <Value<'tcx> as $crate::query::arena_cached::ArenaCached>::
+                                alloc_in_arena
+                            (
                                 tcx,
                                 &tcx.query_system.arenas.$name,
                                 provided_value,
@@ -356,7 +360,8 @@ macro_rules! define_callbacks {
                     erase::erase_val(value)
                 }
 
-                pub type Storage<'tcx> = <$($K)* as $crate::query::Key>::Cache<Erased<$V>>;
+                pub type Storage<'tcx> =
+                    <Key<'tcx> as $crate::query::Key>::Cache<Erased<Value<'tcx>>>;
 
                 // Ensure that keys grow no larger than 88 bytes by accident.
                 // Increase this limit if necessary, but do try to keep the size low if possible
@@ -496,7 +501,7 @@ macro_rules! define_callbacks {
         #[derive(Default)]
         pub struct QueryStates<'tcx> {
             $(
-                pub $name: $crate::query::QueryState<'tcx, $($K)*>,
+                pub $name: $crate::query::QueryState<'tcx, $name::Key<'tcx>>,
             )*
         }
 
@@ -573,16 +578,17 @@ macro_rules! define_callbacks {
     };
 }
 
+// Note: `$V` is unused but present so this can be called by `rustc_with_all_queries`.
 macro_rules! define_feedable {
     (
         $(
             $(#[$attr:meta])*
             [$($modifiers:tt)*]
-            fn $name:ident($($K:tt)*) -> $V:ty,
+            fn $name:ident($K:ty) -> $V:ty,
         )*
     ) => {
         $(
-            impl<'tcx, K: $crate::query::IntoQueryParam<$($K)*> + Copy> TyCtxtFeed<'tcx, K> {
+            impl<'tcx, K: $crate::query::IntoQueryParam<$K> + Copy> TyCtxtFeed<'tcx, K> {
                 $(#[$attr])*
                 #[inline(always)]
                 pub fn $name(self, value: $name::ProvidedValue<'tcx>) {

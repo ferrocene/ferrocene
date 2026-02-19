@@ -2218,7 +2218,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                                 "}".to_owned(),
                             ));
 
-                            err.multipart_suggestion_verbose(
+                            err.multipart_suggestion(
                                 format!("use struct {descr} syntax instead of calling"),
                                 parts,
                                 applicability,
@@ -2430,7 +2430,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
                     if non_visible_spans.len() > 0 {
                         if let Some(fields) = self.r.field_visibility_spans.get(&def_id) {
-                            err.multipart_suggestion_verbose(
+                            err.multipart_suggestion(
                                 format!(
                                     "consider making the field{} publicly accessible",
                                     pluralize!(fields.len())
@@ -3529,7 +3529,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 &mut err,
                 Some(lifetime_ref.ident),
                 |err, _, span, message, suggestion, span_suggs| {
-                    err.multipart_suggestion_verbose(
+                    err.multipart_suggestion(
                         message,
                         std::iter::once((span, suggestion)).chain(span_suggs).collect(),
                         Applicability::MaybeIncorrect,
@@ -3912,7 +3912,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     err,
                     None,
                     |err, higher_ranked, span, message, intro_sugg, _| {
-                        err.multipart_suggestion_verbose(
+                        err.multipart_suggestion(
                             message,
                             std::iter::once((span, intro_sugg))
                                 .chain(spans_suggs.clone())
@@ -3941,7 +3941,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 } else {
                     String::new()
                 };
-                err.multipart_suggestion_verbose(
+                err.multipart_suggestion(
                     format!("consider using the `{existing_name}` lifetime{post}"),
                     spans_suggs,
                     Applicability::MaybeIncorrect,
@@ -3990,7 +3990,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                             };
                             let dotdotdot =
                                 if lt.kind == MissingLifetimeKind::Ampersand { "..." } else { "" };
-                            err.multipart_suggestion_verbose(
+                            err.multipart_suggestion(
                                 format!(
                                     "instead, you are more likely to want to change {the} \
                                      argument{s} to be borrowed{dotdotdot}",
@@ -4045,7 +4045,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                                 err,
                                 None,
                                 |err, higher_ranked, span, message, intro_sugg, _| {
-                                    err.multipart_suggestion_verbose(
+                                    err.multipart_suggestion(
                                         message,
                                         std::iter::once((span, intro_sugg))
                                             .chain(spans_suggs.clone())
@@ -4173,7 +4173,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                             {
                                 sugg = vec![(span, String::new())];
                             }
-                            err.multipart_suggestion_verbose(
+                            err.multipart_suggestion(
                                 format!("{pre} to return an owned value"),
                                 sugg,
                                 Applicability::MaybeIncorrect,
@@ -4190,7 +4190,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 if spans_suggs.len() > 0 {
                     // This happens when we have `Foo<T>` where we point at the space before `T`,
                     // but this can be confusing so we give a suggestion with placeholders.
-                    err.multipart_suggestion_verbose(
+                    err.multipart_suggestion(
                         "consider using one of the available lifetimes here",
                         spans_suggs,
                         Applicability::HasPlaceholders,

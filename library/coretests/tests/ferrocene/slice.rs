@@ -252,3 +252,11 @@ fn slice_escape_ascii_display_fmt_nonempty_back() {
         escaped.next_back();
     }
 }
+
+// covers: `core::array::equality::<impl core::cmp::PartialEq<[U; N]> for [T]>::eq`
+#[test]
+fn slice_eq_array_different_length() {
+    let slice = [1, 2, 3, 4, 5].as_slice();
+    let array = [1, 2, 3];
+    assert!(!slice.eq(&array));
+}

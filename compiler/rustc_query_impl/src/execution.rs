@@ -244,12 +244,12 @@ fn wait_for_query<'tcx, C: QueryCache>(
 
     match result {
         Ok(()) => {
-            let Some((v, index)) = query.query_cache(tcx).lookup(&key) else {
+            let Some((v, index)) = query.cache.lookup(&key) else {
                 outline(|| {
                     // We didn't find the query result in the query cache. Check if it was
                     // poisoned due to a panic instead.
                     let key_hash = sharded::make_hash(&key);
-                    let shard = query.query_state(tcx).active.lock_shard_by_hash(key_hash);
+                    let shard = query.state.active.lock_shard_by_hash(key_hash);
                     match shard.find(key_hash, equivalent_key(&key)) {
                         // The query we waited on panicked. Continue unwinding here.
                         Some((_, ActiveKeyStatus::Poisoned)) => FatalError.raise(),
@@ -280,9 +280,8 @@ fn try_execute_query<'tcx, C: QueryCache, const INCR: bool>(
     // query+key, which we should reuse instead of creating a new one.
     dep_node: Option<DepNode>,
 ) -> (C::Value, Option<DepNodeIndex>) {
-    let state = query.query_state(tcx);
     let key_hash = sharded::make_hash(&key);
-    let mut state_lock = state.active.lock_shard_by_hash(key_hash);
+    let mut state_lock = query.state.active.lock_shard_by_hash(key_hash);
 
     // For the parallel compiler we need to check both the query cache and query state structures
     // while holding the state lock to ensure that 1) the query has not yet completed and 2) the
@@ -291,7 +290,7 @@ fn try_execute_query<'tcx, C: QueryCache, const INCR: bool>(
     // executing, but another thread may have already completed the query and stores it result
     // in the query cache.
     if tcx.sess.threads() > 1 {
-        if let Some((value, index)) = query.query_cache(tcx).lookup(&key) {
+        if let Some((value, index)) = query.cache.lookup(&key) {
             tcx.prof.query_cache_hit(index.into());
             return (value, Some(index));
         }
@@ -310,7 +309,7 @@ fn try_execute_query<'tcx, C: QueryCache, const INCR: bool>(
             // Drop the lock before we start executing the query
             drop(state_lock);
 
-            execute_job::<C, INCR>(query, tcx, state, key, key_hash, id, dep_node)
+            execute_job::<C, INCR>(query, tcx, key, key_hash, id, dep_node)
         }
         Entry::Occupied(mut entry) => {
             match &mut entry.get_mut().1 {
@@ -342,7 +341,6 @@ fn try_execute_query<'tcx, C: QueryCache, const INCR: bool>(
 fn execute_job<'tcx, C: QueryCache, const INCR: bool>(
     query: &'tcx QueryVTable<'tcx, C>,
     tcx: TyCtxt<'tcx>,
-    state: &'tcx QueryState<'tcx, C::Key>,
     key: C::Key,
     key_hash: u64,
     id: QueryJobId,
@@ -350,7 +348,7 @@ fn execute_job<'tcx, C: QueryCache, const INCR: bool>(
 ) -> (C::Value, Option<DepNodeIndex>) {
     // Set up a guard object that will automatically poison the query if a
     // panic occurs while executing the query (or any intermediate plumbing).
-    let job_guard = ActiveJobGuard { state, key, key_hash };
+    let job_guard = ActiveJobGuard { state: &query.state, key, key_hash };
 
     debug_assert_eq!(tcx.dep_graph.is_fully_enabled(), INCR);
 
@@ -361,7 +359,7 @@ fn execute_job<'tcx, C: QueryCache, const INCR: bool>(
         execute_job_non_incr(query, tcx, key, id)
     };
 
-    let cache = query.query_cache(tcx);
+    let cache = &query.cache;
     if query.feedable {
         // We should not compute queries that also got a value via feeding.
         // This can't happen, as query feeding adds the very dependencies to the fed query
@@ -706,7 +704,7 @@ pub(crate) fn force_query<'tcx, C: QueryCache>(
 ) {
     // We may be concurrently trying both execute and force a query.
     // Ensure that only one of them runs the query.
-    if let Some((_, index)) = query.query_cache(tcx).lookup(&key) {
+    if let Some((_, index)) = query.cache.lookup(&key) {
         tcx.prof.query_cache_hit(index.into());
         return;
     }

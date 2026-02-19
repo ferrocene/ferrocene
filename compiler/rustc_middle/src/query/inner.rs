@@ -105,7 +105,6 @@ pub(crate) fn query_feed<'tcx, Cache>(
     tcx: TyCtxt<'tcx>,
     dep_kind: DepKind,
     query_vtable: &QueryVTable<'tcx, Cache>,
-    cache: &Cache,
     key: Cache::Key,
     value: Cache::Value,
 ) where
@@ -115,7 +114,7 @@ pub(crate) fn query_feed<'tcx, Cache>(
     let format_value = query_vtable.format_value;
 
     // Check whether the in-memory cache already has a value for this key.
-    match try_get_cached(tcx, cache, &key) {
+    match try_get_cached(tcx, &query_vtable.cache, &key) {
         Some(old) => {
             // The query already has a cached value for this key.
             // That's OK if both values are the same, i.e. they have the same hash,
@@ -158,7 +157,7 @@ pub(crate) fn query_feed<'tcx, Cache>(
                 query_vtable.hash_result,
                 query_vtable.format_value,
             );
-            cache.complete(key, value, dep_node_index);
+            query_vtable.cache.complete(key, value, dep_node_index);
         }
     }
 }

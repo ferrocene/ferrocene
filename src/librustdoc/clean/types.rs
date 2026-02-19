@@ -308,17 +308,16 @@ impl ExternalCrate {
         // duplicately for the same primitive. This is handled later on when
         // rendering by delegating everything to a hash map.
         fn as_primitive(def_id: DefId, tcx: TyCtxt<'_>) -> Option<(DefId, PrimitiveType)> {
-            tcx.get_attrs(def_id, sym::rustc_doc_primitive).next().map(|attr| {
-                let attr_value = attr.value_str().expect("syntax should already be validated");
-                let Some(prim) = PrimitiveType::from_symbol(attr_value) else {
-                    span_bug!(
-                        attr.span(),
-                        "primitive `{attr_value}` is not a member of `PrimitiveType`"
-                    );
-                };
-
-                (def_id, prim)
-            })
+            let Some((attr_span, prim_sym)) = find_attr!(
+                tcx.get_all_attrs(def_id),
+                AttributeKind::RustcDocPrimitive(span, prim) => (*span, *prim)
+            ) else {
+                return None;
+            };
+            let Some(prim) = PrimitiveType::from_symbol(prim_sym) else {
+                span_bug!(attr_span, "primitive `{prim_sym}` is not a member of `PrimitiveType`");
+            };
+            Some((def_id, prim))
         }
 
         self.mapped_root_modules(tcx, as_primitive)

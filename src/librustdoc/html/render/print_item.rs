@@ -400,7 +400,7 @@ fn item_module(cx: &Context<'_>, item: &clean::Item, items: &[clean::Item]) -> i
                         let (stab_tags, deprecation) = match import.source.did {
                             Some(import_def_id) => {
                                 let stab_tags =
-                                    print_extra_info_tags(tcx, myitem, item, Some(import_def_id))
+                                    print_extra_info_tags(cx, myitem, item, Some(import_def_id))
                                         .to_string();
                                 let deprecation = tcx
                                     .lookup_deprecation(import_def_id)
@@ -465,7 +465,7 @@ fn item_module(cx: &Context<'_>, item: &clean::Item, items: &[clean::Item]) -> i
                             {docs_before}{docs}{docs_after}",
                             name = EscapeBodyTextWithWbr(item_name.as_str()),
                             visibility_and_hidden = visibility_and_hidden,
-                            stab_tags = print_extra_info_tags(tcx, myitem, item, None),
+                            stab_tags = print_extra_info_tags(cx, myitem, item, None),
                             class = type_,
                             unsafety_flag = unsafety_flag,
                             href = print_item_path(type_, item_name.as_str()),
@@ -488,11 +488,14 @@ fn item_module(cx: &Context<'_>, item: &clean::Item, items: &[clean::Item]) -> i
 /// Render the stability, deprecation and portability tags that are displayed in the item's summary
 /// at the module level.
 fn print_extra_info_tags(
-    tcx: TyCtxt<'_>,
+    // Ferrocene addition: takes a rustdoc Context, not a tcx.
+    cx: &Context<'_>,
     item: &clean::Item,
     parent: &clean::Item,
     import_def_id: Option<DefId>,
 ) -> impl Display {
+    let tcx = cx.tcx();
+
     fmt::from_fn(move |f| {
         fn tag_html(class: &str, title: &str, contents: &str) -> impl Display {
             fmt::from_fn(move |f| {
@@ -518,6 +521,11 @@ fn print_extra_info_tags(
             .map_or_else(|| item.stability(tcx), |import_did| tcx.lookup_stability(import_did));
         if stability.is_some_and(|s| s.is_unstable() && s.feature != sym::rustc_private) {
             write!(f, "{}", tag_html("unstable", "", "Experimental"))?;
+        }
+
+        // Ferrocene addition
+        if super::show_validated(cx, item) {
+            write!(f, "{}", tag_html("certification", "", "validated"))?;
         }
 
         let cfg = match (&item.cfg, parent.cfg.as_ref()) {

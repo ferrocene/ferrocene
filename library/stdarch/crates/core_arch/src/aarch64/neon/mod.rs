@@ -78,6 +78,7 @@ pub struct float64x2x4_t(
 );
 
 /// Helper for the 'shift right and insert' functions.
+#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! shift_right_and_insert {
     ($ty:ty, $width:literal, $N:expr, $a:expr, $b:expr) => {{
         type V = Simd<$ty, $width>;
@@ -99,6 +100,7 @@ macro_rules! shift_right_and_insert {
     }};
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) use shift_right_and_insert;
 
 /// Duplicate vector element to vector or scalar

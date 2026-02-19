@@ -183,27 +183,11 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(lang_items))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(min_specialization))]
 #![feature(multiple_supertrait_upcastable)]
-<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(negative_impls))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(never_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(optimize_attribute))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(rustc_allow_const_fn_unstable))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(rustc_attrs))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_internals))]
-||||||| 71e00273c09
-#![feature(negative_impls)]
-#![feature(never_type)]
-#![feature(optimize_attribute)]
-#![feature(rustc_allow_const_fn_unstable)]
-#![feature(rustc_attrs)]
-#![feature(slice_internals)]
-=======
-#![feature(negative_impls)]
-#![feature(never_type)]
-#![feature(optimize_attribute)]
-#![feature(rustc_attrs)]
-#![feature(slice_internals)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(staged_api)]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(stmt_expr_attributes))]
 #![feature(strict_provenance_lints)]

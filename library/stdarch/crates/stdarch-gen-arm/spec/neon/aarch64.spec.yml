@@ -3631,16 +3631,8 @@ intrinsics:
     doc: "Load multiple single-element structures to one, two, three, or four registers"
     arguments: ["ptr: {type[0]}"]
     return_type: "{neon_type[1]}"
-<<<<<<< HEAD
     attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
-    assert_instr: [ld1]
-||||||| 71e00273c09
-    attr: [*neon-stable]
-    assert_instr: [ld1]
-=======
-    attr: [*neon-stable]
     assert_instr: [ld]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     safety:
       unsafe: [neon]
     types:
@@ -4241,14 +4233,8 @@ intrinsics:
     doc: Load multiple 3-element structures to three registers
     arguments: ["a: {type[0]}"]
     return_type: "{neon_type[1]}"
-<<<<<<< HEAD
     attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
-||||||| 71e00273c09
-    attr: [*neon-stable]
-=======
-    attr: [*neon-stable]
     big_endian_inverse: false
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     safety:
       unsafe: [neon]
     assert_instr: [ld3]
@@ -7246,25 +7232,11 @@ intrinsics:
           - FnCall: [simd_shuffle!, [a, a, "{type[3]}"]]
       - FnCall: ["vmovl{neon_type[0].noq}", [a]]
 
-<<<<<<< HEAD
-  - name: "vpadd{neon_type.no}"
-    doc: Floating-point add pairwise
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{type}"
-    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
-||||||| 71e00273c09
-  - name: "vpadd{neon_type.no}"
-    doc: Floating-point add pairwise
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{type}"
-    attr: [*neon-stable]
-=======
   - name: "vpadd{neon_type[0].no}"
     doc: "Floating-point add pairwise"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]
     return_type: "{neon_type[0]}"
-    attr: [*neon-stable]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    attr: [*neon-stable, FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]]
     assert_instr: [faddp]
     safety: safe
     types:
@@ -13828,51 +13800,6 @@ intrinsics:
             - link: "llvm.aarch64.neon.usqadd.{neon_type[1]}"
               arch: aarch64,arm64ec
 
-<<<<<<< HEAD
-  - name: "vpadd{neon_type.no}"
-    doc: "Add Pairwise"
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{neon_type}"
-    attr:
-      - FnCall: [cfg, [{ FnCall: [not, ['feature = "ferrocene_subset"']]}]]
-      - *neon-stable
-    assert_instr: [addp]
-    safety: safe
-    types:
-      - int8x16_t
-      - int16x8_t
-      - int32x4_t
-      - int64x2_t
-    compose:
-      - LLVMLink:
-          name: "vpadd{neon_type.no}"
-          links:
-            - link: "llvm.aarch64.neon.addp.{neon_type}"
-              arch: aarch64,arm64ec
-
-||||||| 71e00273c09
-  - name: "vpadd{neon_type.no}"
-    doc: "Add Pairwise"
-    arguments: ["a: {neon_type}", "b: {neon_type}"]
-    return_type: "{neon_type}"
-    attr:
-      - *neon-stable
-    assert_instr: [addp]
-    safety: safe
-    types:
-      - int8x16_t
-      - int16x8_t
-      - int32x4_t
-      - int64x2_t
-    compose:
-      - LLVMLink:
-          name: "vpadd{neon_type.no}"
-          links:
-            - link: "llvm.aarch64.neon.addp.{neon_type}"
-              arch: aarch64,arm64ec
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
   - name: "vpadd{neon_type[0].no}"
     doc: "Add Pairwise"
     arguments: ["a: {neon_type[0]}", "b: {neon_type[0]}"]

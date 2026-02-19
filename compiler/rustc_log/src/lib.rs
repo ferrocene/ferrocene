@@ -39,11 +39,11 @@ use std::io::{self, IsTerminal};
 
 use tracing::dispatcher::SetGlobalDefaultError;
 use tracing::{Event, Subscriber};
-use tracing_subscriber::Registry;
 use tracing_subscriber::filter::{Directive, EnvFilter, LevelFilter};
 use tracing_subscriber::fmt::FmtContext;
-use tracing_subscriber::fmt::format::{self, FormatEvent, FormatFields};
+use tracing_subscriber::fmt::format::{self, FmtSpan, FormatEvent, FormatFields};
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::{Layer, Registry};
 // Re-export tracing
 pub use {tracing, tracing_core, tracing_subscriber};
 
@@ -55,6 +55,7 @@ pub struct LoggerConfig {
     pub verbose_entry_exit: Result<String, VarError>,
     pub verbose_thread_ids: Result<String, VarError>,
     pub backtrace: Result<String, VarError>,
+    pub json: Result<String, VarError>,
     pub wraptree: Result<String, VarError>,
     pub lines: Result<String, VarError>,
 }
@@ -69,6 +70,7 @@ impl LoggerConfig {
             backtrace: env::var(format!("{env}_BACKTRACE")),
             wraptree: env::var(format!("{env}_WRAPTREE")),
             lines: env::var(format!("{env}_LINES")),
+            json: env::var(format!("{env}_FORMAT_JSON")),
         }
     }
 }
@@ -136,23 +138,48 @@ where
         Err(_) => false,
     };
 
-    let mut layer = tracing_tree::HierarchicalLayer::default()
-        .with_writer(io::stderr)
-        .with_ansi(color_logs)
-        .with_targets(true)
-        .with_verbose_exit(verbose_entry_exit)
-        .with_verbose_entry(verbose_entry_exit)
-        .with_indent_amount(2)
-        .with_indent_lines(lines)
-        .with_thread_ids(verbose_thread_ids)
-        .with_thread_names(verbose_thread_ids);
+    let json = match cfg.json {
+        Ok(v) => &v == "1",
+        Err(_) => false,
+    };
 
-    if let Ok(v) = cfg.wraptree {
-        match v.parse::<usize>() {
-            Ok(v) => layer = layer.with_wraparound(v),
-            Err(_) => return Err(Error::InvalidWraptree(v)),
+    let layer = if json {
+        let format = tracing_subscriber::fmt::format()
+            .json()
+            .with_span_list(true)
+            .with_source_location(true);
+
+        let fmt_layer = tracing_subscriber::fmt::layer()
+            .json()
+            .event_format(format)
+            .with_writer(io::stderr)
+            .with_target(true)
+            .with_ansi(false)
+            .with_thread_ids(verbose_thread_ids)
+            .with_thread_names(verbose_thread_ids)
+            .with_span_events(FmtSpan::ACTIVE);
+        Layer::boxed(fmt_layer)
+    } else {
+        let mut layer = tracing_tree::HierarchicalLayer::default()
+            .with_writer(io::stderr)
+            .with_ansi(color_logs)
+            .with_targets(true)
+            .with_verbose_exit(verbose_entry_exit)
+            .with_verbose_entry(verbose_entry_exit)
+            .with_indent_amount(2)
+            .with_indent_lines(lines)
+            .with_thread_ids(verbose_thread_ids)
+            .with_thread_names(verbose_thread_ids);
+
+        if let Ok(v) = cfg.wraptree {
+            match v.parse::<usize>() {
+                Ok(v) => layer = layer.with_wraparound(v),
+                Err(_) => return Err(Error::InvalidWraptree(v)),
+            }
         }
-    }
+
+        Layer::boxed(layer)
+    };
 
     let subscriber = build_subscriber();
     // NOTE: It is important to make sure that the filter is applied on the last layer

@@ -11,11 +11,6 @@ use crate::{core_arch::simd::*, hint::unreachable_unchecked, intrinsics::simd::*
 #[cfg(test)]
 use stdarch_test::assert_instr;
 
-// Ferrocene addition: Imports used by the certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{core_arch::simd::*, intrinsics::simd::*, mem::transmute};
-
 pub(crate) trait AsUnsigned {
     type Unsigned;
     fn as_unsigned(self) -> Self::Unsigned;

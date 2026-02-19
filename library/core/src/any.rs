@@ -91,11 +91,6 @@ use crate::mem::transmute;
 use crate::mem::type_info::{TraitImpl, TypeKind};
 use crate::{fmt, hash, ptr};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{fmt, intrinsics};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Any trait
 ///////////////////////////////////////////////////////////////////////////////
@@ -727,8 +722,6 @@ impl dyn Any + Send + Sync {
 /// ```
 #[derive(Copy, PartialOrd, Ord)]
 #[derive_const(Clone, Eq)]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy))]
-#[cfg_attr(feature = "ferrocene_subset", derive_const(Clone))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
 #[ferrocene::prevalidated]

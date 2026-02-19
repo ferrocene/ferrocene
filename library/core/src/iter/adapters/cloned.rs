@@ -5,11 +5,6 @@ use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccess
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen, UncheckedIterator};
 use crate::ops::Try;
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::{TrustedLen, UncheckedIterator};
-
 /// An iterator that clones the elements of an underlying iterator.
 ///
 /// This `struct` is created by the [`cloned`] method on [`Iterator`]. See its

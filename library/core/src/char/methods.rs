@@ -8,11 +8,6 @@ use crate::ub_checks::assert_unsafe_precondition;
 use crate::unicode::printable::is_printable;
 use crate::unicode::{self, conversions};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::unicode;
-
 impl char {
     /// The lowest valid code point a `char` can have, `'\0'`.
     ///

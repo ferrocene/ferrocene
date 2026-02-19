@@ -204,12 +204,6 @@
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs
 // from other crates, but since this can only appear for lang items, it doesn't seem worth fixing.
 #![feature(intra_doc_pointers)]
-//
-// Ferrocene lints/features:
-#![cfg_attr(feature = "ferrocene_subset", allow(rustdoc::broken_intra_doc_links))]
-#![feature(register_tool)]
-#![register_tool(ferrocene)]
-#![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

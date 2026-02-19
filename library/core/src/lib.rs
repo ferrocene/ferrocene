@@ -195,16 +195,6 @@
 #![feature(wasm_target_feature)]
 #![feature(x86_amx_intrinsics)]
 // not-alphabetical-end
-//
-// Ferrocene lints/features:
-#![cfg_attr(
-    feature = "ferrocene_subset",
-    expect(rustdoc::broken_intra_doc_links),
-    expect(rustdoc::private_intra_doc_links)
-)]
-#![feature(register_tool)]
-#![register_tool(ferrocene)]
-#![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

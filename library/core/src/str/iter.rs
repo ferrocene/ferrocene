@@ -16,17 +16,6 @@ use crate::ops::Try;
 use crate::slice::{self, Split as SliceSplit};
 use crate::{char as char_mod, option};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use {
-    super::{
-        from_utf8_unchecked,
-        pattern::{Pattern, Searcher},
-    },
-    crate::{fmt, iter::Copied, slice},
-};
-
 /// An iterator over the [`char`]s of a string slice.
 ///
 ///

@@ -7,14 +7,6 @@ use crate::num::NonZero;
 use crate::ops::{Deref as _, DerefMut as _, IndexRange, Range, Try};
 use crate::{fmt, ptr};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{
-    fmt,
-    ops::{Deref as _, DerefMut as _, IndexRange, Try},
-};
-
 mod iter_inner;
 
 type InnerSized<T, const N: usize> = iter_inner::PolymorphicIter<[MaybeUninit<T>; N]>;

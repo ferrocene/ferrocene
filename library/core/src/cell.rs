@@ -259,16 +259,6 @@ use crate::pin::PinCoerceUnsized;
 use crate::ptr::{self, NonNull};
 use crate::range;
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{
-    marker::{Destruct, PhantomData},
-    mem,
-    ops::{Deref, DerefMut},
-    ptr::NonNull,
-};
-
 mod lazy;
 mod once;
 
@@ -1646,7 +1636,6 @@ impl const Clone for BorrowRef<'_> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_not_suspend = "holding a Ref across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRef"]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 #[ferrocene::prevalidated]
 pub struct Ref<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b T` to avoid `noalias` violations, because a
@@ -2135,7 +2124,6 @@ impl<'b> BorrowRefMut<'b> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_not_suspend = "holding a RefMut across suspend points can cause BorrowErrors"]
 #[rustc_diagnostic_item = "RefCellRefMut"]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 #[ferrocene::prevalidated]
 pub struct RefMut<'b, T: ?Sized + 'b> {
     // NB: we use a pointer instead of `&'b mut T` to avoid `noalias` violations, because a

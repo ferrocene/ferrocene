@@ -7,14 +7,6 @@ use crate::num::NonZero;
 use crate::ops::{ControlFlow, Try};
 use crate::{array, fmt, option, result};
 
-// Ferrocene addition: imports for the certified subset
-#[rustfmt::skip]
-#[cfg(feature = "ferrocene_subset")]
-use crate::{
-    fmt,
-    iter::{Fuse, Map},
-};
-
 /// An iterator that maps each element to an iterator, and yields the elements
 /// of the produced iterators.
 ///

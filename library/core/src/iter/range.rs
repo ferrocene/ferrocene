@@ -7,11 +7,6 @@ use crate::net::{Ipv4Addr, Ipv6Addr};
 use crate::num::NonZero;
 use crate::ops::{self, Try};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use super::TrustedStep;
-
 // Safety: All invariants are upheld.
 macro_rules! unsafe_impl_trusted_step {
     ($($type:ty)*) => {$(

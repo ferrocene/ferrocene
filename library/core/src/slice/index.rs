@@ -6,11 +6,6 @@ use crate::panic::const_panic;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ops, range};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::ops;
-
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 impl<T, I> const ops::Index<I> for [T]
@@ -114,11 +109,6 @@ const unsafe fn get_offset_len_mut_noubcheck<T>(
 
 mod private_slice_index {
     use super::{ops, range};
-
-    // Ferrocene addition: imports for certified subset
-    #[cfg(feature = "ferrocene_subset")]
-    #[rustfmt::skip]
-    use super::ops;
 
     #[stable(feature = "slice_get_slice", since = "1.28.0")]
     pub trait Sealed {}

@@ -61,15 +61,6 @@ pub use self::{
     scan::Scan, skip::Skip, skip_while::SkipWhile, take::Take, take_while::TakeWhile, zip::Zip,
 };
 
-// Ferrocene addition: imports for certified subset
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-pub use self::{
-    chain::Chain, enumerate::Enumerate, filter::Filter, flatten::FlatMap, fuse::Fuse, map::Map,
-    rev::Rev, skip::Skip, step_by::StepBy, take::Take, take_while::TakeWhile, zip::Zip,
-};
-
 /// This trait provides transitive access to source-stage in an iterator-adapter pipeline
 /// under the conditions that
 /// * the iterator source `S` itself implements `SourceIter<Source = S>`

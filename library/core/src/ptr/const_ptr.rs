@@ -4,11 +4,6 @@ use crate::intrinsics::const_eval_select;
 use crate::mem::{self, SizedTypeProperties};
 use crate::slice::{self, SliceIndex};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::mem;
-
 impl<T: PointeeSized> *const T {
     #[doc = include_str!("docs/is_null.md")]
     ///

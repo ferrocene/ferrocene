@@ -91,11 +91,6 @@ pub use self::sip::SipHasher;
 pub use self::sip::SipHasher13;
 use crate::{fmt, marker};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::marker;
-
 mod sip;
 
 /// A hashable type.

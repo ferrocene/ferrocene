@@ -408,15 +408,6 @@ use crate::mem::{self, MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::{fmt, hash, intrinsics, ub_checks};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{
-    intrinsics,
-    marker::{Destruct, PointeeSized},
-    ub_checks,
-};
-
 mod alignment;
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 pub use alignment::Alignment;

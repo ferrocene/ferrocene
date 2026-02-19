@@ -5,11 +5,6 @@ use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen, Unch
 use crate::num::NonZero;
 use crate::ops::Try;
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::{TrustedLen, UncheckedIterator};
-
 /// An iterator that maps the values of `iter` with `f`.
 ///
 /// This `struct` is created by the [`map`] method on [`Iterator`]. See its

@@ -7,11 +7,6 @@ use crate::intrinsics::{aggregate_raw_ptr, ptr_metadata};
 use crate::marker::{Freeze, PointeeSized};
 use crate::ptr::NonNull;
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::hash::Hash;
-
 /// Provides the pointer metadata type of any pointed-to type.
 ///
 /// # Pointer metadata

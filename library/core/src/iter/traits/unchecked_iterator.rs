@@ -33,7 +33,4 @@ pub(crate) trait UncheckedIterator: TrustedLen {
         // `Self: TrustedLen` so we can actually trust the `size_hint`.
         unsafe { opt.unwrap_unchecked() }
     }
-    // Ferrocene addition: gate the default implementation
-    #[cfg(feature = "ferrocene_subset")]
-    unsafe fn next_unchecked(&mut self) -> Self::Item;
 }

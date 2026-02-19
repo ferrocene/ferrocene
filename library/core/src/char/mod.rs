@@ -49,14 +49,6 @@ use crate::fmt::{self, Write};
 use crate::iter::{FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
 use crate::num::NonZero;
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{
-    escape::{EscapeIterInner, MaybeEscaped},
-    fmt,
-};
-
 // UTF-8 ranges and tags for encoding characters
 const TAG_CONT: u8 = 0b1000_0000;
 const TAG_TWO_B: u8 = 0b1100_0000;

@@ -43,11 +43,6 @@ use crate::convert::TryInto as _;
 use crate::slice::memchr;
 use crate::{cmp, fmt};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::cmp;
-
 // Pattern
 
 /// A string pattern.

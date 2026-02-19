@@ -11,7 +11,6 @@ use crate::panic::Location;
 #[lang = "panic_info"]
 #[stable(feature = "panic_hooks", since = "1.10.0")]
 #[derive(Debug)]
-#[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
 #[ferrocene::prevalidated]
 pub struct PanicInfo<'a> {
     message: &'a fmt::Arguments<'a>,

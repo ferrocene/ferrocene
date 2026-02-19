@@ -501,7 +501,7 @@ macro_rules! define_queries {
                     #[cfg(debug_assertions)]
                     let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
                     execution::get_query_incr(
-                        QueryType::query_dispatcher(tcx),
+                        &tcx.query_system.query_vtables.$name,
                         tcx,
                         span,
                         key,
@@ -521,7 +521,7 @@ macro_rules! define_queries {
                     __mode: QueryMode,
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
                     Some(execution::get_query_non_incr(
-                        QueryType::query_dispatcher(tcx),
+                        &tcx.query_system.query_vtables.$name,
                         tcx,
                         span,
                         key,
@@ -628,7 +628,7 @@ macro_rules! define_queries {
                 type UnerasedValue = queries::$name::Value<'tcx>;
 
                 #[inline(always)]
-                fn query_dispatcher(tcx: TyCtxt<'tcx>)
+                fn query_vtable(tcx: TyCtxt<'tcx>)
                     -> &'tcx QueryVTable<'tcx, queries::$name::Storage<'tcx>>
                 {
                     &tcx.query_system.query_vtables.$name
@@ -697,7 +697,7 @@ macro_rules! define_queries {
                         query_impl::$name::QueryType<'tcx>,
                         _
                     > (
-                        query_impl::$name::QueryType::query_dispatcher(tcx),
+                        &tcx.query_system.query_vtables.$name,
                         tcx,
                         encoder,
                         query_result_index,
@@ -707,7 +707,7 @@ macro_rules! define_queries {
 
             pub(crate) fn query_key_hash_verify<'tcx>(tcx: TyCtxt<'tcx>) {
                 $crate::plumbing::query_key_hash_verify(
-                    query_impl::$name::QueryType::query_dispatcher(tcx),
+                    &tcx.query_system.query_vtables.$name,
                     tcx,
                 )
             }

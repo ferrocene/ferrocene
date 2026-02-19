@@ -131,10 +131,10 @@ where
         is_eval_always,
         key_fingerprint_style,
         force_from_dep_node: Some(|tcx, dep_node, _| {
-            force_from_dep_node_inner(Q::query_dispatcher(tcx), tcx, dep_node)
+            force_from_dep_node_inner(Q::query_vtable(tcx), tcx, dep_node)
         }),
         try_load_from_on_disk_cache: Some(|tcx, dep_node| {
-            try_load_from_on_disk_cache_inner(Q::query_dispatcher(tcx), tcx, dep_node)
+            try_load_from_on_disk_cache_inner(Q::query_vtable(tcx), tcx, dep_node)
         }),
     }
 }

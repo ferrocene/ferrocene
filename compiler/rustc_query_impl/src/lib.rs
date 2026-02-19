@@ -50,7 +50,7 @@ mod values;
 trait QueryDispatcherUnerased<'tcx, C: QueryCache> {
     type UnerasedValue;
 
-    fn query_dispatcher(tcx: TyCtxt<'tcx>) -> &'tcx QueryVTable<'tcx, C>;
+    fn query_vtable(tcx: TyCtxt<'tcx>) -> &'tcx QueryVTable<'tcx, C>;
 
     fn restore_val(value: C::Value) -> Self::UnerasedValue;
 }

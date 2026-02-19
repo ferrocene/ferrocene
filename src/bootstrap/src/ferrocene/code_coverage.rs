@@ -168,7 +168,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: state.target.subset_equivalent(),
+        certified_target: state.target,
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -256,10 +256,7 @@ impl Step for CoverageOutcomesDir {
             FerroceneCoverageOutcomes::DownloadCi => {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
-            FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.subset_equivalent();
-                Some(coverage_dir(builder, certified_target))
-            }
+            FerroceneCoverageOutcomes::Local => Some(coverage_dir(builder, builder.host_target)),
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
         }
     }

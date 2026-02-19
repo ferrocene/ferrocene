@@ -204,7 +204,9 @@ impl Step for CoverageReport {
 
     fn make_run(run: RunConfig<'_>) {
         let builder = run.builder;
-        let certified_target = run.target.subset_equivalent();
+
+        run.target.require_certified_subset();
+
         let for_ = FerroceneCoverageFor::Library;
         let paths = Paths::find(builder, run.target, for_);
         // FIXME(@jyn514): this is not a good CLI interface.
@@ -227,10 +229,10 @@ impl Step for CoverageReport {
             CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
         let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
 
-        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, certified_target));
+        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target));
 
         builder.ensure(CoverageReport {
-            certified_target,
+            certified_target: run.target,
             profdata: paths.profdata_file,
             instrumented_binaries,
             symbol_report,

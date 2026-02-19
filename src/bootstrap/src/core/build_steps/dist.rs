@@ -131,6 +131,7 @@ impl Step for JsonDocs {
             self.build_compiler,
             target,
             DocumentationFormat::Json,
+            false,
         ));
 
         let dest = "share/doc/rust/json";

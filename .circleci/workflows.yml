@@ -85,9 +85,6 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
-  targets--subset-targets--build:
-    type: string
-    default: ""
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
@@ -182,21 +179,6 @@ jobs:
     steps:
       - ferrocene-job-dist:
           qnx: true
-          restore-from-job: x86_64-linux-build
-
-  # A basic check to ensure the certified libcore subset builds
-  # Will be replaced by a more sophisticated mechanism
-  x86_64-linux-certified:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--subset-targets--build >>
-      SCRIPT: |
-        ./x.py build --stage 2 library/core
-        ./x.py doc   --stage 2 library/core
-    steps:
-      - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:

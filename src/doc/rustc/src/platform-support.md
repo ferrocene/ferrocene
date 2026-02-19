@@ -475,10 +475,6 @@ target | std | host | notes
 `aarch64v8r-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
-`x86_64-unknown-ferrocene.subset` | * |  | Freestanding/bare-metal x86_64, softfloat (subset)
-`aarch64-unknown-ferrocene.subset` | * |  | Bare ARM64, hardfloat (subset)
-`thumbv7em-ferrocene.subset-eabi` | * |  | Bare Armv7E-M (subset)
-`thumbv7em-ferrocene.subset-eabihf` | * |  | Bare Armv7E-M, hardfloat (subset)
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

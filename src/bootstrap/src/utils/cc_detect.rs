@@ -82,8 +82,6 @@ pub fn fill_compilers(build: &mut Build) {
                 .chain(&build.hosts)
                 .cloned()
                 .chain(iter::once(build.host_target))
-                // Ferrocene addition: Load the matching certified target
-                .flat_map(|t| std::iter::once(t).chain(t.try_subset_equivalent()))
                 .collect()
         }
     };
@@ -331,11 +329,11 @@ impl Language {
 }
 
 fn contains_ferrocene_vendors(triple: Interned<String>) -> bool {
-    triple.contains("ferrocene.facade") || triple.contains("ferrocene.subset")
+    triple.contains("ferrocene.facade")
 }
 
 fn replace_ferrocene_vendors(triple: Interned<String>) -> String {
-    triple.replace("ferrocene.facade", "none").replace("ferrocene.subset", "none")
+    triple.replace("ferrocene.facade", "none")
 }
 
 #[cfg(test)]

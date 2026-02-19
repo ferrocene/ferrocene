@@ -68,10 +68,6 @@ GENERIC_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
-    "x86_64-unknown-ferrocene.subset",
-    "aarch64-unknown-ferrocene.subset",
-    "thumbv7em-ferrocene.subset-eabi",
-    "thumbv7em-ferrocene.subset-eabihf",
 ]
 
 # Targets only built (and self-tested!) on Linux.
@@ -96,14 +92,6 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
-
-# Targets for which there is a certified core library subset
-SUBSET_TARGETS = [
-    "aarch64-unknown-ferrocene.subset",
-    "thumbv7em-ferrocene.subset-eabi",
-    "thumbv7em-ferrocene.subset-eabihf",
-    "x86_64-unknown-ferrocene.subset",
-]
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -199,8 +187,6 @@ def calculate_targets(host_plus_stage: str):
                 targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
             case "x86_64-pc-windows-msvc":
                 targets = X86_64_WINDOWS_BUILD_HOSTS
-            case "subset-targets":
-                targets = SUBSET_TARGETS
             case _:
                 raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":

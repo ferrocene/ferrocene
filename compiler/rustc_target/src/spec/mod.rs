@@ -1797,10 +1797,6 @@ supported_targets! {
     ("aarch64r82-unknown-ferrocene.facade", aarch64r82_unknown_ferrocene_facade),
     ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
-    ("x86_64-unknown-ferrocene.subset", x86_64_unknown_ferrocene_subset),
-    ("aarch64-unknown-ferrocene.subset", aarch64_unknown_ferrocene_subset),
-    ("thumbv7em-ferrocene.subset-eabi", thumbv7em_ferrocene_subset_eabi),
-    ("thumbv7em-ferrocene.subset-eabihf", thumbv7em_ferrocene_subset_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),
@@ -3501,13 +3497,6 @@ impl Target {
 
     pub fn vendor_symbol(&self) -> Symbol {
         Symbol::intern(&self.vendor)
-    }
-
-    /// Modify the target to be a subset one
-    pub fn ferrocene_subset(&mut self) {
-        self.metadata.description =
-            self.metadata.description.as_ref().map(|v| format!("{v} (subset)").into());
-        self.metadata.tier = Some(3);
     }
 }
 

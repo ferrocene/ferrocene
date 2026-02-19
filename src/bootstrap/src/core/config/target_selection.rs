@@ -117,35 +117,24 @@ impl TargetSelection {
     }
 
     // Ferrocene addition
-    /// Map the target to the subset target that is based on it.
-    ///
-    /// Panics if there is no subset equivalent.
-    /// See [`TargetSelection::try_subset_equivalent`] for a non-panicking version.
-    pub fn subset_equivalent(&self) -> TargetSelection {
-        self.try_subset_equivalent()
-            .expect(&format!("no certified equivalent exists for target \"{self}\""))
+    pub fn has_certified_subset(&self) -> bool {
+        match self.triple.as_ref() {
+            "x86_64-unknown-linux-gnu"
+            | "aarch64-unknown-none"
+            | "aarch64-apple-darwin"
+            | "aarch64-unknown-ferrocene.facade"
+            | "thumbv7em-none-eabi"
+            | "thumbv7em-ferrocene.facade-eabi"
+            | "thumbv7em-none-eabihf"
+            | "thumbv7em-ferrocene.facade-eabihf" => true,
+            _ => false,
+        }
     }
 
-    // Ferrocene addition
-    /// Map the target to the subset target that is based on it.
-    ///
-    /// [`None`] if there is no subset equivalent.
-    pub fn try_subset_equivalent(&self) -> Option<TargetSelection> {
-        let target_tuple = match self.triple.as_ref() {
-            "x86_64-unknown-linux-gnu" => "x86_64-unknown-ferrocene.subset",
-            "aarch64-unknown-none"
-            | "aarch64-apple-darwin"
-            | "aarch64-unknown-ferrocene.facade" => "aarch64-unknown-ferrocene.subset",
-            "thumbv7em-none-eabi" | "thumbv7em-ferrocene.facade-eabi" => {
-                "thumbv7em-ferrocene.subset-eabi"
-            }
-            "thumbv7em-none-eabihf" | "thumbv7em-ferrocene.facade-eabihf" => {
-                "thumbv7em-ferrocene.subset-eabihf"
-            }
-            target if target.contains("ferrocene.subset") => target,
-            _ => return None,
-        };
-        Some(TargetSelection::from_user(target_tuple))
+    pub fn require_certified_subset(&self) {
+        if !self.has_certified_subset() {
+            panic!("libcore for `{self}` is not certified!");
+        }
     }
 
     /// Path to the file defining the custom target, if any.

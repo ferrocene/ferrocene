@@ -17,7 +17,7 @@ impl Step for CertifiedApiDocs {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        if run.target.try_subset_equivalent().is_some() {
+        if run.target.has_certified_subset() {
             run.builder.ensure(CertifiedApiDocs { target: run.target });
         } else if run.builder.was_invoked_explicitly::<CertifiedApiDocs>(crate::Kind::Doc) {
             panic!(
@@ -25,20 +25,21 @@ impl Step for CertifiedApiDocs {
                 run.target.to_string()
             )
         } else {
-            run.builder.info(&format!("No certified target for {}", run.target.to_string()));
+            run.builder.info(&format!("libcore for `{}` is not certified", run.target.to_string()));
         }
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        let certified_target = self.target.subset_equivalent();
+        self.target.require_certified_subset();
 
         // Build the docs for the certified target
         let certified_target_doc_out = builder.ensure(
             doc::Std::from_build_compiler(
                 builder.compiler(builder.top_stage, builder.host_target),
-                certified_target,
+                self.target,
                 doc::DocumentationFormat::Html,
+                true,
             )
             .with_crates(certified_crates),
         );

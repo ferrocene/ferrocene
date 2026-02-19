@@ -16,7 +16,6 @@ aarch64-pc-windows-gnullvm
 aarch64-pc-windows-msvc
 aarch64-rhivos2-linux-gnu
 aarch64-unknown-ferrocene.facade
-aarch64-unknown-ferrocene.subset
 aarch64-unknown-freebsd
 aarch64-unknown-fuchsia
 aarch64-unknown-helenos
@@ -250,8 +249,6 @@ thumbv7a-pc-windows-msvc
 thumbv7a-uwp-windows-msvc
 thumbv7em-ferrocene.facade-eabi
 thumbv7em-ferrocene.facade-eabihf
-thumbv7em-ferrocene.subset-eabi
-thumbv7em-ferrocene.subset-eabihf
 thumbv7em-none-eabi
 thumbv7em-none-eabihf
 thumbv7em-nuttx-eabi
@@ -297,7 +294,6 @@ x86_64-pc-windows-gnullvm
 x86_64-pc-windows-msvc
 x86_64-unikraft-linux-musl
 x86_64-unknown-dragonfly
-x86_64-unknown-ferrocene.subset
 x86_64-unknown-freebsd
 x86_64-unknown-fuchsia
 x86_64-unknown-haiku

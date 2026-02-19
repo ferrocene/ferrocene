@@ -3,7 +3,7 @@ pub trait Trait {
 }
 
 pub type Alias = dyn Trait<A = Self::A>;
-//~^ ERROR failed to resolve: `Self`
+//~^ ERROR cannot find `Self`
 
 fn main() {}
 

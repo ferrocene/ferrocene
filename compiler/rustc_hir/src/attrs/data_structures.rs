@@ -897,6 +897,9 @@ pub enum AttributeKind {
     /// Represents `#[debugger_visualizer]`.
     DebuggerVisualizer(ThinVec<DebugVisualizer>),
 
+    /// Represents `#![default_lib_allocator]`
+    DefaultLibAllocator,
+
     /// Represents [`#[deprecated]`](https://doc.rust-lang.org/stable/reference/attributes/diagnostics.html#the-deprecated-attribute).
     Deprecation { deprecation: Deprecation, span: Span },
 
@@ -1165,6 +1168,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_do_not_const_check]`
     RustcDoNotConstCheck,
+
+    /// Represents `#[rustc_doc_primitive = ...]`
+    RustcDocPrimitive(Span, Symbol),
 
     /// Represents `#[rustc_dummy]`.
     RustcDummy,

@@ -6,9 +6,10 @@
 //! other phases think of as an "item".
 
 use rustc_data_structures::fx::FxHashMap;
-use rustc_hir::def::DefKind;
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::DefId;
-use rustc_span::{Symbol, sym};
+use rustc_hir::find_attr;
+use rustc_span::Symbol;
 use rustdoc_json_types as types;
 
 use super::JsonRenderer;
@@ -88,12 +89,10 @@ impl JsonRenderer<'_> {
                 // We need this workaround because primitive types' DefId actually refers to
                 // their parent module, which isn't present in the output JSON items. So
                 // instead, we directly get the primitive symbol
-                if matches!(self.tcx.def_kind(def_id), DefKind::Mod)
-                    && let Some(prim) = self
-                        .tcx
-                        .get_attrs(def_id, sym::rustc_doc_primitive)
-                        .find_map(|attr| attr.value_str())
-                {
+                if let Some(prim) = find_attr!(
+                    self.tcx.get_all_attrs(def_id),
+                    AttributeKind::RustcDocPrimitive(_, prim) => *prim
+                ) {
                     Some(prim)
                 } else {
                     self.tcx.opt_item_name(def_id)

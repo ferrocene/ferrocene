@@ -254,9 +254,16 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             LangItem::TransmuteTrait,
                         ) {
                             // Recompute the safe transmute reason and use that for the error reporting
+                            let (report_obligation, report_pred) =
+                                self.select_transmute_obligation_for_reporting(
+                                    &obligation,
+                                    main_trait_predicate,
+                                    root_obligation,
+                                );
+
                             match self.get_safe_transmute_error_and_reason(
-                                obligation.clone(),
-                                main_trait_predicate,
+                                report_obligation,
+                                report_pred,
                                 span,
                             ) {
                                 GetSafeTransmuteErrorAndReason::Silent => {
@@ -282,22 +289,30 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         if self.tcx.is_diagnostic_item(sym::From, trait_def_id)
                             || self.tcx.is_diagnostic_item(sym::TryFrom, trait_def_id)
                         {
-                            let found_ty = leaf_trait_predicate.skip_binder().trait_ref.args.type_at(1);
-                            let ty = main_trait_predicate.skip_binder().self_ty();
-                            if let Some(cast_ty) = self.find_explicit_cast_type(
-                                obligation.param_env,
-                                found_ty,
-                                ty,
-                            ) {
-                                let found_ty_str = self.tcx.short_string(found_ty, &mut long_ty_file);
-                                let cast_ty_str = self.tcx.short_string(cast_ty, &mut long_ty_file);
-                                err.help(
-                                    format!(
+                            let trait_ref = leaf_trait_predicate.skip_binder().trait_ref;
+
+                            // Defensive: next-solver may produce fewer args than expected.
+                            if trait_ref.args.len() > 1 {
+                                let found_ty = trait_ref.args.type_at(1);
+                                let ty = main_trait_predicate.skip_binder().self_ty();
+
+                                if let Some(cast_ty) = self.find_explicit_cast_type(
+                                    obligation.param_env,
+                                    found_ty,
+                                    ty,
+                                ) {
+                                    let found_ty_str =
+                                        self.tcx.short_string(found_ty, &mut long_ty_file);
+                                    let cast_ty_str =
+                                        self.tcx.short_string(cast_ty, &mut long_ty_file);
+
+                                    err.help(format!(
                                         "consider casting the `{found_ty_str}` value to `{cast_ty_str}`",
-                                    ),
-                                );
+                                    ));
+                                }
                             }
                         }
+
 
                         *err.long_ty_path() = long_ty_file;
 
@@ -2815,6 +2830,51 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     ),
                 )
             })
+    }
+
+    fn select_transmute_obligation_for_reporting(
+        &self,
+        obligation: &PredicateObligation<'tcx>,
+        trait_predicate: ty::PolyTraitPredicate<'tcx>,
+        root_obligation: &PredicateObligation<'tcx>,
+    ) -> (PredicateObligation<'tcx>, ty::PolyTraitPredicate<'tcx>) {
+        let ocx = ObligationCtxt::new(self);
+        let normalized_predicate = self.tcx.erase_and_anonymize_regions(
+            self.tcx.instantiate_bound_regions_with_erased(trait_predicate),
+        );
+        let trait_ref = normalized_predicate.trait_ref;
+
+        let Ok(assume) = ocx.structurally_normalize_const(
+            &obligation.cause,
+            obligation.param_env,
+            trait_ref.args.const_at(2),
+        ) else {
+            return (obligation.clone(), trait_predicate);
+        };
+
+        let Some(assume) = rustc_transmute::Assume::from_const(self.tcx, assume) else {
+            return (obligation.clone(), trait_predicate);
+        };
+
+        let is_normalized_yes = matches!(
+            rustc_transmute::TransmuteTypeEnv::new(self.tcx).is_transmutable(
+                trait_ref.args.type_at(1),
+                trait_ref.args.type_at(0),
+                assume,
+            ),
+            rustc_transmute::Answer::Yes,
+        );
+
+        // If the normalized check unexpectedly passes, fall back to root obligation for reporting.
+        if is_normalized_yes
+            && let ty::PredicateKind::Clause(ty::ClauseKind::Trait(root_pred)) =
+                root_obligation.predicate.kind().skip_binder()
+            && root_pred.def_id() == trait_predicate.def_id()
+        {
+            return (root_obligation.clone(), root_obligation.predicate.kind().rebind(root_pred));
+        }
+
+        (obligation.clone(), trait_predicate)
     }
 
     fn get_safe_transmute_error_and_reason(

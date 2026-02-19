@@ -12120,6 +12120,7 @@ pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
@@ -12131,6 +12132,22 @@ pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
         fn _vld1_f64_x2(a: *const f64) -> float64x1x2_t;
     }
     _vld1_f64_x2(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x2.v1f64.p0"
+        )]
+        fn _vld1_f64_x2(a: *const f64) -> float64x1x2_t;
+    }
+    _vld1_f64_x2(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1_f64_x2(ptr: *const f64) -> float64x1x2_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f64_x3)"]
@@ -12139,6 +12156,7 @@ pub unsafe fn vld1_f64_x2(a: *const f64) -> float64x1x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
@@ -12150,6 +12168,22 @@ pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
         fn _vld1_f64_x3(a: *const f64) -> float64x1x3_t;
     }
     _vld1_f64_x3(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x3.v1f64.p0"
+        )]
+        fn _vld1_f64_x3(a: *const f64) -> float64x1x3_t;
+    }
+    _vld1_f64_x3(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1_f64_x3(ptr: *const f64) -> float64x1x3_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1_f64_x4)"]
@@ -12158,6 +12192,7 @@ pub unsafe fn vld1_f64_x3(a: *const f64) -> float64x1x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
@@ -12169,6 +12204,22 @@ pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
         fn _vld1_f64_x4(a: *const f64) -> float64x1x4_t;
     }
     _vld1_f64_x4(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x4.v1f64.p0"
+        )]
+        fn _vld1_f64_x4(a: *const f64) -> float64x1x4_t;
+    }
+    _vld1_f64_x4(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1_f64_x4(ptr: *const f64) -> float64x1x4_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f64_x2)"]
@@ -12177,6 +12228,7 @@ pub unsafe fn vld1_f64_x4(a: *const f64) -> float64x1x4_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
@@ -12188,6 +12240,22 @@ pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
         fn _vld1q_f64_x2(a: *const f64) -> float64x2x2_t;
     }
     _vld1q_f64_x2(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x2.v2f64.p0"
+        )]
+        fn _vld1q_f64_x2(a: *const f64) -> float64x2x2_t;
+    }
+    _vld1q_f64_x2(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1q_f64_x2(ptr: *const f64) -> float64x2x2_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f64_x3)"]
@@ -12196,6 +12264,7 @@ pub unsafe fn vld1q_f64_x2(a: *const f64) -> float64x2x2_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
@@ -12207,6 +12276,22 @@ pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
         fn _vld1q_f64_x3(a: *const f64) -> float64x2x3_t;
     }
     _vld1q_f64_x3(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x3.v2f64.p0"
+        )]
+        fn _vld1q_f64_x3(a: *const f64) -> float64x2x3_t;
+    }
+    _vld1q_f64_x3(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1q_f64_x3(ptr: *const f64) -> float64x2x3_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load multiple single-element structures to one, two, three, or four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld1q_f64_x4)"]
@@ -12215,6 +12300,7 @@ pub unsafe fn vld1q_f64_x3(a: *const f64) -> float64x2x3_t {
 #[inline(always)]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(ld1))]
 pub unsafe fn vld1q_f64_x4(a: *const f64) -> float64x2x4_t {
@@ -12226,6 +12312,22 @@ pub unsafe fn vld1q_f64_x4(a: *const f64) -> float64x2x4_t {
         fn _vld1q_f64_x4(a: *const f64) -> float64x2x4_t;
     }
     _vld1q_f64_x4(a)
+||||||| 71e00273c09
+#[cfg_attr(test, assert_instr(ld1))]
+pub unsafe fn vld1q_f64_x4(a: *const f64) -> float64x2x4_t {
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.ld1x4.v2f64.p0"
+        )]
+        fn _vld1q_f64_x4(a: *const f64) -> float64x2x4_t;
+    }
+    _vld1q_f64_x4(a)
+=======
+#[cfg_attr(test, assert_instr(ld))]
+pub unsafe fn vld1q_f64_x4(ptr: *const f64) -> float64x2x4_t {
+    crate::ptr::read_unaligned(ptr.cast())
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 #[doc = "Load single 2-element structure and replicate to all lanes of two registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_dup_f64)"]
@@ -12294,14 +12396,7 @@ pub unsafe fn vld2q_dup_s64(a: *const i64) -> int64x2x2_t {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld2_f64(a: *const f64) -> float64x1x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld2.v1f64.p0"
-        )]
-        fn _vld2_f64(ptr: *const float64x1_t) -> float64x1x2_t;
-    }
-    _vld2_f64(a as _)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple 2-element structures to two registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2_lane_f64)"]
@@ -12623,7 +12718,6 @@ pub unsafe fn vld2q_p64(a: *const p64) -> poly64x2x2_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -12631,6 +12725,7 @@ pub unsafe fn vld2q_p64(a: *const p64) -> poly64x2x2_t {
 pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
     transmute(vld2q_s64(transmute(a)))
 }
+<<<<<<< HEAD
 #[doc = "Load multiple 2-element structures to two registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_u64)"]
 #[doc = "## Safety"]
@@ -12647,6 +12742,24 @@ pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
     ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
     ret_val
 }
+||||||| 71e00273c09
+#[doc = "Load multiple 2-element structures to two registers"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld2q_u64)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(ld2))]
+pub unsafe fn vld2q_u64(a: *const u64) -> uint64x2x2_t {
+    let mut ret_val: uint64x2x2_t = transmute(vld2q_s64(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Load single 3-element structure and replicate to all lanes of three registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_dup_f64)"]
 #[doc = "## Safety"]
@@ -12714,14 +12827,7 @@ pub unsafe fn vld3q_dup_s64(a: *const i64) -> int64x2x3_t {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld3_f64(a: *const f64) -> float64x1x3_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld3.v1f64.p0"
-        )]
-        fn _vld3_f64(ptr: *const float64x1_t) -> float64x1x3_t;
-    }
-    _vld3_f64(a as _)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple 3-element structures to three registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3_lane_f64)"]
@@ -13075,7 +13181,6 @@ pub unsafe fn vld3q_p64(a: *const p64) -> poly64x2x3_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -13083,6 +13188,7 @@ pub unsafe fn vld3q_p64(a: *const p64) -> poly64x2x3_t {
 pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
     transmute(vld3q_s64(transmute(a)))
 }
+<<<<<<< HEAD
 #[doc = "Load multiple 3-element structures to three registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_u64)"]
 #[doc = "## Safety"]
@@ -13100,6 +13206,25 @@ pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
     ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
     ret_val
 }
+||||||| 71e00273c09
+#[doc = "Load multiple 3-element structures to three registers"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld3q_u64)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(ld3))]
+pub unsafe fn vld3q_u64(a: *const u64) -> uint64x2x3_t {
+    let mut ret_val: uint64x2x3_t = transmute(vld3q_s64(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Load single 4-element structure and replicate to all lanes of four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_dup_f64)"]
 #[doc = "## Safety"]
@@ -13167,14 +13292,7 @@ pub unsafe fn vld4q_dup_s64(a: *const i64) -> int64x2x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(nop))]
 pub unsafe fn vld4_f64(a: *const f64) -> float64x1x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.ld4.v1f64.p0"
-        )]
-        fn _vld4_f64(ptr: *const float64x1_t) -> float64x1x4_t;
-    }
-    _vld4_f64(a as _)
+    crate::ptr::read_unaligned(a.cast())
 }
 #[doc = "Load multiple 4-element structures to four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4_lane_f64)"]
@@ -13536,7 +13654,6 @@ pub unsafe fn vld4q_p64(a: *const p64) -> poly64x2x4_t {
 #[doc = "## Safety"]
 #[doc = "  * Neon intrinsic unsafe"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -13544,6 +13661,7 @@ pub unsafe fn vld4q_p64(a: *const p64) -> poly64x2x4_t {
 pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
     transmute(vld4q_s64(transmute(a)))
 }
+<<<<<<< HEAD
 #[doc = "Load multiple 4-element structures to four registers"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_u64)"]
 #[doc = "## Safety"]
@@ -13562,6 +13680,26 @@ pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
     ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
     ret_val
 }
+||||||| 71e00273c09
+#[doc = "Load multiple 4-element structures to four registers"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vld4q_u64)"]
+#[doc = "## Safety"]
+#[doc = "  * Neon intrinsic unsafe"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(ld4))]
+pub unsafe fn vld4q_u64(a: *const u64) -> uint64x2x4_t {
+    let mut ret_val: uint64x2x4_t = transmute(vld4q_s64(transmute(a)));
+    ret_val.0 = unsafe { simd_shuffle!(ret_val.0, ret_val.0, [1, 0]) };
+    ret_val.1 = unsafe { simd_shuffle!(ret_val.1, ret_val.1, [1, 0]) };
+    ret_val.2 = unsafe { simd_shuffle!(ret_val.2, ret_val.2, [1, 0]) };
+    ret_val.3 = unsafe { simd_shuffle!(ret_val.3, ret_val.3, [1, 0]) };
+    ret_val
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Load-acquire RCpc one single-element structure to one lane of one register"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vldap1_lane_s64)"]
 #[doc = "## Safety"]
@@ -17087,14 +17225,11 @@ pub fn vpaddd_u64(a: uint64x2_t) -> u64 {
 #[cfg(not(target_arch = "arm64ec"))]
 #[cfg_attr(test, assert_instr(faddp))]
 pub fn vpaddq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.faddp.v8f16"
-        )]
-        fn _vpaddq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<8>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<8>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_f16(a, b) }
 }
 #[doc = "Floating-point add pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_f32)"]
@@ -17104,14 +17239,11 @@ pub fn vpaddq_f16(a: float16x8_t, b: float16x8_t) -> float16x8_t {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(faddp))]
 pub fn vpaddq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.faddp.v4f32"
-        )]
-        fn _vpaddq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<4>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<4>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_f32(a, b) }
 }
 #[doc = "Floating-point add pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_f64)"]
@@ -17121,14 +17253,11 @@ pub fn vpaddq_f32(a: float32x4_t, b: float32x4_t) -> float32x4_t {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(faddp))]
 pub fn vpaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.faddp.v2f64"
-        )]
-        fn _vpaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<2>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<2>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_f64(a, b) }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_s8)"]
@@ -17138,14 +17267,11 @@ pub fn vpaddq_f64(a: float64x2_t, b: float64x2_t) -> float64x2_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.addp.v16i8"
-        )]
-        fn _vpaddq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<16>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<16>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_s8(a, b) }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_s16)"]
@@ -17155,14 +17281,11 @@ pub fn vpaddq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.addp.v8i16"
-        )]
-        fn _vpaddq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<8>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<8>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_s16(a, b) }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_s32)"]
@@ -17172,14 +17295,11 @@ pub fn vpaddq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.addp.v4i32"
-        )]
-        fn _vpaddq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t;
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<4>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<4>());
+        simd_add(even, odd)
     }
-    unsafe { _vpaddq_s32(a, b) }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_s64)"]
@@ -17189,6 +17309,7 @@ pub fn vpaddq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_s64(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+<<<<<<< HEAD
     unsafe extern "unadjusted" {
         #[cfg_attr(
             any(target_arch = "aarch64", target_arch = "arm64ec"),
@@ -17222,24 +17343,68 @@ pub fn vpaddq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
         unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
     let b: uint8x16_t =
         unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+||||||| 71e00273c09
+    unsafe extern "unadjusted" {
+        #[cfg_attr(
+            any(target_arch = "aarch64", target_arch = "arm64ec"),
+            link_name = "llvm.aarch64.neon.addp.v2i64"
+        )]
+        fn _vpaddq_s64(a: int64x2_t, b: int64x2_t) -> int64x2_t;
+    }
+    unsafe { _vpaddq_s64(a, b) }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "little")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
+    unsafe { transmute(vpaddq_s8(transmute(a), transmute(b))) }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
+    let a: uint8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     unsafe {
-        let ret_val: uint8x16_t = transmute(vpaddq_s8(transmute(a), transmute(b)));
-        simd_shuffle!(
-            ret_val,
-            ret_val,
-            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-        )
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<2>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<2>());
+        simd_add(even, odd)
+    }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u8)"]
+#[inline(always)]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
+    unsafe {
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<16>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<16>());
+        simd_add(even, odd)
     }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u16)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
+<<<<<<< HEAD
     unsafe { transmute(vpaddq_s16(transmute(a), transmute(b))) }
 }
 #[doc = "Add Pairwise"]
@@ -17253,20 +17418,36 @@ pub fn vpaddq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
 pub fn vpaddq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
     let a: uint16x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
     let b: uint16x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+||||||| 71e00273c09
+    unsafe { transmute(vpaddq_s16(transmute(a), transmute(b))) }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u16)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
+    let a: uint16x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint16x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     unsafe {
-        let ret_val: uint16x8_t = transmute(vpaddq_s16(transmute(a), transmute(b)));
-        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<8>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<8>());
+        simd_add(even, odd)
     }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u32)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
+<<<<<<< HEAD
     unsafe { transmute(vpaddq_s32(transmute(a), transmute(b))) }
 }
 #[doc = "Add Pairwise"]
@@ -17280,20 +17461,36 @@ pub fn vpaddq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
 pub fn vpaddq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
     let a: uint32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
     let b: uint32x4_t = unsafe { simd_shuffle!(b, b, [3, 2, 1, 0]) };
+||||||| 71e00273c09
+    unsafe { transmute(vpaddq_s32(transmute(a), transmute(b))) }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u32)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
+    let a: uint32x4_t = unsafe { simd_shuffle!(a, a, [3, 2, 1, 0]) };
+    let b: uint32x4_t = unsafe { simd_shuffle!(b, b, [3, 2, 1, 0]) };
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     unsafe {
-        let ret_val: uint32x4_t = transmute(vpaddq_s32(transmute(a), transmute(b)));
-        simd_shuffle!(ret_val, ret_val, [3, 2, 1, 0])
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<4>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<4>());
+        simd_add(even, odd)
     }
 }
 #[doc = "Add Pairwise"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u64)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[cfg_attr(test, assert_instr(addp))]
 pub fn vpaddq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
+<<<<<<< HEAD
     unsafe { transmute(vpaddq_s64(transmute(a), transmute(b))) }
 }
 #[doc = "Add Pairwise"]
@@ -17307,9 +17504,25 @@ pub fn vpaddq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
 pub fn vpaddq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
     let a: uint64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
     let b: uint64x2_t = unsafe { simd_shuffle!(b, b, [1, 0]) };
+||||||| 71e00273c09
+    unsafe { transmute(vpaddq_s64(transmute(a), transmute(b))) }
+}
+#[doc = "Add Pairwise"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vpaddq_u64)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[cfg_attr(test, assert_instr(addp))]
+pub fn vpaddq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
+    let a: uint64x2_t = unsafe { simd_shuffle!(a, a, [1, 0]) };
+    let b: uint64x2_t = unsafe { simd_shuffle!(b, b, [1, 0]) };
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     unsafe {
-        let ret_val: uint64x2_t = transmute(vpaddq_s64(transmute(a), transmute(b)));
-        simd_shuffle!(ret_val, ret_val, [1, 0])
+        let even = simd_shuffle!(a, b, crate::core_arch::macros::even::<2>());
+        let odd = simd_shuffle!(a, b, crate::core_arch::macros::odd::<2>());
+        simd_add(even, odd)
     }
 }
 #[doc = "Floating-point add pairwise"]
@@ -20961,7 +21174,6 @@ pub fn vqtbl2q_s8(a: int8x16x2_t, b: uint8x16_t) -> int8x16_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -20970,6 +21182,7 @@ pub fn vqtbl2_u8(a: uint8x16x2_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbl2(transmute(a.0), transmute(a.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21000,9 +21213,40 @@ pub fn vqtbl2_u8(a: uint8x16x2_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl2_u8(a: uint8x16x2_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x16x2_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbl2(transmute(a.0), transmute(a.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21011,6 +21255,7 @@ pub fn vqtbl2q_u8(a: uint8x16x2_t, b: uint8x16_t) -> uint8x16_t {
     unsafe { transmute(vqtbl2q(transmute(a.0), transmute(a.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21046,9 +21291,45 @@ pub fn vqtbl2q_u8(a: uint8x16x2_t, b: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl2q_u8(a: uint8x16x2_t, b: uint8x16_t) -> uint8x16_t {
+    let mut a: uint8x16x2_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t = transmute(vqtbl2q(transmute(a.0), transmute(a.1), b));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21057,6 +21338,7 @@ pub fn vqtbl2_p8(a: poly8x16x2_t, b: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbl2(transmute(a.0), transmute(a.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21087,9 +21369,40 @@ pub fn vqtbl2_p8(a: poly8x16x2_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl2_p8(a: poly8x16x2_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x16x2_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbl2(transmute(a.0), transmute(a.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21098,6 +21411,7 @@ pub fn vqtbl2q_p8(a: poly8x16x2_t, b: uint8x16_t) -> poly8x16_t {
     unsafe { transmute(vqtbl2q(transmute(a.0), transmute(a.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21133,6 +21447,43 @@ pub fn vqtbl2q_p8(a: poly8x16x2_t, b: uint8x16_t) -> poly8x16_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl2q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl2q_p8(a: poly8x16x2_t, b: uint8x16_t) -> poly8x16_t {
+    let mut a: poly8x16x2_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t = transmute(vqtbl2q(transmute(a.0), transmute(a.1), b));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -21189,7 +21540,6 @@ pub fn vqtbl3q_s8(a: int8x16x3_t, b: uint8x16_t) -> int8x16_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21198,6 +21548,7 @@ pub fn vqtbl3_u8(a: uint8x16x3_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbl3(transmute(a.0), transmute(a.1), transmute(a.2), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21236,9 +21587,48 @@ pub fn vqtbl3_u8(a: uint8x16x3_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl3_u8(a: uint8x16x3_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x16x3_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t =
+            transmute(vqtbl3(transmute(a.0), transmute(a.1), transmute(a.2), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21247,6 +21637,7 @@ pub fn vqtbl3q_u8(a: uint8x16x3_t, b: uint8x16_t) -> uint8x16_t {
     unsafe { transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21290,9 +21681,53 @@ pub fn vqtbl3q_u8(a: uint8x16x3_t, b: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl3q_u8(a: uint8x16x3_t, b: uint8x16_t) -> uint8x16_t {
+    let mut a: uint8x16x3_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t =
+            transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21301,6 +21736,7 @@ pub fn vqtbl3_p8(a: poly8x16x3_t, b: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbl3(transmute(a.0), transmute(a.1), transmute(a.2), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21339,9 +21775,48 @@ pub fn vqtbl3_p8(a: poly8x16x3_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl3_p8(a: poly8x16x3_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x16x3_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t =
+            transmute(vqtbl3(transmute(a.0), transmute(a.1), transmute(a.2), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21350,6 +21825,7 @@ pub fn vqtbl3q_p8(a: poly8x16x3_t, b: uint8x16_t) -> poly8x16_t {
     unsafe { transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21393,6 +21869,51 @@ pub fn vqtbl3q_p8(a: poly8x16x3_t, b: uint8x16_t) -> poly8x16_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl3q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl3q_p8(a: poly8x16x3_t, b: uint8x16_t) -> poly8x16_t {
+    let mut a: poly8x16x3_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t =
+            transmute(vqtbl3q(transmute(a.0), transmute(a.1), transmute(a.2), b));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -21461,7 +21982,6 @@ pub fn vqtbl4q_s8(a: int8x16x4_t, b: uint8x16_t) -> int8x16_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21478,6 +21998,7 @@ pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21528,9 +22049,60 @@ pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl4_u8(a: uint8x16x4_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x16x4_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21547,6 +22119,7 @@ pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21602,9 +22175,65 @@ pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl4q_u8(a: uint8x16x4_t, b: uint8x16_t) -> uint8x16_t {
+    let mut a: uint8x16x4_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t = transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21621,6 +22250,7 @@ pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21671,9 +22301,60 @@ pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl4_p8(a: poly8x16x4_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x16x4_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbl4(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -21689,6 +22370,7 @@ pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
         ))
     }
 }
+<<<<<<< HEAD
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_p8)"]
 #[inline(always)]
@@ -21744,6 +22426,63 @@ pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
         )
     }
 }
+||||||| 71e00273c09
+#[doc = "Table look-up"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbl4q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbl4q_p8(a: poly8x16x4_t, b: uint8x16_t) -> poly8x16_t {
+    let mut a: poly8x16x4_t = a;
+    a.0 = unsafe {
+        simd_shuffle!(
+            a.0,
+            a.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.1 = unsafe {
+        simd_shuffle!(
+            a.1,
+            a.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.2 = unsafe {
+        simd_shuffle!(
+            a.2,
+            a.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    a.3 = unsafe {
+        simd_shuffle!(
+            a.3,
+            a.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let b: uint8x16_t =
+        unsafe { simd_shuffle!(b, b, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t = transmute(vqtbl4q(
+            transmute(a.0),
+            transmute(a.1),
+            transmute(a.2),
+            transmute(a.3),
+            b,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx1)"]
 #[inline(always)]
@@ -21895,7 +22634,6 @@ pub fn vqtbx2q_s8(a: int8x16_t, b: int8x16x2_t, c: uint8x16_t) -> int8x16_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -21904,6 +22642,7 @@ pub fn vqtbx2_u8(a: uint8x8_t, b: uint8x16x2_t, c: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21935,9 +22674,41 @@ pub fn vqtbx2_u8(a: uint8x8_t, b: uint8x16x2_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx2_u8(a: uint8x8_t, b: uint8x16x2_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x16x2_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -21946,6 +22717,7 @@ pub fn vqtbx2q_u8(a: uint8x16_t, b: uint8x16x2_t, c: uint8x16_t) -> uint8x16_t {
     unsafe { transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -21984,9 +22756,48 @@ pub fn vqtbx2q_u8(a: uint8x16_t, b: uint8x16x2_t, c: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx2q_u8(a: uint8x16_t, b: uint8x16x2_t, c: uint8x16_t) -> uint8x16_t {
+    let mut b: uint8x16x2_t = b;
+    let a: uint8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t =
+            transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -21995,6 +22806,7 @@ pub fn vqtbx2_p8(a: poly8x8_t, b: poly8x16x2_t, c: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22026,9 +22838,41 @@ pub fn vqtbx2_p8(a: poly8x8_t, b: poly8x16x2_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx2_p8(a: poly8x8_t, b: poly8x16x2_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x16x2_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbx2(transmute(a), transmute(b.0), transmute(b.1), c));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22037,6 +22881,7 @@ pub fn vqtbx2q_p8(a: poly8x16_t, b: poly8x16x2_t, c: uint8x16_t) -> poly8x16_t {
     unsafe { transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22075,6 +22920,46 @@ pub fn vqtbx2q_p8(a: poly8x16_t, b: poly8x16x2_t, c: uint8x16_t) -> poly8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx2q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx2q_p8(a: poly8x16_t, b: poly8x16x2_t, c: uint8x16_t) -> poly8x16_t {
+    let mut b: poly8x16x2_t = b;
+    let a: poly8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t =
+            transmute(vqtbx2q(transmute(a), transmute(b.0), transmute(b.1), c));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -22138,7 +23023,6 @@ pub fn vqtbx3q_s8(a: int8x16_t, b: int8x16x3_t, c: uint8x16_t) -> int8x16_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22155,6 +23039,7 @@ pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22199,9 +23084,54 @@ pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx3_u8(a: uint8x8_t, b: uint8x16x3_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x16x3_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22218,6 +23148,7 @@ pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22268,9 +23199,60 @@ pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx3q_u8(a: uint8x16_t, b: uint8x16x3_t, c: uint8x16_t) -> uint8x16_t {
+    let mut b: uint8x16x3_t = b;
+    let a: uint8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t = transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22287,6 +23269,7 @@ pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22331,9 +23314,54 @@ pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx3_p8(a: poly8x8_t, b: poly8x16x3_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x16x3_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbx3(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22350,6 +23378,7 @@ pub fn vqtbx3q_p8(a: poly8x16_t, b: poly8x16x3_t, c: uint8x16_t) -> poly8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22400,6 +23429,58 @@ pub fn vqtbx3q_p8(a: poly8x16_t, b: poly8x16x3_t, c: uint8x16_t) -> poly8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx3q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx3q_p8(a: poly8x16_t, b: poly8x16x3_t, c: uint8x16_t) -> poly8x16_t {
+    let mut b: poly8x16x3_t = b;
+    let a: poly8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t = transmute(vqtbx3q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -22484,7 +23565,6 @@ pub fn vqtbx4q_s8(a: int8x16_t, b: int8x16x4_t, c: uint8x16_t) -> int8x16_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22502,6 +23582,7 @@ pub fn vqtbx4_u8(a: uint8x8_t, b: uint8x16x4_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22554,9 +23635,62 @@ pub fn vqtbx4_u8(a: uint8x8_t, b: uint8x16x4_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx4_u8(a: uint8x8_t, b: uint8x16x4_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x16x4_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbx4(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            transmute(b.3),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22574,6 +23708,7 @@ pub fn vqtbx4q_u8(a: uint8x16_t, b: uint8x16x4_t, c: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22632,9 +23767,68 @@ pub fn vqtbx4q_u8(a: uint8x16_t, b: uint8x16x4_t, c: uint8x16_t) -> uint8x16_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx4q_u8(a: uint8x16_t, b: uint8x16x4_t, c: uint8x16_t) -> uint8x16_t {
+    let mut b: uint8x16x4_t = b;
+    let a: uint8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x16_t = transmute(vqtbx4q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            transmute(b.3),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22652,6 +23846,7 @@ pub fn vqtbx4_p8(a: poly8x8_t, b: poly8x16x4_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -22704,9 +23899,62 @@ pub fn vqtbx4_p8(a: poly8x8_t, b: poly8x16x4_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx4_p8(a: poly8x8_t, b: poly8x16x4_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x16x4_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbx4(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            transmute(b.3),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -22723,6 +23971,7 @@ pub fn vqtbx4q_p8(a: poly8x16_t, b: poly8x16x4_t, c: uint8x16_t) -> poly8x16_t {
         ))
     }
 }
+<<<<<<< HEAD
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_p8)"]
 #[inline(always)]
@@ -22781,6 +24030,66 @@ pub fn vqtbx4q_p8(a: poly8x16_t, b: poly8x16x4_t, c: uint8x16_t) -> poly8x16_t {
         )
     }
 }
+||||||| 71e00273c09
+#[doc = "Extended table look-up"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vqtbx4q_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vqtbx4q_p8(a: poly8x16_t, b: poly8x16x4_t, c: uint8x16_t) -> poly8x16_t {
+    let mut b: poly8x16x4_t = b;
+    let a: poly8x16_t =
+        unsafe { simd_shuffle!(a, a, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe {
+        simd_shuffle!(
+            b.0,
+            b.0,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.1 = unsafe {
+        simd_shuffle!(
+            b.1,
+            b.1,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.2 = unsafe {
+        simd_shuffle!(
+            b.2,
+            b.2,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    b.3 = unsafe {
+        simd_shuffle!(
+            b.3,
+            b.3,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    };
+    let c: uint8x16_t =
+        unsafe { simd_shuffle!(c, c, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x16_t = transmute(vqtbx4q(
+            transmute(a),
+            transmute(b.0),
+            transmute(b.1),
+            transmute(b.2),
+            transmute(b.3),
+            c,
+        ));
+        simd_shuffle!(
+            ret_val,
+            ret_val,
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        )
+    }
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Rotate and exclusive OR"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vrax1q_u64)"]
 #[inline(always)]
@@ -27026,14 +28335,7 @@ pub fn vsqrth_f16(a: f16) -> f16 {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
     static_assert!(N >= 1 && N <= 8);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v8i8"
-        )]
-        fn _vsri_n_s8(a: int8x8_t, b: int8x8_t, n: i32) -> int8x8_t;
-    }
-    unsafe { _vsri_n_s8(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u8, 8, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s8)"]
@@ -27045,14 +28347,7 @@ pub fn vsri_n_s8<const N: i32>(a: int8x8_t, b: int8x8_t) -> int8x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
     static_assert!(N >= 1 && N <= 8);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v16i8"
-        )]
-        fn _vsriq_n_s8(a: int8x16_t, b: int8x16_t, n: i32) -> int8x16_t;
-    }
-    unsafe { _vsriq_n_s8(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u8, 16, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s16)"]
@@ -27064,14 +28359,7 @@ pub fn vsriq_n_s8<const N: i32>(a: int8x16_t, b: int8x16_t) -> int8x16_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
     static_assert!(N >= 1 && N <= 16);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v4i16"
-        )]
-        fn _vsri_n_s16(a: int16x4_t, b: int16x4_t, n: i32) -> int16x4_t;
-    }
-    unsafe { _vsri_n_s16(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u16, 4, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s16)"]
@@ -27083,14 +28371,7 @@ pub fn vsri_n_s16<const N: i32>(a: int16x4_t, b: int16x4_t) -> int16x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
     static_assert!(N >= 1 && N <= 16);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v8i16"
-        )]
-        fn _vsriq_n_s16(a: int16x8_t, b: int16x8_t, n: i32) -> int16x8_t;
-    }
-    unsafe { _vsriq_n_s16(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u16, 8, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s32)"]
@@ -27102,14 +28383,7 @@ pub fn vsriq_n_s16<const N: i32>(a: int16x8_t, b: int16x8_t) -> int16x8_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
     static_assert!(N >= 1 && N <= 32);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v2i32"
-        )]
-        fn _vsri_n_s32(a: int32x2_t, b: int32x2_t, n: i32) -> int32x2_t;
-    }
-    unsafe { _vsri_n_s32(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u32, 2, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s32)"]
@@ -27121,14 +28395,7 @@ pub fn vsri_n_s32<const N: i32>(a: int32x2_t, b: int32x2_t) -> int32x2_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
     static_assert!(N >= 1 && N <= 32);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v4i32"
-        )]
-        fn _vsriq_n_s32(a: int32x4_t, b: int32x4_t, n: i32) -> int32x4_t;
-    }
-    unsafe { _vsriq_n_s32(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u32, 4, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_s64)"]
@@ -27140,14 +28407,7 @@ pub fn vsriq_n_s32<const N: i32>(a: int32x4_t, b: int32x4_t) -> int32x4_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsri_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
     static_assert!(N >= 1 && N <= 64);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v1i64"
-        )]
-        fn _vsri_n_s64(a: int64x1_t, b: int64x1_t, n: i32) -> int64x1_t;
-    }
-    unsafe { _vsri_n_s64(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u64, 1, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsriq_n_s64)"]
@@ -27159,14 +28419,7 @@ pub fn vsri_n_s64<const N: i32>(a: int64x1_t, b: int64x1_t) -> int64x1_t {
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub fn vsriq_n_s64<const N: i32>(a: int64x2_t, b: int64x2_t) -> int64x2_t {
     static_assert!(N >= 1 && N <= 64);
-    unsafe extern "unadjusted" {
-        #[cfg_attr(
-            any(target_arch = "aarch64", target_arch = "arm64ec"),
-            link_name = "llvm.aarch64.neon.vsri.v2i64"
-        )]
-        fn _vsriq_n_s64(a: int64x2_t, b: int64x2_t, n: i32) -> int64x2_t;
-    }
-    unsafe { _vsriq_n_s64(a, b, N) }
+    unsafe { super::shift_right_and_insert!(u64, 2, N, a, b) }
 }
 #[doc = "Shift Right and Insert (immediate)"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vsri_n_u8)"]
@@ -27343,7 +28596,7 @@ pub fn vsriq_n_p64<const N: i32>(a: poly64x2_t, b: poly64x2_t) -> poly64x2_t {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[rustc_legacy_const_generics(2)]
-#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(sri, N = 2))]
+#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(bfxil, N = 2))]
 pub fn vsrid_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
     static_assert!(N >= 1 && N <= 64);
     unsafe { transmute(vsri_n_s64::<N>(transmute(a), transmute(b))) }
@@ -27355,7 +28608,7 @@ pub fn vsrid_n_s64<const N: i32>(a: i64, b: i64) -> i64 {
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 #[rustc_legacy_const_generics(2)]
-#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(sri, N = 2))]
+#[cfg_attr(all(test, not(target_env = "msvc")), assert_instr(bfxil, N = 2))]
 pub fn vsrid_n_u64<const N: i32>(a: u64, b: u64) -> u64 {
     static_assert!(N >= 1 && N <= 64);
     unsafe { transmute(vsri_n_u64::<N>(transmute(a), transmute(b))) }
@@ -29071,7 +30324,6 @@ pub fn vtbl2_s8(a: int8x8x2_t, b: int8x8_t) -> int8x8_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29080,6 +30332,7 @@ pub fn vtbl2_u8(a: uint8x8x2_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbl1(transmute(vcombine_u8(a.0, a.1)), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29098,9 +30351,28 @@ pub fn vtbl2_u8(a: uint8x8x2_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl2_u8(a: uint8x8x2_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x8x2_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbl1(transmute(vcombine_u8(a.0, a.1)), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29109,6 +30381,7 @@ pub fn vtbl2_p8(a: poly8x8x2_t, b: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbl1(transmute(vcombine_p8(a.0, a.1)), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29127,6 +30400,26 @@ pub fn vtbl2_p8(a: poly8x8x2_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl2_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl2_p8(a: poly8x8x2_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x8x2_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbl1(transmute(vcombine_p8(a.0, a.1)), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -29143,7 +30436,6 @@ pub fn vtbl3_s8(a: int8x8x3_t, b: int8x8_t) -> int8x8_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29156,6 +30448,7 @@ pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29179,9 +30472,33 @@ pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl3_u8(a: uint8x8x3_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x8x3_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = uint8x16x2_t(
+        vcombine_u8(a.0, a.1),
+        vcombine_u8(a.2, unsafe { crate::mem::zeroed() }),
+    );
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29194,6 +30511,7 @@ pub fn vtbl3_p8(a: poly8x8x3_t, b: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29217,6 +30535,31 @@ pub fn vtbl3_p8(a: poly8x8x3_t, b: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl3_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl3_p8(a: poly8x8x3_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x8x3_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = poly8x16x2_t(
+        vcombine_p8(a.0, a.1),
+        vcombine_p8(a.2, unsafe { crate::mem::zeroed() }),
+    );
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -29230,7 +30573,6 @@ pub fn vtbl4_s8(a: int8x8x4_t, b: int8x8_t) -> int8x8_t {
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29240,6 +30582,7 @@ pub fn vtbl4_u8(a: uint8x8x4_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
 #[doc = "Table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29261,9 +30604,31 @@ pub fn vtbl4_u8(a: uint8x8x4_t, b: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl4_u8(a: uint8x8x4_t, b: uint8x8_t) -> uint8x8_t {
+    let mut a: uint8x8x4_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.3 = unsafe { simd_shuffle!(a.3, a.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = uint8x16x2_t(vcombine_u8(a.0, a.1), vcombine_u8(a.2, a.3));
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbl))]
@@ -29272,6 +30637,7 @@ pub fn vtbl4_p8(a: poly8x8x4_t, b: uint8x8_t) -> poly8x8_t {
     let x = poly8x16x2_t(vcombine_p8(a.0, a.1), vcombine_p8(a.2, a.3));
     unsafe { transmute(vqtbl2(transmute(x.0), transmute(x.1), b)) }
 }
+<<<<<<< HEAD
 #[doc = "Table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_p8)"]
 #[inline(always)]
@@ -29293,6 +30659,29 @@ pub fn vtbl4_p8(a: poly8x8x4_t, b: uint8x8_t) -> poly8x8_t {
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
+||||||| 71e00273c09
+#[doc = "Table look-up"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbl4_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbl))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbl4_p8(a: poly8x8x4_t, b: uint8x8_t) -> poly8x8_t {
+    let mut a: poly8x8x4_t = a;
+    a.0 = unsafe { simd_shuffle!(a.0, a.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.1 = unsafe { simd_shuffle!(a.1, a.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.2 = unsafe { simd_shuffle!(a.2, a.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    a.3 = unsafe { simd_shuffle!(a.3, a.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let b: uint8x8_t = unsafe { simd_shuffle!(b, b, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = poly8x16x2_t(vcombine_p8(a.0, a.1), vcombine_p8(a.2, a.3));
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbl2(transmute(x.0), transmute(x.1), b));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx1_s8)"]
 #[inline(always)]
@@ -29366,7 +30755,6 @@ pub fn vtbx2_s8(a: int8x8_t, b: int8x8x2_t, c: int8x8_t) -> int8x8_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29375,6 +30763,7 @@ pub fn vtbx2_u8(a: uint8x8_t, b: uint8x8x2_t, c: uint8x8_t) -> uint8x8_t {
     unsafe { transmute(vqtbx1(transmute(a), transmute(vcombine_u8(b.0, b.1)), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29395,9 +30784,30 @@ pub fn vtbx2_u8(a: uint8x8_t, b: uint8x8x2_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx2_u8(a: uint8x8_t, b: uint8x8x2_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x8x2_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t =
+            transmute(vqtbx1(transmute(a), transmute(vcombine_u8(b.0, b.1)), c));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29406,6 +30816,7 @@ pub fn vtbx2_p8(a: poly8x8_t, b: poly8x8x2_t, c: uint8x8_t) -> poly8x8_t {
     unsafe { transmute(vqtbx1(transmute(a), transmute(vcombine_p8(b.0, b.1)), c)) }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29426,6 +30837,28 @@ pub fn vtbx2_p8(a: poly8x8_t, b: poly8x8x2_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx2_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx2_p8(a: poly8x8_t, b: poly8x8x2_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x8x2_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t =
+            transmute(vqtbx1(transmute(a), transmute(vcombine_p8(b.0, b.1)), c));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -29453,7 +30886,6 @@ pub fn vtbx3_s8(a: int8x8_t, b: int8x8x3_t, c: int8x8_t) -> int8x8_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29472,6 +30904,7 @@ pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29500,9 +30933,38 @@ pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx3_u8(a: uint8x8_t, b: uint8x8x3_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x8x3_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = uint8x16x2_t(
+        vcombine_u8(b.0, b.1),
+        vcombine_u8(b.2, unsafe { crate::mem::zeroed() }),
+    );
+    unsafe {
+        let ret_val: uint8x8_t = transmute(simd_select(
+            simd_lt::<uint8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
+            transmute(vqtbx2(transmute(a), transmute(x.0), transmute(x.1), c)),
+            a,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29521,6 +30983,7 @@ pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_p8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29549,6 +31012,36 @@ pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx3_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx3_p8(a: poly8x8_t, b: poly8x8x3_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x8x3_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let x = poly8x16x2_t(
+        vcombine_p8(b.0, b.1),
+        vcombine_p8(b.2, unsafe { crate::mem::zeroed() }),
+    );
+    unsafe {
+        let ret_val: poly8x8_t = transmute(simd_select(
+            simd_lt::<poly8x8_t, int8x8_t>(transmute(c), transmute(u8x8::splat(24))),
+            transmute(vqtbx2(transmute(a), transmute(x.0), transmute(x.1), c)),
+            a,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_s8)"]
 #[inline(always)]
 #[target_feature(enable = "neon")]
@@ -29568,7 +31061,6 @@ pub fn vtbx4_s8(a: int8x8_t, b: int8x8x4_t, c: int8x8_t) -> int8x8_t {
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_u8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29584,6 +31076,7 @@ pub fn vtbx4_u8(a: uint8x8_t, b: uint8x8x4_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+<<<<<<< HEAD
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_u8)"]
 #[inline(always)]
 #[cfg(target_endian = "big")]
@@ -29610,9 +31103,36 @@ pub fn vtbx4_u8(a: uint8x8_t, b: uint8x8x4_t, c: uint8x8_t) -> uint8x8_t {
     }
 }
 #[doc = "Extended table look-up"]
+||||||| 71e00273c09
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_u8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx4_u8(a: uint8x8_t, b: uint8x8x4_t, c: uint8x8_t) -> uint8x8_t {
+    let mut b: uint8x8x4_t = b;
+    let a: uint8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.3 = unsafe { simd_shuffle!(b.3, b.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: uint8x8_t = transmute(vqtbx2(
+            transmute(a),
+            transmute(vcombine_u8(b.0, b.1)),
+            transmute(vcombine_u8(b.2, b.3)),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+#[doc = "Extended table look-up"]
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_p8)"]
 #[inline(always)]
-#[cfg(target_endian = "little")]
 #[target_feature(enable = "neon")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg_attr(test, assert_instr(tbx))]
@@ -29627,6 +31147,7 @@ pub fn vtbx4_p8(a: poly8x8_t, b: poly8x8x4_t, c: uint8x8_t) -> poly8x8_t {
         ))
     }
 }
+<<<<<<< HEAD
 #[doc = "Extended table look-up"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_p8)"]
 #[inline(always)]
@@ -29653,6 +31174,34 @@ pub fn vtbx4_p8(a: poly8x8_t, b: poly8x8x4_t, c: uint8x8_t) -> poly8x8_t {
         simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
     }
 }
+||||||| 71e00273c09
+#[doc = "Extended table look-up"]
+#[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtbx4_p8)"]
+#[inline(always)]
+#[cfg(target_endian = "big")]
+#[target_feature(enable = "neon")]
+#[cfg_attr(test, assert_instr(tbx))]
+#[stable(feature = "neon_intrinsics", since = "1.59.0")]
+pub fn vtbx4_p8(a: poly8x8_t, b: poly8x8x4_t, c: uint8x8_t) -> poly8x8_t {
+    let mut b: poly8x8x4_t = b;
+    let a: poly8x8_t = unsafe { simd_shuffle!(a, a, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.0 = unsafe { simd_shuffle!(b.0, b.0, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.1 = unsafe { simd_shuffle!(b.1, b.1, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.2 = unsafe { simd_shuffle!(b.2, b.2, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    b.3 = unsafe { simd_shuffle!(b.3, b.3, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    let c: uint8x8_t = unsafe { simd_shuffle!(c, c, [7, 6, 5, 4, 3, 2, 1, 0]) };
+    unsafe {
+        let ret_val: poly8x8_t = transmute(vqtbx2(
+            transmute(a),
+            transmute(vcombine_p8(b.0, b.1)),
+            transmute(vcombine_p8(b.2, b.3)),
+            c,
+        ));
+        simd_shuffle!(ret_val, ret_val, [7, 6, 5, 4, 3, 2, 1, 0])
+    }
+}
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[doc = "Transpose vectors"]
 #[doc = "[Arm's documentation](https://developer.arm.com/architectures/instruction-sets/intrinsics/vtrn1_f16)"]
 #[inline(always)]

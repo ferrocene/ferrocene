@@ -61,6 +61,29 @@ pub(crate) enum ItemId {
     Blanket { impl_id: DefId, for_: DefId },
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum Defaultness {
+    Implicit,
+    Default,
+    Final,
+}
+
+impl Defaultness {
+    pub(crate) fn from_trait_item(defaultness: hir::Defaultness) -> Self {
+        match defaultness {
+            hir::Defaultness::Default { .. } => Self::Implicit,
+            hir::Defaultness::Final => Self::Final,
+        }
+    }
+
+    pub(crate) fn from_impl_item(defaultness: hir::Defaultness) -> Self {
+        match defaultness {
+            hir::Defaultness::Default { .. } => Self::Default,
+            hir::Defaultness::Final => Self::Implicit,
+        }
+    }
+}
+
 impl ItemId {
     #[inline]
     pub(crate) fn is_local(self) -> bool {
@@ -285,17 +308,16 @@ impl ExternalCrate {
         // duplicately for the same primitive. This is handled later on when
         // rendering by delegating everything to a hash map.
         fn as_primitive(def_id: DefId, tcx: TyCtxt<'_>) -> Option<(DefId, PrimitiveType)> {
-            tcx.get_attrs(def_id, sym::rustc_doc_primitive).next().map(|attr| {
-                let attr_value = attr.value_str().expect("syntax should already be validated");
-                let Some(prim) = PrimitiveType::from_symbol(attr_value) else {
-                    span_bug!(
-                        attr.span(),
-                        "primitive `{attr_value}` is not a member of `PrimitiveType`"
-                    );
-                };
-
-                (def_id, prim)
-            })
+            let Some((attr_span, prim_sym)) = find_attr!(
+                tcx.get_all_attrs(def_id),
+                AttributeKind::RustcDocPrimitive(span, prim) => (*span, *prim)
+            ) else {
+                return None;
+            };
+            let Some(prim) = PrimitiveType::from_symbol(prim_sym) else {
+                span_bug!(attr_span, "primitive `{prim_sym}` is not a member of `PrimitiveType`");
+            };
+            Some((def_id, prim))
         }
 
         self.mapped_root_modules(tcx, as_primitive)
@@ -707,12 +729,12 @@ impl Item {
         ItemType::from(self)
     }
 
-    pub(crate) fn is_default(&self) -> bool {
+    pub(crate) fn defaultness(&self) -> Option<Defaultness> {
         match self.kind {
-            ItemKind::MethodItem(_, Some(defaultness)) => {
-                defaultness.has_value() && !defaultness.is_final()
+            ItemKind::MethodItem(_, defaultness) | ItemKind::RequiredMethodItem(_, defaultness) => {
+                Some(defaultness)
             }
-            _ => false,
+            _ => None,
         }
     }
 
@@ -774,8 +796,8 @@ impl Item {
                 }
             }
             ItemKind::FunctionItem(_)
-            | ItemKind::MethodItem(_, _)
-            | ItemKind::RequiredMethodItem(_) => {
+            | ItemKind::MethodItem(..)
+            | ItemKind::RequiredMethodItem(..) => {
                 let def_id = self.def_id().unwrap();
                 build_fn_header(def_id, tcx, tcx.asyncness(def_id))
             }
@@ -859,11 +881,11 @@ pub(crate) enum ItemKind {
     TraitAliasItem(TraitAlias),
     ImplItem(Box<Impl>),
     /// A required method in a trait declaration meaning it's only a function signature.
-    RequiredMethodItem(Box<Function>),
+    RequiredMethodItem(Box<Function>, Defaultness),
     /// A method in a trait impl or a provided method in a trait declaration.
     ///
     /// Compared to [RequiredMethodItem], it also contains a method body.
-    MethodItem(Box<Function>, Option<hir::Defaultness>),
+    MethodItem(Box<Function>, Defaultness),
     StructFieldItem(Type),
     VariantItem(Variant),
     /// `fn`s from an extern block
@@ -921,8 +943,8 @@ impl ItemKind {
             | StaticItem(_)
             | ConstantItem(_)
             | TraitAliasItem(_)
-            | RequiredMethodItem(_)
-            | MethodItem(_, _)
+            | RequiredMethodItem(..)
+            | MethodItem(..)
             | StructFieldItem(_)
             | ForeignFunctionItem(_, _)
             | ForeignStaticItem(_, _)

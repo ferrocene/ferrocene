@@ -14,7 +14,7 @@ pub use sealed::IntoQueryParam;
 use crate::dep_graph;
 use crate::dep_graph::{DepKind, DepNode, DepNodeIndex, SerializedDepNodeIndex};
 use crate::ich::StableHashingContext;
-use crate::queries::{ExternProviders, PerQueryVTables, Providers, QueryArenas, QueryEngine};
+use crate::queries::{ExternProviders, PerQueryVTables, Providers, QueryArenas};
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
 use crate::query::{QueryCache, QueryInfo, QueryJob};
@@ -157,6 +157,8 @@ pub struct QueryVTable<'tcx, C: QueryCache> {
     ///
     /// Used when reporting query cycle errors and similar problems.
     pub description_fn: fn(TyCtxt<'tcx>, C::Key) -> String,
+
+    pub execute_query_fn: fn(TyCtxt<'tcx>, Span, C::Key, QueryMode) -> Option<C::Value>,
 }
 
 impl<'tcx, C: QueryCache> fmt::Debug for QueryVTable<'tcx, C> {
@@ -215,7 +217,6 @@ impl<'tcx, C: QueryCache> QueryVTable<'tcx, C> {
 }
 
 pub struct QuerySystemFns {
-    pub engine: QueryEngine,
     pub local_providers: Providers,
     pub extern_providers: ExternProviders,
     pub encode_query_results: for<'tcx> fn(
@@ -509,7 +510,7 @@ macro_rules! define_callbacks {
                         (crate::query::inner::query_ensure)
                     )(
                         self.tcx,
-                        self.tcx.query_system.fns.engine.$name,
+                        self.tcx.query_system.query_vtables.$name.execute_query_fn,
                         &self.tcx.query_system.query_vtables.$name.cache,
                         $crate::query::IntoQueryParam::into_query_param(key),
                         $crate::query::EnsureMode::Ok,
@@ -525,7 +526,7 @@ macro_rules! define_callbacks {
                 pub fn $name(self, key: query_helper_param_ty!($($K)*)) {
                     crate::query::inner::query_ensure(
                         self.tcx,
-                        self.tcx.query_system.fns.engine.$name,
+                        self.tcx.query_system.query_vtables.$name.execute_query_fn,
                         &self.tcx.query_system.query_vtables.$name.cache,
                         $crate::query::IntoQueryParam::into_query_param(key),
                         $crate::query::EnsureMode::Done,
@@ -554,7 +555,7 @@ macro_rules! define_callbacks {
 
                     erase::restore_val::<$V>(inner::query_get_at(
                         self.tcx,
-                        self.tcx.query_system.fns.engine.$name,
+                        self.tcx.query_system.query_vtables.$name.execute_query_fn,
                         &self.tcx.query_system.query_vtables.$name.cache,
                         self.span,
                         $crate::query::IntoQueryParam::into_query_param(key),
@@ -653,17 +654,6 @@ macro_rules! define_callbacks {
         impl Copy for ExternProviders {}
         impl Clone for ExternProviders {
             fn clone(&self) -> Self { *self }
-        }
-
-        pub struct QueryEngine {
-            $(
-                pub $name: for<'tcx> fn(
-                    TyCtxt<'tcx>,
-                    Span,
-                    $name::Key<'tcx>,
-                    $crate::query::QueryMode,
-                ) -> Option<$crate::query::erase::Erased<$V>>,
-            )*
         }
     };
 }

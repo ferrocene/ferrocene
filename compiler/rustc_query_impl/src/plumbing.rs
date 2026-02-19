@@ -548,7 +548,7 @@ macro_rules! define_queries {
                 }
             }
 
-            pub(crate) fn make_query_vtable<'tcx>()
+            pub(crate) fn make_query_vtable<'tcx>(incremental: bool)
                 -> QueryVTable<'tcx, queries::$name::Storage<'tcx>>
             {
                 QueryVTable {
@@ -603,6 +603,11 @@ macro_rules! define_queries {
                     hash_result: hash_result!([$($modifiers)*][queries::$name::Value<'tcx>]),
                     format_value: |value| format!("{:?}", erase::restore_val::<queries::$name::Value<'tcx>>(*value)),
                     description_fn: $crate::queries::_description_fns::$name,
+                    execute_query_fn: if incremental {
+                        query_impl::$name::get_query_incr::__rust_end_short_backtrace
+                    } else {
+                        query_impl::$name::get_query_non_incr::__rust_end_short_backtrace
+                    },
                 }
             }
 
@@ -687,22 +692,10 @@ macro_rules! define_queries {
             }
         })*}
 
-        pub(crate) fn engine(incremental: bool) -> QueryEngine {
-            if incremental {
-                QueryEngine {
-                    $($name: query_impl::$name::get_query_incr::__rust_end_short_backtrace,)*
-                }
-            } else {
-                QueryEngine {
-                    $($name: query_impl::$name::get_query_non_incr::__rust_end_short_backtrace,)*
-                }
-            }
-        }
-
-        pub fn make_query_vtables<'tcx>() -> queries::PerQueryVTables<'tcx> {
+        pub fn make_query_vtables<'tcx>(incremental: bool) -> queries::PerQueryVTables<'tcx> {
             queries::PerQueryVTables {
                 $(
-                    $name: query_impl::$name::make_query_vtable(),
+                    $name: query_impl::$name::make_query_vtable(incremental),
                 )*
             }
         }

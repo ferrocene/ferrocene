@@ -845,6 +845,7 @@ where
     struct DropOnPanic<T> {
         // Invariant: valid pointer and points to an initialized value that is not further used,
         // i.e. it can be dropped by this guard.
+        #[allow(unused)]
         inner: *mut T,
     }
 

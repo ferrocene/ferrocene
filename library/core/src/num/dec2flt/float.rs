@@ -213,6 +213,7 @@ pub trait RawFloat:
 }
 
 /// Solve for `b` in `10^b = 2^a`
+#[ferrocene::annotation("This function is only being used in constants and cannot be covered")]
 const fn pow2_to_pow10(a: i64) -> i64 {
     let res = (a as f64) / f64::consts::LOG2_10;
     res as i64

@@ -165,3 +165,89 @@ fn fmt_num_exp_u128() {
     assert_eq!(format!("{:+.5e}", 100_u128), "+1.00000e2");
     assert_eq!(format!("{:e}", 1_000_000_000_000_u128), "1e12");
 }
+
+// Covers
+// - `core::num::<impl i128>::abs_diff`
+// - `core::num::<impl i16>::abs_diff`
+// - `core::num::<impl i32>::abs_diff`
+// - `core::num::<impl i64>::abs_diff`
+// - `core::num::<impl i8>::abs_diff`
+macro_rules! test_int_abs_diff {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!((10 as $T).abs_diff(-10), 20);
+                assert_eq!((-10 as $T).abs_diff(10), 20);
+            }
+        )*
+    };
+}
+test_int_abs_diff! {
+    i8 => i8_abs_diff,
+    i16 => i16_abs_diff,
+    i32 => i32_abs_diff,
+    i64 => i64_abs_diff,
+    i128 => i128_abs_diff,
+    isize => isize_abs_diff,
+}
+
+// Covers
+// - `core::convert::num::<impl core::convert::TryFrom<i128> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i16> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i32> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i64> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<i8> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u128> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u16> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u32> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u64> for bool>::try_from`
+// - `core::convert::num::<impl core::convert::TryFrom<u8> for bool>::try_from`
+macro_rules! test_bool_try_from_int {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(bool::try_from(0 as $T), Ok(false));
+                assert_eq!(bool::try_from(1 as $T), Ok(true));
+                assert!(bool::try_from(2 as $T).is_err());
+            }
+        )*
+    };
+}
+test_bool_try_from_int! {
+    u8 => bool_try_from_u8,
+    u16 => bool_try_from_u16,
+    u32 => bool_try_from_u32,
+    u64 => bool_try_from_u64,
+    u128 => bool_try_from_u128,
+    i8 => bool_try_from_i8,
+    i16 => bool_try_from_i16,
+    i32 => bool_try_from_i32,
+    i64 => bool_try_from_i64,
+    i128 => bool_try_from_i128,
+}
+
+// covers: `<core::num::niche_types::$T as core::fmt::Debug>::fmt`
+macro_rules! test_niche_types_debug_fmt {
+    ($($fn:ident => $T:ident : $val:literal == $str:literal,)*) => { $(
+        #[test]
+        fn $fn() {
+            let val = <core::num::niche_types::$T>::new($val).unwrap();
+
+            assert_eq!(format!("{val:?}"), $str);
+        }
+    )*};
+}
+test_niche_types_debug_fmt!(
+    non_zero_u8_inner_debug_fmt => NonZeroU8Inner: 5 == "5",
+    non_zero_u16_inner_debug_fmt => NonZeroU16Inner: 5 == "5",
+    non_zero_u32_inner_debug_fmt => NonZeroU32Inner: 5 == "5",
+    non_zero_u64_inner_debug_fmt => NonZeroU64Inner: 5 == "5",
+    non_zero_usize_inner_debug_fmt => NonZeroUsizeInner: 5 == "5",
+    non_zero_i8_inner_debug_fmt => NonZeroI8Inner: 5 == "5",
+    non_zero_i16_inner_debug_fmt => NonZeroI16Inner: 5 == "5",
+    non_zero_i32_inner_debug_fmt => NonZeroI32Inner: 5 == "5",
+    non_zero_i64_inner_debug_fmt => NonZeroI64Inner: 5 == "5",
+    non_zero_isize_inner_debug_fmt => NonZeroIsizeInner: 5 == "5",
+);

@@ -1,6 +1,8 @@
 // This test ensures we are able to compile -Zbuild-std=core under a variety of profiles.
 // Currently, it tests that we can compile to all Tier 1 targets, and it does this by checking what
 // the tier metadata in target-spec JSON. This means that all in-tree targets must have a tier set.
+//@ ignore-test Ferrocene annotation: This test is for a nightly feature we do not qualify and
+//              produces a large number of timeouts in CI.
 
 #![deny(warnings)]
 

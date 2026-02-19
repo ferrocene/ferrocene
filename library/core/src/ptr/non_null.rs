@@ -10,16 +10,6 @@ use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{fmt, hash, intrinsics, mem, ptr};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{
-    fmt, intrinsics,
-    marker::PointeeSized,
-    mem::{self, SizedTypeProperties},
-    ptr,
-};
-
 /// `*mut T` but non-zero and [covariant].
 ///
 /// This is often the correct thing to use when building data structures using

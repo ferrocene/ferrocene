@@ -87,8 +87,6 @@ unsafe fn next_back_unchecked(&mut self) -> $elem {
 
             // Helper function for creating a slice from the iterator.
             #[inline(always)]
-            // NOTE(dead_code): Method is used by Iter, but not IterMut
-            #[cfg_attr(feature = "ferrocene_subset", allow(dead_code))]
             #[ferrocene::prevalidated]
 fn make_slice(&self) -> &'a [T] {
                 // SAFETY: the iterator was created from a slice with pointer

@@ -3,8 +3,6 @@
 //! suggestions from rustc if you get anything slightly wrong in here, and overall
 //! helps with clarity as we're also referring to `char` intentionally in here.
 
-#[cfg(feature = "ferrocene_subset")]
-use crate::fmt;
 use crate::mem::transmute;
 use crate::{assert_unsafe_precondition, fmt};
 

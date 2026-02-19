@@ -3,11 +3,6 @@ use crate::iter::{TrustedLen, TrustedRandomAccess, from_fn};
 use crate::num::NonZero;
 use crate::ops::{Range, Try};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::from_fn;
-
 /// An iterator for stepping iterators by a custom amount.
 ///
 /// This `struct` is created by the [`step_by`] method on [`Iterator`]. See

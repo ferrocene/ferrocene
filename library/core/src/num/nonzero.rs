@@ -10,11 +10,6 @@ use crate::panic::{RefUnwindSafe, UnwindSafe};
 use crate::str::FromStr;
 use crate::{fmt, intrinsics, ptr, ub_checks};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{fmt, intrinsics, ops::Div, ub_checks};
-
 /// A marker trait for primitive types which can be zero.
 ///
 /// This is an implementation detail for <code>[NonZero]\<T></code> which may disappear or be replaced at any time.

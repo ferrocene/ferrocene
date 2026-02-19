@@ -10,17 +10,6 @@ use crate::cmp::{self, Ordering};
 use crate::num::NonZero;
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use {
-    super::super::{
-        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, FlatMap, Fuse, Map, Rev,
-        Skip, StepBy, Sum, Take, TakeWhile, Zip,
-    },
-    crate::ops::{ControlFlow, Try},
-};
-
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
 
 /// A trait for dealing with iterators.

@@ -12,11 +12,6 @@ use crate::panic::const_assert;
 use crate::ptr::Alignment;
 use crate::{clone, cmp, fmt, hash, intrinsics, ptr};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{cmp, fmt, intrinsics, ptr};
-
 mod manually_drop;
 #[stable(feature = "manually_drop", since = "1.20.0")]
 pub use manually_drop::ManuallyDrop;

@@ -14,11 +14,6 @@ use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 use crate::{cmp, fmt};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::{TrustedLen, UncheckedIterator};
-
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
 impl<T> !Iterator for [T] {}
 

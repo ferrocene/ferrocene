@@ -10,11 +10,6 @@ use crate::mem::SizedTypeProperties;
 use crate::ptr::{Alignment, NonNull};
 use crate::{assert_unsafe_precondition, fmt, mem};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{assert_unsafe_precondition, intrinsics::unchecked_sub, mem, mem::SizedTypeProperties, ptr::Alignment};
-
 /// Layout of a block of memory.
 ///
 /// An instance of `Layout` describes a particular layout of memory.

@@ -16,11 +16,6 @@ use crate::num::FpCategory;
 use crate::panic::const_assert;
 use crate::{cfg_select, intrinsics, mem};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{intrinsics, mem};
-
 /// The radix or base of the internal representation of `f32`.
 /// Use [`f32::RADIX`] instead.
 ///

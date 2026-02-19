@@ -7,11 +7,6 @@ use crate::fmt::{self, Write};
 use crate::intrinsics::const_eval_select;
 use crate::{ascii, iter, ops};
 
-// Ferrocene addition: imports for the certified subset
-#[rustfmt::skip]
-#[cfg(feature = "ferrocene_subset")]
-use crate::{ascii, iter};
-
 impl [u8] {
     /// Checks if all bytes in this slice are within the ASCII range.
     ///

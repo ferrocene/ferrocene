@@ -5,11 +5,6 @@ use crate::marker::{Destruct, PointeeSized};
 use crate::mem::{self, SizedTypeProperties};
 use crate::slice::{self, SliceIndex};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{marker::PointeeSized, slice::SliceIndex};
-
 impl<T: PointeeSized> *mut T {
     #[doc = include_str!("docs/is_null.md")]
     ///

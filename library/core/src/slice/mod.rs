@@ -18,11 +18,6 @@ use crate::simd::{self, Simd};
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{fmt, hint, ptr, range, slice};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{hint, mem::SizedTypeProperties, ptr};
-
 #[unstable(
     feature = "slice_internals",
     issue = "none",
@@ -81,12 +76,6 @@ pub use raw::{from_mut, from_ref};
 pub use raw::{from_mut_ptr_range, from_ptr_range};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use raw::{from_raw_parts, from_raw_parts_mut};
-
-// Ferrocene addition: imports for certified subset
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-pub use iter::{Chunks, ChunksMut, Windows};
 
 /// Calculates the direction and split point of a one-sided range.
 ///

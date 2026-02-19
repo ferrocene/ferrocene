@@ -10,11 +10,6 @@ use crate::ptr::NonNull;
 use crate::slice::memchr;
 use crate::{fmt, ops, slice, str};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{fmt, slice};
-
 // FIXME: because this is doc(inline)d, we *have* to use intra-doc links because the actual link
 //   depends on where the item is being documented. however, since this is libcore, we can't
 //   actually reference libstd or liballoc in intra-doc links. so, the best we can do is remove the

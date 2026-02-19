@@ -8,11 +8,6 @@ use crate::mem::SizedTypeProperties;
 use crate::num::NonZero;
 use crate::ops::ControlFlow;
 
-// Ferrocene addition: Imports for the certified subset
-#[rustfmt::skip]
-#[cfg(feature = "ferrocene_subset")]
-use crate::cmp::BytewiseEq;
-
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T, U> const PartialEq<[U]> for [T]

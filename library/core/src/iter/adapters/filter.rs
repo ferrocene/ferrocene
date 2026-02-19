@@ -8,11 +8,6 @@ use crate::iter::{FusedIterator, InPlaceIterable, TrustedFused, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
 
-// Ferrocene addition: imports for the certified subset
-#[rustfmt::skip]
-#[cfg(feature = "ferrocene_subset")]
-use crate::iter::TrustedLen;
-
 /// An iterator that filters the elements of `iter` with `predicate`.
 ///
 /// This `struct` is created by the [`filter`] method on [`Iterator`]. See its

@@ -7,11 +7,6 @@ use crate::slice::SliceIndex;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ops, ptr, range};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{ops, ptr};
-
 /// Implements ordering of strings.
 ///
 /// Strings are ordered  [lexicographically](Ord#lexicographical-comparison) by their byte values. This orders Unicode code

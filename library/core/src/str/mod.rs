@@ -20,14 +20,6 @@ use crate::slice::{self, SliceIndex};
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ascii, mem};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use {
-    self::pattern::{Pattern, ReverseSearcher, Searcher},
-    crate::{char, mem, slice::SliceIndex},
-};
-
 pub mod pattern;
 
 mod lossy;
@@ -67,18 +59,6 @@ pub use lossy::{Utf8Chunk, Utf8Chunks};
 pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
 pub use validations::{next_code_point, utf8_char_width};
-
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-pub use {
-    error::Utf8Error,
-    iter::{Bytes, CharIndices, Chars},
-};
-
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use iter::SplitInternal;
 
 #[inline(never)]
 #[cold]

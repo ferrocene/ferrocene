@@ -21,11 +21,6 @@ use crate::ptr::{null, null_mut};
 use crate::slice::{Iter, IterMut};
 use crate::{fmt, ptr};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::UncheckedIterator;
-
 mod ascii;
 mod drain;
 mod equality;

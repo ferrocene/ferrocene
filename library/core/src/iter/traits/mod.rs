@@ -22,16 +22,3 @@ pub use self::{
     iterator::Iterator,
     marker::{FusedIterator, TrustedLen},
 };
-
-// Ferrocene addition: imports for certified subset
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-pub use self::{
-    accum::Sum,
-    collect::{Extend, FromIterator, IntoIterator},
-    double_ended::DoubleEndedIterator,
-    exact_size::ExactSizeIterator,
-    iterator::Iterator,
-    marker::{FusedIterator, TrustedLen},
-};

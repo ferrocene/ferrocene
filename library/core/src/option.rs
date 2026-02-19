@@ -584,17 +584,10 @@
 use crate::clone::TrivialClone;
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
-#[cfg(feature = "ferrocene_subset")]
-use crate::ops::{self, ControlFlow, Deref, DerefMut};
 use crate::ops::{self, ControlFlow, Deref, DerefMut, Residual, Try};
 use crate::panicking::{panic, panic_display};
 use crate::pin::Pin;
 use crate::{cmp, convert, hint, mem, slice};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -2581,7 +2574,6 @@ unsafe impl<A> TrustedLen for Item<A> {}
 #[derive(Debug)]
 #[ferrocene::prevalidated]
 pub struct Iter<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a A>,
 }
 
@@ -2633,7 +2625,6 @@ impl<A> Clone for Iter<'_, A> {
 #[derive(Debug)]
 #[ferrocene::prevalidated]
 pub struct IterMut<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a mut A>,
 }
 

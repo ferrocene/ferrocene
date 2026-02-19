@@ -19,11 +19,6 @@ use crate::{
 #[cfg(test)]
 use stdarch_test::assert_instr;
 
-// Ferrocene addition: Imports used by the certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{core_arch::arm_shared::*, mem::transmute};
-
 types! {
     #![stable(feature = "neon_intrinsics", since = "1.59.0")]
 

@@ -306,15 +306,15 @@ where
     QueryStackFrameExtra::new(description, span, def_kind)
 }
 
-pub(crate) fn create_deferred_query_stack_frame<'tcx, Cache>(
+pub(crate) fn create_deferred_query_stack_frame<'tcx, C>(
     tcx: TyCtxt<'tcx>,
-    vtable: &'tcx QueryVTable<'tcx, Cache>,
-    key: Cache::Key,
+    vtable: &'tcx QueryVTable<'tcx, C>,
+    key: C::Key,
 ) -> QueryStackFrame<QueryStackDeferred<'tcx>>
 where
-    Cache: QueryCache,
-    Cache::Key: Key + DynSend + DynSync,
-    QueryVTable<'tcx, Cache>: DynSync,
+    C: QueryCache,
+    C::Key: Key + DynSend + DynSync,
+    QueryVTable<'tcx, C>: DynSync,
 {
     let kind = vtable.dep_kind;
 

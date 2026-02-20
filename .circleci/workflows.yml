@@ -120,6 +120,7 @@ jobs:
     executor: docker-x86_64-ubuntu-20
     resource_class: medium
     environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py dist ferrocene-sbom
     steps:

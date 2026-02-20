@@ -24,7 +24,7 @@
 //! ```
 //! At the time we first see it, we have no idea what the type of T is, so we cannot resolve
 //! `<T as Clone>::clone`. We have to wait until we see a caller that monomorphizes it as (e.g.)
-//! `uninstantiated::<i32>(0)`. Only then do we know whether the implementation is verified.
+//! `uninstantiated::<i32>(0)`. Only then do we know whether the implementation is validated.
 //!
 //! ### macros
 //!
@@ -35,7 +35,7 @@
 //! ### function pointers
 //!
 //! Normally we only lint at call sites. However, once a function is cast to a function pointer, we
-//! no longer have a way to retrieve its `#[ferrocene::prevalidated]` attributes. We want to avoid
+//! no longer have a way to retrieve its `#[ferrocene::prevalidated]` attribute. We want to avoid
 //! having to ban function pointers altogether, so instead we force a decision of whether to lint at
 //! the time of the cast. Consider this program:
 //! ```rust
@@ -152,7 +152,7 @@ declare_tool_lint! {
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
     ///
-    /// This lint is allowed-by-default, to avoid loud warnings for people using ferrocene as a
+    /// This lint is allowed-by-default, to avoid loud warnings for people using Ferrocene as a
     /// "normal" compiler. To enable it, add `#![warn(ferrocene::unvalidated)]` to each crate in
     /// your build, or add it to `[lints]` in Cargo.toml.
     pub ferrocene::UNVALIDATED,
@@ -171,18 +171,12 @@ mod dynamic_casts;
 mod post_mono;
 mod thir;
 
-// for intra-doc links
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
 use rustc_hir::{HirId, Item};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
-#[allow(unused_imports)]
-use rustc_middle::{
-    mir::TerminatorKind,
-    ty::{GenericArgsRef, ParamEnv},
-};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
 use rustc_span::Span;
 use rustc_span::def_id::{DefId, LocalDefId};
@@ -191,6 +185,14 @@ use tracing::{debug, info};
 use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::thir::LintThir;
 use crate::{LateContext, LateLintPass};
+
+// for intra-doc links
+#[rustfmt::skip]
+#[allow(unused_imports)]
+use rustc_middle::{
+    mir::TerminatorKind,
+    ty::{GenericArgsRef, ParamEnv},
+};
 
 impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
@@ -258,7 +260,7 @@ impl<'tcx> LintState<'tcx> {
         // We have conditional logic below that -Z deduplicate-diagnostics doesn't know about.
         // Deduplicate lints manually.
         if tcx.sess.opts.unstable_opts.deduplicate_diagnostics && !self.shown_lints.insert(callee) {
-            info!(r#"ignoring duplicate lint for {callee:?}"#);
+            info!("ignoring duplicate lint for {callee:?}");
             return;
         }
 

@@ -19,6 +19,7 @@
 //! - [MIR Debugging](https://rustc-dev-guide.rust-lang.org/mir/debugging.html)
 
 use rustc_data_structures::fx::FxHashSet;
+use rustc_data_structures::unord::UnordSet;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{CRATE_HIR_ID, HirId};
 use rustc_middle::mir::mono::MonoItem;
@@ -46,6 +47,10 @@ struct LintPostMono<'a, 'tcx> {
     /// This needs to store Instances, not DefIds, because different instantiations may call
     /// different concrete functions, and we want to make sure we lint all of them.
     visited: &'a mut FxHashSet<Instance<'tcx>>,
+    /// A list of all items we are going to traverse.
+    /// This is needed to avoid non-determinism in diagnostics; we don't want `from_instantiation`
+    /// to vary based on iteration order.
+    roots: &'a [MonoItem<'tcx>],
     /// May be `None` if this is a mono root.
     from_instantiation: Option<InstantiationSite<'tcx>>,
 }
@@ -57,7 +62,7 @@ pub(super) struct InstantiationSite<'tcx> {
     pub(super) lint_node: HirId,
     pub(super) caller_span: Span,
     pub(super) caller_instance: Instance<'tcx>,
-    /// `callee_instance`, but before we called `expect_instance`.
+    /// `callee_instance`, but before we called `expect_instance` on it.
     /// This may not be the same as `use_.def_id()` if we resolved an associated function
     /// to an implementation.
     pub(super) pre_mono_callee: DefId,
@@ -71,14 +76,18 @@ pub(super) struct InstantiationSite<'tcx> {
 /// We can't depend on anything in rustc_monomorphize here because we're too early in [rustc's
 /// dependency graph](https://rustc-dev-guide.rust-lang.org/compiler-src.html#big-picture). Instead
 /// we call this function in a query override in `rustc_interface`.
-pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>) {
+pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: UnordSet<MonoItem<'tcx>>) {
     trace!("all roots: {roots:?}");
 
     let mut visited = FxHashSet::default();
+
+    // We need to sort these for query stability.
+    let roots = tcx.with_stable_hashing_context(move |ref hcx| roots.into_sorted(hcx, true));
+
     // FIXME: reuse linter across roots so we don't emit duplicate diagnostics.
     // let linter = LintHelper::new(tcx, local);
-    for root in roots {
-        let instance = match root {
+    for root in &roots {
+        let instance = match *root {
             // global asm is always an exported constraint
             MonoItem::GlobalAsm(..) => continue,
             // NOTE: `mono` panics if item has generics rather than silently doing the wrong thing
@@ -107,7 +116,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: Vec<MonoItem<'tcx>>)
         debug!("linting root: {instance:?}");
         let def_id = instance.def_id().expect_local();
         if let Some(mut linter) = LintState::new(tcx, def_id) {
-            LintPostMono::visit_instance(&mut linter, &mut visited, instance, None);
+            LintPostMono::visit_instance(&mut linter, &mut visited, &roots, instance, None);
         }
     }
 }
@@ -195,31 +204,59 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     pre_mono_callee,
                 }
             };
+
+        if self.roots.contains(&MonoItem::Fn(callee_instance)) {
+            info!("don't need to recurse into {callee_instance:?}, we'll lint it separately");
+            return;
+        }
+
         trace!("recurse into {callee_instance:?}, lint_node={lint_node:?}");
-        LintPostMono::visit_instance(self.linter, self.visited, callee_instance, Some(site));
+        LintPostMono::visit_instance(
+            self.linter,
+            self.visited,
+            self.roots,
+            callee_instance,
+            Some(site),
+        );
     }
 
     fn visit_instance(
         linter: &'a mut LintState<'tcx>,
         visited: &mut FxHashSet<Instance<'tcx>>,
-        instance: Instance<'tcx>,
+        roots: &'a [MonoItem<'tcx>],
+        mut instance: Instance<'tcx>,
         from_instantiation: Option<InstantiationSite<'tcx>>,
     ) {
         let tcx = linter.tcx;
         let owner = instance.def_id();
 
-        if tcx.intrinsic(owner).is_some() {
-            // Instrinsics are qualified as part of the compiler, and don't have a body anyway.
-            info!("ignoring intrinsic {owner:?}");
-            return;
-        }
-        if !tcx.is_mir_available(owner) {
+        if let Some(intrinsic) = tcx.intrinsic(owner) {
+            if intrinsic.must_be_overridden {
+                // Instrinsics with no fallback body are qualified as part of the compiler,
+                // and will panic in `instance_mir`.
+                info!("ignoring intrinsic {owner:?}");
+                return;
+            }
+
+            // See equivalent code in `rustc_monomorphize::collector::visit_instance_use`.
+            if tcx.sess.replaced_intrinsics.contains(&intrinsic.name) {
+                // This is normal: LLVM in particular has specialized overrides for many
+                // integer operations. But that means the fallback body won't actually be
+                // used, so don't try to check it.
+                info!("ignoring overridden intrinsic body for {owner:?}");
+                return;
+            }
+
+            debug!("using fallback body for {owner:?}");
+            instance = ty::Instance::new_raw(owner, instance.args);
+        } else if !tcx.is_mir_available(owner) {
             // We've already compiled this item in a previous crate and we didn't save the
             // MIR between crates.
             // We must have checked the item when it was compiled, so just ignore it.
             info!("no MIR for {owner:?}");
             return;
         }
+
         if !visited.insert(instance) {
             // We've already linted this instance (or maybe we're still halfway through linting it).
             // Don't loop forever.
@@ -237,7 +274,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         }
 
         let body = tcx.instance_mir(instance.def);
-        let mut this = LintPostMono { linter, visited, instance, body, from_instantiation };
+        let mut this = LintPostMono { linter, visited, roots, instance, body, from_instantiation };
         for (bb, data) in mir::traversal::reachable(body) {
             this.visit_basic_block_data(bb, data);
         }
@@ -272,13 +309,25 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     info!("ignoring call to non-constant function {func:?}");
                     return None;
                 };
-                let instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
+                let mut instance = self.monomorphize_instance(pre_mono_call, generic_args, span);
                 if matches!(instance.def, InstanceKind::Virtual(..)) {
                     // This is a call through a vtable: (x as dyn Trait).foo().
                     // We don't know what instance `foo` resolves too, but we linted earlier when
                     // `x` was cast to `dyn Trait`, so we can assume this call here is ok.
                     // See the reasoning in THIR about function pointers.
                     return None;
+                }
+
+                // Look for `<T as Fn>::call` for some T.
+                // If T is a function type, the compiler synthesizes an impl, so we'll check
+                // the trait declaration in libcore which isn't what we want. Check if the
+                // function is annotated instead.
+                if let InstanceKind::FnPtrShim(_, ty) | InstanceKind::FnPtrAddrShim(_, ty) =
+                    instance.def
+                    && let ty::FnDef(fn_item, fn_args) = ty.kind()
+                {
+                    debug!("found function item {fn_item:?}");
+                    instance = self.monomorphize_instance(*fn_item, fn_args, span);
                 }
 
                 (pre_mono_call, instance)

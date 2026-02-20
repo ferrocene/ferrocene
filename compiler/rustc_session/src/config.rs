@@ -1589,9 +1589,8 @@ pub fn build_target_config(
     early_dcx: &EarlyDiagCtxt,
     target: &TargetTuple,
     sysroot: &Path,
-    unstable_options: bool,
 ) -> Target {
-    match Target::search(target, sysroot, unstable_options) {
+    match Target::search(target, sysroot) {
         Ok((target, warnings)) => {
             for warning in warnings.warning_messages() {
                 early_dcx.early_warn(warning)

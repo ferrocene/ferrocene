@@ -20,6 +20,8 @@ ISO 26262 2-5
 5.4.2.1
 ~~~~~~~
 
+Ferrous Systems is ISO 9001-2015 certified. See :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
 5.4.2.2
 ~~~~~~~
 

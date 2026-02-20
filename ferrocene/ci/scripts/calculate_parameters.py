@@ -97,8 +97,8 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
 
-# Targets with a certified core library
-CERTIFIED_TARGETS = [
+# Targets for which there is a certified core library subset
+SUBSET_TARGETS = [
     "aarch64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",
     "thumbv7em-ferrocene.subset-eabihf",
@@ -199,8 +199,8 @@ def calculate_targets(host_plus_stage: str):
                 targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
             case "x86_64-pc-windows-msvc":
                 targets = X86_64_WINDOWS_BUILD_HOSTS
-            case "certified-targets":
-                targets = CERTIFIED_TARGETS
+            case "subset-targets":
+                targets = SUBSET_TARGETS
             case _:
                 raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":

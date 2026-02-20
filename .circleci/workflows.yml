@@ -85,7 +85,7 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
-  targets--certified-targets--build:
+  targets--subset-targets--build:
     type: string
     default: ""
 
@@ -191,8 +191,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      # Certified targets only
-      FERROCENE_TARGETS: << pipeline.parameters.targets--certified-targets--build >>
+      FERROCENE_TARGETS: << pipeline.parameters.targets--subset-targets--build >>
       SCRIPT: |
         ./x.py build --stage 2 library/core
         ./x.py doc   --stage 2 library/core

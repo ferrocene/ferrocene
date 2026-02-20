@@ -88,6 +88,8 @@ N/A; the core library is a pure software library. Hardware constraints should be
 7.2.2.11
 ~~~~~~~~
 
+N/A;
+
 .. include:: ../../partials/na-no-config.rst
 
 7.2.2.12-13

@@ -9,7 +9,9 @@ ISO 26262 6-9
 ==============================
 
 9.4.1
-------
+-----
+
+The certified core library is a "safety-related element".
 
 9.4.2
 -----

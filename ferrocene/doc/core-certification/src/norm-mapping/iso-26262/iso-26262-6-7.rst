@@ -70,6 +70,8 @@ See 7.4.2.
 7.4.2.b
 ~~~~~~~
 
+N/A;
+
 .. include:: ../../partials/na-no-config.rst
 
 7.4.2.c

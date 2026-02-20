@@ -138,7 +138,7 @@ ISO 26262 Applicable clauses
    * - 9-6 Coexistence of Elements
      - No
      - Only a single element of ASIL B, therefore no coexistence
-   * - 9-7 Analy of Dependent Failures
+   * - 9-7 Analysis of Dependent Failures
      - No
      - No dependencies*, single ASIL component, therefore tailored
    * - 9-8 Safety Analyses
@@ -156,7 +156,7 @@ ISO 26262 Applicable clauses
    * - 12-8 Hazard Analysis and Risk A
      - No
      - No motorcycles in scope
-   * - 12-9Vehicle Integration&Testing
+   * - 12-9 Vehicle Integration&Testing
      - No
      - No motorcycles in scope
    * - 12-10 Safety Validation

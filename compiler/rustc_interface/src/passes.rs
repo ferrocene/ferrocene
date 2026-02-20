@@ -1199,7 +1199,7 @@ pub(crate) fn start_codegen<'tcx>(
 
     // Hook for tests.
     if let Some((def_id, _)) = tcx.entry_fn(())
-        && find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcDelayedBugFromInsideQuery)
+        && find_attr!(tcx, def_id, RustcDelayedBugFromInsideQuery)
     {
         tcx.ensure_ok().trigger_delayed_bug(def_id);
     }

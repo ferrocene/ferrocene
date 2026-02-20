@@ -17,7 +17,6 @@ use rustc_errors::{
     struct_span_code_err,
 };
 use rustc_hir as hir;
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{self, CtorKind, CtorOf, DefKind, MacroKinds};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
@@ -1115,8 +1114,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     // confused by them.
                     continue;
                 }
-                if let Some(d) =
-                    hir::find_attr!(r.tcx.get_all_attrs(did), AttributeKind::Doc(d) => d)
+                if let Some(d) = hir::find_attr!(r.tcx, did, Doc(d) => d)
                     && d.aliases.contains_key(&item_name)
                 {
                     return Some(did);
@@ -2665,12 +2663,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
             )
             .iter()
             .filter_map(|candidate| candidate.did)
-            .find(|did| {
-                find_attr!(
-                    self.r.tcx.get_all_attrs(*did),
-                    AttributeKind::RustcDiagnosticItem(sym::Default)
-                )
-            });
+            .find(|did| find_attr!(self.r.tcx, *did, RustcDiagnosticItem(sym::Default)));
         let Some(default_trait) = default_trait else {
             return;
         };

@@ -35,13 +35,16 @@
 
 use std::env::{self, VarError};
 use std::fmt::{self, Display};
+use std::fs::File;
 use std::io::{self, IsTerminal};
+use std::sync::Mutex;
 
 use tracing::dispatcher::SetGlobalDefaultError;
 use tracing::{Event, Subscriber};
 use tracing_subscriber::filter::{Directive, EnvFilter, LevelFilter};
 use tracing_subscriber::fmt::FmtContext;
 use tracing_subscriber::fmt::format::{self, FmtSpan, FormatEvent, FormatFields};
+use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::{Layer, Registry};
 // Re-export tracing
@@ -56,6 +59,7 @@ pub struct LoggerConfig {
     pub verbose_thread_ids: Result<String, VarError>,
     pub backtrace: Result<String, VarError>,
     pub json: Result<String, VarError>,
+    pub output_target: Result<String, VarError>,
     pub wraptree: Result<String, VarError>,
     pub lines: Result<String, VarError>,
 }
@@ -71,6 +75,7 @@ impl LoggerConfig {
             wraptree: env::var(format!("{env}_WRAPTREE")),
             lines: env::var(format!("{env}_LINES")),
             json: env::var(format!("{env}_FORMAT_JSON")),
+            output_target: env::var(format!("{env}_OUTPUT_TARGET")),
         }
     }
 }
@@ -143,6 +148,17 @@ where
         Err(_) => false,
     };
 
+    let output_target: BoxMakeWriter = match cfg.output_target {
+        Ok(v) => match File::options().create(true).write(true).truncate(true).open(&v) {
+            Ok(i) => BoxMakeWriter::new(Mutex::new(i)),
+            Err(e) => {
+                eprintln!("couldn't open {v} as a log target: {e:?}");
+                BoxMakeWriter::new(io::stderr)
+            }
+        },
+        Err(_) => BoxMakeWriter::new(io::stderr),
+    };
+
     let layer = if json {
         let format = tracing_subscriber::fmt::format()
             .json()
@@ -152,7 +168,7 @@ where
         let fmt_layer = tracing_subscriber::fmt::layer()
             .json()
             .event_format(format)
-            .with_writer(io::stderr)
+            .with_writer(output_target)
             .with_target(true)
             .with_ansi(false)
             .with_thread_ids(verbose_thread_ids)
@@ -161,7 +177,7 @@ where
         Layer::boxed(fmt_layer)
     } else {
         let mut layer = tracing_tree::HierarchicalLayer::default()
-            .with_writer(io::stderr)
+            .with_writer(output_target)
             .with_ansi(color_logs)
             .with_targets(true)
             .with_verbose_exit(verbose_entry_exit)

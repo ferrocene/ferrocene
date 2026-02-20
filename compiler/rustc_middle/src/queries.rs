@@ -25,9 +25,13 @@
 //! Query modifiers are special flags that alter the behavior of a query. They are parsed and processed by the `rustc_macros`
 //! The main modifiers are:
 //!
-//! - `desc { ... }`: Sets the human-readable description for diagnostics and profiling. Required for every query.
+//! - `desc { ... }`: Sets the human-readable description for diagnostics and profiling. Required
+//!   for every query. The block should contain a `format!`-style string literal followed by
+//!   optional arguments. The query key identifier is available for use within the block, as is
+//!   `tcx`.
 //! - `arena_cache`: Use an arena for in-memory caching of the query result.
-//! - `cache_on_disk_if { ... }`: Cache the query result to disk if the provided block evaluates to true.
+//! - `cache_on_disk_if { ... }`: Cache the query result to disk if the provided block evaluates to
+//!   true. The query key identifier is available for use within the block, as is `tcx`.
 //! - `cycle_fatal`: If a dependency cycle is detected, abort compilation with a fatal error.
 //! - `cycle_delay_bug`: If a dependency cycle is detected, emit a delayed bug instead of aborting immediately.
 //! - `cycle_stash`: If a dependency cycle is detected, stash the error for later handling.
@@ -1211,7 +1215,7 @@ rustc_queries! {
     query check_liveness(key: LocalDefId) -> &'tcx rustc_index::bit_set::DenseBitSet<abi::FieldIdx> {
         arena_cache
         desc { "checking liveness of variables in `{}`", tcx.def_path_str(key.to_def_id()) }
-        cache_on_disk_if(tcx) { tcx.is_typeck_child(key.to_def_id()) }
+        cache_on_disk_if { tcx.is_typeck_child(key.to_def_id()) }
     }
 
     /// Return the live symbols in the crate for dead code check.
@@ -1244,7 +1248,7 @@ rustc_queries! {
 
     query typeck(key: LocalDefId) -> &'tcx ty::TypeckResults<'tcx> {
         desc { "type-checking `{}`", tcx.def_path_str(key) }
-        cache_on_disk_if(tcx) { !tcx.is_typeck_child(key.to_def_id()) }
+        cache_on_disk_if { !tcx.is_typeck_child(key.to_def_id()) }
     }
 
     query used_trait_imports(key: LocalDefId) -> &'tcx UnordSet<LocalDefId> {

@@ -22,7 +22,7 @@ use rustc_infer::infer::relate::TypeRelation;
 use rustc_infer::traits::{PredicateObligations, TraitObligation};
 use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::bug;
-use rustc_middle::dep_graph::{DepNodeIndex, dep_kinds};
+use rustc_middle::dep_graph::{DepKind, DepNodeIndex};
 pub use rustc_middle::traits::select::*;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::TypeErrorToStringExt;
@@ -1399,7 +1399,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     where
         OP: FnOnce(&mut Self) -> R,
     {
-        self.tcx().dep_graph.with_anon_task(self.tcx(), dep_kinds::TraitSelect, || op(self))
+        self.tcx().dep_graph.with_anon_task(self.tcx(), DepKind::TraitSelect, || op(self))
     }
 
     /// filter_impls filters candidates that have a positive impl for a negative

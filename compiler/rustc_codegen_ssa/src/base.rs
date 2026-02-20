@@ -911,7 +911,7 @@ impl CrateInfo {
             .rev()
             .copied()
             .filter(|&cnum| {
-                let link = !tcx.dep_kind(cnum).macros_only();
+                let link = !tcx.crate_dep_kind(cnum).macros_only();
                 if link && tcx.is_compiler_builtins(cnum) {
                     compiler_builtins = Some(cnum);
                     return false;

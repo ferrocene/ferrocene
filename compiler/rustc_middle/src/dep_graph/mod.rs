@@ -3,8 +3,7 @@ use std::panic;
 use tracing::instrument;
 
 pub use self::dep_node::{
-    DepKind, DepKindVTable, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, dep_kinds,
-    label_strs,
+    DepKind, DepKindVTable, DepNode, DepNodeKey, WorkProductId, dep_kind_from_label, label_strs,
 };
 pub use self::graph::{
     DepGraph, DepGraphData, DepNodeIndex, QuerySideEffect, TaskDepsRef, WorkProduct,
@@ -18,7 +17,7 @@ use crate::ty::print::with_reduced_queries;
 use crate::ty::{self, TyCtxt};
 
 mod debug;
-pub mod dep_node;
+pub(crate) mod dep_node;
 mod dep_node_key;
 mod edges;
 mod graph;

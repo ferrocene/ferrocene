@@ -9,7 +9,7 @@
 //! - `#[rustc_clean(cfg="rev2")]` same as above, except that the
 //!   fingerprints must be the SAME (along with all other fingerprints).
 //!
-//! - `#[rustc_clean(cfg="rev2", loaded_from_disk='typeck")]` asserts that
+//! - `#[rustc_clean(cfg="rev2", loaded_from_disk="typeck")]` asserts that
 //!   the query result for `DepNode::typeck(X)` was actually
 //!   loaded from disk (not just marked green). This can be useful
 //!   to ensure that a test is actually exercising the deserialization

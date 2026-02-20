@@ -84,7 +84,7 @@ const DEP_NODE_WIDTH_BITS: usize = DEP_NODE_SIZE / 2;
 
 /// Data for use when recompiling the **current crate**.
 ///
-/// There may be unused indices with DEP_KIND_NULL in this graph due to batch allocation of
+/// There may be unused indices with DepKind::Null in this graph due to batch allocation of
 /// indices to threads.
 #[derive(Debug, Default)]
 pub struct SerializedDepGraph {
@@ -220,7 +220,7 @@ impl SerializedDepGraph {
 
         let mut nodes = IndexVec::from_elem_n(
             DepNode {
-                kind: DepKind::NULL,
+                kind: DepKind::Null,
                 key_fingerprint: PackedFingerprint::from(Fingerprint::ZERO),
             },
             node_max,
@@ -250,7 +250,7 @@ impl SerializedDepGraph {
 
             let node = &mut nodes[index];
             // Make sure there's no duplicate indices in the dep graph.
-            assert!(node_header.node().kind != DepKind::NULL && node.kind == DepKind::NULL);
+            assert!(node_header.node().kind != DepKind::Null && node.kind == DepKind::Null);
             *node = node_header.node();
 
             value_fingerprints[index] = node_header.value_fingerprint();
@@ -287,14 +287,15 @@ impl SerializedDepGraph {
         for (idx, node) in nodes.iter_enumerated() {
             if index[node.kind.as_usize()].insert(node.key_fingerprint, idx).is_some() {
                 // Empty nodes and side effect nodes can have duplicates
-                if node.kind != DepKind::NULL && node.kind != DepKind::SIDE_EFFECT {
-                    let name = node.kind.name();
+                if node.kind != DepKind::Null && node.kind != DepKind::SideEffect {
+                    let kind = node.kind;
                     panic!(
-                    "Error: A dep graph node ({name}) does not have an unique index. \
-                     Running a clean build on a nightly compiler with `-Z incremental-verify-ich` \
-                     can help narrow down the issue for reporting. A clean build may also work around the issue.\n
-                     DepNode: {node:?}"
-                )
+                        "Error: A dep graph node ({kind:?}) does not have an unique index. \
+                         Running a clean build on a nightly compiler with \
+                         `-Z incremental-verify-ich` can help narrow down the issue for reporting. \
+                         A clean build may also work around the issue.\n
+                         DepNode: {node:?}"
+                    )
                 }
             }
         }
@@ -361,7 +362,7 @@ impl SerializedNodeHeader {
     ) -> Self {
         debug_assert_eq!(Self::TOTAL_BITS, Self::LEN_BITS + Self::WIDTH_BITS + Self::KIND_BITS);
 
-        let mut head = node.kind.as_inner();
+        let mut head = node.kind.as_u16();
 
         let free_bytes = edge_max_index.leading_zeros() as usize / 8;
         let bytes_per_index = (DEP_NODE_SIZE - free_bytes).saturating_sub(1);
@@ -408,7 +409,7 @@ impl SerializedNodeHeader {
         Unpacked {
             len: len.checked_sub(1),
             bytes_per_index: bytes_per_index as usize + 1,
-            kind: DepKind::new(kind),
+            kind: DepKind::from_u16(kind),
             index: SerializedDepNodeIndex::from_u32(index),
             key_fingerprint: Fingerprint::from_le_bytes(key_fingerprint).into(),
             value_fingerprint: Fingerprint::from_le_bytes(value_fingerprint),

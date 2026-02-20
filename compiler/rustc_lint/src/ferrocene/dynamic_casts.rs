@@ -96,6 +96,8 @@ impl<'tcx> LintState<'tcx> {
         }
 
         let bound_traits = self.dyn_trait_refs(coerce_src, coerce_dst);
+        // NOTE: this only checks functions directly on the `trait_ref`.
+        // Supertraits are already handled in `dyn_trait_refs` as a separate trait.
         for trait_ref in bound_traits {
             // First, check if we are casting to a `dyn Fn*` trait.
             // If so, this is disallowed no matter what, for the same reason as casting
@@ -143,7 +145,7 @@ impl<'tcx> LintState<'tcx> {
         match ty.kind() {
             ty::FnDef(maybe_trait_fn, generic_args) => {
                 // Indeterminate results are handled later by a post-mono pass that checks the
-                // instantiation is verified. For now just ignore errors.
+                // instantiation is validated. For now just ignore errors.
                 try_instantiate(*maybe_trait_fn, generic_args).instance()
             }
             ty::Closure(def_id, args) => {
@@ -177,7 +179,7 @@ impl<'tcx> LintState<'tcx> {
             // 1. If the function was validated, no problem.
             // 2. If the function was unvalidated, and is a literal or assigned to a local
             //    variable, then either:
-            //    - We can resolve it to a concrete instance, in which case we would have caught it in ZstLiteral above.
+            //    - We can resolve it to a concrete instance, in which case we would have caught it in `ZstLiteral` above.
             //    - We can't resolve it yet, but it stays a unique function type, so we will
             //    catch the call later in the post-mono pass.
             //    - We can't resolve it yet and it's cast to a function pointer so we don't
@@ -192,7 +194,7 @@ impl<'tcx> LintState<'tcx> {
             //   - It was defined in this function, in which case we treat it as also
             //   validated.
             //   - It was passed as an argument, which is ok by 3).
-            //   - It is a global const/static, so we catch it in NamedConst/StaticRef above.
+            //   - It is a global const/static, so we catch it in `NamedConst`/`StaticRef` above.
             ty::FnPtr(..) => None,
             other => span_bug!(span, "unsupported call kind {other:?}"),
         }
@@ -231,19 +233,23 @@ impl<'tcx> LintState<'tcx> {
         loop {
             debug!("peel_tys step: src={src_inner:?}, dst={dst_inner:?}");
             match (src_inner.kind(), dst_inner.kind()) {
+                /* End conditions. **/
                 (_, ty::Dynamic(..)) => return Some((src_inner, dst_inner)),
                 // There's only ever one unsizing coercion at once.
                 // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
                 // Return now so we don't crash trying to prove that the array implements `Trait`.
                 (ty::Array(..), ty::Slice(..)) => return None,
 
-                // We've finished handling CoerceUnsized; now handle Unsize.
+                /* We've finished handling CoerceUnsized; now handle Unsize.
+                 * From here onward, the only thing we'll ever hit in the loop is `Dynamic` or
+                 * `Array` (handled above). */
                 (ty::Ref(_, a, _), ty::Ref(_, b, _)) | (ty::RawPtr(a, _), ty::RawPtr(b, _)) => {
                     (src_inner, dst_inner) =
                         tcx.struct_lockstep_tails_for_codegen(*a, *b, typing_env);
                 }
 
-                // Handle CoerceUnsized
+                /* Handle CoerceUnsized.
+                 * This is the only part of the loop that recurses more than once. **/
                 (ty::Pat(a, _), ty::Pat(b, _)) => {
                     (src_inner, dst_inner) = (*a, *b);
                 }

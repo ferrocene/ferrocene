@@ -1,5 +1,4 @@
 use rustc_errors::{Applicability, Diag, MultiSpan, listify};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::Res;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::{self as hir, find_attr};
@@ -1092,7 +1091,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 //
                 // FIXME? Other potential candidate methods: `as_ref` and
                 // `as_mut`?
-                && find_attr!(self.tcx.get_all_attrs(m.def_id), AttributeKind::RustcConversionSuggestion)
+                && find_attr!(self.tcx, m.def_id, RustcConversionSuggestion)
             },
         );
 

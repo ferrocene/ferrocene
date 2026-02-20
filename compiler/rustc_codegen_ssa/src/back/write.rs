@@ -18,7 +18,6 @@ use rustc_errors::{
     Level, MultiSpan, Style, Suggestions, catch_fatal_errors,
 };
 use rustc_fs_util::link_or_copy;
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::find_attr;
 use rustc_incremental::{
     copy_cgu_workproduct_to_incr_comp_cache_dir, in_incr_comp_dir, in_incr_comp_dir_sess,
@@ -454,8 +453,7 @@ pub(crate) fn start_async_codegen<B: ExtraBackendMethods>(
 ) -> OngoingCodegen<B> {
     let (coordinator_send, coordinator_receive) = channel();
 
-    let crate_attrs = tcx.hir_attrs(rustc_hir::CRATE_HIR_ID);
-    let no_builtins = find_attr!(crate_attrs, AttributeKind::NoBuiltins);
+    let no_builtins = find_attr!(tcx, crate, NoBuiltins);
 
     let crate_info = CrateInfo::new(tcx, target_cpu);
 

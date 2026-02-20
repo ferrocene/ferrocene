@@ -12,7 +12,6 @@ use rustc_data_structures::assert_matches;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::{Diag, EmissionGuarantee};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem, find_attr};
 use rustc_infer::infer::BoundRegionConversionTime::{self, HigherRankedType};
@@ -1445,7 +1444,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             && let ty::ImplPolarity::Reservation = tcx.impl_polarity(def_id)
         {
             if let Some(intercrate_ambiguity_clauses) = &mut self.intercrate_ambiguity_causes {
-                let message = find_attr!(tcx.get_all_attrs(def_id), AttributeKind::RustcReservationImpl(_, message) => *message);
+                let message = find_attr!(tcx, def_id, RustcReservationImpl(_, message) => *message);
                 if let Some(message) = message {
                     debug!(
                         "filter_reservation_impls: \

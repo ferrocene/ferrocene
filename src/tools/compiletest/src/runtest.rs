@@ -508,12 +508,10 @@ impl<'test> TestCx<'test> {
             let normalized_revision = normalize_revision(revision);
             let cfg_arg = ["--cfg", &normalized_revision];
             let arg = format!("--cfg={normalized_revision}");
-            if self
-                .props
-                .compile_flags
-                .windows(2)
-                .any(|args| args == cfg_arg || args[0] == arg || args[1] == arg)
-            {
+            let contains_arg =
+                self.props.compile_flags.iter().any(|considered_arg| *considered_arg == arg);
+            let contains_cfg_arg = self.props.compile_flags.windows(2).any(|args| args == cfg_arg);
+            if contains_arg || contains_cfg_arg {
                 error!(
                     "redundant cfg argument `{normalized_revision}` is already created by the \
                     revision"

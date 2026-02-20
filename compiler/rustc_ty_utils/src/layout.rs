@@ -777,7 +777,9 @@ fn layout_of_uncached<'tcx>(
             let err = if ty.has_param() || !cx.typing_env.param_env.caller_bounds().is_empty() {
                 LayoutError::TooGeneric(ty)
             } else {
-                unreachable!("invalid rigid alias in layout_of after normalization: {ty:?}");
+                LayoutError::ReferencesError(cx.tcx().dcx().delayed_bug(format!(
+                    "unexpected rigid alias in layout_of after normalization: {ty:?}"
+                )))
             };
             return Err(error(cx, err));
         }

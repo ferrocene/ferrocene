@@ -893,12 +893,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     mpart_suggestion,
                 })
             }
-            ResolutionError::SelfImportCanOnlyAppearOnceInTheList => {
-                self.dcx().create_err(errs::SelfImportCanOnlyAppearOnceInTheList { span })
-            }
-            ResolutionError::SelfImportOnlyInImportListWithNonEmptyPrefix => {
-                self.dcx().create_err(errs::SelfImportOnlyInImportListWithNonEmptyPrefix { span })
-            }
             ResolutionError::FailedToResolve { segment, label, suggestion, module, message } => {
                 let mut err = struct_span_code_err!(self.dcx(), span, E0433, "{message}");
                 err.span_label(span, label);

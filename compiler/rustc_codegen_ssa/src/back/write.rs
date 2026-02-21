@@ -12,7 +12,6 @@ use rustc_data_structures::jobserver::{self, Acquired};
 use rustc_data_structures::memmap::Mmap;
 use rustc_data_structures::profiling::{SelfProfilerRef, VerboseTimingGuard};
 use rustc_errors::emitter::Emitter;
-use rustc_errors::translation::Translator;
 use rustc_errors::{
     Diag, DiagArgMap, DiagCtxt, DiagCtxtHandle, DiagMessage, ErrCode, FatalError, FatalErrorMarker,
     Level, MultiSpan, Style, Suggestions, catch_fatal_errors,
@@ -100,7 +99,6 @@ pub struct ModuleConfig {
     pub emit_ir: bool,
     pub emit_asm: bool,
     pub emit_obj: EmitObj,
-    pub emit_thin_lto: bool,
     pub emit_thin_lto_summary: bool,
 
     // Miscellaneous flags. These are mostly copied from command-line
@@ -211,9 +209,6 @@ impl ModuleConfig {
                 false
             ),
             emit_obj,
-            // thin lto summaries prevent fat lto, so do not emit them if fat
-            // lto is requested. See PR #136840 for background information.
-            emit_thin_lto: sess.opts.unstable_opts.emit_thin_lto && sess.lto() != Lto::Fat,
             emit_thin_lto_summary: if_regular!(
                 sess.opts.output_types.contains_key(&OutputType::ThinLinkBitcode),
                 false
@@ -2039,10 +2034,6 @@ impl Emitter for SharedEmitter {
 
     fn source_map(&self) -> Option<&SourceMap> {
         None
-    }
-
-    fn translator(&self) -> &Translator {
-        panic!("shared emitter attempted to translate a diagnostic");
     }
 }
 

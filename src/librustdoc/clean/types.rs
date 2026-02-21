@@ -1393,7 +1393,7 @@ impl Type {
     /// use rustdoc::format::cache::Cache;
     /// use rustdoc::clean::types::{Type, PrimitiveType};
     /// let cache = Cache::new(false);
-    /// let generic = Type::Generic(rustc_span::symbol::sym::Any);
+    /// let generic = Type::Generic(Symbol::intern("T"));
     /// let unit = Type::Primitive(PrimitiveType::Unit);
     /// assert!(!generic.is_doc_subtype_of(&unit, &cache));
     /// assert!(unit.is_doc_subtype_of(&generic, &cache));

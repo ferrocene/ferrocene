@@ -1274,6 +1274,9 @@ pub enum AttributeKind {
     /// Represents `#[rustc_if_this_changed]`
     RustcIfThisChanged(Span, Option<Symbol>),
 
+    /// Represents `#[rustc_inherit_overflow_checks]`
+    RustcInheritOverflowChecks,
+
     /// Represents `#[rustc_insignificant_dtor]`
     RustcInsignificantDtor,
 

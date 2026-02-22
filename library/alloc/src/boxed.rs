@@ -237,15 +237,14 @@ pub struct Box<
 >(Unique<T>, A);
 
 /// Monomorphic function for allocating an uninit `Box`.
-///
-/// # Safety
-///
-/// size and align need to be safe for `Layout::from_size_align_unchecked`.
 #[inline]
+// The is a separate function to avoid doing it in every generic version, but it
+// looks small to the mir inliner (particularly in panic=abort) so leave it to
+// the backend to decide whether pulling it in everywhere is worth doing.
+#[rustc_no_mir_inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(no_global_oom_handling))]
-unsafe fn box_new_uninit(size: usize, align: usize) -> *mut u8 {
-    let layout = unsafe { Layout::from_size_align_unchecked(size, align) };
+fn box_new_uninit(layout: Layout) -> *mut u8 {
     match Global.allocate(layout) {
         Ok(ptr) => ptr.as_mut_ptr(),
         Err(_) => handle_alloc_error(layout),
@@ -284,10 +283,7 @@ impl<T> Box<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn new(x: T) -> Self {
         // This is `Box::new_uninit` but inlined to avoid build time regressions.
-        // SAFETY: The size and align of a valid type `T` are always valid for `Layout`.
-        let ptr = unsafe {
-            box_new_uninit(<T as SizedTypeProperties>::SIZE, <T as SizedTypeProperties>::ALIGN)
-        } as *mut T;
+        let ptr = box_new_uninit(<T as SizedTypeProperties>::LAYOUT) as *mut T;
         // Nothing below can panic so we do not have to worry about deallocating `ptr`.
         // SAFETY: we just allocated the box to store `x`.
         unsafe { core::intrinsics::write_via_move(ptr, x) };
@@ -317,14 +313,8 @@ impl<T> Box<T> {
         // `Box::new`).
 
         // SAFETY:
-        // - The size and align of a valid type `T` are always valid for `Layout`.
         // - If `allocate` succeeds, the returned pointer exactly matches what `Box` needs.
-        unsafe {
-            mem::transmute(box_new_uninit(
-                <T as SizedTypeProperties>::SIZE,
-                <T as SizedTypeProperties>::ALIGN,
-            ))
-        }
+        unsafe { mem::transmute(box_new_uninit(<T as SizedTypeProperties>::LAYOUT)) }
     }
 
     /// Constructs a new `Box` with uninitialized contents, with the memory

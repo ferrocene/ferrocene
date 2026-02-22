@@ -14,7 +14,7 @@ pub use sealed::IntoQueryParam;
 use crate::dep_graph;
 use crate::dep_graph::{DepKind, DepNode, DepNodeIndex, SerializedDepNodeIndex};
 use crate::ich::StableHashingContext;
-use crate::queries::{ExternProviders, PerQueryVTables, Providers, QueryArenas};
+use crate::queries::{ExternProviders, Providers, QueryArenas, QueryVTables};
 use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
 use crate::query::{QueryCache, QueryInfo, QueryJob};
@@ -229,7 +229,7 @@ pub struct QuerySystemFns {
 
 pub struct QuerySystem<'tcx> {
     pub arenas: WorkerLocal<QueryArenas<'tcx>>,
-    pub query_vtables: PerQueryVTables<'tcx>,
+    pub query_vtables: QueryVTables<'tcx>,
 
     /// This provides access to the incremental compilation on-disk cache for query results.
     /// Do not access this directly. It is only meant to be used by
@@ -588,9 +588,7 @@ macro_rules! define_callbacks {
         )*
 
         /// Holds a `QueryVTable` for each query.
-        ///
-        /// ("Per" just makes this pluralized name more visually distinct.)
-        pub struct PerQueryVTables<'tcx> {
+        pub struct QueryVTables<'tcx> {
             $(
                 pub $name: ::rustc_middle::query::plumbing::QueryVTable<'tcx, $name::Storage<'tcx>>,
             )*

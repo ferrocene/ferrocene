@@ -692,8 +692,8 @@ macro_rules! define_queries {
             }
         })*}
 
-        pub fn make_query_vtables<'tcx>(incremental: bool) -> queries::PerQueryVTables<'tcx> {
-            queries::PerQueryVTables {
+        pub fn make_query_vtables<'tcx>(incremental: bool) -> queries::QueryVTables<'tcx> {
+            queries::QueryVTables {
                 $(
                     $name: query_impl::$name::make_query_vtable(incremental),
                 )*

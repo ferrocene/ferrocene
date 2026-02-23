@@ -2204,6 +2204,15 @@ pub(crate) struct DefaultNotFollowedByItem {
 }
 
 #[derive(Diagnostic)]
+#[diag("`final` is not followed by an item")]
+#[note("only associated functions in traits may be prefixed by `final`")]
+pub(crate) struct FinalNotFollowedByItem {
+    #[primary_span]
+    #[label("the `final` qualifier")]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 pub(crate) enum MissingKeywordForItemDefinition {
     #[diag("missing `enum` for enum definition")]
     Enum {
@@ -3785,6 +3794,17 @@ pub(crate) struct RecoverImportAsUse {
     )]
     pub span: Span,
     pub token_name: String,
+}
+
+#[derive(Diagnostic)]
+#[diag("{$article} {$descr} cannot be `final`")]
+#[note("only associated functions in traits can be `final`")]
+pub(crate) struct InappropriateFinal {
+    #[primary_span]
+    #[label("`final` because of this")]
+    pub span: Span,
+    pub article: &'static str,
+    pub descr: &'static str,
 }
 
 #[derive(Diagnostic)]

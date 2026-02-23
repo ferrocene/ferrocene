@@ -4,7 +4,6 @@
 
 use std::num::NonZero;
 
-use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_data_structures::unord::UnordMap;
@@ -15,23 +14,18 @@ use rustc_index::Idx;
 use rustc_middle::bug;
 #[expect(unused_imports, reason = "used by doc comments")]
 use rustc_middle::dep_graph::DepKindVTable;
-use rustc_middle::dep_graph::{
-    self, DepContext, DepNode, DepNodeIndex, DepNodeKey, DepsType, HasDepContext,
-    SerializedDepNodeIndex, dep_kinds,
-};
+use rustc_middle::dep_graph::{DepKind, DepNode, DepNodeIndex, DepNodeKey, SerializedDepNodeIndex};
 use rustc_middle::query::on_disk_cache::{
     AbsoluteBytePos, CacheDecoder, CacheEncoder, EncodedDepNodeIndex,
 };
 use rustc_middle::query::plumbing::QueryVTable;
 use rustc_middle::query::{
-    Key, QueryCache, QueryContext, QueryJobId, QueryStackDeferred, QueryStackFrame,
-    QueryStackFrameExtra,
+    Key, QueryCache, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
 };
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
 use rustc_middle::ty::tls::{self, ImplicitCtxt};
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_query_system::query::QuerySideEffect;
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
@@ -40,151 +34,95 @@ use crate::execution::{all_inactive, force_query};
 use crate::job::{QueryJobMap, find_dep_kind_root};
 use crate::{QueryDispatcherUnerased, QueryFlags, SemiDynamicQueryDispatcher};
 
-/// Implements [`QueryContext`] for use by [`rustc_query_system`], since that
-/// crate does not have direct access to [`TyCtxt`].
-#[derive(Copy, Clone)]
-pub struct QueryCtxt<'tcx> {
-    pub tcx: TyCtxt<'tcx>,
+fn depth_limit_error<'tcx>(tcx: TyCtxt<'tcx>, job: QueryJobId) {
+    let job_map =
+        collect_active_jobs_from_all_queries(tcx, true).expect("failed to collect active queries");
+    let (info, depth) = find_dep_kind_root(job, job_map);
+
+    let suggested_limit = match tcx.recursion_limit() {
+        Limit(0) => Limit(2),
+        limit => limit * 2,
+    };
+
+    tcx.sess.dcx().emit_fatal(QueryOverflow {
+        span: info.job.span,
+        note: QueryOverflowNote { desc: info.frame.info.extract().description, depth },
+        suggested_limit,
+        crate_name: tcx.crate_name(LOCAL_CRATE),
+    });
 }
 
-impl<'tcx> QueryCtxt<'tcx> {
-    #[inline]
-    pub fn new(tcx: TyCtxt<'tcx>) -> Self {
-        QueryCtxt { tcx }
-    }
+#[inline]
+pub(crate) fn next_job_id<'tcx>(tcx: TyCtxt<'tcx>) -> QueryJobId {
+    QueryJobId(
+        NonZero::new(tcx.query_system.jobs.fetch_add(1, std::sync::atomic::Ordering::Relaxed))
+            .unwrap(),
+    )
+}
 
-    fn depth_limit_error(self, job: QueryJobId) {
-        let job_map = self
-            .collect_active_jobs_from_all_queries(true)
-            .expect("failed to collect active queries");
-        let (info, depth) = find_dep_kind_root(job, job_map);
+#[inline]
+pub(crate) fn current_query_job<'tcx>(tcx: TyCtxt<'tcx>) -> Option<QueryJobId> {
+    tls::with_related_context(tcx, |icx| icx.query)
+}
 
-        let suggested_limit = match self.tcx.recursion_limit() {
-            Limit(0) => Limit(2),
-            limit => limit * 2,
+/// Executes a job by changing the `ImplicitCtxt` to point to the
+/// new query job while it executes.
+#[inline(always)]
+pub(crate) fn start_query<'tcx, R>(
+    tcx: TyCtxt<'tcx>,
+    token: QueryJobId,
+    depth_limit: bool,
+    compute: impl FnOnce() -> R,
+) -> R {
+    // The `TyCtxt` stored in TLS has the same global interner lifetime
+    // as `self`, so we use `with_related_context` to relate the 'tcx lifetimes
+    // when accessing the `ImplicitCtxt`.
+    tls::with_related_context(tcx, move |current_icx| {
+        if depth_limit && !tcx.recursion_limit().value_within_limit(current_icx.query_depth) {
+            depth_limit_error(tcx, token);
+        }
+
+        // Update the `ImplicitCtxt` to point to our new query job.
+        let new_icx = ImplicitCtxt {
+            tcx,
+            query: Some(token),
+            query_depth: current_icx.query_depth + depth_limit as usize,
+            task_deps: current_icx.task_deps,
         };
 
-        self.tcx.sess.dcx().emit_fatal(QueryOverflow {
-            span: info.job.span,
-            note: QueryOverflowNote { desc: info.frame.info.extract().description, depth },
-            suggested_limit,
-            crate_name: self.tcx.crate_name(LOCAL_CRATE),
-        });
-    }
-
-    #[inline]
-    pub(crate) fn next_job_id(self) -> QueryJobId {
-        QueryJobId(
-            NonZero::new(
-                self.tcx.query_system.jobs.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            )
-            .unwrap(),
-        )
-    }
-
-    #[inline]
-    pub(crate) fn current_query_job(self) -> Option<QueryJobId> {
-        tls::with_related_context(self.tcx, |icx| icx.query)
-    }
-
-    /// Executes a job by changing the `ImplicitCtxt` to point to the
-    /// new query job while it executes.
-    #[inline(always)]
-    pub(crate) fn start_query<R>(
-        self,
-        token: QueryJobId,
-        depth_limit: bool,
-        compute: impl FnOnce() -> R,
-    ) -> R {
-        // The `TyCtxt` stored in TLS has the same global interner lifetime
-        // as `self`, so we use `with_related_context` to relate the 'tcx lifetimes
-        // when accessing the `ImplicitCtxt`.
-        tls::with_related_context(self.tcx, move |current_icx| {
-            if depth_limit
-                && !self.tcx.recursion_limit().value_within_limit(current_icx.query_depth)
-            {
-                self.depth_limit_error(token);
-            }
-
-            // Update the `ImplicitCtxt` to point to our new query job.
-            let new_icx = ImplicitCtxt {
-                tcx: self.tcx,
-                query: Some(token),
-                query_depth: current_icx.query_depth + depth_limit as usize,
-                task_deps: current_icx.task_deps,
-            };
-
-            // Use the `ImplicitCtxt` while we execute the query.
-            tls::enter_context(&new_icx, compute)
-        })
-    }
-
-    /// Returns a map of currently active query jobs, collected from all queries.
-    ///
-    /// If `require_complete` is `true`, this function locks all shards of the
-    /// query results to produce a complete map, which always returns `Ok`.
-    /// Otherwise, it may return an incomplete map as an error if any shard
-    /// lock cannot be acquired.
-    ///
-    /// Prefer passing `false` to `require_complete` to avoid potential deadlocks,
-    /// especially when called from within a deadlock handler, unless a
-    /// complete map is needed and no deadlock is possible at this call site.
-    pub fn collect_active_jobs_from_all_queries(
-        self,
-        require_complete: bool,
-    ) -> Result<QueryJobMap<'tcx>, QueryJobMap<'tcx>> {
-        let mut job_map_out = QueryJobMap::default();
-        let mut complete = true;
-
-        for gather_fn in crate::PER_QUERY_GATHER_ACTIVE_JOBS_FNS.iter() {
-            if gather_fn(self.tcx, require_complete, &mut job_map_out).is_none() {
-                complete = false;
-            }
-        }
-
-        if complete { Ok(job_map_out) } else { Err(job_map_out) }
-    }
+        // Use the `ImplicitCtxt` while we execute the query.
+        tls::enter_context(&new_icx, compute)
+    })
 }
 
-impl<'tcx> HasDepContext for QueryCtxt<'tcx> {
-    type Deps = DepsType;
-    type DepContext = TyCtxt<'tcx>;
+/// Returns a map of currently active query jobs, collected from all queries.
+///
+/// If `require_complete` is `true`, this function locks all shards of the
+/// query results to produce a complete map, which always returns `Ok`.
+/// Otherwise, it may return an incomplete map as an error if any shard
+/// lock cannot be acquired.
+///
+/// Prefer passing `false` to `require_complete` to avoid potential deadlocks,
+/// especially when called from within a deadlock handler, unless a
+/// complete map is needed and no deadlock is possible at this call site.
+pub fn collect_active_jobs_from_all_queries<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    require_complete: bool,
+) -> Result<QueryJobMap<'tcx>, QueryJobMap<'tcx>> {
+    let mut job_map_out = QueryJobMap::default();
+    let mut complete = true;
 
-    #[inline]
-    fn dep_context(&self) -> &Self::DepContext {
-        &self.tcx
-    }
-}
-
-impl<'tcx> QueryContext<'tcx> for QueryCtxt<'tcx> {
-    #[inline]
-    fn jobserver_proxy(&self) -> &Proxy {
-        &self.tcx.jobserver_proxy
-    }
-
-    // Interactions with on_disk_cache
-    fn load_side_effect(
-        self,
-        prev_dep_node_index: SerializedDepNodeIndex,
-    ) -> Option<QuerySideEffect> {
-        self.tcx
-            .query_system
-            .on_disk_cache
-            .as_ref()
-            .and_then(|c| c.load_side_effect(self.tcx, prev_dep_node_index))
-    }
-
-    #[inline(never)]
-    #[cold]
-    fn store_side_effect(self, dep_node_index: DepNodeIndex, side_effect: QuerySideEffect) {
-        if let Some(c) = self.tcx.query_system.on_disk_cache.as_ref() {
-            c.store_side_effect(dep_node_index, side_effect)
+    for gather_fn in crate::PER_QUERY_GATHER_ACTIVE_JOBS_FNS.iter() {
+        if gather_fn(tcx, require_complete, &mut job_map_out).is_none() {
+            complete = false;
         }
     }
+
+    if complete { Ok(job_map_out) } else { Err(job_map_out) }
 }
 
-pub(super) fn try_mark_green<'tcx>(tcx: TyCtxt<'tcx>, dep_node: &dep_graph::DepNode) -> bool {
-    tcx.dep_graph.try_mark_green(QueryCtxt::new(tcx), dep_node).is_some()
+pub(super) fn try_mark_green<'tcx>(tcx: TyCtxt<'tcx>, dep_node: &DepNode) -> bool {
+    tcx.dep_graph.try_mark_green(tcx, dep_node).is_some()
 }
 
 pub(super) fn encode_all_query_results<'tcx>(
@@ -198,7 +136,7 @@ pub(super) fn encode_all_query_results<'tcx>(
 }
 
 pub fn query_key_hash_verify_all<'tcx>(tcx: TyCtxt<'tcx>) {
-    if tcx.sess().opts.unstable_opts.incremental_verify_ich || cfg!(debug_assertions) {
+    if tcx.sess.opts.unstable_opts.incremental_verify_ich || cfg!(debug_assertions) {
         tcx.sess.time("query_key_hash_verify_all", || {
             for verify in super::QUERY_KEY_HASH_VERIFY.iter() {
                 verify(tcx);
@@ -353,7 +291,7 @@ where
     } else {
         description
     };
-    let span = if vtable.dep_kind == dep_graph::dep_kinds::def_span || reduce_queries {
+    let span = if vtable.dep_kind == DepKind::def_span || reduce_queries {
         // The `def_span` query is used to calculate `default_span`,
         // so exit to avoid infinite recursion.
         None
@@ -361,7 +299,7 @@ where
         Some(key.default_span(tcx))
     };
 
-    let def_kind = if vtable.dep_kind == dep_graph::dep_kinds::def_kind || reduce_queries {
+    let def_kind = if vtable.dep_kind == DepKind::def_kind || reduce_queries {
         // Try to avoid infinite recursion.
         None
     } else {
@@ -397,19 +335,19 @@ where
 
 pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
-    qcx: QueryCtxt<'tcx>,
+    tcx: TyCtxt<'tcx>,
     encoder: &mut CacheEncoder<'a, 'tcx>,
     query_result_index: &mut EncodedDepNodeIndex,
 ) where
     Q: QueryDispatcherUnerased<'tcx, C, FLAGS>,
     Q::UnerasedValue: Encodable<CacheEncoder<'a, 'tcx>>,
 {
-    let _timer = qcx.tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
+    let _timer = tcx.prof.generic_activity_with_arg("encode_query_results_for", query.name());
 
-    assert!(all_inactive(query.query_state(qcx)));
-    let cache = query.query_cache(qcx);
+    assert!(all_inactive(query.query_state(tcx)));
+    let cache = query.query_cache(tcx);
     cache.iter(&mut |key, value, dep_node| {
-        if query.will_cache_on_disk_for_key(qcx.tcx, key) {
+        if query.will_cache_on_disk_for_key(tcx, key) {
             let dep_node = SerializedDepNodeIndex::new(dep_node.index());
 
             // Record position of the cache entry.
@@ -424,14 +362,14 @@ pub(crate) fn encode_query_results<'a, 'tcx, Q, C: QueryCache, const FLAGS: Quer
 
 pub(crate) fn query_key_hash_verify<'tcx, C: QueryCache, const FLAGS: QueryFlags>(
     query: SemiDynamicQueryDispatcher<'tcx, C, FLAGS>,
-    qcx: QueryCtxt<'tcx>,
+    tcx: TyCtxt<'tcx>,
 ) {
-    let _timer = qcx.tcx.prof.generic_activity_with_arg("query_key_hash_verify_for", query.name());
+    let _timer = tcx.prof.generic_activity_with_arg("query_key_hash_verify_for", query.name());
 
-    let cache = query.query_cache(qcx);
+    let cache = query.query_cache(tcx);
     let mut map = UnordMap::with_capacity(cache.len());
     cache.iter(&mut |key, _, _| {
-        let node = DepNode::construct(qcx.tcx, query.dep_kind(), key);
+        let node = DepNode::construct(tcx, query.dep_kind(), key);
         if let Some(other_key) = map.insert(node, *key) {
             bug!(
                 "query key:\n\
@@ -456,8 +394,11 @@ pub(crate) fn try_load_from_on_disk_cache_inner<'tcx, C: QueryCache, const FLAGS
 ) {
     debug_assert!(tcx.dep_graph.is_green(&dep_node));
 
-    let key = C::Key::recover(tcx, &dep_node).unwrap_or_else(|| {
-        panic!("Failed to recover key for {:?} with hash {}", dep_node, dep_node.hash)
+    let key = C::Key::try_recover_key(tcx, &dep_node).unwrap_or_else(|| {
+        panic!(
+            "Failed to recover key for {dep_node:?} with key fingerprint {}",
+            dep_node.key_fingerprint
+        )
     });
     if query.will_cache_on_disk_for_key(tcx, &key) {
         // Call `tcx.$query(key)` for its side-effect of loading the disk-cached
@@ -518,25 +459,24 @@ pub(crate) fn force_from_dep_node_inner<'tcx, C: QueryCache, const FLAGS: QueryF
     // hit the cache instead of having to go through `force_from_dep_node`.
     // This assertion makes sure, we actually keep applying the solution above.
     debug_assert!(
-        dep_node.kind != dep_kinds::codegen_unit,
+        dep_node.kind != DepKind::codegen_unit,
         "calling force_from_dep_node() on dep_kinds::codegen_unit"
     );
 
-    if let Some(key) = C::Key::recover(tcx, &dep_node) {
-        force_query(query, QueryCtxt::new(tcx), key, dep_node);
+    if let Some(key) = C::Key::try_recover_key(tcx, &dep_node) {
+        force_query(query, tcx, key, dep_node);
         true
     } else {
         false
     }
 }
 
-// NOTE: `$V` isn't used here, but we still need to match on it so it can be passed to other macros
-// invoked by `rustc_with_all_queries`.
+// Note: `$K` and `$V` are unused but present so this can be called by `rustc_with_all_queries`.
 macro_rules! define_queries {
     (
         $(
             $(#[$attr:meta])*
-            [$($modifiers:tt)*] fn $name:ident($($K:tt)*) -> $V:ty,
+            [$($modifiers:tt)*] fn $name:ident($K:ty) -> $V:ty,
         )*
     ) => {
 
@@ -561,7 +501,7 @@ macro_rules! define_queries {
                     let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
                     execution::get_query_incr(
                         QueryType::query_dispatcher(tcx),
-                        QueryCtxt::new(tcx),
+                        tcx,
                         span,
                         key,
                         mode
@@ -581,7 +521,7 @@ macro_rules! define_queries {
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
                     Some(execution::get_query_non_incr(
                         QueryType::query_dispatcher(tcx),
-                        QueryCtxt::new(tcx),
+                        tcx,
                         span,
                         key,
                     ))
@@ -624,7 +564,7 @@ macro_rules! define_queries {
                 QueryVTable {
                     name: stringify!($name),
                     eval_always: is_eval_always!([$($modifiers)*]),
-                    dep_kind: dep_graph::dep_kinds::$name,
+                    dep_kind: dep_graph::DepKind::$name,
                     cycle_error_handling: cycle_error_handling!([$($modifiers)*]),
                     query_state: std::mem::offset_of!(QueryStates<'tcx>, $name),
                     query_cache: std::mem::offset_of!(QueryCaches<'tcx>, $name),
@@ -688,8 +628,6 @@ macro_rules! define_queries {
                 for QueryType<'tcx>
             {
                 type UnerasedValue = queries::$name::Value<'tcx>;
-
-                const NAME: &'static &'static str = &stringify!($name);
 
                 #[inline(always)]
                 fn query_dispatcher(tcx: TyCtxt<'tcx>)
@@ -765,7 +703,7 @@ macro_rules! define_queries {
                         _
                     > (
                         query_impl::$name::QueryType::query_dispatcher(tcx),
-                        QueryCtxt::new(tcx),
+                        tcx,
                         encoder,
                         query_result_index,
                     )
@@ -775,7 +713,7 @@ macro_rules! define_queries {
             pub(crate) fn query_key_hash_verify<'tcx>(tcx: TyCtxt<'tcx>) {
                 $crate::plumbing::query_key_hash_verify(
                     query_impl::$name::QueryType::query_dispatcher(tcx),
-                    QueryCtxt::new(tcx),
+                    tcx,
                 )
             }
         })*}

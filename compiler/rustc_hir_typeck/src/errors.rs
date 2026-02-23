@@ -304,7 +304,7 @@ impl Subdiagnostic for SuggestAnnotations {
             }
         }
 
-        diag.multipart_suggestion_verbose(
+        diag.multipart_suggestion(
             "use `()` annotations to avoid fallback changes",
             suggestions,
             Applicability::MachineApplicable,
@@ -567,6 +567,14 @@ pub(crate) struct InvalidCallee<'tcx> {
     pub span: Span,
     pub ty: Ty<'tcx>,
     pub found: String,
+}
+
+#[derive(Diagnostic)]
+#[diag("scalable vector types cannot be initialised using their constructor")]
+pub(crate) struct ScalableVectorCtor<'tcx> {
+    #[primary_span]
+    pub span: Span,
+    pub ty: Ty<'tcx>,
 }
 
 #[derive(Diagnostic)]

@@ -7,10 +7,10 @@ use rustc_data_structures::stable_hasher::HashStable;
 pub use rustc_data_structures::vec_cache::VecCache;
 use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_index::Idx;
-use rustc_query_system::ich::StableHashingContext;
 use rustc_span::def_id::{DefId, DefIndex};
 
 use crate::dep_graph::DepNodeIndex;
+use crate::ich::StableHashingContext;
 
 /// Traits that all query keys must satisfy.
 pub trait QueryCacheKey = Hash + Eq + Copy + Debug + for<'a> HashStable<StableHashingContext<'a>>;
@@ -67,7 +67,7 @@ where
     #[inline]
     fn complete(&self, key: K, value: V, index: DepNodeIndex) {
         // We may be overwriting another value. This is all right, since the dep-graph
-        // will check that the fingerprint matches.
+        // will check that the value fingerprint matches.
         self.cache.insert(key, (value, index));
     }
 

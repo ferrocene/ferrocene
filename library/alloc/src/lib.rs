@@ -242,6 +242,7 @@ pub mod collections;
 pub mod ffi;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod intrinsics;
 #[cfg(not(no_rc))]
 #[cfg(not(feature = "ferrocene_subset"))]

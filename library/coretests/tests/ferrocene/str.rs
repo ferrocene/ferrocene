@@ -212,3 +212,15 @@ fn test_bytes_iter_methods() {
     assert_eq!(s.bytes().rposition(|b| b == b','), Some(5));
     assert_eq!(s.bytes().size_hint(), (13, Some(13)));
 }
+
+// Covers `core::str::pattern::TwoWaySearcher::next_back`
+#[test]
+fn test_two_way_searcher_next_back() {
+    // In theory it should be possible to test TwoWaySearcher::next_back
+    // through e.g. str::rfind. We need a needle for which the left part
+    // matches but the right part does not. The "problem is that I did not find
+    // any needle that is long_period=false and more than one character. For
+    // needles of length zero or one the right part is always an empty string
+    // which always matches.
+    core::str::pattern::ferrocene_test::test_two_way_searcher_next_back();
+}

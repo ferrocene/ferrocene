@@ -646,8 +646,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
 
             Rvalue::Cast(_, _, _) => {}
 
-            Rvalue::ShallowInitBox(_, _) => {}
-
             Rvalue::UnaryOp(op, operand) => {
                 let ty = operand.ty(self.body, self.tcx);
                 match op {
@@ -846,13 +844,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     } else {
                         self.check_op(ops::PanicNonStr);
                     }
-                    // Allow this call, skip all the checks below.
-                    return;
-                }
-
-                // This can be called on stable via the `vec!` macro.
-                if tcx.is_lang_item(callee, LangItem::ExchangeMalloc) {
-                    self.check_op(ops::HeapAllocation);
                     // Allow this call, skip all the checks below.
                     return;
                 }

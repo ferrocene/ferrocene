@@ -2,8 +2,6 @@ use std::env;
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 
-use build_helper::ci::CiEnv;
-
 use super::{Builder, Kind};
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
@@ -787,6 +785,10 @@ impl Builder<'_> {
                         .rustc_cmd(compiler)
                         .arg("--target")
                         .arg(target.rustc_target_arg())
+                        // FIXME(#152709): -Zunstable-options is to handle JSON targets.
+                        // Remove when JSON targets are stabilized.
+                        .arg("-Zunstable-options")
+                        .env("RUSTC_BOOTSTRAP", "1")
                         .arg("--print=file-names")
                         .arg("--crate-type=proc-macro")
                         .arg("-")
@@ -1353,7 +1355,7 @@ impl Builder<'_> {
         // Try to use a sysroot-relative bindir, in case it was configured absolutely.
         cargo.env("RUSTC_INSTALL_BINDIR", self.config.bindir_relative());
 
-        if CiEnv::is_ci() {
+        if self.config.is_running_on_ci() {
             // Tell cargo to use colored output for nicer logs in CI, even
             // though CI isn't printing to a terminal.
             // Also set an explicit `TERM=xterm` so that cargo doesn't warn

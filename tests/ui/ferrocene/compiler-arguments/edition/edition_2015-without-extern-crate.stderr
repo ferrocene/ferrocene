@@ -1,4 +1,4 @@
-error[E0433]: failed to resolve: use of unresolved module or unlinked crate `some_crate`
+error[E0433]: cannot find module or crate `some_crate` in the crate root
   --> $DIR/edition_2015-without-extern-crate.rs:7:7
    |
 LL |     ::some_crate::hello();

@@ -2,9 +2,9 @@
 // because macros with the same names are in prelude.
 
 fn main() {
-    env::current_dir; //~ ERROR use of unresolved module or unlinked crate `env`
-    type A = panic::PanicInfo; //~ ERROR use of unresolved module or unlinked crate `panic`
-    type B = vec::Vec<u8>; //~ ERROR use of unresolved module or unlinked crate `vec`
+    env::current_dir; //~ ERROR cannot find module or crate `env`
+    type A = panic::PanicInfo; //~ ERROR cannot find module or crate `panic`
+    type B = vec::Vec<u8>; //~ ERROR cannot find module or crate `vec`
 }
 
 // ferrocene-annotations: fls_9i5msiuuyihf

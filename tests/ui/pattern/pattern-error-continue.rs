@@ -32,7 +32,7 @@ fn main() {
     //~| NOTE expected `char`, found `bool`
 
     match () {
-        E::V => {} //~ ERROR failed to resolve: use of undeclared type `E`
+        E::V => {} //~ ERROR cannot find type `E`
     }
 }
 

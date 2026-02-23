@@ -186,7 +186,6 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(negative_impls))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(never_type))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(optimize_attribute))]
-#![cfg_attr(not(feature = "ferrocene_subset"), feature(rustc_allow_const_fn_unstable))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(rustc_attrs))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(slice_internals))]
 #![feature(staged_api)]
@@ -243,6 +242,8 @@ pub mod collections;
 pub mod ffi;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod intrinsics;
 #[cfg(not(no_rc))]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod rc;

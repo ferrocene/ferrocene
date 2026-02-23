@@ -17,6 +17,59 @@ pub(crate) struct CfgAttrNoAttributes;
 pub(crate) struct NoSyntaxVarsExprRepeat {
     #[primary_span]
     pub span: Span,
+    #[subdiagnostic]
+    pub typo_repeatable: Option<VarTypoSuggestionRepeatable>,
+    #[subdiagnostic]
+    pub typo_unrepeatable: Option<VarTypoSuggestionUnrepeatable>,
+    #[subdiagnostic]
+    pub typo_unrepeatable_label: Option<VarTypoSuggestionUnrepeatableLabel>,
+    #[subdiagnostic]
+    pub var_no_typo: Option<VarNoTypo>,
+    #[subdiagnostic]
+    pub no_repeatable_var: Option<NoRepeatableVar>,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion(
+    "there's a macro metavariable with a similar name",
+    applicability = "maybe-incorrect",
+    style = "verbose"
+)]
+pub(crate) struct VarTypoSuggestionRepeatable {
+    #[suggestion_part(code = "{name}")]
+    pub span: Span,
+    pub name: Symbol,
+}
+
+#[derive(Subdiagnostic)]
+#[label("argument not found")]
+pub(crate) struct VarTypoSuggestionUnrepeatable {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Subdiagnostic)]
+#[label("this similarly named macro metavariable is unrepeatable")]
+pub(crate) struct VarTypoSuggestionUnrepeatableLabel {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Subdiagnostic)]
+#[label("expected a repeatable metavariable: {$msg}")]
+pub(crate) struct VarNoTypo {
+    #[primary_span]
+    pub span: Span,
+    pub msg: String,
+}
+
+#[derive(Subdiagnostic)]
+#[label(
+    "this macro metavariable is not repeatable and there are no other repeatable metavariables"
+)]
+pub(crate) struct NoRepeatableVar {
+    #[primary_span]
+    pub span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -444,18 +497,6 @@ pub(crate) struct CrateTypeInCfgAttr {
 pub(crate) struct GlobDelegationTraitlessQpath {
     #[primary_span]
     pub span: Span,
-}
-
-// This used to be the `proc_macro_back_compat` lint (#83125). It was later
-// turned into a hard error.
-#[derive(Diagnostic)]
-#[diag("using an old version of `{$crate_name}`")]
-#[note(
-    "older versions of the `{$crate_name}` crate no longer compile; please update to `{$crate_name}` v{$fixed_version}, or switch to one of the `{$crate_name}` alternatives"
-)]
-pub(crate) struct ProcMacroBackCompat {
-    pub crate_name: String,
-    pub fixed_version: String,
 }
 
 pub(crate) use metavar_exprs::*;

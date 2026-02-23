@@ -204,7 +204,7 @@ impl ExternalCrate {
                 url.push('/');
             }
             let is_absolute = url.starts_with('/')
-                || url.split_once("://").is_some_and(|(scheme, _)| {
+                || url.split_once(':').is_some_and(|(scheme, _)| {
                     scheme.bytes().next().is_some_and(|b| b.is_ascii_alphabetic())
                         && scheme
                             .bytes()

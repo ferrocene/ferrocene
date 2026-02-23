@@ -5,7 +5,7 @@
 //@ pp-exact:delegation-inherit-attributes.pp
 
 #![allow(incomplete_features)]
-#![feature(fn_delegation)]
+#![attr = Feature([fn_delegation#0])]
 extern crate std;
 #[attr = PreludeImport]
 use std::prelude::rust_2021::*;

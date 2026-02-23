@@ -1,5 +1,5 @@
 use rustc_middle::bug;
-use rustc_middle::dep_graph::{DepKindVTable, DepNodeKey, FingerprintStyle};
+use rustc_middle::dep_graph::{DepKindVTable, DepNodeKey, KeyFingerprintStyle};
 use rustc_middle::query::QueryCache;
 
 use crate::plumbing::{force_from_dep_node_inner, try_load_from_on_disk_cache_inner};
@@ -15,12 +15,11 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Unit,
+            key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node: Some(|_, dep_node, _| {
                 bug!("force_from_dep_node: encountered {dep_node:?}")
             }),
             try_load_from_on_disk_cache: None,
-            name: &"Null",
         }
     }
 
@@ -29,12 +28,11 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Unit,
+            key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node: Some(|_, dep_node, _| {
                 bug!("force_from_dep_node: encountered {dep_node:?}")
             }),
             try_load_from_on_disk_cache: None,
-            name: &"Red",
         }
     }
 
@@ -42,13 +40,12 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Unit,
+            key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node: Some(|tcx, _, prev_index| {
                 tcx.dep_graph.force_diagnostic_node(tcx, prev_index);
                 true
             }),
             try_load_from_on_disk_cache: None,
-            name: &"SideEffect",
         }
     }
 
@@ -56,10 +53,9 @@ mod non_query {
         DepKindVTable {
             is_anon: true,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Opaque,
+            key_fingerprint_style: KeyFingerprintStyle::Opaque,
             force_from_dep_node: Some(|_, _, _| bug!("cannot force an anon node")),
             try_load_from_on_disk_cache: None,
-            name: &"AnonZeroDeps",
         }
     }
 
@@ -67,10 +63,9 @@ mod non_query {
         DepKindVTable {
             is_anon: true,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Unit,
+            key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node: None,
             try_load_from_on_disk_cache: None,
-            name: &"TraitSelect",
         }
     }
 
@@ -78,10 +73,9 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Opaque,
+            key_fingerprint_style: KeyFingerprintStyle::Opaque,
             force_from_dep_node: None,
             try_load_from_on_disk_cache: None,
-            name: &"CompileCodegenUnit",
         }
     }
 
@@ -89,10 +83,9 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Opaque,
+            key_fingerprint_style: KeyFingerprintStyle::Opaque,
             force_from_dep_node: None,
             try_load_from_on_disk_cache: None,
-            name: &"CompileMonoItem",
         }
     }
 
@@ -100,10 +93,9 @@ mod non_query {
         DepKindVTable {
             is_anon: false,
             is_eval_always: false,
-            fingerprint_style: FingerprintStyle::Unit,
+            key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node: None,
             try_load_from_on_disk_cache: None,
-            name: &"Metadata",
         }
     }
 }
@@ -118,34 +110,32 @@ where
     Cache: QueryCache + 'tcx,
 {
     let is_anon = FLAGS.is_anon;
-    let fingerprint_style = if is_anon {
-        FingerprintStyle::Opaque
+    let key_fingerprint_style = if is_anon {
+        KeyFingerprintStyle::Opaque
     } else {
-        <Cache::Key as DepNodeKey<'tcx>>::fingerprint_style()
+        <Cache::Key as DepNodeKey<'tcx>>::key_fingerprint_style()
     };
 
-    if is_anon || !fingerprint_style.reconstructible() {
+    if is_anon || !key_fingerprint_style.reconstructible() {
         return DepKindVTable {
             is_anon,
             is_eval_always,
-            fingerprint_style,
+            key_fingerprint_style,
             force_from_dep_node: None,
             try_load_from_on_disk_cache: None,
-            name: Q::NAME,
         };
     }
 
     DepKindVTable {
         is_anon,
         is_eval_always,
-        fingerprint_style,
+        key_fingerprint_style,
         force_from_dep_node: Some(|tcx, dep_node, _| {
             force_from_dep_node_inner(Q::query_dispatcher(tcx), tcx, dep_node)
         }),
         try_load_from_on_disk_cache: Some(|tcx, dep_node| {
             try_load_from_on_disk_cache_inner(Q::query_dispatcher(tcx), tcx, dep_node)
         }),
-        name: Q::NAME,
     }
 }
 

@@ -427,7 +427,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 false
             }
             ast::AssocItemKind::Const(box ast::ConstItem {
-                rhs_kind: ast::ConstItemRhsKind::TypeConst { .. },
+                rhs_kind: ast::ConstItemRhsKind::TypeConst { rhs },
                 ..
             }) => {
                 // Make sure this is only allowed if the feature gate is enabled.
@@ -438,6 +438,17 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                     i.span,
                     "associated `type const` are unstable"
                 );
+                // Make sure associated `type const` defaults in traits are only allowed
+                // if the feature gate is enabled.
+                // #![feature(associated_type_defaults)]
+                if ctxt == AssocCtxt::Trait && rhs.is_some() {
+                    gate!(
+                        &self,
+                        associated_type_defaults,
+                        i.span,
+                        "associated type defaults are unstable"
+                    );
+                }
                 false
             }
             _ => false,
@@ -481,11 +492,6 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
             }
         };
     }
-    gate_all!(
-        if_let_guard,
-        "`if let` guards are experimental",
-        "you can write `if matches!(<expr>, <pattern>)` instead of `if let <pattern> = <expr>`"
-    );
     gate_all!(
         async_trait_bounds,
         "`async` trait bounds are unstable",
@@ -580,6 +586,7 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
     gate_all!(frontmatter, "frontmatters are experimental");
     gate_all!(coroutines, "coroutine syntax is experimental");
     gate_all!(const_block_items, "const block items are experimental");
+    gate_all!(final_associated_functions, "`final` on trait functions is experimental");
 
     if !visitor.features.never_patterns() {
         if let Some(spans) = spans.get(&sym::never_patterns) {

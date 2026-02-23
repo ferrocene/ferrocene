@@ -7,57 +7,57 @@
 /// # `anon` query modifier
 ///
 /// Generate a dep node based on the dependencies of the query
-pub struct anon;
+pub(crate) struct anon;
 
 /// # `arena_cache` query modifier
 ///
 /// Use this type for the in-memory cache.
-pub struct arena_cache;
+pub(crate) struct arena_cache;
 
 /// # `cache_on_disk_if` query modifier
 ///
 /// Cache the query to disk if the `Block` returns true.
-pub struct cache_on_disk_if;
+pub(crate) struct cache_on_disk_if;
 
 /// # `cycle_delay_bug` query modifier
 ///
 /// A cycle error results in a delay_bug call
-pub struct cycle_delay_bug;
+pub(crate) struct cycle_delay_bug;
 
 /// # `cycle_fatal` query modifier
 ///
 /// A cycle error for this query aborting the compilation with a fatal error.
-pub struct cycle_fatal;
+pub(crate) struct cycle_fatal;
 
 /// # `cycle_stash` query modifier
 ///
 /// A cycle error results in a stashed cycle error that can be unstashed and canceled later
-pub struct cycle_stash;
+pub(crate) struct cycle_stash;
 
 /// # `depth_limit` query modifier
 ///
 /// Whether the query has a call depth limit
-pub struct depth_limit;
+pub(crate) struct depth_limit;
 
 /// # `desc` query modifier
 ///
 /// The description of the query. This modifier is required on every query.
-pub struct desc;
+pub(crate) struct desc;
 
 /// # `eval_always` query modifier
 ///
 /// Always evaluate the query, ignoring its dependencies
-pub struct eval_always;
+pub(crate) struct eval_always;
 
 /// # `feedable` query modifier
 ///
 /// Generate a `feed` method to set the query's value from another query.
-pub struct feedable;
+pub(crate) struct feedable;
 
 /// # `no_hash` query modifier
 ///
 /// Don't hash the result, instead just mark a query red if it runs
-pub struct no_hash;
+pub(crate) struct no_hash;
 
 /// # `return_result_from_ensure_ok` query modifier
 ///
@@ -71,11 +71,11 @@ pub struct no_hash;
 ///
 /// Can only be applied to queries with a return value of
 /// `Result<_, ErrorGuaranteed>`.
-pub struct return_result_from_ensure_ok;
+pub(crate) struct return_result_from_ensure_ok;
 
 /// # `separate_provide_extern` query modifier
 ///
 /// Use a separate query provider for local and extern crates
-pub struct separate_provide_extern;
+pub(crate) struct separate_provide_extern;
 
 // tidy-alphabetical-end

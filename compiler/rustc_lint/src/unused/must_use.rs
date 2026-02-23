@@ -87,11 +87,39 @@ declare_lint! {
 
 declare_lint_pass!(UnusedResults => [UNUSED_MUST_USE, UNUSED_RESULTS]);
 
+/// Must the type be used?
+#[derive(Debug)]
+pub enum IsTyMustUse {
+    /// Yes, `MustUsePath` contains an explanation for why the type must be used.
+    /// This will result in `unused_must_use` lint.
+    Yes(MustUsePath),
+    /// No, an ordinary type that may be ignored.
+    /// This will result in `unused_results` lint.
+    No,
+    /// No, the type is trivial and thus should always be ignored.
+    /// (this suppresses `unused_results` lint)
+    Trivial,
+}
+
+impl IsTyMustUse {
+    fn map(self, f: impl FnOnce(MustUsePath) -> MustUsePath) -> Self {
+        match self {
+            Self::Yes(must_use_path) => Self::Yes(f(must_use_path)),
+            _ => self,
+        }
+    }
+
+    fn yes(self) -> Option<MustUsePath> {
+        match self {
+            Self::Yes(must_use_path) => Some(must_use_path),
+            _ => None,
+        }
+    }
+}
+
 /// A path through a type to a `must_use` source. Contains useful info for the lint.
 #[derive(Debug)]
 pub enum MustUsePath {
-    /// Suppress must_use checking.
-    Suppressed,
     /// The root of the normal `must_use` lint with an optional message.
     Def(Span, DefId, Option<Symbol>),
     Boxed(Box<Self>),
@@ -114,15 +142,15 @@ pub fn is_ty_must_use<'tcx>(
     ty: Ty<'tcx>,
     expr: &hir::Expr<'_>,
     span: Span,
-) -> Option<MustUsePath> {
+) -> IsTyMustUse {
     if ty.is_unit() {
-        return Some(MustUsePath::Suppressed);
+        return IsTyMustUse::Trivial;
     }
     let parent_mod_did = cx.tcx.parent_module(expr.hir_id).to_def_id();
     let is_uninhabited =
         |t: Ty<'tcx>| !t.is_inhabited_from(cx.tcx, parent_mod_did, cx.typing_env());
     if is_uninhabited(ty) {
-        return Some(MustUsePath::Suppressed);
+        return IsTyMustUse::Trivial;
     }
 
     match *ty.kind() {
@@ -140,7 +168,7 @@ pub fn is_ty_must_use<'tcx>(
                 && args.type_at(0).is_unit()
                 && is_uninhabited(args.type_at(1)) =>
         {
-            Some(MustUsePath::Suppressed)
+            IsTyMustUse::Trivial
         }
         // Suppress warnings on `ControlFlow<Uninhabited, ()>` (e.g. `ControlFlow<!, ()>`).
         ty::Adt(def, args)
@@ -148,9 +176,11 @@ pub fn is_ty_must_use<'tcx>(
                 && args.type_at(1).is_unit()
                 && is_uninhabited(args.type_at(0)) =>
         {
-            Some(MustUsePath::Suppressed)
+            IsTyMustUse::Trivial
         }
-        ty::Adt(def, _) => is_def_must_use(cx, def.did(), span),
+        ty::Adt(def, _) => {
+            is_def_must_use(cx, def.did(), span).map_or(IsTyMustUse::No, IsTyMustUse::Yes)
+        }
         ty::Alias(ty::Opaque | ty::Projection, ty::AliasTy { def_id: def, .. }) => {
             elaborate(cx.tcx, cx.tcx.explicit_item_self_bounds(def).iter_identity_copied())
                 // We only care about self bounds for the impl-trait
@@ -168,16 +198,20 @@ pub fn is_ty_must_use<'tcx>(
                     }
                 })
                 .map(|inner| MustUsePath::Opaque(Box::new(inner)))
+                .map_or(IsTyMustUse::No, IsTyMustUse::Yes)
         }
-        ty::Dynamic(binders, _) => binders.iter().find_map(|predicate| {
-            if let ty::ExistentialPredicate::Trait(ref trait_ref) = predicate.skip_binder() {
-                let def_id = trait_ref.def_id;
-                is_def_must_use(cx, def_id, span)
-                    .map(|inner| MustUsePath::TraitObject(Box::new(inner)))
-            } else {
-                None
-            }
-        }),
+        ty::Dynamic(binders, _) => binders
+            .iter()
+            .find_map(|predicate| {
+                if let ty::ExistentialPredicate::Trait(ref trait_ref) = predicate.skip_binder() {
+                    let def_id = trait_ref.def_id;
+                    is_def_must_use(cx, def_id, span)
+                        .map(|inner| MustUsePath::TraitObject(Box::new(inner)))
+                } else {
+                    None
+                }
+            })
+            .map_or(IsTyMustUse::No, IsTyMustUse::Yes),
         ty::Tuple(tys) => {
             let elem_exprs = if let hir::ExprKind::Tup(elem_exprs) = expr.kind {
                 debug_assert_eq!(elem_exprs.len(), tys.len());
@@ -194,35 +228,38 @@ pub fn is_ty_must_use<'tcx>(
                 .zip(elem_exprs)
                 .enumerate()
                 .filter_map(|(i, (ty, expr))| {
-                    is_ty_must_use(cx, ty, expr, expr.span).map(|path| (i, path))
+                    is_ty_must_use(cx, ty, expr, expr.span).yes().map(|path| (i, path))
                 })
                 .collect::<Vec<_>>();
 
             if !nested_must_use.is_empty() {
-                Some(MustUsePath::TupleElement(nested_must_use))
+                IsTyMustUse::Yes(MustUsePath::TupleElement(nested_must_use))
             } else {
-                None
+                IsTyMustUse::No
             }
         }
         ty::Array(ty, len) => match len.try_to_target_usize(cx.tcx) {
             // If the array is empty we don't lint, to avoid false positives
-            Some(0) | None => None,
+            Some(0) | None => IsTyMustUse::No,
             // If the array is definitely non-empty, we can do `#[must_use]` checking.
             Some(len) => is_ty_must_use(cx, ty, expr, span)
                 .map(|inner| MustUsePath::Array(Box::new(inner), len)),
         },
-        ty::Closure(..) | ty::CoroutineClosure(..) => Some(MustUsePath::Closure(span)),
+        ty::Closure(..) | ty::CoroutineClosure(..) => IsTyMustUse::Yes(MustUsePath::Closure(span)),
         ty::Coroutine(def_id, ..) => {
             // async fn should be treated as "implementor of `Future`"
-            let must_use = if cx.tcx.coroutine_is_async(def_id) {
-                let def_id = cx.tcx.lang_items().future_trait()?;
-                is_def_must_use(cx, def_id, span).map(|inner| MustUsePath::Opaque(Box::new(inner)))
+            if cx.tcx.coroutine_is_async(def_id)
+                && let Some(def_id) = cx.tcx.lang_items().future_trait()
+            {
+                IsTyMustUse::Yes(MustUsePath::Opaque(Box::new(
+                    is_def_must_use(cx, def_id, span)
+                        .expect("future trait is marked as `#[must_use]`"),
+                )))
             } else {
-                None
-            };
-            must_use.or(Some(MustUsePath::Coroutine(span)))
+                IsTyMustUse::Yes(MustUsePath::Coroutine(span))
+            }
         }
-        _ => None,
+        _ => IsTyMustUse::No,
     }
 }
 
@@ -269,17 +306,18 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
         let ty = cx.typeck_results().expr_ty(expr);
 
         let must_use_result = is_ty_must_use(cx, ty, expr, expr.span);
-        let type_lint_emitted_or_suppressed = match must_use_result {
-            Some(path) => {
+        let type_lint_emitted_or_trivial = match must_use_result {
+            IsTyMustUse::Yes(path) => {
                 emit_must_use_untranslated(cx, &path, "", "", 1, false, expr_is_from_block);
                 true
             }
-            None => false,
+            IsTyMustUse::Trivial => true,
+            IsTyMustUse::No => false,
         };
 
         let fn_warned = check_fn_must_use(cx, expr, expr_is_from_block);
 
-        if !fn_warned && type_lint_emitted_or_suppressed {
+        if !fn_warned && type_lint_emitted_or_trivial {
             // We don't warn about unused unit or uninhabited types.
             // (See https://github.com/rust-lang/rust/issues/43806 for details.)
             return;
@@ -349,7 +387,8 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
             op_warned = true;
         }
 
-        if !(type_lint_emitted_or_suppressed || fn_warned || op_warned) {
+        // Only emit unused results lint if we haven't emitted any of the more specific lints and the expression type is non trivial.
+        if !(type_lint_emitted_or_trivial || fn_warned || op_warned) {
             cx.emit_span_lint(UNUSED_RESULTS, s.span, UnusedResult { ty });
         }
     }
@@ -431,7 +470,6 @@ fn emit_must_use_untranslated(
     let plural_suffix = pluralize!(plural_len);
 
     match path {
-        MustUsePath::Suppressed => {}
         MustUsePath::Boxed(path) => {
             let descr_pre = &format!("{descr_pre}boxed ");
             emit_must_use_untranslated(

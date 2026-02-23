@@ -9,6 +9,7 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![cfg_attr(bootstrap, feature(assert_matches))]
+#![cfg_attr(bootstrap, feature(if_let_guard))]
 #![cfg_attr(bootstrap, feature(ptr_as_ref_unchecked))]
 #![feature(arbitrary_self_types)]
 #![feature(box_patterns)]
@@ -16,7 +17,6 @@
 #![feature(const_trait_impl)]
 #![feature(control_flow_into_value)]
 #![feature(default_field_values)]
-#![feature(if_let_guard)]
 #![feature(iter_intersperse)]
 #![feature(rustc_attrs)]
 #![feature(trim_prefix_suffix)]
@@ -53,7 +53,7 @@ use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::{Applicability, Diag, ErrCode, ErrorGuaranteed, LintBuffer};
 use rustc_expand::base::{DeriveResolution, SyntaxExtension, SyntaxExtensionKind};
 use rustc_feature::BUILTIN_ATTRIBUTES;
-use rustc_hir::attrs::{AttributeKind, StrippedCfgItem};
+use rustc_hir::attrs::StrippedCfgItem;
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{
     self, CtorOf, DefKind, DocLinkResMap, LifetimeRes, MacroKinds, NonMacroAttrKind, PartialRes,
@@ -274,16 +274,13 @@ enum ResolutionError<'ra> {
     UndeclaredLabel { name: Symbol, suggestion: Option<LabelSuggestion> },
     /// Error E0429: `self` imports are only allowed within a `{ }` list.
     SelfImportsOnlyAllowedWithin { root: bool, span_with_rename: Span },
-    /// Error E0430: `self` import can only appear once in the list.
-    SelfImportCanOnlyAppearOnceInTheList,
-    /// Error E0431: `self` import can only appear in an import list with a non-empty prefix.
-    SelfImportOnlyInImportListWithNonEmptyPrefix,
     /// Error E0433: failed to resolve.
     FailedToResolve {
-        segment: Option<Symbol>,
+        segment: Symbol,
         label: String,
         suggestion: Option<Suggestion>,
         module: Option<ModuleOrUniformRoot<'ra>>,
+        message: String,
     },
     /// Error E0434: can't capture dynamic environment in a fn item.
     CannotCaptureDynamicEnvironmentInFnItem,
@@ -342,7 +339,7 @@ enum ResolutionError<'ra> {
 enum VisResolutionError<'a> {
     Relative2018(Span, &'a ast::Path),
     AncestorOnly(Span),
-    FailedToResolve(Span, String, Option<Suggestion>),
+    FailedToResolve(Span, Symbol, String, Option<Suggestion>, String),
     ExpectedFound(Span, String, Res),
     Indeterminate(Span),
     ModuleOnly(Span),
@@ -371,16 +368,6 @@ impl Segment {
         Segment {
             ident,
             id: None,
-            has_generic_args: false,
-            has_lifetime_args: false,
-            args_span: DUMMY_SP,
-        }
-    }
-
-    fn from_ident_and_id(ident: Ident, id: NodeId) -> Segment {
-        Segment {
-            ident,
-            id: Some(id),
             has_generic_args: false,
             has_lifetime_args: false,
             args_span: DUMMY_SP,
@@ -486,6 +473,7 @@ enum PathResult<'ra> {
         /// The segment name of target
         segment_name: Symbol,
         error_implied_by_parse_error: bool,
+        message: String,
     },
 }
 
@@ -496,10 +484,14 @@ impl<'ra> PathResult<'ra> {
         finalize: bool,
         error_implied_by_parse_error: bool,
         module: Option<ModuleOrUniformRoot<'ra>>,
-        label_and_suggestion: impl FnOnce() -> (String, Option<Suggestion>),
+        label_and_suggestion: impl FnOnce() -> (String, String, Option<Suggestion>),
     ) -> PathResult<'ra> {
-        let (label, suggestion) =
-            if finalize { label_and_suggestion() } else { (String::new(), None) };
+        let (message, label, suggestion) = if finalize {
+            label_and_suggestion()
+        } else {
+            // FIXME: this output isn't actually present in the test suite.
+            (format!("cannot find `{ident}` in this scope"), String::new(), None)
+        };
         PathResult::Failed {
             span: ident.span,
             segment_name: ident.name,
@@ -508,6 +500,7 @@ impl<'ra> PathResult<'ra> {
             is_error_from_last_segment,
             module,
             error_implied_by_parse_error,
+            message,
         }
     }
 }
@@ -2468,8 +2461,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
         find_attr!(
             // we can use parsed attrs here since for other crates they're already available
-            self.tcx.get_all_attrs(def_id),
-            AttributeKind::RustcLegacyConstGenerics{fn_indexes,..} => fn_indexes
+            self.tcx, def_id,
+            RustcLegacyConstGenerics{fn_indexes,..} => fn_indexes
         )
         .map(|fn_indexes| fn_indexes.iter().map(|(num, _)| *num).collect())
     }

@@ -172,9 +172,11 @@ change. This initiates :ref:`dev-phase-review`.
 Dev Phase 3: Code Review
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-During this phase, the latest commit of a PR must receive a positive review
-through GitHub Reviews by an independent Ferrocene Reviewer, and there must be
-no outstanding request for changes.
+During this phase, the changes up to latest commit of a PR must receive an
+approval through GitHub Reviews or unambigious comment by an independent
+Ferrocene Reviewer. In the case of a PR authored by multiple Ferrocene
+developers, individual developers may review each others changes, but cannot
+approve their own changes. There must be no outstanding request for changes.
 
 Any code change pushed after a positive review invalidates the assessment and
 demands that the code be reviewed again. Outstanding requests for changes must
@@ -195,9 +197,10 @@ This can be done in the event that the Ferrocene developer wants to run the full
 test suite before the PR is approved in order to ensure that the PR will pass
 the test suite ahead of the review.
 
-Once the commit workflow successfully executes, and the necessary positive
-approval is left by a Ferrocene Reviewer, any Ferrocene developer can send a
-command to the bot to queue the PR for :ref:`dev-phase-queue`.
+Once the commit workflow successfully executes, the necessary positive
+approval is left by a Ferrocene Reviewer, and there are no outstanding requests
+for changes, any Ferrocene developer can send a command to the bot to queue the
+PR for :ref:`dev-phase-queue`.
 
 .. _dev-phase-queue:
 

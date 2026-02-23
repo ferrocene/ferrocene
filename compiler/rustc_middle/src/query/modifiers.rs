@@ -1,4 +1,8 @@
 //! This contains documentation which is linked from query modifiers used in the `rustc_queries!` proc macro.
+//!
+//! The dummy items in this module are used to enable hover documentation for
+//! modifier names in the query list, and to allow find-all-references to list
+//! all queries that use a particular modifier.
 #![allow(unused, non_camel_case_types)]
 // FIXME: Update and clarify documentation for these modifiers.
 

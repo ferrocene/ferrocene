@@ -15,21 +15,37 @@ use rustc_data_structures::{assert_matches, outline};
 use rustc_errors::DiagInner;
 use rustc_index::IndexVec;
 use rustc_macros::{Decodable, Encodable};
-use rustc_query_system::ich::StableHashingContext;
-use rustc_query_system::query::QuerySideEffect;
 use rustc_serialize::opaque::{FileEncodeResult, FileEncoder};
 use rustc_session::Session;
 use tracing::{debug, instrument};
 #[cfg(debug_assertions)]
 use {super::debug::EdgeFilter, std::env};
 
-use super::query::DepGraphQuery;
+use super::retained::RetainedDepGraph;
 use super::serialized::{GraphEncoder, SerializedDepGraph, SerializedDepNodeIndex};
-use super::{DepKind, DepNode, HasDepContext, WorkProductId, read_deps, with_deps};
+use super::{DepKind, DepNode, WorkProductId, read_deps, with_deps};
 use crate::dep_graph::edges::EdgesVec;
+use crate::ich::StableHashingContext;
 use crate::ty::TyCtxt;
 use crate::verify_ich::incremental_verify_ich;
 
+/// Tracks 'side effects' for a particular query.
+/// This struct is saved to disk along with the query result,
+/// and loaded from disk if we mark the query as green.
+/// This allows us to 'replay' changes to global state
+/// that would otherwise only occur if we actually
+/// executed the query method.
+///
+/// Each side effect gets an unique dep node index which is added
+/// as a dependency of the query which had the effect.
+#[derive(Debug, Encodable, Decodable)]
+pub enum QuerySideEffect {
+    /// Stores a diagnostic emitted during query execution.
+    /// This diagnostic will be re-emitted if we mark
+    /// the query as green, as that query will have the side
+    /// effect dep node as a dependency.
+    Diagnostic(DiagInner),
+}
 #[derive(Clone)]
 pub struct DepGraph {
     data: Option<Arc<DepGraphData>>,
@@ -126,15 +142,17 @@ impl DepGraph {
 
         // Instantiate a node with zero dependencies only once for anonymous queries.
         let _green_node_index = current.alloc_new_node(
-            DepNode { kind: DepKind::ANON_ZERO_DEPS, hash: current.anon_id_seed.into() },
+            DepNode { kind: DepKind::AnonZeroDeps, key_fingerprint: current.anon_id_seed.into() },
             EdgesVec::new(),
             Fingerprint::ZERO,
         );
         assert_eq!(_green_node_index, DepNodeIndex::SINGLETON_ZERO_DEPS_ANON_NODE);
 
-        // Instantiate a dependy-less red node only once for anonymous queries.
+        // Create a single always-red node, with no dependencies of its own.
+        // Other nodes can use the always-red node as a fake dependency, to
+        // ensure that their dependency list will never be all-green.
         let red_node_index = current.alloc_new_node(
-            DepNode { kind: DepKind::RED, hash: Fingerprint::ZERO.into() },
+            DepNode { kind: DepKind::Red, key_fingerprint: Fingerprint::ZERO.into() },
             EdgesVec::new(),
             Fingerprint::ZERO,
         );
@@ -173,9 +191,9 @@ impl DepGraph {
         self.data.is_some()
     }
 
-    pub fn with_query(&self, f: impl Fn(&DepGraphQuery)) {
+    pub fn with_retained_dep_graph(&self, f: impl Fn(&RetainedDepGraph)) {
         if let Some(data) = &self.data {
-            data.current.encoder.with_query(f)
+            data.current.encoder.with_retained_dep_graph(f)
         }
     }
 
@@ -252,17 +270,17 @@ impl DepGraph {
     }
 
     #[inline(always)]
-    pub fn with_task<'tcx, Ctxt: HasDepContext<'tcx>, A: Debug, R>(
+    pub fn with_task<'tcx, A: Debug, R>(
         &self,
-        key: DepNode,
-        cx: Ctxt,
-        arg: A,
-        task: fn(Ctxt, A) -> R,
+        dep_node: DepNode,
+        tcx: TyCtxt<'tcx>,
+        task_arg: A,
+        task_fn: fn(tcx: TyCtxt<'tcx>, task_arg: A) -> R,
         hash_result: Option<fn(&mut StableHashingContext<'_>, &R) -> Fingerprint>,
     ) -> (R, DepNodeIndex) {
         match self.data() {
-            Some(data) => data.with_task(key, cx, arg, task, hash_result),
-            None => (task(cx, arg), self.next_virtual_depnode_index()),
+            Some(data) => data.with_task(dep_node, tcx, task_arg, task_fn, hash_result),
+            None => (task_fn(tcx, task_arg), self.next_virtual_depnode_index()),
         }
     }
 
@@ -294,33 +312,21 @@ impl DepGraphData {
     /// prevent implicit 'leaks' of tracked state into the task (which
     /// could then be read without generating correct edges in the
     /// dep-graph -- see the [rustc dev guide] for more details on
-    /// the dep-graph). To this end, the task function gets exactly two
-    /// pieces of state: the context `cx` and an argument `arg`. Both
-    /// of these bits of state must be of some type that implements
-    /// `DepGraphSafe` and hence does not leak.
+    /// the dep-graph).
     ///
-    /// The choice of two arguments is not fundamental. One argument
-    /// would work just as well, since multiple values can be
-    /// collected using tuples. However, using two arguments works out
-    /// to be quite convenient, since it is common to need a context
-    /// (`cx`) and some argument (e.g., a `DefId` identifying what
-    /// item to process).
-    ///
-    /// For cases where you need some other number of arguments:
-    ///
-    /// - If you only need one argument, just use `()` for the `arg`
-    ///   parameter.
-    /// - If you need 3+ arguments, use a tuple for the
-    ///   `arg` parameter.
+    /// Therefore, the task function takes a `TyCtxt`, plus exactly one
+    /// additional argument, `task_arg`. The additional argument type can be
+    /// `()` if no argument is needed, or a tuple if multiple arguments are
+    /// needed.
     ///
     /// [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/queries/incremental-compilation.html
     #[inline(always)]
-    pub fn with_task<'tcx, Ctxt: HasDepContext<'tcx>, A: Debug, R>(
+    pub fn with_task<'tcx, A: Debug, R>(
         &self,
-        key: DepNode,
-        cx: Ctxt,
-        arg: A,
-        task: fn(Ctxt, A) -> R,
+        dep_node: DepNode,
+        tcx: TyCtxt<'tcx>,
+        task_arg: A,
+        task_fn: fn(tcx: TyCtxt<'tcx>, task_arg: A) -> R,
         hash_result: Option<fn(&mut StableHashingContext<'_>, &R) -> Fingerprint>,
     ) -> (R, DepNodeIndex) {
         // If the following assertion triggers, it can have two reasons:
@@ -328,32 +334,28 @@ impl DepGraphData {
         //    in `DepGraph::try_mark_green()`.
         // 2. Two distinct query keys get mapped to the same `DepNode`
         //    (see for example #48923).
-        self.assert_dep_node_not_yet_allocated_in_current_session(
-            cx.dep_context().sess,
-            &key,
-            || {
-                format!(
-                    "forcing query with already existing `DepNode`\n\
-                 - query-key: {arg:?}\n\
-                 - dep-node: {key:?}"
-                )
-            },
-        );
+        self.assert_dep_node_not_yet_allocated_in_current_session(tcx.sess, &dep_node, || {
+            format!(
+                "forcing query with already existing `DepNode`\n\
+                 - query-key: {task_arg:?}\n\
+                 - dep-node: {dep_node:?}"
+            )
+        });
 
-        let with_deps = |task_deps| with_deps(task_deps, || task(cx, arg));
-        let (result, edges) = if cx.dep_context().is_eval_always(key.kind) {
+        let with_deps = |task_deps| with_deps(task_deps, || task_fn(tcx, task_arg));
+        let (result, edges) = if tcx.is_eval_always(dep_node.kind) {
             (with_deps(TaskDepsRef::EvalAlways), EdgesVec::new())
         } else {
             let task_deps = Lock::new(TaskDeps::new(
                 #[cfg(debug_assertions)]
-                Some(key),
+                Some(dep_node),
                 0,
             ));
             (with_deps(TaskDepsRef::Allow(&task_deps)), task_deps.into_inner().reads)
         };
 
         let dep_node_index =
-            self.hash_result_and_alloc_node(cx.dep_context(), key, edges, &result, hash_result);
+            self.hash_result_and_alloc_node(tcx, dep_node, edges, &result, hash_result);
 
         (result, dep_node_index)
     }
@@ -418,7 +420,7 @@ impl DepGraphData {
                     // Fingerprint::combine() is faster than sending Fingerprint
                     // through the StableHasher (at least as long as StableHasher
                     // is so slow).
-                    hash: self.current.anon_id_seed.combine(hasher.finish()).into(),
+                    key_fingerprint: self.current.anon_id_seed.combine(hasher.finish()).into(),
                 };
 
                 // The DepNodes generated by the process above are not unique. 2 queries could
@@ -585,7 +587,7 @@ impl DepGraph {
                         data.current.record_edge(
                             dep_node_index,
                             node,
-                            data.prev_fingerprint_of(prev_index),
+                            data.prev_value_fingerprint_of(prev_index),
                         );
                     }
 
@@ -658,8 +660,8 @@ impl DepGraphData {
     }
 
     #[inline]
-    pub fn prev_fingerprint_of(&self, prev_index: SerializedDepNodeIndex) -> Fingerprint {
-        self.previous.fingerprint_by_index(prev_index)
+    pub fn prev_value_fingerprint_of(&self, prev_index: SerializedDepNodeIndex) -> Fingerprint {
+        self.previous.value_fingerprint_for_index(prev_index)
     }
 
     #[inline]
@@ -678,8 +680,8 @@ impl DepGraphData {
         // Use `send_new` so we get an unique index, even though the dep node is not.
         let dep_node_index = self.current.encoder.send_new(
             DepNode {
-                kind: DepKind::SIDE_EFFECT,
-                hash: PackedFingerprint::from(Fingerprint::ZERO),
+                kind: DepKind::SideEffect,
+                key_fingerprint: PackedFingerprint::from(Fingerprint::ZERO),
             },
             Fingerprint::ZERO,
             // We want the side effect node to always be red so it will be forced and emit the
@@ -711,8 +713,8 @@ impl DepGraphData {
                 prev_index,
                 &self.colors,
                 DepNode {
-                    kind: DepKind::SIDE_EFFECT,
-                    hash: PackedFingerprint::from(Fingerprint::ZERO),
+                    kind: DepKind::SideEffect,
+                    key_fingerprint: PackedFingerprint::from(Fingerprint::ZERO),
                 },
                 Fingerprint::ZERO,
                 std::iter::once(DepNodeIndex::FOREVER_RED_NODE).collect(),
@@ -727,12 +729,12 @@ impl DepGraphData {
         &self,
         key: DepNode,
         edges: EdgesVec,
-        fingerprint: Option<Fingerprint>,
+        value_fingerprint: Option<Fingerprint>,
     ) -> DepNodeIndex {
         if let Some(prev_index) = self.previous.node_to_index_opt(&key) {
             // Determine the color and index of the new `DepNode`.
-            let is_green = if let Some(fingerprint) = fingerprint {
-                if fingerprint == self.previous.fingerprint_by_index(prev_index) {
+            let is_green = if let Some(value_fingerprint) = value_fingerprint {
+                if value_fingerprint == self.previous.value_fingerprint_for_index(prev_index) {
                     // This is a green node: it existed in the previous compilation,
                     // its query was re-executed, and it has the same result as before.
                     true
@@ -749,22 +751,22 @@ impl DepGraphData {
                 false
             };
 
-            let fingerprint = fingerprint.unwrap_or(Fingerprint::ZERO);
+            let value_fingerprint = value_fingerprint.unwrap_or(Fingerprint::ZERO);
 
             let dep_node_index = self.current.encoder.send_and_color(
                 prev_index,
                 &self.colors,
                 key,
-                fingerprint,
+                value_fingerprint,
                 edges,
                 is_green,
             );
 
-            self.current.record_node(dep_node_index, key, fingerprint);
+            self.current.record_node(dep_node_index, key, value_fingerprint);
 
             dep_node_index
         } else {
-            self.current.alloc_new_node(key, edges, fingerprint.unwrap_or(Fingerprint::ZERO))
+            self.current.alloc_new_node(key, edges, value_fingerprint.unwrap_or(Fingerprint::ZERO))
         }
     }
 
@@ -781,7 +783,7 @@ impl DepGraphData {
             self.current.record_edge(
                 dep_node_index,
                 *self.previous.index_to_node(prev_index),
-                self.previous.fingerprint_by_index(prev_index),
+                self.previous.value_fingerprint_for_index(prev_index),
             );
         }
 
@@ -925,7 +927,7 @@ impl DepGraphData {
         if !tcx.is_eval_always(dep_dep_node.kind) {
             debug!(
                 "state of dependency {:?} ({}) is unknown, trying to mark it green",
-                dep_dep_node, dep_dep_node.hash,
+                dep_dep_node, dep_dep_node.key_fingerprint,
             );
 
             let node_index = self.try_mark_previous_green(tcx, parent_dep_node_index, Some(frame));
@@ -938,7 +940,7 @@ impl DepGraphData {
 
         // We failed to mark it green, so we try to force the query.
         debug!("trying to force dependency {dep_dep_node:?}");
-        if !tcx.dep_context().try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
+        if !tcx.try_force_from_dep_node(*dep_dep_node, parent_dep_node_index, frame) {
             // The DepNode could not be forced.
             debug!("dependency {dep_dep_node:?} could not be forced");
             return None;
@@ -985,10 +987,7 @@ impl DepGraphData {
         let frame = MarkFrame { index: prev_dep_node_index, parent: frame };
 
         // We never try to mark eval_always nodes as green
-        debug_assert!(
-            !tcx.dep_context()
-                .is_eval_always(self.previous.index_to_node(prev_dep_node_index).kind)
-        );
+        debug_assert!(!tcx.is_eval_always(self.previous.index_to_node(prev_dep_node_index).kind));
 
         let prev_deps = self.previous.edge_targets_from(prev_dep_node_index);
 
@@ -1157,10 +1156,10 @@ pub(super) struct CurrentDepGraph {
     encoder: GraphEncoder,
     anon_node_to_index: ShardedHashMap<DepNode, DepNodeIndex>,
 
-    /// This is used to verify that fingerprints do not change between the creation of a node
-    /// and its recomputation.
+    /// This is used to verify that value fingerprints do not change between the
+    /// creation of a node and its recomputation.
     #[cfg(debug_assertions)]
-    fingerprints: Lock<IndexVec<DepNodeIndex, Option<Fingerprint>>>,
+    value_fingerprints: Lock<IndexVec<DepNodeIndex, Option<Fingerprint>>>,
 
     /// Used to trap when a specific edge is added to the graph.
     /// This is used for debug purposes and is only active with `debug_assertions`.
@@ -1227,7 +1226,7 @@ impl CurrentDepGraph {
             #[cfg(debug_assertions)]
             forbidden_edge,
             #[cfg(debug_assertions)]
-            fingerprints: Lock::new(IndexVec::from_elem_n(None, new_node_count_estimate)),
+            value_fingerprints: Lock::new(IndexVec::from_elem_n(None, new_node_count_estimate)),
             nodes_in_current_session: new_node_dbg.then(|| {
                 Lock::new(FxHashMap::with_capacity_and_hasher(
                     new_node_count_estimate,
@@ -1240,12 +1239,20 @@ impl CurrentDepGraph {
     }
 
     #[cfg(debug_assertions)]
-    fn record_edge(&self, dep_node_index: DepNodeIndex, key: DepNode, fingerprint: Fingerprint) {
+    fn record_edge(
+        &self,
+        dep_node_index: DepNodeIndex,
+        key: DepNode,
+        value_fingerprint: Fingerprint,
+    ) {
         if let Some(forbidden_edge) = &self.forbidden_edge {
             forbidden_edge.index_to_node.lock().insert(dep_node_index, key);
         }
-        let previous = *self.fingerprints.lock().get_or_insert_with(dep_node_index, || fingerprint);
-        assert_eq!(previous, fingerprint, "Unstable fingerprints for {:?}", key);
+        let prior_value_fingerprint = *self
+            .value_fingerprints
+            .lock()
+            .get_or_insert_with(dep_node_index, || value_fingerprint);
+        assert_eq!(prior_value_fingerprint, value_fingerprint, "Unstable fingerprints for {key:?}");
     }
 
     #[inline(always)]
@@ -1253,10 +1260,10 @@ impl CurrentDepGraph {
         &self,
         dep_node_index: DepNodeIndex,
         key: DepNode,
-        _current_fingerprint: Fingerprint,
+        _value_fingerprint: Fingerprint,
     ) {
         #[cfg(debug_assertions)]
-        self.record_edge(dep_node_index, key, _current_fingerprint);
+        self.record_edge(dep_node_index, key, _value_fingerprint);
 
         if let Some(ref nodes_in_current_session) = self.nodes_in_current_session {
             outline(|| {
@@ -1274,11 +1281,11 @@ impl CurrentDepGraph {
         &self,
         key: DepNode,
         edges: EdgesVec,
-        current_fingerprint: Fingerprint,
+        value_fingerprint: Fingerprint,
     ) -> DepNodeIndex {
-        let dep_node_index = self.encoder.send_new(key, current_fingerprint, edges);
+        let dep_node_index = self.encoder.send_new(key, value_fingerprint, edges);
 
-        self.record_node(dep_node_index, key, current_fingerprint);
+        self.record_node(dep_node_index, key, value_fingerprint);
 
         dep_node_index
     }

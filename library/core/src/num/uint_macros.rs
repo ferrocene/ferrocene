@@ -17,8 +17,8 @@ macro_rules! uint_impl {
         fsh_op = $fsh_op:literal,
         fshl_result = $fshl_result:literal,
         fshr_result = $fshr_result:literal,
-        clmul_lhs = $clmul_rhs:literal,
-        clmul_rhs = $clmul_lhs:literal,
+        clmul_lhs = $clmul_lhs:literal,
+        clmul_rhs = $clmul_rhs:literal,
         clmul_result = $clmul_result:literal,
         swap_op = $swap_op:literal,
         swapped = $swapped:literal,
@@ -487,8 +487,8 @@ macro_rules! uint_impl {
 
         /// Performs a carry-less multiplication, returning the lower bits.
         ///
-        /// This operation is similar to long multiplication, except that exclusive or is used
-        /// instead of addition. The implementation is equivalent to:
+        /// This operation is similar to long multiplication in base 2, except that exclusive or is
+        /// used instead of addition. The implementation is equivalent to:
         ///
         /// ```no_run
         #[doc = concat!("pub fn carryless_mul(lhs: ", stringify!($SelfT), ", rhs: ", stringify!($SelfT), ") -> ", stringify!($SelfT), "{")]

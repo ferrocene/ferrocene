@@ -214,7 +214,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             if let [best_trait] = visible_traits
                 .iter()
                 .copied()
-                .filter(|trait_def_id| {
+                .filter(|&trait_def_id| {
                     tcx.associated_items(trait_def_id)
                         .filter_by_name_unhygienic(suggested_name)
                         .any(|item| item.tag() == assoc_tag)
@@ -528,7 +528,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         }
                     }
                 }
-                err.multipart_suggestion_verbose(
+                err.multipart_suggestion(
                     "there is a variant with a similar name",
                     suggestion,
                     Applicability::HasPlaceholders,
@@ -1234,7 +1234,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             && let name = Symbol::intern(&format!("{ident2}_{ident3}"))
             && let Some(item) = inherent_impls
                 .iter()
-                .flat_map(|inherent_impl| {
+                .flat_map(|&inherent_impl| {
                     tcx.associated_items(inherent_impl).filter_by_name_unhygienic(name)
                 })
                 .next()
@@ -1546,7 +1546,7 @@ pub fn prohibit_assoc_item_constraint(
                             (constraint.span.with_lo(constraint.ident.span.hi()), String::new()),
                         ];
 
-                        err.multipart_suggestion_verbose(
+                        err.multipart_suggestion(
                             "declare the type parameter right after the `impl` keyword",
                             suggestions,
                             Applicability::MaybeIncorrect,
@@ -1721,7 +1721,7 @@ fn generics_args_err_extend<'a>(
                 },
                 (args_span, String::new()),
             ];
-            err.multipart_suggestion_verbose(msg, suggestion, Applicability::MaybeIncorrect);
+            err.multipart_suggestion(msg, suggestion, Applicability::MaybeIncorrect);
         }
         GenericsArgsErrExtend::DefVariant(segments) => {
             let args: Vec<Span> = segments

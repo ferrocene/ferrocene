@@ -838,7 +838,7 @@ impl<'a, G: EmissionGuarantee> Diag<'a, G> {
     }
 
     with_fn! { with_multipart_suggestion,
-    /// Show a suggestion that has multiple parts to it.
+    /// Show a suggestion that has multiple parts to it, always as its own subdiagnostic.
     /// In other words, multiple changes need to be applied as part of this suggestion.
     pub fn multipart_suggestion(
         &mut self,
@@ -850,25 +850,9 @@ impl<'a, G: EmissionGuarantee> Diag<'a, G> {
             msg,
             suggestion,
             applicability,
-            SuggestionStyle::ShowCode,
-        )
-    } }
-
-    /// Show a suggestion that has multiple parts to it, always as its own subdiagnostic.
-    /// In other words, multiple changes need to be applied as part of this suggestion.
-    pub fn multipart_suggestion_verbose(
-        &mut self,
-        msg: impl Into<DiagMessage>,
-        suggestion: Vec<(Span, String)>,
-        applicability: Applicability,
-    ) -> &mut Self {
-        self.multipart_suggestion_with_style(
-            msg,
-            suggestion,
-            applicability,
             SuggestionStyle::ShowAlways,
         )
-    }
+    } }
 
     /// [`Diag::multipart_suggestion()`] but you can set the [`SuggestionStyle`].
     pub fn multipart_suggestion_with_style(
@@ -1338,6 +1322,13 @@ impl<'a, G: EmissionGuarantee> Diag<'a, G> {
     pub fn cancel(mut self) {
         self.diag = None;
         drop(self);
+    }
+
+    /// Cancels this diagnostic and returns its first message, if it exists.
+    pub fn cancel_into_message(self) -> Option<String> {
+        let s = self.diag.as_ref()?.messages.get(0)?.0.as_str().map(ToString::to_string);
+        self.cancel();
+        s
     }
 
     /// See `DiagCtxt::stash_diagnostic` for details.

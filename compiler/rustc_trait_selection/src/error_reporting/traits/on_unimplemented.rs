@@ -71,6 +71,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 return None;
             };
 
+            #[allow(deprecated)]
             tcx.has_attr(impl_def_id_and_args.0, sym::rustc_on_unimplemented)
                 .then_some(impl_def_id_and_args)
         })
@@ -206,7 +207,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
 
             if self_ty.is_fn() {
                 let fn_sig = self_ty.fn_sig(self.tcx);
-                let shortname = if let ty::FnDef(def_id, _) = self_ty.kind()
+                let shortname = if let ty::FnDef(def_id, _) = *self_ty.kind()
                     && self.tcx.codegen_fn_attrs(def_id).safe_target_features
                 {
                     "#[target_feature] fn"
@@ -589,7 +590,10 @@ impl<'tcx> OnUnimplementedDirective {
             // We don't support those.
             return Ok(None);
         };
-        if let Some(attr) = tcx.get_attr(item_def_id, sym::rustc_on_unimplemented) {
+        if let Some(attr) = {
+            #[allow(deprecated)]
+            tcx.get_attr(item_def_id, sym::rustc_on_unimplemented)
+        } {
             return Self::parse_attribute(attr, false, tcx, item_def_id);
         } else {
             tcx.get_attrs_by_path(item_def_id, &[sym::diagnostic, attr])

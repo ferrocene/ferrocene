@@ -15,7 +15,6 @@ use rustc_errors::{
     Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey, Subdiagnostic, listify, pluralize,
     struct_span_code_err,
 };
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::lang_items::LangItem;
@@ -2449,7 +2448,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 .tcx
                 .inherent_impls(def_id)
                 .into_iter()
-                .flat_map(|i| self.tcx.associated_items(i).in_definition_order())
+                .flat_map(|&i| self.tcx.associated_items(i).in_definition_order())
                 // Only assoc fn with no receivers.
                 .filter(|item| item.is_fn() && !item.is_method())
                 .filter_map(|item| {
@@ -3184,7 +3183,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // Check if there is an associated function with the same name.
         if let Some(def_id) = base_ty.peel_refs().ty_adt_def().map(|d| d.did()) {
-            for impl_def_id in self.tcx.inherent_impls(def_id) {
+            for &impl_def_id in self.tcx.inherent_impls(def_id) {
                 for item in self.tcx.associated_items(impl_def_id).in_definition_order() {
                     if let ExprKind::Field(base_expr, _) = expr.kind
                         && item.name() == field.name
@@ -3676,7 +3675,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn check_expr_asm(&self, asm: &'tcx hir::InlineAsm<'tcx>, span: Span) -> Ty<'tcx> {
         if let rustc_ast::AsmMacro::NakedAsm = asm.asm_macro {
-            if !find_attr!(self.tcx.get_all_attrs(self.body_id), AttributeKind::Naked(..)) {
+            if !find_attr!(self.tcx, self.body_id, Naked(..)) {
                 self.tcx.dcx().emit_err(NakedAsmOutsideNakedFn { span });
             }
         }

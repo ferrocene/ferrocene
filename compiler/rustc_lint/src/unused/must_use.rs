@@ -146,14 +146,13 @@ pub fn is_ty_must_use<'tcx>(
     if ty.is_unit() {
         return IsTyMustUse::Trivial;
     }
+
     let parent_mod_did = cx.tcx.parent_module(expr.hir_id).to_def_id();
     let is_uninhabited =
         |t: Ty<'tcx>| !t.is_inhabited_from(cx.tcx, parent_mod_did, cx.typing_env());
-    if is_uninhabited(ty) {
-        return IsTyMustUse::Trivial;
-    }
 
     match *ty.kind() {
+        _ if is_uninhabited(ty) => IsTyMustUse::Trivial,
         ty::Adt(..) if let Some(boxed) = ty.boxed_ty() => {
             is_ty_must_use(cx, boxed, expr, span).map(|inner| MustUsePath::Boxed(Box::new(inner)))
         }
@@ -212,6 +211,7 @@ pub fn is_ty_must_use<'tcx>(
                 }
             })
             .map_or(IsTyMustUse::No, IsTyMustUse::Yes),
+        // NB: unit is checked up above; this is only reachable for tuples with at least one element
         ty::Tuple(tys) => {
             let elem_exprs = if let hir::ExprKind::Tup(elem_exprs) = expr.kind {
                 debug_assert_eq!(elem_exprs.len(), tys.len());
@@ -364,28 +364,29 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
             _ => None,
         };
 
-        let mut op_warned = false;
-
-        if let Some(must_use_op) = must_use_op {
-            let span = expr.span.find_ancestor_not_from_macro().unwrap_or(expr.span);
-            cx.emit_span_lint(
-                UNUSED_MUST_USE,
-                expr.span,
-                UnusedOp {
-                    op: must_use_op,
-                    label: expr.span,
-                    suggestion: if expr_is_from_block {
-                        UnusedOpSuggestion::BlockTailExpr {
-                            before_span: span.shrink_to_lo(),
-                            after_span: span.shrink_to_hi(),
-                        }
-                    } else {
-                        UnusedOpSuggestion::NormalExpr { span: span.shrink_to_lo() }
+        let op_warned = match must_use_op {
+            Some(must_use_op) => {
+                let span = expr.span.find_ancestor_not_from_macro().unwrap_or(expr.span);
+                cx.emit_span_lint(
+                    UNUSED_MUST_USE,
+                    expr.span,
+                    UnusedOp {
+                        op: must_use_op,
+                        label: expr.span,
+                        suggestion: if expr_is_from_block {
+                            UnusedOpSuggestion::BlockTailExpr {
+                                before_span: span.shrink_to_lo(),
+                                after_span: span.shrink_to_hi(),
+                            }
+                        } else {
+                            UnusedOpSuggestion::NormalExpr { span: span.shrink_to_lo() }
+                        },
                     },
-                },
-            );
-            op_warned = true;
-        }
+                );
+                true
+            }
+            None => false,
+        };
 
         // Only emit unused results lint if we haven't emitted any of the more specific lints and the expression type is non trivial.
         if !(type_lint_emitted_or_trivial || fn_warned || op_warned) {
@@ -399,38 +400,33 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
 fn check_fn_must_use(cx: &LateContext<'_>, expr: &hir::Expr<'_>, expr_is_from_block: bool) -> bool {
     let maybe_def_id = match expr.kind {
         hir::ExprKind::Call(callee, _) => {
-            match callee.kind {
-                hir::ExprKind::Path(ref qpath) => {
-                    match cx.qpath_res(qpath, callee.hir_id) {
-                        Res::Def(DefKind::Fn | DefKind::AssocFn, def_id) => Some(def_id),
-                        // `Res::Local` if it was a closure, for which we
-                        // do not currently support must-use linting
-                        _ => None,
-                    }
-                }
-                _ => None,
+            if let hir::ExprKind::Path(ref qpath) = callee.kind
+                // `Res::Local` if it was a closure, for which we
+                // do not currently support must-use linting
+                && let Res::Def(DefKind::Fn | DefKind::AssocFn, def_id) =
+                    cx.qpath_res(qpath, callee.hir_id)
+            {
+                Some(def_id)
+            } else {
+                None
             }
         }
         hir::ExprKind::MethodCall(..) => cx.typeck_results().type_dependent_def_id(expr.hir_id),
         _ => None,
     };
-    if let Some(def_id) = maybe_def_id {
-        check_must_use_def(cx, def_id, expr.span, "return value of ", "", expr_is_from_block)
-    } else {
-        false
+
+    match maybe_def_id {
+        Some(def_id) => {
+            check_must_use_def(cx, def_id, expr.span, "return value of ", "", expr_is_from_block)
+        }
+        None => false,
     }
 }
 
 fn is_def_must_use(cx: &LateContext<'_>, def_id: DefId, span: Span) -> Option<MustUsePath> {
-    if let Some(reason) = find_attr!(
-        cx.tcx, def_id,
-        MustUse { reason, .. } => reason
-    ) {
-        // check for #[must_use = "..."]
-        Some(MustUsePath::Def(span, def_id, *reason))
-    } else {
-        None
-    }
+    // check for #[must_use = "..."]
+    find_attr!(cx.tcx, def_id, MustUse { reason, .. } => reason)
+        .map(|reason| MustUsePath::Def(span, def_id, *reason))
 }
 
 /// Returns whether further errors should be suppressed because a lint has been emitted.

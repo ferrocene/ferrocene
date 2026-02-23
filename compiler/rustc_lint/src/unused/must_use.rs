@@ -127,6 +127,10 @@ pub enum MustUsePath {
     Opaque(Box<Self>),
     TraitObject(Box<Self>),
     TupleElement(Vec<(usize, Self)>),
+    /// `Result<T, Uninhabited>`
+    Result(Box<Self>),
+    /// `ControlFlow<Uninhabited, T>`
+    ControlFlow(Box<Self>),
     Array(Box<Self>, u64),
     /// The root of the unused_closures lint.
     Closure(Span),
@@ -136,12 +140,19 @@ pub enum MustUsePath {
 
 /// Returns `Some(path)` if `ty` should be considered as "`must_use`" in the context of `expr`
 /// (`expr` is used to get the parent module, which can affect which types are considered uninhabited).
+///
+/// If `simplify_uninhabited` is true, this function considers `Result<T, Uninhabited>` and
+/// `ControlFlow<Uninhabited, T>` the same as `T` (we don't set this *yet* in rustc, but expose this
+/// so clippy can use this).
+//
+// FIXME: remove `simplify_uninhabited` once clippy had a release with the new semantics.
 #[instrument(skip(cx, expr), level = "debug", ret)]
 pub fn is_ty_must_use<'tcx>(
     cx: &LateContext<'tcx>,
     ty: Ty<'tcx>,
     expr: &hir::Expr<'_>,
     span: Span,
+    simplify_uninhabited: bool,
 ) -> IsTyMustUse {
     if ty.is_unit() {
         return IsTyMustUse::Trivial;
@@ -154,12 +165,33 @@ pub fn is_ty_must_use<'tcx>(
     match *ty.kind() {
         _ if is_uninhabited(ty) => IsTyMustUse::Trivial,
         ty::Adt(..) if let Some(boxed) = ty.boxed_ty() => {
-            is_ty_must_use(cx, boxed, expr, span).map(|inner| MustUsePath::Boxed(Box::new(inner)))
+            is_ty_must_use(cx, boxed, expr, span, simplify_uninhabited)
+                .map(|inner| MustUsePath::Boxed(Box::new(inner)))
         }
         ty::Adt(def, args) if cx.tcx.is_lang_item(def.did(), LangItem::Pin) => {
             let pinned_ty = args.type_at(0);
-            is_ty_must_use(cx, pinned_ty, expr, span)
+            is_ty_must_use(cx, pinned_ty, expr, span, simplify_uninhabited)
                 .map(|inner| MustUsePath::Pinned(Box::new(inner)))
+        }
+        // Consider `Result<T, Uninhabited>` (e.g. `Result<(), !>`) equivalent to `T`.
+        ty::Adt(def, args)
+            if simplify_uninhabited
+                && cx.tcx.is_diagnostic_item(sym::Result, def.did())
+                && is_uninhabited(args.type_at(1)) =>
+        {
+            let ok_ty = args.type_at(0);
+            is_ty_must_use(cx, ok_ty, expr, span, simplify_uninhabited)
+                .map(|path| MustUsePath::Result(Box::new(path)))
+        }
+        // Consider `ControlFlow<Uninhabited, T>` (e.g. `ControlFlow<!, ()>`) equivalent to `T`.
+        ty::Adt(def, args)
+            if simplify_uninhabited
+                && cx.tcx.is_diagnostic_item(sym::ControlFlow, def.did())
+                && is_uninhabited(args.type_at(0)) =>
+        {
+            let continue_ty = args.type_at(1);
+            is_ty_must_use(cx, continue_ty, expr, span, simplify_uninhabited)
+                .map(|path| MustUsePath::ControlFlow(Box::new(path)))
         }
         // Suppress warnings on `Result<(), Uninhabited>` (e.g. `Result<(), !>`).
         ty::Adt(def, args)
@@ -228,7 +260,9 @@ pub fn is_ty_must_use<'tcx>(
                 .zip(elem_exprs)
                 .enumerate()
                 .filter_map(|(i, (ty, expr))| {
-                    is_ty_must_use(cx, ty, expr, expr.span).yes().map(|path| (i, path))
+                    is_ty_must_use(cx, ty, expr, expr.span, simplify_uninhabited)
+                        .yes()
+                        .map(|path| (i, path))
                 })
                 .collect::<Vec<_>>();
 
@@ -242,7 +276,7 @@ pub fn is_ty_must_use<'tcx>(
             // If the array is empty we don't lint, to avoid false positives
             Some(0) | None => IsTyMustUse::No,
             // If the array is definitely non-empty, we can do `#[must_use]` checking.
-            Some(len) => is_ty_must_use(cx, ty, expr, span)
+            Some(len) => is_ty_must_use(cx, ty, expr, span, simplify_uninhabited)
                 .map(|inner| MustUsePath::Array(Box::new(inner), len)),
         },
         ty::Closure(..) | ty::CoroutineClosure(..) => IsTyMustUse::Yes(MustUsePath::Closure(span)),
@@ -305,7 +339,7 @@ impl<'tcx> LateLintPass<'tcx> for UnusedResults {
 
         let ty = cx.typeck_results().expr_ty(expr);
 
-        let must_use_result = is_ty_must_use(cx, ty, expr, expr.span);
+        let must_use_result = is_ty_must_use(cx, ty, expr, expr.span, false);
         let type_lint_emitted_or_trivial = match must_use_result {
             IsTyMustUse::Yes(path) => {
                 emit_must_use_untranslated(cx, &path, "", "", 1, false, expr_is_from_block);
@@ -527,6 +561,30 @@ fn emit_must_use_untranslated(
                     expr_is_from_block,
                 );
             }
+        }
+        MustUsePath::Result(path) => {
+            let descr_post = &format!(" in a `Result` with an uninhabited error{descr_post}");
+            emit_must_use_untranslated(
+                cx,
+                path,
+                descr_pre,
+                descr_post,
+                plural_len,
+                true,
+                expr_is_from_block,
+            );
+        }
+        MustUsePath::ControlFlow(path) => {
+            let descr_post = &format!(" in a `ControlFlow` with an uninhabited break {descr_post}");
+            emit_must_use_untranslated(
+                cx,
+                path,
+                descr_pre,
+                descr_post,
+                plural_len,
+                true,
+                expr_is_from_block,
+            );
         }
         MustUsePath::Array(path, len) => {
             let descr_pre = &format!("{descr_pre}array{plural_suffix} of ");

@@ -53,15 +53,6 @@ Architecture specific functions are:
 * All functions in the ``core::arch`` module
 * ``core::hint::spin_loop``
 
-Practice careful usage of floating point math
----------------------------------------------
-
-.. id::  CORE_CSTR_0070_VERIFY_FLOATS
-
-Associated requirement ID: :id:`CORE_AVD_FLOAT_004`.
-
-Floating point code is dependent on external conditions, such as the FPU in use and which operations are implemented in hardware or in software. Users must thoroughly test floating point calculations in the context of their application and hardware and not rely on compiler and library qualification as their sole argument.
-
 Tool related
 ++++++++++++
 

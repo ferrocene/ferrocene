@@ -23,6 +23,7 @@ Ferrocene User Manual
    rustc/executable
    rustc/mixed-language
    rustc/system-calls
+   rustc/floating-points
    rustc/testing-facades
 
 .. toctree::

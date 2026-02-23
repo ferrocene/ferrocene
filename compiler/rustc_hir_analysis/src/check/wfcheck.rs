@@ -14,7 +14,7 @@ use rustc_hir::{AmbigArg, ItemKind, find_attr};
 use rustc_infer::infer::outlives::env::OutlivesEnvironment;
 use rustc_infer::infer::{self, InferCtxt, SubregionOrigin, TyCtxtInferExt};
 use rustc_lint_defs::builtin::SHADOWING_SUPERTRAIT_ITEMS;
-use rustc_macros::LintDiagnostic;
+use rustc_macros::Diagnostic;
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::traits::solve::NoSolution;
 use rustc_middle::ty::trait_def::TraitSpecializationKind;
@@ -797,7 +797,7 @@ fn lint_item_shadowing_supertrait_item<'tcx>(tcx: TyCtxt<'tcx>, trait_item_def_i
             errors::SupertraitItemShadowee::Several { traits: traits.into(), spans: spans.into() }
         };
 
-        tcx.emit_node_span_lint(
+        tcx.emit_diag_node_span_lint(
             SHADOWING_SUPERTRAIT_ITEMS,
             tcx.local_def_id_to_hir_id(trait_item_def_id),
             tcx.def_span(trait_item_def_id),
@@ -2458,7 +2458,7 @@ fn lint_redundant_lifetimes<'tcx>(
                 && outlives_env.free_region_map().sub_free_regions(tcx, victim, candidate)
             {
                 shadowed.insert(victim);
-                tcx.emit_node_span_lint(
+                tcx.emit_diag_node_span_lint(
                     rustc_lint_defs::builtin::REDUNDANT_LIFETIMES,
                     tcx.local_def_id_to_hir_id(def_id.expect_local()),
                     tcx.def_span(def_id),
@@ -2469,7 +2469,7 @@ fn lint_redundant_lifetimes<'tcx>(
     }
 }
 
-#[derive(LintDiagnostic)]
+#[derive(Diagnostic)]
 #[diag("unnecessary lifetime parameter `{$victim}`")]
 #[note("you can use the `{$candidate}` lifetime directly, in place of `{$victim}`")]
 struct RedundantLifetimeArgsLint<'tcx> {

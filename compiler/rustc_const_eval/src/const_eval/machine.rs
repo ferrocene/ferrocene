@@ -21,12 +21,11 @@ use tracing::debug;
 
 use super::error::*;
 use crate::errors::{LongRunning, LongRunningWarn};
-use crate::interpret::util::type_implements_dyn_trait;
 use crate::interpret::{
     self, AllocId, AllocInit, AllocRange, ConstAllocation, CtfeProvenance, FnArg, Frame,
     GlobalAlloc, ImmTy, InterpCx, InterpResult, OpTy, PlaceTy, Pointer, RangeSet, Scalar,
     compile_time_machine, err_inval, interp_ok, throw_exhaust, throw_inval, throw_ub,
-    throw_ub_custom, throw_unsup, throw_unsup_format,
+    throw_ub_custom, throw_unsup, throw_unsup_format, type_implements_dyn_trait,
 };
 
 /// When hitting this many interpreted terminators we emit a deny by default lint

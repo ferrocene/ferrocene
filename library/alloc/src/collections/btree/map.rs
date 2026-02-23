@@ -1253,7 +1253,6 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
     /// Similar to [`insert`], though, the key is not overwritten,
     /// which matters for types that can be `==` without being identical.
     ///
-    ///
     /// [`insert`]: BTreeMap::insert
     /// [`append`]: BTreeMap::append
     ///
@@ -1311,19 +1310,28 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
         let mut self_cursor = self.lower_bound_mut(Bound::Included(&first_other_key));
 
         if let Some((self_key, _)) = self_cursor.peek_next() {
-            match K::cmp(&first_other_key, self_key) {
+            match K::cmp(self_key, &first_other_key) {
                 Ordering::Equal => {
-                    self_cursor.with_next(|self_key, self_val| {
-                        conflict(self_key, self_val, first_other_val)
-                    });
+                    // if `f` unwinds, the next entry is already removed leaving
+                    // the tree in valid state.
+                    // FIXME: Once `MaybeDangling` is implemented, we can optimize
+                    // this through using a drop handler and transmutating CursorMutKey<K, V>
+                    // to CursorMutKey<ManuallyDrop<K>, ManuallyDrop<V>> (see PR #152418)
+                    if let Some((k, v)) = self_cursor.remove_next() {
+                        // SAFETY: we remove the K, V out of the next entry,
+                        // apply 'f' to get a new (K, V), and insert it back
+                        // into the next entry that the cursor is pointing at
+                        let v = conflict(&k, v, first_other_val);
+                        unsafe { self_cursor.insert_after_unchecked(k, v) };
+                    }
                 }
-                Ordering::Less =>
+                Ordering::Greater =>
                 // SAFETY: we know our other_key's ordering is less than self_key,
                 // so inserting before will guarantee sorted order
                 unsafe {
                     self_cursor.insert_before_unchecked(first_other_key, first_other_val);
                 },
-                Ordering::Greater => {
+                Ordering::Less => {
                     unreachable!("Cursor's peek_next should return None.");
                 }
             }
@@ -1338,22 +1346,31 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
         for (other_key, other_val) in other_iter {
             loop {
                 if let Some((self_key, _)) = self_cursor.peek_next() {
-                    match K::cmp(&other_key, self_key) {
+                    match K::cmp(self_key, &other_key) {
                         Ordering::Equal => {
-                            self_cursor.with_next(|self_key, self_val| {
-                                conflict(self_key, self_val, other_val)
-                            });
+                            // if `f` unwinds, the next entry is already removed leaving
+                            // the tree in valid state.
+                            // FIXME: Once `MaybeDangling` is implemented, we can optimize
+                            // this through using a drop handler and transmutating CursorMutKey<K, V>
+                            // to CursorMutKey<ManuallyDrop<K>, ManuallyDrop<V>> (see PR #152418)
+                            if let Some((k, v)) = self_cursor.remove_next() {
+                                // SAFETY: we remove the K, V out of the next entry,
+                                // apply 'f' to get a new (K, V), and insert it back
+                                // into the next entry that the cursor is pointing at
+                                let v = conflict(&k, v, other_val);
+                                unsafe { self_cursor.insert_after_unchecked(k, v) };
+                            }
                             break;
                         }
-                        Ordering::Less => {
-                            // SAFETY: we know our other_key's ordering is less than self_key,
+                        Ordering::Greater => {
+                            // SAFETY: we know our self_key's ordering is greater than other_key,
                             // so inserting before will guarantee sorted order
                             unsafe {
                                 self_cursor.insert_before_unchecked(other_key, other_val);
                             }
                             break;
                         }
-                        Ordering::Greater => {
+                        Ordering::Less => {
                             // FIXME: instead of doing a linear search here,
                             // this can be optimized to search the tree by starting
                             // from self_cursor and going towards the root and then
@@ -1363,6 +1380,11 @@ impl<K, V, A: Allocator + Clone> BTreeMap<K, V, A> {
                         }
                     }
                 } else {
+                    // FIXME: If we get here, that means all of other's keys are greater than
+                    // self's keys. For performance, this should really do a bulk insertion of items
+                    // from other_iter into the end of self `BTreeMap`. Maybe this should be
+                    // a method for Cursor*?
+
                     // SAFETY: reaching here means our cursor is at the end
                     // self BTreeMap so we just insert other_key here
                     unsafe {
@@ -3396,37 +3418,6 @@ impl<'a, K, V, A> CursorMutKey<'a, K, V, A> {
 
 // Now the tree editing operations
 impl<'a, K: Ord, V, A: Allocator + Clone> CursorMutKey<'a, K, V, A> {
-    /// Calls a function with ownership of the next element's key and
-    /// and value and expects it to return a value to write
-    /// back to the next element's key and value. The cursor is not
-    /// advanced forward.
-    ///
-    /// If the cursor is at the end of the map then the function is not called
-    /// and this essentially does not do anything.
-    ///
-    /// # Safety
-    ///
-    /// You must ensure that the `BTreeMap` invariants are maintained.
-    /// Specifically:
-    ///
-    /// * The next element's key must be unique in the tree.
-    /// * All keys in the tree must remain in sorted order.
-    #[allow(dead_code)] /* This function exists for consistency with CursorMut */
-    pub(super) fn with_next(&mut self, f: impl FnOnce(K, V) -> (K, V)) {
-        // if `f` unwinds, the next entry is already removed leaving
-        // the tree in valid state.
-        // FIXME: Once `MaybeDangling` is implemented, we can optimize
-        // this through using a drop handler and transmutating CursorMutKey<K, V>
-        // to CursorMutKey<ManuallyDrop<K>, ManuallyDrop<V>> (see PR #152418)
-        if let Some((k, v)) = self.remove_next() {
-            // SAFETY: we remove the K, V out of the next entry,
-            // apply 'f' to get a new (K, V), and insert it back
-            // into the next entry that the cursor is pointing at
-            let (k, v) = f(k, v);
-            unsafe { self.insert_after_unchecked(k, v) };
-        }
-    }
-
     /// Inserts a new key-value pair into the map in the gap that the
     /// cursor is currently pointing to.
     ///
@@ -3632,29 +3623,6 @@ impl<'a, K: Ord, V, A: Allocator + Clone> CursorMutKey<'a, K, V, A> {
 }
 
 impl<'a, K: Ord, V, A: Allocator + Clone> CursorMut<'a, K, V, A> {
-    /// Calls a function with a reference to the next element's key and
-    /// ownership of its value. The function is expected to return a value
-    /// to write back to the next element's value. The cursor is not
-    /// advanced forward.
-    ///
-    /// If the cursor is at the end of the map then the function is not called
-    /// and this essentially does not do anything.
-    pub(super) fn with_next(&mut self, f: impl FnOnce(&K, V) -> V) {
-        // FIXME: This can be optimized to not do all the removing/reinserting
-        // logic by using ptr::read, calling `f`, and then using ptr::write.
-        // if `f` unwinds, then we need to remove the entry while being careful to
-        // not cause UB by moving or dropping the already-dropped `V`
-        // for the entry. Some implementation ideas:
-        // https://github.com/rust-lang/rust/pull/152418#discussion_r2800232576
-        if let Some((k, v)) = self.remove_next() {
-            // SAFETY: we remove the K, V out of the next entry,
-            // apply 'f' to get a new V, and insert (K, V) back
-            // into the next entry that the cursor is pointing at
-            let v = f(&k, v);
-            unsafe { self.insert_after_unchecked(k, v) };
-        }
-    }
-
     /// Inserts a new key-value pair into the map in the gap that the
     /// cursor is currently pointing to.
     ///

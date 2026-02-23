@@ -87,12 +87,12 @@ declare_lint! {
 
 declare_lint_pass!(UnusedResults => [UNUSED_MUST_USE, UNUSED_RESULTS]);
 
-/// A path through a type to a must_use source. Contains useful info for the lint.
+/// A path through a type to a `must_use` source. Contains useful info for the lint.
 #[derive(Debug)]
 pub enum MustUsePath {
     /// Suppress must_use checking.
     Suppressed,
-    /// The root of the normal must_use lint with an optional message.
+    /// The root of the normal `must_use` lint with an optional message.
     Def(Span, DefId, Option<Symbol>),
     Boxed(Box<Self>),
     Pinned(Box<Self>),
@@ -106,6 +106,8 @@ pub enum MustUsePath {
     Coroutine(Span),
 }
 
+/// Returns `Some(path)` if `ty` should be considered as "`must_use`" in the context of `expr`
+/// (`expr` is used to get the parent module, which can affect which types are considered uninhabited).
 #[instrument(skip(cx, expr), level = "debug", ret)]
 pub fn is_ty_must_use<'tcx>(
     cx: &LateContext<'tcx>,
@@ -392,8 +394,7 @@ fn is_def_must_use(cx: &LateContext<'_>, def_id: DefId, span: Span) -> Option<Mu
     }
 }
 
-// Returns whether further errors should be suppressed because either a lint has been
-// emitted or the type should be ignored.
+/// Returns whether further errors should be suppressed because a lint has been emitted.
 fn check_must_use_def(
     cx: &LateContext<'_>,
     def_id: DefId,

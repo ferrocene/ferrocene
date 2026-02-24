@@ -316,3 +316,9 @@ fn escape_iter_inner_always_escaped_fmt_debug() {
 fn escape_iter_inner_maybe_escaped_fmt_debug() {
     assert_eq!(format!("{:?}", '!'.escape_debug()), "EscapeDebug(EscapeIterInner('!'))");
 }
+
+// Cover `<core::ffi::c_void as core::fmt::Debug>::fmt`
+#[test]
+fn ffi_c_void_fmt_debug() {
+    assert_eq!(format!("{:?}", core::ffi::c_void::__variant1), "c_void");
+}

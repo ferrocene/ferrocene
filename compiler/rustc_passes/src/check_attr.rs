@@ -639,7 +639,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         }
                     });
                     if !has_generic {
-                        self.tcx.emit_node_span_lint(
+                        self.tcx.emit_diag_node_span_lint(
                             MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
                             hir_id,
                             span,

@@ -1450,7 +1450,7 @@ pub(crate) struct FunctionNamesDuplicated {
     pub spans: Vec<Span>,
 }
 
-#[derive(LintDiagnostic)]
+#[derive(Diagnostic)]
 #[diag("there is no parameter `{$argument_name}` on trait `{$trait_name}`")]
 pub(crate) struct UnknownFormatParameterForOnUnimplementedAttr {
     pub argument_name: Symbol,

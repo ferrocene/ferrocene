@@ -98,21 +98,9 @@
 // of conflicts we have when merging main.
 //
 // Library features:
-<<<<<<< HEAD
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
-#![feature(cfg_select)]
-||||||| b6bed6f2d9f
-// tidy-alphabetical-start
-#![feature(asm_experimental_arch)]
-#![feature(bstr_internals)]
-#![feature(cfg_select)]
-=======
-// tidy-alphabetical-start
-#![feature(asm_experimental_arch)]
-#![feature(bstr_internals)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
 #![feature(const_cmp)]

@@ -948,7 +948,7 @@ impl<'p, 'tcx: 'p> PatCx for RustcPatCtxt<'p, 'tcx> {
             .map(|span| errors::Overlap { range: overlap_as_pat.to_string(), span })
             .collect();
         let pat_span = pat.data().span;
-        self.tcx.emit_node_span_lint(
+        self.tcx.emit_diag_node_span_lint(
             lint::builtin::OVERLAPPING_RANGE_ENDPOINTS,
             self.match_lint_level,
             pat_span,
@@ -984,7 +984,7 @@ impl<'p, 'tcx: 'p> PatCx for RustcPatCtxt<'p, 'tcx> {
         let gap_as_pat = self.print_pat_range(&gap, *pat.ty());
         if gapped_with.is_empty() {
             // If `gapped_with` is empty, `gap == T::MAX`.
-            self.tcx.emit_node_span_lint(
+            self.tcx.emit_diag_node_span_lint(
                 lint::builtin::NON_CONTIGUOUS_RANGE_ENDPOINTS,
                 self.match_lint_level,
                 thir_pat.span,
@@ -998,7 +998,7 @@ impl<'p, 'tcx: 'p> PatCx for RustcPatCtxt<'p, 'tcx> {
                 },
             );
         } else {
-            self.tcx.emit_node_span_lint(
+            self.tcx.emit_diag_node_span_lint(
                 lint::builtin::NON_CONTIGUOUS_RANGE_ENDPOINTS,
                 self.match_lint_level,
                 thir_pat.span,

@@ -322,3 +322,9 @@ fn escape_iter_inner_maybe_escaped_fmt_debug() {
 fn ffi_c_void_fmt_debug() {
     assert_eq!(format!("{:?}", core::ffi::c_void::__variant1), "c_void");
 }
+
+// Cover `<core::fmt::Error as core::fmt::Display>::fmt`
+#[test]
+fn fmt_error_fmt_display() {
+    assert_eq!(format!("{:?}", core::fmt::Error), "Error");
+}

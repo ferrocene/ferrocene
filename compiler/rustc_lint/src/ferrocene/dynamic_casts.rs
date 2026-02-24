@@ -233,7 +233,7 @@ impl<'tcx> LintState<'tcx> {
         loop {
             debug!("peel_tys step: src={src_inner:?}, dst={dst_inner:?}");
             match (src_inner.kind(), dst_inner.kind()) {
-                /* End conditions. **/
+                /* End conditions. */
                 (_, ty::Dynamic(..)) => return Some((src_inner, dst_inner)),
                 // There's only ever one unsizing coercion at once.
                 // Even if this is a `[dyn Trait; N]`, we would have checked it earlier.
@@ -249,7 +249,7 @@ impl<'tcx> LintState<'tcx> {
                 }
 
                 /* Handle CoerceUnsized.
-                 * This is the only part of the loop that recurses more than once. **/
+                 * This is the only part of the loop that recurses more than once. */
                 (ty::Pat(a, _), ty::Pat(b, _)) => {
                     (src_inner, dst_inner) = (*a, *b);
                 }

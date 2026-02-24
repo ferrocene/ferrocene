@@ -62,17 +62,24 @@
 //! let buffer = [0; PATH_MAX]; // totally fine
 //! ```
 //!
-//! However, if there's a function pointer anywhere in the
-//! constant, we need to make sure that function can't be called at runtime. In that case, we
-//! require the const or static to be marked with `ferrocene::prevalidated` at each use site, and
-//! walk the const body at the definition site.
+//! However, if there's a function pointer anywhere in the constant, we need to make sure that
+//! function can't be called at runtime. In that case, we require the const or static to be marked
+//! with `ferrocene::prevalidated` at each use site:
 //!
 //! ```
 //! # use std::panic::{set_hook, PanicHookInfo};
 //! fn unvalidated_panic(_: &PanicHookInfo) {}
 //! const PANIC_HOOK: fn(&PanicHookInfo) = unvalidated_panic;
-//! // not ok: unvalidated_panic called at runtime
-//! set_hook(Box::new(PANIC_HOOK));
+//! set_hook(Box::new(PANIC_HOOK)); //~ ERRROR PANIC_HOOK is unvalidated
+//! ```
+//!
+//! Then, once the user adds the annotation, we walk the const body at the definition site.
+//! ```
+//! # use std::panic::{set_hook, PanicHookInfo};
+//! fn unvalidated_panic(_: &PanicHookInfo) {}
+//! #[ferrocene::prevalidated]
+//! const PANIC_HOOK: fn(&PanicHookInfo) = unvalidated_panic;
+//! //~^ ERROR unvalidated_panic is unvalidated
 //! ```
 //!
 //! ### trait object coercions
@@ -148,7 +155,7 @@
 // NOTE: UNVALIDATED is public.
 declare_tool_lint! {
     /// The `ferrocene::unvalidated` lint detects verified code that calls unverified functions.
-    /// This is not allowed if you want your code to be validated by a safety assessor.
+    /// This may result in unverified code running in a safety critical context.
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
     ///

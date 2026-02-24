@@ -304,3 +304,9 @@ fn cell_sync_unsafe_cell_fmt_debug() {
 fn cell_unsafe_cell_fmt_debug() {
     assert_eq!(format!("{:?}", core::cell::UnsafeCell::new(0)), "UnsafeCell { .. }");
 }
+
+// Cover `<core::escape::EscapeIterInner<N, core::escape::AlwaysEscaped> as core::fmt::Debug>::fmt`
+#[test]
+fn escape_iter_inner_always_escaped_fmt_debug() {
+    assert_eq!(format!("{:?}", '?'.escape_unicode()), "EscapeUnicode(EscapeIterInner('\\u{3f}'))");
+}

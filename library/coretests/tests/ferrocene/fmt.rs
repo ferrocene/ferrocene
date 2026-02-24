@@ -286,3 +286,9 @@ fn array_try_from_slice_error_fmt_display() {
         "could not convert slice to array"
     );
 }
+
+// Cover `<core::ascii::EscapeDefault as core::fmt::Debug>::fmt`
+#[test]
+fn ascii_escape_default_fmt_debug() {
+    assert_eq!(format!("{:?}", core::ascii::escape_default(b'\t')), "EscapeDefault { .. }");
+}

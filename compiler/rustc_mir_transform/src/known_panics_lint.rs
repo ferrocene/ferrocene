@@ -297,7 +297,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         let source_info = self.body.source_info(location);
         if let Some(lint_root) = self.lint_root(*source_info) {
             let span = source_info.span;
-            self.tcx.emit_node_span_lint(
+            self.tcx.emit_diag_node_span_lint(
                 lint_kind.lint(),
                 lint_root,
                 span,

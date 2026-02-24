@@ -10,7 +10,7 @@ use rustc_hir::CRATE_HIR_ID;
 use rustc_hir::def_id::LocalDefId;
 use rustc_index::bit_set::MixedBitSet;
 use rustc_index::{IndexSlice, IndexVec};
-use rustc_macros::{LintDiagnostic, Subdiagnostic};
+use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::bug;
 use rustc_middle::mir::{
     self, BasicBlock, Body, ClearCrossCrate, Local, Location, MirDumper, Place, StatementKind,
@@ -451,7 +451,7 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
         }
 
         let span = local_labels[0].span;
-        tcx.emit_node_span_lint(
+        tcx.emit_diag_node_span_lint(
             lint::builtin::TAIL_EXPR_DROP_ORDER,
             lint_root.unwrap_or(CRATE_HIR_ID),
             span,
@@ -498,7 +498,7 @@ fn assign_observables_names(
     names
 }
 
-#[derive(LintDiagnostic)]
+#[derive(Diagnostic)]
 #[diag("relative drop order changing in Rust 2024")]
 struct TailExprDropOrderLint<'a> {
     #[subdiagnostic]

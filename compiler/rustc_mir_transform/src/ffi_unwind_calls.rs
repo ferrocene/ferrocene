@@ -63,7 +63,7 @@ fn has_ffi_unwind_calls(tcx: TyCtxt<'_>, local_def_id: LocalDefId) -> bool {
                     .lint_root;
                 let span = terminator.source_info.span;
 
-                tcx.emit_node_span_lint(
+                tcx.emit_diag_node_span_lint(
                     FFI_UNWIND_CALLS,
                     lint_root,
                     span,
@@ -115,7 +115,7 @@ fn has_ffi_unwind_calls(tcx: TyCtxt<'_>, local_def_id: LocalDefId) -> bool {
             let span = terminator.source_info.span;
 
             let foreign = fn_def_id.is_some();
-            tcx.emit_node_span_lint(
+            tcx.emit_diag_node_span_lint(
                 FFI_UNWIND_CALLS,
                 lint_root,
                 span,

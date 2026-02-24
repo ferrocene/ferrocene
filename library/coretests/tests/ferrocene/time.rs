@@ -35,3 +35,16 @@ fn duration_checked_add() {
 fn duration_try_from_secs_f32() {
     let _nope = Duration::from_secs_f32(-1.0);
 }
+
+// Cover `<core::time::TryFromFloatSecsError as core::fmt::Display>::fmt`
+#[test]
+fn try_from_floats_secs_error_fmt_nan() {
+    assert_eq!(
+        format!("{}", Duration::try_from_secs_f32(f32::NAN).unwrap_err()),
+        "cannot convert float seconds to Duration: value is either too big or NaN"
+    );
+    assert_eq!(
+        format!("{}", Duration::try_from_secs_f64(f64::NAN).unwrap_err()),
+        "cannot convert float seconds to Duration: value is either too big or NaN"
+    );
+}

@@ -66,7 +66,8 @@ fn do_count_chars(s: &str) -> usize {
     // nice, as we would rather not mark the `char_count_general_case` function
     // as cold.
     if unlikely(body.is_empty() || head.len() > USIZE_SIZE || tail.len() > USIZE_SIZE) {
-        return char_count_general_case(s.as_bytes());
+        // return char_count_general_case(s.as_bytes());
+        unreachable!("do_count_chars")
     }
 
     let mut total = char_count_general_case(head) + char_count_general_case(tail);

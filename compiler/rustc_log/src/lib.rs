@@ -66,6 +66,7 @@ pub struct LoggerConfig {
 
 impl LoggerConfig {
     pub fn from_env(env: &str) -> Self {
+        // NOTE: documented in the dev guide. If you change this, also update it!
         LoggerConfig {
             filter: env::var(env),
             color_logs: env::var(format!("{env}_COLOR")),

@@ -174,7 +174,7 @@ impl<'tcx> MoveCheckVisitor<'tcx> {
             }
         }
 
-        self.tcx.emit_node_span_lint(
+        self.tcx.emit_diag_node_span_lint(
             LARGE_ASSIGNMENTS,
             lint_root,
             reported_span,

@@ -179,7 +179,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::RustcAllowConstFnUnstable(_, first_span)) => {
                     self.check_rustc_allow_const_fn_unstable(hir_id, *first_span, span, target)
                 }
-                Attribute::Parsed(AttributeKind::Deprecation {span: attr_span, .. }) => {
+                Attribute::Parsed(AttributeKind::Deprecated { span: attr_span, .. }) => {
                     self.check_deprecated(hir_id, *attr_span, target)
                 }
                 Attribute::Parsed(AttributeKind::TargetFeature{ attr_span, ..}) => {
@@ -191,7 +191,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 &Attribute::Parsed(AttributeKind::RustcPubTransparent(attr_span)) => {
                     self.check_rustc_pub_transparent(attr_span, span, attrs)
                 }
-                Attribute::Parsed(AttributeKind::Align { align, span: attr_span }) => {
+                Attribute::Parsed(AttributeKind::RustcAlign { align, span: attr_span }) => {
                     self.check_align(*align, *attr_span)
                 }
                 Attribute::Parsed(AttributeKind::Naked(..)) => {
@@ -253,7 +253,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     // `#[doc]` is actually a lot more than just doc comments, so is checked below
                     | AttributeKind::DocComment {..}
                     | AttributeKind::EiiDeclaration { .. }
-                    | AttributeKind::EiiForeignItem
                     | AttributeKind::ExportName { .. }
                     | AttributeKind::ExportStable
                     | AttributeKind::Feature(..)
@@ -308,7 +307,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcCoherenceIsCore(..)
                     | AttributeKind::RustcCoinductive(..)
                     | AttributeKind::RustcConfusables { .. }
-                    | AttributeKind::RustcConstStabilityIndirect
+                    | AttributeKind::RustcConstStableIndirect
                     | AttributeKind::RustcConversionSuggestion
                     | AttributeKind::RustcDeallocator
                     | AttributeKind::RustcDefPath(..)
@@ -326,6 +325,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDumpVtable(..)
                     | AttributeKind::RustcDynIncompatibleTrait(..)
                     | AttributeKind::RustcEffectiveVisibility
+                    | AttributeKind::RustcEiiForeignItem
                     | AttributeKind::RustcEvaluateWhereClauses
                     | AttributeKind::RustcHasIncoherentInherentImpls
                     | AttributeKind::RustcHiddenTypeOfOpaques
@@ -344,7 +344,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcMacroTransparency(_)
                     | AttributeKind::RustcMain
                     | AttributeKind::RustcMir(_)
-                    | AttributeKind::RustcNeverReturnsNullPointer
+                    | AttributeKind::RustcNeverReturnsNullPtr
                     | AttributeKind::RustcNeverTypeOptions {..}
                     | AttributeKind::RustcNoImplicitAutorefs
                     | AttributeKind::RustcNoImplicitBounds

@@ -61,7 +61,7 @@ fn check_expectations(tcx: TyCtxt<'_>, tool_filter: Option<Symbol>) {
         {
             let rationale = expectation.reason.map(|rationale| ExpectationNote { rationale });
             let note = expectation.is_unfulfilled_lint_expectations;
-            tcx.emit_node_span_lint(
+            tcx.emit_diag_node_span_lint(
                 UNFULFILLED_LINT_EXPECTATIONS,
                 *hir_id,
                 expectation.emission_span,

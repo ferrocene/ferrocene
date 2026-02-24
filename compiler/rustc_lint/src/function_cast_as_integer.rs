@@ -47,7 +47,7 @@ impl<'tcx> LateLintPass<'tcx> for FunctionCastsAsInteger {
         }
         let cast_from_ty = cx.typeck_results().expr_ty(cast_from_expr);
         if matches!(cast_from_ty.kind(), ty::FnDef(..)) {
-            cx.tcx.emit_node_span_lint(
+            cx.tcx.emit_diag_node_span_lint(
                 FUNCTION_CASTS_AS_INTEGER,
                 expr.hir_id,
                 cast_to_expr.span.with_lo(cast_from_expr.span.hi() + BytePos(1)),

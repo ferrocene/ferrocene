@@ -173,7 +173,7 @@ impl<'tcx> LateLintPass<'tcx> for ImproperGpuKernelLint {
             let mut checker = CheckGpuKernelTypes { tcx: cx.tcx, has_invalid: false };
             input_ty.fold_with(&mut checker);
             if checker.has_invalid {
-                cx.tcx.emit_node_span_lint(
+                cx.tcx.emit_diag_node_span_lint(
                     IMPROPER_GPU_KERNEL_ARG,
                     input_hir.hir_id,
                     input_hir.span,

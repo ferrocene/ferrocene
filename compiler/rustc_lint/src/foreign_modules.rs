@@ -162,7 +162,7 @@ impl ClashingExternDeclarations {
                     sub,
                 }
             };
-            tcx.emit_node_span_lint(
+            tcx.emit_diag_node_span_lint(
                 CLASHING_EXTERN_DECLARATIONS,
                 this_fi.hir_id(),
                 mismatch_label,

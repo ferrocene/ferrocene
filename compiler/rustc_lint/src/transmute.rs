@@ -3,7 +3,7 @@ use rustc_errors::Applicability;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{self as hir};
-use rustc_macros::LintDiagnostic;
+use rustc_macros::Diagnostic;
 use rustc_middle::ty::{self, Ty};
 use rustc_session::{declare_lint, impl_lint_pass};
 use rustc_span::sym;
@@ -166,7 +166,7 @@ fn check_int_to_ptr_transmute<'tcx>(
     }
 
     let suffix = if mutbl.is_mut() { "_mut" } else { "" };
-    cx.tcx.emit_node_span_lint(
+    cx.tcx.emit_diag_node_span_lint(
         INTEGER_TO_PTR_TRANSMUTES,
         expr.hir_id,
         expr.span,
@@ -219,7 +219,7 @@ fn check_ptr_transmute_in_const<'tcx>(
         || matches!(cx.tcx.def_kind(body_owner_def_id), DefKind::AssocConst)
     {
         if src.is_raw_ptr() && dst.is_integral() {
-            cx.tcx.emit_node_span_lint(
+            cx.tcx.emit_diag_node_span_lint(
                 PTR_TO_INTEGER_TRANSMUTE_IN_CONSTS,
                 expr.hir_id,
                 expr.span,
@@ -368,7 +368,7 @@ fn check_unnecessary_transmute<'tcx>(
     });
 }
 
-#[derive(LintDiagnostic)]
+#[derive(Diagnostic)]
 #[diag("pointers cannot be transmuted to integers during const eval")]
 #[note("at compile-time, pointers do not have an integer value")]
 #[note(

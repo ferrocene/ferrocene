@@ -6,7 +6,8 @@ Floating Points
 
 This chapter describes floating points in Rust and ways to improve the safety of their use.
 
-The following Rust types map to `IEEE 754-2008 <https://ieeexplore.ieee.org/document/4610935>`_ types:
+The following Rust types map to `IEEE 754-2008 <https://ieeexplore.ieee.org/document/4610935>`_
+types:
 
 * ``f32`` maps to IEEE 754-2008's ``binary32``
 * ``f64`` maps to IEEE 754-2008's ``binary64``
@@ -18,8 +19,8 @@ Disallowing Floating Point Arithmetic
 In some contexts, such as constrained embedded scenarios, it's desirable to disallow floating point
 operations entirely.
 
-Clippy provides a lint ``float_arithmetic`` that can be used to ensure code does not perform floating
-point operations. The below example produces an error when ``cargo clippy`` is run:
+Clippy provides a lint ``float_arithmetic`` that can be used to ensure code does not perform
+floating point operations. The below example produces an error when ``cargo clippy`` is run:
 
 .. code-block::
 
@@ -28,10 +29,11 @@ point operations. The below example produces an error when ``cargo clippy`` is r
     fn main() {
         let x: f64 = 0.0;
         let y: f64 = 1.0;
-        println!("{}", x+ y);
+        println!("{}", x + y);
     }
 
-When using ``clippy`` lints, users should include running `cargo clippy` in their testing processes.
+When using ``clippy`` lints, users should include running ``cargo clippy`` in their testing
+processes.
 
 Use More Precise Expressions
 ----------------------------
@@ -61,7 +63,7 @@ is run:
         let _ = a.exp() - 1.0;
     }
 
-Clippy also provides the `suboptimal_flops` lint which can suggest more optimal floating point
+Clippy also provides the ``suboptimal_flops`` lint which can suggest more optimal floating point
 operations, both in accuracy and performance. The below example produces errors with suggested
 remedies when ``cargo clippy`` is run:
 
@@ -92,30 +94,33 @@ remedies when ``cargo clippy`` is run:
         };
     }
 
-When using ``clippy`` lints, users should include running `cargo clippy` in their testing processes.
+When using ``clippy`` lints, users should include running ``cargo clippy`` in their testing
+processes.
 
 Do Not Declare Lossy Literals
 -----------------------------
 
 It is generally not intended to declare literal floats that cannot be represented by the type.
 
-Clippy provides a lint ``lossy_float_literal`` that can be used to suggest code more accurate floating
-point operations. The below example produces an error when ``cargo clippy`` is run:
+Clippy provides a lint ``lossy_float_literal`` that can be used to suggest code more accurate
+floating point operations. The below example produces an error when ``cargo clippy`` is run:
 
 .. code-block::
 
     #![deny(clippy::lossy_float_literal)]
 
     fn main() {
-        let _: f32 = 16_777_217.0; // 16_777_216.0
+        let _: f32 = 16_777_217.0; // Becomes 16_777_216.0
     }
 
 
-When using ``clippy`` lints, users should include running `cargo clippy` in their testing processes.
+When using ``clippy`` lints, users should include running ``cargo clippy`` in their testing
+processes.
 
 
 Be Extra Mindful of CPU/FPU Errata
 ----------------------------------
 
-Floating point operations are a common source of CPU/GPU errata. Users should invest extra diligence
-into monitoring their relevant chipset and hardware errata when using floating point operations.
+Floating point operations are a common source of CPU/FPU errata. Users should invest extra
+diligence into monitoring their relevant chipset and hardware errata when using floating
+point operations.

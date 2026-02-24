@@ -78,6 +78,8 @@ impl AttributeKind {
             NoMangle(..) => Yes, // Needed for rustdoc
             NoStd(..) => No,
             NonExhaustive(..) => Yes, // Needed for rustdoc
+            OnConst { .. } => Yes,
+            OnUnimplemented { .. } => Yes,
             Optimize(..) => No,
             PanicRuntime => No,
             PatchableFunctionEntry { .. } => Yes,
@@ -92,6 +94,7 @@ impl AttributeKind {
             ProfilerRuntime => No,
             RecursionLimit { .. } => No,
             ReexportTestHarnessMain(..) => No,
+            RegisterTool(..) => No,
             Repr { .. } => No,
             RustcAbi { .. } => No,
             RustcAllocator => No,

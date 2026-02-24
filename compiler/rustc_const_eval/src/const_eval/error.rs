@@ -252,9 +252,9 @@ pub(super) fn lint<'tcx, L>(
     lint: &'static rustc_session::lint::Lint,
     decorator: impl FnOnce(Vec<errors::FrameNote>) -> L,
 ) where
-    L: for<'a> rustc_errors::LintDiagnostic<'a, ()>,
+    L: for<'a> rustc_errors::Diagnostic<'a, ()>,
 {
     let (span, frames) = get_span_and_frames(tcx, &machine.stack);
 
-    tcx.emit_node_span_lint(lint, machine.best_lint_scope(*tcx), span, decorator(frames));
+    tcx.emit_diag_node_span_lint(lint, machine.best_lint_scope(*tcx), span, decorator(frames));
 }

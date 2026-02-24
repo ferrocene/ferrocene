@@ -573,6 +573,20 @@ pub fn diag_lint_level<'a, D: Diagnostic<'a, ()> + 'a>(
             false
         };
 
+        if disable_suggestions {
+            // If this is a future incompatible that is not an edition fixing lint
+            // it'll become a hard error, so we have to emit *something*. Also,
+            // if this lint occurs in the expansion of a macro from an external crate,
+            // allow individual lints to opt-out from being reported.
+            let incompatible = future_incompatible.is_some_and(|f| f.reason.edition().is_none());
+
+            if !incompatible && !lint.report_in_external_macro {
+                // Don't continue further, since we don't want to have
+                // `diag_span_note_once` called for a diagnostic that isn't emitted.
+                return;
+            }
+        }
+
         let mut err: Diag<'_, ()> = if !skip {
             decorate(sess.dcx(), err_level)
         } else {
@@ -597,20 +611,6 @@ pub fn diag_lint_level<'a, D: Diagnostic<'a, ()> + 'a>(
             // Any suggestions made here are likely to be incorrect, so anything we
             // emit shouldn't be automatically fixed by rustfix.
             err.disable_suggestions();
-
-            // If this is a future incompatible that is not an edition fixing lint
-            // it'll become a hard error, so we have to emit *something*. Also,
-            // if this lint occurs in the expansion of a macro from an external crate,
-            // allow individual lints to opt-out from being reported.
-            let incompatible = future_incompatible.is_some_and(|f| f.reason.edition().is_none());
-
-            if !incompatible && !lint.report_in_external_macro {
-                err.cancel();
-
-                // Don't continue further, since we don't want to have
-                // `diag_span_note_once` called for a diagnostic that isn't emitted.
-                return;
-            }
         }
 
         err.is_lint(lint.name_lower(), has_future_breakage);

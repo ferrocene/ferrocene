@@ -954,6 +954,9 @@ pub enum AttributeKind {
     /// Represents `#[export_stable]`.
     ExportStable,
 
+    /// Represents `#[feature(...)]`
+    Feature(ThinVec<Ident>, Span),
+
     /// Represents `#[ffi_const]`.
     FfiConst(Span),
 
@@ -1273,6 +1276,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_if_this_changed]`
     RustcIfThisChanged(Span, Option<Symbol>),
+
+    /// Represents `#[rustc_inherit_overflow_checks]`
+    RustcInheritOverflowChecks,
 
     /// Represents `#[rustc_insignificant_dtor]`
     RustcInsignificantDtor,

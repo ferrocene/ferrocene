@@ -271,3 +271,9 @@ fn dyn_any_send_static_fmt_debug() {
     let c: &(dyn Any + Send + Sync + 'static) = &a;
     assert_eq!(format!("{:?}", c), "Any { .. }");
 }
+
+// Covers `<core::any::TypeId as core::fmt::Debug>::fmt`
+#[test]
+fn any_type_id_fmt_debug() {
+    assert!(format!("{:?}", core::any::Any::type_id(&0_u32)).starts_with("TypeId(0x"));
+}

@@ -147,7 +147,7 @@ impl<const N: usize> fmt::Write for UnsizedBuffer<N> {
 // Covers `core::fmt::Write::write_fmt`
 #[test]
 fn test_write_fmt_unsized() {
-    let mut array = [0u8; 256];
+    let mut array = [0; 256];
     let buffer = UnsizedBuffer::new(&mut array);
 
     fn how_dare_you() -> &'static str {
@@ -157,6 +157,8 @@ fn test_write_fmt_unsized() {
         "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. {}",
         how_dare_you()
     );
+    assert!(args.as_statically_known_str().is_none());
+
     fmt::Write::write_fmt(buffer, args).unwrap();
     assert_eq!(
         buffer.as_str(),
@@ -164,29 +166,32 @@ fn test_write_fmt_unsized() {
     )
 }
 
-// Covers `core::fmt::Write::write_fmt`
-#[test]
-fn test_write_fmt_unsized_statically_known() {
-    let mut array = [0_u8; 256];
-    let buffer = UnsizedBuffer::new(&mut array);
+mod module_to_avoid_optimisations {
+    use super::*;
 
-    fmt::Write::write_fmt(
-        buffer,
-        format_args!(
-            "My message is that we'll be watching you. This is all wrong. I shouldn't be up here."
-        ),
-    )
-    .unwrap();
-    assert_eq!(
-        buffer.as_str(),
-        "My message is that we'll be watching you. This is all wrong. I shouldn't be up here."
-    )
+    // Covers `core::fmt::Write::write_fmt`
+    #[test]
+    fn test_write_fmt_unsized_statically_known() {
+        let mut array = [0; 256];
+        let buffer = UnsizedBuffer::new(&mut array);
+
+        let args = format_args!("Hello, world!");
+        assert!(args.as_statically_known_str().is_some());
+
+        fmt::Write::write_fmt(buffer, args).unwrap();
+
+        assert_eq!(buffer.as_str(), "Hello, world!")
+    }
 }
 
 // Covers `core::fmt::Write::write_fmt`
 #[test]
 fn test_write_fmt_sized_statically_known() {
     let mut buffer = String::new();
-    fmt::Write::write_fmt(&mut buffer, format_args!("Hello, world!")).unwrap();
+
+    let args = format_args!("Hello, world!");
+    assert!(args.as_statically_known_str().is_some());
+
+    fmt::Write::write_fmt(&mut buffer, args).unwrap();
     assert_eq!(buffer.as_str(), "Hello, world!")
 }

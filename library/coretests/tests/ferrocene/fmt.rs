@@ -277,3 +277,12 @@ fn dyn_any_send_static_fmt_debug() {
 fn any_type_id_fmt_debug() {
     assert!(format!("{:?}", core::any::Any::type_id(&0_u32)).starts_with("TypeId(0x"));
 }
+
+// Cover `<core::array::TryFromSliceError as core::fmt::Display>::fmt`
+#[test]
+fn array_try_from_slice_error_fmt_display() {
+    assert_eq!(
+        format!("{}", TryInto::<[u32; 4]>::try_into([0].as_slice()).unwrap_err()),
+        "could not convert slice to array"
+    );
+}

@@ -254,3 +254,20 @@ test_debug_tuple_field_finish! {
 fn mut_ref_fmt_pointer() {
     assert!(format!("{:p}", &mut [1, 2, 3]).starts_with("0x"));
 }
+
+// Covers:
+// - `<(dyn core::any::Any + core::marker::Send + 'static) as core::fmt::Debug>::fmt`
+// - `<(dyn core::any::Any + core::marker::Send + core::marker::Sync + 'static) as core::fmt::Debug>::fmt`
+#[test]
+fn dyn_any_send_static_fmt_debug() {
+    use core::any::Any;
+    use core::marker::{Send, Sync};
+
+    let a = "Hello, world!";
+
+    let b: &(dyn Any + Send + 'static) = &a;
+    assert_eq!(format!("{:?}", b), "Any { .. }");
+
+    let c: &(dyn Any + Send + Sync + 'static) = &a;
+    assert_eq!(format!("{:?}", c), "Any { .. }");
+}

@@ -310,3 +310,9 @@ fn cell_unsafe_cell_fmt_debug() {
 fn escape_iter_inner_always_escaped_fmt_debug() {
     assert_eq!(format!("{:?}", '?'.escape_unicode()), "EscapeUnicode(EscapeIterInner('\\u{3f}'))");
 }
+
+// Cover `<core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Debug>::fmt`
+#[test]
+fn escape_iter_inner_maybe_escaped_fmt_debug() {
+    assert_eq!(format!("{:?}", '!'.escape_debug()), "EscapeDebug(EscapeIterInner('!'))");
+}

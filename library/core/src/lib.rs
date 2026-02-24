@@ -101,7 +101,6 @@
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(bstr_internals))]
-#![feature(cfg_select)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(const_carrying_mul_add)]
 #![feature(const_cmp)]
@@ -247,7 +246,7 @@ pub mod autodiff {
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod contracts;
 
-#[unstable(feature = "cfg_select", issue = "115585")]
+#[stable(feature = "cfg_select", since = "CURRENT_RUSTC_VERSION")]
 pub use crate::macros::cfg_select;
 
 #[macro_use]

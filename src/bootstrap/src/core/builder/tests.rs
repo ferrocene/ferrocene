@@ -2856,18 +2856,111 @@ mod snapshot {
     }
 
     #[test]
+    fn install_plain() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("install")
+                .args(&[
+                    // Using backslashes fails with `--set`
+                    "--set", &format!("install.prefix={}", ctx.normalized_dir()),
+                    "--set", &format!("install.bindir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.libdir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.datadir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.mandir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.sysconfdir={}", ctx.normalized_dir()),
+                    "--build", "x86_64-unknown-linux-gnu",
+                    "--host", "x86_64-unknown-linux-gnu",
+                    "--target", "x86_64-unknown-linux-gnu",
+                ])
+                .get_steps()
+                .render_with(RenderConfig {
+                    normalize_host: false
+                }), @"
+        [build] llvm <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
+        [dist] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu>
+        [build] rustdoc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> GenerateCopyright 1 <x86_64-unknown-linux-gnu>
+        [dist] rustc <x86_64-unknown-linux-gnu>
+        ");
+    }
+
+    #[test]
+    fn install_src() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("install")
+                .path("src")
+                .args(&[
+                    // Using backslashes fails with `--set`
+                    "--set", &format!("install.prefix={}", ctx.normalized_dir()),
+                    "--set", &format!("install.bindir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.libdir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.datadir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.mandir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.sysconfdir={}", ctx.normalized_dir()),
+                    "--build", "x86_64-unknown-linux-gnu",
+                    "--host", "x86_64-unknown-linux-gnu",
+                    "--target", "x86_64-unknown-linux-gnu",
+                ])
+                .get_steps()
+                .render_with(RenderConfig {
+                    normalize_host: false
+                }), @"
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
+        [dist] src <>
+        ");
+    }
+
+    #[test]
+    fn install_src_no_docs() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("install")
+                .path("src")
+                .args(&[
+                    // Using backslashes fails with `--set`
+                    "--set", &format!("install.prefix={}", ctx.normalized_dir()),
+                    "--set", &format!("install.bindir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.libdir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.datadir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.mandir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.sysconfdir={}", ctx.normalized_dir()),
+                    "--set", "build.docs=false",
+                    "--build", "x86_64-unknown-linux-gnu",
+                    "--host", "x86_64-unknown-linux-gnu",
+                    "--target", "x86_64-unknown-linux-gnu",
+                ])
+                .get_steps()
+                .render_with(RenderConfig {
+                    normalize_host: false
+                }), @"
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
+        [dist] src <>
+        ");
+    }
+
+    #[test]
     fn install_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("install")
                 .args(&[
                     // Using backslashes fails with `--set`
-                    "--set", &format!("install.prefix={}", ctx.dir().display()).replace("\\", "/"),
-                    "--set", &format!("install.sysconfdir={}", ctx.dir().display()).replace("\\", "/"),
+                    "--set", &format!("install.prefix={}", ctx.normalized_dir()),
+                    "--set", &format!("install.bindir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.libdir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.datadir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.mandir={}", ctx.normalized_dir()),
+                    "--set", &format!("install.sysconfdir={}", ctx.normalized_dir()),
                     "--set", "build.extended=true",
                     // For Cranelift to be disted
                     "--build", "x86_64-unknown-linux-gnu",
-                    "--host", "x86_64-unknown-linux-gnu"
+                    "--host", "x86_64-unknown-linux-gnu",
                 ])
                 .get_steps()
                 .render_with(RenderConfig {

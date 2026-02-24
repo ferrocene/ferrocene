@@ -106,7 +106,8 @@ Nightly features are activated by setting the ``RUSTC_BOOTSTRAP`` environment va
 
 Nightly features used by the core library are listed as ``#![feature(name_of_the_feature)]`` in ``library/core/src/lib.rs``.
 
-Nightly features are tested by the ``compiletest`` test suite, by tests that activate that feature explicitly. E.g. ``tests/ui/unknown-language-item.rs`` tests ``#![feature(lang_items)]``.
+Nightly features are tested by the ``compiletest`` test suite, by tests that activate that feature explicitly.
+As an example, most tests in ``tests/ui/lang-items/`` directory test ``#![feature(lang_items)]``.
 
 .. _nightly-flags:
 

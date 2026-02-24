@@ -18,7 +18,6 @@ fn main() {
 }
 
 //~? ERROR are too big for the target architecture
-//~? ERROR are too big for the target architecture
 
 // ferrocene-annotations: fls_xinykul167l
 // Array Expressions

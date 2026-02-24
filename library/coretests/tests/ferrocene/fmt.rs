@@ -298,3 +298,9 @@ fn ascii_escape_default_fmt_debug() {
 fn cell_sync_unsafe_cell_fmt_debug() {
     assert_eq!(format!("{:?}", core::cell::SyncUnsafeCell::new(0)), "SyncUnsafeCell { .. }");
 }
+
+// Cover `<core::cell::UnsafeCell<T> as core::fmt::Debug>::fmt`
+#[test]
+fn cell_unsafe_cell_fmt_debug() {
+    assert_eq!(format!("{:?}", core::cell::UnsafeCell::new(0)), "UnsafeCell { .. }");
+}

@@ -470,6 +470,7 @@ target | std | host | notes
 [`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit x86 LynxOS-178 (2022.07)
 `aarch64r82-unknown-none` | * |   | Arm Cortex-R82 bare metal (hard-float)
 `aarch64r82-unknown-none-softfloat` | * |   | Arm Cortex-R82 bare metal (soft-float)
+`aarch64-rhivos2-linux-gnu` | * |  | ARM64 Linux (kernel 4.1, glibc 2.17+, RHIVOS)
 `aarch64-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `aarch64r82-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `aarch64v8r-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests

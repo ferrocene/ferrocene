@@ -186,7 +186,7 @@ fn lint_addr_of_local<'a>(
         && let Res::Local(from) = cx.qpath_res(qpath, inner_of.hir_id)
         && cx.tcx.hir_enclosing_body_owner(from) == dcx.body
     {
-        cx.tcx.emit_diag_node_span_lint(
+        cx.tcx.emit_node_span_lint(
             DANGLING_POINTERS_FROM_LOCALS,
             expr.hir_id,
             expr.span,
@@ -270,7 +270,7 @@ fn lint_expr(cx: &LateContext<'_>, expr: &Expr<'_>) {
         && find_attr!(cx.tcx, fn_id, RustcAsPtr(_))
     {
         // FIXME: use `emit_node_lint` when `#[primary_span]` is added.
-        cx.tcx.emit_diag_node_span_lint(
+        cx.tcx.emit_node_span_lint(
             DANGLING_POINTERS_FROM_TEMPORARIES,
             expr.hir_id,
             method.ident.span,

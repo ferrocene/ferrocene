@@ -797,7 +797,7 @@ fn check_for_bindings_named_same_as_variants(
     {
         let variant_count = edef.variants().len();
         let ty_path = with_no_trimmed_paths!(cx.tcx.def_path_str(edef.did()));
-        cx.tcx.emit_diag_node_span_lint(
+        cx.tcx.emit_node_span_lint(
             BINDINGS_WITH_VARIANT_NAME,
             cx.hir_source,
             pat.span,
@@ -839,7 +839,7 @@ fn report_irrefutable_let_patterns(
 ) {
     macro_rules! emit_diag {
         ($lint:tt) => {{
-            tcx.emit_diag_node_span_lint(IRREFUTABLE_LET_PATTERNS, id, span, $lint { count });
+            tcx.emit_node_span_lint(IRREFUTABLE_LET_PATTERNS, id, span, $lint { count });
         }};
     }
 
@@ -924,7 +924,7 @@ fn report_unreachable_pattern<'p, 'tcx>(
             lint.covered_by_many = Some(multispan);
         }
     }
-    cx.tcx.emit_diag_node_span_lint(UNREACHABLE_PATTERNS, hir_id, pat_span, lint);
+    cx.tcx.emit_node_span_lint(UNREACHABLE_PATTERNS, hir_id, pat_span, lint);
 }
 
 /// Detect typos that were meant to be a `const` but were interpreted as a new pattern binding.

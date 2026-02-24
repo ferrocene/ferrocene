@@ -642,7 +642,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'tcx> {
                             && c.fully_stable
                             && !unstable_feature_bound_in_effect
                         {
-                            self.tcx.emit_diag_node_span_lint(
+                            self.tcx.emit_node_span_lint(
                                 INEFFECTIVE_UNSTABLE_TRAIT_IMPL,
                                 item.hir_id(),
                                 span,
@@ -859,7 +859,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'tcx> {
                                         note: Some(deprecation),
                                         since_kind: lint::DeprecatedSinceKind::InEffect,
                                     };
-                                    self.tcx.emit_diag_node_span_lint(
+                                    self.tcx.emit_node_span_lint(
                                         DEPRECATED,
                                         id,
                                         method_span.unwrap_or(path.span),
@@ -1130,7 +1130,7 @@ fn unnecessary_partially_stable_feature_lint(
     implies: Symbol,
     since: Symbol,
 ) {
-    tcx.emit_diag_node_span_lint(
+    tcx.emit_node_span_lint(
         lint::builtin::STABLE_FEATURES,
         hir::CRATE_HIR_ID,
         span,
@@ -1153,7 +1153,7 @@ fn unnecessary_stable_feature_lint(
     if since.as_str() == VERSION_PLACEHOLDER {
         since = sym::env_CFG_RELEASE;
     }
-    tcx.emit_diag_node_span_lint(
+    tcx.emit_node_span_lint(
         lint::builtin::STABLE_FEATURES,
         hir::CRATE_HIR_ID,
         span,

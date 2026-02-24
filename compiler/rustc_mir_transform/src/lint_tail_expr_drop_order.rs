@@ -451,7 +451,7 @@ pub(crate) fn run_lint<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, body: &Body<
         }
 
         let span = local_labels[0].span;
-        tcx.emit_diag_node_span_lint(
+        tcx.emit_node_span_lint(
             lint::builtin::TAIL_EXPR_DROP_ORDER,
             lint_root.unwrap_or(CRATE_HIR_ID),
             span,

@@ -345,7 +345,7 @@ where
                         .map(|(&def_id, _)| self.tcx.def_span(def_id))
                         .collect();
 
-                    self.tcx.emit_diag_node_span_lint(
+                    self.tcx.emit_node_span_lint(
                         IMPL_TRAIT_OVERCAPTURES,
                         self.tcx.local_def_id_to_hir_id(opaque_def_id),
                         opaque_span,
@@ -402,7 +402,7 @@ where
                     .iter()
                     .all(|(def_id, _)| explicitly_captured.contains(def_id))
                 {
-                    self.tcx.emit_diag_node_span_lint(
+                    self.tcx.emit_node_span_lint(
                         IMPL_TRAIT_REDUNDANT_CAPTURES,
                         self.tcx.local_def_id_to_hir_id(opaque_def_id),
                         opaque_span,

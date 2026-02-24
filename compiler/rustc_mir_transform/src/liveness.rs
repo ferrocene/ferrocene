@@ -968,7 +968,7 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                     let typo = maybe_suggest_typo();
                     errors::UnusedVariableSugg::TryPrefix { spans: vec![def_span], name, typo }
                 };
-                tcx.emit_diag_node_span_lint(
+                tcx.emit_node_span_lint(
                     lint::builtin::UNUSED_VARIABLES,
                     hir_id,
                     def_span,
@@ -1018,7 +1018,7 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                 }
 
                 let typo = maybe_suggest_typo();
-                tcx.emit_diag_node_span_lint(
+                tcx.emit_node_span_lint(
                     lint::builtin::UNUSED_VARIABLES,
                     hir_id,
                     def_span,
@@ -1060,7 +1060,7 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                 errors::UnusedVariableSugg::TryPrefix { name, typo, spans: vec![def_span] }
             };
 
-            tcx.emit_diag_node_span_lint(
+            tcx.emit_node_span_lint(
                 lint::builtin::UNUSED_VARIABLES,
                 hir_id,
                 spans,
@@ -1126,20 +1126,20 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                             source_info.span,
                             self.body,
                         );
-                        tcx.emit_diag_node_span_lint(
+                        tcx.emit_node_span_lint(
                             lint::builtin::UNUSED_ASSIGNMENTS,
                             hir_id,
                             source_info.span,
                             errors::UnusedAssign { name, help: suggestion.is_none(), suggestion },
                         )
                     }
-                    AccessKind::Param => tcx.emit_diag_node_span_lint(
+                    AccessKind::Param => tcx.emit_node_span_lint(
                         lint::builtin::UNUSED_ASSIGNMENTS,
                         hir_id,
                         source_info.span,
                         errors::UnusedAssignPassed { name },
                     ),
-                    AccessKind::Capture => tcx.emit_diag_node_span_lint(
+                    AccessKind::Capture => tcx.emit_node_span_lint(
                         lint::builtin::UNUSED_ASSIGNMENTS,
                         hir_id,
                         decl_span,

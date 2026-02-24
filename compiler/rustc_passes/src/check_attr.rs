@@ -453,7 +453,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                                         .span_until_char(attr_span, '[')
                                         .shrink_to_hi();
 
-                                    self.tcx.emit_diag_node_span_lint(
+                                    self.tcx.emit_node_span_lint(
                                         UNUSED_ATTRIBUTES,
                                         hir_id,
                                         attr.span,
@@ -464,7 +464,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                                         },
                                     )
                                 }
-                                ast::AttrStyle::Inner => self.tcx.emit_diag_node_span_lint(
+                                ast::AttrStyle::Inner => self.tcx.emit_node_span_lint(
                                     UNUSED_ATTRIBUTES,
                                     hir_id,
                                     attr.span,
@@ -595,7 +595,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     if _impl.of_trait.is_none()
             )
         {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 MISPLACED_DIAGNOSTIC_ATTRIBUTES,
                 hir_id,
                 attr_span,
@@ -613,7 +613,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         directive: Option<&Directive>,
     ) {
         if !matches!(target, Target::Trait) {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 MISPLACED_DIAGNOSTIC_ATTRIBUTES,
                 hir_id,
                 attr_span,
@@ -639,7 +639,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         }
                     });
                     if !has_generic {
-                        self.tcx.emit_diag_node_span_lint(
+                        self.tcx.emit_node_span_lint(
                             MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
                             hir_id,
                             span,
@@ -668,7 +668,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 ItemLike::Item(it) => match it.expect_impl().constness {
                     Constness::Const => {
                         let item_span = self.tcx.hir_span(hir_id);
-                        self.tcx.emit_diag_node_span_lint(
+                        self.tcx.emit_node_span_lint(
                             MISPLACED_DIAGNOSTIC_ATTRIBUTES,
                             hir_id,
                             attr_span,
@@ -682,7 +682,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             }
         }
         let item_span = self.tcx.hir_span(hir_id);
-        self.tcx.emit_diag_node_span_lint(
+        self.tcx.emit_node_span_lint(
             MISPLACED_DIAGNOSTIC_ATTRIBUTES,
             hir_id,
             attr_span,
@@ -707,7 +707,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     let attrs = self.tcx.codegen_fn_attrs(did);
                     // Not checking naked as `#[inline]` is forbidden for naked functions anyways.
                     if attrs.contains_extern_indicator() {
-                        self.tcx.emit_diag_node_span_lint(
+                        self.tcx.emit_node_span_lint(
                             UNUSED_ATTRIBUTES,
                             hir_id,
                             attr_span,
@@ -1058,7 +1058,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         match target {
             Target::Use | Target::ExternCrate => {}
             _ => {
-                self.tcx.emit_diag_node_span_lint(
+                self.tcx.emit_node_span_lint(
                     INVALID_DOC_ATTRIBUTES,
                     hir_id,
                     span,
@@ -1073,7 +1073,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
     fn check_doc_masked(&self, span: Span, hir_id: HirId, target: Target) {
         if target != Target::ExternCrate {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 INVALID_DOC_ATTRIBUTES,
                 hir_id,
                 span,
@@ -1086,7 +1086,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
 
         if self.tcx.extern_mod_stmt_cnum(hir_id.owner.def_id).is_none() {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 INVALID_DOC_ATTRIBUTES,
                 hir_id,
                 span,
@@ -1238,7 +1238,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             return;
         }
 
-        self.tcx.emit_diag_node_span_lint(
+        self.tcx.emit_node_span_lint(
             UNUSED_ATTRIBUTES,
             hir_id,
             attr_span,
@@ -1475,7 +1475,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     if let ItemLike::Item(item) = item { is_c_like_enum(item) } else { false }
                 }))
         {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 CONFLICTING_REPR_HINTS,
                 hir_id,
                 hint_spans.collect::<Vec<Span>>(),
@@ -1571,7 +1571,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 if self.tcx.def_kind(self.tcx.local_parent(hir_id.owner.def_id))
                     == DefKind::Impl { of_trait: true } =>
             {
-                self.tcx.emit_diag_node_span_lint(
+                self.tcx.emit_node_span_lint(
                     UNUSED_ATTRIBUTES,
                     hir_id,
                     attr_span,
@@ -1592,7 +1592,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         let is_decl_macro = !macro_definition.macro_rules;
 
         if is_decl_macro {
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 UNUSED_ATTRIBUTES,
                 hir_id,
                 attr_span,
@@ -1644,7 +1644,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                                 .span_until_char(attr_span, '[')
                                 .shrink_to_hi();
 
-                            self.tcx.emit_diag_node_span_lint(
+                            self.tcx.emit_node_span_lint(
                                 UNUSED_ATTRIBUTES,
                                 hir_id,
                                 attr_span,
@@ -1655,7 +1655,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                                 },
                             )
                         }
-                        Some(ast::AttrStyle::Inner) | None => self.tcx.emit_diag_node_span_lint(
+                        Some(ast::AttrStyle::Inner) | None => self.tcx.emit_node_span_lint(
                             UNUSED_ATTRIBUTES,
                             hir_id,
                             attr.span(),
@@ -1681,7 +1681,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 return;
             };
 
-        self.tcx.emit_diag_node_span_lint(
+        self.tcx.emit_node_span_lint(
             UNUSED_ATTRIBUTES,
             hir_id,
             attr.span(),
@@ -1849,7 +1849,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 "#[export_name]"
             };
 
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 lint::builtin::UNUSED_ATTRIBUTES,
                 hir_id,
                 no_mangle_span,
@@ -2193,7 +2193,7 @@ fn check_duplicates(
                     } else {
                         (attr_span, *entry.get())
                     };
-                    tcx.emit_diag_node_span_lint(
+                    tcx.emit_node_span_lint(
                         UNUSED_ATTRIBUTES,
                         hir_id,
                         this,

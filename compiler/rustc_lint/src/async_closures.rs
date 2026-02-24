@@ -92,7 +92,7 @@ impl<'tcx> LateLintPass<'tcx> for AsyncClosureUsage {
 
         let deletion_span = cx.tcx.sess.source_map().span_extend_while_whitespace(async_decl_span);
 
-        cx.tcx.emit_diag_node_span_lint(
+        cx.tcx.emit_node_span_lint(
             CLOSURE_RETURNING_ASYNC_BLOCK,
             expr.hir_id,
             fn_decl_span,

@@ -1990,7 +1990,7 @@ fn check_must_not_suspend_def(
     if let Some(reason_str) = find_attr!(tcx, def_id, MustNotSupend {reason} => reason) {
         let reason =
             reason_str.map(|s| errors::MustNotSuspendReason { span: data.source_span, reason: s });
-        tcx.emit_diag_node_span_lint(
+        tcx.emit_node_span_lint(
             rustc_session::lint::builtin::MUST_NOT_SUSPEND,
             hir_id,
             data.source_span,

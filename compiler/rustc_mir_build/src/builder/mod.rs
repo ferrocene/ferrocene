@@ -921,7 +921,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 .as_ref()
                 .unwrap_crate_local()
                 .lint_root;
-            self.tcx.emit_diag_node_span_lint(
+            self.tcx.emit_node_span_lint(
                 lint::builtin::UNREACHABLE_CODE,
                 lint_root,
                 target_loc.span,

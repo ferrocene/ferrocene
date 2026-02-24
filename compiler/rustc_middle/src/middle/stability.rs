@@ -257,7 +257,7 @@ fn late_report_deprecation(
         note: depr.note.map(|ident| ident.name),
         since_kind: deprecated_since_kind(is_in_effect, depr.since),
     };
-    tcx.emit_diag_node_span_lint(lint, hir_id, method_span, diag);
+    tcx.emit_node_span_lint(lint, hir_id, method_span, diag);
 }
 
 /// Result of `TyCtxt::eval_stability`.

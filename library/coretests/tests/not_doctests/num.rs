@@ -251,3 +251,35 @@ test_niche_types_debug_fmt!(
     non_zero_i64_inner_debug_fmt => NonZeroI64Inner: 5 == "5",
     non_zero_isize_inner_debug_fmt => NonZeroIsizeInner: 5 == "5",
 );
+
+// covers: `<$T as core::pat::RangePattern>::sub_one`
+macro_rules! test_range_pattern_sub_one {
+    ($(( $fn:ident, $fn_panic:ident ) => $T:ty,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(0 as $T, core::pat::RangePattern::sub_one(1 as $T));
+            }
+
+            #[test]
+            #[should_panic = "exclusive range end at minimum value of type"]
+            fn $fn_panic() {
+                core::pat::RangePattern::sub_one(<$T>::MIN);
+            }
+        )*
+    };
+}
+test_range_pattern_sub_one! {
+    (range_pattern_sub_one_u8, range_pattern_sub_one_panic_u8) => u8,
+    (range_pattern_sub_one_u16, range_pattern_sub_one_panic_u16) => u16,
+    (range_pattern_sub_one_u32, range_pattern_sub_one_panic_u32) => u32,
+    (range_pattern_sub_one_u64, range_pattern_sub_one_panic_u64) => u64,
+    (range_pattern_sub_one_u128, range_pattern_sub_one_panic_u128) => u128,
+    (range_pattern_sub_one_usize, range_pattern_sub_one_panic_usize) => usize,
+    (range_pattern_sub_one_i8, range_pattern_sub_one_panic_i8) => i8,
+    (range_pattern_sub_one_i16, range_pattern_sub_one_panic_i16) => i16,
+    (range_pattern_sub_one_i32, range_pattern_sub_one_panic_i32) => i32,
+    (range_pattern_sub_one_i64, range_pattern_sub_one_panic_i64) => i64,
+    (range_pattern_sub_one_i128, range_pattern_sub_one_panic_i128) => i128,
+    (range_pattern_sub_one_isize, range_pattern_sub_one_panic_isize) => isize,
+}

@@ -62,6 +62,8 @@ const EXCEPTION_PATHS: &[&str] = &[
     "library/std/src/lib.rs", // for miniz_oxide leaking docs, which itself workaround
     "library/std/src/path.rs",
     "library/std/src/io/error.rs", // Repr unpacked needed for UEFI
+    // Ferrocene addition
+    "library/core/src/ferrocene_test.rs",
 ];
 
 pub fn check(library_path: &Path, tidy_ctx: TidyCtx) {

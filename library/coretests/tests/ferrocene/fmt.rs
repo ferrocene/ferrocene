@@ -248,3 +248,9 @@ test_debug_tuple_field_finish! {
     test_debug_tuple_field5_finish => TupleField5((), (), (), (), ()) == "TupleField5((), (), (), (), ())",
     test_debug_tuple_fields_finish => TupleFields((), (), (), (), (), ()) == "TupleFields((), (), (), (), (), ())",
 }
+
+// Covers `<&mut T as core::fmt::Pointer>::fmt`
+#[test]
+fn mut_ref_fmt_pointer() {
+    assert!(format!("{:p}", &mut [1, 2, 3]).starts_with("0x"));
+}

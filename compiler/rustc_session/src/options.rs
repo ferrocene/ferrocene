@@ -760,7 +760,7 @@ fn build_options<O: Default>(
                     match value {
                         None => early_dcx.early_fatal(
                             format!(
-                                "{outputname} option `{key}` requires {type_desc} ({prefix} {key}=<value>)"
+                                "{outputname} option `{key}` requires {type_desc} (`-{prefix} {key}=<value>`)"
                             ),
                         ),
                         Some(value) => early_dcx.early_fatal(

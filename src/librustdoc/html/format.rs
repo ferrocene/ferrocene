@@ -532,6 +532,7 @@ fn make_href(
     fqp: &[Symbol],
     is_absolute: bool,
 ) -> String {
+    // FIXME: relative extern URLs may break when prefixed with root_path
     if !is_absolute && let Some(root_path) = root_path {
         let root = root_path.trim_end_matches('/');
         url_parts.push_front(root);

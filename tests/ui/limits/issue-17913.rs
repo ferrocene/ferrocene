@@ -18,6 +18,7 @@ fn main() {
 }
 
 //~? ERROR are too big for the target architecture
+<<<<<<< HEAD
 //~? ERROR are too big for the target architecture
 
 // ferrocene-annotations: fls_xinykul167l
@@ -28,3 +29,7 @@ fn main() {
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg
+||||||| b6bed6f2d9f
+//~? ERROR are too big for the target architecture
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

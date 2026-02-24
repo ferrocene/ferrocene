@@ -14,7 +14,7 @@ use rustc_errors::{
     struct_span_code_err,
 };
 use rustc_feature::BUILTIN_ATTRIBUTES;
-use rustc_hir::attrs::{AttributeKind, CfgEntry, StrippedCfgItem};
+use rustc_hir::attrs::{CfgEntry, StrippedCfgItem};
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{self, CtorKind, CtorOf, DefKind, MacroKinds, NonMacroAttrKind, PerNS};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
@@ -893,12 +893,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     mpart_suggestion,
                 })
             }
-            ResolutionError::SelfImportCanOnlyAppearOnceInTheList => {
-                self.dcx().create_err(errs::SelfImportCanOnlyAppearOnceInTheList { span })
-            }
-            ResolutionError::SelfImportOnlyInImportListWithNonEmptyPrefix => {
-                self.dcx().create_err(errs::SelfImportOnlyInImportListWithNonEmptyPrefix { span })
-            }
             ResolutionError::FailedToResolve { segment, label, suggestion, module, message } => {
                 let mut err = struct_span_code_err!(self.dcx(), span, E0433, "{message}");
                 err.span_label(span, label);
@@ -1430,8 +1424,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         let note = if let Some(did) = did {
                             let requires_note = !did.is_local()
                                 && find_attr!(
-                                    this.tcx.get_all_attrs(did),
-                                    AttributeKind::RustcDiagnosticItem(
+                                    this.tcx,
+                                    did,
+                                    RustcDiagnosticItem(
                                         sym::TryInto | sym::TryFrom | sym::FromIterator
                                     )
                                 );
@@ -2170,7 +2165,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         // Otherwise, point out if the struct has any private fields.
         if let Some(def_id) = res.opt_def_id()
             && !def_id.is_local()
-            && let Some(attr_span) = find_attr!(self.tcx.get_all_attrs(def_id), AttributeKind::NonExhaustive(span) => *span)
+            && let Some(attr_span) = find_attr!(self.tcx, def_id, NonExhaustive(span) => *span)
         {
             non_exhaustive = Some(attr_span);
         } else if let Some(span) = ctor_fields_span {
@@ -2212,7 +2207,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     })
                 })
                 .collect();
-            if let Some(def_id) = path.get(0)
+            if let Some(&def_id) = path.get(0)
                 && let Some(path) = path_names
             {
                 if let Some(def_id) = def_id.as_local() {

@@ -30,7 +30,6 @@ use rustc_data_structures::sync::{
     self, DynSend, DynSync, FreezeReadGuard, Lock, RwLock, WorkerLocal,
 };
 use rustc_errors::{Applicability, Diag, DiagCtxtHandle, LintDiagnostic, MultiSpan};
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::{DefPathData, Definitions, DisambiguatorState};
@@ -994,8 +993,10 @@ impl<'tcx> TyCtxt<'tcx> {
     /// `rustc_layout_scalar_valid_range` attribute.
     // FIXME(eddyb) this is an awkward spot for this method, maybe move it?
     pub fn layout_scalar_valid_range(self, def_id: DefId) -> (Bound<u128>, Bound<u128>) {
-        let start = find_attr!(self.get_all_attrs(def_id), AttributeKind::RustcLayoutScalarValidRangeStart(n, _) => Bound::Included(**n)).unwrap_or(Bound::Unbounded);
-        let end = find_attr!(self.get_all_attrs(def_id), AttributeKind::RustcLayoutScalarValidRangeEnd(n, _) => Bound::Included(**n)).unwrap_or(Bound::Unbounded);
+        let start = find_attr!(self, def_id, RustcLayoutScalarValidRangeStart(n, _) => Bound::Included(**n)).unwrap_or(Bound::Unbounded);
+        let end =
+            find_attr!(self, def_id, RustcLayoutScalarValidRangeEnd(n, _) => Bound::Included(**n))
+                .unwrap_or(Bound::Unbounded);
         (start, end)
     }
 
@@ -1330,8 +1331,8 @@ impl<'tcx> TyCtxt<'tcx> {
         caller: DefId,
     ) -> Option<ty::Binder<'tcx, ty::FnSig<'tcx>>> {
         let fun_features = &self.codegen_fn_attrs(fun_def).target_features;
-        let callee_features = &self.codegen_fn_attrs(caller).target_features;
-        if self.is_target_feature_call_safe(&fun_features, &callee_features) {
+        let caller_features = &self.body_codegen_attrs(caller).target_features;
+        if self.is_target_feature_call_safe(&fun_features, &caller_features) {
             return Some(fun_sig.map_bound(|sig| ty::FnSig { safety: hir::Safety::Safe, ..sig }));
         }
         None
@@ -2085,7 +2086,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Given a `ty`, return whether it's an `impl Future<...>`.
     pub fn ty_is_opaque_future(self, ty: Ty<'_>) -> bool {
-        let ty::Alias(ty::Opaque, ty::AliasTy { def_id, .. }) = ty.kind() else { return false };
+        let ty::Alias(ty::Opaque, ty::AliasTy { def_id, .. }) = *ty.kind() else { return false };
         let future_trait = self.require_lang_item(LangItem::Future, DUMMY_SP);
 
         self.explicit_item_self_bounds(def_id).skip_binder().iter().any(|&(predicate, _)| {
@@ -2768,7 +2769,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Whether this is a trait implementation that has `#[diagnostic::do_not_recommend]`
     pub fn do_not_recommend_impl(self, def_id: DefId) -> bool {
-        find_attr!(self.get_all_attrs(def_id), AttributeKind::DoNotRecommend { .. })
+        find_attr!(self, def_id, DoNotRecommend { .. })
     }
 
     pub fn is_trivial_const<P>(self, def_id: P) -> bool
@@ -2794,10 +2795,8 @@ impl<'tcx> TyCtxt<'tcx> {
 }
 
 pub fn provide(providers: &mut Providers) {
-    providers.is_panic_runtime =
-        |tcx, LocalCrate| find_attr!(tcx.hir_krate_attrs(), AttributeKind::PanicRuntime);
-    providers.is_compiler_builtins =
-        |tcx, LocalCrate| find_attr!(tcx.hir_krate_attrs(), AttributeKind::CompilerBuiltins);
+    providers.is_panic_runtime = |tcx, LocalCrate| find_attr!(tcx, crate, PanicRuntime);
+    providers.is_compiler_builtins = |tcx, LocalCrate| find_attr!(tcx, crate, CompilerBuiltins);
     providers.has_panic_handler = |tcx, LocalCrate| {
         // We want to check if the panic handler was defined in this crate
         tcx.lang_items().panic_impl().is_some_and(|did| did.is_local())

@@ -1,4 +1,4 @@
-//! Run a pre-mono THIR pass the current crate.
+//! Run a pre-mono THIR pass on the current crate.
 //! In THIR, all operator overloads have been resolved to a function call, but we still may have
 //! uninstantiated generic functions.
 //!
@@ -175,8 +175,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         let tcx = self.linter.tcx;
         match Instance::try_resolve(tcx, self.typing_env(), def_id, args) {
             Err(_) => {
-                // this happens when we hit the [type length
-                // limit](https://doc.rust-lang.org/reference/attributes/limits.html#the-type_length_limit-attribute)
+                // this happens when we hit the
+                // [type length limit](https://doc.rust-lang.org/reference/attributes/limits.html#the-type_length_limit-attribute)
                 tcx.dcx().span_delayed_bug(
                     span,
                     format!("could not resolve instance ({def_id:?}, {args:?})"),

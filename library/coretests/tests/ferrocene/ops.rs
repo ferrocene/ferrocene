@@ -43,8 +43,6 @@ fn bound_methods() {
 
 #[test]
 fn range_bound_map() {
-    use core::ops::Bound;
-
     use Bound::*;
 
     let bound_string = Included("Hello, World!");
@@ -98,4 +96,11 @@ fn test_range_inclusive_iterator_impl() {
 #[test]
 fn range_inclusve_count_empty() {
     assert_eq!((3..=2).count(), 0);
+}
+
+// Covers `core::slice::index::try_into_slice_range`
+#[test]
+fn test_try_into_slice_range_end_excluded_gt_len() {
+    use core::slice::SliceIndex;
+    assert_eq!((Bound::Unbounded, Bound::Excluded(10)).get([0, 1].as_slice()), None);
 }

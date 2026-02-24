@@ -148,6 +148,7 @@
 #![feature(slice_iter_mut_as_mut_slice)]
 #![feature(str_as_str)]
 #![feature(str_from_raw_parts)]
+#![feature(sync_unsafe_cell)]
 #![feature(temporary_niche_types)]
 #![feature(trusted_step)]
 // tidy-alphabetical-end

@@ -292,3 +292,9 @@ fn array_try_from_slice_error_fmt_display() {
 fn ascii_escape_default_fmt_debug() {
     assert_eq!(format!("{:?}", core::ascii::escape_default(b'\t')), "EscapeDefault { .. }");
 }
+
+// Cover `<core::cell::SyncUnsafeCell<T> as core::fmt::Debug>::fmt`
+#[test]
+fn cell_sync_unsafe_cell_fmt_debug() {
+    assert_eq!(format!("{:?}", core::cell::SyncUnsafeCell::new(0)), "SyncUnsafeCell { .. }");
+}

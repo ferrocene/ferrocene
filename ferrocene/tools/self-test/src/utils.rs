@@ -57,8 +57,13 @@ pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, Find
 /// Therefore the sysroot is the grandparent of `ferrocene-self-test`
 /// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
 pub(crate) fn get_sysroot() -> Option<PathBuf> {
-    let current_exe = std::env::current_exe().ok()?;
-    Some(current_exe.parent()?.parent()?.to_path_buf())
+    match std::env::var("FERROCENE_SELF_TEST_SYSROOT") {
+        Ok(dir) => Some(PathBuf::from(dir)),
+        Err(_) => {
+            let current_exe = std::env::current_exe().ok()?;
+            Some(current_exe.parent()?.parent()?.to_path_buf())
+        }
+    }
 }
 
 #[cfg(test)]

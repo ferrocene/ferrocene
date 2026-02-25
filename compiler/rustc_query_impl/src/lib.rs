@@ -61,8 +61,6 @@ pub fn query_system<'tcx>(
         on_disk_cache,
         local_providers,
         extern_providers,
-        encode_query_results: encode_all_query_results,
-        try_mark_green,
         jobs: AtomicU64::new(1),
     }
 }
@@ -72,4 +70,6 @@ rustc_middle::rustc_with_all_queries! { define_queries! }
 pub fn provide(providers: &mut rustc_middle::util::Providers) {
     providers.hooks.alloc_self_profile_query_strings = alloc_self_profile_query_strings;
     providers.hooks.query_key_hash_verify_all = query_key_hash_verify_all;
+    providers.hooks.encode_all_query_results = encode_all_query_results;
+    providers.hooks.try_mark_green = try_mark_green;
 }

@@ -11,11 +11,10 @@ use rustc_macros::HashStable;
 use rustc_span::{ErrorGuaranteed, Span};
 pub use sealed::IntoQueryParam;
 
-use crate::dep_graph;
 use crate::dep_graph::{DepKind, DepNode, DepNodeIndex, SerializedDepNodeIndex};
 use crate::ich::StableHashingContext;
 use crate::queries::{ExternProviders, Providers, QueryArenas, QueryVTables};
-use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
+use crate::query::on_disk_cache::OnDiskCache;
 use crate::query::stack::{QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra};
 use crate::query::{QueryCache, QueryInfo, QueryJob};
 use crate::ty::TyCtxt;
@@ -228,12 +227,6 @@ pub struct QuerySystem<'tcx> {
 
     pub local_providers: Providers,
     pub extern_providers: ExternProviders,
-    pub encode_query_results: fn(
-        tcx: TyCtxt<'tcx>,
-        encoder: &mut CacheEncoder<'_, 'tcx>,
-        query_result_index: &mut EncodedDepNodeIndex,
-    ),
-    pub try_mark_green: fn(tcx: TyCtxt<'tcx>, dep_node: &dep_graph::DepNode) -> bool,
 
     pub jobs: AtomicU64,
 }
@@ -322,10 +315,6 @@ impl<'tcx> TyCtxt<'tcx> {
     #[inline(always)]
     pub fn at(self, span: Span) -> TyCtxtAt<'tcx> {
         TyCtxtAt { tcx: self, span }
-    }
-
-    pub fn try_mark_green(self, dep_node: &dep_graph::DepNode) -> bool {
-        (self.query_system.try_mark_green)(self, dep_node)
     }
 }
 

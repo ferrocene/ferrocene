@@ -915,14 +915,7 @@ impl<'a> Parser<'a> {
             });
         }
 
-        let mgca_disambiguation = self.mgca_direct_lit_hack(&expr);
-        Ok((expr, mgca_disambiguation))
-    }
-
-    /// Under `min_generic_const_args`, prefer direct const arguments rather than
-    /// wrapping literals in anon consts.
-    pub fn mgca_direct_lit_hack(&self, _expr: &Expr) -> MgcaDisambiguation {
-        MgcaDisambiguation::Direct
+        Ok((expr, MgcaDisambiguation::Direct))
     }
 
     /// Parse a generic argument in a path segment.

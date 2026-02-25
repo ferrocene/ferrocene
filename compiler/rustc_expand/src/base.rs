@@ -983,7 +983,7 @@ impl SyntaxExtension {
             stability,
             deprecation: find_attr!(
                 attrs,
-                Deprecation { deprecation, .. } => *deprecation
+                Deprecated { deprecation, .. } => *deprecation
             ),
             helper_attrs,
             edition,

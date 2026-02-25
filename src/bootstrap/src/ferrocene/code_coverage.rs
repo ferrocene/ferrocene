@@ -27,6 +27,7 @@ pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, comp
     cargo.rustflag("-Copt-level=2");
 
     cargo.rustdocflag("-Cinstrument-coverage");
+    cargo.rustdocflag("--merge-doctests=yes");
     cargo.rustflag("-Cinstrument-coverage");
     cargo.rustflag("--cfg=ferrocene_coverage");
     cargo.arg("--features=core/ferrocene_inject_profiler_builtins");

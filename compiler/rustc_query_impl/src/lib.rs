@@ -10,9 +10,7 @@
 
 use rustc_data_structures::sync::AtomicU64;
 use rustc_middle::dep_graph;
-use rustc_middle::queries::{
-    self, ExternProviders, Providers, QueryCaches, QueryEngine, QueryStates,
-};
+use rustc_middle::queries::{self, ExternProviders, Providers};
 use rustc_middle::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex, OnDiskCache};
 use rustc_middle::query::plumbing::{QuerySystem, QuerySystemFns, QueryVTable};
 use rustc_middle::query::{AsLocalKey, QueryCache, QueryMode};
@@ -58,13 +56,10 @@ pub fn query_system<'tcx>(
     incremental: bool,
 ) -> QuerySystem<'tcx> {
     QuerySystem {
-        states: Default::default(),
         arenas: Default::default(),
-        caches: Default::default(),
-        query_vtables: make_query_vtables(),
+        query_vtables: make_query_vtables(incremental),
         on_disk_cache,
         fns: QuerySystemFns {
-            engine: engine(incremental),
             local_providers,
             extern_providers,
             encode_query_results: encode_all_query_results,

@@ -1,2 +1,2 @@
-error: codegen option `opt-level` requires a string (C opt-level=<value>)
+error: codegen option `opt-level` requires a string (`-C opt-level=<value>`)
 

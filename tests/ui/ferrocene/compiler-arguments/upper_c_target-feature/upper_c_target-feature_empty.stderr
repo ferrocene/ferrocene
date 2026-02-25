@@ -1,2 +1,2 @@
-error: codegen option `target-feature` requires a string (C target-feature=<value>)
+error: codegen option `target-feature` requires a string (`-C target-feature=<value>`)
 

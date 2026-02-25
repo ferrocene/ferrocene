@@ -2977,6 +2977,7 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[rustc_intrinsic_const_stable_indirect]
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_intrinsic]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 /// Check if a type represented by a `TypeId` implements a trait represented by a `TypeId`.

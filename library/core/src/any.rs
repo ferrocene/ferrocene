@@ -86,17 +86,14 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::{fmt, hash, intrinsics, ptr};
-||||||| b3869b94cd1
-use crate::{fmt, hash, intrinsics, ptr};
-=======
 use crate::intrinsics::{self, type_id_vtable};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::transmute;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::type_info::{TraitImpl, TypeKind};
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, ptr};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
@@ -824,6 +821,7 @@ impl TypeId {
     /// assert!(const { TypeId::of::<u8>().trait_info_of::<dyn Blah>() }.is_some());
     /// assert!(const { TypeId::of::<u16>().trait_info_of::<dyn Blah>() }.is_none());
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
     pub const fn trait_info_of<
@@ -851,6 +849,7 @@ impl TypeId {
     /// assert!(const { TypeId::of::<u8>().trait_info_of_trait_type_id(TypeId::of::<dyn Blah>()) }.is_some());
     /// assert!(const { TypeId::of::<u16>().trait_info_of_trait_type_id(TypeId::of::<dyn Blah>()) }.is_none());
     /// ```
+    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
     pub const fn trait_info_of_trait_type_id(

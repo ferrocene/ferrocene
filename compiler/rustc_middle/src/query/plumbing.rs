@@ -216,17 +216,6 @@ impl<'tcx, C: QueryCache> QueryVTable<'tcx, C> {
     }
 }
 
-pub struct QuerySystemFns {
-    pub local_providers: Providers,
-    pub extern_providers: ExternProviders,
-    pub encode_query_results: for<'tcx> fn(
-        tcx: TyCtxt<'tcx>,
-        encoder: &mut CacheEncoder<'_, 'tcx>,
-        query_result_index: &mut EncodedDepNodeIndex,
-    ),
-    pub try_mark_green: for<'tcx> fn(tcx: TyCtxt<'tcx>, dep_node: &dep_graph::DepNode) -> bool,
-}
-
 pub struct QuerySystem<'tcx> {
     pub arenas: WorkerLocal<QueryArenas<'tcx>>,
     pub query_vtables: QueryVTables<'tcx>,
@@ -237,7 +226,14 @@ pub struct QuerySystem<'tcx> {
     /// This is `None` if we are not incremental compilation mode
     pub on_disk_cache: Option<OnDiskCache>,
 
-    pub fns: QuerySystemFns,
+    pub local_providers: Providers,
+    pub extern_providers: ExternProviders,
+    pub encode_query_results: fn(
+        tcx: TyCtxt<'tcx>,
+        encoder: &mut CacheEncoder<'_, 'tcx>,
+        query_result_index: &mut EncodedDepNodeIndex,
+    ),
+    pub try_mark_green: fn(tcx: TyCtxt<'tcx>, dep_node: &dep_graph::DepNode) -> bool,
 
     pub jobs: AtomicU64,
 }
@@ -329,7 +325,7 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn try_mark_green(self, dep_node: &dep_graph::DepNode) -> bool {
-        (self.query_system.fns.try_mark_green)(self, dep_node)
+        (self.query_system.try_mark_green)(self, dep_node)
     }
 }
 

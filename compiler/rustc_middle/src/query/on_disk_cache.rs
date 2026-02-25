@@ -261,7 +261,7 @@ impl OnDiskCache {
             tcx.sess.time("encode_query_results", || {
                 let enc = &mut encoder;
                 let qri = &mut query_result_index;
-                (tcx.query_system.fns.encode_query_results)(tcx, enc, qri);
+                (tcx.query_system.encode_query_results)(tcx, enc, qri);
             });
 
             // Encode side effects.

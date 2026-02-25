@@ -39,6 +39,7 @@ declare_lint_pass! {
         DEPRECATED_IN_FUTURE,
         DEPRECATED_SAFE_2024,
         DEPRECATED_WHERE_CLAUSE_LOCATION,
+        DUPLICATE_FEATURES,
         DUPLICATE_MACRO_ATTRIBUTES,
         ELIDED_LIFETIMES_IN_ASSOCIATED_CONSTANT,
         ELIDED_LIFETIMES_IN_PATHS,
@@ -1096,6 +1097,16 @@ declare_lint! {
     pub UNUSED_FEATURES,
     Warn,
     "unused features found in crate-level `#[feature]` directives"
+}
+
+declare_lint! {
+    /// The `duplicate_features` lint detects duplicate features found in
+    /// crate-level [`feature` attributes].
+    ///
+    /// [`feature` attributes]: https://doc.rust-lang.org/nightly/unstable-book/
+    pub DUPLICATE_FEATURES,
+    Warn,
+    "duplicate features found in crate-level `#[feature]` directives"
 }
 
 declare_lint! {

@@ -1,8 +1,8 @@
 error: generic parameters in const blocks are only allowed as the direct value of a `type const`
-  --> $DIR/rhs-but-not-root.rs:7:54
+  --> $DIR/generic-param-rhs.rs:6:19
    |
-LL | type const FOO<const N: usize>: usize = ID::<const { N + 1 }>;
-   |                                                      ^
+LL |     foo::<const { N + 1 }>();
+   |                   ^
    |
    = help: consider factoring the expression into a `type const` item and use it as the const argument instead
 

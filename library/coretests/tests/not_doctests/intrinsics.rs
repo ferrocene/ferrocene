@@ -65,3 +65,31 @@ fn unchecked_funnel_shift_usize() {
         0x6e12fe78e45983ac
     );
 }
+
+// Test `<$T as core::intrinsics::fallback::CarrylessMul>::carryless_mul`
+macro_rules! test_int_carryless_mul {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+        #[test]
+        fn $fn() {
+            assert_eq!(
+                2 as $T,
+                core::intrinsics::fallback::CarrylessMul::carryless_mul(1 as $T, 2 as $T)
+            );
+        }
+        )*
+    };
+}
+test_int_carryless_mul! {
+    u8 => test_u8_carryless_mul,
+    u16 => test_u16_carryless_mul,
+    u32 => test_u32_carryless_mul,
+    u64 => test_u64_carryless_mul,
+    u128 => test_u128_carryless_mul,
+    usize => test_usize_carryless_mul,
+}
+
+#[test]
+fn test_carryless_mul_intrinsic() {
+    assert_eq!(2u8, core::intrinsics::carryless_mul(1u8, 2u8));
+}

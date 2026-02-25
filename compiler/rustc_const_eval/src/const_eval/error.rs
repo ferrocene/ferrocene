@@ -110,7 +110,7 @@ pub fn get_span_and_frames<'tcx>(
     tcx: TyCtxtAt<'tcx>,
     stack: &[Frame<'tcx, impl Provenance, impl Sized>],
 ) -> (Span, Vec<errors::FrameNote>) {
-    let mut stacktrace = Frame::generate_stacktrace_from_stack(stack);
+    let mut stacktrace = Frame::generate_stacktrace_from_stack(stack, *tcx);
     // Filter out `requires_caller_location` frames.
     stacktrace.retain(|frame| !frame.instance.def.requires_caller_location(*tcx));
     let span = stacktrace.last().map(|f| f.span).unwrap_or(tcx.span);

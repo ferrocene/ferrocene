@@ -223,3 +223,28 @@ test_debug_struct_field_finish! {
     test_debug_struct_field5_finish => StructField5 { a, b, c, d, e } == "StructField5 { a: (), b: (), c: (), d: (), e: () }",
     test_debug_struct_fields_finish => StructFields { a, b, c, d, e, f } == "StructFields { a: (), b: (), c: (), d: (), e: (), f: () }",
 }
+//  Test `core::fmt::Formatter::<'a>::debug_tuple_field._finis(h`
+macro_rules! test_debug_tuple_field_finish {
+    ($($fn:ident => $T:ident ( $($t:ty),* ) == $str:literal,)*) => {
+        $(
+        #[test]
+        #[allow(dead_code, unused)]
+        fn $fn() {
+            #[derive(Debug, Default)]
+            struct $T ( $($t,)* );
+            assert_eq!(
+                format!("{:?}", <$T>::default()),
+                $str,
+            );
+        }
+        )*
+    }
+}
+test_debug_tuple_field_finish! {
+    test_debug_tuple_field1_finish => TupleField1(()) == "TupleField1(())",
+    test_debug_tuple_field2_finish => TupleField2((), ()) == "TupleField2((), ())",
+    test_debug_tuple_field3_finish => TupleField3((), (), ()) == "TupleField3((), (), ())",
+    test_debug_tuple_field4_finish => TupleField4((), (), (), ()) == "TupleField4((), (), (), ())",
+    test_debug_tuple_field5_finish => TupleField5((), (), (), (), ()) == "TupleField5((), (), (), (), ())",
+    test_debug_tuple_fields_finish => TupleFields((), (), (), (), (), ()) == "TupleFields((), (), (), (), (), ())",
+}

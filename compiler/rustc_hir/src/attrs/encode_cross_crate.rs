@@ -45,6 +45,7 @@ impl AttributeKind {
             EiiImpls(..) => No,
             ExportName { .. } => Yes,
             ExportStable => No,
+            Feature(..) => No,
             FfiConst(..) => No,
             FfiPure(..) => No,
             Fundamental { .. } => Yes,
@@ -77,6 +78,8 @@ impl AttributeKind {
             NoMangle(..) => Yes, // Needed for rustdoc
             NoStd(..) => No,
             NonExhaustive(..) => Yes, // Needed for rustdoc
+            OnConst { .. } => Yes,
+            OnUnimplemented { .. } => Yes,
             Optimize(..) => No,
             PanicRuntime => No,
             PatchableFunctionEntry { .. } => Yes,
@@ -91,6 +94,7 @@ impl AttributeKind {
             ProfilerRuntime => No,
             RecursionLimit { .. } => No,
             ReexportTestHarnessMain(..) => No,
+            RegisterTool(..) => No,
             Repr { .. } => No,
             RustcAbi { .. } => No,
             RustcAllocator => No,
@@ -130,6 +134,7 @@ impl AttributeKind {
             RustcHasIncoherentInherentImpls => Yes,
             RustcHiddenTypeOfOpaques => No,
             RustcIfThisChanged(..) => No,
+            RustcInheritOverflowChecks => No,
             RustcInsignificantDtor => Yes,
             RustcIntrinsic => Yes,
             RustcIntrinsicConstStableIndirect => No,

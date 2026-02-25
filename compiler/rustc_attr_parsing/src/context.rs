@@ -26,7 +26,9 @@ use crate::attributes::confusables::*;
 use crate::attributes::crate_level::*;
 use crate::attributes::debugger::*;
 use crate::attributes::deprecation::*;
-use crate::attributes::do_not_recommend::*;
+use crate::attributes::diagnostic::do_not_recommend::*;
+use crate::attributes::diagnostic::on_const::*;
+use crate::attributes::diagnostic::on_unimplemented::*;
 use crate::attributes::doc::*;
 use crate::attributes::dummy::*;
 use crate::attributes::inline::*;
@@ -147,6 +149,8 @@ attribute_parsers!(
         DocParser,
         MacroUseParser,
         NakedParser,
+        OnConstParser,
+        OnUnimplementedParser,
         RustcCguTestAttributeParser,
         StabilityParser,
         UsedParser,
@@ -157,8 +161,10 @@ attribute_parsers!(
         Combine<AllowInternalUnstableParser>,
         Combine<CrateTypeParser>,
         Combine<DebuggerViualizerParser>,
+        Combine<FeatureParser>,
         Combine<ForceTargetFeatureParser>,
         Combine<LinkParser>,
+        Combine<RegisterToolParser>,
         Combine<ReprParser>,
         Combine<RustcCleanParser>,
         Combine<RustcLayoutParser>,
@@ -286,6 +292,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcEvaluateWhereClausesParser>>,
         Single<WithoutArgs<RustcHasIncoherentInherentImplsParser>>,
         Single<WithoutArgs<RustcHiddenTypeOfOpaquesParser>>,
+        Single<WithoutArgs<RustcInheritOverflowChecksParser>>,
         Single<WithoutArgs<RustcInsignificantDtorParser>>,
         Single<WithoutArgs<RustcIntrinsicConstStableIndirectParser>>,
         Single<WithoutArgs<RustcIntrinsicParser>>,

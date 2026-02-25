@@ -1056,7 +1056,8 @@ impl<'b> Pattern for &'b str {
 
                 #[cfg(any(
                     all(target_arch = "x86_64", target_feature = "sse2"),
-                    all(target_arch = "loongarch64", target_feature = "lsx")
+                    all(target_arch = "loongarch64", target_feature = "lsx"),
+                    all(target_arch = "aarch64", target_feature = "neon")
                 ))]
                 if self.len() <= 32 {
                     if let Some(result) = simd_contains(self, haystack) {
@@ -1844,7 +1845,8 @@ impl TwoWayStrategy for RejectAndMatch {
 /// [0]: http://0x80.pl/articles/simd-strfind.html#sse-avx2
 #[cfg(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
-    all(target_arch = "loongarch64", target_feature = "lsx")
+    all(target_arch = "loongarch64", target_feature = "lsx"),
+    all(target_arch = "aarch64", target_feature = "neon")
 ))]
 #[inline]
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -1980,7 +1982,8 @@ fn simd_contains(needle: &str, haystack: &str) -> Option<bool> {
 /// Both slices must have the same length.
 #[cfg(any(
     all(target_arch = "x86_64", target_feature = "sse2"),
-    all(target_arch = "loongarch64", target_feature = "lsx")
+    all(target_arch = "loongarch64", target_feature = "lsx"),
+    all(target_arch = "aarch64", target_feature = "neon")
 ))]
 #[inline]
 #[cfg(not(feature = "ferrocene_subset"))]

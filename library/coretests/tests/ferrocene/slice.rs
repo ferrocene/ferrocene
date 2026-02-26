@@ -260,3 +260,26 @@ fn slice_eq_array_different_length() {
     let array = [1, 2, 3];
     assert!(!slice.eq(&array));
 }
+
+// covers `<core::slice::iter::Iter<'_, T> as core::fmt::Debug>::fmt`.
+#[test]
+fn slice_iter_debug_fmt() {
+    let x: &[u8] = b"hello";
+
+    assert_eq!(format!("{:?}", x.iter()), "Iter([104, 101, 108, 108, 111])");
+}
+
+// covers `<core::slice::iter::IterMut<'_, T> as core::fmt::Debug>::fmt`.
+#[test]
+fn slice_iter_mut_debug_fmt() {
+    let mut x = b"hello".to_vec();
+
+    assert_eq!(format!("{:?}", x.as_mut_slice().iter_mut()), "IterMut([104, 101, 108, 108, 111])");
+}
+
+// covers `<core::slice::ascii::EscapeAscii<'a> as core::fmt::Debug>::fmt`.
+#[test]
+fn slice_escape_ascii_debug_fmt() {
+    let x = b"hello".escape_ascii();
+    assert_eq!(format!("{x:?}"), "EscapeAscii { .. }");
+}

@@ -27,7 +27,7 @@ There are also two variants of the standard library available:
   ``proc_macro`` built-in crates.
 
 .. note::
-  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core`` 
+  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core``
   are evaluated and tested within the scope of Ferrocene qualification for
   compiler use only. The use of these libraries by end-use code is outside the scope of the
   current Ferrocene qualification.
@@ -123,7 +123,7 @@ qualified upon request.
 Quality managed targets
 -----------------------
 
-Quality managed targets are targets which are suitable for use in production 
+Quality managed targets are targets which are suitable for use in production
 outside of safety critical contexts.
 
 Support is available. Known problems are tracked and available.
@@ -217,11 +217,23 @@ Supported targets can often be qualified or quality managed upon request.
      - Bare-metal
      - \-
 
+   * - :target:`powerpc64le-unknown-linux-gnu`
+     - ``powerpc64le-unknown-linux-gnu``
+     - Cross-compilation
+     - Full
+     - \-
+
    * - :target:`riscv64gc-unknown-linux-gnu`
      - ``riscv64gc-unknown-linux-gnu``
      - Cross-compilation
      - Full
-     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
+     - \-
+
+   * - :target:`s390x-unknown-linux-gnu`
+     - ``s390x-unknown-linux-gnu``
+     - Cross-compilation
+     - Full
+     - \-
 
    * - :target:`thumbv6m-none-eabi`
      - ``thumbv6m-none-eabi``

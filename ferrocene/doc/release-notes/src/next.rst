@@ -12,10 +12,12 @@ release.
 New features
 ------------
 
-* A new Supported target has been added. Supported targets can often be qualified or quality
-  managed upon request. The new target is:
+* New Supported targets have been added. Supported targets can often be qualified or quality
+  managed upon request. The new targets are:
 
   * :target-with-tuple:`aarch64v8r-unknown-none`
+  * :target-with-tuple:`s390x-unknown-linux-gnu`
+  * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
 
 * Certify the ``core::fmt`` module.
 

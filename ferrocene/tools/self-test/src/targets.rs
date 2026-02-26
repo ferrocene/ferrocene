@@ -70,6 +70,16 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
         // the `riscv64-unknown-linux-gnu-` prefix instead of `riscv64-linux-gnu-`
         linker: Linker::CrossCc(&["riscv64-unknown-linux-gnu-"]),
     },
+    TargetSpec {
+        tuple: "powerpc64le-unknown-linux-gnu",
+        std: true,
+        linker: Linker::CrossCc(&["powerpc64le-linux-gnu-"]),
+    },
+    TargetSpec {
+        tuple: "s390x-unknown-linux-gnu",
+        std: true,
+        linker: Linker::CrossCc(&["s390x-linux-gnu-"]),
+    },
     TargetSpec { tuple: "thumbv6m-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "thumbv7em-ferrocene.facade-eabi", std: true, linker: Linker::BundledLld },

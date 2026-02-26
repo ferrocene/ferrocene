@@ -16,6 +16,7 @@ use rustc_span::{ErrorGuaranteed, Ident, Span, Symbol};
 pub use rustc_target::spec::SanitizerSet;
 use thin_vec::ThinVec;
 
+use crate::attrs::diagnostic::*;
 use crate::attrs::pretty_printing::PrintAttribute;
 use crate::limit::Limit;
 use crate::{DefaultBodyStability, PartialConstStability, RustcVersion, Stability};
@@ -954,6 +955,9 @@ pub enum AttributeKind {
     /// Represents `#[export_stable]`.
     ExportStable,
 
+    /// Represents `#[feature(...)]`
+    Feature(ThinVec<Ident>, Span),
+
     /// Represents `#[ffi_const]`.
     FfiConst(Span),
 
@@ -1079,6 +1083,20 @@ pub enum AttributeKind {
     /// Represents `#[non_exhaustive]`
     NonExhaustive(Span),
 
+    /// Represents `#[diagnostic::on_const]`.
+    OnConst {
+        span: Span,
+        /// None if the directive was malformed in some way.
+        directive: Option<Box<Directive>>,
+    },
+
+    /// Represents `#[rustc_on_unimplemented]` and `#[diagnostic::on_unimplemented]`.
+    OnUnimplemented {
+        span: Span,
+        /// None if the directive was malformed in some way.
+        directive: Option<Box<Directive>>,
+    },
+
     /// Represents `#[optimize(size|speed)]`
     Optimize(OptimizeAttr, Span),
 
@@ -1135,6 +1153,9 @@ pub enum AttributeKind {
 
     /// Represents `#[reexport_test_harness_main]`
     ReexportTestHarnessMain(Symbol),
+
+    /// Represents `#[register_tool]`
+    RegisterTool(ThinVec<Ident>, Span),
 
     /// Represents [`#[repr]`](https://doc.rust-lang.org/stable/reference/type-layout.html#representations).
     Repr {
@@ -1273,6 +1294,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_if_this_changed]`
     RustcIfThisChanged(Span, Option<Symbol>),
+
+    /// Represents `#[rustc_inherit_overflow_checks]`
+    RustcInheritOverflowChecks,
 
     /// Represents `#[rustc_insignificant_dtor]`
     RustcInsignificantDtor,

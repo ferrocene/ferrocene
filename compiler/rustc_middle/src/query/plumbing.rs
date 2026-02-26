@@ -97,8 +97,20 @@ impl<'tcx> CycleError<QueryStackDeferred<'tcx>> {
 
 #[derive(Debug)]
 pub enum QueryMode {
+    /// This is a normal query call to `tcx.$query(..)` or `tcx.at(span).$query(..)`.
     Get,
-    Ensure { check_cache: bool },
+    /// This is a call to `tcx.ensure_ok().$query(..)` or `tcx.ensure_done().$query(..)`.
+    Ensure { ensure_mode: EnsureMode },
+}
+
+/// Distinguishes between `tcx.ensure_ok()` and `tcx.ensure_done()` in shared
+/// code paths that handle both modes.
+#[derive(Debug)]
+pub enum EnsureMode {
+    /// Corresponds to [`TyCtxt::ensure_ok`].
+    Ok,
+    /// Corresponds to [`TyCtxt::ensure_done`].
+    Done,
 }
 
 /// Stores function pointers and other metadata for a particular query.
@@ -383,6 +395,17 @@ macro_rules! if_return_result_from_ensure_ok {
     };
 }
 
+// Expands to `$item` if the `feedable` modifier is present.
+macro_rules! item_if_feedable {
+    ([] $($item:tt)*) => {};
+    ([(feedable) $($rest:tt)*] $($item:tt)*) => {
+        $($item)*
+    };
+    ([$other:tt $($modifiers:tt)*] $($item:tt)*) => {
+        item_if_feedable! { [$($modifiers)*] $($item)* }
+    };
+}
+
 macro_rules! define_callbacks {
     (
         // You might expect the key to be `$K:ty`, but it needs to be `$($K:tt)*` so that
@@ -526,7 +549,7 @@ macro_rules! define_callbacks {
                         self.tcx.query_system.fns.engine.$name,
                         &self.tcx.query_system.caches.$name,
                         $crate::query::IntoQueryParam::into_query_param(key),
-                        false,
+                        $crate::query::EnsureMode::Ok,
                     )
                 }
             )*
@@ -542,7 +565,7 @@ macro_rules! define_callbacks {
                         self.tcx.query_system.fns.engine.$name,
                         &self.tcx.query_system.caches.$name,
                         $crate::query::IntoQueryParam::into_query_param(key),
-                        true,
+                        $crate::query::EnsureMode::Done,
                     );
                 }
             )*
@@ -576,6 +599,30 @@ macro_rules! define_callbacks {
                 }
             )*
         }
+
+        $(
+            item_if_feedable! {
+                [$($modifiers)*]
+                impl<'tcx, K: $crate::query::IntoQueryParam<$name::Key<'tcx>> + Copy>
+                    TyCtxtFeed<'tcx, K>
+                {
+                    $(#[$attr])*
+                    #[inline(always)]
+                    pub fn $name(self, value: $name::ProvidedValue<'tcx>) {
+                        let key = self.key().into_query_param();
+                        let erased_value = $name::provided_to_erased(self.tcx, value);
+                        $crate::query::inner::query_feed(
+                            self.tcx,
+                            dep_graph::DepKind::$name,
+                            &self.tcx.query_system.query_vtables.$name,
+                            &self.tcx.query_system.caches.$name,
+                            key,
+                            erased_value,
+                        );
+                    }
+                }
+            }
+        )*
 
         /// Holds a `QueryVTable` for each query.
         ///
@@ -664,39 +711,6 @@ macro_rules! define_callbacks {
             )*
         }
     };
-}
-
-// Note: `$V` is unused but present so this can be called by `rustc_with_all_queries`.
-macro_rules! define_feedable {
-    (
-        $(
-            $(#[$attr:meta])*
-            [$($modifiers:tt)*]
-            fn $name:ident($K:ty) -> $V:ty,
-        )*
-    ) => {
-        $(
-            impl<'tcx, K: $crate::query::IntoQueryParam<$K> + Copy> TyCtxtFeed<'tcx, K> {
-                $(#[$attr])*
-                #[inline(always)]
-                pub fn $name(self, value: $name::ProvidedValue<'tcx>) {
-                    let key = self.key().into_query_param();
-
-                    let tcx = self.tcx;
-                    let erased_value = $name::provided_to_erased(tcx, value);
-
-                    $crate::query::inner::query_feed(
-                        tcx,
-                        dep_graph::DepKind::$name,
-                        &tcx.query_system.query_vtables.$name,
-                        &tcx.query_system.caches.$name,
-                        key,
-                        erased_value,
-                    );
-                }
-            }
-        )*
-    }
 }
 
 // Each of these queries corresponds to a function pointer field in the

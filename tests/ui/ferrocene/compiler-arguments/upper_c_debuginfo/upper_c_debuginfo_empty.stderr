@@ -1,2 +1,2 @@
-error: codegen option `debuginfo` requires either an integer (0, 1, 2), `none`, `line-directives-only`, `line-tables-only`, `limited`, or `full` (C debuginfo=<value>)
+error: codegen option `debuginfo` requires either an integer (0, 1, 2), `none`, `line-directives-only`, `line-tables-only`, `limited`, or `full` (`-C debuginfo=<value>`)
 

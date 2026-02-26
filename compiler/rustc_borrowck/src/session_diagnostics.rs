@@ -47,7 +47,7 @@ pub(crate) struct GenericDoesNotLiveLongEnough {
     pub span: Span,
 }
 
-#[derive(LintDiagnostic)]
+#[derive(Diagnostic)]
 #[diag("variable does not need to be mutable")]
 pub(crate) struct VarNeedNotMut {
     #[suggestion(

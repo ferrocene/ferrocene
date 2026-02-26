@@ -864,6 +864,7 @@ symbols! {
         //   it's clearer that it's intended as a dummy value, and more likely
         //   to be detected if it accidentally does get used.
         empty: "",
+        empty_braces: "{}",
         emscripten_wasm_eh,
         enable,
         end,
@@ -2055,6 +2056,7 @@ symbols! {
         type_changing_struct_update,
         type_id,
         type_id_eq,
+        type_id_vtable,
         type_info,
         type_ir,
         type_ir_infer_ctxt_like,
@@ -2207,7 +2209,6 @@ symbols! {
         vsreg,
         vsx,
         vtable_align,
-        vtable_for,
         vtable_size,
         warn,
         wasip2,

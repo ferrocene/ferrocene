@@ -995,3 +995,83 @@ fn test_take_while_try_fold() {
     while iter.next().is_some() {}
     assert_eq!(Some(0), iter.try_fold(0, |a, b| Some(a + b)));
 }
+
+// covers `<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold`.
+#[test]
+fn test_cloned_rfold() {
+    let first = vec![1i8, 2];
+    let iter = first.iter().cloned();
+    assert_eq!(iter.rfold(3, |x, acc| x - acc), 0);
+}
+
+// covers `<core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipFmt<A, B>>::fmt`.
+#[test]
+fn test_zip_debug_fmt() {
+    let iter = vec![1u8, 2].into_iter().zip(vec![3u8, 4]);
+
+    assert_eq!(format!("{iter:?}"), "Zip");
+
+    #[derive(Debug)]
+    struct Wrapper<I>(I);
+    impl<I: Iterator> Iterator for Wrapper<I> {
+        type Item = I::Item;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.0.next()
+        }
+    }
+
+    let iter = Wrapper(vec![1u8, 2].into_iter()).zip(Wrapper(vec![3u8, 4].into_iter()));
+
+    assert_eq!(
+        format!("{iter:?}"),
+        "Zip { a: Wrapper(IntoIter([1, 2])), b: Wrapper(IntoIter([3, 4])) }"
+    );
+}
+
+// covers `<core::iter::adapters::filter::Filter<I, P> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_filter_debug_fmt() {
+    let iter = vec![1u8, 2].into_iter().filter(|x| x % 2 == 0);
+
+    assert_eq!(format!("{iter:?}"), "Filter { iter: IntoIter([1, 2]) }");
+}
+
+// covers `<core::iter::sources::from_fn::FromFn<F> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_from_fn_debug_fmt() {
+    let mut x = 0;
+    let iter = core::iter::from_fn(|| {
+        x += 1;
+        Some(x)
+    });
+
+    assert_eq!(format!("{iter:?}"), "FromFn");
+}
+
+// covers `<core::iter::adapters::map::Map<I, F> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_map_debug_fmt() {
+    let iter = vec![1u8, 2].into_iter().map(|x| x + 1);
+
+    assert_eq!(format!("{iter:?}"), "Map { iter: IntoIter([1, 2]) }");
+}
+
+// covers `<core::iter::adapters::flatten::FlatMap<I, U, F> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_flat_map_debug_fmt() {
+    let iter = vec![vec![1u8, 2]].into_iter().flat_map(|x| x);
+
+    assert_eq!(
+        format!("{iter:?}"),
+        "FlatMap { inner: FlattenCompat { iter: Fuse { iter: Some(Map { iter: IntoIter([[1, 2]]) }) }, frontiter: None, backiter: None } }"
+    );
+}
+
+// covers `<core::iter::adapters::take_while::TakeWhile<I, P> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_take_while_debug_fmt() {
+    let iter = vec![1u8, 2].into_iter().take_while(|_| true);
+
+    assert_eq!(format!("{iter:?}"), "TakeWhile { iter: IntoIter([1, 2]), flag: false }");
+}

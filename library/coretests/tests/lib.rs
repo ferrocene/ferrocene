@@ -95,6 +95,7 @@
 #![feature(pattern_type_range_trait)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
+#![feature(ptr_alignment_type)]
 #![feature(ptr_metadata)]
 #![feature(result_option_map_or_default)]
 #![feature(signed_bigint_helpers)]

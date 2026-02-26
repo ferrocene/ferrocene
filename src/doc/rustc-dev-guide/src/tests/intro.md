@@ -63,6 +63,7 @@ package tests:
 
 * `--doc` — Only runs documentation tests in the package.
 * `--all-targets` — Run all tests *except* documentation tests.
+* `--tests` — Only runs unit and integration tests
 
 [tidy-unit-tests]: https://github.com/rust-lang/rust/blob/HEAD/src/tools/tidy/src/unit_tests.rs
 

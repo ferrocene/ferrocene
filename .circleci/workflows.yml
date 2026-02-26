@@ -73,9 +73,6 @@ parameters:
   targets--aarch64-unknown-linux-gnu--self-test:
     type: string
     default: ""
-  targets--aarch64-unknown-linux-gnu--std:
-    type: string
-    default: ""
   targets--aarch64-apple-darwin--build:
     type: string
     default: ""
@@ -417,19 +414,6 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - ferrocene-job-dist:
-          restore-from-job: aarch64-linux-build
-
-  aarch64-linux-dist-targets:
-    executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--std >>
-      SCRIPT: |
-        ./x.py --stage 2 dist rust-std
-    steps:
-      - ferrocene-job-dist:
-          qnx: true
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
@@ -1138,9 +1122,6 @@ workflows:
           requires:
             - aarch64-linux-llvm
       - aarch64-linux-dist:
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-dist-targets:
           requires:
             - aarch64-linux-build
       - aarch64-linux-dist-tools:

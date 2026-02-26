@@ -465,6 +465,10 @@ impl Build {
     ///
     /// By default all build output will be placed in the current directory.
     pub fn new(mut config: Config) -> Build {
+        if config.cmd.no_doc() {
+            panic!("DEPRECATED: `--no-doc` is deprecated. Use `--all-targets` or `--tests`.")
+        }
+
         let src = config.src.clone();
         let out = config.out.clone();
 

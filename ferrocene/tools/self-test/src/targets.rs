@@ -21,6 +21,14 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
     #[cfg(target_arch = "x86_64")]
     TargetSpec {
+        tuple: "aarch64-rhivos2-linux-gnu",
+        std: true,
+        linker: Linker::CrossCc(&["aarch64-linux-gnu-"]),
+    },
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec { tuple: "aarch64-rhivos2-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "x86_64")]
+    TargetSpec {
         tuple: "aarch64-unknown-linux-musl",
         std: true,
         linker: Linker::CrossCc(&["aarch64-linux-musl-"]),

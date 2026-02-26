@@ -459,15 +459,15 @@ fn generate_item_def_id_path(
 
     let shortty = ItemType::from_def_id(def_id, tcx);
     let module_fqp = to_module_fqp(shortty, &fqp);
-    let mut is_absolute = false;
 
-    let url_parts = url_parts(cx.cache(), def_id, module_fqp, &cx.current, &mut is_absolute)?;
-    let mut url_parts = make_href(root_path, shortty, url_parts, &fqp, is_absolute);
+    let (parts, is_absolute) = url_parts(cx.cache(), def_id, module_fqp, &cx.current)?;
+    let mut url = make_href(root_path, shortty, parts, &fqp, is_absolute);
+
     if def_id != original_def_id {
         let kind = ItemType::from_def_id(original_def_id, tcx);
-        url_parts = format!("{url_parts}#{kind}.{}", tcx.item_name(original_def_id))
+        url = format!("{url}#{kind}.{}", tcx.item_name(original_def_id))
     };
-    Ok(HrefInfo { url: url_parts, kind: shortty, rust_path: fqp })
+    Ok(HrefInfo { url, kind: shortty, rust_path: fqp })
 }
 
 /// Checks if the given defid refers to an item that is unnamable, such as one defined in a const block.
@@ -511,16 +511,14 @@ fn url_parts(
     def_id: DefId,
     module_fqp: &[Symbol],
     relative_to: &[Symbol],
-    is_absolute: &mut bool,
-) -> Result<UrlPartsBuilder, HrefError> {
+) -> Result<(UrlPartsBuilder, bool), HrefError> {
     match cache.extern_locations[&def_id.krate] {
-        ExternalLocation::Remote { ref url, is_absolute: abs } => {
-            *is_absolute = abs;
-            let mut builder = remote_url_prefix(url, abs, relative_to.len());
+        ExternalLocation::Remote { ref url, is_absolute } => {
+            let mut builder = remote_url_prefix(url, is_absolute, relative_to.len());
             builder.extend(module_fqp.iter().copied());
-            Ok(builder)
+            Ok((builder, is_absolute))
         }
-        ExternalLocation::Local => Ok(href_relative_parts(module_fqp, relative_to)),
+        ExternalLocation::Local => Ok((href_relative_parts(module_fqp, relative_to), false)),
         ExternalLocation::Unknown => Err(HrefError::DocumentationNotBuilt),
     }
 }
@@ -596,13 +594,17 @@ pub(crate) fn href_with_root_path(
         }
     }
 
-    let mut is_absolute = false;
-    let (fqp, shortty, url_parts) = match cache.paths.get(&did) {
-        Some(&(ref fqp, shortty)) => (fqp, shortty, {
-            let module_fqp = to_module_fqp(shortty, fqp.as_slice());
-            debug!(?fqp, ?shortty, ?module_fqp);
-            href_relative_parts(module_fqp, relative_to)
-        }),
+    let (fqp, shortty, url_parts, is_absolute) = match cache.paths.get(&did) {
+        Some(&(ref fqp, shortty)) => (
+            fqp,
+            shortty,
+            {
+                let module_fqp = to_module_fqp(shortty, fqp.as_slice());
+                debug!(?fqp, ?shortty, ?module_fqp);
+                href_relative_parts(module_fqp, relative_to)
+            },
+            false,
+        ),
         None => {
             // Associated items are handled differently with "jump to def". The anchor is generated
             // directly here whereas for intra-doc links, we have some extra computation being
@@ -610,7 +612,8 @@ pub(crate) fn href_with_root_path(
             let def_id_to_get = if root_path.is_some() { original_did } else { did };
             if let Some(&(ref fqp, shortty)) = cache.external_paths.get(&def_id_to_get) {
                 let module_fqp = to_module_fqp(shortty, fqp);
-                (fqp, shortty, url_parts(cache, did, module_fqp, relative_to, &mut is_absolute)?)
+                let (parts, is_absolute) = url_parts(cache, did, module_fqp, relative_to)?;
+                (fqp, shortty, parts, is_absolute)
             } else if matches!(def_kind, DefKind::Macro(_)) {
                 return generate_macro_def_id_path(did, cx, root_path);
             } else if did.is_local() {

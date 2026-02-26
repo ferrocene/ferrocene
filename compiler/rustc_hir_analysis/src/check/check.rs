@@ -977,7 +977,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(),
                         (0, _) => ("const", "consts", None),
                         _ => ("type or const", "types or consts", None),
                     };
-                    let name = if find_attr!(tcx, def_id, EiiForeignItem) {
+                    let name = if find_attr!(tcx, def_id, RustcEiiForeignItem) {
                         "externally implementable items"
                     } else {
                         "foreign items"
@@ -1256,7 +1256,7 @@ fn check_impl_items_against_trait<'tcx>(
         }
 
         if self_is_guaranteed_unsize_self && tcx.generics_require_sized_self(ty_trait_item.def_id) {
-            tcx.emit_diag_node_span_lint(
+            tcx.emit_node_span_lint(
                 rustc_lint_defs::builtin::DEAD_CODE,
                 tcx.local_def_id_to_hir_id(ty_impl_item.def_id.expect_local()),
                 tcx.def_span(ty_impl_item.def_id),

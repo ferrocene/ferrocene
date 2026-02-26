@@ -224,3 +224,57 @@ fn test_two_way_searcher_next_back() {
     // which always matches.
     core::str::pattern::ferrocene_test::test_two_way_searcher_next_back();
 }
+
+// covers `<core::str::error::Utf8Error as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "invalid utf-8 sequence of 1 bytes from index 0"]
+fn test_invalid_utf_8() {
+    if let Err(e) = String::from_utf8([0xc9, 0x2c].to_vec()) {
+        panic!("{e}");
+    }
+}
+
+// covers `<core::str::error::Utf8Error as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "incomplete utf-8 byte sequence from index 0"]
+fn test_incomplete_utf_8() {
+    if let Err(e) = String::from_utf8([0xc3].to_vec()) {
+        panic!("{e}");
+    }
+}
+
+// covers `<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::size_hint`.
+#[test]
+fn test_char_indices_size_hint() {
+    assert_eq!("hello".char_indices().size_hint(), (2, Some(5)));
+}
+
+// covers `core::str::iter::CharIndices::<'a>::as_str`.
+#[test]
+fn test_char_indices_as_str() {
+    let mut iter = "hello".char_indices();
+    iter.next().unwrap();
+
+    assert_eq!(iter.as_str(), "ello");
+}
+
+// covers:
+// - `<core::str::iter::SplitInclusive<'a, P> as core::fmt::Debug>::fmt`
+// - `<core::str::iter::SplitInternal<'a, P> as core::fmt::Debug>::fmt`
+#[test]
+fn test_split_inclusive_debug_fmt() {
+    let x = "hello world!".split_inclusive(' ');
+
+    assert_eq!(
+        format!("{x:?}"),
+        "SplitInclusive { 0: SplitInternal { start: 0, end: 12, matcher: CharSearcher { haystack: \"hello world!\", finger: 0, finger_back: 12, needle: ' ', utf8_size: 1, utf8_encoded: [32, 0, 0, 0] }, allow_trailing_empty: false, finished: false } }"
+    );
+}
+
+// covers `<core::str::lossy::Utf8Chunks<'_> as core::fmt::Debug>::fmt`.
+#[test]
+fn foo() {
+    let x = b"hello".utf8_chunks();
+
+    assert_eq!(format!("{x:?}"), "Utf8Chunks { source: \"hello\" }");
+}

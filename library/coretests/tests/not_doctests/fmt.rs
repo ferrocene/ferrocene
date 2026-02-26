@@ -195,3 +195,56 @@ fn test_write_fmt_sized_statically_known() {
     fmt::Write::write_fmt(&mut buffer, args).unwrap();
     assert_eq!(buffer.as_str(), "Hello, world!")
 }
+
+//  Test `core::fmt::Formatter::<'a>::debug_struct_field._finish`
+macro_rules! test_debug_struct_field_finish {
+    ($($fn:ident => $T:ident { $($field:ident),* } == $str:literal,)*) => {
+        $(
+        #[test]
+        #[allow(dead_code, unused)]
+        fn $fn() {
+            #[derive(Debug, Default)]
+            struct $T {
+                $($field: (),)*
+            }
+            assert_eq!(
+                format!("{:?}", <$T>::default()),
+                $str,
+            );
+        }
+        )*
+    }
+}
+test_debug_struct_field_finish! {
+    test_debug_struct_field1_finish => StructField1 { a } == "StructField1 { a: () }",
+    test_debug_struct_field2_finish => StructField2 { a, b } == "StructField2 { a: (), b: () }",
+    test_debug_struct_field3_finish => StructField3 { a, b, c } == "StructField3 { a: (), b: (), c: () }",
+    test_debug_struct_field4_finish => StructField4 { a, b, c, d } == "StructField4 { a: (), b: (), c: (), d: () }",
+    test_debug_struct_field5_finish => StructField5 { a, b, c, d, e } == "StructField5 { a: (), b: (), c: (), d: (), e: () }",
+    test_debug_struct_fields_finish => StructFields { a, b, c, d, e, f } == "StructFields { a: (), b: (), c: (), d: (), e: (), f: () }",
+}
+//  Test `core::fmt::Formatter::<'a>::debug_tuple_field._finis(h`
+macro_rules! test_debug_tuple_field_finish {
+    ($($fn:ident => $T:ident ( $($t:ty),* ) == $str:literal,)*) => {
+        $(
+        #[test]
+        #[allow(dead_code, unused)]
+        fn $fn() {
+            #[derive(Debug, Default)]
+            struct $T ( $($t,)* );
+            assert_eq!(
+                format!("{:?}", <$T>::default()),
+                $str,
+            );
+        }
+        )*
+    }
+}
+test_debug_tuple_field_finish! {
+    test_debug_tuple_field1_finish => TupleField1(()) == "TupleField1(())",
+    test_debug_tuple_field2_finish => TupleField2((), ()) == "TupleField2((), ())",
+    test_debug_tuple_field3_finish => TupleField3((), (), ()) == "TupleField3((), (), ())",
+    test_debug_tuple_field4_finish => TupleField4((), (), (), ()) == "TupleField4((), (), (), ())",
+    test_debug_tuple_field5_finish => TupleField5((), (), (), (), ()) == "TupleField5((), (), (), (), ())",
+    test_debug_tuple_fields_finish => TupleFields((), (), (), (), (), ()) == "TupleFields((), (), (), (), (), ())",
+}

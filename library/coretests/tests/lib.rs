@@ -91,6 +91,8 @@
 #![feature(numfmt)]
 #![feature(one_sided_range)]
 #![feature(pattern)]
+#![feature(pattern_type_macro)]
+#![feature(pattern_type_range_trait)]
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
 #![feature(ptr_metadata)]

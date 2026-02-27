@@ -1,3 +1,107 @@
+macro_rules! nums_to_bytes_tests {
+    ($($int:ty),*) => {
+        $({
+            let int = <$int>::MAX;
+            let le_bytes = int.to_le_bytes();
+            let be_bytes = int.to_be_bytes();
+
+            assert_eq!(<$int>::from_le_bytes(le_bytes), int);
+            assert_eq!(<$int>::from_be_bytes(be_bytes), int);
+        })*
+    }
+}
+
+#[test]
+fn numbers_to_bytes() {
+    nums_to_bytes_tests! {
+        u8, u16, u32, u64, u128, usize,
+        i8, i16, i32, i64, i128, isize,
+        f32, f64
+    }
+}
+
+#[test]
+fn abs_diff_vectorization() {
+    fn sad_iter(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        a.iter().zip(b).map(|(&a, &b)| a.abs_diff(b) as u32).sum()
+    }
+
+    fn sad_loop(a: &[u8; 8], b: &[u8; 8]) -> u32 {
+        let mut sum = 0;
+        for i in 0..a.len() {
+            sum += a[i].abs_diff(b[i]) as u32;
+        }
+        sum
+    }
+
+    let max_buf = [u8::MAX; 8];
+    let min_buf = [u8::MIN; 8];
+
+    assert_eq!(sad_iter(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+    assert_eq!(sad_loop(&max_buf, &min_buf), 8 * (u8::MAX as u32));
+}
+
+macro_rules! ilog2_loop {
+    ($(($T:ty, $ilog2_max:expr) => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                assert_eq!(<$T>::MAX.ilog2(), $ilog2_max);
+                for i in 0..=$ilog2_max {
+                    let p = (2 as $T).pow(i as u32);
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog2(), i - 1);
+                    }
+                    assert_eq!(p.ilog2(), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog2(), i);
+                    }
+
+                    // also check `x.ilog(2)`
+                    if p >= 2 {
+                        assert_eq!((p - 1).ilog(2), i - 1);
+                    }
+                    assert_eq!(p.ilog(2), i);
+                    if p >= 2 {
+                        assert_eq!((p + 1).ilog(2), i);
+                    }
+                }
+            }
+        )*
+    };
+}
+ilog2_loop! {
+    (u8, 7) => ilog2_u8,
+    (u16, 15) => ilog2_u16,
+    (u32, 31) => ilog2_u32,
+    (u64, 63) => ilog2_u64,
+    (u128, 127) => ilog2_u128,
+    (i8, 6) => ilog2_i8,
+    (i16, 14) => ilog2_i16,
+    (i32, 30) => ilog2_i32,
+    (i64, 62) => ilog2_i64,
+    (i128, 126) => ilog2_i128,
+}
+
+macro_rules! nonpositive_ilog2 {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            #[should_panic = "argument of integer logarithm must be positive"]
+            fn $fn() {
+                let _ = (-1 as $T).ilog2();
+            }
+        )*
+    };
+}
+nonpositive_ilog2! {
+    i8 => nonpositive_ilog2_of_i8,
+    i16 => nonpositive_ilog2_of_i16,
+    i32 => nonpositive_ilog2_of_i32,
+    i64 => nonpositive_ilog2_of_i64,
+    i128 => nonpositive_ilog2_of_i128,
+}
+
 // covers:
 // - `<core::num::niche_types::$T as core::hash::Hash>::hash`
 // - `<core::num::niche_types::$T::new`

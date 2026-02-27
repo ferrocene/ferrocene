@@ -2045,3 +2045,9 @@ unsafe fn small_slice_eq(x: &[u8], y: &[u8]) -> bool {
         vx == vy
     }
 }
+
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test;

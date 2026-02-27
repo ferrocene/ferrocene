@@ -2,6 +2,27 @@ use core::str::pattern::Pattern;
 use core::{ptr, slice};
 
 #[test]
+fn str_methods() {
+    let s = <&str>::default();
+    assert_eq!(s.as_str(), "");
+
+    let mut buf = String::from("a");
+    let s = unsafe { core::slice::from_raw_parts_mut(buf.as_mut_str().as_mut_ptr(), 1) };
+    s[0] = b'b';
+    assert_eq!(buf, "b");
+}
+
+#[test]
+fn str_bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}
+
+#[test]
 fn str_from_utf8_ok() {
     let sparkle_heart = vec![240, 159, 146, 150];
     let sparkle_heart = str::from_utf8(&sparkle_heart);
@@ -190,4 +211,16 @@ fn test_bytes_iter_methods() {
     assert_eq!(s.bytes().nth(5), Some(b','));
     assert_eq!(s.bytes().rposition(|b| b == b','), Some(5));
     assert_eq!(s.bytes().size_hint(), (13, Some(13)));
+}
+
+// Covers `core::str::pattern::TwoWaySearcher::next_back`
+#[test]
+fn test_two_way_searcher_next_back() {
+    // In theory it should be possible to test TwoWaySearcher::next_back
+    // through e.g. str::rfind. We need a needle for which the left part
+    // matches but the right part does not. The "problem is that I did not find
+    // any needle that is long_period=false and more than one character. For
+    // needles of length zero or one the right part is always an empty string
+    // which always matches.
+    core::str::pattern::ferrocene_test::test_two_way_searcher_next_back();
 }

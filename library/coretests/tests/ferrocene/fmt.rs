@@ -248,3 +248,83 @@ test_debug_tuple_field_finish! {
     test_debug_tuple_field5_finish => TupleField5((), (), (), (), ()) == "TupleField5((), (), (), (), ())",
     test_debug_tuple_fields_finish => TupleFields((), (), (), (), (), ()) == "TupleFields((), (), (), (), (), ())",
 }
+
+// Covers `<&mut T as core::fmt::Pointer>::fmt`
+#[test]
+fn mut_ref_fmt_pointer() {
+    assert!(format!("{:p}", &mut [1, 2, 3]).starts_with("0x"));
+}
+
+// Covers:
+// - `<(dyn core::any::Any + core::marker::Send + 'static) as core::fmt::Debug>::fmt`
+// - `<(dyn core::any::Any + core::marker::Send + core::marker::Sync + 'static) as core::fmt::Debug>::fmt`
+#[test]
+fn dyn_any_send_static_fmt_debug() {
+    use core::any::Any;
+    use core::marker::{Send, Sync};
+
+    let a = "Hello, world!";
+
+    let b: &(dyn Any + Send + 'static) = &a;
+    assert_eq!(format!("{:?}", b), "Any { .. }");
+
+    let c: &(dyn Any + Send + Sync + 'static) = &a;
+    assert_eq!(format!("{:?}", c), "Any { .. }");
+}
+
+// Covers `<core::any::TypeId as core::fmt::Debug>::fmt`
+#[test]
+fn any_type_id_fmt_debug() {
+    assert!(format!("{:?}", core::any::Any::type_id(&0_u32)).starts_with("TypeId(0x"));
+}
+
+// Cover `<core::array::TryFromSliceError as core::fmt::Display>::fmt`
+#[test]
+fn array_try_from_slice_error_fmt_display() {
+    assert_eq!(
+        format!("{}", TryInto::<[u32; 4]>::try_into([0].as_slice()).unwrap_err()),
+        "could not convert slice to array"
+    );
+}
+
+// Cover `<core::ascii::EscapeDefault as core::fmt::Debug>::fmt`
+#[test]
+fn ascii_escape_default_fmt_debug() {
+    assert_eq!(format!("{:?}", core::ascii::escape_default(b'\t')), "EscapeDefault { .. }");
+}
+
+// Cover `<core::cell::SyncUnsafeCell<T> as core::fmt::Debug>::fmt`
+#[test]
+fn cell_sync_unsafe_cell_fmt_debug() {
+    assert_eq!(format!("{:?}", core::cell::SyncUnsafeCell::new(0)), "SyncUnsafeCell { .. }");
+}
+
+// Cover `<core::cell::UnsafeCell<T> as core::fmt::Debug>::fmt`
+#[test]
+fn cell_unsafe_cell_fmt_debug() {
+    assert_eq!(format!("{:?}", core::cell::UnsafeCell::new(0)), "UnsafeCell { .. }");
+}
+
+// Cover `<core::escape::EscapeIterInner<N, core::escape::AlwaysEscaped> as core::fmt::Debug>::fmt`
+#[test]
+fn escape_iter_inner_always_escaped_fmt_debug() {
+    assert_eq!(format!("{:?}", '?'.escape_unicode()), "EscapeUnicode(EscapeIterInner('\\u{3f}'))");
+}
+
+// Cover `<core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Debug>::fmt`
+#[test]
+fn escape_iter_inner_maybe_escaped_fmt_debug() {
+    assert_eq!(format!("{:?}", '!'.escape_debug()), "EscapeDebug(EscapeIterInner('!'))");
+}
+
+// Cover `<core::ffi::c_void as core::fmt::Debug>::fmt`
+#[test]
+fn ffi_c_void_fmt_debug() {
+    assert_eq!(format!("{:?}", core::ffi::c_void::__variant1), "c_void");
+}
+
+// Cover `<core::fmt::Error as core::fmt::Display>::fmt`
+#[test]
+fn fmt_error_fmt_display() {
+    assert_eq!(format!("{:?}", core::fmt::Error), "Error");
+}

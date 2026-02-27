@@ -1,5 +1,274 @@
 use std::array::IntoIter;
 
+#[test]
+fn exact_iterator_mut_ref_is_empty() {
+    assert!((&mut (0..0)).is_empty());
+    assert!(!(&mut (0..1)).is_empty());
+}
+
+#[test]
+fn step_default_forward_and_backward() {
+    use core::iter::Step;
+
+    #[derive(Debug, Clone, PartialOrd, PartialEq)]
+    struct Wrapper(usize);
+
+    impl Step for Wrapper {
+        fn steps_between(start: &Self, end: &Self) -> (usize, Option<usize>) {
+            usize::steps_between(&start.0, &end.0)
+        }
+
+        fn forward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::forward_checked(start.0, count).map(Self)
+        }
+
+        fn backward_checked(start: Self, count: usize) -> Option<Self> {
+            usize::backward_checked(start.0, count).map(Self)
+        }
+    }
+
+    assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
+    assert_eq!(unsafe { Step::backward_unchecked(Wrapper(10), 10) }, Wrapper(0));
+}
+
+macro_rules! int_step {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&<$T>::MIN, &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MAX / 2), &<$T>::MAX);
+                assert!(upper_bound.is_some() || lower_bound == usize::MAX);
+
+                let (lower_bound, upper_bound) = <$T as core::iter::Step>::steps_between(&(<$T>::MIN), &(<$T>::MIN + 1));
+                assert_eq!(1, lower_bound);
+                assert_eq!(Some(1), upper_bound);
+
+                assert_eq!(
+                    (0, None),
+                    <$T as core::iter::Step>::steps_between(&<$T>::MAX, &<$T>::MIN)
+                );
+
+                assert_eq!(
+                    <$T>::MAX,
+                    <$T as core::iter::Step>::backward(<$T>::MIN, 1)
+                );
+                let half_max = (<$T>::MAX / 2) as usize;
+                let expected = <$T>::MAX - half_max as $T;
+                assert_eq!(
+                    expected,
+                    <$T as core::iter::Step>::backward(<$T>::MAX, half_max)
+                );
+                assert_eq!(
+                    expected,
+                    unsafe { <$T as core::iter::Step>::backward_unchecked(<$T>::MAX, half_max) }
+                );
+                assert_eq!(
+                    Some(expected),
+                    <$T as core::iter::Step>::backward_checked(<$T>::MAX, half_max)
+                );
+                assert!(
+                    <$T as core::iter::Step>::backward_checked(<$T>::MIN, usize::MAX).is_none()
+                );
+
+                assert!(
+                    <$T as core::iter::Step>::forward_checked(<$T>::MAX, usize::MAX).is_none()
+                );
+                assert_eq!(
+                    Some(<$T>::MIN + <$T>::MAX as usize as $T),
+                    <$T as core::iter::Step>::forward_checked(<$T>::MIN, <$T>::MAX as usize)
+                );
+                assert_eq!(
+                    <$T>::MIN,
+                    <$T as core::iter::Step>::forward(<$T>::MAX, 1)
+                );
+                assert_eq!(
+                    <$T>::MIN + <$T>::MAX as usize as $T,
+                    <$T as core::iter::Step>::forward(<$T>::MIN, <$T>::MAX as usize)
+                );
+            }
+        )*
+    };
+}
+int_step! {
+    i8 => i8_step,
+    i16 => i16_step,
+    i32 => i32_step,
+    i64 => i64_step,
+    i128 => i128_step,
+    isize => isize_step,
+    u8 => u8_step,
+    u16 => u16_step,
+    u32 => u32_step,
+    u64 => u64_step,
+    u128 => u128_step,
+    usize => usize_step,
+}
+
+#[test]
+fn chunks_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let chunk = vals.chunks(2).nth(10);
+    assert!(chunk.is_none());
+}
+
+// <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn take_as_iter_nth() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let nth = vals.iter().take(2).nth(10);
+    assert!(nth.is_none());
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::fold
+#[test]
+fn skip_as_iter_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).fold(0, |x, y| x + y);
+    assert_eq!(folded, 0);
+}
+
+// <core::iter::adapters::skip::Skip<I> as core::iter::traits::iterator::Iterator>::try_fold
+#[test]
+fn skip_as_iter_try_fold() {
+    let vals = [0, 1, 2, 3, 4, 5];
+    let folded = vals.iter().skip(10).try_fold(0, |x, y| std::io::Result::Ok(x + y)).unwrap();
+    assert_eq!(folded, 0);
+}
+
+// <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+#[test]
+fn spec_iter_eq() {
+    let inf_1 = 0..;
+    let inf_2 = 1..;
+    assert_eq!(inf_1.into_iter().eq(inf_2), false);
+}
+
+// <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
+// Basically `test_decode_utf16_size_hint` from `char.rs`
+#[test]
+fn decode_utf_16_as_iter_size_hint() {
+    fn check(s: &[u16]) {
+        let mut iter = char::decode_utf16(s.iter().cloned());
+
+        loop {
+            let count = iter.clone().count();
+            let (lower, upper) = iter.size_hint();
+
+            assert!(
+                lower <= count && count <= upper.unwrap(),
+                "lower = {lower}, count = {count}, upper = {upper:?}"
+            );
+
+            if let None = iter.next() {
+                break;
+            }
+        }
+    }
+
+    check(&[0xD801, 0xD800, 0xD801, 0xD801]);
+}
+
+// <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
+#[test]
+fn test_iterator_chain_advance_by() {
+    let first = vec![1, 2];
+    let second = vec![4, 5];
+    let mut iter = first.into_iter().chain(second.into_iter());
+    iter.advance_back_by(3).unwrap(); // Make `self.b = None`
+    iter.advance_by(2).ok(); // Go past `self.a`
+    assert_eq!(iter.next(), None);
+}
+
+// <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::size_hint
+#[test]
+fn iter_zip_size_hint() {
+    #[derive(Clone, Copy)]
+    struct MaybeUpper {
+        val: usize,
+        size_hint: (usize, Option<usize>),
+    }
+
+    impl Iterator for MaybeUpper {
+        type Item = usize;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            Some(self.val)
+        }
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            self.size_hint
+        }
+    }
+
+    let none = MaybeUpper { val: 1, size_hint: (0, None) };
+
+    let some_1 = MaybeUpper { val: 1, size_hint: (1, Some(1)) };
+    let some_2 = MaybeUpper { val: 2, size_hint: (2, Some(2)) };
+
+    let none_none_zip = none.zip(none);
+    assert_eq!(none_none_zip.size_hint(), (0, None));
+
+    let some_some_zip = some_1.zip(some_2);
+    assert_eq!(some_some_zip.size_hint(), (1, Some(1)));
+
+    let some_none_zip = some_1.zip(none);
+    assert_eq!(some_none_zip.size_hint(), (0, Some(1)));
+
+    let none_some_zip = none.zip(some_2);
+    assert_eq!(none_some_zip.size_hint(), (0, Some(2)));
+}
+
+// <core::iter::adapters::step_by::StepBy<I> as core::iter::adapters::step_by::StepByImpl<I>>::spec_nth
+#[test]
+fn iter_step_by_spec_nth() {
+    let mut it = (0_u128..).step_by(1);
+    let _first = it.next();
+    let stepped = it.nth(usize::MAX);
+    assert_eq!(stepped, Some(usize::MAX as u128 + 1));
+}
+
+// <core::slice::iter::Chunks<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_last() {
+    let buf: Vec<usize> = vec![];
+    let it = buf.chunks(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksExact<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_nth() {
+    let slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksExactMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_exact_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_exact_mut(2);
+    assert_eq!(iter.nth(55), None);
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::last
+#[test]
+fn iter_chunks_mut_last() {
+    let mut buf: Vec<usize> = vec![];
+    let it = buf.chunks_mut(5);
+    assert_eq!(it.last(), None)
+}
+
+// <core::slice::iter::ChunksMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
+#[test]
+fn iter_chunks_mut_nth() {
+    let mut slice = ['l', 'o', 'r', 'e', 'm'];
+    let mut iter = slice.chunks_mut(2);
+    assert_eq!(iter.nth(55), None);
+}
+
 // <core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::advance_by
 #[test]
 fn test_iterator_copied_advance_by() {

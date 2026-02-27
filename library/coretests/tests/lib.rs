@@ -136,6 +136,7 @@
 #![feature(atomic_from_mut)]
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
+#![feature(c_void_variant)]
 #![feature(char_internals)]
 #![feature(const_raw_ptr_comparison)]
 #![feature(control_flow_into_value)]
@@ -148,6 +149,7 @@
 #![feature(slice_iter_mut_as_mut_slice)]
 #![feature(str_as_str)]
 #![feature(str_from_raw_parts)]
+#![feature(sync_unsafe_cell)]
 #![feature(temporary_niche_types)]
 #![feature(trusted_step)]
 // tidy-alphabetical-end
@@ -207,6 +209,7 @@ mod clone;
 mod cmp;
 mod const_ptr;
 mod convert;
+mod ferrocene;
 mod ffi;
 mod floats;
 mod fmt;
@@ -223,7 +226,6 @@ mod manually_drop;
 mod mem;
 mod net;
 mod nonzero;
-mod not_doctests;
 mod num;
 mod ops;
 mod option;

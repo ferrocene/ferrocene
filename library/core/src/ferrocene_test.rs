@@ -73,3 +73,73 @@ pub fn test_index_range_double_ended_iterator() {
     // rfold
     assert_eq!((), ir.rfold((), |_, _| ()));
 }
+
+/// Provides println-like functions for debugging libcore.
+///
+/// This is useful because within libcore there are no `println!` or `dbg!` macros available.
+///
+/// If building the subset targets, as is done when executing `./x test library/core --no-doc --coverage=library`, it is necessary to mark those function calls with `#[cfg(not(feature = "ferrocene_subset"))]`.
+///
+/// ```ignore (for internal use only)
+/// use crate::ferrocene_test::println;
+///
+/// fn some_libcore_function(param_a: u32) {
+///     #[cfg(not(feature = "ferrocene_subset"))]
+///     println::eprintln_args(format_args!("param_a={}", param_a));
+///
+///     if param_a > 10 {
+///         #[cfg(not(feature = "ferrocene_subset"))]
+///         println::eprintln_str("hit branch A");
+///     } else {
+///         #[cfg(not(feature = "ferrocene_subset"))]
+///         println::eprintln_str("hit branch B");
+///     }
+/// }
+/// ```
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+pub(crate) mod println {
+    use crate::fmt;
+
+    unsafe extern "C" {
+        fn dprintf(fd: i32, s: *const u8, ...);
+    }
+
+    pub fn eprintln_str(s: &str) {
+        eprintln_args(format_args!("{s}"));
+    }
+
+    pub fn eprintln_args(args: fmt::Arguments<'_>) {
+        let mut buf = Buffer::new();
+        let mut f = fmt::Formatter::new(&mut buf, fmt::FormattingOptions::new());
+        fmt::Display::fmt(&format_args!("{args}\n"), &mut f).unwrap();
+        // SAFETY: the arguments to the function are correct
+        unsafe {
+            dprintf(2, "%s\0".as_ptr(), buf.read().as_ptr() as *const u8);
+        }
+    }
+
+    struct Buffer {
+        buf: [u8; 10 * 1024],
+        i: usize,
+    }
+
+    impl Buffer {
+        fn new() -> Self {
+            Self { buf: [0; _], i: 0 }
+        }
+
+        fn read(&self) -> &[u8] {
+            &self.buf[..self.i]
+        }
+    }
+
+    impl fmt::Write for Buffer {
+        fn write_str(&mut self, s: &str) -> fmt::Result {
+            for byte in s.as_bytes() {
+                self.buf[self.i] = *byte;
+                self.i += 1;
+            }
+            Ok(())
+        }
+    }
+}

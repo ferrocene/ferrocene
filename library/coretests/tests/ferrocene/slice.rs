@@ -1,3 +1,54 @@
+#[test]
+fn slice_methods() {
+    let mut arr = [0; 10];
+    let slice = arr.as_mut_slice();
+
+    assert_eq!(slice.len(), 10);
+
+    assert!(slice.first_chunk_mut::<11>().is_none());
+    assert!(slice.first_chunk_mut::<1>().is_some());
+
+    assert!(slice.split_first_mut().is_some());
+
+    let mut empty = [0; 0];
+    assert!(empty.as_mut_slice().split_first_mut().is_none());
+}
+
+#[test]
+fn slice_partial_eq() {
+    #[derive(Debug, Eq, PartialEq, Copy, Clone)]
+    struct Byte(u8);
+
+    let a1 = [Byte(0u8); 100];
+    let a2 = [Byte(0u8); 99];
+    let mut a3 = [Byte(0u8); 100];
+
+    assert_ne!(a1.as_slice(), a2.as_slice());
+
+    assert_eq!(a1.as_slice(), a3.as_slice());
+
+    a3[a3.len() - 1] = Byte(1);
+    assert_ne!(a1.as_slice(), a3.as_slice());
+}
+
+#[test]
+fn as_mut_array() {
+    let mut arr = [0u8; 1];
+    let slice = arr.as_mut_slice();
+
+    assert!(slice.as_mut_array::<2>().is_none());
+    assert!(slice.as_mut_array::<1>().is_some());
+}
+
+#[test]
+fn chunks_exact_is_empty() {
+    assert!([0; 10].chunks_exact(11).is_empty());
+    assert!(![0; 10].chunks_exact(2).is_empty());
+
+    assert!([0; 10].chunks_exact_mut(11).is_empty());
+    assert!(![0; 10].chunks_exact_mut(2).is_empty());
+}
+
 // covers `core::slice::<impl [T]>::first_mut`
 #[test]
 fn first_mut() {
@@ -200,4 +251,12 @@ fn slice_escape_ascii_display_fmt_nonempty_back() {
         assert_eq!(format!("{escaped}"), s);
         escaped.next_back();
     }
+}
+
+// covers: `core::array::equality::<impl core::cmp::PartialEq<[U; N]> for [T]>::eq`
+#[test]
+fn slice_eq_array_different_length() {
+    let slice = [1, 2, 3, 4, 5].as_slice();
+    let array = [1, 2, 3];
+    assert!(!slice.eq(&array));
 }

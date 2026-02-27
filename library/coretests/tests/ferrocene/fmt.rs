@@ -101,6 +101,27 @@ fn test_u128_fmt_inner() {
     assert_eq!(buffer, "10000000000000001");
 }
 
+// Covers `core::fmt::Formatter::<'a>::sign`
+#[test]
+fn test_formatter_sign_none() {
+    let mut buffer = String::new();
+    let mut f = fmt::Formatter::new(&mut buffer, fmt::FormattingOptions::new());
+
+    assert_eq!(f.sign(), None);
+}
+
+// Covers `core::fmt::Formatter::<'a>::sign`
+#[test]
+fn test_formatter_sign_some() {
+    let mut options = fmt::FormattingOptions::new();
+    options.sign(Some(fmt::Sign::Plus));
+
+    let mut buffer = String::new();
+    let mut f = fmt::Formatter::new(&mut buffer, options);
+
+    assert_eq!(f.sign(), Some(fmt::Sign::Plus));
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

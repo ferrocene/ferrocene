@@ -202,6 +202,19 @@ fn test_builder_debug_set_entry_with() {
     assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "{new entry: [1, 2, 3]}");
 }
 
+// Covers `core::fmt::builders::from_fn`
+#[test]
+fn test_builder_from_fn() {
+    let value = 5;
+    let wrapped = fmt::from_fn(|f| {
+        for _ in 0..value {
+            write!(f, "from_fn ")?
+        }
+        write!(f, "from_fn")
+    });
+    assert_eq!(format!("{wrapped}"), "from_fn from_fn from_fn from_fn from_fn from_fn");
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

@@ -1,5 +1,10 @@
 use core::intrinsics::fallback::FunnelShift;
 
+#[test]
+fn assume() {
+    unsafe { core::hint::assert_unchecked(true) };
+}
+
 macro_rules! test_unchecked_funnel_shift {
     ($lhs:literal, $rhs:literal, $shift:literal, $res_shl:literal, $res_shr:literal) => {
         unsafe {

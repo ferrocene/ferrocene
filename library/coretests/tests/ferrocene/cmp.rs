@@ -1,3 +1,29 @@
+#[test]
+fn ordering_equality() {
+    use core::cmp::Ordering;
+
+    let os = [Ordering::Less, Ordering::Equal, Ordering::Greater];
+    for ordering in os {
+        let is_eq = ordering.is_eq();
+        let is_ne = ordering.is_ne();
+        if let Ordering::Equal = ordering {
+            assert!(is_eq);
+            assert!(!is_ne);
+        } else {
+            assert!(!is_eq);
+            assert!(is_ne);
+        }
+    }
+}
+
+#[test]
+fn unit_comparisons() {
+    assert!(!(() != ()));
+    assert!(!(&() != &mut ()));
+    assert!(!(&mut () != &()));
+    assert!(!(() < ()));
+}
+
 // covers `core::cmp::Ord::clamp`.
 #[test]
 fn default_clamp_impl() {

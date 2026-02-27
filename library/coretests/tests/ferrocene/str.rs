@@ -2,6 +2,27 @@ use core::str::pattern::Pattern;
 use core::{ptr, slice};
 
 #[test]
+fn str_methods() {
+    let s = <&str>::default();
+    assert_eq!(s.as_str(), "");
+
+    let mut buf = String::from("a");
+    let s = unsafe { core::slice::from_raw_parts_mut(buf.as_mut_str().as_mut_ptr(), 1) };
+    s[0] = b'b';
+    assert_eq!(buf, "b");
+}
+
+#[test]
+fn str_bytes() {
+    let s = "yellow submarine";
+
+    assert!(s.bytes().all(|b| b.is_ascii()));
+    assert!(s.bytes().any(|b| b.is_ascii_whitespace()));
+    assert!(s.bytes().find(|b| *b == b'i').is_some());
+    assert_eq!(s.bytes().position(|b| b == b's'), Some(7));
+}
+
+#[test]
 fn str_from_utf8_ok() {
     let sparkle_heart = vec![240, 159, 146, 150];
     let sparkle_heart = str::from_utf8(&sparkle_heart);

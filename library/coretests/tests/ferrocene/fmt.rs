@@ -188,6 +188,20 @@ fn test_builder_debug_list_entry_with() {
     assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "[new entry: [1, 2, 3]]");
 }
 
+// Covers `core::fmt::builders::DebugSet::<'a, 'b>::entry_with`
+#[test]
+fn test_builder_debug_set_entry_with() {
+    struct Foo(Vec<i32>);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_set().entry_with(|f| write!(f, "new entry: {:?}", self.0)).finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "{new entry: [1, 2, 3]}");
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

@@ -80,7 +80,7 @@ pub fn test_index_range_double_ended_iterator() {
 ///
 /// If building the subset targets, as is done when executing `./x test library/core --no-doc --coverage=library`, it is necessary to mark those function calls with `#[cfg(not(feature = "ferrocene_subset"))]`.
 ///
-/// ```
+/// ```ignore (for internal use only)
 /// use crate::ferrocene_test::println;
 ///
 /// fn some_libcore_function(param_a: u32) {

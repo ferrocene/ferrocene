@@ -40,3 +40,33 @@ fn maybe_uninit() {
     assert_eq!(source, u64::MAX);
     assert_eq!(destination, u64::MAX);
 }
+
+// Test `<core::mem::Discriminant<T> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_discriminant_debug_fmt() {
+    let x = core::mem::discriminant(&Some(true));
+    assert_eq!(format!("{x:?}"), "Discriminant(1)");
+}
+
+// Test `<core::mem::manually_drop::ManuallyDrop<T> as core::cmp::PartialEq>::eq`.
+#[test]
+fn test_manually_drop_eq() {
+    let mut x = core::mem::ManuallyDrop::new(vec![]);
+    let mut y = core::mem::ManuallyDrop::new(vec![1]);
+
+    x.push(1);
+    assert_eq!(x, y);
+
+    unsafe {
+        core::mem::ManuallyDrop::drop(&mut x);
+        core::mem::ManuallyDrop::drop(&mut y);
+    }
+}
+
+// Test `core::mem::maybe_dangling::MaybeDangling::<P>::into_inner`.
+#[test]
+fn test_maybe_dangling_into_inner() {
+    let boxed = Box::new(0u32);
+    let maybe_dangling = core::mem::MaybeDangling::new(boxed);
+    assert_eq!(*maybe_dangling.into_inner(), 0u32);
+}

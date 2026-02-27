@@ -144,6 +144,18 @@ fn test_formatter_with_options() {
     assert_eq!(f2.sign(), Some(fmt::Sign::Plus));
 }
 
+// Covers `core::fmt::FormattingOptions::create_formatter`
+#[test]
+fn test_formatting_options_create_formatter() {
+    let mut options = fmt::FormattingOptions::new();
+    options.sign(Some(fmt::Sign::Plus));
+
+    let mut buffer = String::new();
+    let mut f = options.create_formatter(&mut buffer);
+
+    assert_eq!(f.sign(), Some(fmt::Sign::Plus));
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

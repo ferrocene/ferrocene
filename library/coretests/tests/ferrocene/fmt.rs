@@ -156,6 +156,24 @@ fn test_formatting_options_create_formatter() {
     assert_eq!(f.sign(), Some(fmt::Sign::Plus));
 }
 
+// Covers `core::fmt::FormattingOptions::precision`
+#[test]
+fn test_formatting_options_precision_none() {
+    let mut options = fmt::FormattingOptions::new();
+
+    options.precision(None);
+    assert_eq!(options.get_precision(), None);
+}
+
+// Covers `core::fmt::FormattingOptions::precision`
+#[test]
+fn test_formatting_options_precision_some() {
+    let mut options = fmt::FormattingOptions::new();
+
+    options.precision(Some(4));
+    assert_eq!(options.get_precision(), Some(4));
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

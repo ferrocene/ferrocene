@@ -171,7 +171,7 @@ def calculate_llvm_rebuild(target: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
+    url: urllib.parse.ParseResult = llvm_cache.get_url(target)
     assert url.scheme == "s3"
 
     try:

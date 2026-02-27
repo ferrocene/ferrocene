@@ -68,3 +68,29 @@ fn volatile_ops() {
         assert_eq!(std::ptr::read_volatile(y), 12);
     }
 }
+
+// Cover `<core::ptr::non_null::NonNull<T> as core::fmt::Debug>::fmt`.
+#[test]
+fn test_non_null_debug_fmt() {
+    let x = 5;
+    let ptr = core::ptr::NonNull::from_ref(&x);
+    assert_eq!(format!("{ptr:?}"), format!("{:?}", ptr.as_ptr()));
+}
+
+// Cover `<core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt`.
+#[test]
+fn test_non_null_pointer_fmt() {
+    let x = 5;
+    let ptr = core::ptr::NonNull::from_ref(&x);
+    assert_eq!(format!("{ptr:p}"), format!("{:p}", ptr.as_ptr()));
+}
+
+// Cover `<core::ptr::metadata::DynMetadata<Dyn> as core::clone::Clone>::clone`.
+#[test]
+fn test_dyn_metadata_clone() {
+    let x = 5;
+    let r = &x as &dyn core::fmt::Debug;
+
+    let metadata = core::ptr::metadata(r);
+    assert_eq!(metadata, metadata.clone());
+}

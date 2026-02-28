@@ -115,7 +115,7 @@ impl<'tcx> LintState<'tcx> {
             if tcx
                 .associated_item_def_ids(trait_ref.def_id())
                 .iter()
-                .find(|&id| tcx.def_kind(id).is_fn_like())
+                .find(|&id| tcx.def_kind(*id).is_fn_like())
                 .is_none()
             {
                 // not possible to call any functions on this trait object, casting is always ok.
@@ -310,7 +310,7 @@ impl<'tcx> LintState<'tcx> {
             ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref),
         ) {
             Ok(ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, .. })) => {
-                Some(tcx.coerce_unsized_info(impl_def_id).unwrap().custom_kind.unwrap())
+                Some(tcx.coerce_unsized_info(*impl_def_id).unwrap().custom_kind.unwrap())
             }
             _ => None,
         }
@@ -342,7 +342,7 @@ impl<'tcx> LintState<'tcx> {
         let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
         for trait_item in tcx.associated_item_def_ids(tcx.impl_trait_id(impl_block)) {
             debug!("considering {trait_item:?}");
-            if !tcx.def_kind(trait_item).is_fn_like() {
+            if !tcx.def_kind(*trait_item).is_fn_like() {
                 debug!("ignoring non-fn {trait_item:?}");
                 continue;
             }

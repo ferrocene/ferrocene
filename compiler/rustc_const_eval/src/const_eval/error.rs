@@ -110,7 +110,7 @@ pub fn get_span_and_frames<'tcx>(
     tcx: TyCtxtAt<'tcx>,
     stack: &[Frame<'tcx, impl Provenance, impl Sized>],
 ) -> (Span, Vec<errors::FrameNote>) {
-    let mut stacktrace = Frame::generate_stacktrace_from_stack(stack);
+    let mut stacktrace = Frame::generate_stacktrace_from_stack(stack, *tcx);
     // Filter out `requires_caller_location` frames.
     stacktrace.retain(|frame| !frame.instance.def.requires_caller_location(*tcx));
     let span = stacktrace.last().map(|f| f.span).unwrap_or(tcx.span);
@@ -256,5 +256,5 @@ pub(super) fn lint<'tcx, L>(
 {
     let (span, frames) = get_span_and_frames(tcx, &machine.stack);
 
-    tcx.emit_diag_node_span_lint(lint, machine.best_lint_scope(*tcx), span, decorator(frames));
+    tcx.emit_node_span_lint(lint, machine.best_lint_scope(*tcx), span, decorator(frames));
 }

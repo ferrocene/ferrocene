@@ -35,3 +35,6 @@ fn main() {
     //~^ ERROR the trait bound `Box<Box<Box<NonCopy>>>: Test` is not satisfied
     //~| SUGGESTION ***
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

@@ -11,3 +11,6 @@ impl Drop for MyStruct {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

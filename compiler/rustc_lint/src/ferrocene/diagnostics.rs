@@ -112,7 +112,7 @@ impl<'tcx> LintState<'tcx> {
 
             let drop = tcx.require_lang_item(LangItem::Drop, caller_span);
             let get_drop_impl = |def_id| {
-                tcx.trait_impl_of_assoc(def_id).filter(|impl_| tcx.impl_trait_id(impl_) == drop)
+                tcx.trait_impl_of_assoc(def_id).filter(|impl_| tcx.impl_trait_id(*impl_) == drop)
             };
 
             let msg = if let Some(impl_) =

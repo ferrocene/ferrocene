@@ -10,3 +10,9 @@ fn main() {
     });
     println!("{:?}", x);
 }
+
+// ferrocene-annotations: fls_cleoffpn5ew6
+// Temporaries
+
+// ferrocene-annotations: fls_gho955gmob73
+// Variables

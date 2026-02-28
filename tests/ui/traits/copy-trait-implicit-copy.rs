@@ -13,3 +13,6 @@ fn can_copy_copy<T: Copy>(v: T) {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

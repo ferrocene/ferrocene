@@ -7,3 +7,6 @@ const fn test_fn(x: *const i32) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

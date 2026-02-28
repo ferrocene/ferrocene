@@ -22,3 +22,9 @@ fn main() {
     b = &mut three_four.1;
     //~^ ERROR cannot assign twice to immutable variable `b`
 }
+
+// ferrocene-annotations: fls_y4by2i8dl05o
+// Assignment Expressions
+//
+// ferrocene-annotations: fls_nnqlae9zp80s
+// Basic Assignment

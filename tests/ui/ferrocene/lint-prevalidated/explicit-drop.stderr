@@ -1,0 +1,25 @@
+error: validated function calls an unvalidated method
+  --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
+   |
+  ::: $DIR/explicit-drop.rs:26:8
+   |
+LL |     fn drop(&mut self) {}
+   |        ---- `<ExplicitDropImpl as Drop>::drop` is unvalidated
+   |
+note: `has_drop_reachable` is validated
+  --> $DIR/explicit-drop.rs:19:8
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn has_drop_reachable() {
+   |        ^^^^^^^^^^^^^^^^^^
+LL |     ExplicitDropImpl;
+   |                     - `ExplicitDropImpl` dropped here, in `has_drop_reachable`
+note: the lint level is defined here
+  --> $DIR/explicit-drop.rs:9:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

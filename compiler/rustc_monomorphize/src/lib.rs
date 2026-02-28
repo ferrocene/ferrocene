@@ -20,6 +20,9 @@ mod mono_checks;
 mod partitioning;
 mod util;
 
+// Ferrocene addition
+pub use collector::ferrocene::collect_validated_roots;
+
 fn custom_coerce_unsize_info<'tcx>(
     tcx: TyCtxtAt<'tcx>,
     source_ty: Ty<'tcx>,

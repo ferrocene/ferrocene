@@ -4,7 +4,7 @@
 
 set -xeuo pipefail
 
-curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh
+curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
 
 export PATH="$HOME/.local/bin:$PATH"
 

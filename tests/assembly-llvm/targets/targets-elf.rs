@@ -844,6 +844,9 @@
 //@ revisions: thumbv7em_ferrocene_subset_eabihf
 //@ [thumbv7em_ferrocene_subset_eabihf] compile-flags: --target thumbv7em-ferrocene.subset-eabihf
 //@ [thumbv7em_ferrocene_subset_eabihf] needs-llvm-components: arm
+//@ revisions: aarch64_rhivos2_linux_gnu
+//@ [aarch64_rhivos2_linux_gnu] compile-flags: --target aarch64-rhivos2-linux-gnu
+//@ [aarch64_rhivos2_linux_gnu] needs-llvm-components: aarch64
 
 // Sanity-check that each target can produce assembly code.
 

@@ -27,7 +27,7 @@ There are also two variants of the standard library available:
   ``proc_macro`` built-in crates.
 
 .. note::
-  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core`` 
+  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core``
   are evaluated and tested within the scope of Ferrocene qualification for
   compiler use only. The use of these libraries by end-use code is outside the scope of the
   current Ferrocene qualification.
@@ -123,7 +123,7 @@ qualified upon request.
 Quality managed targets
 -----------------------
 
-Quality managed targets are targets which are suitable for use in production 
+Quality managed targets are targets which are suitable for use in production
 outside of safety critical contexts.
 
 Support is available. Known problems are tracked and available.
@@ -186,6 +186,12 @@ Supported targets can often be qualified or quality managed upon request.
      - Host platform
      - Full
      - \-
+
+   * - :target:`aarch64-rhivos2-linux-gnu`
+     - ``aarch64-rhivos2-linux-gnu``
+     - Host platform
+     - Full
+     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux.
 
    * - :target:`aarch64r82-unknown-none`
      - ``aarch64r82-unknown-none``

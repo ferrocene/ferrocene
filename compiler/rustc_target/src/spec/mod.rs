@@ -1801,6 +1801,7 @@ supported_targets! {
     ("aarch64-unknown-ferrocene.subset", aarch64_unknown_ferrocene_subset),
     ("thumbv7em-ferrocene.subset-eabi", thumbv7em_ferrocene_subset_eabi),
     ("thumbv7em-ferrocene.subset-eabihf", thumbv7em_ferrocene_subset_eabihf),
+    ("aarch64-rhivos2-linux-gnu", aarch64_rhivos2_linux_gnu),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

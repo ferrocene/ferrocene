@@ -387,3 +387,57 @@ test_range_pattern_sub_one! {
     (range_pattern_sub_one_i128, range_pattern_sub_one_panic_i128) => i128,
     (range_pattern_sub_one_isize, range_pattern_sub_one_panic_isize) => isize,
 }
+
+// covers `<core::num::error::ParseIntError as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "cannot parse integer from empty string"]
+fn test_parse_int_error_empty_display_fmt() {
+    if let Err(e) = "".parse::<u8>() {
+        panic!("{e}")
+    }
+}
+
+// covers `<core::num::error::ParseIntError as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "invalid digit found in string"]
+fn test_parse_int_error_invalid_digit_display_fmt() {
+    if let Err(e) = "hello".parse::<u8>() {
+        panic!("{e}")
+    }
+}
+
+// covers `<core::num::error::ParseIntError as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "number too large to fit in target type"]
+fn test_parse_int_error_pos_overflow_display_fmt() {
+    if let Err(e) = "256".parse::<u8>() {
+        panic!("{e}")
+    }
+}
+
+// covers `<core::num::error::ParseIntError as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "number too small to fit in target type"]
+fn test_parse_int_error_neg_overflow_display_fmt() {
+    if let Err(e) = "-129".parse::<i8>() {
+        panic!("{e}")
+    }
+}
+
+// covers `<core::num::error::ParseIntError as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "number would be zero for non-zero type"]
+fn test_parse_int_error_zero_display_fmt() {
+    if let Err(e) = "0".parse::<core::num::NonZeroU8>() {
+        panic!("{e}")
+    }
+}
+
+// covers `<core::num::error::TryFromIntError as core::fmt::Display>::fmt`
+#[test]
+#[should_panic = "out of range integral type conversion attempted"]
+fn test_try_from_int_error_display_fmt() {
+    if let Err(e) = u8::try_from(256u16) {
+        panic!("{e}")
+    }
+}

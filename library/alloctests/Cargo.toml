@@ -29,7 +29,8 @@ path = "tests/vec_deque_alloc_error.rs"
 [[bench]]
 name = "allocbenches"
 path = "benches/lib.rs"
-test = true
+# Ferrocene modification: Comment out to not run benches for coverage
+# test = true
 
 [[bench]]
 name = "vec_deque_append_bench"

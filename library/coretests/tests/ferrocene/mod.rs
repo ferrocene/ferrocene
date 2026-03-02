@@ -3,6 +3,7 @@ mod array;
 mod ascii;
 mod atomic;
 mod borrow;
+mod bstr;
 mod cell;
 mod cmp;
 mod floats;

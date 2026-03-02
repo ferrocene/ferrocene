@@ -1075,3 +1075,11 @@ fn test_take_while_debug_fmt() {
 
     assert_eq!(format!("{iter:?}"), "TakeWhile { iter: IntoIter([1, 2]), flag: false }");
 }
+
+// covers `core::unit::<impl core::iter::traits::collect::FromIterator<()> for ()>::from_iter`.
+#[test]
+fn test_from_iterator_unit() {
+    let mut x = 0;
+    let _ = vec![1; 10].into_iter().map(|y| x += y).collect::<()>();
+    assert_eq!(x, 10);
+}

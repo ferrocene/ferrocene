@@ -328,3 +328,9 @@ fn ffi_c_void_fmt_debug() {
 fn fmt_error_fmt_display() {
     assert_eq!(format!("{:?}", core::fmt::Error), "Error");
 }
+
+// Covers `<core::marker::PhantomData<T> as core::fmt::Debug>::fmt`.
+#[test]
+fn phantom_data_debug_fmt() {
+    assert_eq!(format!("{:?}", core::marker::PhantomData::<()>), "PhantomData<()>");
+}

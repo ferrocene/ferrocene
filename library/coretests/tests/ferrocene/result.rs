@@ -63,3 +63,18 @@ fn inspect_result() {
 fn inspect_result_err() {
     let _ = Err::<&str, &str>("foo").inspect_err(|_| panic!("reached"));
 }
+
+// covers `<core::result::Result<T, E> as core::clone::Clone>::clone_from`.
+#[test]
+fn clone_from() {
+    let mut res = Ok(1);
+
+    res.clone_from(&Ok(2));
+    assert_eq!(res, Ok(2));
+
+    res.clone_from(&Err(1));
+    assert_eq!(res, Err(1));
+
+    res.clone_from(&Err(2));
+    assert_eq!(res, Err(2));
+}

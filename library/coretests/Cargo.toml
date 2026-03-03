@@ -21,7 +21,8 @@ path = "tests/lib.rs"
 [[bench]]
 name = "corebenches"
 path = "benches/lib.rs"
-test = true
+# Ferrocene modification: Comment out to not run benches for coverage
+# test = true
 
 [dev-dependencies]
 rand = { version = "0.9.0", default-features = false }

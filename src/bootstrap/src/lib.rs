@@ -183,13 +183,21 @@ impl std::str::FromStr for CodegenBackendKind {
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
-pub enum DocTests {
-    /// Run normal tests and doc tests (default).
-    Yes,
-    /// Do not run any doc tests.
-    No,
+pub enum TestTarget {
+    /// Run unit, integration and doc tests (default).
+    Default,
+    /// Run unit, integration, doc tests, examples, bins, benchmarks (no doc tests).
+    AllTargets,
     /// Only run doc tests.
-    Only,
+    Doc,
+    /// Only run unit and integration tests.
+    Tests,
+}
+
+impl TestTarget {
+    fn runs_doctests(&self) -> bool {
+        matches!(self, TestTarget::Doc | TestTarget::Default)
+    }
 }
 
 pub enum GitRepo {
@@ -230,7 +238,7 @@ pub struct Build {
     in_tree_gcc_info: GitInfo,
     local_rebuild: bool,
     fail_fast: bool,
-    doc_tests: DocTests,
+    test_target: TestTarget,
     verbosity: usize,
 
     /// Build triple for the pre-compiled snapshot compiler.
@@ -457,6 +465,10 @@ impl Build {
     ///
     /// By default all build output will be placed in the current directory.
     pub fn new(mut config: Config) -> Build {
+        if config.cmd.no_doc() {
+            panic!("DEPRECATED: `--no-doc` is deprecated. Use `--all-targets` or `--tests`.")
+        }
+
         let src = config.src.clone();
         let out = config.out.clone();
 
@@ -560,7 +572,7 @@ impl Build {
             initial_sysroot: config.initial_sysroot.clone(),
             local_rebuild: config.local_rebuild,
             fail_fast: config.cmd.fail_fast(),
-            doc_tests: config.cmd.doc_tests(),
+            test_target: config.cmd.test_target(),
             verbosity: config.exec_ctx.verbosity as usize,
 
             host_target: config.host_target,

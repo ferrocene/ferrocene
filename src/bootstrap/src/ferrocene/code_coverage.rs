@@ -13,7 +13,7 @@ use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
-use crate::{BootstrapCommand, Compiler, DocTests, Mode};
+use crate::{BootstrapCommand, Compiler, Mode};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
     if !builder.config.profiler {
@@ -105,7 +105,9 @@ pub(super) fn instrumented_binaries(
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
-            let doctests_bins = (builder.doc_tests != DocTests::No)
+            let doctests_bins = builder
+                .test_target
+                .runs_doctests()
                 .then(|| builder.read_dir(&paths.doctests_bins_dir))
                 .into_iter()
                 .flatten()
@@ -177,7 +179,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     builder.info(&format!("Saving coverage report to {}", dist_report.display()));
     builder.copy_link(&html_report, &dist_report, crate::FileType::Regular);
 
-    if builder.doc_tests != DocTests::No {
+    if builder.test_target.runs_doctests() {
         // Remove the doctest binaries so they're not distributed afterwards.
         builder.remove_dir(&paths.doctests_bins_dir);
     }

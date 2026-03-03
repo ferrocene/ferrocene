@@ -93,6 +93,11 @@ impl Argument<'_> {
     pub const fn new_debug<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Debug>::fmt)
     }
+    #[ferrocene::annotation(
+        "This function is not publicly available in stable Rust. It is only available in nightly with the \"fmt_internals\" feature enabled. \
+        Also it is not emitted by the compiler unless the unstable compiler option `-Z fmt-debug=none` is passed to `rustc`. Unstable compiler options are not qualified, therefore this function will never be used in qualified code. \
+        See https://github.com/ferrocene/ferrocene/blob/205b3a16164939e0da17deb74285418b3d4991ae/compiler/rustc_ast_lowering/src/format.rs#L247."
+    )]
     #[inline]
     pub const fn new_debug_noop<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, |_: &T, _| Ok(()))

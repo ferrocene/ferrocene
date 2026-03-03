@@ -1,0 +1,41 @@
+error: validated function calls an unvalidated function
+  --> $DIR/intrinsic-fallback-bodies.rs:14:5
+   |
+LL | const fn unvalidated() {}
+   |          ----------- `unvalidated` is unvalidated
+...
+LL |     unvalidated();
+   |     ^^^^^^^^^^^
+   |
+note: `prefetch_read_data` is validated
+  --> $DIR/intrinsic-fallback-bodies.rs:13:10
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | const fn prefetch_read_data<T, const LOCALITY: i32>(_data: *const T) {
+   |          ^^^^^^^^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/intrinsic-fallback-bodies.rs:4:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated function
+  --> $DIR/intrinsic-fallback-bodies.rs:28:5
+   |
+LL | const fn prefetch_read<T>(_ptr: *const T, _locality: Locality) {}
+   |          ------------- `prefetch_read::<i32>` is unvalidated
+...
+LL |     prefetch_read(&x, Locality::L3);
+   |     ^^^^^^^^^^^^^
+   |
+note: `uses_unvalidated_intrinsic` is validated
+  --> $DIR/intrinsic-fallback-bodies.rs:26:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn uses_unvalidated_intrinsic() {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

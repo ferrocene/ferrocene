@@ -1,0 +1,24 @@
+error: validated method calls an unvalidated function
+  --> $DIR/stable-lint-order.rs:16:9
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |         unvalidated();
+   |         ^^^^^^^^^^^^^
+   |
+note: `<Validated as Drop>::drop` is validated
+  --> $DIR/stable-lint-order.rs:15:8
+   |
+LL |     #[ferrocene::prevalidated]
+   |     -------------------------- marked as validated here
+LL |     fn drop(&mut self) {
+   |        ^^^^
+note: the lint level is defined here
+  --> $DIR/stable-lint-order.rs:8:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

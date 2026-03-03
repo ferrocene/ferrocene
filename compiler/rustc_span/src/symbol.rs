@@ -1531,6 +1531,7 @@ symbols! {
         prelude,
         prelude_import,
         preserves_flags,
+        prevalidated,
         prfchw_target_feature,
         proc_dash_macro: "proc-macro",
         proc_macro,

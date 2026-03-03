@@ -1,0 +1,68 @@
+warning: validated function calls an unvalidated function
+  --> $DIR/lint-levels.rs:49:5
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |     unvalidated();
+   |     ^^^^^^^^^^^
+   |
+note: `unreachable` is validated
+  --> $DIR/lint-levels.rs:47:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn unreachable() {
+   |    ^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-levels.rs:48:12
+   |
+LL |     #[warn(ferrocene::unvalidated)]
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: validated function calls an unvalidated method
+  --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
+   |
+  ::: $DIR/lint-levels.rs:15:8
+   |
+LL |     fn drop(&mut self) {}
+   |        ---- `<Unvalidated as Drop>::drop` is unvalidated
+   |
+note: `reachable` is validated
+  --> $DIR/lint-levels.rs:36:8
+   |
+LL | fn uninstantiated_generic_indirect<T>(val: T) {}
+   |                                                - `Unvalidated` dropped here, in `uninstantiated_generic_indirect::<Unvalidated>`
+...
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn reachable() {
+   |        ^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-levels.rs:23:8
+   |
+LL | #[warn(ferrocene::unvalidated)]
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: validated function calls an unvalidated method
+  --> $DIR/lint-levels.rs:29:5
+   |
+LL |     fn clone(&self) -> Self { Unvalidated }
+   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
+...
+LL |     val.clone();
+   |     ^^^^^^^^^^^
+   |
+note: generic function `uninstantiated_generic_direct` instantiated by `reachable`, which is called from a validated entrypoint
+  --> $DIR/lint-levels.rs:39:5
+   |
+LL |     uninstantiated_generic_direct(Unvalidated);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-levels.rs:28:12
+   |
+LL |     #[warn(ferrocene::unvalidated)]
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: 3 warnings emitted
+

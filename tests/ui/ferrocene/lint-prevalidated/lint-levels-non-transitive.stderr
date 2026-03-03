@@ -1,0 +1,27 @@
+error: validated function calls an unvalidated function
+  --> $DIR/lint-levels-non-transitive.rs:14:5
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+...
+LL |     f();
+   |     ^^^
+   |
+note: `reachable_indirect` is validated
+  --> $DIR/lint-levels-non-transitive.rs:19:8
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | #[allow(ferrocene::unvalidated)]
+LL | pub fn reachable_indirect() {
+   |        ^^^^^^^^^^^^^^^^^^
+LL |     uninstantiated_generic_indirect(unvalidated);
+   |     -------------------------------------------- generic function `uninstantiated_generic_indirect` instantiated by `reachable_indirect`
+note: the lint level is defined here
+  --> $DIR/lint-levels-non-transitive.rs:6:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

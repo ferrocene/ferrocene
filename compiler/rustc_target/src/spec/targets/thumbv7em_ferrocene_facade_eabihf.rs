@@ -10,6 +10,7 @@ pub(crate) fn target() -> Target {
     target.os = "linux".into();
     target.env = "musl".into();
     target.has_thread_local = true;
+    target.cpu = "cortex-m4".into();
 
     // crt and libc are self-contained
     target.pre_link_objects_self_contained = crt_objects::all("crt1.o");

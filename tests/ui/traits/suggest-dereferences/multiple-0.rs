@@ -34,3 +34,6 @@ fn main() {
     foo(&baz);
     //~^ ERROR the trait bound `&Baz: Happy` is not satisfied
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

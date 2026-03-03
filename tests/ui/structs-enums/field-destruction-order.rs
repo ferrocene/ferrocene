@@ -46,5 +46,8 @@ pub fn main() {
     let _c = C { a: A, b: B };
 }
 
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+
 // ferrocene-annotations: fls_u2mzjgiwbkz0
 // Destructors

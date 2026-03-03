@@ -19,6 +19,7 @@
 #![warn(unused_lifetimes)]
 #![deny(clippy::pattern_type_mismatch)]
 #![expect(clippy::uninlined_format_args)]
+#![allow(clippy::collapsible_match)]
 
 // The rustc crates we need
 extern crate rustc_abi;

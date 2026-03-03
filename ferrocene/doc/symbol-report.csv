@@ -972,7 +972,7 @@
 <char as core::str::pattern::Pattern>::is_prefix_of
 <char as core::str::pattern::Pattern>::is_suffix_of
 <core::alloc::layout::Layout as core::clone::Clone>::clone
-<core::alloc::layout::Layout as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::alloc::layout::Layout as core::cmp::Eq>::assert_fields_are_eq
 <core::alloc::layout::Layout as core::cmp::PartialEq>::eq
 <core::alloc::layout::Layout as core::fmt::Debug>::fmt
 <core::alloc::layout::Layout as core::hash::Hash>::hash
@@ -1015,7 +1015,7 @@
 <core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::next
 <core::ascii::EscapeDefault as core::iter::traits::iterator::Iterator>::size_hint
 <core::ascii::ascii_char::AsciiChar as core::clone::Clone>::clone
-<core::ascii::ascii_char::AsciiChar as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ascii::ascii_char::AsciiChar as core::cmp::Eq>::assert_fields_are_eq
 <core::ascii::ascii_char::AsciiChar as core::cmp::Ord>::cmp
 <core::ascii::ascii_char::AsciiChar as core::cmp::PartialEq>::eq
 <core::ascii::ascii_char::AsciiChar as core::cmp::PartialOrd>::partial_cmp
@@ -1049,7 +1049,7 @@
 <core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::next
 <core::char::EscapeDebug as core::iter::traits::iterator::Iterator>::size_hint
 <core::char::convert::CharTryFromError as core::clone::Clone>::clone
-<core::char::convert::CharTryFromError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::char::convert::CharTryFromError as core::cmp::Eq>::assert_fields_are_eq
 <core::char::convert::CharTryFromError as core::cmp::PartialEq>::eq
 <core::char::convert::CharTryFromError as core::fmt::Debug>::fmt
 <core::char::decode::DecodeUtf16<I> as core::clone::Clone>::clone
@@ -1057,11 +1057,11 @@
 <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::next
 <core::char::decode::DecodeUtf16<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::char::decode::DecodeUtf16Error as core::clone::Clone>::clone
-<core::char::decode::DecodeUtf16Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::char::decode::DecodeUtf16Error as core::cmp::Eq>::assert_fields_are_eq
 <core::char::decode::DecodeUtf16Error as core::cmp::PartialEq>::eq
 <core::char::decode::DecodeUtf16Error as core::fmt::Debug>::fmt
 <core::cmp::Ordering as core::clone::Clone>::clone
-<core::cmp::Ordering as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::cmp::Ordering as core::cmp::Eq>::assert_fields_are_eq
 <core::cmp::Ordering as core::cmp::Ord>::cmp
 <core::cmp::Ordering as core::cmp::PartialEq>::eq
 <core::cmp::Ordering as core::cmp::PartialOrd>::partial_cmp
@@ -1079,28 +1079,28 @@
 <core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Display>::fmt
 <core::escape::MaybeEscaped as core::clone::Clone>::clone
 <core::escape::MaybeEscapedCharacter<N> as core::clone::Clone>::clone
-<core::ffi::c_str::CStr as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ffi::c_str::CStr as core::cmp::Eq>::assert_fields_are_eq
 <core::ffi::c_str::CStr as core::cmp::PartialEq>::eq
 <core::ffi::c_str::CStr as core::fmt::Debug>::fmt
 <core::ffi::c_str::CStr as core::hash::Hash>::hash
 <core::ffi::c_str::FromBytesWithNulError as core::clone::Clone>::clone
-<core::ffi::c_str::FromBytesWithNulError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ffi::c_str::FromBytesWithNulError as core::cmp::Eq>::assert_fields_are_eq
 <core::ffi::c_str::FromBytesWithNulError as core::cmp::PartialEq>::eq
 <core::ffi::c_str::FromBytesWithNulError as core::fmt::Debug>::fmt
 <core::ffi::c_void as core::fmt::Debug>::fmt
 <core::fmt::Alignment as core::clone::Clone>::clone
-<core::fmt::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Alignment as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Alignment as core::cmp::PartialEq>::eq
 <core::fmt::Alignment as core::fmt::Debug>::fmt
 <core::fmt::Arguments<'_> as core::fmt::Debug>::fmt
 <core::fmt::Arguments<'_> as core::fmt::Display>::fmt
 <core::fmt::Arguments<'a> as core::clone::Clone>::clone
 <core::fmt::DebugAsHex as core::clone::Clone>::clone
-<core::fmt::DebugAsHex as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::DebugAsHex as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::DebugAsHex as core::cmp::PartialEq>::eq
 <core::fmt::DebugAsHex as core::fmt::Debug>::fmt
 <core::fmt::Error as core::clone::Clone>::clone
-<core::fmt::Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Error as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Error as core::cmp::Ord>::cmp
 <core::fmt::Error as core::cmp::PartialEq>::eq
 <core::fmt::Error as core::cmp::PartialOrd>::partial_cmp
@@ -1112,12 +1112,12 @@
 <core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt
 <core::fmt::Formatter<'_> as core::fmt::Write>::write_str
 <core::fmt::FormattingOptions as core::clone::Clone>::clone
-<core::fmt::FormattingOptions as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::FormattingOptions as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::FormattingOptions as core::cmp::PartialEq>::eq
 <core::fmt::FormattingOptions as core::default::Default>::default
 <core::fmt::FormattingOptions as core::fmt::Debug>::fmt
 <core::fmt::Sign as core::clone::Clone>::clone
-<core::fmt::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::fmt::Sign as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Sign as core::cmp::PartialEq>::eq
 <core::fmt::Sign as core::fmt::Debug>::fmt
 <core::fmt::builders::FromFn<F> as core::fmt::Debug>::fmt
@@ -1129,7 +1129,7 @@
 <core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
 <core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
 <core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
-<core::intrinsics::AtomicOrdering as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::intrinsics::AtomicOrdering as core::cmp::Eq>::assert_fields_are_eq
 <core::intrinsics::AtomicOrdering as core::cmp::PartialEq>::eq
 <core::intrinsics::AtomicOrdering as core::fmt::Debug>::fmt
 <core::iter::adapters::chain::Chain<A, B> as core::clone::Clone>::clone
@@ -1330,7 +1330,7 @@
 <core::mem::maybe_uninit::MaybeUninit<T> as core::clone::Clone>::clone
 <core::mem::maybe_uninit::MaybeUninit<T> as core::fmt::Debug>::fmt
 <core::num::FpCategory as core::clone::Clone>::clone
-<core::num::FpCategory as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::FpCategory as core::cmp::Eq>::assert_fields_are_eq
 <core::num::FpCategory as core::cmp::PartialEq>::eq
 <core::num::FpCategory as core::fmt::Debug>::fmt
 <core::num::bignum::Big32x40 as core::clone::Clone>::clone
@@ -1341,37 +1341,37 @@
 <core::num::diy_float::Fp as core::clone::Clone>::clone
 <core::num::diy_float::Fp as core::fmt::Debug>::fmt
 <core::num::error::IntErrorKind as core::clone::Clone>::clone
-<core::num::error::IntErrorKind as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::IntErrorKind as core::cmp::Eq>::assert_fields_are_eq
 <core::num::error::IntErrorKind as core::cmp::PartialEq>::eq
 <core::num::error::IntErrorKind as core::fmt::Debug>::fmt
 <core::num::error::IntErrorKind as core::hash::Hash>::hash
 <core::num::error::ParseIntError as core::clone::Clone>::clone
-<core::num::error::ParseIntError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::ParseIntError as core::cmp::Eq>::assert_fields_are_eq
 <core::num::error::ParseIntError as core::cmp::PartialEq>::eq
 <core::num::error::ParseIntError as core::fmt::Debug>::fmt
 <core::num::error::ParseIntError as core::fmt::Display>::fmt
 <core::num::error::TryFromIntError as core::clone::Clone>::clone
-<core::num::error::TryFromIntError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::error::TryFromIntError as core::cmp::Eq>::assert_fields_are_eq
 <core::num::error::TryFromIntError as core::cmp::PartialEq>::eq
 <core::num::error::TryFromIntError as core::convert::From<!>>::from
 <core::num::error::TryFromIntError as core::convert::From<core::convert::Infallible>>::from
 <core::num::error::TryFromIntError as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::fmt::Display>::fmt
 <core::num::flt2dec::Sign as core::clone::Clone>::clone
-<core::num::flt2dec::Sign as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::Sign as core::cmp::Eq>::assert_fields_are_eq
 <core::num::flt2dec::Sign as core::cmp::PartialEq>::eq
 <core::num::flt2dec::Sign as core::fmt::Debug>::fmt
 <core::num::flt2dec::decoder::Decoded as core::clone::Clone>::clone
-<core::num::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_fields_are_eq
 <core::num::flt2dec::decoder::Decoded as core::cmp::PartialEq>::eq
 <core::num::flt2dec::decoder::Decoded as core::fmt::Debug>::fmt
 <core::num::flt2dec::decoder::FullDecoded as core::clone::Clone>::clone
-<core::num::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_fields_are_eq
 <core::num::flt2dec::decoder::FullDecoded as core::cmp::PartialEq>::eq
 <core::num::flt2dec::decoder::FullDecoded as core::fmt::Debug>::fmt
 <core::num::fmt::Formatted<'a> as core::clone::Clone>::clone
 <core::num::fmt::Part<'a> as core::clone::Clone>::clone
-<core::num::fmt::Part<'a> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::num::fmt::Part<'a> as core::cmp::Eq>::assert_fields_are_eq
 <core::num::fmt::Part<'a> as core::cmp::PartialEq>::eq
 <core::num::fmt::Part<'a> as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
@@ -1478,7 +1478,7 @@
 <core::num::nonzero::NonZero<T> as core::fmt::UpperHex>::fmt
 <core::num::nonzero::NonZero<T> as core::hash::Hash>::hash
 <core::ops::control_flow::ControlFlow<B, C> as core::clone::Clone>::clone
-<core::ops::control_flow::ControlFlow<B, C> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::control_flow::ControlFlow<B, C> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::PartialEq>::eq
 <core::ops::control_flow::ControlFlow<B, C> as core::fmt::Debug>::fmt
 <core::ops::control_flow::ControlFlow<B, C> as core::hash::Hash>::hash
@@ -1486,7 +1486,7 @@
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::branch
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::from_output
 <core::ops::index_range::IndexRange as core::clone::Clone>::clone
-<core::ops::index_range::IndexRange as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::index_range::IndexRange as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::index_range::IndexRange as core::cmp::PartialEq>::eq
 <core::ops::index_range::IndexRange as core::fmt::Debug>::fmt
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1507,7 +1507,7 @@
 <core::ops::index_range::IndexRange as core::slice::index::SliceIndex<[T]>>::index
 <core::ops::index_range::IndexRange as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::Bound<T> as core::clone::Clone>::clone
-<core::ops::range::Bound<T> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::Bound<T> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::Bound<T> as core::cmp::PartialEq>::eq
 <core::ops::range::Bound<T> as core::fmt::Debug>::fmt
 <core::ops::range::Bound<T> as core::hash::Hash>::hash
@@ -1520,7 +1520,7 @@
 <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth
 <core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth_back
 <core::ops::range::Range<Idx> as core::clone::Clone>::clone
-<core::ops::range::Range<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::Range<Idx> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::Range<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::Range<Idx> as core::default::Default>::default
 <core::ops::range::Range<Idx> as core::fmt::Debug>::fmt
@@ -1544,7 +1544,7 @@
 <core::ops::range::RangeFrom<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeFrom<&T> as core::ops::range::RangeBounds<T>>::start_bound
 <core::ops::range::RangeFrom<Idx> as core::clone::Clone>::clone
-<core::ops::range::RangeFrom<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeFrom<Idx> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeFrom<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::RangeFrom<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::RangeFrom<Idx> as core::hash::Hash>::hash
@@ -1559,7 +1559,7 @@
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::RangeFull as core::clone::Clone>::clone
-<core::ops::range::RangeFull as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeFull as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeFull as core::cmp::PartialEq>::eq
 <core::ops::range::RangeFull as core::default::Default>::default
 <core::ops::range::RangeFull as core::fmt::Debug>::fmt
@@ -1580,7 +1580,7 @@
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold
 <core::ops::range::RangeInclusive<Idx> as core::clone::Clone>::clone
-<core::ops::range::RangeInclusive<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeInclusive<Idx> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeInclusive<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::RangeInclusive<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::RangeInclusive<Idx> as core::hash::Hash>::hash
@@ -1600,7 +1600,7 @@
 <core::ops::range::RangeTo<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeTo<&T> as core::ops::range::RangeBounds<T>>::start_bound
 <core::ops::range::RangeTo<Idx> as core::clone::Clone>::clone
-<core::ops::range::RangeTo<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeTo<Idx> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeTo<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::RangeTo<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::RangeTo<Idx> as core::hash::Hash>::hash
@@ -1617,7 +1617,7 @@
 <core::ops::range::RangeToInclusive<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeToInclusive<&T> as core::ops::range::RangeBounds<T>>::start_bound
 <core::ops::range::RangeToInclusive<Idx> as core::clone::Clone>::clone
-<core::ops::range::RangeToInclusive<Idx> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ops::range::RangeToInclusive<Idx> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeToInclusive<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::RangeToInclusive<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::RangeToInclusive<Idx> as core::hash::Hash>::hash
@@ -1651,7 +1651,7 @@
 <core::option::Option<&'a mut T> as core::convert::From<&'a mut core::option::Option<T>>>::from
 <core::option::Option<T> as core::clone::Clone>::clone
 <core::option::Option<T> as core::clone::Clone>::clone_from
-<core::option::Option<T> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::option::Option<T> as core::cmp::Eq>::assert_fields_are_eq
 <core::option::Option<T> as core::cmp::PartialEq>::eq
 <core::option::Option<T> as core::convert::From<T>>::from
 <core::option::Option<T> as core::default::Default>::default
@@ -1671,12 +1671,12 @@
 <core::panicking::AssertKind as core::fmt::Debug>::fmt
 <core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
 <core::ptr::alignment::Alignment as core::clone::Clone>::clone
-<core::ptr::alignment::Alignment as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ptr::alignment::Alignment as core::cmp::Eq>::assert_fields_are_eq
 <core::ptr::alignment::Alignment as core::cmp::PartialEq>::eq
 <core::ptr::alignment::Alignment as core::fmt::Debug>::fmt
 <core::ptr::alignment::Alignment as core::hash::Hash>::hash
 <core::ptr::alignment::AlignmentEnum as core::clone::Clone>::clone
-<core::ptr::alignment::AlignmentEnum as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::ptr::alignment::AlignmentEnum as core::cmp::Eq>::assert_fields_are_eq
 <core::ptr::alignment::AlignmentEnum as core::cmp::PartialEq>::eq
 <core::ptr::metadata::DynMetadata<Dyn> as core::clone::Clone>::clone
 <core::ptr::metadata::DynMetadata<Dyn> as core::fmt::Debug>::fmt
@@ -1687,7 +1687,7 @@
 <core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt
 <core::result::Result<T, E> as core::clone::Clone>::clone
 <core::result::Result<T, E> as core::clone::Clone>::clone_from
-<core::result::Result<T, E> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::result::Result<T, E> as core::cmp::Eq>::assert_fields_are_eq
 <core::result::Result<T, E> as core::cmp::Ord>::cmp
 <core::result::Result<T, E> as core::cmp::PartialEq>::eq
 <core::result::Result<T, E> as core::cmp::PartialOrd>::partial_cmp
@@ -1780,7 +1780,7 @@
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
 <core::str::error::Utf8Error as core::clone::Clone>::clone
-<core::str::error::Utf8Error as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::error::Utf8Error as core::cmp::Eq>::assert_fields_are_eq
 <core::str::error::Utf8Error as core::cmp::PartialEq>::eq
 <core::str::error::Utf8Error as core::fmt::Debug>::fmt
 <core::str::error::Utf8Error as core::fmt::Display>::fmt
@@ -1816,7 +1816,7 @@
 <core::str::iter::SplitInternal<'a, P> as core::fmt::Debug>::fmt
 <core::str::lossy::Debug<'_> as core::fmt::Debug>::fmt
 <core::str::lossy::Utf8Chunk<'a> as core::clone::Clone>::clone
-<core::str::lossy::Utf8Chunk<'a> as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::lossy::Utf8Chunk<'a> as core::cmp::Eq>::assert_fields_are_eq
 <core::str::lossy::Utf8Chunk<'a> as core::cmp::PartialEq>::eq
 <core::str::lossy::Utf8Chunk<'a> as core::fmt::Debug>::fmt
 <core::str::lossy::Utf8Chunks<'_> as core::fmt::Debug>::fmt
@@ -1838,7 +1838,7 @@
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::rejecting
 <core::str::pattern::RejectAndMatch as core::str::pattern::TwoWayStrategy>::use_early_reject
 <core::str::pattern::SearchStep as core::clone::Clone>::clone
-<core::str::pattern::SearchStep as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::str::pattern::SearchStep as core::cmp::Eq>::assert_fields_are_eq
 <core::str::pattern::SearchStep as core::cmp::PartialEq>::eq
 <core::str::pattern::SearchStep as core::fmt::Debug>::fmt
 <core::str::pattern::StrSearcher<'a, 'b> as core::clone::Clone>::clone
@@ -1868,12 +1868,12 @@
 <core::sync::atomic::AtomicUsize as core::default::Default>::default
 <core::sync::atomic::AtomicUsize as core::fmt::Debug>::fmt
 <core::sync::atomic::Ordering as core::clone::Clone>::clone
-<core::sync::atomic::Ordering as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::sync::atomic::Ordering as core::cmp::Eq>::assert_fields_are_eq
 <core::sync::atomic::Ordering as core::cmp::PartialEq>::eq
 <core::sync::atomic::Ordering as core::fmt::Debug>::fmt
 <core::sync::atomic::Ordering as core::hash::Hash>::hash
 <core::time::Duration as core::clone::Clone>::clone
-<core::time::Duration as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::time::Duration as core::cmp::Eq>::assert_fields_are_eq
 <core::time::Duration as core::cmp::Ord>::cmp
 <core::time::Duration as core::cmp::PartialEq>::eq
 <core::time::Duration as core::cmp::PartialOrd>::partial_cmp
@@ -1885,12 +1885,12 @@
 <core::time::Duration as core::ops::arith::Div<u32>>::div
 <core::time::Duration as core::ops::arith::Sub>::sub
 <core::time::TryFromFloatSecsError as core::clone::Clone>::clone
-<core::time::TryFromFloatSecsError as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::time::TryFromFloatSecsError as core::cmp::Eq>::assert_fields_are_eq
 <core::time::TryFromFloatSecsError as core::cmp::PartialEq>::eq
 <core::time::TryFromFloatSecsError as core::fmt::Debug>::fmt
 <core::time::TryFromFloatSecsError as core::fmt::Display>::fmt
 <core::time::TryFromFloatSecsErrorKind as core::clone::Clone>::clone
-<core::time::TryFromFloatSecsErrorKind as core::cmp::Eq>::assert_receiver_is_total_eq
+<core::time::TryFromFloatSecsErrorKind as core::cmp::Eq>::assert_fields_are_eq
 <core::time::TryFromFloatSecsErrorKind as core::cmp::PartialEq>::eq
 <core::time::TryFromFloatSecsErrorKind as core::fmt::Debug>::fmt
 <f128 as core::default::Default>::default
@@ -3919,6 +3919,7 @@ core::clone::impls::<impl core::clone::Clone for u32>::clone
 core::clone::impls::<impl core::clone::Clone for u64>::clone
 core::clone::impls::<impl core::clone::Clone for u8>::clone
 core::clone::impls::<impl core::clone::Clone for usize>::clone
+core::cmp::Eq::assert_fields_are_eq
 core::cmp::Eq::assert_receiver_is_total_eq
 core::cmp::Ord::clamp
 core::cmp::Ord::max

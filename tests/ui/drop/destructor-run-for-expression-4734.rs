@@ -37,3 +37,6 @@ fn main() {
     { B; }
     assert_eq!(unsafe { NUM_DROPS }, 4);
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

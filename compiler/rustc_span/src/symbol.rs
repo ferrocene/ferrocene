@@ -432,6 +432,7 @@ symbols! {
         assert,
         assert_eq,
         assert_eq_macro,
+        assert_fields_are_eq,
         assert_inhabited,
         assert_macro,
         assert_mem_uninitialized_valid,
@@ -1090,6 +1091,7 @@ symbols! {
         integer_: "integer", // underscore to avoid clashing with the function `sym::integer` below
         integral,
         internal,
+        internal_eq_trait_method_impls,
         internal_features,
         into_async_iter_into_iter,
         into_future,

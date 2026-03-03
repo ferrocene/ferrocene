@@ -16,3 +16,6 @@ fn main() {
     let x: AtomicPtr<usize> = AtomicPtr::new(ptr::null_mut());
     let x = *&x; //~ ERROR: cannot move out of a shared reference
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

@@ -846,13 +846,6 @@ pub struct RustcCleanQueries {
 #[derive(Clone, Debug, HashStable_Generic, Encodable, Decodable, PrintAttribute)]
 pub enum AttributeKind {
     // tidy-alphabetical-start
-    /// Represents `#[align(N)]`.
-    // FIXME(#82232, #143834): temporarily renamed to mitigate `#[align]` nameres ambiguity
-    Align {
-        align: Align,
-        span: Span,
-    },
-
     /// Represents `#[allow_internal_unsafe]`.
     AllowInternalUnsafe(Span),
 
@@ -911,7 +904,7 @@ pub enum AttributeKind {
     DefaultLibAllocator,
 
     /// Represents [`#[deprecated]`](https://doc.rust-lang.org/stable/reference/attributes/diagnostics.html#the-deprecated-attribute).
-    Deprecation {
+    Deprecated {
         deprecation: Deprecation,
         span: Span,
     },
@@ -937,9 +930,6 @@ pub enum AttributeKind {
 
     /// Implementation detail of `#[eii]`
     EiiDeclaration(EiiDecl),
-
-    /// Implementation detail of `#[eii]`
-    EiiForeignItem,
 
     /// Implementation detail of `#[eii]`
     EiiImpls(ThinVec<EiiImpl>),
@@ -1169,6 +1159,13 @@ pub enum AttributeKind {
         kind: RustcAbiAttrKind,
     },
 
+    /// Represents `#[align(N)]`.
+    // FIXME(#82232, #143834): temporarily renamed to mitigate `#[align]` nameres ambiguity
+    RustcAlign {
+        align: Align,
+        span: Span,
+    },
+
     /// Represents `#[rustc_allocator]`
     RustcAllocator,
 
@@ -1230,7 +1227,7 @@ pub enum AttributeKind {
     },
 
     /// Represents `#[rustc_const_stable_indirect]`.
-    RustcConstStabilityIndirect,
+    RustcConstStableIndirect,
 
     /// Represents `#[rustc_conversion_suggestion]`
     RustcConversionSuggestion,
@@ -1283,6 +1280,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_effective_visibility]`.
     RustcEffectiveVisibility,
+
+    /// Implementation detail of `#[eii]`
+    RustcEiiForeignItem,
 
     /// Represents `#[rustc_evaluate_where_clauses]`
     RustcEvaluateWhereClauses,
@@ -1352,7 +1352,7 @@ pub enum AttributeKind {
     },
 
     /// Represents `#[rustc_never_returns_null_ptr]`
-    RustcNeverReturnsNullPointer,
+    RustcNeverReturnsNullPtr,
 
     /// Represents `#[rustc_never_type_options]`.
     RustcNeverTypeOptions {

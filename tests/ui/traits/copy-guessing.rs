@@ -38,3 +38,6 @@ fn main() {
         ret
     })(), 1337+1);
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

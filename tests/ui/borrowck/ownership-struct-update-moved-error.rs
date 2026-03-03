@@ -17,3 +17,6 @@ fn main() {
     let end = Mine { other_val: 1, ..start.make_string_bar() };
     println!("{}", start.test); //~ ERROR borrow of moved value: `start`
 }
+
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership

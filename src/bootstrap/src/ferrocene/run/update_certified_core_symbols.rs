@@ -40,6 +40,6 @@ impl Step for UpdateCertifiedCoreSymbols {
         let qualified_name_list = symbol_report.to_qualified_fn_list();
         std::fs::write(TRACKED_FILE, qualified_name_list.join("\n")).unwrap();
 
-        eprintln!("Updated {TRACKED_FILE}");
+        builder.info(&format!("Updated {TRACKED_FILE}"));
     }
 }

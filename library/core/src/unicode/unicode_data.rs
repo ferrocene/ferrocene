@@ -63,6 +63,9 @@ const fn bitset_search<
 struct ShortOffsetRunHeader(u32);
 
 impl ShortOffsetRunHeader {
+    #[ferrocene::annotation(
+        "The only uses of this function are inside statics without any inner mutability. Meaning that they can't be covered"
+    )]
     const fn new(start_index: usize, prefix_sum: u32) -> Self {
         assert!(start_index < (1 << 11));
         assert!(prefix_sum < (1 << 21));

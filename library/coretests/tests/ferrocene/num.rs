@@ -441,3 +441,12 @@ fn test_try_from_int_error_display_fmt() {
         panic!("{e}")
     }
 }
+
+// covers `<core::num::nonzero::NonZero<T> as core::cmp::PartialEq>::ne`.
+#[test]
+fn non_zero_ne() {
+    let lhs = core::num::NonZero::<u8>::new(1).unwrap();
+    let rhs = core::num::NonZero::<u8>::new(2).unwrap();
+    assert!(lhs != rhs);
+    assert!(!(lhs != lhs));
+}

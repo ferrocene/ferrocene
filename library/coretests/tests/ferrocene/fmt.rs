@@ -200,6 +200,26 @@ fn test_write_fmt_sized_statically_known() {
     assert_eq!(buffer.as_str(), "Hello, world!")
 }
 
+// Covers:
+// - `<core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt`
+// - `<core::fmt::Formatter<'_> as core::fmt::Write>::write_str`
+#[test]
+fn test_formatter_write() {
+    struct Foo;
+
+    impl fmt::Display for Foo {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt::Write::write_fmt(f, format_args!("Hello"))?;
+            for x in [",", " "] {
+                fmt::Write::write_fmt(f, format_args!("{x}"))?;
+            }
+            fmt::Write::write_str(f, "world!")
+        }
+    }
+
+    assert_eq!(Foo.to_string(), "Hello, world!");
+}
+
 //  Test `core::fmt::Formatter::<'a>::debug_struct_field._finish`
 macro_rules! test_debug_struct_field_finish {
     ($($fn:ident => $T:ident { $($field:ident),* } == $str:literal,)*) => {

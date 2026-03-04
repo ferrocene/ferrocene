@@ -472,3 +472,19 @@ fn fmt_error_fmt_display() {
 fn phantom_data_debug_fmt() {
     assert_eq!(format!("{:?}", core::marker::PhantomData::<()>), "PhantomData<()>");
 }
+
+// Covers `<core::fmt::Error as core::fmt::Display>::fmt`.
+#[test]
+#[should_panic = "an error occurred when formatting an argument"]
+fn fmt_error_display_fmt() {
+    panic!("{}", core::fmt::Error)
+}
+
+// Covers `<core::fmt::builders::FromFn<F> as core::fmt::Debug>::fmt`.
+#[test]
+fn from_fn_debug_fmt() {
+    let msg = "Hello, world!";
+
+    let val = core::fmt::from_fn(|f| write!(f, "{msg}"));
+    assert_eq!(format!("{val:?}"), msg);
+}

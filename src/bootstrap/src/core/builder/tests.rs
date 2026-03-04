@@ -1,3 +1,4 @@
+// ignore-tidy-filelength
 use std::env::VarError;
 use std::{panic, thread};
 
@@ -3021,6 +3022,45 @@ mod snapshot {
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
         [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-ferrocene.subset> crates=[core]
         "###);
+    }
+
+    #[test]
+    fn cargo_miri_stage_1() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .args(&["cargo-miri"])
+                .stage(1)
+                .get_steps()
+                .render(), @"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 0 <host> -> miri 1 <host>
+        [build] rustc 0 <host> -> cargo-miri 1 <host>
+        [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        ");
+    }
+
+    #[test]
+    fn cargo_miri_stage_2() {
+        let ctx = TestCtx::new();
+        insta::assert_snapshot!(
+            ctx.config("test")
+                .args(&["cargo-miri"])
+                .stage(2)
+                .get_steps()
+                .render(), @"
+        [build] llvm <host>
+        [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 1 <host> -> miri 2 <host>
+        [build] rustc 1 <host> -> cargo-miri 2 <host>
+        [build] rustdoc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 0 <host> -> cargo 1 <host>
+        ");
     }
 
     // Check that `x run miri --target FOO` actually builds miri for the host.

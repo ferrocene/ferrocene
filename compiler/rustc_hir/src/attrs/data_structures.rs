@@ -1,9 +1,12 @@
 use std::borrow::Cow;
+use std::fmt;
 use std::path::PathBuf;
 
 pub use ReprAttr::*;
 use rustc_abi::Align;
 pub use rustc_ast::attr::data_structures::*;
+use rustc_ast::expand::autodiff_attrs::{DiffActivity, DiffMode};
+use rustc_ast::expand::typetree::TypeTree;
 use rustc_ast::token::DocFragmentKind;
 use rustc_ast::{AttrStyle, Path, ast};
 use rustc_data_structures::fx::FxIndexMap;
@@ -794,6 +797,103 @@ pub struct RustcCleanQueries {
     pub span: Span,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(HashStable_Generic, Encodable, Decodable, PrintAttribute)]
+pub struct RustcAutodiff {
+    /// Conceptually either forward or reverse mode AD, as described in various autodiff papers and
+    /// e.g. in the [JAX
+    /// Documentation](https://jax.readthedocs.io/en/latest/_tutorials/advanced-autodiff.html#how-it-s-made-two-foundational-autodiff-functions).
+    pub mode: DiffMode,
+    /// A user-provided, batching width. If not given, we will default to 1 (no batching).
+    /// Calling a differentiated, non-batched function through a loop 100 times is equivalent to:
+    /// - Calling the function 50 times with a batch size of 2
+    /// - Calling the function 25 times with a batch size of 4,
+    /// etc. A batched function takes more (or longer) arguments, and might be able to benefit from
+    /// cache locality, better re-usal of primal values, and other optimizations.
+    /// We will (before LLVM's vectorizer runs) just generate most LLVM-IR instructions `width`
+    /// times, so this massively increases code size. As such, values like 1024 are unlikely to
+    /// work. We should consider limiting this to u8 or u16, but will leave it at u32 for
+    /// experiments for now and focus on documenting the implications of a large width.
+    pub width: u32,
+    pub input_activity: ThinVec<DiffActivity>,
+    pub ret_activity: DiffActivity,
+}
+
+impl RustcAutodiff {
+    pub fn has_primal_ret(&self) -> bool {
+        matches!(self.ret_activity, DiffActivity::Active | DiffActivity::Dual)
+    }
+}
+
+impl RustcAutodiff {
+    pub fn has_ret_activity(&self) -> bool {
+        self.ret_activity != DiffActivity::None
+    }
+    pub fn has_active_only_ret(&self) -> bool {
+        self.ret_activity == DiffActivity::ActiveOnly
+    }
+
+    pub fn error() -> Self {
+        RustcAutodiff {
+            mode: DiffMode::Error,
+            width: 0,
+            ret_activity: DiffActivity::None,
+            input_activity: ThinVec::new(),
+        }
+    }
+
+    pub fn source() -> Self {
+        RustcAutodiff {
+            mode: DiffMode::Source,
+            width: 0,
+            ret_activity: DiffActivity::None,
+            input_activity: ThinVec::new(),
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        self.mode != DiffMode::Error
+    }
+
+    pub fn is_source(&self) -> bool {
+        self.mode == DiffMode::Source
+    }
+    pub fn apply_autodiff(&self) -> bool {
+        !matches!(self.mode, DiffMode::Error | DiffMode::Source)
+    }
+
+    pub fn into_item(
+        self,
+        source: String,
+        target: String,
+        inputs: Vec<TypeTree>,
+        output: TypeTree,
+    ) -> AutoDiffItem {
+        AutoDiffItem { source, target, inputs, output, attrs: self }
+    }
+}
+
+/// We generate one of these structs for each `#[autodiff(...)]` attribute.
+#[derive(Clone, Eq, PartialEq, Encodable, Decodable, Debug, HashStable_Generic)]
+pub struct AutoDiffItem {
+    /// The name of the function getting differentiated
+    pub source: String,
+    /// The name of the function being generated
+    pub target: String,
+    pub attrs: RustcAutodiff,
+    pub inputs: Vec<TypeTree>,
+    pub output: TypeTree,
+}
+
+impl fmt::Display for AutoDiffItem {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Differentiating {} -> {}", self.source, self.target)?;
+        write!(f, " with attributes: {:?}", self.attrs)?;
+        write!(f, " with inputs: {:?}", self.inputs)?;
+        write!(f, " with output: {:?}", self.output)
+    }
+}
+
 /// Represents parsed *built-in* inert attributes.
 ///
 /// ## Overview
@@ -1185,6 +1285,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_as_ptr]` (used by the `dangling_pointers_from_temporaries` lint).
     RustcAsPtr(Span),
+
+    /// Represents `#[rustc_autodiff]`.
+    RustcAutodiff(Option<Box<RustcAutodiff>>),
 
     /// Represents `#[rustc_default_body_unstable]`.
     RustcBodyStability {

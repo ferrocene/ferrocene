@@ -2632,6 +2632,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             trait_def_id != def_id
                 && trait_name == self.tcx.item_name(def_id)
                 && trait_has_same_params(def_id)
+                // `PointeeSized` is removed during lowering.
+                && !self.tcx.is_lang_item(def_id, LangItem::PointeeSized)
                 && self.predicate_must_hold_modulo_regions(&Obligation::new(
                     self.tcx,
                     obligation.cause.clone(),
@@ -3288,12 +3290,14 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     err.fn_once_label = Some(ClosureFnOnceLabel {
                         span: *span,
                         place: ty::place_to_string_for_capture(self.tcx, place),
+                        trait_prefix,
                     })
                 }
                 (ty::ClosureKind::FnMut, Some((span, place))) => {
                     err.fn_mut_label = Some(ClosureFnMutLabel {
                         span: *span,
                         place: ty::place_to_string_for_capture(self.tcx, place),
+                        trait_prefix,
                     })
                 }
                 _ => {}

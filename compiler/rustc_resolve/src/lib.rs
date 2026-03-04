@@ -1055,7 +1055,10 @@ impl<'ra> DeclData<'ra> {
     }
 
     fn is_assoc_item(&self) -> bool {
-        matches!(self.res(), Res::Def(DefKind::AssocConst | DefKind::AssocFn | DefKind::AssocTy, _))
+        matches!(
+            self.res(),
+            Res::Def(DefKind::AssocConst { .. } | DefKind::AssocFn | DefKind::AssocTy, _)
+        )
     }
 
     fn macro_kinds(&self) -> Option<MacroKinds> {
@@ -2504,7 +2507,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
 fn names_to_string(names: impl Iterator<Item = Symbol>) -> String {
     let mut result = String::new();
-    for (i, name) in names.filter(|name| *name != kw::PathRoot).enumerate() {
+    for (i, name) in names.enumerate().filter(|(_, name)| *name != kw::PathRoot) {
         if i > 0 {
             result.push_str("::");
         }

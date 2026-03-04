@@ -144,14 +144,17 @@ impl<const N: usize> fmt::Write for UnsizedBuffer<N> {
     }
 }
 
-// Covers `core::fmt::Write::write_fmt`
+// Covers:
+// - `core::fmt::Write::write_fmt`
+// - `<&mut W as core::fmt::Write>::write_fmt`
+// - `<&mut W as core::fmt::Write>::write_char`
 #[test]
 fn test_write_fmt_unsized() {
     let mut array = [0; 256];
-    let buffer = UnsizedBuffer::new(&mut array);
+    let mut buffer = UnsizedBuffer::new(&mut array);
 
     fn how_dare_you() -> &'static str {
-        "How dare you!"
+        "How dare you"
     }
     let args = format_args!(
         "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. {}",
@@ -159,11 +162,12 @@ fn test_write_fmt_unsized() {
     );
     assert!(args.as_statically_known_str().is_none());
 
-    fmt::Write::write_fmt(buffer, args).unwrap();
+    fmt::Write::write_fmt(&mut buffer, args).unwrap();
+    fmt::Write::write_char(&mut buffer, '!').unwrap();
     assert_eq!(
         buffer.as_str(),
         "My message is that we'll be watching you. This is all wrong. I shouldn't be up here. I should be back in school on the other side of the ocean. Yet you all come to us young people for hope. How dare you!"
-    )
+    );
 }
 
 mod module_to_avoid_optimisations {
@@ -194,6 +198,26 @@ fn test_write_fmt_sized_statically_known() {
 
     fmt::Write::write_fmt(&mut buffer, args).unwrap();
     assert_eq!(buffer.as_str(), "Hello, world!")
+}
+
+// Covers:
+// - `<core::fmt::Formatter<'_> as core::fmt::Write>::write_fmt`
+// - `<core::fmt::Formatter<'_> as core::fmt::Write>::write_str`
+#[test]
+fn test_formatter_write() {
+    struct Foo;
+
+    impl fmt::Display for Foo {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt::Write::write_fmt(f, format_args!("Hello"))?;
+            for x in [",", " "] {
+                fmt::Write::write_fmt(f, format_args!("{x}"))?;
+            }
+            fmt::Write::write_str(f, "world!")
+        }
+    }
+
+    assert_eq!(Foo.to_string(), "Hello, world!");
 }
 
 //  Test `core::fmt::Formatter::<'a>::debug_struct_field._finish`

@@ -101,6 +101,120 @@ fn test_u128_fmt_inner() {
     assert_eq!(buffer, "10000000000000001");
 }
 
+// Covers `core::fmt::Formatter::<'a>::sign`
+#[test]
+fn test_formatter_sign_none() {
+    let mut buffer = String::new();
+    let f = fmt::Formatter::new(&mut buffer, fmt::FormattingOptions::new());
+
+    assert_eq!(f.sign(), None);
+}
+
+// Covers `core::fmt::Formatter::<'a>::sign`
+#[test]
+fn test_formatter_sign_some() {
+    let mut options = fmt::FormattingOptions::new();
+    options.sign(Some(fmt::Sign::Plus));
+
+    let mut buffer = String::new();
+    let f = fmt::Formatter::new(&mut buffer, options);
+
+    assert_eq!(f.sign(), Some(fmt::Sign::Plus));
+}
+
+// Covers `core::fmt::Formatter::<'a>::with_options`
+#[test]
+fn test_formatter_with_options() {
+    // these are the first options, they gonna be overwritten
+    let mut options1 = fmt::FormattingOptions::new();
+    options1.precision(Some(4));
+
+    // create a formatter with the first options
+    let mut buffer = String::new();
+    let mut f1 = fmt::Formatter::new(&mut buffer, options1);
+
+    // these are the second options, they gonna be used
+    let mut options2 = fmt::FormattingOptions::new();
+    options2.sign(Some(fmt::Sign::Plus));
+    let f2 = f1.with_options(options2);
+
+    // assert that the first options are overwritten
+    assert_ne!(f2.precision(), Some(4));
+    // assert that the second options are used
+    assert_eq!(f2.sign(), Some(fmt::Sign::Plus));
+}
+
+// Covers `core::fmt::FormattingOptions::create_formatter`
+#[test]
+fn test_formatting_options_create_formatter() {
+    let mut options = fmt::FormattingOptions::new();
+    options.sign(Some(fmt::Sign::Plus));
+
+    let mut buffer = String::new();
+    let f = options.create_formatter(&mut buffer);
+
+    assert_eq!(f.sign(), Some(fmt::Sign::Plus));
+}
+
+// Covers `core::fmt::FormattingOptions::precision`
+#[test]
+fn test_formatting_options_precision_none() {
+    let mut options = fmt::FormattingOptions::new();
+
+    options.precision(None);
+    assert_eq!(options.get_precision(), None);
+}
+
+// Covers `core::fmt::FormattingOptions::precision`
+#[test]
+fn test_formatting_options_precision_some() {
+    let mut options = fmt::FormattingOptions::new();
+
+    options.precision(Some(4));
+    assert_eq!(options.get_precision(), Some(4));
+}
+
+// Covers `core::fmt::builders::DebugList::<'a, 'b>::entry_with`
+#[test]
+fn test_builder_debug_list_entry_with() {
+    struct Foo(Vec<i32>);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_list().entry_with(|f| write!(f, "new entry: {:?}", self.0)).finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "[new entry: [1, 2, 3]]");
+}
+
+// Covers `core::fmt::builders::DebugSet::<'a, 'b>::entry_with`
+#[test]
+fn test_builder_debug_set_entry_with() {
+    struct Foo(Vec<i32>);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_set().entry_with(|f| write!(f, "new entry: {:?}", self.0)).finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "{new entry: [1, 2, 3]}");
+}
+
+// Covers `core::fmt::builders::from_fn`
+#[test]
+fn test_builder_from_fn() {
+    let value = 5;
+    let wrapped = fmt::from_fn(|f| {
+        for _ in 0..value {
+            write!(f, "from_fn ")?
+        }
+        write!(f, "from_fn")
+    });
+    assert_eq!(format!("{wrapped}"), "from_fn from_fn from_fn from_fn from_fn from_fn");
+}
+
 /// This horrific type exists because `&mut dyn fmt::Write` does not hit the
 /// specialisation for unsized types in `fmt::Write::write_fmt`.
 #[repr(C)]

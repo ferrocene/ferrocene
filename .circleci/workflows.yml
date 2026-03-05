@@ -1119,7 +1119,6 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            -
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library-cortex-m4

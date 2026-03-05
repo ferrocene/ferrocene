@@ -93,8 +93,3 @@ test_int_carryless_mul! {
     u128 => test_u128_carryless_mul,
     usize => test_usize_carryless_mul,
 }
-
-#[test]
-fn test_carryless_mul_intrinsic() {
-    assert_eq!(2u8, core::intrinsics::carryless_mul(1u8, 2u8));
-}

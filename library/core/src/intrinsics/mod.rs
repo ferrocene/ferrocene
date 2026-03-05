@@ -425,6 +425,9 @@ pub const unsafe fn assume(b: bool) {
 /// any safety invariants.
 ///
 /// The stabilized version of this intrinsic is [`core::hint::cold_path`].
+#[ferrocene::annotation(
+    "All calls of this function are removed during code generation as this is only a hint used to do certain optimizations. The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/cold_path.rs`, `tests/codegen-llvm/intrinsics/cold_path2.rs` and `tests/codegen-llvm/intrinsics/cold_path3.rs`."
+)]
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
@@ -491,6 +494,9 @@ pub const fn unlikely(b: bool) -> bool {
 /// The public form of this intrinsic is [`core::hint::select_unpredictable`].
 /// However unlike the public form, the intrinsic will not drop the value that
 /// is not selected.
+#[ferrocene::annotation(
+    "All calls of this function are replaced during code generation, meaning that the code inside the function is never run. The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/select_unpredictable.rs`"
+)]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
 #[rustc_intrinsic]
@@ -1945,7 +1951,7 @@ pub const fn three_way_compare<T: Copy>(lhs: T, rhss: T) -> crate::cmp::Ordering
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec] // the fallbacks all `assume` to tell Miri
 #[ferrocene::annotation(
-    "This function only redirects to `intrinsics::fallback::DisjointBitOr::disjoint_bitor` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
+    "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::DisjointBitOr::disjoint_bitor` which is thoroughly tested.  The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/disjoint_bitor.rs`"
 )]
 pub const unsafe fn disjoint_bitor<T: [const] fallback::DisjointBitOr>(a: T, b: T) -> T {
     // SAFETY: same preconditions as this function.
@@ -2011,6 +2017,9 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 ///
 /// This currently supports unsigned integers *only*, no signed ones.
 /// The stabilized versions of this intrinsic are available on integers.
+#[ferrocene::annotation(
+    "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::CarryingMulAdd::carrying_mul_add` which is thoroughly tested.  The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/carrying_mul_add.rs`"
+)]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_const_unstable(feature = "const_carrying_mul_add", issue = "85532")]
 #[rustc_nounwind]
@@ -2241,7 +2250,7 @@ pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::annotation(
-    "This function only redirects to `intrinsics::fallback::FunnelShift::unchecked_funnel_shl` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
+    "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::FunnelShift::unchecked_funnel_shl` which is thoroughly tested. The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/rotate_left.rs`"
 )]
 pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
     a: T,
@@ -2272,7 +2281,7 @@ pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
 #[track_caller]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::annotation(
-    "This function only redirects to `intrinsics::fallback::FunnelShift::unchecked_funnel_shr` which is thoroughly tested. The fact this is shown as uncovered is a known problem in our coverage tooling."
+    "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::FunnelShift::unchecked_funnel_shr` which is thoroughly tested. "
 )]
 pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
     a: T,
@@ -2292,6 +2301,9 @@ pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
 #[rustc_const_unstable(feature = "uint_carryless_mul", issue = "152080")]
 #[unstable(feature = "uint_carryless_mul", issue = "152080")]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::annotation(
+    "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::CarryingMul::carryless_mul` which is thoroughly tested. "
+)]
 pub const fn carryless_mul<T: [const] fallback::CarrylessMul>(a: T, b: T) -> T {
     a.carryless_mul(b)
 }
@@ -2650,6 +2662,9 @@ pub(crate) macro const_eval_select {
 /// # _ = foo(&5_i32);
 /// # _ = bar(&5_i32);
 /// ```
+#[ferrocene::annotation(
+    "All calls of this function are replaced during code generation, meaning that the code inside the function is never run. The correctness of the code generation is tested in `tests/codegen-llvm/is_val_statically_known.rs`"
+)]
 #[rustc_const_stable_indirect]
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]

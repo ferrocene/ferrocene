@@ -61,6 +61,9 @@
 //@ revisions: aarch64_unknown_none
 //@ [aarch64_unknown_none] compile-flags: --target aarch64-unknown-none
 //@ [aarch64_unknown_none] needs-llvm-components: aarch64
+//@ revisions: aarch64_a53_none
+//@ [aarch64_a53_none] compile-flags: --target aarch64-a53-none
+//@ [aarch64_a53_none] needs-llvm-components: aarch64
 //@ revisions: aarch64_unknown_none_softfloat
 //@ [aarch64_unknown_none_softfloat] compile-flags: --target aarch64-unknown-none-softfloat
 //@ [aarch64_unknown_none_softfloat] needs-llvm-components: aarch64
@@ -547,6 +550,9 @@
 //@ revisions: thumbv7em_none_eabihf
 //@ [thumbv7em_none_eabihf] compile-flags: --target thumbv7em-none-eabihf
 //@ [thumbv7em_none_eabihf] needs-llvm-components: arm
+//@ revisions: thumbv7em_m4_none_eabihf
+//@ [thumbv7em_m4_none_eabihf] compile-flags: --target thumbv7em-m4-none-eabihf
+//@ [thumbv7em_m4_none_eabihf] needs-llvm-components: arm
 //@ revisions: thumbv7m_none_eabi
 //@ [thumbv7m_none_eabi] compile-flags: --target thumbv7m-none-eabi
 //@ [thumbv7m_none_eabi] needs-llvm-components: arm
@@ -754,6 +760,9 @@
 //@ revisions: aarch64_unknown_ferrocene_facade
 //@ [aarch64_unknown_ferrocene_facade] compile-flags: --target aarch64-unknown-ferrocene.facade
 //@ [aarch64_unknown_ferrocene_facade] needs-llvm-components: aarch64
+//@ revisions: aarch64_a53_ferrocene_facade
+//@ [aarch64_a53_ferrocene_facade] compile-flags: --target aarch64-a53-ferrocene.facade
+//@ [aarch64_a53_ferrocene_facade] needs-llvm-components: aarch64
 //@ revisions: thumbv7em_ferrocene_facade_eabi
 //@ [thumbv7em_ferrocene_facade_eabi] compile-flags: --target thumbv7em-ferrocene.facade-eabi
 //@ [thumbv7em_ferrocene_facade_eabi] needs-llvm-components: arm
@@ -781,6 +790,9 @@
 //@ revisions: aarch64_ferrocene_none
 //@ [aarch64_ferrocene_none] compile-flags: --target aarch64-ferrocene-none
 //@ [aarch64_ferrocene_none] needs-llvm-components: aarch64
+//@ revisions: aarch64_ferrocene_a53_none
+//@ [aarch64_ferrocene_a53_none] compile-flags: --target aarch64-ferrocene.a53-none
+//@ [aarch64_ferrocene_a53_none] needs-llvm-components: aarch64
 //@ revisions: x86_64_ferrocene_none
 //@ [x86_64_ferrocene_none] compile-flags: --target x86_64-ferrocene-none
 //@ [x86_64_ferrocene_none] needs-llvm-components: x86
@@ -790,6 +802,9 @@
 //@ revisions: thumbv7em_ferrocene_none_eabihf
 //@ [thumbv7em_ferrocene_none_eabihf] compile-flags: --target thumbv7em-ferrocene-none-eabihf
 //@ [thumbv7em_ferrocene_none_eabihf] needs-llvm-components: arm
+//@ revisions: thumbv7em_ferrocene_m4_none_eabihf
+//@ [thumbv7em_ferrocene_m4_none_eabihf] compile-flags: --target thumbv7em-ferrocene.m4-none-eabihf
+//@ [thumbv7em_ferrocene_m4_none_eabihf] needs-llvm-components: arm
 
 // Sanity-check that each target can produce assembly code.
 

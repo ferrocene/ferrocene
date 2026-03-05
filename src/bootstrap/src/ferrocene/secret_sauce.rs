@@ -12,7 +12,7 @@ use crate::core::config::FerroceneSecretSauce;
 // for `bors try`
 static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
 
-const DATE_COMMIT: &str = "20260305/56edbcc";
+const DATE_COMMIT: &str = "20260305/1552c68";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

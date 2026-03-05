@@ -771,7 +771,7 @@ pub fn std_cargo(
     if target.contains("facade") {
         match &*target.triple {
             "aarch64-unknown-ferrocene.facade"
-            | "aarch64-unknown-ferrocene.facade.a53"
+            | "aarch64-a53-ferrocene.facade"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf"
             | "thumbv7em-m4-ferrocene.facade-eabihf" => {

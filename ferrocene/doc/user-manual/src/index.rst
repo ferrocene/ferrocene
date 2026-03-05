@@ -32,7 +32,9 @@ Ferrocene User Manual
 
    targets/index
    targets/thumbv7em-none-eabi
+   targets/thumbv7em-m4-none-eabihf
    targets/thumbv7em-none-eabihf
+   targets/aarch64-a53-none
    targets/aarch64-unknown-none
    targets/aarch64-unknown-nto-qnx710
    targets/aarch64-apple-darwin

@@ -68,7 +68,7 @@ which means it can use ``std`` for testing and enriched interactive development 
 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
 
-.. _thumbv7em-ferrocene-none-eabihf:
+.. _thumbv7em-ferrocene.m4-none-eabihf:
 
 Certified equivalent
 --------------------

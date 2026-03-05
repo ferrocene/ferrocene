@@ -104,10 +104,10 @@ impl TargetSelection {
 
         match &*self.triple {
             "aarch64-unknown-ferrocene.facade"
-            | "aarch64-unknown-ferrocene.facade.a53"
+            | "aarch64-a53-ferrocene.facade"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf"
-            | "thumbv7em-ferrocene.facade.m4-eabihf"=> true,
+            | "thumbv7em-m4-ferrocene.facade-eabihf"=> true,
             _ => todo!("expand this `match`"),
         }
     }

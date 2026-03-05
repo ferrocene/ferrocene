@@ -959,15 +959,15 @@ workflows:
             - aarch64-none-test-library
             - aarch64-none-test-library-certified-panic
             - aarch64-none-compiletest
-            - aarch64-none-test-library-cortex-a53
-            - aarch64-none-test-library-certified-panic-cortex-a53
-            - aarch64-none-compiletest-cortex-a53
+            - aarch64-a53-none-test-library
+            - aarch64-a53-none-test-library-certified-panic
+            - aarch64-a53-none-compiletest
             - thumbv7em-eabihf-test-library
             - thumbv7em-eabihf-test-library-certified-panic
             - thumbv7em-eabihf-test-compiletest
-            - thumbv7em-eabihf-test-library-cortex-m4
-            - thumbv7em-eabihf-test-library-certified-panic-cortex-m4
-            - thumbv7em-eabihf-test-compiletest-cortex-m4
+            - thumbv7em-m4-none-eabihf-test-library
+            - thumbv7em-m4-none-eabihf-test-library-certified-panic
+            - thumbv7em-m4-none-eabihf-test-compiletest
             - thumbv7em-eabi-test-library
             - thumbv7em-eabi-test-library-certified-panic
             - thumbv7em-eabi-test-compiletest
@@ -1028,8 +1028,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64-none-compiletest-cortex-a53
-          target: aarch64-unknown-ferrocene.facade.a53
+          name: aarch64-a53-none-compiletest
+          target: aarch64-a53-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
@@ -1048,8 +1048,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64-none-test-library-cortex-a53
-          target: aarch64-unknown-ferrocene.facade.a53
+          name: aarch64-a53-none-test-library
+          target: aarch64-a53-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
@@ -1067,8 +1067,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-certified-panic-test:
-          name: aarch64-none-test-library-certified-panic-cortex-a53
-          target: aarch64-unknown-ferrocene.facade.a53
+          name: aarch64-a53-none-test-library-certified-panic
+          target: aarch64-a53-ferrocene.facade
           test-variant: cortex-a53
           qemu-arch: qemu-aarch64
           resource-class: large # 4-core
@@ -1125,8 +1125,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabihf-test-library-cortex-m4
-          target: thumbv7em-ferrocene.facade.m4-eabihf
+          name: thumbv7em-m4-none-eabihf-test-library
+          target: thumbv7em-m4-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: test:library
@@ -1154,8 +1154,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-certified-panic-test:
-          name: thumbv7em-eabihf-test-library-certified-panic-cortex-m4
-          target: thumbv7em-ferrocene.facade.m4-eabihf
+          name: thumbv7em-m4-none-eabihf-test-library-certified-panic
+          target: thumbv7em-m4-ferrocene.facade-eabihf
           test-variant: cortex-m4
           qemu-arch: qemu-arm
           resource-class: large # 4-core
@@ -1182,8 +1182,8 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabihf-test-compiletest-cortex-m4
-          target: thumbv7em-ferrocene.facade.m4-eabihf
+          name: thumbv7em-m4-none-eabihf-test-compiletest
+          target: thumbv7em-m4-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts

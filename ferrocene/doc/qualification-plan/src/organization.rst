@@ -18,10 +18,10 @@ Leadership roles
      - Florian Gilcher
 
    * - Product Manager
-     - Brigitte Markmann
+     - Alexander Senier
 
    * - Project Manager
-     - Brigitte Markmann
+     - Alexander Senier
 
    * - Technical Lead
      - Ana Hobden

@@ -1769,7 +1769,6 @@ supported_targets! {
     ("aarch64-unknown-ferrocene.facade", aarch64_unknown_ferrocene_facade),
     ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
-    ("thumbv7em-ferrocene.facade.m4-eabihf", thumbv7em_m4_ferrocene_facade_eabihf),
     ("x86_64-unknown-ferrocene.subset", x86_64_unknown_ferrocene_subset),
     ("aarch64-unknown-ferrocene.subset", aarch64_unknown_ferrocene_subset),
     ("thumbv7em-ferrocene.subset-eabi", thumbv7em_ferrocene_subset_eabi),
@@ -1783,6 +1782,7 @@ supported_targets! {
     ("thumbv7em-ferrocene-none-eabihf", thumbv7em_ferrocene_none_eabihf),
     ("thumbv7em-m4-none-eabihf", thumbv7em_m4_none_eabihf),
     ("thumbv7em-ferrocene.m4-none-eabihf", thumbv7em_ferrocene_m4_none_eabihf),
+    ("thumbv7em-m4-ferrocene.facade-eabihf", thumbv7em_m4_ferrocene_facade_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

@@ -6,7 +6,10 @@ tests = [
     "tests/codegen-llvm/enum/enum-match.rs",
     "tests/codegen-llvm/enum/enum-transparent-extract.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+]
 reason = "TODO: to be investigated"
 
 [["tests/ui"]]
@@ -45,7 +48,11 @@ reason = "QEMU user space emulation doesn't support most sanitizers"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "<assert.h> is not available for inclusion on this platform"
 
 [["tests/run-make"]]
@@ -59,14 +66,23 @@ reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["aarch64-unknown-ferrocene.facade"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+]
 reason = "libcheckrust includes symbols which cannot be used without `-fPIC` on this platform"
 
 [["tests/ui"]]
 tests = [
     "tests/ui/command/command-argv0.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "QEMU user space emulation behaves differently with argv0"
 
 [["tests/ui"]]
@@ -74,7 +90,13 @@ tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "QEMU user space emulation behaves differently when spawning processes fails"
 
 [["tests/ui"]]
@@ -97,7 +119,13 @@ tests = [
     "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
     "tests/ui/test-attrs/test-panic-abort.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
 [["tests/debuginfo"]]
@@ -112,7 +140,13 @@ reason = "The test does not pass on CI, to be revisited later. https://github.co
 
 [["tests/debuginfo"]]
 tests = ["tests/debuginfo"]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "Running these tests require changes to bootstrap"
 
 [["tests/ui"]]
@@ -124,5 +158,11 @@ tests = [
     "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_comma-same-flag-many-times.rs",
     "tests/ui/ferrocene/compiler-arguments/upper_c_target-feature/upper_c_target-feature_eq.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = [
+    "aarch64-a53-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-m4-ferrocene.facade-eabihf",
+]
 reason = "Currently output of these tests experiences multiple stdout writers colliding to create unreproducible results"

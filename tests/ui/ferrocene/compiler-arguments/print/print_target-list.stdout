@@ -1,3 +1,5 @@
+aarch64-a53-ferrocene.facade
+aarch64-a53-none
 aarch64-apple-darwin
 aarch64-apple-ios
 aarch64-apple-ios-macabi
@@ -9,6 +11,7 @@ aarch64-apple-visionos-sim
 aarch64-apple-watchos
 aarch64-apple-watchos-sim
 aarch64-ferrocene-none
+aarch64-ferrocene.a53-none
 aarch64-kmc-solid_asp3
 aarch64-linux-android
 aarch64-nintendo-switch-freestanding
@@ -232,8 +235,11 @@ thumbv7em-ferrocene-none-eabi
 thumbv7em-ferrocene-none-eabihf
 thumbv7em-ferrocene.facade-eabi
 thumbv7em-ferrocene.facade-eabihf
+thumbv7em-ferrocene.m4-none-eabihf
 thumbv7em-ferrocene.subset-eabi
 thumbv7em-ferrocene.subset-eabihf
+thumbv7em-m4-ferrocene.facade-eabihf
+thumbv7em-m4-none-eabihf
 thumbv7em-none-eabi
 thumbv7em-none-eabihf
 thumbv7em-nuttx-eabi

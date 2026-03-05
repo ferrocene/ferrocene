@@ -37,8 +37,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "x86_64-unknown-motor",
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
+    "aarch64-unknown-ferrocene.facade.a53",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv7em-ferrocene.facade.m4-eabihf",
     "aarch64-unknown-ferrocene.subset",
     "x86_64-unknown-ferrocene.subset",
     "thumbv7em-ferrocene.subset-eabi",

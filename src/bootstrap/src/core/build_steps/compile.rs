@@ -771,8 +771,10 @@ pub fn std_cargo(
     if target.contains("facade") {
         match &*target.triple {
             "aarch64-unknown-ferrocene.facade"
+            | "aarch64-unknown-ferrocene.facade.a53"
             | "thumbv7em-ferrocene.facade-eabi"
-            | "thumbv7em-ferrocene.facade-eabihf" => {
+            | "thumbv7em-ferrocene.facade-eabihf"
+            | "thumbv7em-ferrocene.facade.m4-eabihf" => {
                 cargo.rustflag("--cfg=ferrocene_facade_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),

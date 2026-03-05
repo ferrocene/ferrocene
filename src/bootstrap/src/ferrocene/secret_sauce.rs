@@ -8,11 +8,11 @@ use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneSecretSauce;
 
 // for `bors merge`
-static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce";
+// static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce";
 // for `bors try`
-// static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
+static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce/try";
 
-const DATE_COMMIT: &str = "20250807/6df2831";
+const DATE_COMMIT: &str = "20260305/56edbcc";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

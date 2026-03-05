@@ -746,8 +746,7 @@ pub fn std_cargo(
     }
 
     if let Some(cpu) = target_cpu {
-        // There's probably a better way to say "don't compile this for the host". But this seems to
-        // work.
+        // There's probably a better way to say "don't compile this for the host".
         if target != cargo.compiler().host {
             cargo.rustflag(&format!("-Ctarget-cpu={cpu}"));
         }

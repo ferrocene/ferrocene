@@ -415,10 +415,7 @@ impl Step for Cargo {
                 VariantCondition::QemuCpu(cpu) => {
                     cargo.env("QEMU_CPU", cpu);
                 }
-                VariantCondition::TargetCpu(cpu) => {
-                    let v = cargo.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
-                    cargo.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
-                }
+                VariantCondition::TargetCpu(_) => condition.mark_unused(),
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
@@ -2395,10 +2392,7 @@ Please disable assertions with `rust.debug-assertions = false`.
                 VariantCondition::QemuCpu(cpu) => {
                     cmd.env("QEMU_CPU", cpu);
                 }
-                VariantCondition::TargetCpu(cpu) => {
-                    let v = cmd.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
-                    cmd.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
-                }
+                VariantCondition::TargetCpu(_) => condition.mark_unused(),
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
@@ -2848,10 +2842,7 @@ pub(crate) fn run_cargo_test<'a>(
             VariantCondition::QemuCpu(cpu) => {
                 cargo.env("QEMU_CPU", cpu);
             }
-            VariantCondition::TargetCpu(cpu) => {
-                let v = cargo.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
-                cargo.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
-            }
+            VariantCondition::TargetCpu(_) => condition.mark_unused(),
             VariantCondition::PanicRuntime => {} // handled by build::Std
         }
     }

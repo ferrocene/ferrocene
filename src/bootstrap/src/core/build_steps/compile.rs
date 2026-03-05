@@ -726,12 +726,31 @@ pub fn std_cargo(
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
     }
-    let is_panic_test_variant = TestVariant::current(builder, target)
-        .condititions()
-        .any(|v| matches!(v.get(), VariantCondition::PanicRuntime))
-        && cargo.compiler().stage == builder.top_stage;
+    let mut is_panic_test_variant = false;
+    let mut target_cpu = None;
+
+    for condition in TestVariant::current(builder, target).condititions() {
+        match condition.get() {
+            VariantCondition::PanicRuntime => {
+                is_panic_test_variant = true;
+            }
+            VariantCondition::TargetCpu(cpu) => target_cpu = Some(*cpu),
+            _ => {}
+        }
+    }
+
+    let is_panic_test_variant =
+        is_panic_test_variant && cargo.compiler().stage == builder.top_stage;
     if has_certified_runtime(target.triple) || is_panic_test_variant {
         cargo.arg("--features=ferrocene_certified_runtime");
+    }
+
+    if let Some(cpu) = target_cpu {
+        // There's probably a better way to say "don't compile this for the host". But this seems to
+        // work.
+        if target != cargo.compiler().host {
+            cargo.rustflag(&format!("-Ctarget-cpu={cpu}"));
+        }
     }
 
     // By default, rustc uses `-Cembed-bitcode=yes`, and Cargo overrides that

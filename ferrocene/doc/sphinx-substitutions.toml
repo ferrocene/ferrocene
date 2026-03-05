@@ -11,6 +11,7 @@ iso_26262_doc = "Road Vehicles - Functional Safety"
 iso_26262_ferrocene_asil = "ASIL D"
 iso_26262_core_asil = "ASIL B"
 iso_26262_ferrocene_tcl = "TCL 3"
+iso_26262_core_tcl = "TCL 2"
 iso_26262_ferrocene_tql = "class T3"
 
 iec_61508_ref = "IEC 61508:2010"

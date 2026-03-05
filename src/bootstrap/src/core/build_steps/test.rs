@@ -2,6 +2,7 @@
 //!
 //! `./x.py test` (aka [`Kind::Test`]) is currently allowed to reach build steps in other modules.
 //! However, this contains ~all test parts we expect people to be able to build and run locally.
+// ignore-tidy-filelength
 
 use std::collections::HashSet;
 use std::env::split_paths;
@@ -413,6 +414,10 @@ impl Step for Cargo {
                 VariantCondition::Edition(_) => condition.mark_unused(),
                 VariantCondition::QemuCpu(cpu) => {
                     cargo.env("QEMU_CPU", cpu);
+                }
+                VariantCondition::TargetCpu(cpu) => {
+                    let v = cargo.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
+                    cargo.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
                 }
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
@@ -2390,6 +2395,10 @@ Please disable assertions with `rust.debug-assertions = false`.
                 VariantCondition::QemuCpu(cpu) => {
                     cmd.env("QEMU_CPU", cpu);
                 }
+                VariantCondition::TargetCpu(cpu) => {
+                    let v = cmd.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
+                    cmd.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
+                }
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
@@ -2838,6 +2847,10 @@ pub(crate) fn run_cargo_test<'a>(
             VariantCondition::Edition(_) => condition.mark_unused(),
             VariantCondition::QemuCpu(cpu) => {
                 cargo.env("QEMU_CPU", cpu);
+            }
+            VariantCondition::TargetCpu(cpu) => {
+                let v = cargo.get_envs().find(|(k, _)| *k == "RUSTFLAGS").map(|(_k, v)| v).unwrap_or_default().unwrap_or_default().to_str().unwrap_or_default();
+                cargo.env("RUSTFLAGS", format!("{v} -C target-cpu={cpu}"));
             }
             VariantCondition::PanicRuntime => {} // handled by build::Std
         }

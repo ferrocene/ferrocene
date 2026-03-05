@@ -58,18 +58,40 @@ static VARIANTS: &[(&str, &[VariantCondition])] = &[
         VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-a53"),
     ]),
+    ("2021-specific-cortex-a53", &[
+        VariantCondition::Edition("2021"),
+        VariantCondition::QemuCpu("cortex-a53"),
+        VariantCondition::TargetCpu("cortex-a53"),
+    ]),
     ("2021-cortex-a53-certified-panic", &[
         VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-a53"),
+        VariantCondition::PanicRuntime,
+    ]),
+    ("2021-specific-cortex-a53-certified-panic", &[
+        VariantCondition::Edition("2021"),
+        VariantCondition::QemuCpu("cortex-a53"),
+        VariantCondition::TargetCpu("cortex-a53"),
         VariantCondition::PanicRuntime,
     ]),
     ("2021-cortex-m4", &[
         VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-m4"),
     ]),
+    ("2021-specific-cortex-m4", &[
+        VariantCondition::Edition("2021"),
+        VariantCondition::QemuCpu("cortex-m4"),
+        VariantCondition::TargetCpu("cortex-m4"),
+    ]),
     ("2021-cortex-m4-certified-panic", &[
         VariantCondition::Edition("2021"),
         VariantCondition::QemuCpu("cortex-m4"),
+        VariantCondition::PanicRuntime,
+    ]),
+    ("2021-specific-cortex-m4-certified-panic", &[
+        VariantCondition::Edition("2021"),
+        VariantCondition::QemuCpu("cortex-m4"),
+        VariantCondition::TargetCpu("cortex-m4"),
         VariantCondition::PanicRuntime,
     ]),
     // INTERNAL_PROCEDURES_END_TEST_VARIANTS
@@ -84,6 +106,7 @@ static DEFAULT_VARIANT_FALLBACK: &str = "2021";
 pub(crate) enum VariantCondition {
     Edition(&'static str),
     QemuCpu(&'static str),
+    TargetCpu(&'static str),
     PanicRuntime,
 }
 
@@ -129,6 +152,7 @@ impl TestVariant {
             match condition.get() {
                 VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
                 VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),
+                VariantCondition::TargetCpu(cpu) => id.push_str(&format!("c{cpu}")),
                 VariantCondition::PanicRuntime => id.push_str(&format!("p")),
             }
         }
@@ -145,6 +169,9 @@ impl TestVariant {
                 }
                 VariantCondition::QemuCpu(cpu) => {
                     fields.insert("Emulated CPU".into(), cpu.to_string());
+                }
+                VariantCondition::TargetCpu(cpu) => {
+                    fields.insert("Target CPU".into(), cpu.to_string());
                 }
                 VariantCondition::PanicRuntime => {
                     fields.insert("Panic Runtime".into(), "Certified".into());

@@ -1777,8 +1777,12 @@ supported_targets! {
     ("thumbv7em-ferrocene.subset-eabihf", thumbv7em_ferrocene_subset_eabihf),
     ("x86_64-ferrocene-none", x86_64_ferrocene_none),
     ("aarch64-ferrocene-none", aarch64_ferrocene_none),
+    ("aarch64-a53-none", aarch64_ferrocene_a53_none),
+    ("aarch64-ferrocene.a53-none", aarch64_ferrocene_a53_none),
     ("thumbv7em-ferrocene-none-eabi", thumbv7em_ferrocene_none_eabi),
     ("thumbv7em-ferrocene-none-eabihf", thumbv7em_ferrocene_none_eabihf),
+    ("thumbv7em-m4-none-eabihf", thumbv7em_ferrocene_m4_none_eabihf),
+    ("thumbv7em-ferrocene.m4-none-eabihf", thumbv7em_ferrocene_m4_none_eabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

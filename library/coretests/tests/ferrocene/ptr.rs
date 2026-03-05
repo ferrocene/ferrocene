@@ -94,3 +94,11 @@ fn test_dyn_metadata_clone() {
     let metadata = core::ptr::metadata(r);
     assert_eq!(metadata, metadata.clone());
 }
+
+// Cover `core::ptr::replace`.
+#[test]
+fn test_zst_replace() {
+    let src = ();
+    let mut dst = ();
+    unsafe { core::ptr::replace(&mut dst, src) };
+}

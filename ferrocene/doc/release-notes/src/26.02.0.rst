@@ -15,6 +15,10 @@ New features
   and :doc:`Core Library Certification <core-certification:index>`.
 * Targets with certified ``core`` libraries now have ``*-ferrocene-*`` equivalents, which contain a minimal certified panic implementation.
 * The core certification documentation has been expanded.
+* Two new targets are now supported and qualified for safety critical use:
+
+  * :target-with-tuple:`thumbv7em-m4-none-eabihf`
+  * :target-with-tuple:`aarch64-a53-none`
 
 For more information on the certified ``core`` library and a complete list of functions, see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
 

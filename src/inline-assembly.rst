@@ -1653,6 +1653,9 @@ Macros: asm, global_asm, and naked_asm
 :std:`core::arch::global_asm`, and
 :std:`core::arch::naked_asm`.
 
+:dp:`fls_tKj18krZ1pSt`
+An :t:`inline assembly argument` is either an :t:`assembly instruction`, a :t:`register argument`, an :t:`ABI clobber`, or an :t:`assembly option`.
+
 :dp:`fls_nLBhw2w6uznH`
 Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`; all other :t:`[attribute]s` shall be rejected.
 

@@ -38,9 +38,11 @@ Language changes in Rust 1.93.0
 
   - Changed syntax: :s:`AssemblyCodeBlock`, :s:`AsmArguments`, :s:`GlobalAsmArguments`
   - New syntax: :s:`AssemblyTemplate`, :s:`AssemblyAttributeRegisterArgument`, :s:`AssemblyAttributeAbiClobber`, :s:`AssemblyAttributeAssemblyOption`
+  - New glossary entry: :t:`inline assembly argument`
 
   - New paragraphs:
 
+    - :p:`fls_tKj18krZ1pSt`
     - :p:`fls_nLBhw2w6uznH`
     - :p:`fls_xzDPz2zfRfoI`
     - :p:`fls_cTEiqjf6haEg`

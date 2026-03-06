@@ -14,7 +14,7 @@ use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_span::{DUMMY_SP, Span};
 
-use crate::plumbing::collect_active_jobs_from_all_queries;
+use crate::collect_active_jobs_from_all_queries;
 
 /// Map from query job IDs to job information collected by
 /// `collect_active_jobs_from_all_queries`.
@@ -26,7 +26,7 @@ pub struct QueryJobMap<'tcx> {
 impl<'tcx> QueryJobMap<'tcx> {
     /// Adds information about a job ID to the job map.
     ///
-    /// Should only be called by `gather_active_jobs_inner`.
+    /// Should only be called by `gather_active_jobs`.
     pub(crate) fn insert(&mut self, id: QueryJobId, info: QueryJobInfo<'tcx>) {
         self.map.insert(id, info);
     }
@@ -438,7 +438,12 @@ pub(crate) fn report_cycle<'a>(
     let mut cycle_stack = Vec::new();
 
     use crate::error::StackCount;
-    let stack_count = if stack.len() == 1 { StackCount::Single } else { StackCount::Multiple };
+    let stack_bottom = stack[0].frame.info.description.to_owned();
+    let stack_count = if stack.len() == 1 {
+        StackCount::Single { stack_bottom: stack_bottom.clone() }
+    } else {
+        StackCount::Multiple { stack_bottom: stack_bottom.clone() }
+    };
 
     for i in 1..stack.len() {
         let frame = &stack[i].frame;
@@ -467,7 +472,7 @@ pub(crate) fn report_cycle<'a>(
     let cycle_diag = crate::error::Cycle {
         span,
         cycle_stack,
-        stack_bottom: stack[0].frame.info.description.to_owned(),
+        stack_bottom,
         alias,
         cycle_usage,
         stack_count,

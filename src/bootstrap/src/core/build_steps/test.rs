@@ -2,6 +2,7 @@
 //!
 //! `./x.py test` (aka [`Kind::Test`]) is currently allowed to reach build steps in other modules.
 //! However, this contains ~all test parts we expect people to be able to build and run locally.
+// ignore-tidy-filelength
 
 use std::collections::HashSet;
 use std::env::split_paths;
@@ -414,6 +415,7 @@ impl Step for Cargo {
                 VariantCondition::QemuCpu(cpu) => {
                     cargo.env("QEMU_CPU", cpu);
                 }
+                VariantCondition::TargetCpu(_) => {}
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
@@ -2390,6 +2392,7 @@ Please disable assertions with `rust.debug-assertions = false`.
                 VariantCondition::QemuCpu(cpu) => {
                     cmd.env("QEMU_CPU", cpu);
                 }
+                VariantCondition::TargetCpu(_) => {}
                 VariantCondition::PanicRuntime => {} // handled by build::Std
             }
         }
@@ -2839,6 +2842,7 @@ pub(crate) fn run_cargo_test<'a>(
             VariantCondition::QemuCpu(cpu) => {
                 cargo.env("QEMU_CPU", cpu);
             }
+            VariantCondition::TargetCpu(_) => {}
             VariantCondition::PanicRuntime => {} // handled by build::Std
         }
     }

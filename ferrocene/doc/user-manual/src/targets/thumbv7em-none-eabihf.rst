@@ -8,12 +8,15 @@
 
 .. note::
 
-   Currently the baseline target is qualified, without any specific
-   ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
+   Not all target configurations are qualified for use in safety-critical applications.
+
+   A full list of target configurations for this target is
+   ``-Ctarget-cpu`` or ``-Ctarget-feature`` mentioned in `the rustc book
    <https://doc.rust-lang.org/1.86/rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
 
    Please contact support if your use case demands fully optimized builds for
    a specific CPU configuration, or double-precision FPU support.
+
 
 
 The ``thumbv7em-none-eabihf`` Ferrocene target provides support for
@@ -52,6 +55,13 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 * ``--target=thumbv7em-none-eabihf``
+
+Allowed compiler flags
+----------------------
+
+The following options are qualified for use in safety-critical contexts.
+
+* ``--target-cpu=cortex-m4``: properly enables all processor features available on an Cortex-M4 core.
 
 Testing Facade (Experimental)
 -----------------------------

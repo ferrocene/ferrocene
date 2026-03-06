@@ -6,6 +6,15 @@
 :target:`aarch64-unknown-none`
 ==============================
 
+.. note::
+
+   Not all target configurations are qualified for use in safety-critical applications.
+
+   This impacts the usage of the ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags.
+
+   Please contact support if your use case demands fully optimized builds for
+   a specific CPU configuration.
+
 The ``aarch64-unknown-none`` Ferrocene target provides support for
 bare-metal ARMv8-A processors operating in Aarch64 mode.
 
@@ -29,6 +38,13 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 * ``--target=aarch64-unknown-none``
+
+Allowed compiler flags
+----------------------
+
+The following options are qualified for use in safety-critical contexts.
+
+* ``--target-cpu=cortex-a53``: properly enables all processor features available on an Cortex-A53 core.
 
 Testing Facade (Experimental)
 -----------------------------

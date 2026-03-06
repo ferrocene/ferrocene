@@ -126,6 +126,7 @@ add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
+add --set 'target."aarch64-a53-none".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-a53-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
@@ -136,6 +137,7 @@ add --set 'target."aarch64-a53-ferrocene.subset".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-m4-ferrocene.subset-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-m4-none-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."aarch64-ferrocene-none".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-ferrocene.a53-none".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene-none-eabi".cc=arm-none-eabi-gcc'

@@ -1657,7 +1657,7 @@ Macros: asm, global_asm, and naked_asm
 Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`; all other :t:`[attribute]s` shall be rejected.
 
 :dp:`fls_xzDPz2zfRfoI`
-If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` is annotated with :c:`cfg` or :c:`cfg_attr` and the related :t:`configuration predicate` evaluates to ``false``, the annotated argument is not considered part of the related macro invocation, consistent with :t:`conditional compilation`.
+If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` in :s:`AsmArguments` or :s:`GlobalAsmArguments` is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``, then that construct is not considered part of the related :s:`AsmArguments` or :s:`GlobalAsmArguments`, consistent with :t:`conditional compilation`.
 
 :dp:`fls_cTEiqjf6haEg`
 It is a static error for a :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` to appear before the first :t:`assembly instruction`, even if the argument is ignored by :t:`conditional compilation`.

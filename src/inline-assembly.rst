@@ -1659,11 +1659,8 @@ An :t:`inline assembly argument` is either an :t:`assembly instruction`, a :t:`r
 :dp:`fls_nLBhw2w6uznH`
 Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[inline assembly arguments]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`.
 
-:dp:`fls_xzDPz2zfRfoI`
-If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` in :s:`AsmArguments` or :s:`GlobalAsmArguments` is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``, then that construct is not considered part of the related :s:`AsmArguments` or :s:`GlobalAsmArguments`, consistent with :t:`conditional compilation`.
-
 :dp:`fls_cTEiqjf6haEg`
-It is a static error for a :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` to appear before the first :t:`assembly instruction`, including when that construct is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``.
+It is a static error for a :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` to appear before the first :t:`assembly instruction`, including when that :t:`inline assembly argument` is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``.
 
 :dp:`fls_1ikzov7cxic1`
 When invoking :t:`macro` :std:`core::arch::asm`, the :s:`DelimitedTokenTree` of

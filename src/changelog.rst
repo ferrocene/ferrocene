@@ -44,7 +44,6 @@ Language changes in Rust 1.93.0
 
     - :p:`fls_tKj18krZ1pSt`
     - :p:`fls_nLBhw2w6uznH`
-    - :p:`fls_xzDPz2zfRfoI`
     - :p:`fls_cTEiqjf6haEg`
 
 - `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_

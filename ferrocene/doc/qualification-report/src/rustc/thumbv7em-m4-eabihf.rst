@@ -5,4 +5,4 @@
    :host: x86_64-unknown-linux-gnu
    :target: thumbv7em-m4-none-eabihf
    :certified_target: thumbv7em-ferrocene.m4-none-eabihf
-   :bare_metal_test_target: thumbv7em-ferrocene.facade.m4-eabihf
+   :bare_metal_test_target: thumbv7em-m4-ferrocene.facade-eabihf

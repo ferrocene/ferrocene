@@ -88,8 +88,8 @@ qualified upon request.
      - Standard library
      - Notes
 
-   * - :ref:`aarch64-a53-none`
-     - ``aarch64-a53-none``
+   * - :ref:`aarch64a53-unknown-none`
+     - ``aarch64a53-unknown-none``
      - Cross-compilation
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
@@ -112,8 +112,8 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :ref:`thumbv7em-m4-none-eabihf`
-     - ``thumbv7em-m4-none-eabihf``
+   * - :ref:`thumbm4-none-eabihf`
+     - ``thumbm4-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.

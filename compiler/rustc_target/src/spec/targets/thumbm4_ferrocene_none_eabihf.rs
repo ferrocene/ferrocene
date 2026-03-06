@@ -1,7 +1,7 @@
 use crate::spec::Target;
 
 pub(crate) fn target() -> Target {
-    let mut target = super::aarch64_a53_none::target();
+    let mut target = super::thumbm4_none_eabihf::target();
 
     target.ferrocene_certified_runtime();
 

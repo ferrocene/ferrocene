@@ -10,7 +10,7 @@
 use crate::spec::{LinkSelfContainedDefault, Target, TargetMetadata, crt_objects, cvs};
 
 pub(crate) fn target() -> Target {
-    let mut target = super::aarch64_a53_none::target();
+    let mut target = super::aarch64a53_unknown_none::target();
 
     target.metadata = TargetMetadata::default();
 

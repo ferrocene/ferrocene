@@ -459,12 +459,12 @@ target | std | host | notes
 `aarch64-ferrocene-none` | * |  | Bare ARM64, hardfloat (certified runtime)
 `thumbv7em-ferrocene-none-eabi` | * |  | Bare Armv7E-M (certified runtime)
 `thumbv7em-ferrocene-none-eabihf` | * |  | Bare Armv7E-M, hardfloat (certified runtime)
-`aarch64-a53-none` | * |  | Armv8-A bare-metal
-`aarch64-ferrocene.a53-none` | * |  | Armv8-A bare-metal (certified runtime)
-`aarch64-a53-ferrocene.facade` | ✓ | ✓ | Internal target for tests
-`thumbv7em-m4-none-eabihf` | * |  | Armv7E-M bare-metal (Cortex M4, hard-float)
-`thumbv7em-ferrocene.m4-none-eabihf` | * |  | Armv7E-M bare-metal (Cortex M4, hard-float, certified runtime)
-`thumbv7em-m4-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
+`aarch64a53-unknown-none` | * |  | Armv8-A bare-metal
+`aarch64a53-ferrocene-none` | * |  | Armv8-A bare-metal (certified runtime)
+`aarch64a53-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
+`thumbm4-none-eabihf` | * |  | Armv7E-M bare-metal (Cortex M4, hard-float)
+`thumbm4-ferrocene-none-eabihf` | * |  | Armv7E-M bare-metal (Cortex M4, hard-float, certified runtime)
+`thumbm4-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

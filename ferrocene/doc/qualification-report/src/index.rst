@@ -23,11 +23,11 @@ qualification, in accordance to the standards above.
 
    rustc/index
    rustc/aarch64-unknown-none
-   rustc/aarch64-a53-none
+   rustc/aarch64a53-unknown-none
    rustc/aarch64-unknown-nto-qnx710
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
-   rustc/thumbv7em-m4-eabihf
+   rustc/thumbm4-none-eabihf
    rustc/x86_64-unknown-linux-gnu
    rustc/x86_64-pc-nto-qnx710
 

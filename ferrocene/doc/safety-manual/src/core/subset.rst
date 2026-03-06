@@ -33,13 +33,13 @@ To prove compliance with the subset, follow these steps:
    * - Compilation target
      - Subset equivalent
    * - | ``aarch64-unknown-none``
-       | ``aarch64-a53-none``
+       | ``aarch64a53-unknown-none``
        | ``aarch64-unknown-nto-qnx710``
      - ``aarch64-unknown-ferrocene.subset``
    * - ``thumbv7em-none-eabi``
      - ``thumbv7em-ferrocene.subset-eabi``
    * - | ``thumbv7em-none-eabihf``
-       | ``thumbv7em-m4-none-eabihf``
+       | ``thumbm4-none-eabihf``
      - ``thumbv7em-ferrocene.subset-eabihf``
    * - | ``x86_64-unknown-linux-gnu``
        | ``x86_64-pc-nto-qnx710``

@@ -1,18 +1,18 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-a53-none:
+.. _aarch64a53-unknown-none:
 
-:target:`aarch64-a53-none`
-==============================
+:target:`aarch64a53-unknown-none`
+=================================
 
 .. note::
 
-    This target is similar to the baseline :ref:`aarch64-a53-none`
+    This target is similar to the baseline :ref:`aarch64a53-unknown-none`
     target, except the target CPU is set to ``cortex-a53`` as if
     ``-C target-cpu=cortex-a53`` was passed.
 
-The ``aarch64-a53-none`` Ferrocene target provides support for
+The ``aarch64a53-unknown-none`` Ferrocene target provides support for
 bare-metal ARMv8-A Cortex-a53 processors operating in Aarch64 mode.
 
 Prerequisites
@@ -26,7 +26,7 @@ Archives to install
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-a53-none``
+* ``rust-std-aarch64a53-unknown-none``
 
 Required compiler flags
 -----------------------
@@ -34,7 +34,7 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-* ``--target=aarch64-a53-none``
+* ``--target=aarch64a53-unknown-none``
 
 Testing Facade (Experimental)
 -----------------------------
@@ -45,7 +45,7 @@ functionality.
 
 The following additional archive is needed when :doc:`installing </rustc/install>`:
 
-* ``rust-std-aarch64-a53-ferrocene.facade``
+* ``rust-std-aarch64a53-unknown-ferrocene.facade``
 
 This target is the same as the one it proxies, except it includes a Linux ``libc``,
 which means it can use ``std`` for testing and enriched interactive development on a
@@ -53,15 +53,15 @@ which means it can use ``std`` for testing and enriched interactive development 
 
 For more information, consult :doc:`Testing Facades </rustc/testing-facades>`.
 
-.. _aarch64-ferrocene.a53-none:
+.. _aarch64a53-ferrocene-none:
 
 Certified equivalent
 --------------------
 
 This :ref:`qualified target<qualified-targets>`'s certified equivalent is
-``aarch64-ferrocene.a53-none``. To use the certified core library, the
+``aarch64a53-ferrocene-none``. To use the certified core library, the
 following additional flags must be provided to ``rustc``:
 
-* ``--target=aarch64-ferrocene.a53-none``
+* ``--target=aarch64a53-ferrocene-none``
 
 Refer to :ref:`certified-core-targets` for more information about certified targets.

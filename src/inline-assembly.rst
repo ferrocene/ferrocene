@@ -1653,9 +1653,6 @@ Macros: asm, global_asm, and naked_asm
 :std:`core::arch::global_asm`, and
 :std:`core::arch::naked_asm`.
 
-:dp:`fls_m0SBtonaNppV`
-The :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments` may be preceded by :t:`outer attribute` instances.
-
 :dp:`fls_nLBhw2w6uznH`
 Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are accepted on inline assembly arguments. All other attributes are rejected.
 

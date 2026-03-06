@@ -41,7 +41,6 @@ Language changes in Rust 1.93.0
 
   - New paragraphs:
 
-    - :p:`fls_m0SBtonaNppV`
     - :p:`fls_nLBhw2w6uznH`
     - :p:`fls_xzDPz2zfRfoI`
     - :p:`fls_cTEiqjf6haEg`

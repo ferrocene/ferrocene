@@ -100,7 +100,7 @@ impl TestVariant {
         TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
     }
 
-    pub(crate) fn condititions(&self) -> impl Iterator<Item = VariantConditionAccessor<'_>> {
+    pub(crate) fn conditions(&self) -> impl Iterator<Item = VariantConditionAccessor<'_>> {
         self.base
             .iter()
             .enumerate()
@@ -111,7 +111,7 @@ impl TestVariant {
     #[cfg(feature = "build-metrics")]
     pub(crate) fn id(&self) -> String {
         let mut id = String::new();
-        for condition in self.condititions() {
+        for condition in self.conditions() {
             if !id.is_empty() {
                 id.push('-');
             }
@@ -126,7 +126,7 @@ impl TestVariant {
     #[cfg(feature = "build-metrics")]
     pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
         let mut fields = BTreeMap::new();
-        for condition in self.condititions() {
+        for condition in self.conditions() {
             match condition.get() {
                 VariantCondition::Edition(edition) => {
                     fields.insert("Edition".into(), edition.to_string());

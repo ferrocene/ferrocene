@@ -63,6 +63,12 @@ fn main() {
         "aarch64-ferrocene-none",
         "thumbv7em-ferrocene-none-eabi",
         "thumbv7em-ferrocene-none-eabihf",
+        "aarch64-a53-none",
+        "aarch64-ferrocene.a53-none",
+        "aarch64-a53-ferrocene.facade",
+        "thumbv7em-m4-none-eabihf",
+        "thumbv7em-ferrocene.m4-none-eabihf",
+        "thumbv7em-m4-ferrocene.facade-eabihf",
     ];
     let mut invalid_target_name_found = false;
     for target in &target_list {

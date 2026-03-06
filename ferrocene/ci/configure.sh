@@ -88,6 +88,10 @@ if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.aarch64-unknown-none.cxx=clang
     add --set target.aarch64-unknown-none.ar=llvm-ar
 
+    add --set target.aarch64-a53-none.cc=clang
+    add --set target.aarch64-a53-none.cxx=clang
+    add --set target.aarch64-a53-none.ar=llvm-ar
+
     add --set target.thumbv6m-none-eabi.cc=clang
     add --set target.thumbv6m-none-eabi.cxx=clang
     add --set target.thumbv6m-none-eabi.ar=llvm-ar
@@ -99,6 +103,10 @@ if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.thumbv7em-none-eabihf.cc=clang
     add --set target.thumbv7em-none-eabihf.cxx=clang
     add --set target.thumbv7em-none-eabihf.ar=llvm-ar
+
+    add --set target.thumbv7em-m4-none-eabihf.cc=clang
+    add --set target.thumbv7em-m4-none-eabihf.cxx=clang
+    add --set target.thumbv7em-m4-none-eabihf.ar=llvm-ar
 
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang
@@ -118,15 +126,23 @@ add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
+add --set 'target."aarch64-a53-none".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64-a53-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-m4-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."aarch64-unknown-ferrocene.subset".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64-a53-ferrocene.subset".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.subset-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-m4-ferrocene.subset-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-m4-none-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."aarch64-ferrocene-none".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64-ferrocene.a53-none".cc=aarch64-linux-gnu-gcc'
 add --set 'target."thumbv7em-ferrocene-none-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene-none-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-ferrocene.m4-none-eabihf".cc=arm-none-eabi-gcc'
 
 # musl toolchains use the architecture, also we need to set the `musl-root`
 add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
@@ -141,8 +157,10 @@ add --set target.x86_64-unknown-linux-musl.sanitizers=false
 
 # experiment to enable code coverage
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
+add --set 'target."aarch64-a53-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
+add --set 'target."thumbv7em-m4-ferrocene.facade-eabihf".profiler=true'
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

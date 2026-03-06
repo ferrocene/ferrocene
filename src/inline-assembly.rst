@@ -1657,7 +1657,7 @@ Macros: asm, global_asm, and naked_asm
 An :t:`inline assembly argument` is either an :t:`assembly instruction`, a :t:`register argument`, an :t:`ABI clobber`, or an :t:`assembly option`.
 
 :dp:`fls_nLBhw2w6uznH`
-Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`; all other :t:`[attribute]s` shall be rejected.
+Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[inline assembly arguments]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`.
 
 :dp:`fls_xzDPz2zfRfoI`
 If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` in :s:`AsmArguments` or :s:`GlobalAsmArguments` is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``, then that construct is not considered part of the related :s:`AsmArguments` or :s:`GlobalAsmArguments`, consistent with :t:`conditional compilation`.

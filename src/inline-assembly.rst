@@ -1654,7 +1654,7 @@ Macros: asm, global_asm, and naked_asm
 :std:`core::arch::naked_asm`.
 
 :dp:`fls_nLBhw2w6uznH`
-Only the :t:`attribute` :c:`cfg` and the :t:`attribute` :c:`cfg_attr` are accepted on inline assembly arguments. All other attributes are rejected.
+Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[assembly instruction]s`, :t:`[register argument]s`, :t:`[ABI clobber]s`, and :t:`[assembly option]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`; all other :t:`[attribute]s` shall be rejected.
 
 :dp:`fls_xzDPz2zfRfoI`
 If a :t:`assembly instruction`, :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` is annotated with :c:`cfg` or :c:`cfg_attr` and the related :t:`configuration predicate` evaluates to ``false``, the annotated argument is not considered part of the related macro invocation, consistent with :t:`conditional compilation`.

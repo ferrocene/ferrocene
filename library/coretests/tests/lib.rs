@@ -261,3 +261,9 @@ fn check_that_qemu_cpu_was_set() {
         panic!("extend this logic")
     }
 }
+
+#[test]
+fn test_crc_feature_set() {
+    #[cfg(not(target_feature = "crc"))] // `cortex-a53` has this feature, `generic` does not.
+    panic!("The target feature `crc` was not set, but should have been.")
+}

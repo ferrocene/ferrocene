@@ -56,6 +56,10 @@ The following targets are certified for use with the pre-compiled certified core
      - Qualified target tuple
      - Certified target tuple
 
+   * - :ref:`aarch64-a53-none`
+     - ``aarch64-a53-none``
+     - ``aarch64-ferrocene.a53-none``
+
    * - :ref:`aarch64-unknown-none`
      - ``aarch64-unknown-none``
      - ``aarch64-ferrocene-none``
@@ -67,6 +71,10 @@ The following targets are certified for use with the pre-compiled certified core
    * - :ref:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
      - ``thumbv7em-ferrocene-none-eabi``
+
+   * - :ref:`thumbv7em-m4-none-eabihf`
+     - ``thumbv7em-m4-none-eabihf``
+     - ``thumbv7em-ferrocene.m4-none-eabihf``
 
    * - :ref:`thumbv7em-none-eabihf`
      - ``thumbv7em-none-eabihf``

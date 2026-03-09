@@ -19,6 +19,21 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.93.1
+-------------------------------
+
+- `Don’t try to recover keyword as non-keyword identifier <https://github.com/rust-lang/rust/pull/150590>`_
+
+  - No change: bug fix in the compiler without visible ramifications
+
+- `Fix clippy::panicking_unwrap false-positive on field access with implicit deref <https://github.com/rust-lang/rust-clippy/pull/16196>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Revert “Update wasm-related dependencies in CI” <https://github.com/rust-lang/rust/pull/152259>`_
+
+  - No change: the target is outside the scope of FLS
+
 Language changes in Rust 1.93.0
 -------------------------------
 

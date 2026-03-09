@@ -427,7 +427,7 @@ impl Step for Cargo {
 
         // Ferrocene addition
         let variant = TestVariant::current(builder, self.host);
-        for condition in variant.condititions() {
+        for condition in variant.conditions() {
             match condition.get() {
                 VariantCondition::Edition(_) => condition.mark_unused(),
                 VariantCondition::QemuCpu(cpu) => {
@@ -2500,7 +2500,7 @@ Please disable assertions with `rust.debug-assertions = false`.
         cmd.arg("--git-merge-commit-email").arg(git_config.git_merge_commit_email);
 
         let variant = TestVariant::current(builder, self.target);
-        for condition in variant.condititions() {
+        for condition in variant.conditions() {
             match condition.get() {
                 VariantCondition::Edition(edition) => {
                     cmd.arg(format!("--edition={edition}"));
@@ -2965,7 +2965,7 @@ pub(crate) fn run_cargo_test<'a>(
 
     // Ferrocene addition: --test-variant
     let variant = TestVariant::current(builder, target);
-    for condition in variant.condititions() {
+    for condition in variant.conditions() {
         match condition.get() {
             VariantCondition::Edition(_) => condition.mark_unused(),
             VariantCondition::QemuCpu(cpu) => {

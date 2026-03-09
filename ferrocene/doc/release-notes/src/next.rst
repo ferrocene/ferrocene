@@ -12,10 +12,11 @@ release.
 New features
 ------------
 
-* A new Supported target has been added. Supported targets can often be qualified or quality
-  managed upon request. The new target is:
+* New Supported targets have been added. Supported targets can often be qualified or quality
+  managed upon request. The new targets are:
 
   * :target-with-tuple:`aarch64v8r-unknown-none`
+  * :target-with-tuple:`aarch64-rhivos2-linux-gnu`
 
 * Certify the ``core::fmt`` module.
 

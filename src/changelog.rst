@@ -57,10 +57,10 @@ Language changes in Rust 1.93.0
 
   - Lints are outside the scope of FLS
 
-FLS maintenance corrections
----------------------------
+FLS corrections
+---------------
 
-- Deduplicate historically reused paragraph IDs in the glossary (ID-integrity fix).
+- Deduplicate historically reused paragraph IDs in the glossary.
 
   - Corrected glossary `discriminant type` paragraph ID:
     - old reused ID: ``fls_t4yeovFm83Wo``
@@ -68,7 +68,6 @@ FLS maintenance corrections
   - Corrected glossary `local trait` paragraph ID:
     - old reused ID: ``fls_I9JaKZelMiby``
     - new unique ID: ``fls_H5vkbMFvzrFs``
-  - This is a historical FLS maintenance correction (no Rust language semantics change).
 
 Language changes in Rust 1.92.0
 -------------------------------

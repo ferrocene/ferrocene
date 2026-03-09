@@ -385,8 +385,14 @@ pub(crate) fn initialize_checked_jobserver(early_dcx: &EarlyDiagCtxt) {
 
 // JUSTIFICATION: before session exists, only config
 #[allow(rustc::bad_opt_access)]
-pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Send) -> R {
+pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R + Send) -> R {
     trace!("run_compiler");
+
+    // Ferrocene addition
+    // We have to do things in this strange way because ferrocene::unvalidated works on THIR, and the
+    // LateLintPass trait runs later than unsafety-checking, which means that normally if we try to
+    // read THIR bodies we'll get an ICE. Tell unsafety-checking not to steal the THIR.
+    config.opts.unstable_opts.no_steal_thir = true;
 
     // Set parallel mode before thread pool creation, which will create `Lock`s.
     rustc_data_structures::sync::set_dyn_thread_safe_mode(config.opts.unstable_opts.threads > 1);

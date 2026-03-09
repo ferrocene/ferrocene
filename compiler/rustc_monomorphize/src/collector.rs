@@ -207,6 +207,9 @@
 
 mod autodiff;
 
+// Ferrocene addition
+pub(crate) mod ferrocene;
+
 use std::cell::OnceCell;
 use std::ops::ControlFlow;
 
@@ -220,6 +223,7 @@ use rustc_hir::def_id::{DefId, DefIdMap, LocalDefId};
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::limit::Limit;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::Validated;
 use rustc_middle::mir::interpret::{AllocId, ErrorHandled, GlobalAlloc, Scalar};
 use rustc_middle::mir::mono::{
     CollectionMode, InstantiationMode, MonoItem, NormalizationErrorInMono,
@@ -250,6 +254,9 @@ use crate::errors::{
 pub(crate) enum MonoItemCollectionStrategy {
     Eager,
     Lazy,
+
+    // Ferrocene addition
+    Validated,
 }
 
 /// The state that is shared across the concurrent threads that are doing collection.
@@ -1650,21 +1657,32 @@ impl<'v> RootCollector<'_, 'v> {
     }
 
     fn is_root(&self, def_id: LocalDefId) -> bool {
+        // Ferrocene addition: reuse same strategy as Lazy collector
+        // closure so that we don't slow down incremental by calling queries we don't use
+        let is_reachable_lazy = || {
+            self.entry_fn.and_then(|(id, _)| id.as_local()) == Some(def_id)
+                || self.tcx.is_reachable_non_generic(def_id)
+                || {
+                    let flags = self.tcx.codegen_fn_attrs(def_id).flags;
+                    flags.intersects(
+                        CodegenFnAttrFlags::RUSTC_STD_INTERNAL_SYMBOL
+                            | CodegenFnAttrFlags::EXTERNALLY_IMPLEMENTABLE_ITEM,
+                    )
+                }
+        };
+
         !self.tcx.generics_of(def_id).requires_monomorphization(self.tcx)
             && match self.strategy {
                 MonoItemCollectionStrategy::Eager => {
                     !matches!(self.tcx.codegen_fn_attrs(def_id).inline, InlineAttr::Force { .. })
                 }
-                MonoItemCollectionStrategy::Lazy => {
-                    self.entry_fn.and_then(|(id, _)| id.as_local()) == Some(def_id)
-                        || self.tcx.is_reachable_non_generic(def_id)
-                        || {
-                            let flags = self.tcx.codegen_fn_attrs(def_id).flags;
-                            flags.intersects(
-                                CodegenFnAttrFlags::RUSTC_STD_INTERNAL_SYMBOL
-                                    | CodegenFnAttrFlags::EXTERNALLY_IMPLEMENTABLE_ITEM,
-                            )
-                        }
+                MonoItemCollectionStrategy::Lazy => is_reachable_lazy(),
+                // Ferrocene addition
+                MonoItemCollectionStrategy::Validated => {
+                    let entrypoint = is_reachable_lazy();
+                    // Explicit match is intentional, please update this if you add new fields.
+                    entrypoint
+                        && matches!(self.tcx.codegen_fn_attrs(def_id).validated, Some(Validated {}))
                 }
             }
     }

@@ -1,4 +1,5 @@
 use crate::ops::IndexRange;
+use crate::panic::{Location, PanicInfo};
 use crate::slice::SliceIndex;
 
 pub fn test_index_range_slice_index() {
@@ -142,4 +143,8 @@ pub(crate) mod println {
             Ok(())
         }
     }
+}
+
+pub fn create_panic_info<'a>(args: &'a crate::fmt::Arguments<'a>) -> PanicInfo<'a> {
+    PanicInfo::new(args, Location::caller(), true, false)
 }

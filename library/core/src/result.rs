@@ -1245,7 +1245,7 @@ impl<T, E> Result<T, E> {
     #[inline(always)]
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
-    // Ferrocene: blocked on Debug
+    #[ferrocene::prevalidated]
     pub fn unwrap(self) -> T
     where
         E: fmt::Debug,

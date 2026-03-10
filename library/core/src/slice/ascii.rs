@@ -617,6 +617,8 @@ const fn is_ascii(bytes: &[u8]) -> bool {
                 return remainder.iter().all(|b| b.is_ascii());
             }
 
+            // Bug in the lint: is_ascii isn't validated, only the expansion of `is_ascii::runtime`
+            #[allow(ferrocene::unvalidated)]
             is_ascii_sse2(bytes)
         }
     )

@@ -39,9 +39,6 @@ DOCKER_IMAGES_PATH = "ferrocene/ci/docker-images/"
 S3_REGION = "us-east-1"
 ECR_REGION = "us-east-1"
 
-# How long should it take before an image is rebuilt.
-REBUILD_IMAGES_OLDER_THAN_DAYS = 7
-
 # QNX targets only work on x86_64 Windows, x86_64 Linux, and x86_64 Mac
 # They must be excluded on, for example, aarch64 Mac
 QNX_TARGETS = [
@@ -151,10 +148,7 @@ def calculate_docker_image_rebuild(repo_plus_platform_plus_image: str) -> bool:
         # Image doesn't exist, build it.
         return True
 
-    # FIXME: .utcnow should be .now(datetime.UTC), but CI is on python 3.9
-    now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
-    delta: datetime.timedelta = now - image["imagePushedAt"]
-    return delta.days >= REBUILD_IMAGES_OLDER_THAN_DAYS
+    return False
 
 
 def calculate_docker_repository_url(repo: str) -> str:

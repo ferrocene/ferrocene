@@ -23,6 +23,9 @@ Language changes in Rust 1.94.0
 -------------------------------
 
 - `Impls and impl items inherit dead_code lint level of the corresponding traits and trait items <https://github.com/rust-lang/rust/pull/144113>`_
+
+  - No change: Lints are not part of the FLS
+
 - `Stabilize additional 29 RISC-V target features including large portions of the RVA22U64 / RVA23U64 profiles <https://github.com/rust-lang/rust/pull/145948>`_
 - `Add warn-by-default unused_visibilities lint for visibility on const _ declarations <https://github.com/rust-lang/rust/pull/147136>`_
 - `Update to Unicode 17 <https://github.com/rust-lang/rust/pull/148321>`_

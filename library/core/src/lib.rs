@@ -139,12 +139,8 @@
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(doc_notable_trait))]
 #![feature(extern_types)]
 #![feature(f128)]
-<<<<<<< HEAD
 #![feature(f16)]
-||||||| f02672cb8bf
-=======
 #![feature(field_projections)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(funnel_shifts)]
@@ -304,13 +300,9 @@ pub mod convert;
 pub mod default;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod error;
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f02672cb8bf
-=======
 #[unstable(feature = "field_projections", issue = "145383")]
 pub mod field;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod index;
 pub mod marker;
 pub mod ops;

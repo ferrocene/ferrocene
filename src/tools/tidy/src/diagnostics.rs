@@ -48,7 +48,7 @@ impl TidyCtx {
             None => CiEnv::current(),
         };
 
-        let mut tidy_ctx = Self {
+        let tidy_ctx = Self {
             diag_ctx: Arc::new(Mutex::new(DiagCtxInner {
                 running_checks: Default::default(),
                 finished_checks: Default::default(),
@@ -59,7 +59,10 @@ impl TidyCtx {
             ci_env,
             base_commit: None,
         };
-        tidy_ctx.base_commit = find_base_commit(&tidy_ctx);
+
+        // Ferrocene addition: Disable this, since our CI doesn't have enough history checked out.
+        // This only affects the check for rustdoc_types::FORMAT_VERSION anyway.
+        // tidy_ctx.base_commit = find_base_commit(&tidy_ctx);
 
         tidy_ctx
     }
@@ -100,7 +103,7 @@ impl TidyCtx {
     }
 }
 
-fn find_base_commit(tidy_ctx: &TidyCtx) -> Option<String> {
+fn _find_base_commit(tidy_ctx: &TidyCtx) -> Option<String> {
     let mut check = tidy_ctx.start_check("CI history");
 
     let stage0 = parse_stage0_file();
@@ -116,11 +119,11 @@ fn find_base_commit(tidy_ctx: &TidyCtx) -> Option<String> {
     ) {
         Ok(Some(commit)) => Some(commit),
         Ok(None) => {
-            error_if_in_ci("no base commit found", tidy_ctx.is_running_on_ci(), &mut check);
+            _error_if_in_ci("no base commit found", tidy_ctx.is_running_on_ci(), &mut check);
             None
         }
         Err(error) => {
-            error_if_in_ci(
+            _error_if_in_ci(
                 &format!("failed to retrieve base commit: {error}"),
                 tidy_ctx.is_running_on_ci(),
                 &mut check,
@@ -132,7 +135,7 @@ fn find_base_commit(tidy_ctx: &TidyCtx) -> Option<String> {
     base_commit
 }
 
-fn error_if_in_ci(msg: &str, is_ci: bool, check: &mut RunningCheck) {
+fn _error_if_in_ci(msg: &str, is_ci: bool, check: &mut RunningCheck) {
     if is_ci {
         check.error(msg);
     } else {

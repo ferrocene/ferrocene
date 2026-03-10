@@ -5,14 +5,10 @@ use super::ParseBoolError;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 use crate::intrinsics::unchecked_sub;
+#[cfg(not(feature = "ferrocene_subset"))]
+use crate::range;
 use crate::slice::SliceIndex;
 use crate::ub_checks::assert_unsafe_precondition;
-#[cfg(not(feature = "ferrocene_subset"))]
-use crate::{ops, ptr, range};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
 use crate::{ops, ptr};
 
 /// Implements ordering of strings.
@@ -797,6 +793,7 @@ unsafe impl const SliceIndex<str> for ops::RangeToInclusive<usize> {
 /// `is_char_boundary`, or equal to `len`), or if `last >= len`.
 #[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
+#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl const SliceIndex<str> for range::RangeToInclusive<usize> {
     type Output = str;
     #[inline]

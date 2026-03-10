@@ -13,14 +13,8 @@ use crate::marker::PhantomData;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::NonNull;
 use crate::slice::memchr;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::{fmt, ops, slice, str};
-||||||| f02672cb8bf
-use crate::{fmt, ops, slice, str};
-=======
 use crate::{fmt, ops, range, slice, str};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
@@ -751,10 +745,7 @@ impl ops::Index<ops::RangeFrom<usize>> for CStr {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-||||||| f02672cb8bf
-=======
 #[unstable(feature = "new_range_api", issue = "125687")]
 impl ops::Index<range::RangeFrom<usize>> for CStr {
     type Output = CStr;
@@ -765,7 +756,7 @@ impl ops::Index<range::RangeFrom<usize>> for CStr {
     }
 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "cstring_asref", since = "1.7.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const AsRef<CStr> for CStr {

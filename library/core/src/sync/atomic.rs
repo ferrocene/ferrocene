@@ -314,38 +314,6 @@ macro impl_atomic_primitive(
     }
 }
 
-<<<<<<< HEAD
-impl_atomic_primitive!(AtomicBool(bool), size("8"), align(1));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicI8(i8), size("8"), align(1));
-impl_atomic_primitive!(AtomicU8(u8), size("8"), align(1));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicI16(i16), size("16"), align(2));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicU16(u16), size("16"), align(2));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicI32(i32), size("32"), align(4));
-impl_atomic_primitive!(AtomicU32(u32), size("32"), align(4));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicI64(i64), size("64"), align(8));
-impl_atomic_primitive!(AtomicU64(u64), size("64"), align(8));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicI128(i128), size("128"), align(16));
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicU128(u128), size("128"), align(16));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicBool(bool), size("8"), align(1));
-impl_atomic_primitive!(AtomicI8(i8), size("8"), align(1));
-impl_atomic_primitive!(AtomicU8(u8), size("8"), align(1));
-impl_atomic_primitive!(AtomicI16(i16), size("16"), align(2));
-impl_atomic_primitive!(AtomicU16(u16), size("16"), align(2));
-impl_atomic_primitive!(AtomicI32(i32), size("32"), align(4));
-impl_atomic_primitive!(AtomicU32(u32), size("32"), align(4));
-impl_atomic_primitive!(AtomicI64(i64), size("64"), align(8));
-impl_atomic_primitive!(AtomicU64(u64), size("64"), align(8));
-impl_atomic_primitive!(AtomicI128(i128), size("128"), align(16));
-impl_atomic_primitive!(AtomicU128(u128), size("128"), align(16));
-=======
 impl_atomic_primitive!([] bool as Align1<u8>, size("8"));
 impl_atomic_primitive!([] i8 as Align1<i8>, size("8"));
 impl_atomic_primitive!([] u8 as Align1<u8>, size("8"));
@@ -357,35 +325,13 @@ impl_atomic_primitive!([] i64 as Align8<i64>, size("64"));
 impl_atomic_primitive!([] u64 as Align8<u64>, size("64"));
 impl_atomic_primitive!([] i128 as Align16<i128>, size("128"));
 impl_atomic_primitive!([] u128 as Align16<u128>, size("128"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(target_pointer_width = "16")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(2));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(2));
-=======
 impl_atomic_primitive!([] isize as Align2<isize>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_pointer_width = "32")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(4));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(4));
-=======
 impl_atomic_primitive!([] isize as Align4<isize>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_pointer_width = "64")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(8));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicIsize(isize), size("ptr"), align(8));
-=======
 impl_atomic_primitive!([] isize as Align8<isize>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(target_pointer_width = "16")]
 impl_atomic_primitive!([] usize as Align2<usize>, size("ptr"));
@@ -395,32 +341,11 @@ impl_atomic_primitive!([] usize as Align4<usize>, size("ptr"));
 impl_atomic_primitive!([] usize as Align8<usize>, size("ptr"));
 
 #[cfg(target_pointer_width = "16")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(2));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(2));
-=======
 impl_atomic_primitive!([T] *mut T as Align2<*mut T>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_pointer_width = "32")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(4));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(4));
-=======
 impl_atomic_primitive!([T] *mut T as Align4<*mut T>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[cfg(target_pointer_width = "64")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(8));
-||||||| f02672cb8bf
-impl_atomic_primitive!(AtomicPtr<T>(*mut T), size("ptr"), align(8));
-=======
 impl_atomic_primitive!([T] *mut T as Align8<*mut T>, size("ptr"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// A memory location which can be safely modified from multiple threads.
 ///
@@ -437,12 +362,6 @@ impl_atomic_primitive!([T] *mut T as Align8<*mut T>, size("ptr"));
 ///
 /// [module-level documentation]: crate::sync::atomic
 #[unstable(feature = "generic_atomic", issue = "130539")]
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-pub type Atomic<T> = <T as AtomicPrimitive>::AtomicInner;
-||||||| f02672cb8bf
-pub type Atomic<T> = <T as AtomicPrimitive>::AtomicInner;
-=======
 #[repr(C)]
 #[rustc_diagnostic_item = "Atomic"]
 pub struct Atomic<T: AtomicPrimitive> {
@@ -453,7 +372,6 @@ pub struct Atomic<T: AtomicPrimitive> {
 unsafe impl<T: AtomicPrimitive> Send for Atomic<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 unsafe impl<T: AtomicPrimitive> Sync for Atomic<T> {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // Some architectures don't have byte-sized atomics, which results in LLVM
 // emulating them using a LL/SC loop. However for AtomicBool we can take
@@ -499,26 +417,8 @@ impl Default for AtomicBool {
 /// loads and stores of pointers. Its size depends on the target pointer's size.
 #[cfg(target_has_atomic_load_store = "ptr")]
 #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< HEAD
-#[rustc_diagnostic_item = "AtomicPtr"]
-#[cfg_attr(target_pointer_width = "16", repr(C, align(2)))]
-#[cfg_attr(target_pointer_width = "32", repr(C, align(4)))]
-#[cfg_attr(target_pointer_width = "64", repr(C, align(8)))]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub struct AtomicPtr<T> {
-    p: UnsafeCell<*mut T>,
-}
-||||||| f02672cb8bf
-#[rustc_diagnostic_item = "AtomicPtr"]
-#[cfg_attr(target_pointer_width = "16", repr(C, align(2)))]
-#[cfg_attr(target_pointer_width = "32", repr(C, align(4)))]
-#[cfg_attr(target_pointer_width = "64", repr(C, align(8)))]
-pub struct AtomicPtr<T> {
-    p: UnsafeCell<*mut T>,
-}
-=======
 pub type AtomicPtr<T> = Atomic<*mut T>;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[cfg(target_has_atomic_load_store = "ptr")]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -530,26 +430,6 @@ impl<T> Default for AtomicPtr<T> {
     }
 }
 
-<<<<<<< HEAD
-#[cfg(target_has_atomic_load_store = "ptr")]
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T> Send for AtomicPtr<T> {}
-#[cfg(target_has_atomic_load_store = "ptr")]
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
-unsafe impl<T> Sync for AtomicPtr<T> {}
-
-||||||| f02672cb8bf
-#[cfg(target_has_atomic_load_store = "ptr")]
-#[stable(feature = "rust1", since = "1.0.0")]
-unsafe impl<T> Send for AtomicPtr<T> {}
-#[cfg(target_has_atomic_load_store = "ptr")]
-#[stable(feature = "rust1", since = "1.0.0")]
-unsafe impl<T> Sync for AtomicPtr<T> {}
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 /// Atomic memory orderings
 ///
 /// Memory orderings specify the way atomic operations synchronize memory.

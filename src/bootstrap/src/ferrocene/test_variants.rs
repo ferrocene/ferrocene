@@ -59,36 +59,109 @@ static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
 ];
 static DEFAULT_VARIANT_FALLBACK: &str = "2021";
 
+macro_rules! define_conditions {
+    ($($name:ident : $ty:ty => ($prefix:literal, $readable_name:literal),)*) => {
+        struct TestVariantBase {
+            $($name: Option<$ty>,)*
+        }
+
+        impl TestVariantBase {
+            const fn new() -> Self {
+                Self {
+                    $($name: None,)*
+                }
+            }
+
+            $(
+                const fn $name(mut self, value: $ty) -> Self {
+                    self.$name = Some(value);
+                    self
+                }
+            )*
+        }
+
+        pub(crate) struct TestVariant {
+            $($name: Option<MaskedValue<$ty>>,)*
+        }
+
+        impl TestVariant {
+            fn new(base: &TestVariantBase) -> Self {
+                Self {
+                    $($name: base.$name.clone().map(MaskedValue::new),)*
+                }
+            }
+
+            $(
+                pub(crate) fn $name(&self) -> Option<MaskedValueRef<'_, $ty>> {
+                    self.$name.as_ref()?.get()
+                }
+            )*
+
+            #[cfg(feature = "build-metrics")]
+            pub(crate) fn id(&self) -> String {
+                let mut fragments = vec![];
+
+                $(
+                    if let Some(value) = self.$name() {
+                        fragments.push(format!("{}{value}", $prefix));
+                    }
+                )*
+
+                match fragments.into_iter().reduce(|acc, val| format!("{acc}-{val}")) {
+                    Some(id) => id,
+                    None => "empty".to_owned(),
+                }
+            }
+
+            #[cfg(feature = "build-metrics")]
+            pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
+                let mut fields = BTreeMap::new();
+
+                $(
+                    if let Some(value) = self.$name() {
+                        fields.insert($readable_name.into(), value.to_string());
+                    }
+                )*
+
+                FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
+            }
+        }
+
+    };
+}
+
+define_conditions! {
+    edition: &'static str => ("e", "Edition"),
+    qemu_cpu: &'static str => ("q", "Emulated CPU"),
+}
+
 #[derive(Clone)]
-pub(crate) struct MaskedValue<T, B> {
+pub(crate) struct MaskedValue<T> {
     inner: T,
-    mask: B,
+    mask: RefCell<bool>,
 }
 
-impl<T> From<MaskedValue<T, ()>> for MaskedValue<T, RefCell<bool>> {
-    fn from(value: MaskedValue<T, ()>) -> Self {
-        Self { inner: value.inner, mask: RefCell::new(true) }
+impl<T> MaskedValue<T> {
+    const fn new(inner: T) -> Self {
+        Self { inner, mask: RefCell::new(true) }
     }
-}
-
-impl<T> MaskedValue<T, RefCell<bool>> {
-    pub(crate) fn get(&self) -> Option<MaskedValueRef<'_, T, RefCell<bool>>> {
+    fn get(&self) -> Option<MaskedValueRef<'_, T>> {
         self.mask.borrow().then(|| MaskedValueRef { inner: &self.inner, mask: &self.mask })
     }
 }
 
-pub(crate) struct MaskedValueRef<'a, T, B> {
+pub(crate) struct MaskedValueRef<'a, T> {
     inner: &'a T,
-    mask: &'a B,
+    mask: &'a RefCell<bool>,
 }
 
-impl<'a, T> MaskedValueRef<'a, T, RefCell<bool>> {
+impl<'a, T> MaskedValueRef<'a, T> {
     pub(crate) fn mark_unused(&self) {
         *self.mask.borrow_mut() = false;
     }
 }
 
-impl<'a, T, B> core::ops::Deref for MaskedValueRef<'a, T, B> {
+impl<'a, T> core::ops::Deref for MaskedValueRef<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -96,54 +169,9 @@ impl<'a, T, B> core::ops::Deref for MaskedValueRef<'a, T, B> {
     }
 }
 
-impl<'a, T: core::fmt::Display, B> core::fmt::Display for MaskedValueRef<'a, T, B> {
+impl<'a, T: core::fmt::Display> core::fmt::Display for MaskedValueRef<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.inner.fmt(f)
-    }
-}
-
-#[derive(Clone)]
-pub(crate) struct TestVariantInner<B> {
-    edition: Option<MaskedValue<&'static str, B>>,
-    qemu_cpu: Option<MaskedValue<&'static str, B>>,
-}
-
-type TestVariantBase = TestVariantInner<()>;
-
-impl TestVariantBase {
-    const fn new() -> Self {
-        Self { edition: None, qemu_cpu: None }
-    }
-
-    const fn edition(mut self, edition: &'static str) -> Self {
-        self.edition = Some(MaskedValue { inner: edition, mask: () });
-        self
-    }
-
-    const fn qemu_cpu(mut self, qemu_cpu: &'static str) -> Self {
-        self.qemu_cpu = Some(MaskedValue { inner: qemu_cpu, mask: () });
-        self
-    }
-}
-
-pub(crate) type TestVariant = TestVariantInner<RefCell<bool>>;
-
-impl TestVariant {
-    pub(crate) fn edition(&self) -> Option<MaskedValueRef<'_, &'static str, RefCell<bool>>> {
-        self.edition.as_ref()?.get()
-    }
-
-    pub(crate) fn qemu_cpu(&self) -> Option<MaskedValueRef<'_, &'static str, RefCell<bool>>> {
-        self.qemu_cpu.as_ref()?.get()
-    }
-}
-
-impl From<TestVariantBase> for TestVariant {
-    fn from(base: TestVariantBase) -> Self {
-        Self {
-            edition: base.edition.clone().map(|edition| edition.into()),
-            qemu_cpu: base.qemu_cpu.clone().map(|qemu_cpu| qemu_cpu.into()),
-        }
     }
 }
 
@@ -163,38 +191,7 @@ impl TestVariant {
             )
         });
 
-        base.clone().into()
-    }
-
-    #[cfg(feature = "build-metrics")]
-    pub(crate) fn id(&self) -> String {
-        let mut fragments = vec![];
-
-        if let Some(edition) = self.edition() {
-            fragments.push(format!("e{edition}"));
-        }
-        if let Some(qemu_cpu) = self.qemu_cpu() {
-            fragments.push(format!("q{qemu_cpu}"));
-        }
-
-        match fragments.into_iter().reduce(|acc, val| format!("{acc}-{val}")) {
-            Some(id) => id,
-            None => "empty".to_owned(),
-        }
-    }
-
-    #[cfg(feature = "build-metrics")]
-    pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
-        let mut fields = BTreeMap::new();
-
-        if let Some(edition) = self.edition() {
-            fields.insert("Edition".into(), edition.to_string());
-        }
-        if let Some(qemu_cpu) = self.qemu_cpu() {
-            fields.insert("Emulated CPU".into(), qemu_cpu.to_string());
-        }
-
-        FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
+        TestVariant::new(base)
     }
 }
 

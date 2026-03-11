@@ -30,6 +30,7 @@ impl<T: TrivialClone> SpecFill<T> for [T] {
 }
 
 impl SpecFill<u8> for [u8] {
+    #[ferrocene::prevalidated]
     fn spec_fill(&mut self, value: u8) {
         // SAFETY: The pointer is derived from a reference, so it's writable.
         unsafe {

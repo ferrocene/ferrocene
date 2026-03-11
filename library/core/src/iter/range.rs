@@ -796,6 +796,7 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
 
 impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_next(&mut self) -> Option<T> {
         if self.start < self.end {
             let old = self.start;
@@ -808,6 +809,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_nth(&mut self, n: usize) -> Option<T> {
         if let Some(plus_n) = Step::forward_checked(self.start, n) {
             if plus_n < self.end {
@@ -822,6 +824,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);
@@ -838,6 +841,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_next_back(&mut self) -> Option<T> {
         if self.start < self.end {
             // SAFETY: just checked precondition
@@ -864,6 +868,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         let steps = Step::steps_between(&self.start, &self.end);
         let available = steps.1.unwrap_or(steps.0);

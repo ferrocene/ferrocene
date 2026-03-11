@@ -58,7 +58,12 @@ fn main() {
             }
 
             // Run the command and parse its STDOUT stream as a symbol report.
-            let stdout = command.arg(input_path).run().stdout_utf8();
+            let stdout = command
+                .arg(input_path)
+                .arg("--emit=metadata")
+                .arg("--crate-type=lib")
+                .run()
+                .stdout_utf8();
             let mut actual_report: SymbolReport = serde_json::from_str(&stdout).unwrap();
 
             // Trim the testcases path from all the filenames in the symbol report so we can run

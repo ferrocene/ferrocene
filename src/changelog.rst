@@ -29,6 +29,11 @@ Language changes in Rust 1.94.0
 
 - `Add warn-by-default unused_visibilities lint for visibility on const _ declarations <https://github.com/rust-lang/rust/pull/147136>`_
 - `Update to Unicode 17 <https://github.com/rust-lang/rust/pull/148321>`_
+
+  - Changed paragraphs:
+
+    - :p:`fls_jpecw46eh061`
+
 - `Avoid incorrect lifetime errors for closures <https://github.com/rust-lang/rust/pull/148329>`_
 
 Language changes in Rust 1.93.1

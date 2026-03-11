@@ -1793,11 +1793,14 @@
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::fold
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::new
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::new
+<core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::new
+<core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::next
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::next
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::next
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::nth
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::nth
 <core::iter::adapters::zip::Zip<A, B> as core::iter::adapters::zip::ZipImpl<A, B>>::size_hint
+<core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::__iterator_get_unchecked
 <core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::zip::Zip<A, B> as core::iter::traits::iterator::Iterator>::nth
@@ -2700,6 +2703,7 @@
 <core::ops::range::Range<Idx> as core::default::Default>::default
 <core::ops::range::Range<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::Range<Idx> as core::hash::Hash>::hash
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_nth_back
 <core::ops::range::Range<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::start_bound
@@ -2916,6 +2920,7 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::slice::iter::Iter<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::__iterator_get_unchecked
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::advance_by
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::all
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::any
@@ -2928,6 +2933,7 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::rposition
+<core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
 <core::slice::iter::Iter<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::IterMut<'_, T> as core::default::Default>::default
 <core::slice::iter::IterMut<'_, T> as core::fmt::Debug>::fmt
@@ -2935,6 +2941,7 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::__iterator_get_unchecked
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::advance_by
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::all
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::any
@@ -2947,6 +2954,7 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::nth
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
+<core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::Windows<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count

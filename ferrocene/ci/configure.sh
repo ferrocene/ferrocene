@@ -240,13 +240,13 @@ else
     #
     # If this is not provided, the report will not be included in the generated
     # documentation. This should only be set in stable, qualified releases.
-    #add --set ferrocene.compiler-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf"
+    add --set ferrocene.compiler-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/2026-03-10-ferrocene-26.02.0-compiler-technical-report.pdf"
 
     # Include the core library technical report from the assessor in the documentation.
     #
     # If this is not provided, the report will not be included in the generated
     # documentation. This should only be set in stable, qualified releases.
-    #add --set ferrocene.core-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf"
+    add --set ferrocene.core-technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/2026-03-10-ferrocene-26.02.0-core-technical-report.pdf"
 fi
 
 ./configure ${configure_args[@]}

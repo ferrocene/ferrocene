@@ -39,29 +39,17 @@ use crate::core::config::TargetSelection;
 // The variants are so few that setting up an OnceLock to define a global hashmap is too
 // much complexity. If we are able to test so many variants that this loop becomes a
 // bottleneck I guess congrats on Ferrocene's success :D
-#[rustfmt::skip]
-static VARIANTS: &[(&str, &[VariantCondition])] = &[
+static VARIANTS: &[(&str, TestVariantBase)] = &[
     // FIXME: all of these point to edition 2015 instead of 2021!!!
 
     // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
     // documentation, as the list of test variants currently supported.
 
     // INTERNAL_PROCEDURES_START_TEST_VARIANTS
-    ("2021", &[
-        VariantCondition::Edition("2015"),
-    ]),
-    ("2021-cortex-a53", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("cortex-a53"),
-    ]),
-    ("2021-neoverse-v1", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("neoverse-v1"),
-    ]),
-    ("2021-cortex-m4", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("cortex-m4"),
-    ]),
+    ("2021", TestVariantBase::new().edition("2015")),
+    ("2021-cortex-a53", TestVariantBase::new().edition("2015").qemu_cpu("cortex-a53")),
+    ("2021-neoverse-v1", TestVariantBase::new().edition("2015").qemu_cpu("neoverse-v1")),
+    ("2021-cortex-m4", TestVariantBase::new().edition("2015").qemu_cpu("cortex-m4")),
     // INTERNAL_PROCEDURES_END_TEST_VARIANTS
 ];
 static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
@@ -71,15 +59,92 @@ static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
 ];
 static DEFAULT_VARIANT_FALLBACK: &str = "2021";
 
-pub(crate) enum VariantCondition {
-    Edition(&'static str),
-    QemuCpu(&'static str),
+#[derive(Clone)]
+pub(crate) struct MaskedValue<T, B> {
+    inner: T,
+    mask: B,
+}
+
+impl<T> From<MaskedValue<T, ()>> for MaskedValue<T, RefCell<bool>> {
+    fn from(value: MaskedValue<T, ()>) -> Self {
+        Self { inner: value.inner, mask: RefCell::new(true) }
+    }
+}
+
+impl<T> MaskedValue<T, RefCell<bool>> {
+    pub(crate) fn get(&self) -> Option<MaskedValueRef<'_, T, RefCell<bool>>> {
+        self.mask.borrow().then(|| MaskedValueRef { inner: &self.inner, mask: &self.mask })
+    }
+}
+
+pub(crate) struct MaskedValueRef<'a, T, B> {
+    inner: &'a T,
+    mask: &'a B,
+}
+
+impl<'a, T> MaskedValueRef<'a, T, RefCell<bool>> {
+    pub(crate) fn mark_unused(&self) {
+        *self.mask.borrow_mut() = false;
+    }
+}
+
+impl<'a, T, B> core::ops::Deref for MaskedValueRef<'a, T, B> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner
+    }
+}
+
+impl<'a, T: core::fmt::Display, B> core::fmt::Display for MaskedValueRef<'a, T, B> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.inner.fmt(f)
+    }
 }
 
 #[derive(Clone)]
-pub(crate) struct TestVariant {
-    base: &'static [VariantCondition],
-    masks: RefCell<Vec<bool>>,
+pub(crate) struct TestVariantInner<B> {
+    edition: Option<MaskedValue<&'static str, B>>,
+    qemu_cpu: Option<MaskedValue<&'static str, B>>,
+}
+
+type TestVariantBase = TestVariantInner<()>;
+
+impl TestVariantBase {
+    const fn new() -> Self {
+        Self { edition: None, qemu_cpu: None }
+    }
+
+    const fn edition(mut self, edition: &'static str) -> Self {
+        self.edition = Some(MaskedValue { inner: edition, mask: () });
+        self
+    }
+
+    const fn qemu_cpu(mut self, qemu_cpu: &'static str) -> Self {
+        self.qemu_cpu = Some(MaskedValue { inner: qemu_cpu, mask: () });
+        self
+    }
+}
+
+pub(crate) type TestVariant = TestVariantInner<RefCell<bool>>;
+
+impl TestVariant {
+    pub(crate) fn edition(&self) -> Option<MaskedValueRef<'_, &'static str, RefCell<bool>>> {
+        self.edition.as_ref()?.get()
+    }
+
+    pub(crate) fn qemu_cpu(&self) -> Option<MaskedValueRef<'_, &'static str, RefCell<bool>>> {
+        self.qemu_cpu.as_ref()?.get()
+    }
+}
+
+impl From<TestVariantBase> for TestVariant {
+    fn from(base: TestVariantBase) -> Self {
+        Self {
+            edition: base.edition.clone().map(|edition| edition.into()),
+            qemu_cpu: base.qemu_cpu.clone().map(|qemu_cpu| qemu_cpu.into()),
+        }
+    }
 }
 
 impl TestVariant {
@@ -97,62 +162,39 @@ impl TestVariant {
                 VARIANTS.iter().map(|(k, _)| k).collect::<Vec<_>>()
             )
         });
-        TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
-    }
 
-    pub(crate) fn conditions(&self) -> impl Iterator<Item = VariantConditionAccessor<'_>> {
-        self.base
-            .iter()
-            .enumerate()
-            .filter(|(idx, _)| self.masks.borrow()[*idx])
-            .map(|(index, condition)| VariantConditionAccessor { parent: self, condition, index })
+        base.clone().into()
     }
 
     #[cfg(feature = "build-metrics")]
     pub(crate) fn id(&self) -> String {
-        let mut id = String::new();
-        for condition in self.conditions() {
-            if !id.is_empty() {
-                id.push('-');
-            }
-            match condition.get() {
-                VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
-                VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),
-            }
+        let mut fragments = vec![];
+
+        if let Some(edition) = self.edition() {
+            fragments.push(format!("e{edition}"));
         }
-        if id.is_empty() { "empty".into() } else { id }
+        if let Some(qemu_cpu) = self.qemu_cpu() {
+            fragments.push(format!("q{qemu_cpu}"));
+        }
+
+        match fragments.into_iter().reduce(|acc, val| format!("{acc}-{val}")) {
+            Some(id) => id,
+            None => "empty".to_owned(),
+        }
     }
 
     #[cfg(feature = "build-metrics")]
     pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
         let mut fields = BTreeMap::new();
-        for condition in self.conditions() {
-            match condition.get() {
-                VariantCondition::Edition(edition) => {
-                    fields.insert("Edition".into(), edition.to_string());
-                }
-                VariantCondition::QemuCpu(cpu) => {
-                    fields.insert("Emulated CPU".into(), cpu.to_string());
-                }
-            }
+
+        if let Some(edition) = self.edition() {
+            fields.insert("Edition".into(), edition.to_string());
         }
+        if let Some(qemu_cpu) = self.qemu_cpu() {
+            fields.insert("Emulated CPU".into(), qemu_cpu.to_string());
+        }
+
         FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
-    }
-}
-
-pub(crate) struct VariantConditionAccessor<'a> {
-    parent: &'a TestVariant,
-    condition: &'a VariantCondition,
-    index: usize,
-}
-
-impl VariantConditionAccessor<'_> {
-    pub(crate) fn get(&self) -> &VariantCondition {
-        self.condition
-    }
-
-    pub(crate) fn mark_unused(&self) {
-        self.parent.masks.borrow_mut()[self.index] = false;
     }
 }
 

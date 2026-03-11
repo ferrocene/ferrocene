@@ -221,6 +221,7 @@ macro_rules! iterator {
             }
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let exact = len!(self);
                 (exact, Some(exact))
@@ -432,6 +433,7 @@ macro_rules! iterator {
             }
 
             #[inline]
+            #[ferrocene::prevalidated]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: the caller must guarantee that `i` is in bounds of
                 // the underlying slice, so `i` cannot overflow an `isize`, and

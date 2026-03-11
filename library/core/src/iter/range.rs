@@ -849,6 +849,7 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_nth_back(&mut self, n: usize) -> Option<T> {
         if let Some(minus_n) = Step::backward_checked(self.end, n) {
             if minus_n > self.start {

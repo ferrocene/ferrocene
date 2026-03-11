@@ -112,6 +112,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -309,12 +310,14 @@ where
     A: TrustedRandomAccess + Iterator,
     B: TrustedRandomAccess + Iterator,
 {
+    #[ferrocene::prevalidated]
     fn new(a: A, b: B) -> Self {
         let len = cmp::min(a.size(), b.size());
         Zip { a, b, index: 0, len }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<(A::Item, B::Item)> {
         if self.index < self.len {
             let i = self.index;

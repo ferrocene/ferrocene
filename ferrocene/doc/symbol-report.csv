@@ -1430,6 +1430,7 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_ref
+<[u8] as core::slice::specialize::SpecFill<u8>>::spec_fill
 <bool as core::default::Default>::default
 <bool as core::fmt::Debug>::fmt
 <bool as core::fmt::Display>::fmt
@@ -1564,6 +1565,7 @@
 <core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Debug>::fmt
 <core::escape::EscapeIterInner<N, core::escape::MaybeEscaped> as core::fmt::Display>::fmt
 <core::escape::MaybeEscaped as core::clone::Clone>::clone
+<core::escape::MaybeEscapedCharacter<N> as core::clone::Clone>::clone
 <core::ffi::c_str::CStr as core::cmp::Eq>::assert_fields_are_eq
 <core::ffi::c_str::CStr as core::cmp::PartialEq>::eq
 <core::ffi::c_str::CStr as core::fmt::Debug>::fmt
@@ -2703,6 +2705,11 @@
 <core::ops::range::Range<Idx> as core::default::Default>::default
 <core::ops::range::Range<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::Range<Idx> as core::hash::Hash>::hash
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_advance_back_by
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_advance_by
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_next
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_next_back
+<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_nth
 <core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_nth_back
 <core::ops::range::Range<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::end_bound

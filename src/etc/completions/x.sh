@@ -4103,7 +4103,7 @@ _x() {
                     return 0
                     ;;
                 --test-variant)
-                    COMPREPLY=($(compgen -f "${cur}"))
+                    COMPREPLY=($(compgen -W "2021 2021-cortex-a53 2021-neoverse-v1 2021-cortex-m4" -- "${cur}"))
                     return 0
                     ;;
                 --config)

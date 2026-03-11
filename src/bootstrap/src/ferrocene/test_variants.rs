@@ -36,28 +36,47 @@ use crate::Subcommand;
 use crate::builder::Builder;
 use crate::core::config::TargetSelection;
 
-// The variants are so few that setting up an OnceLock to define a global hashmap is too
-// much complexity. If we are able to test so many variants that this loop becomes a
-// bottleneck I guess congrats on Ferrocene's success :D
-static VARIANTS: &[(&str, TestVariantBase)] = &[
-    // FIXME: all of these point to edition 2015 instead of 2021!!!
+#[derive(Clone, Copy, Debug, clap::ValueEnum)]
+pub enum TestVariantName {
+    #[clap(name = "2021")]
+    Ed2021,
+    #[clap(name = "2021-cortex-a53")]
+    Ed2021CortexA53,
+    #[clap(name = "2021-neoverse-v1")]
+    Ed2021NeoverseV1,
+    #[clap(name = "2021-cortex-m4")]
+    Ed2021CortexM4,
+}
 
-    // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
-    // documentation, as the list of test variants currently supported.
+impl TestVariantName {
+    const fn base(&self) -> TestVariantBase {
+        // FIXME: all of these point to edition 2015 instead of 2021!!!
 
-    // INTERNAL_PROCEDURES_START_TEST_VARIANTS
-    ("2021", TestVariantBase::new().edition("2015")),
-    ("2021-cortex-a53", TestVariantBase::new().edition("2015").qemu_cpu("cortex-a53")),
-    ("2021-neoverse-v1", TestVariantBase::new().edition("2015").qemu_cpu("neoverse-v1")),
-    ("2021-cortex-m4", TestVariantBase::new().edition("2015").qemu_cpu("cortex-m4")),
-    // INTERNAL_PROCEDURES_END_TEST_VARIANTS
-];
-static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
-    ("aarch64-unknown-ferrocene.facade", "2021-cortex-a53"),
-    ("thumbv7em-ferrocene.facade-eabi", "2021-cortex-m4"),
-    ("thumbv7em-ferrocene.facade-eabihf", "2021-cortex-m4"),
-];
-static DEFAULT_VARIANT_FALLBACK: &str = "2021";
+        // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
+        // documentation, as the list of test variants currently supported.
+
+        match self {
+            // INTERNAL_PROCEDURES_START_TEST_VARIANTS
+            Self::Ed2021 => TestVariantBase::new().edition("2015"),
+            Self::Ed2021CortexA53 => TestVariantBase::new().edition("2015").qemu_cpu("cortex-a53"),
+            Self::Ed2021NeoverseV1 => {
+                TestVariantBase::new().edition("2015").qemu_cpu("neoverse-v1")
+            }
+            Self::Ed2021CortexM4 => TestVariantBase::new().edition("2015").qemu_cpu("cortex-m4"),
+            // INTERNAL_PROCEDURES_END_TEST_VARIANTS
+        }
+    }
+
+    fn default_by_target(target: &str) -> Self {
+        match target {
+            "aarch64-unknown-ferrocene.facade" => Self::Ed2021CortexA53,
+            "thumbv7em-ferrocene.facade-eabi" | "thumbv7em-ferrocene.facade-eabihf" => {
+                Self::Ed2021CortexM4
+            }
+            _ => Self::Ed2021,
+        }
+    }
+}
 
 macro_rules! define_conditions {
     ($($name:ident : $ty:ty => ($prefix:literal, $readable_name:literal),)*) => {
@@ -85,9 +104,9 @@ macro_rules! define_conditions {
         }
 
         impl TestVariant {
-            fn new(base: &TestVariantBase) -> Self {
+            fn new(base: TestVariantBase) -> Self {
                 Self {
-                    $($name: base.$name.clone().map(MaskedValue::new),)*
+                    $($name: base.$name.map(MaskedValue::new),)*
                 }
             }
 
@@ -178,28 +197,10 @@ impl<'a, T: core::fmt::Display> core::fmt::Display for MaskedValueRef<'a, T> {
 impl TestVariant {
     pub(crate) fn current(builder: &Builder<'_>, target: TargetSelection) -> Self {
         let name = match &builder.config.cmd {
-            Subcommand::Test { test_variant: Some(name), .. } => name,
-            _ => find_in_slice(DEFAULT_VARIANTS_BY_TARGET, &target.triple)
-                .map(|s| *s)
-                .unwrap_or(DEFAULT_VARIANT_FALLBACK),
+            Subcommand::Test { test_variant: Some(name), .. } => *name,
+            _ => TestVariantName::default_by_target(&target.triple),
         };
 
-        let base = find_in_slice(VARIANTS, name).unwrap_or_else(|| {
-            panic!(
-                "unknown test variant: {name}\nexpected one of {:?}",
-                VARIANTS.iter().map(|(k, _)| k).collect::<Vec<_>>()
-            )
-        });
-
-        TestVariant::new(base)
+        TestVariant::new(name.base())
     }
-}
-
-fn find_in_slice<'a, T>(slice: &'a [(&str, T)], expected: &str) -> Option<&'a T> {
-    for (key, value) in slice {
-        if *key == expected {
-            return Some(value);
-        }
-    }
-    None
 }

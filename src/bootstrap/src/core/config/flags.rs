@@ -15,6 +15,7 @@ use crate::core::build_steps::setup::Profile;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
+use crate::ferrocene::test_variants::TestVariantName;
 use crate::{Build, CodegenBackendKind, DocTests};
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]
@@ -458,7 +459,7 @@ pub enum Subcommand {
         ferrocene_test_one_crate_per_cargo_call: bool,
         /// Choose the test variant to use for this execution.
         #[arg(long)]
-        test_variant: Option<String>,
+        test_variant: Option<TestVariantName>,
     },
     /// Build and run some test suites *in Miri*
     Miri {
@@ -671,9 +672,9 @@ impl Subcommand {
     }
 
     // Ferrocene addition
-    pub fn test_variant(&self) -> Option<&str> {
+    pub fn test_variant(&self) -> Option<TestVariantName> {
         match self {
-            Subcommand::Test { test_variant, .. } => test_variant.as_deref(),
+            Subcommand::Test { test_variant, .. } => test_variant.clone(),
             _ => None,
         }
     }

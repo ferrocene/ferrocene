@@ -355,7 +355,7 @@ _arguments "${_arguments_options[@]}" : \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
-'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:_default' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-neoverse-v1 2021-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \

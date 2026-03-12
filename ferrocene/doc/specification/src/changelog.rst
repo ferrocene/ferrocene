@@ -19,6 +19,29 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.94.0
+-------------------------------
+
+- `Impls and impl items inherit dead_code lint level of the corresponding traits and trait items <https://github.com/rust-lang/rust/pull/144113>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Stabilize additional 29 RISC-V target features including large portions of the RVA22U64 / RVA23U64 profiles <https://github.com/rust-lang/rust/pull/145948>`_
+
+  - No change: the target is outside the scope of FLS
+
+- `Add warn-by-default unused_visibilities lint for visibility on const _ declarations <https://github.com/rust-lang/rust/pull/147136>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Update to Unicode 17 <https://github.com/rust-lang/rust/pull/148321>`_
+
+  - Changed paragraphs:
+
+    - :p:`fls_jpecw46eh061`
+
+- `Avoid incorrect lifetime errors for closures <https://github.com/rust-lang/rust/pull/148329>`_
+
 Language changes in Rust 1.93.1
 -------------------------------
 
@@ -50,6 +73,17 @@ Language changes in Rust 1.93.0
   - No change: this bug was not documented in FLS
 
 - `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
+
+  - Changed syntax: :s:`AssemblyCodeBlock`, :s:`AsmArguments`, :s:`GlobalAsmArguments`
+  - New syntax: :s:`AssemblyTemplate`, :s:`AssemblyAttributeRegisterArgument`, :s:`AssemblyAttributeAbiClobber`, :s:`AssemblyAttributeAssemblyOption`
+  - New glossary entry: :t:`inline assembly argument`
+
+  - New paragraphs:
+
+    - :p:`fls_tKj18krZ1pSt`
+    - :p:`fls_nLBhw2w6uznH`
+    - :p:`fls_cTEiqjf6haEg`
+
 - `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_
 
   * No change: Already covered by the classification of :t:`[constant expression]s`.

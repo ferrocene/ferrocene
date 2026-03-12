@@ -674,7 +674,7 @@ impl Subcommand {
     // Ferrocene addition
     pub fn test_variant(&self) -> Option<TestVariantName> {
         match self {
-            Subcommand::Test { test_variant, .. } => test_variant.clone(),
+            Subcommand::Test { test_variant, .. } => *test_variant,
             _ => None,
         }
     }

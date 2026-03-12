@@ -591,6 +591,10 @@ Select which editor you would like to set up [default: None]: ";
     /// A list of historical hashes of each LSP settings file
     /// New entries should be appended whenever this is updated so we can detect
     /// outdated vs. user-modified settings files.
+
+    // Ferrocene addition: all these configs were modified to add `ferrocene/tools` to
+    // `linkedWorkspaces`. You will need to update the hashes to match whenever there's a merge
+    // conflict.
     fn hashes(&self) -> &'static [&'static str] {
         match self {
             EditorKind::Emacs => &[
@@ -602,6 +606,7 @@ Select which editor you would like to set up [default: None]: ";
                 "f501475c6654187091c924ae26187fa5791d74d4a8ab3fb61fbbe4c0275aade1",
                 "54bc48fe1996177f5eef86d7231b33978e6d8b737cb0a899e622b7e975c95308",
                 "08d30e455ceec6e01d9bcef8b9449f2ddd14d278ca8627cdad90e02d9f44e938",
+                "e0571691854fdda88ff9fe82fc65e60b343d7bc9d0f41666051037d1759e0d50",
             ],
             EditorKind::Helix => &[
                 "2d3069b8cf1b977e5d4023965eb6199597755e6c96c185ed5f2854f98b83d233",
@@ -611,7 +616,6 @@ Select which editor you would like to set up [default: None]: ";
                 "1c43ead340b20792b91d02b08494ee68708e7e09f56b6766629b4b72079208f1",
                 "eec09a09452682060afd23dd5d3536ccac5615b3cdbf427366446901215fb9f6",
                 "cb653043852d9d5ff4a5be56407b859ff9928be055ad3f307eb309aad04765e6",
-                "e28b1930d16d3d8bbdeed7bd4a995613e648b49e08c9b6f5271880f520637fed",
             ],
             EditorKind::Vim | EditorKind::VsCode => &[
                 "ea67e259dedf60d4429b6c349a564ffcd1563cf41c920a856d1f5b16b4701ac8",
@@ -631,7 +635,6 @@ Select which editor you would like to set up [default: None]: ";
                 "02a49ac2d31f00ef6e4531c44e00dac51cea895112e480553f1ba060b3942a47",
                 "0aa4748848de0d1cb7ece92a0123c8897fef6de2f58aff8fda1426f098b7a798",
                 "e5e357862e5d6d0d9da335e9823c07b8a7dc42bbf18d72cc5206ad1049cd8fcc",
-                "a68fd5828e75f3e921f265e29ce1e9efa554083c3773fdb4b8e1ab3b2d9dc6cd",
             ],
             EditorKind::Zed => &[
                 "bbce727c269d1bd0c98afef4d612eb4ce27aea3c3a8968c5f10b31affbc40b6c",
@@ -642,7 +645,6 @@ Select which editor you would like to set up [default: None]: ";
                 "5ef83292111d9a8bb63b6afc3abf42d0bc78fe24985f0d2e039e73258b5dab8f",
                 "74420c13094b530a986b37c4f1d23cb58c0e8e2295f5858ded129fb1574e66f9",
                 "2d3b592c089b2ad2c528686a1e371af49922edad1c59accd5d5f31612a441568",
-                "0767a2398ccc253274b184adbb9e018ce931bd0ef45baad06dad19b652c52951",
             ],
         }
     }

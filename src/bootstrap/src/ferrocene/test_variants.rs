@@ -35,6 +35,7 @@ use build_helper::metrics::FerroceneVariantMetadata;
 use crate::Subcommand;
 use crate::builder::Builder;
 use crate::core::config::TargetSelection;
+use crate::utils::exec::BootstrapCommand;
 
 #[derive(Clone, Copy, Debug, clap::ValueEnum)]
 pub enum TestVariantName {
@@ -57,13 +58,16 @@ impl TestVariantName {
 
         match self {
             // INTERNAL_PROCEDURES_START_TEST_VARIANTS
-            Self::Ed2021 => TestVariantBase::new().edition("2015"),
-            Self::Ed2021CortexA53 => TestVariantBase::new().edition("2015").qemu_cpu("cortex-a53"),
-            Self::Ed2021NeoverseV1 => {
-                TestVariantBase::new().edition("2015").qemu_cpu("neoverse-v1")
+            Self::Ed2021 => TestVariantBase::new().edition(Edition("2015")),
+            Self::Ed2021CortexA53 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-a53"))
             }
-            Self::Ed2021CortexM4 => TestVariantBase::new().edition("2015").qemu_cpu("cortex-m4"),
-            // INTERNAL_PROCEDURES_END_TEST_VARIANTS
+            Self::Ed2021NeoverseV1 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("neoverse-v1"))
+            }
+            Self::Ed2021CortexM4 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
+            } // INTERNAL_PROCEDURES_END_TEST_VARIANTS
         }
     }
 
@@ -79,7 +83,7 @@ impl TestVariantName {
 }
 
 macro_rules! define_conditions {
-    ($($name:ident : $ty:ty => ($prefix:literal, $readable_name:literal),)*) => {
+    ($($name:ident : $ty:ty,)*) => {
         struct TestVariantBase {
             $($name: Option<$ty>,)*
         }
@@ -122,7 +126,7 @@ macro_rules! define_conditions {
 
                 $(
                     if let Some(value) = self.$name() {
-                        fragments.push(format!("{}{value}", $prefix));
+                        fragments.push(format!("{}{}", <$ty as TestCondition>::PREFIX, TestCondition::display(&*value)));
                     }
                 )*
 
@@ -138,7 +142,7 @@ macro_rules! define_conditions {
 
                 $(
                     if let Some(value) = self.$name() {
-                        fields.insert($readable_name.into(), value.to_string());
+                        fields.insert(<$ty as TestCondition>::READABLE_NAME.into(), TestCondition::display(&*value).to_string());
                     }
                 )*
 
@@ -150,8 +154,47 @@ macro_rules! define_conditions {
 }
 
 define_conditions! {
-    edition: &'static str => ("e", "Edition"),
-    qemu_cpu: &'static str => ("q", "Emulated CPU"),
+    edition: Edition,
+    qemu_cpu: QemuCpu,
+}
+
+pub(crate) trait TestCondition {
+    const PREFIX: &'static str;
+    const READABLE_NAME: &'static str;
+
+    fn apply(&self, cmd: &mut BootstrapCommand);
+
+    fn display(&self) -> impl core::fmt::Display;
+}
+
+pub(crate) struct Edition(&'static str);
+
+impl TestCondition for Edition {
+    const PREFIX: &'static str = "e";
+    const READABLE_NAME: &'static str = "Edition";
+
+    fn apply(&self, cmd: &mut BootstrapCommand) {
+        cmd.arg(&format!("--edition={}", self.0));
+    }
+
+    fn display(&self) -> impl core::fmt::Display {
+        self.0
+    }
+}
+
+pub(crate) struct QemuCpu(&'static str);
+
+impl TestCondition for QemuCpu {
+    const PREFIX: &'static str = "q";
+    const READABLE_NAME: &'static str = "Emulated CPU";
+
+    fn apply(&self, cmd: &mut BootstrapCommand) {
+        cmd.env("QEMU_CPU", self.0);
+    }
+
+    fn display(&self) -> impl core::fmt::Display {
+        self.0
+    }
 }
 
 #[derive(Clone)]

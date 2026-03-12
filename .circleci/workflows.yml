@@ -850,6 +850,7 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
+        - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
       - build-docker-x86_64:
           name: build-docker--ubuntu-20--x86_64

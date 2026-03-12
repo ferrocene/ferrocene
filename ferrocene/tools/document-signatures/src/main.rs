@@ -86,7 +86,7 @@ fn find_tar_binary() -> Result<&'static str, Error> {
     for name in ["tar", "gtar"] {
         let Ok(output) = Command::new(name).arg("--version").output() else { continue };
         if std::str::from_utf8(&output.stdout).map(|s| s.contains("GNU tar")).unwrap_or(false) {
-            dbg!(name);
+            eprintln!("note: inferred macOS GNU tar -> {name}");
             return Ok(name);
         }
     }

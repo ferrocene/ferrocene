@@ -10,13 +10,14 @@ pub(crate) mod signature_files;
 
 use std::path::{Path, PathBuf};
 
-use crate::Subcommand;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
+use crate::core::builder::Kind;
 use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::utils::exec::BootstrapCommand;
+use crate::{Mode, Subcommand};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
@@ -48,12 +49,15 @@ impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
         builder.require_and_update_all_submodules();
 
         let document = builder.ensure(self.document);
-        document_signatures_cmd::<S>(builder)
-            .arg("sign")
-            .arg(builder.src.join(S::SOURCE))
-            .arg(&document)
-            .args(force_args)
-            .run(builder);
+        let mut signing_cmd = document_signatures_cmd::<S>(builder);
+        signing_cmd.arg("sign").arg(builder.src.join(S::SOURCE)).arg(&document).args(force_args);
+
+        let bootstrap_compiler = builder.compiler(0, builder.config.host_target);
+        let document_name = document.file_name().unwrap().display();
+        let _group =
+            builder.msg(Kind::Sign, document_name, Mode::ToolBootstrap, bootstrap_compiler, None);
+
+        signing_cmd.run(builder);
     }
 }
 
@@ -87,8 +91,6 @@ macro_rules! documents {
                         document: crate::ferrocene::doc::$name {
                             mode: SphinxMode::Html,
                             target: self.target,
-                            // Ensure there are no leftover artifacts from a previous incremental
-                            // build when generating the signature.
                         },
                     });
                 }

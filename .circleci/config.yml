@@ -86,4 +86,5 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
+        - equal: [<< pipeline.trigger_source >>, "api"]
     jobs: [setup]

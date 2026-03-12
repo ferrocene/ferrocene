@@ -42,6 +42,8 @@ Language changes in Rust 1.94.0
 
 - `Avoid incorrect lifetime errors for closures <https://github.com/rust-lang/rust/pull/148329>`_
 
+  - No change: the exact machanics of the borrow checker are outside the scope of the FLS
+
 Language changes in Rust 1.93.1
 -------------------------------
 

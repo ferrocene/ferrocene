@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-api_url="https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID/?circle-token=$CIRCLECI_API_TOKEN"
+api_url="https://circleci.com/api/v2/pipeline/$CIRCLE_PIPELINE_ID?circle-token=$CIRCLECI_API_TOKEN"
 i=0
 
 while ! [ "$i" = 12 ]; do

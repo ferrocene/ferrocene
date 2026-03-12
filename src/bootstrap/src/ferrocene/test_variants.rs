@@ -158,6 +158,7 @@ define_conditions! {
     qemu_cpu: QemuCpu,
 }
 
+#[cfg_attr(not(feature = "build-metrics"), allow(dead_code))]
 pub(crate) trait TestCondition {
     const PREFIX: &'static str;
     const READABLE_NAME: &'static str;

@@ -5,7 +5,6 @@ fn main() {
     //~^ ERROR expected identifier, found `0`
     //~| ERROR expected identifier, found `1`
     //~| ERROR expected identifier, found `2`
-    //~| ERROR missing fields `0`, `1` and `2` in initializer of `Rgb`
 }
 
 // ferrocene-annotations: fls_8tsynkj2cufj

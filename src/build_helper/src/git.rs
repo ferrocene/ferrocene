@@ -216,17 +216,11 @@ fn get_latest_upstream_commit_that_modified_files(
 pub fn get_closest_upstream_commit(
     git_dir: Option<&Path>,
     config: &GitConfig<'_>,
-    env: CiEnv,
+    _env: CiEnv,
 ) -> Result<Option<String>, String> {
-    let base = match env {
-        CiEnv::None => "HEAD",
-        CiEnv::GitHubActions => {
-            // On CI, we should always have a non-upstream merge commit at the tip,
-            // and our first parent should be the most recently merged upstream commit.
-            // We thus simply return our first parent.
-            return resolve_commit_sha(git_dir, "HEAD^1").map(Some);
-        }
-    };
+    // Ferrocene addition: Always use HEAD here even in CI, otherwise this fails.
+    // I think this is related to not fetching enough git history?
+    let base = "HEAD";
 
     let mut git = Command::new("git");
 
@@ -260,7 +254,7 @@ pub fn get_closest_upstream_commit(
 }
 
 /// Resolve the commit SHA of `commit_ref`.
-fn resolve_commit_sha(git_dir: Option<&Path>, commit_ref: &str) -> Result<String, String> {
+fn _resolve_commit_sha(git_dir: Option<&Path>, commit_ref: &str) -> Result<String, String> {
     let mut git = Command::new("git");
 
     if let Some(git_dir) = git_dir {

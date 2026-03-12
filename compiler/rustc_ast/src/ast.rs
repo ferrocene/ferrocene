@@ -1724,6 +1724,12 @@ pub enum StructRest {
     Rest(Span),
     /// No trailing `..` or expression.
     None,
+    /// No trailing `..` or expression, and also, a parse error occurred inside the struct braces.
+    ///
+    /// This struct should be treated similarly to as if it had an `..` in it,
+    /// in particular rather than reporting missing fields, because the parse error
+    /// makes which fields the struct was intended to have not fully known.
+    NoneWithError(ErrorGuaranteed),
 }
 
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
@@ -2553,6 +2559,11 @@ pub enum TyKind {
     /// Pattern types like `pattern_type!(u32 is 1..=)`, which is the same as `NonZero<u32>`,
     /// just as part of the type system.
     Pat(Box<Ty>, Box<TyPat>),
+    /// A `field_of` expression (e.g., `builtin # field_of(Struct, field)`).
+    ///
+    /// Usually not written directly in user code but indirectly via the macro
+    /// `core::field::field_of!(...)`.
+    FieldOf(Box<Ty>, Option<Ident>, Ident),
     /// Sometimes we need a dummy value when no error has occurred.
     Dummy,
     /// Placeholder for a kind that has failed to be defined.
@@ -3542,6 +3553,19 @@ impl VisibilityKind {
     }
 }
 
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct ImplRestriction {
+    pub kind: RestrictionKind,
+    pub span: Span,
+    pub tokens: Option<LazyAttrTokenStream>,
+}
+
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub enum RestrictionKind {
+    Unrestricted,
+    Restricted { path: Box<Path>, id: NodeId, shorthand: bool },
+}
+
 /// Field definition in a struct, variant or union.
 ///
 /// E.g., `bar: usize` as in `struct Foo { bar: usize }`.
@@ -3741,6 +3765,7 @@ pub struct Trait {
     pub constness: Const,
     pub safety: Safety,
     pub is_auto: IsAuto,
+    pub impl_restriction: ImplRestriction,
     pub ident: Ident,
     pub generics: Generics,
     #[visitable(extra = BoundKind::SuperTraits)]

@@ -140,6 +140,7 @@
 #![feature(extern_types)]
 #![feature(f128)]
 #![feature(f16)]
+#![feature(field_projections)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(funnel_shifts)]
@@ -299,6 +300,8 @@ pub mod convert;
 pub mod default;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod error;
+#[unstable(feature = "field_projections", issue = "145383")]
+pub mod field;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod index;
 pub mod marker;

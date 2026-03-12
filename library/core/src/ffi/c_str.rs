@@ -14,7 +14,7 @@ use crate::marker::PhantomData;
 use crate::ptr::NonNull;
 use crate::slice::memchr;
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::{fmt, ops, slice, str};
+use crate::{fmt, ops, range, slice, str};
 
 // Ferrocene addition: imports for certified subset
 #[cfg(feature = "ferrocene_subset")]
@@ -742,6 +742,17 @@ impl ops::Index<ops::RangeFrom<usize>> for CStr {
                 index.start
             );
         }
+    }
+}
+
+#[cfg(not(feature = "ferrocene_subset"))]
+#[unstable(feature = "new_range_api", issue = "125687")]
+impl ops::Index<range::RangeFrom<usize>> for CStr {
+    type Output = CStr;
+
+    #[inline]
+    fn index(&self, index: range::RangeFrom<usize>) -> &CStr {
+        ops::Index::index(self, ops::RangeFrom::from(index))
     }
 }
 

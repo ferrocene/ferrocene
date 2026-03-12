@@ -1088,6 +1088,7 @@
 <core::ffi::c_str::FromBytesWithNulError as core::cmp::PartialEq>::eq
 <core::ffi::c_str::FromBytesWithNulError as core::fmt::Debug>::fmt
 <core::ffi::c_void as core::fmt::Debug>::fmt
+<core::field::FieldRepresentingType<T, VARIANT, FIELD> as core::clone::Clone>::clone
 <core::fmt::Alignment as core::clone::Clone>::clone
 <core::fmt::Alignment as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Alignment as core::cmp::PartialEq>::eq
@@ -1851,22 +1852,22 @@
 <core::str::pattern::StrSearcherImpl as core::fmt::Debug>::fmt
 <core::str::pattern::TwoWaySearcher as core::clone::Clone>::clone
 <core::str::pattern::TwoWaySearcher as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicBool as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicU16 as core::convert::From<u16>>::from
-<core::sync::atomic::AtomicU16 as core::default::Default>::default
-<core::sync::atomic::AtomicU16 as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicU32 as core::convert::From<u32>>::from
-<core::sync::atomic::AtomicU32 as core::default::Default>::default
-<core::sync::atomic::AtomicU32 as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicU64 as core::convert::From<u64>>::from
-<core::sync::atomic::AtomicU64 as core::default::Default>::default
-<core::sync::atomic::AtomicU64 as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicU8 as core::convert::From<u8>>::from
-<core::sync::atomic::AtomicU8 as core::default::Default>::default
-<core::sync::atomic::AtomicU8 as core::fmt::Debug>::fmt
-<core::sync::atomic::AtomicUsize as core::convert::From<usize>>::from
-<core::sync::atomic::AtomicUsize as core::default::Default>::default
-<core::sync::atomic::AtomicUsize as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<bool> as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<u16> as core::convert::From<u16>>::from
+<core::sync::atomic::Atomic<u16> as core::default::Default>::default
+<core::sync::atomic::Atomic<u16> as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<u32> as core::convert::From<u32>>::from
+<core::sync::atomic::Atomic<u32> as core::default::Default>::default
+<core::sync::atomic::Atomic<u32> as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<u64> as core::convert::From<u64>>::from
+<core::sync::atomic::Atomic<u64> as core::default::Default>::default
+<core::sync::atomic::Atomic<u64> as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<u8> as core::convert::From<u8>>::from
+<core::sync::atomic::Atomic<u8> as core::default::Default>::default
+<core::sync::atomic::Atomic<u8> as core::fmt::Debug>::fmt
+<core::sync::atomic::Atomic<usize> as core::convert::From<usize>>::from
+<core::sync::atomic::Atomic<usize> as core::default::Default>::default
+<core::sync::atomic::Atomic<usize> as core::fmt::Debug>::fmt
 <core::sync::atomic::Ordering as core::clone::Clone>::clone
 <core::sync::atomic::Ordering as core::cmp::Eq>::assert_fields_are_eq
 <core::sync::atomic::Ordering as core::cmp::PartialEq>::eq
@@ -6154,138 +6155,138 @@ core::str::validations::utf8_acc_cont_byte
 core::str::validations::utf8_char_width
 core::str::validations::utf8_first_byte
 core::str::validations::utf8_is_cont_byte
-core::sync::atomic::AtomicBool::compare_exchange
-core::sync::atomic::AtomicBool::fetch_and
-core::sync::atomic::AtomicBool::fetch_or
-core::sync::atomic::AtomicBool::load
-core::sync::atomic::AtomicBool::new
-core::sync::atomic::AtomicBool::store
-core::sync::atomic::AtomicBool::swap
-core::sync::atomic::AtomicU16::as_ptr
-core::sync::atomic::AtomicU16::compare_and_swap
-core::sync::atomic::AtomicU16::compare_exchange
-core::sync::atomic::AtomicU16::compare_exchange_weak
-core::sync::atomic::AtomicU16::fetch_add
-core::sync::atomic::AtomicU16::fetch_and
-core::sync::atomic::AtomicU16::fetch_max
-core::sync::atomic::AtomicU16::fetch_min
-core::sync::atomic::AtomicU16::fetch_nand
-core::sync::atomic::AtomicU16::fetch_or
-core::sync::atomic::AtomicU16::fetch_sub
-core::sync::atomic::AtomicU16::fetch_update
-core::sync::atomic::AtomicU16::fetch_xor
-core::sync::atomic::AtomicU16::from_mut
-core::sync::atomic::AtomicU16::from_mut_slice
-core::sync::atomic::AtomicU16::from_ptr
-core::sync::atomic::AtomicU16::get_mut
-core::sync::atomic::AtomicU16::get_mut_slice
-core::sync::atomic::AtomicU16::into_inner
-core::sync::atomic::AtomicU16::load
-core::sync::atomic::AtomicU16::new
-core::sync::atomic::AtomicU16::store
-core::sync::atomic::AtomicU16::swap
-core::sync::atomic::AtomicU16::try_update
-core::sync::atomic::AtomicU16::update
-core::sync::atomic::AtomicU32::as_ptr
-core::sync::atomic::AtomicU32::compare_and_swap
-core::sync::atomic::AtomicU32::compare_exchange
-core::sync::atomic::AtomicU32::compare_exchange_weak
-core::sync::atomic::AtomicU32::fetch_add
-core::sync::atomic::AtomicU32::fetch_and
-core::sync::atomic::AtomicU32::fetch_max
-core::sync::atomic::AtomicU32::fetch_min
-core::sync::atomic::AtomicU32::fetch_nand
-core::sync::atomic::AtomicU32::fetch_or
-core::sync::atomic::AtomicU32::fetch_sub
-core::sync::atomic::AtomicU32::fetch_update
-core::sync::atomic::AtomicU32::fetch_xor
-core::sync::atomic::AtomicU32::from_mut
-core::sync::atomic::AtomicU32::from_mut_slice
-core::sync::atomic::AtomicU32::from_ptr
-core::sync::atomic::AtomicU32::get_mut
-core::sync::atomic::AtomicU32::get_mut_slice
-core::sync::atomic::AtomicU32::into_inner
-core::sync::atomic::AtomicU32::load
-core::sync::atomic::AtomicU32::new
-core::sync::atomic::AtomicU32::store
-core::sync::atomic::AtomicU32::swap
-core::sync::atomic::AtomicU32::try_update
-core::sync::atomic::AtomicU32::update
-core::sync::atomic::AtomicU64::as_ptr
-core::sync::atomic::AtomicU64::compare_and_swap
-core::sync::atomic::AtomicU64::compare_exchange
-core::sync::atomic::AtomicU64::compare_exchange_weak
-core::sync::atomic::AtomicU64::fetch_add
-core::sync::atomic::AtomicU64::fetch_and
-core::sync::atomic::AtomicU64::fetch_max
-core::sync::atomic::AtomicU64::fetch_min
-core::sync::atomic::AtomicU64::fetch_nand
-core::sync::atomic::AtomicU64::fetch_or
-core::sync::atomic::AtomicU64::fetch_sub
-core::sync::atomic::AtomicU64::fetch_update
-core::sync::atomic::AtomicU64::fetch_xor
-core::sync::atomic::AtomicU64::from_mut
-core::sync::atomic::AtomicU64::from_mut_slice
-core::sync::atomic::AtomicU64::from_ptr
-core::sync::atomic::AtomicU64::get_mut
-core::sync::atomic::AtomicU64::get_mut_slice
-core::sync::atomic::AtomicU64::into_inner
-core::sync::atomic::AtomicU64::load
-core::sync::atomic::AtomicU64::new
-core::sync::atomic::AtomicU64::store
-core::sync::atomic::AtomicU64::swap
-core::sync::atomic::AtomicU64::try_update
-core::sync::atomic::AtomicU64::update
-core::sync::atomic::AtomicU8::as_ptr
-core::sync::atomic::AtomicU8::compare_and_swap
-core::sync::atomic::AtomicU8::compare_exchange
-core::sync::atomic::AtomicU8::compare_exchange_weak
-core::sync::atomic::AtomicU8::fetch_add
-core::sync::atomic::AtomicU8::fetch_and
-core::sync::atomic::AtomicU8::fetch_max
-core::sync::atomic::AtomicU8::fetch_min
-core::sync::atomic::AtomicU8::fetch_nand
-core::sync::atomic::AtomicU8::fetch_or
-core::sync::atomic::AtomicU8::fetch_sub
-core::sync::atomic::AtomicU8::fetch_update
-core::sync::atomic::AtomicU8::fetch_xor
-core::sync::atomic::AtomicU8::from_mut
-core::sync::atomic::AtomicU8::from_mut_slice
-core::sync::atomic::AtomicU8::from_ptr
-core::sync::atomic::AtomicU8::get_mut
-core::sync::atomic::AtomicU8::get_mut_slice
-core::sync::atomic::AtomicU8::into_inner
-core::sync::atomic::AtomicU8::load
-core::sync::atomic::AtomicU8::new
-core::sync::atomic::AtomicU8::store
-core::sync::atomic::AtomicU8::swap
-core::sync::atomic::AtomicU8::try_update
-core::sync::atomic::AtomicU8::update
-core::sync::atomic::AtomicUsize::as_ptr
-core::sync::atomic::AtomicUsize::compare_and_swap
-core::sync::atomic::AtomicUsize::compare_exchange
-core::sync::atomic::AtomicUsize::compare_exchange_weak
-core::sync::atomic::AtomicUsize::fetch_add
-core::sync::atomic::AtomicUsize::fetch_and
-core::sync::atomic::AtomicUsize::fetch_max
-core::sync::atomic::AtomicUsize::fetch_min
-core::sync::atomic::AtomicUsize::fetch_nand
-core::sync::atomic::AtomicUsize::fetch_or
-core::sync::atomic::AtomicUsize::fetch_sub
-core::sync::atomic::AtomicUsize::fetch_update
-core::sync::atomic::AtomicUsize::fetch_xor
-core::sync::atomic::AtomicUsize::from_mut
-core::sync::atomic::AtomicUsize::from_mut_slice
-core::sync::atomic::AtomicUsize::from_ptr
-core::sync::atomic::AtomicUsize::get_mut
-core::sync::atomic::AtomicUsize::get_mut_slice
-core::sync::atomic::AtomicUsize::into_inner
-core::sync::atomic::AtomicUsize::load
-core::sync::atomic::AtomicUsize::new
-core::sync::atomic::AtomicUsize::store
-core::sync::atomic::AtomicUsize::swap
-core::sync::atomic::AtomicUsize::try_update
-core::sync::atomic::AtomicUsize::update
+core::sync::atomic::Atomic::<bool>::compare_exchange
+core::sync::atomic::Atomic::<bool>::fetch_and
+core::sync::atomic::Atomic::<bool>::fetch_or
+core::sync::atomic::Atomic::<bool>::load
+core::sync::atomic::Atomic::<bool>::new
+core::sync::atomic::Atomic::<bool>::store
+core::sync::atomic::Atomic::<bool>::swap
+core::sync::atomic::Atomic::<u16>::as_ptr
+core::sync::atomic::Atomic::<u16>::compare_and_swap
+core::sync::atomic::Atomic::<u16>::compare_exchange
+core::sync::atomic::Atomic::<u16>::compare_exchange_weak
+core::sync::atomic::Atomic::<u16>::fetch_add
+core::sync::atomic::Atomic::<u16>::fetch_and
+core::sync::atomic::Atomic::<u16>::fetch_max
+core::sync::atomic::Atomic::<u16>::fetch_min
+core::sync::atomic::Atomic::<u16>::fetch_nand
+core::sync::atomic::Atomic::<u16>::fetch_or
+core::sync::atomic::Atomic::<u16>::fetch_sub
+core::sync::atomic::Atomic::<u16>::fetch_update
+core::sync::atomic::Atomic::<u16>::fetch_xor
+core::sync::atomic::Atomic::<u16>::from_mut
+core::sync::atomic::Atomic::<u16>::from_mut_slice
+core::sync::atomic::Atomic::<u16>::from_ptr
+core::sync::atomic::Atomic::<u16>::get_mut
+core::sync::atomic::Atomic::<u16>::get_mut_slice
+core::sync::atomic::Atomic::<u16>::into_inner
+core::sync::atomic::Atomic::<u16>::load
+core::sync::atomic::Atomic::<u16>::new
+core::sync::atomic::Atomic::<u16>::store
+core::sync::atomic::Atomic::<u16>::swap
+core::sync::atomic::Atomic::<u16>::try_update
+core::sync::atomic::Atomic::<u16>::update
+core::sync::atomic::Atomic::<u32>::as_ptr
+core::sync::atomic::Atomic::<u32>::compare_and_swap
+core::sync::atomic::Atomic::<u32>::compare_exchange
+core::sync::atomic::Atomic::<u32>::compare_exchange_weak
+core::sync::atomic::Atomic::<u32>::fetch_add
+core::sync::atomic::Atomic::<u32>::fetch_and
+core::sync::atomic::Atomic::<u32>::fetch_max
+core::sync::atomic::Atomic::<u32>::fetch_min
+core::sync::atomic::Atomic::<u32>::fetch_nand
+core::sync::atomic::Atomic::<u32>::fetch_or
+core::sync::atomic::Atomic::<u32>::fetch_sub
+core::sync::atomic::Atomic::<u32>::fetch_update
+core::sync::atomic::Atomic::<u32>::fetch_xor
+core::sync::atomic::Atomic::<u32>::from_mut
+core::sync::atomic::Atomic::<u32>::from_mut_slice
+core::sync::atomic::Atomic::<u32>::from_ptr
+core::sync::atomic::Atomic::<u32>::get_mut
+core::sync::atomic::Atomic::<u32>::get_mut_slice
+core::sync::atomic::Atomic::<u32>::into_inner
+core::sync::atomic::Atomic::<u32>::load
+core::sync::atomic::Atomic::<u32>::new
+core::sync::atomic::Atomic::<u32>::store
+core::sync::atomic::Atomic::<u32>::swap
+core::sync::atomic::Atomic::<u32>::try_update
+core::sync::atomic::Atomic::<u32>::update
+core::sync::atomic::Atomic::<u64>::as_ptr
+core::sync::atomic::Atomic::<u64>::compare_and_swap
+core::sync::atomic::Atomic::<u64>::compare_exchange
+core::sync::atomic::Atomic::<u64>::compare_exchange_weak
+core::sync::atomic::Atomic::<u64>::fetch_add
+core::sync::atomic::Atomic::<u64>::fetch_and
+core::sync::atomic::Atomic::<u64>::fetch_max
+core::sync::atomic::Atomic::<u64>::fetch_min
+core::sync::atomic::Atomic::<u64>::fetch_nand
+core::sync::atomic::Atomic::<u64>::fetch_or
+core::sync::atomic::Atomic::<u64>::fetch_sub
+core::sync::atomic::Atomic::<u64>::fetch_update
+core::sync::atomic::Atomic::<u64>::fetch_xor
+core::sync::atomic::Atomic::<u64>::from_mut
+core::sync::atomic::Atomic::<u64>::from_mut_slice
+core::sync::atomic::Atomic::<u64>::from_ptr
+core::sync::atomic::Atomic::<u64>::get_mut
+core::sync::atomic::Atomic::<u64>::get_mut_slice
+core::sync::atomic::Atomic::<u64>::into_inner
+core::sync::atomic::Atomic::<u64>::load
+core::sync::atomic::Atomic::<u64>::new
+core::sync::atomic::Atomic::<u64>::store
+core::sync::atomic::Atomic::<u64>::swap
+core::sync::atomic::Atomic::<u64>::try_update
+core::sync::atomic::Atomic::<u64>::update
+core::sync::atomic::Atomic::<u8>::as_ptr
+core::sync::atomic::Atomic::<u8>::compare_and_swap
+core::sync::atomic::Atomic::<u8>::compare_exchange
+core::sync::atomic::Atomic::<u8>::compare_exchange_weak
+core::sync::atomic::Atomic::<u8>::fetch_add
+core::sync::atomic::Atomic::<u8>::fetch_and
+core::sync::atomic::Atomic::<u8>::fetch_max
+core::sync::atomic::Atomic::<u8>::fetch_min
+core::sync::atomic::Atomic::<u8>::fetch_nand
+core::sync::atomic::Atomic::<u8>::fetch_or
+core::sync::atomic::Atomic::<u8>::fetch_sub
+core::sync::atomic::Atomic::<u8>::fetch_update
+core::sync::atomic::Atomic::<u8>::fetch_xor
+core::sync::atomic::Atomic::<u8>::from_mut
+core::sync::atomic::Atomic::<u8>::from_mut_slice
+core::sync::atomic::Atomic::<u8>::from_ptr
+core::sync::atomic::Atomic::<u8>::get_mut
+core::sync::atomic::Atomic::<u8>::get_mut_slice
+core::sync::atomic::Atomic::<u8>::into_inner
+core::sync::atomic::Atomic::<u8>::load
+core::sync::atomic::Atomic::<u8>::new
+core::sync::atomic::Atomic::<u8>::store
+core::sync::atomic::Atomic::<u8>::swap
+core::sync::atomic::Atomic::<u8>::try_update
+core::sync::atomic::Atomic::<u8>::update
+core::sync::atomic::Atomic::<usize>::as_ptr
+core::sync::atomic::Atomic::<usize>::compare_and_swap
+core::sync::atomic::Atomic::<usize>::compare_exchange
+core::sync::atomic::Atomic::<usize>::compare_exchange_weak
+core::sync::atomic::Atomic::<usize>::fetch_add
+core::sync::atomic::Atomic::<usize>::fetch_and
+core::sync::atomic::Atomic::<usize>::fetch_max
+core::sync::atomic::Atomic::<usize>::fetch_min
+core::sync::atomic::Atomic::<usize>::fetch_nand
+core::sync::atomic::Atomic::<usize>::fetch_or
+core::sync::atomic::Atomic::<usize>::fetch_sub
+core::sync::atomic::Atomic::<usize>::fetch_update
+core::sync::atomic::Atomic::<usize>::fetch_xor
+core::sync::atomic::Atomic::<usize>::from_mut
+core::sync::atomic::Atomic::<usize>::from_mut_slice
+core::sync::atomic::Atomic::<usize>::from_ptr
+core::sync::atomic::Atomic::<usize>::get_mut
+core::sync::atomic::Atomic::<usize>::get_mut_slice
+core::sync::atomic::Atomic::<usize>::into_inner
+core::sync::atomic::Atomic::<usize>::load
+core::sync::atomic::Atomic::<usize>::new
+core::sync::atomic::Atomic::<usize>::store
+core::sync::atomic::Atomic::<usize>::swap
+core::sync::atomic::Atomic::<usize>::try_update
+core::sync::atomic::Atomic::<usize>::update
 core::sync::atomic::atomic_add
 core::sync::atomic::atomic_and
 core::sync::atomic::atomic_compare_exchange

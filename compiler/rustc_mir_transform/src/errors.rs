@@ -4,7 +4,7 @@ use rustc_errors::{
 };
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::mir::AssertKind;
-use rustc_middle::query::Key;
+use rustc_middle::query::QueryKey;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::lint::{self, Lint};
 use rustc_span::def_id::DefId;
@@ -389,4 +389,5 @@ pub(crate) struct ForceInlineFailure {
 #[note("`{$callee}` is required to be inlined to: {$sym}")]
 pub(crate) struct ForceInlineJustification {
     pub sym: Symbol,
+    pub callee: String,
 }

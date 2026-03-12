@@ -31,6 +31,9 @@ Language changes in Rust 1.94.0
   - No change: the target is outside the scope of FLS
 
 - `Add warn-by-default unused_visibilities lint for visibility on const _ declarations <https://github.com/rust-lang/rust/pull/147136>`_
+
+  - No change: Lints are not part of the FLS
+
 - `Update to Unicode 17 <https://github.com/rust-lang/rust/pull/148321>`_
 
   - Changed paragraphs:

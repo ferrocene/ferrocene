@@ -78,15 +78,25 @@ pub(crate) fn sign(
     let raw_bundle = RawCosignBundle::load(bundle_temp.path())?;
     let bundle = raw_bundle.parse()?;
 
-    let email = bundle.email()?;
-    let Some((role_name, role)) = config.roles.iter().find(|(_, role)| role.email == email) else {
-        anyhow::bail!("email {email} has no role in the document's signature config.toml");
-    };
+    let role_name = if env.allow_dev_signing {
+        eprintln!(
+            "Warning: using a dev role. These signatures are not suitable for use in production."
+        );
+        "(Testing) Ferrocene team member"
+    } else {
+        let email = bundle.email()?;
+        let Some((role_name, role)) = config.roles.iter().find(|(_, role)| role.email == email)
+        else {
+            anyhow::bail!("email {email} has no role in the document's signature config.toml");
+        };
 
-    let role_idp = role.idp()?;
-    if role_idp.url != bundle.idp()? {
-        anyhow::bail!("you must authenticate with {}", role_idp.display_name);
-    }
+        let role_idp = role.idp()?;
+        if role_idp.url != bundle.idp()? {
+            anyhow::bail!("you must authenticate with {}", role_idp.display_name);
+        }
+
+        role_name
+    };
 
     signature_files
         .write(&format!("{role_name}.cosign-bundle"), &std::fs::read(bundle_temp.path())?)?;

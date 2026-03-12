@@ -149,6 +149,10 @@ pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(
     if let Some(profile) = &builder.config.ferrocene_aws_profile {
         cmd.env("AWS_PROFILE", profile);
     }
+    cmd.env(
+        "DOCUMENT_SIGNATURES_ALLOW_DEV_SIGNING",
+        builder.config.ferrocene_allow_dev_signing.to_string(),
+    );
     cmd
 }
 

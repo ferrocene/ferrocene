@@ -963,7 +963,10 @@ Assembly Instructions
 .. syntax::
 
    AssemblyCodeBlock ::=
-       AssemblyInstruction ($$,$$ AssemblyInstruction)*
+       AssemblyTemplate ($$,$$ AssemblyTemplate)*
+
+   AssemblyTemplate ::=
+       OuterAttribute* AssemblyInstruction
 
    AssemblyInstruction ::=
        StringLiteral
@@ -1625,10 +1628,19 @@ Macros: asm, global_asm, and naked_asm
 .. syntax::
 
    AsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ RegisterArgument)* ($$,$$ AbiClobber)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ LabelBlock)? ($$,$$ AssemblyAttributeRegisterArgument)* ($$,$$ AssemblyAttributeAbiClobber)* ($$,$$ AssemblyAttributeAssemblyOption)* $$,$$? $$)$$
 
    GlobalAsmArguments ::=
-       $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
+       $$($$ AssemblyCodeBlock ($$,$$ AssemblyAttributeRegisterArgument)* ($$,$$ AssemblyAttributeAssemblyOption)* $$,$$? $$)$$
+
+   AssemblyAttributeRegisterArgument ::=
+       OuterAttribute* RegisterArgument
+
+   AssemblyAttributeAbiClobber ::=
+       OuterAttribute* AbiClobber
+
+   AssemblyAttributeAssemblyOption ::=
+       OuterAttribute* AssemblyOption
 
    LabelBlock ::=
        $$block$$ $${$$ StatementList $$}$$
@@ -1640,6 +1652,15 @@ Macros: asm, global_asm, and naked_asm
 :t:`[macro]s` :std:`core::arch::asm`,
 :std:`core::arch::global_asm`, and
 :std:`core::arch::naked_asm`.
+
+:dp:`fls_tKj18krZ1pSt`
+An :t:`inline assembly argument` is either an :t:`assembly instruction`, a :t:`register argument`, an :t:`ABI clobber`, or an :t:`assembly option`.
+
+:dp:`fls_nLBhw2w6uznH`
+Only :t:`attribute` :c:`cfg` and :t:`attribute` :c:`cfg_attr` shall decorate :t:`[inline assembly arguments]s` in :s:`AsmArguments` and :s:`GlobalAsmArguments`.
+
+:dp:`fls_cTEiqjf6haEg`
+It is a static error for a :t:`register argument`, :t:`ABI clobber`, or :t:`assembly option` to appear before the first :t:`assembly instruction`, including when that :t:`inline assembly argument` is subject to :t:`attribute` :c:`cfg` or :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate` evaluates to ``false``.
 
 :dp:`fls_1ikzov7cxic1`
 When invoking :t:`macro` :std:`core::arch::asm`, the :s:`DelimitedTokenTree` of
@@ -1697,6 +1718,20 @@ The :t:`execution` of an :t:`assembly code block` produced by
    :t:`[register argument]s`, in an undefined order.
 
 .. rubric:: Examples
+
+.. code-block:: rust
+
+   unsafe {
+       core::arch::asm!(
+           "nop",
+           #[cfg(target_feature = "sse2")]
+           "nop",
+           #[cfg(target_feature = "sse2")]
+           in(reg) 0_u32,
+           #[cfg(target_feature = "sse2")]
+           options(nomem, nostack),
+       );
+   }
 
 .. code-block:: rust
 

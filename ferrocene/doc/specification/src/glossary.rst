@@ -3396,6 +3396,14 @@ inline assembly
 :dt:`Inline assembly` is hand-written assembly code that is integrated into a
 Rust program.
 
+.. _fls_K1MwUj4jqd0F:
+
+inline assembly argument
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Q7qnUo0GskSV`
+An :dt:`inline assembly argument` is either an :t:`assembly instruction`, a :t:`register argument`, an :t:`ABI clobber`, or an :t:`assembly option`.
+
 .. _fls_c54lmkluwbwr:
 
 inline module

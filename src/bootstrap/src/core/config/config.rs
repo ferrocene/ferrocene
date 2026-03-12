@@ -341,6 +341,7 @@ pub struct Config {
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
+    pub ferrocene_allow_dev_signing: bool,
     pub ferrocene_compiler_technical_report_url: Option<String>,
     pub ferrocene_core_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
@@ -1105,6 +1106,7 @@ impl Config {
         let mut ferrocene_core_technical_report_url = Default::default();
         let mut ferrocene_secret_sauce = Default::default();
         let mut ferrocene_generate_coverage_report_after_tests = Default::default();
+        let mut ferrocene_allow_dev_signing = Default::default();
         if let Some(f) = toml.ferrocene {
             if let Some(channel) = f.channel {
                 ferrocene_raw_channel = channel;
@@ -1210,6 +1212,10 @@ impl Config {
                 FerroceneSecretSauce::Local(path)
             } else {
                 FerroceneSecretSauce::Download
+            };
+
+            if let Some(s) = f.allow_dev_signing {
+                ferrocene_allow_dev_signing = s;
             }
         }
 
@@ -1704,6 +1710,7 @@ impl Config {
             ferrocene_core_technical_report_url,
             ferrocene_secret_sauce,
             ferrocene_generate_coverage_report_after_tests,
+            ferrocene_allow_dev_signing,
         }
     }
 

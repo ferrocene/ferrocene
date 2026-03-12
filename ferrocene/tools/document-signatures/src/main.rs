@@ -63,6 +63,7 @@ struct Env {
     s3_bucket: Option<String>,
     s3_cache_dir: PathBuf,
     tar_binary: &'static str,
+    allow_dev_signing: bool,
 }
 
 impl Env {
@@ -72,6 +73,7 @@ impl Env {
             cosign_binary: env("COSIGN_BINARY")?,
             s3_bucket: maybe_env("S3_BUCKET")?,
             s3_cache_dir: env("S3_CACHE_DIR")?,
+            allow_dev_signing: env("ALLOW_DEV_SIGNING")?,
         })
     }
 }

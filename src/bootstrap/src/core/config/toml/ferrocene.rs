@@ -24,5 +24,6 @@ define_config! {
         core_technical_report_url: Option<String> = "core-technical-report-url",
         secret_sauce_dir: Option<PathBuf> = "secret-sauce-dir",
         generate_coverage_report_after_test: Option<bool> = "generate-coverage-report-after-tests",
+        allow_dev_signing: Option<bool> = "allow-dev-signing",
     }
 }

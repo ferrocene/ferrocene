@@ -87,7 +87,7 @@ pub fn arg_contains_scalar_pair(v: ContainsScalarPair) -> u32 {
     v.b
 }
 
-// CHECK: define noundef i64 @ret_array_u32x2(
+// CHECK: define {{(dso_local )?}}noundef i64 @ret_array_u32x2(
 #[no_mangle]
 pub fn ret_array_u32x2(x: u32, y: u32) -> [u32; 2] {
     [x, y]

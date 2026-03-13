@@ -11,6 +11,9 @@ expression: test --skip=coverage
 [Test] bootstrap::ferrocene::test::GenerateTarball
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::ferrocene/tools/generate-tarball})
+[Test] bootstrap::ferrocene::test::FlipLink
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/flip-link})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

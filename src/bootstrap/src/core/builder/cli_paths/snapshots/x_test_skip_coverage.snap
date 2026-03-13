@@ -14,6 +14,9 @@ expression: test --skip=coverage
 [Test] bootstrap::ferrocene::test::DiffUpstream
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::ferrocene/tools/diff-upstream})
+[Test] bootstrap::ferrocene::test::FlipLink
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({test::ferrocene/tools/flip-link})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/tidy})

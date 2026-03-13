@@ -220,6 +220,10 @@ impl Step for FlipLink {
     type Output = ();
     const IS_HOST: bool = true;
 
+    fn is_default_step(_builder: &Builder<'_>) -> bool {
+        true
+    }
+
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(FLIP_LINK_PATH)
     }

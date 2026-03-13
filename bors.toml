@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# Gate PRs on the `full` CircleCI workflow
-status = ["full"]
+# These are CircleCI jobs, not GitHub.
+# Gate PRs on `setup`, not just `full`, so that they exit eagerly even if the `full` job
+# never starts.
+status = ["setup", "full"]
 
 # Wait until the `commit` GHA workflow passes before queueing a PR
 pr_status = ["Checks", "Tidy"]

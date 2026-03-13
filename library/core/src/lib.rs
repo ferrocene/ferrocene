@@ -218,6 +218,7 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
+<<<<<<< HEAD
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
@@ -225,6 +226,11 @@ mod macros;
 pub mod ferrocene_test;
 
 #[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
+||||||| f02672cb8bf
+#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
+=======
+#[stable(feature = "assert_matches", since = "1.95.0")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]
@@ -246,7 +252,7 @@ pub mod autodiff {
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod contracts;
 
-#[stable(feature = "cfg_select", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "cfg_select", since = "1.95.0")]
 pub use crate::macros::cfg_select;
 
 #[macro_use]
@@ -337,8 +343,14 @@ pub mod pin;
 #[unstable(feature = "random", issue = "130703")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod random;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+||||||| f02672cb8bf
+#[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+=======
+#[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub mod range;
 pub mod result;
 pub mod sync;

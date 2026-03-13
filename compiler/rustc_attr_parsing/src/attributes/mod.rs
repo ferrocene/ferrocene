@@ -30,6 +30,7 @@ use crate::target_checking::AllowedTargets;
 mod prelude;
 
 pub(crate) mod allow_unstable;
+pub(crate) mod autodiff;
 pub(crate) mod body;
 pub(crate) mod cfg;
 pub(crate) mod cfg_select;

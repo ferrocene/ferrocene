@@ -1514,7 +1514,6 @@ pub(crate) struct HelpIdentifierStartsWithNumber {
 pub(crate) struct ExpectedSemi {
     pub span: Span,
     pub token: Token,
-
     pub unexpected_token_label: Option<Span>,
     pub sugg: ExpectedSemiSugg,
 }

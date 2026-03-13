@@ -781,8 +781,8 @@ pub const fn unlikely(b: bool) -> bool {
 ///     }
 /// }
 /// ```
-#[stable(feature = "cold_path", since = "CURRENT_RUSTC_VERSION")]
-#[rustc_const_stable(feature = "cold_path", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "cold_path", since = "1.95.0")]
+#[rustc_const_stable(feature = "cold_path", since = "1.95.0")]
 #[inline(always)]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub const fn cold_path() {

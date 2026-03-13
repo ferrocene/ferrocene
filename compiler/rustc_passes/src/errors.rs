@@ -20,14 +20,6 @@ use crate::lang_items::Duplicate;
 pub(crate) struct IncorrectDoNotRecommendLocation;
 
 #[derive(Diagnostic)]
-#[diag("`#[autodiff]` should be applied to a function")]
-pub(crate) struct AutoDiffAttr {
-    #[primary_span]
-    #[label("not a function")]
-    pub attr_span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("`#[loop_match]` should be applied to a loop")]
 pub(crate) struct LoopMatchAttr {
     #[primary_span]

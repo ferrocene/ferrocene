@@ -144,14 +144,12 @@ struct QueryModifiers {
     arena_cache: Option<Ident>,
     cache_on_disk_if: Option<CacheOnDiskIf>,
     cycle_delay_bug: Option<Ident>,
-    cycle_fatal: Option<Ident>,
     cycle_stash: Option<Ident>,
     depth_limit: Option<Ident>,
     desc: Desc,
     eval_always: Option<Ident>,
     feedable: Option<Ident>,
     no_hash: Option<Ident>,
-    return_result_from_ensure_ok: Option<Ident>,
     separate_provide_extern: Option<Ident>,
     // tidy-alphabetical-end
 }
@@ -160,7 +158,6 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
     let mut arena_cache = None;
     let mut cache_on_disk_if = None;
     let mut desc = None;
-    let mut cycle_fatal = None;
     let mut cycle_delay_bug = None;
     let mut cycle_stash = None;
     let mut no_hash = None;
@@ -169,7 +166,6 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
     let mut depth_limit = None;
     let mut separate_provide_extern = None;
     let mut feedable = None;
-    let mut return_result_from_ensure_ok = None;
 
     while !input.is_empty() {
         let modifier: Ident = input.parse()?;
@@ -197,8 +193,6 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
             try_insert!(cache_on_disk_if = CacheOnDiskIf { modifier, block });
         } else if modifier == "arena_cache" {
             try_insert!(arena_cache = modifier);
-        } else if modifier == "cycle_fatal" {
-            try_insert!(cycle_fatal = modifier);
         } else if modifier == "cycle_delay_bug" {
             try_insert!(cycle_delay_bug = modifier);
         } else if modifier == "cycle_stash" {
@@ -215,8 +209,6 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
             try_insert!(separate_provide_extern = modifier);
         } else if modifier == "feedable" {
             try_insert!(feedable = modifier);
-        } else if modifier == "return_result_from_ensure_ok" {
-            try_insert!(return_result_from_ensure_ok = modifier);
         } else {
             return Err(Error::new(modifier.span(), "unknown query modifier"));
         }
@@ -228,7 +220,6 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
         arena_cache,
         cache_on_disk_if,
         desc,
-        cycle_fatal,
         cycle_delay_bug,
         cycle_stash,
         no_hash,
@@ -237,28 +228,44 @@ fn parse_query_modifiers(input: ParseStream<'_>) -> Result<QueryModifiers> {
         depth_limit,
         separate_provide_extern,
         feedable,
-        return_result_from_ensure_ok,
     })
 }
 
-fn make_modifiers_stream(query: &Query, modifiers: &QueryModifiers) -> proc_macro2::TokenStream {
+// Does `ret_ty` match `Result<_, ErrorGuaranteed>`?
+fn returns_error_guaranteed(ret_ty: &ReturnType) -> bool {
+    use ::syn::*;
+    if let ReturnType::Type(_, ret_ty) = ret_ty
+        && let Type::Path(type_path) = ret_ty.as_ref()
+        && let Some(PathSegment { ident, arguments }) = type_path.path.segments.last()
+        && ident == "Result"
+        && let PathArguments::AngleBracketed(args) = arguments
+        && args.args.len() == 2
+        && let GenericArgument::Type(ty) = &args.args[1]
+        && let Type::Path(type_path) = ty
+        && type_path.path.is_ident("ErrorGuaranteed")
+    {
+        true
+    } else {
+        false
+    }
+}
+
+fn make_modifiers_stream(query: &Query) -> proc_macro2::TokenStream {
     let QueryModifiers {
         // tidy-alphabetical-start
         anon,
         arena_cache,
         cache_on_disk_if,
         cycle_delay_bug,
-        cycle_fatal,
         cycle_stash,
         depth_limit,
         desc: _,
         eval_always,
         feedable,
         no_hash,
-        return_result_from_ensure_ok,
         separate_provide_extern,
         // tidy-alphabetical-end
-    } = modifiers;
+    } = &query.modifiers;
 
     let anon = anon.is_some();
     let arena_cache = arena_cache.is_some();
@@ -266,8 +273,6 @@ fn make_modifiers_stream(query: &Query, modifiers: &QueryModifiers) -> proc_macr
 
     let cycle_error_handling = if cycle_delay_bug.is_some() {
         quote! { DelayBug }
-    } else if cycle_fatal.is_some() {
-        quote! { Fatal }
     } else if cycle_stash.is_some() {
         quote! { Stash }
     } else {
@@ -278,7 +283,7 @@ fn make_modifiers_stream(query: &Query, modifiers: &QueryModifiers) -> proc_macr
     let eval_always = eval_always.is_some();
     let feedable = feedable.is_some();
     let no_hash = no_hash.is_some();
-    let return_result_from_ensure_ok = return_result_from_ensure_ok.is_some();
+    let returns_error_guaranteed = returns_error_guaranteed(&query.return_ty);
     let separate_provide_extern = separate_provide_extern.is_some();
 
     // Giving an input span to the modifier names in the modifier list seems
@@ -297,7 +302,7 @@ fn make_modifiers_stream(query: &Query, modifiers: &QueryModifiers) -> proc_macr
         eval_always: #eval_always,
         feedable: #feedable,
         no_hash: #no_hash,
-        return_result_from_ensure_ok: #return_result_from_ensure_ok,
+        returns_error_guaranteed: #returns_error_guaranteed,
         separate_provide_extern: #separate_provide_extern,
         // tidy-alphabetical-end
     }
@@ -350,12 +355,10 @@ fn make_helpers_for_query(query: &Query, streams: &mut HelperTokenStreams) {
 
     // Generate a function to check whether we should cache the query to disk, for some key.
     if let Some(CacheOnDiskIf { block, .. }) = modifiers.cache_on_disk_if.as_ref() {
-        // `disallowed_pass_by_ref` is needed because some keys are `rustc_pass_by_value`.
         streams.cache_on_disk_if_fns_stream.extend(quote! {
-            #[cfg_attr(not(bootstrap), allow(unused_variables, rustc::disallowed_pass_by_ref))]
-            #[cfg_attr(bootstrap, allow(unused_variables, rustc::pass_by_value))]
+            #[allow(unused_variables)]
             #[inline]
-            pub fn #erased_name<'tcx>(tcx: TyCtxt<'tcx>, #key_pat: &#key_ty) -> bool
+            pub fn #erased_name<'tcx>(tcx: TyCtxt<'tcx>, #key_pat: #key_ty) -> bool
             #block
         });
     }
@@ -407,7 +410,6 @@ fn add_to_analyzer_stream(query: &Query, analyzer_stream: &mut proc_macro2::Toke
 
     doc_link!(
         arena_cache,
-        cycle_fatal,
         cycle_delay_bug,
         cycle_stash,
         no_hash,
@@ -416,7 +418,6 @@ fn add_to_analyzer_stream(query: &Query, analyzer_stream: &mut proc_macro2::Toke
         depth_limit,
         separate_provide_extern,
         feedable,
-        return_result_from_ensure_ok,
     );
 
     let name = &query.name;
@@ -489,7 +490,7 @@ pub(super) fn rustc_queries(input: TokenStream) -> TokenStream {
             ReturnType::Type(..) => quote! { #return_ty },
         };
 
-        let modifiers_stream = make_modifiers_stream(&query, modifiers);
+        let modifiers_stream = make_modifiers_stream(&query);
 
         // Add the query to the group
         query_stream.extend(quote! {

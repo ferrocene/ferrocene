@@ -205,11 +205,17 @@
 //! this is not implemented however: a mono item will be produced
 //! regardless of whether it is actually needed or not.
 
+<<<<<<< HEAD
 mod autodiff;
 
 // Ferrocene addition
 pub(crate) mod ferrocene;
 
+||||||| d933cf483ed
+mod autodiff;
+
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::cell::OnceCell;
 use std::ops::ControlFlow;
 
@@ -240,11 +246,9 @@ use rustc_middle::ty::{
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
 use rustc_session::config::{DebugInfo, EntryFnType};
-use rustc_span::source_map::{Spanned, dummy_spanned, respan};
-use rustc_span::{DUMMY_SP, Span};
+use rustc_span::{DUMMY_SP, Span, Spanned, dummy_spanned, respan};
 use tracing::{debug, instrument, trace};
 
-use crate::collector::autodiff::collect_autodiff_fn;
 use crate::errors::{
     self, EncounteredErrorWhileInstantiating, EncounteredErrorWhileInstantiatingGlobalAsm,
     NoOptimizedMir, RecursionLimit,
@@ -997,8 +1001,6 @@ fn visit_instance_use<'tcx>(
         return;
     }
     if let Some(intrinsic) = tcx.intrinsic(instance.def_id()) {
-        collect_autodiff_fn(tcx, instance, intrinsic, output);
-
         if let Some(_requirement) = ValidityRequirement::from_intrinsic(intrinsic.name) {
             // The intrinsics assert_inhabited, assert_zero_valid, and assert_mem_uninitialized_valid will
             // be lowered in codegen to nothing or a call to panic_nounwind. So if we encounter any

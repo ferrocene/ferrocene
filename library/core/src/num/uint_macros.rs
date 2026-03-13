@@ -585,7 +585,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         pub const fn extract_bits(self, mask: Self) -> Self {
-            crate::num::int_bits::$ActualT::extract_impl(self as $ActualT, mask as $ActualT) as $SelfT
+            imp::int_bits::$ActualT::extract_impl(self as $ActualT, mask as $ActualT) as $SelfT
         }
 
         /// Returns an integer with the least significant bits of `self`
@@ -603,7 +603,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         pub const fn deposit_bits(self, mask: Self) -> Self {
-            crate::num::int_bits::$ActualT::deposit_impl(self as $ActualT, mask as $ActualT) as $SelfT
+            imp::int_bits::$ActualT::deposit_impl(self as $ActualT, mask as $ActualT) as $SelfT
         }
 
         /// Reverses the order of bits in the integer. The least significant bit becomes the most significant bit,
@@ -815,7 +815,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_add(rhs);
-            if b { overflow_panic::add() } else { a }
+            if b { imp::overflow_panic::add() } else { a }
         }
 
         /// Unchecked integer addition. Computes `self + rhs`, assuming overflow
@@ -912,7 +912,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_add_signed(rhs);
-            if b { overflow_panic::add() } else { a }
+            if b { imp::overflow_panic::add() } else { a }
         }
 
         /// Checked integer subtraction. Computes `self - rhs`, returning
@@ -972,7 +972,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_sub(rhs);
-            if b { overflow_panic::sub() } else { a }
+            if b { imp::overflow_panic::sub() } else { a }
         }
 
         /// Unchecked integer subtraction. Computes `self - rhs`, assuming overflow
@@ -1099,7 +1099,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub_signed(self, rhs: $SignedT) -> Self {
             let (a, b) = self.overflowing_sub_signed(rhs);
-            if b { overflow_panic::sub() } else { a }
+            if b { imp::overflow_panic::sub() } else { a }
         }
 
         #[doc = concat!(
@@ -1210,7 +1210,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_mul(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_mul(rhs);
-            if b { overflow_panic::mul() } else { a }
+            if b { imp::overflow_panic::mul() } else { a }
         }
 
         /// Unchecked integer multiplication. Computes `self * rhs`, assuming overflow
@@ -1648,7 +1648,7 @@ macro_rules! uint_impl {
             if let Some(log) = self.checked_ilog(base) {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -1673,7 +1673,7 @@ macro_rules! uint_impl {
             if let Some(log) = self.checked_ilog2() {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -1698,7 +1698,7 @@ macro_rules! uint_impl {
             if let Some(log) = self.checked_ilog10() {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -1862,7 +1862,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_neg(self) -> Self {
             let (a, b) = self.overflowing_neg();
-            if b { overflow_panic::neg() } else { a }
+            if b { imp::overflow_panic::neg() } else { a }
         }
 
         /// Checked shift left. Computes `self << rhs`, returning `None`
@@ -1920,7 +1920,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shl(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shl(rhs);
-            if b { overflow_panic::shl() } else { a }
+            if b { imp::overflow_panic::shl() } else { a }
         }
 
         /// Unchecked shift left. Computes `self << rhs`, assuming that
@@ -2110,7 +2110,7 @@ macro_rules! uint_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shr(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shr(rhs);
-            if b { overflow_panic::shr() } else { a }
+            if b { imp::overflow_panic::shr() } else { a }
         }
 
         /// Unchecked shift right. Computes `self >> rhs`, assuming that
@@ -3608,7 +3608,7 @@ macro_rules! uint_impl {
         #[inline]
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn isqrt(self) -> Self {
-            let result = crate::num::int_sqrt::$ActualT(self as $ActualT) as $SelfT;
+            let result = imp::int_sqrt::$ActualT(self as $ActualT) as $SelfT;
 
             // Inform the optimizer what the range of outputs is. If testing
             // `core` crashes with no panic message and a `num::int_sqrt::u*`
@@ -3621,7 +3621,7 @@ macro_rules! uint_impl {
             // integers is bounded by `[0, <$ActualT>::MAX]`, sqrt(n) will be
             // bounded by `[sqrt(0), sqrt(<$ActualT>::MAX)]`.
             unsafe {
-                const MAX_RESULT: $SelfT = crate::num::int_sqrt::$ActualT(<$ActualT>::MAX) as $SelfT;
+                const MAX_RESULT: $SelfT = imp::int_sqrt::$ActualT(<$ActualT>::MAX) as $SelfT;
                 crate::hint::assert_unchecked(result <= MAX_RESULT);
             }
 

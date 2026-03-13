@@ -28,16 +28,14 @@ macro_rules! sign_dependent_expr {
     };
 }
 
-// All these modules are technically private and only exposed for coretests:
-#[cfg(not(no_fp_fmt_parse))]
-pub mod bignum;
-#[cfg(not(no_fp_fmt_parse))]
-pub mod dec2flt;
-#[cfg(not(no_fp_fmt_parse))]
-pub mod diy_float;
-#[cfg(not(no_fp_fmt_parse))]
-pub mod flt2dec;
-pub mod fmt;
+// These modules are public only for testing.
+#[doc(hidden)]
+#[unstable(
+    feature = "num_internals",
+    reason = "internal routines only exposed for testing",
+    issue = "none"
+)]
+pub mod imp;
 
 #[macro_use]
 mod int_macros; // import int_impl!
@@ -45,16 +43,31 @@ mod int_macros; // import int_impl!
 mod uint_macros; // import uint_impl!
 
 mod error;
+<<<<<<< HEAD
 mod int_bits;
 mod int_log10;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod int_sqrt;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod libm;
+||||||| d933cf483ed
+mod int_bits;
+mod int_log10;
+mod int_sqrt;
+pub(crate) mod libm;
+=======
+#[cfg(not(no_fp_fmt_parse))]
+mod float_parse;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod nonzero;
+<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
 mod overflow_panic;
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| d933cf483ed
+mod overflow_panic;
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod saturating;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod wrapping;
@@ -63,16 +76,26 @@ mod wrapping;
 #[doc(hidden)]
 pub mod niche_types;
 
+<<<<<<< HEAD
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(no_fp_fmt_parse))]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use dec2flt::ParseFloatError;
+||||||| d933cf483ed
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(no_fp_fmt_parse))]
+pub use dec2flt::ParseFloatError;
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[stable(feature = "int_error_matching", since = "1.55.0")]
 pub use error::IntErrorKind;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use error::ParseIntError;
 #[stable(feature = "try_from", since = "1.34.0")]
 pub use error::TryFromIntError;
+#[stable(feature = "rust1", since = "1.0.0")]
+#[cfg(not(no_fp_fmt_parse))]
+pub use float_parse::ParseFloatError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
 pub use nonzero::NonZero;
 #[unstable(

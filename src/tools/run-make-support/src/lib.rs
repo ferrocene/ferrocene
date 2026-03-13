@@ -36,9 +36,16 @@ pub mod rfs {
 // Ferrocene addition: This module is used inside the run-make tests for symbol-report.
 pub use build_helper::symbol_report;
 // Re-exports of third-party library crates.
-pub use {
-    bstr, gimli, libc, object, regex, rustdoc_json_types, serde_json, similar, tempfile, wasmparser,
-};
+pub use bstr;
+pub use gimli;
+pub use libc;
+pub use object;
+pub use regex;
+pub use rustdoc_json_types;
+pub use serde_json;
+pub use similar;
+pub use tempfile;
+pub use wasmparser;
 
 // Helpers for building names of output artifacts that are potentially target-specific.
 pub use crate::artifact_names::{
@@ -74,7 +81,7 @@ pub use crate::external_deps::llvm::{
     llvm_readobj,
 };
 pub use crate::external_deps::python::python_command;
-pub use crate::external_deps::rustc::{self, Rustc, bare_rustc, rustc, rustc_path};
+pub use crate::external_deps::rustc::{self, Rustc, bare_rustc, rustc, rustc_minicore, rustc_path};
 pub use crate::external_deps::rustdoc::{Rustdoc, bare_rustdoc, rustdoc};
 // Path-related helpers.
 pub use crate::path_helpers::{

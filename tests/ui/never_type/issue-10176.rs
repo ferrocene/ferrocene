@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 fn f() -> isize { //~ NOTE expected `isize` because of return type
     (return 1, return 2)
 //~^ ERROR mismatched types

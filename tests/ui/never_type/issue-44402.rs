@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Regression test for <https://github.com/rust-lang/rust/issues/44402>
 //
 // Previously inhabitedness check was handling cycles incorrectly causing this

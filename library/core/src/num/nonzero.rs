@@ -9,12 +9,8 @@ use crate::cmp::Ordering;
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, Freeze, StructuralPartialEq};
-<<<<<<< HEAD
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| d933cf483ed
-=======
 use crate::num::imp;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{BitOr, BitOrAssign, Div, DivAssign, Neg, Rem, RemAssign};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::{RefUnwindSafe, UnwindSafe};

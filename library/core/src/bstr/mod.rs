@@ -9,7 +9,9 @@ pub use traits::{impl_partial_eq, impl_partial_eq_n, impl_partial_eq_ord};
 
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::borrow::{Borrow, BorrowMut};
-use crate::fmt::{self, Alignment};
+use crate::fmt;
+#[cfg(not(feature = "ferrocene_subset"))]
+use crate::fmt::Alignment;
 use crate::ops::{Deref, DerefMut, DerefPure};
 
 /// A wrapper for `&[u8]` representing a human-readable string that's conventionally, but not

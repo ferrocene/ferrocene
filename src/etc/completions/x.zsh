@@ -389,12 +389,8 @@ _arguments "${_arguments_options[@]}" : \
 '--rustfix-coverage[enable this to generate a Rustfix coverage file, which is saved in \`/<build_base>/rustfix_missing_coverage.txt\`]' \
 '--no-capture[don'\''t capture stdout/stderr of tests]' \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
-<<<<<<< HEAD
 '--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
-||||||| d933cf483ed
-=======
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \

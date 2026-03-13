@@ -13,6 +13,9 @@ pub mod fmt;
 
 pub(crate) mod int_bits;
 pub(crate) mod int_log10;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod int_sqrt;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod libm;
+#[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod overflow_panic;

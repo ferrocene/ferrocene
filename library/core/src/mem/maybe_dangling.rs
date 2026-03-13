@@ -68,14 +68,8 @@ use crate::{mem, ptr};
 /// [`ManuallyDrop`]: crate::mem::ManuallyDrop
 #[repr(transparent)]
 #[rustc_pub_transparent]
-<<<<<<< HEAD
-#[derive(Copy, Clone, Debug, Default)]
-||||||| d933cf483ed
-#[derive(Debug, Copy, Clone, Default)]
-=======
 #[derive(Debug, Copy, Clone, Default)]
 #[lang = "maybe_dangling"]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub struct MaybeDangling<P: ?Sized>(P);
 
 impl<P: ?Sized> MaybeDangling<P> {

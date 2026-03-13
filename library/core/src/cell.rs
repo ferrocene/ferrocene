@@ -724,14 +724,8 @@ impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 #[cfg(not(feature = "ferrocene_subset"))]
 impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<Cell<U>> for Cell<T> {}
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-||||||| d933cf483ed
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
     #[inline]
     fn as_ref(&self) -> &[Cell<T>; N] {
@@ -739,14 +733,8 @@ impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-||||||| d933cf483ed
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
     #[inline]
     fn as_ref(&self) -> &[Cell<T>] {
@@ -754,14 +742,8 @@ impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
     }
 }
 
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-||||||| d933cf483ed
-#[stable(feature = "more_conversion_trait_impls", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "more_conversion_trait_impls", since = "1.95.0")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 impl<T> AsRef<[Cell<T>]> for Cell<[T]> {
     #[inline]
     fn as_ref(&self) -> &[Cell<T>] {

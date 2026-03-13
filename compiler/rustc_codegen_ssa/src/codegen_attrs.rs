@@ -5,14 +5,10 @@ use rustc_hir::attrs::{
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{self as hir, Attribute, find_attr};
-<<<<<<< HEAD
+use rustc_macros::Diagnostic;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
     Validated, ValidatedStatus, item_is_validated,
 };
-||||||| d933cf483ed
-=======
-use rustc_macros::Diagnostic;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs,
 };

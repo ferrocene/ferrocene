@@ -16,14 +16,8 @@ use crate::convert::FloatToInt;
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
-<<<<<<< HEAD
-use crate::num::libm;
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| d933cf483ed
-use crate::num::libm;
-=======
 use crate::num::imp::libm;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::const_assert;
 use crate::{intrinsics, mem};
 

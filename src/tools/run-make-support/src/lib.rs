@@ -33,8 +33,10 @@ pub mod rfs {
     pub use crate::fs::*;
 }
 
+#[rustfmt::skip]
 // Ferrocene addition: This module is used inside the run-make tests for symbol-report.
 pub use build_helper::symbol_report;
+
 // Re-exports of third-party library crates.
 pub use bstr;
 pub use gimli;

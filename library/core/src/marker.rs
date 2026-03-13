@@ -946,14 +946,7 @@ pub unsafe auto trait UnsafeUnpin {}
 
 #[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
-<<<<<<< HEAD
-impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
-
-||||||| d933cf483ed
-impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
-=======
 impl<T: PointeeSized> !UnsafeUnpin for UnsafePinned<T> {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 marker_impls! {
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
     unsafe UnsafeUnpin for

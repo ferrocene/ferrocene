@@ -1380,15 +1380,9 @@ impl Output {
     ///
     /// # Examples
     ///
-<<<<<<< HEAD
     // Ferrocene annotation: QNX does not have the binaries
     /// ```ignore-qnx
-||||||| d933cf483ed
-    /// ```
-=======
-    /// ```
     /// # #![allow(unused_features)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     /// #![feature(exit_status_error)]
     /// # #[cfg(all(unix, not(target_os = "android"), not(all(target_vendor = "apple", not(target_os = "macos")))))] {
     /// use std::process::Command;

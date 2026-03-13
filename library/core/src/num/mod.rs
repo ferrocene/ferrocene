@@ -43,31 +43,11 @@ mod int_macros; // import int_impl!
 mod uint_macros; // import uint_impl!
 
 mod error;
-<<<<<<< HEAD
-mod int_bits;
-mod int_log10;
-#[cfg(not(feature = "ferrocene_subset"))]
-mod int_sqrt;
-#[cfg(not(feature = "ferrocene_subset"))]
-pub(crate) mod libm;
-||||||| d933cf483ed
-mod int_bits;
-mod int_log10;
-mod int_sqrt;
-pub(crate) mod libm;
-=======
 #[cfg(not(no_fp_fmt_parse))]
+#[cfg(not(feature = "ferrocene_subset"))]
 mod float_parse;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod nonzero;
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-mod overflow_panic;
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| d933cf483ed
-mod overflow_panic;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 mod saturating;
 #[cfg(not(feature = "ferrocene_subset"))]
 mod wrapping;
@@ -76,17 +56,6 @@ mod wrapping;
 #[doc(hidden)]
 pub mod niche_types;
 
-<<<<<<< HEAD
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
-pub use dec2flt::ParseFloatError;
-||||||| d933cf483ed
-#[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(no_fp_fmt_parse))]
-pub use dec2flt::ParseFloatError;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #[stable(feature = "int_error_matching", since = "1.55.0")]
 pub use error::IntErrorKind;
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -95,6 +64,7 @@ pub use error::ParseIntError;
 pub use error::TryFromIntError;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(no_fp_fmt_parse))]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub use float_parse::ParseFloatError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
 pub use nonzero::NonZero;

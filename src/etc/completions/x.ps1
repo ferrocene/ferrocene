@@ -390,12 +390,8 @@ Register-ArgumentCompleter -Native -CommandName 'x' -ScriptBlock {
             [CompletionResult]::new('--rustfix-coverage', '--rustfix-coverage', [CompletionResultType]::ParameterName, 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`')
             [CompletionResult]::new('--no-capture', '--no-capture', [CompletionResultType]::ParameterName, 'don''t capture stdout/stderr of tests')
             [CompletionResult]::new('--bypass-ignore-backends', '--bypass-ignore-backends', [CompletionResultType]::ParameterName, 'Ignore `//@ ignore-backends` directives')
-<<<<<<< HEAD
             [CompletionResult]::new('--ferrocene-test-one-crate-per-cargo-call', '--ferrocene-test-one-crate-per-cargo-call', [CompletionResultType]::ParameterName, 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report')
-||||||| d933cf483ed
-=======
             [CompletionResult]::new('--no-doc', '--no-doc', [CompletionResultType]::ParameterName, 'Deprecated. Use `--all-targets` or `--tests` instead')
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')

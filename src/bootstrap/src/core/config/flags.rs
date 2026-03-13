@@ -15,14 +15,8 @@ use crate::core::build_steps::setup::Profile;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
-<<<<<<< HEAD
 use crate::ferrocene::test_variants::TestVariantName;
-use crate::{Build, CodegenBackendKind, DocTests};
-||||||| d933cf483ed
-use crate::{Build, CodegenBackendKind, DocTests};
-=======
 use crate::{Build, CodegenBackendKind, TestTarget};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]
 pub enum Color {
@@ -459,7 +453,6 @@ pub enum Subcommand {
         #[arg(long)]
         /// Ignore `//@ ignore-backends` directives.
         bypass_ignore_backends: bool,
-<<<<<<< HEAD
         /// generate coverage for tests
         #[arg(long)]
         coverage: Option<FerroceneCoverageFor>,
@@ -470,14 +463,11 @@ pub enum Subcommand {
         /// Choose the test variant to use for this execution.
         #[arg(long)]
         test_variant: Option<TestVariantName>,
-||||||| d933cf483ed
-=======
 
         /// Deprecated. Use `--all-targets` or `--tests` instead.
         #[arg(long)]
         #[doc(hidden)]
         no_doc: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     },
     /// Build and run some test suites *in Miri*
     Miri {

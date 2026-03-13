@@ -64,14 +64,8 @@
 
 macro_rules! uint_impl {
     ($U:ident) => {
-<<<<<<< HEAD:library/core/src/num/int_bits.rs
         #[cfg(not(feature = "ferrocene_subset"))]
-        pub(super) mod $U {
-||||||| d933cf483ed:library/core/src/num/int_bits.rs
-        pub(super) mod $U {
-=======
         pub(in crate::num) mod $U {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:library/core/src/num/imp/int_bits.rs
             const STAGES: usize = $U::BITS.ilog2() as usize;
             #[inline]
             const fn prepare(sparse: $U) -> [$U; STAGES] {

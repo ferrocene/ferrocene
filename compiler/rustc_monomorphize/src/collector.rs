@@ -205,17 +205,9 @@
 //! this is not implemented however: a mono item will be produced
 //! regardless of whether it is actually needed or not.
 
-<<<<<<< HEAD
-mod autodiff;
-
 // Ferrocene addition
 pub(crate) mod ferrocene;
 
-||||||| d933cf483ed
-mod autodiff;
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::cell::OnceCell;
 use std::ops::ControlFlow;
 

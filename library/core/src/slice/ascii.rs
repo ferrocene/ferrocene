@@ -1,5 +1,11 @@
 //! Operations on ASCII `[u8]`.
 
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub(crate) mod ferrocene_test;
+
 use core::ascii::EscapeDefault;
 
 use crate::fmt::{self, Write};

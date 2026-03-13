@@ -581,6 +581,12 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test;
+
 use crate::clone::TrivialClone;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{self, FusedIterator, TrustedLen};

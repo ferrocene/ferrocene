@@ -59,3 +59,15 @@ fn filter_option() {
 fn inspect_option() {
     let _ = Some("foo").inspect(|_| panic!("reached"));
 }
+
+// Covers <core::option::Item<A> as core::iter::traits::exact_size::ExactSizeIterator>::len
+#[test]
+fn test_item_exact_size_iterator_some() {
+    core::option::ferrocene_test::test_item_exact_size_iterator_some();
+}
+
+// Covers <core::option::Item<A> as core::iter::traits::exact_size::ExactSizeIterator>::len
+#[test]
+fn test_item_exact_size_iterator_none() {
+    core::option::ferrocene_test::test_item_exact_size_iterator_none();
+}

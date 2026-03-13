@@ -301,6 +301,7 @@ pub mod default;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod error;
 #[unstable(feature = "field_projections", issue = "145383")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod field;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod index;

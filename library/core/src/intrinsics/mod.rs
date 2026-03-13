@@ -2963,6 +2963,7 @@ pub const fn offset_of<T: PointeeSized>(variant: u32, field: u32) -> usize;
 #[rustc_intrinsic]
 #[unstable(feature = "field_projections", issue = "145383")]
 #[rustc_const_unstable(feature = "field_projections", issue = "145383")]
+#[cfg(not(feature = "ferrocene_subset"))]
 pub const fn field_offset<F: crate::field::Field>() -> usize;
 
 /// Returns the number of variants of the type `T` cast to a `usize`;

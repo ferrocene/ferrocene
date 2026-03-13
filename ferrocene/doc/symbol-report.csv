@@ -1088,7 +1088,6 @@
 <core::ffi::c_str::FromBytesWithNulError as core::cmp::PartialEq>::eq
 <core::ffi::c_str::FromBytesWithNulError as core::fmt::Debug>::fmt
 <core::ffi::c_void as core::fmt::Debug>::fmt
-<core::field::FieldRepresentingType<T, VARIANT, FIELD> as core::clone::Clone>::clone
 <core::fmt::Alignment as core::clone::Clone>::clone
 <core::fmt::Alignment as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Alignment as core::cmp::PartialEq>::eq

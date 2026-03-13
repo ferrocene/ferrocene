@@ -5,6 +5,7 @@ mod atomic;
 mod borrow;
 mod bstr;
 mod cell;
+mod char;
 mod cmp;
 mod floats;
 mod fmt;

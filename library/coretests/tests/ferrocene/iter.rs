@@ -1083,3 +1083,12 @@ fn test_from_iterator_unit() {
     let _ = vec![1; 10].into_iter().map(|y| x += y).collect::<()>();
     assert_eq!(x, 10);
 }
+
+// covers `<I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound`.
+#[test]
+fn test_filter_spec_assume_count_default() {
+    let mut yes_trusted_len = [1, 2, 3, 4, 5].iter();
+    // we need to call filter in an iterator that is `!TrustedLen` in order to hit the default implementation and not the specialisation
+    let no_trusted_len: &mut dyn Iterator<Item = &i32> = &mut yes_trusted_len;
+    assert_eq!(no_trusted_len.filter(|a| *a % 2 == 0).count(), 2);
+}

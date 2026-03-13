@@ -41,7 +41,7 @@ use crate::core::config::flags::{
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
-use crate::ferrocene::test_variants::{TestVariant, VariantCondition};
+use crate::ferrocene::test_variants::{TestCondition, TestVariant};
 use crate::ferrocene::tool::SymbolReport;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::exec::{BootstrapCommand, command};
@@ -427,13 +427,13 @@ impl Step for Cargo {
 
         // Ferrocene addition
         let variant = TestVariant::current(builder, self.host);
-        for condition in variant.conditions() {
-            match condition.get() {
-                VariantCondition::Edition(_) => condition.mark_unused(),
-                VariantCondition::QemuCpu(cpu) => {
-                    cargo.env("QEMU_CPU", cpu);
-                }
-            }
+
+        if let Some(edition) = variant.edition() {
+            edition.mark_unused();
+        }
+
+        if let Some(qemu_cpu) = variant.qemu_cpu() {
+            qemu_cpu.apply(&mut cargo);
         }
 
         #[cfg(feature = "build-metrics")]
@@ -2517,15 +2517,13 @@ Please disable assertions with `rust.debug-assertions = false`.
         cmd.arg("--git-merge-commit-email").arg(git_config.git_merge_commit_email);
 
         let variant = TestVariant::current(builder, self.target);
-        for condition in variant.conditions() {
-            match condition.get() {
-                VariantCondition::Edition(edition) => {
-                    cmd.arg(format!("--edition={edition}"));
-                }
-                VariantCondition::QemuCpu(cpu) => {
-                    cmd.env("QEMU_CPU", cpu);
-                }
-            }
+
+        if let Some(edition) = variant.edition() {
+            edition.apply(&mut cmd);
+        }
+
+        if let Some(qemu_cpu) = variant.qemu_cpu() {
+            qemu_cpu.apply(&mut cmd);
         }
 
         #[cfg(feature = "build-metrics")]
@@ -2982,13 +2980,13 @@ pub(crate) fn run_cargo_test<'a>(
 
     // Ferrocene addition: --test-variant
     let variant = TestVariant::current(builder, target);
-    for condition in variant.conditions() {
-        match condition.get() {
-            VariantCondition::Edition(_) => condition.mark_unused(),
-            VariantCondition::QemuCpu(cpu) => {
-                cargo.env("QEMU_CPU", cpu);
-            }
-        }
+
+    if let Some(edition) = variant.edition() {
+        edition.mark_unused();
+    }
+
+    if let Some(qemu_cpu) = variant.qemu_cpu() {
+        qemu_cpu.apply(&mut cargo);
     }
 
     #[cfg(feature = "build-metrics")]

@@ -54,6 +54,12 @@ mod raw;
 mod rotate;
 mod specialize;
 
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+#[cfg(not(feature = "ferrocene_subset"))]
+pub mod ferrocene_test;
+
 #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use ascii::EscapeAscii;

@@ -283,3 +283,16 @@ fn slice_escape_ascii_debug_fmt() {
     let x = b"hello".escape_ascii();
     assert_eq!(format!("{x:?}"), "EscapeAscii { .. }");
 }
+
+// covers `<core::slice::ascii::EscapeByte as core::ops::function::FnOnce<(&u8,)>>::call_once`
+#[test]
+fn slice_escape_byte_call_once_success() {
+    core::slice::ferrocene_test::test_escape_byte_call_once(10, 10);
+}
+
+// covers `<core::slice::ascii::EscapeByte as core::ops::function::FnOnce<(&u8,)>>::call_once`
+#[test]
+#[should_panic = "assertion `left == right` failed"]
+fn slice_escape_byte_call_once_failure() {
+    core::slice::ferrocene_test::test_escape_byte_call_once(30, 31);
+}

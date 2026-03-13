@@ -566,7 +566,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_add(rhs);
-            if b { overflow_panic::add() } else { a }
+            if b { imp::overflow_panic::add() } else { a }
         }
 
         /// Unchecked integer addition. Computes `self + rhs`, assuming overflow
@@ -658,7 +658,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_add_unsigned(self, rhs: $UnsignedT) -> Self {
             let (a, b) = self.overflowing_add_unsigned(rhs);
-            if b { overflow_panic::add() } else { a }
+            if b { imp::overflow_panic::add() } else { a }
         }
 
         /// Checked integer subtraction. Computes `self - rhs`, returning `None` if
@@ -709,7 +709,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_sub(rhs);
-            if b { overflow_panic::sub() } else { a }
+            if b { imp::overflow_panic::sub() } else { a }
         }
 
         /// Unchecked integer subtraction. Computes `self - rhs`, assuming overflow
@@ -801,7 +801,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_sub_unsigned(self, rhs: $UnsignedT) -> Self {
             let (a, b) = self.overflowing_sub_unsigned(rhs);
-            if b { overflow_panic::sub() } else { a }
+            if b { imp::overflow_panic::sub() } else { a }
         }
 
         /// Checked integer multiplication. Computes `self * rhs`, returning `None` if
@@ -852,7 +852,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_mul(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_mul(rhs);
-            if b { overflow_panic::mul() } else { a }
+            if b { imp::overflow_panic::mul() } else { a }
         }
 
         /// Unchecked integer multiplication. Computes `self * rhs`, assuming overflow
@@ -962,7 +962,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_div(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_div(rhs);
-            if b { overflow_panic::div() } else { a }
+            if b { imp::overflow_panic::div() } else { a }
         }
 
         /// Checked Euclidean division. Computes `self.div_euclid(rhs)`,
@@ -1031,7 +1031,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_div_euclid(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_div_euclid(rhs);
-            if b { overflow_panic::div() } else { a }
+            if b { imp::overflow_panic::div() } else { a }
         }
 
         /// Checked integer division without remainder. Computes `self / rhs`,
@@ -1208,7 +1208,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_rem(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_rem(rhs);
-            if b { overflow_panic::rem() } else { a }
+            if b { imp::overflow_panic::rem() } else { a }
         }
 
         /// Checked Euclidean remainder. Computes `self.rem_euclid(rhs)`, returning `None`
@@ -1276,7 +1276,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_rem_euclid(self, rhs: Self) -> Self {
             let (a, b) = self.overflowing_rem_euclid(rhs);
-            if b { overflow_panic::rem() } else { a }
+            if b { imp::overflow_panic::rem() } else { a }
         }
 
         /// Checked negation. Computes `-self`, returning `None` if `self == MIN`.
@@ -1356,7 +1356,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_neg(self) -> Self {
             let (a, b) = self.overflowing_neg();
-            if b { overflow_panic::neg() } else { a }
+            if b { imp::overflow_panic::neg() } else { a }
         }
 
         /// Checked shift left. Computes `self << rhs`, returning `None` if `rhs` is larger
@@ -1414,7 +1414,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shl(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shl(rhs);
-            if b { overflow_panic::shl() } else { a }
+            if b { imp::overflow_panic::shl() } else { a }
         }
 
         /// Unchecked shift left. Computes `self << rhs`, assuming that
@@ -1598,7 +1598,7 @@ macro_rules! int_impl {
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn strict_shr(self, rhs: u32) -> Self {
             let (a, b) = self.overflowing_shr(rhs);
-            if b { overflow_panic::shr() } else { a }
+            if b { imp::overflow_panic::shr() } else { a }
         }
 
         /// Unchecked shift right. Computes `self >> rhs`, assuming that
@@ -1895,7 +1895,7 @@ macro_rules! int_impl {
             } else {
                 // SAFETY: Input is nonnegative in this `else` branch.
                 let result = unsafe {
-                    crate::num::int_sqrt::$ActualT(self as $ActualT) as $SelfT
+                    imp::int_sqrt::$ActualT(self as $ActualT) as $SelfT
                 };
 
                 // Inform the optimizer what the range of outputs is. If
@@ -1912,7 +1912,7 @@ macro_rules! int_impl {
                 unsafe {
                     // SAFETY: `<$ActualT>::MAX` is nonnegative.
                     const MAX_RESULT: $SelfT = unsafe {
-                        crate::num::int_sqrt::$ActualT(<$ActualT>::MAX) as $SelfT
+                        imp::int_sqrt::$ActualT(<$ActualT>::MAX) as $SelfT
                     };
 
                     crate::hint::assert_unchecked(result >= 0);
@@ -3221,7 +3221,7 @@ macro_rules! int_impl {
         pub const fn isqrt(self) -> Self {
             match self.checked_isqrt() {
                 Some(sqrt) => sqrt,
-                None => crate::num::int_sqrt::panic_for_negative_argument(),
+                None => imp::int_sqrt::panic_for_negative_argument(),
             }
         }
 
@@ -3533,7 +3533,7 @@ macro_rules! int_impl {
             if let Some(log) = self.checked_ilog(base) {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -3558,7 +3558,7 @@ macro_rules! int_impl {
             if let Some(log) = self.checked_ilog2() {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -3584,7 +3584,7 @@ macro_rules! int_impl {
             if let Some(log) = self.checked_ilog10() {
                 log
             } else {
-                int_log10::panic_for_nonpositive_argument()
+                imp::int_log10::panic_for_nonpositive_argument()
             }
         }
 
@@ -3657,7 +3657,7 @@ macro_rules! int_impl {
         #[inline]
         #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_ilog10(self) -> Option<u32> {
-            int_log10::$ActualT(self as $ActualT)
+            imp::int_log10::$ActualT(self as $ActualT)
         }
 
         /// Computes the absolute value of `self`.

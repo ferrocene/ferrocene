@@ -16,8 +16,14 @@ use crate::convert::FloatToInt;
 use crate::num::FpCategory;
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
+<<<<<<< HEAD
 use crate::num::libm;
 #[cfg(not(feature = "ferrocene_subset"))]
+||||||| d933cf483ed
+use crate::num::libm;
+=======
+use crate::num::imp::libm;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::panic::const_assert;
 use crate::{intrinsics, mem};
 
@@ -1562,7 +1568,11 @@ impl f16 {
 // #[unstable(feature = "core_float_math", issue = "137578")]
 #[cfg(not(feature = "ferrocene_subset"))]
 #[cfg(not(test))]
-#[doc(test(attr(feature(cfg_target_has_reliable_f16_f128), expect(internal_features))))]
+#[doc(test(attr(
+    feature(cfg_target_has_reliable_f16_f128),
+    expect(internal_features),
+    allow(unused_features)
+)))]
 impl f16 {
     /// Returns the largest integer less than or equal to `self`.
     ///

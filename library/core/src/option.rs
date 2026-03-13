@@ -2507,7 +2507,6 @@ impl<T: [const] Ord> const Ord for Option<T> {
 
 #[derive(Clone, Debug)]
 struct Item<A> {
-    #[allow(dead_code)]
     opt: Option<A>,
 }
 

@@ -52,8 +52,7 @@ Your organizational and licensing needs may differ.
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing </rustc/install>` this
-target as a cross-compilation target:
+The following archives are needed when :doc:`installing <user-manual:rustc/install>` this target as a cross-compilation target:
 
 * ``rust-std-x86_64-pc-nto-qnx710``
 

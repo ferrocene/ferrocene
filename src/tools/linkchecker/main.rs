@@ -83,7 +83,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // The technical report is missing most of the time, as it's only included in stable releases.
     // This is fine though, because that section is hidden by the build system with `display: none`
     // when the link is missing. We thus ignore it to avoid a linkchecker complaint.
-    ("index.html", &["qualification/technical-report.pdf", "certification/core/technical-report.pdf"]),
+    ("index.html", &["qualification/technical-report.pdf", "certification/core-technical-report.pdf"]),
     // The index.html here would be the upstream Rust index.html, which is removed when generating
     // the certified API docs.
     ("certification/api-docs/help.html", &["certification/api-docs/index.html"]),

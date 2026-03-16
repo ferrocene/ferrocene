@@ -20,7 +20,7 @@ pub(crate) fn sign(
     env: &Env,
 ) -> Result<(), Error> {
     let config = Config::load(source_dir)?;
-    let pinned = Pinned::generate(env, output_dir)?;
+    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir)?;
     let mut signature_files = SignatureFiles::load(source_dir, env)?;
 
     let regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml")? {
@@ -100,6 +100,12 @@ pub(crate) fn sign(
 
     signature_files
         .write(&format!("{role_name}.cosign-bundle"), &std::fs::read(bundle_temp.path())?)?;
+
+    let filename =
+        output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
+    let cached_path = Path::new("build/host/signature-diffs").join(filename);
+    let (_, tmp_path) = saved_tarfile.keep()?;
+    std::fs::rename(tmp_path, cached_path)?;
 
     Ok(())
 }

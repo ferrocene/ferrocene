@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Error};
@@ -20,7 +20,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         file.read_to_end(&mut contents)?;
 
         let existing: Pinned = toml::from_slice(&contents)?;
-        let expected = Pinned::generate(env, output_dir)?;
+        let (expected, _) = Pinned::generate(env, output_dir)?;
 
         if existing != expected {
             eprintln!("Signature incorrect: {}", output_dir.display());
@@ -32,6 +32,11 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
                 eprintln!("existing tarball sha256: {}", existing.tarball_sha256);
                 eprintln!("expected tarball sha256: {}", expected.tarball_sha256);
             }
+
+            // Print a diff that explains why this broke.
+            let diff_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diff.py");
+            Command::new(diff_path).arg("local").arg(output_dir.file_name().unwrap()).status()?;
+
             anyhow::bail!("pinned documentation file outdated");
         } else {
             eprintln!("Signature correct: {}", output_dir.display());

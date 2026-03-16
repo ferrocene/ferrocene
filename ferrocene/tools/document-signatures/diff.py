@@ -204,8 +204,9 @@ def find_sphinx_books(path: Path, *, root=None) -> Generator[Path, None, None]:
 
 def diff_local_tarball(document_name: str):
     # Signed docs
-    tarball = Path("build/host/doc/qualification")/document_name/"signature"/"stable-archive.tar.gz"
-    extracted_dir = Path("build/host/signature-diffs")/document_name
+    dir = Path("build/host/signature-diffs")
+    tarball = dir/(document_name+"-stable-archive.tar.gz")
+    extracted_dir = dir/document_name
     extracted_dir.mkdir(parents=True, exist_ok=True)
     subprocess.run(["tar", "-xf", tarball, "-C", extracted_dir], check=True)
 

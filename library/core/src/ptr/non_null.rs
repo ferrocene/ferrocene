@@ -4,7 +4,9 @@ use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PointeeSized, Unsize};
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::mem::{MaybeUninit, SizedTypeProperties, transmute};
+use crate::mem::{MaybeUninit, SizedTypeProperties};
+use crate::mem::transmute;
+#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};

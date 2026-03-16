@@ -19,11 +19,11 @@ import requests
 import subprocess
 import sys
 
+### Bors diffs
 
 GITHUB_REPO = "ferrocene/ferrocene"
 BORS_USER_ID = 87868125
 DOCS_COMPONENTS = ["ferrocene-docs", "ferrocene-docs-signatures"]
-
 
 github = requests.Session()
 github.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
@@ -36,7 +36,7 @@ class BorsCommit:
     prs: Set[int]
 
 
-def main(pr: int):
+def diff_bors_artifact(pr_number: int):
     eprint("===> checking whether you are in a bors GitHub repository...")
     if not os.path.exists("ferrocene/ci/channel"):
         eprint(
@@ -48,13 +48,13 @@ def main(pr: int):
     subprocess.run(["aws", "sts", "get-caller-identity"], check=True)
 
     eprint("===> getting the last bors build from the GitHub API...")
-    build = get_last_bors_build(pr)
+    build = get_last_bors_build(pr_number)
     eprint(f"found {build.hash}!")
 
     destdir = download_docs(build.hash)
 
     eprint("===> building local documentation")
-    subprocess.run(["./x.py", "doc", "ferrocene/doc"])
+    subprocess.run(["./x.py", "doc", "ferrocene/doc"], check=True)
 
     eprint("===> comparing the local and upstream documentation")
     diff_path = generate_diff(destdir)
@@ -202,6 +202,33 @@ def find_sphinx_books(path: Path, *, root=None) -> Generator[Path, None, None]:
                 yield found
 
 
+### Local diffs
+
+def diff_local_tarball(document_name: str):
+    # Signed docs
+    tarball = Path("build/host/doc/qualification")/document_name/"signature"/"stable-archive.tar.gz"
+    extracted_dir = Path("build/host/signature-diffs")/document_name
+    extracted_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["tar", "-xf", tarball, "-C", extracted_dir], check=True)
+
+    # Local docs
+    # build_all_docs()
+
+    built_dir = Path("build/host/doc/qualification")/document_name
+
+    eprint("comparing", extracted_dir, "to", built_dir)
+    subprocess.run([
+        "diff",
+        "--unified",
+        "--recursive",
+        extracted_dir,
+        built_dir,
+        "--exclude=signature",
+    ])
+
+
+### Helpers
+
 def handle_github_api_error(response: requests.Response):
     if response.status_code >= 400:
         eprint(f"error: request to the GitHub API failed: {response.json()['message']}")
@@ -216,7 +243,19 @@ def eprint(*args, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("pr_number", type=int)
-    args = parser.parse_args()
+    subcommands = parser.add_subparsers(dest='cmd')
+    subcommands.required = True
 
-    main(args.pr_number)
+    local = subcommands.add_parser("local")
+    local.add_argument("document_name")
+    local.set_defaults(func=diff_local_tarball)
+
+    bors = subcommands.add_parser("bors")
+    bors.add_argument("pr_number", type=int)
+    bors.set_defaults(func=diff_bors_artifact)
+
+    args = parser.parse_args()
+    if args.cmd == 'local':
+        diff_local_tarball(args.document_name)
+    else:
+        diff_bors_artifact(args.pr_number)

@@ -90,12 +90,6 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :ref:`aarch64-unknown-nto-qnx710`
-     - ``aarch64-unknown-nto-qnx710``
-     - Cross-compilation
-     - Full
-     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
-
    * - :ref:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
      - Cross-compilation
@@ -114,11 +108,6 @@ qualified upon request.
      - Full
      - \-
 
-   * - :ref:`x86_64-pc-nto-qnx710`
-     - ``x86_64-pc-nto-qnx710``
-     - Cross-compilation
-     - Full
-     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
 Quality managed targets
 -----------------------

@@ -673,6 +673,12 @@ sphinx_books! [
         dest: "release-notes",
         require_relnotes: true,
     },
+    {
+        ty: QNX7,
+        name: "QNX7 Manual",
+        src: "ferrocene/doc/qnx7",
+        dest: "qnx7",
+    },
     // Qualification Documents
     {
         ty: DocumentList,

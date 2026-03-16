@@ -5,13 +5,11 @@ use std::path::PathBuf;
 
 use crate::FileType;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Sbom {
-    pub(crate) target: TargetSelection,
     root_dir: PathBuf,
 }
 
@@ -26,7 +24,7 @@ impl Step for Sbom {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Sbom { target: run.target, root_dir: run.builder.src.clone() });
+        run.builder.ensure(Sbom { root_dir: run.builder.src.clone() });
     }
 
     fn is_default_step(_: &Builder<'_>) -> bool {
@@ -90,7 +88,7 @@ impl Step for Sbom {
 
         builder.info(&format!("Saving SBOM to {}", main_spdx_sbom_filepath.display()));
 
-        let tarball = Tarball::new(builder, SBOM_CMD_NAME, &self.target.triple);
+        let tarball = Tarball::new_targetless(builder, SBOM_CMD_NAME);
         tarball.add_file(main_spdx_sbom_filepath, ".", FileType::Regular);
         tarball.generate()
     }

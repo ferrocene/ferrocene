@@ -3,15 +3,8 @@ use crate::clone::TrivialClone;
 use crate::cmp::Ordering;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, PointeeSized, Unsize};
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-use crate::mem::{MaybeUninit, SizedTypeProperties};
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| f02672cb8bf
-use crate::mem::{MaybeUninit, SizedTypeProperties};
-=======
 use crate::mem::{MaybeUninit, SizedTypeProperties, transmute};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::num::NonZero;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{CoerceUnsized, DispatchFromDyn};

@@ -54,7 +54,7 @@ def main(pr: int):
     destdir = download_docs(build.hash)
 
     eprint("===> building local documentation")
-    subprocess.run(["./x.py", "doc", "ferrocene/doc", "--fresh"])
+    subprocess.run(["./x.py", "doc", "ferrocene/doc"])
 
     eprint("===> comparing the local and upstream documentation")
     diff_path = generate_diff(destdir)
@@ -87,6 +87,9 @@ def get_bors_commits(pr: int) -> Generator[BorsCommit, None, None]:
         )
         if parsed:
             yield parsed
+        else:
+            eprint("failed to parse bors commit message:",
+                   commit.json()["commit"]["message"])
 
 
 def get_pr_timeline(pr: int) -> Generator[Any, None, None]:
@@ -105,25 +108,31 @@ def get_pr_timeline(pr: int) -> Generator[Any, None, None]:
 def parse_bors_commit_message(hash: str, message: str) -> Optional[BorsCommit]:
     message = message.removesuffix(":")
 
-    parts = message.split(" ")
+    parts = message.splitlines()[0].split(" ")
     kind = parts[0]
 
     if kind not in ("Merge", "Try"):
+        eprint(f"Unknown bors commit kind: {kind}")
         return None
 
     prs = set()
     for pr in parts[1:]:
         if not pr.startswith("#"):
+            eprint(f"Could not parse PR number: {pr}")
             return None
         pr = pr.removeprefix("#")
         try:
             prs.add(int(pr))
         except ValueError:
             # Not an integer
+            eprint(f"Could not parse PR number: {pr}")
             return None
 
     if prs:
         return BorsCommit(hash=hash, kind=kind, prs=prs)
+
+    eprint(f"Found no PRs in bors message: {message}")
+    return None
 
 
 def download_docs(commit: str) -> Path:

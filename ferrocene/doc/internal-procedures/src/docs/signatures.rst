@@ -110,12 +110,16 @@ to be run by the person who signed the document.
 Before running the script, make sure you have a valid `GitHub Personal Access
 Token (classic) <https://github.com/settings/tokens>`_ authorized with SSO to
 access the Ferrocene organization, and place it in the ``GITHUB_TOKEN``
-environment variable by running `$ export GITHUB_TOKEN=your_token`. Then run
+environment variable by running ``$ export GITHUB_TOKEN=your_token``. Then run
 this command, replacing ``PR_NUMBER`` with the number of the PR that failed CI:
 
 .. code-block::
 
    AWS_PROFILE=ferrocene-ci ferrocene/tools/document-signatures/diff.py PR_NUMBER
+
+The PR is expected to have a "Merge" or "Try" commit build authored by bors, such as the
+"Merge #2204" commit in
+`this 1.92 signature PR <https://github.com/ferrocene/ferrocene/pull/2204#ref-commit-d1aa305>`_.
 
 The command will fetch the documentation from CI, build a fresh copy of the
 documentation locally, and then compare the two. At the end, the script will

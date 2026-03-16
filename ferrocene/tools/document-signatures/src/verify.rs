@@ -5,7 +5,7 @@ use std::io::Read;
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::{Context, Error, anyhow};
+use anyhow::{Context, Error};
 
 use crate::Env;
 use crate::config::Config;
@@ -46,10 +46,21 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
 
     let config = Config::load(source_dir)?;
     for (role_name, role) in config.roles.iter() {
-        let bundle = signature_files
+        let maybe_bundle = signature_files
             .on_disk_as_tempfile(&format!("{role_name}.cosign-bundle"))
-            .with_context(|| format!("failed to read signature for role {role_name}"))?
-            .ok_or_else(|| anyhow!("missing signature file for role {role_name}"))?;
+            .with_context(|| format!("failed to read signature for role {role_name}"))?;
+
+        let bundle = match maybe_bundle {
+            Some(present) => present,
+            None if env.allow_dev_signing => {
+                eprintln!("warning: missing signature from role {role_name}!");
+                eprintln!(
+                    "ignoring since this is a dev build, but these documents cannot be used in production"
+                );
+                continue;
+            }
+            None => anyhow::bail!("missing signature file for role {role_name}"),
+        };
 
         eprintln!("checking role {role_name}");
         let status = Command::new(&env.cosign_binary)

@@ -25,10 +25,6 @@ GITHUB_REPO = "ferrocene/ferrocene"
 BORS_USER_ID = 87868125
 DOCS_COMPONENTS = ["ferrocene-docs", "ferrocene-docs-signatures"]
 
-github = requests.Session()
-github.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
-
-
 @dataclass
 class BorsCommit:
     hash: str
@@ -47,11 +43,14 @@ def diff_bors_artifact(pr_number: int):
     eprint("===> checking whether you are authenticated with AWS...")
     subprocess.run(["aws", "sts", "get-caller-identity"], check=True)
 
+    github = requests.Session()
+    github.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
+
     eprint("===> getting the last bors build from the GitHub API...")
-    build = get_last_bors_build(pr_number)
+    build = get_last_bors_build(pr_number, github)
     eprint(f"found {build.hash}!")
 
-    destdir = download_docs(build.hash)
+    destdir = download_docs(build.hash, github)
 
     eprint("===> building local documentation")
     subprocess.run(["./x.py", "doc", "ferrocene/doc"], check=True)
@@ -63,17 +62,16 @@ def diff_bors_artifact(pr_number: int):
     eprint(f"path to the diff: {diff_path}")
     eprint()
 
-
-def get_last_bors_build(pr: int) -> BorsCommit:
-    commits = list(commit for commit in get_bors_commits(pr) if pr in commit.prs)
+def get_last_bors_build(pr: int, github: requests.Session) -> BorsCommit:
+    commits = list(commit for commit in get_bors_commits(pr, github) if pr in commit.prs)
     if not commits:
         eprint(f"could not find any bors merge commit (try or auto) for PR #{pr}")
         exit(1)
     return commits[-1]
 
 
-def get_bors_commits(pr: int) -> Generator[BorsCommit, None, None]:
-    for event in get_pr_timeline(pr):
+def get_bors_commits(pr: int, github: requests.Session) -> Generator[BorsCommit, None, None]:
+    for event in get_pr_timeline(pr, github):
         if event["event"] != "referenced":
             continue
         if event["actor"]["id"] != BORS_USER_ID:
@@ -92,7 +90,7 @@ def get_bors_commits(pr: int) -> Generator[BorsCommit, None, None]:
                    commit.json()["commit"]["message"])
 
 
-def get_pr_timeline(pr: int) -> Generator[Any, None, None]:
+def get_pr_timeline(pr: int, github: requests.Session) -> Generator[Any, None, None]:
     url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{pr}/timeline"
 
     while url is not None:
@@ -135,11 +133,11 @@ def parse_bors_commit_message(hash: str, message: str) -> Optional[BorsCommit]:
     return None
 
 
-def download_docs(commit: str) -> Path:
+def download_docs(commit: str, github: requests.Session) -> Path:
     tempdir = Path(tempfile.mkdtemp())
 
     for component in DOCS_COMPONENTS:
-        tarball = ferrocene_tarball_name(commit, component)
+        tarball = ferrocene_tarball_name(commit, component, github)
         eprint(f"===> downloading and extracting {tarball} from S3")
         file = tempdir / "tarballs" / tarball
         url = f"s3://ferrocene-ci-artifacts/ferrocene/dist/{commit}/{tarball}"
@@ -150,16 +148,16 @@ def download_docs(commit: str) -> Path:
     return tempdir
 
 
-def ferrocene_tarball_name(commit: str, component: str) -> str:
-    channel = file_for_commit(commit, "ferrocene/ci/channel").strip()
+def ferrocene_tarball_name(commit: str, component: str, github: requests.Session) -> str:
+    channel = file_for_commit(commit, "ferrocene/ci/channel", github).strip()
     if channel == "stable":
-        version = file_for_commit(commit, "ferrocene/version").strip()
+        version = file_for_commit(commit, "ferrocene/version", github).strip()
         return f"{component}-{version}.tar.xz"
     else:
         return f"{component}-{commit[:9]}.tar.xz"
 
 
-def file_for_commit(commit: str, path: str) -> str:
+def file_for_commit(commit: str, path: str, github: requests.Session) -> str:
     resp = github.get(
         f"https://api.github.com/repos/{GITHUB_REPO}/contents/{path}?ref={commit}",
         headers={"accept": "application/vnd.github.raw+json"},

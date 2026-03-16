@@ -7,6 +7,7 @@
 //! relevant to command execution in the bootstrap process. This includes settings such as
 //! dry-run mode, verbosity level, and failure behavior.
 
+use std::backtrace::{Backtrace, BacktraceStatus};
 use std::collections::HashMap;
 use std::ffi::{OsStr, OsString};
 use std::fmt::{Debug, Formatter};
@@ -941,6 +942,14 @@ Executed at: {executed_at}"#,
             }
             if stderr.captures() {
                 writeln!(error_message, "\n--- STDERR vvv\n{}", output.stderr().trim()).unwrap();
+            }
+            let backtrace = if exec_ctx.is_verbose() {
+                Backtrace::force_capture()
+            } else {
+                Backtrace::capture()
+            };
+            if matches!(backtrace.status(), BacktraceStatus::Captured) {
+                writeln!(error_message, "\n--- BACKTRACE vvv\n{backtrace}").unwrap();
             }
 
             match command.failure_behavior {

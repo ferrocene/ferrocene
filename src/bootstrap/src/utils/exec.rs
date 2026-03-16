@@ -34,6 +34,8 @@ pub enum BehaviorOnFailure {
     Exit,
     /// Delay failure until the end of bootstrap invocation.
     DelayFail,
+    /// Delay failure until the end of bootstrap invocation, even when `fail_fast` is enabled.
+    ForceDelayFail,
     /// Ignore the failure, the command can fail in an expected way.
     Ignore,
 }
@@ -310,6 +312,11 @@ impl<'a> BootstrapCommand {
     pub fn stdin(&mut self, stdin: std::process::Stdio) -> &mut Self {
         self.command.stdin(stdin);
         self
+    }
+
+    #[must_use]
+    pub fn force_delay_failure(self) -> Self {
+        Self { failure_behavior: BehaviorOnFailure::ForceDelayFail, ..self }
     }
 
     #[must_use]
@@ -937,6 +944,9 @@ Executed at: {executed_at}"#,
             }
 
             match command.failure_behavior {
+                BehaviorOnFailure::ForceDelayFail => {
+                    exec_ctx.add_to_delay_failure(error_message);
+                }
                 BehaviorOnFailure::DelayFail => {
                     if exec_ctx.fail_fast {
                         exec_ctx.fail(&error_message);

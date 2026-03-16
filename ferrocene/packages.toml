@@ -160,6 +160,6 @@ name = "ferrocene-docs-doctrees"
 # packages would only cause confusion.
 subset = "internal"
 
-[[groups.hosts.packages]]
+[[groups.any-platform.packages]]
 name = "ferrocene-sbom"
 subset = "default"

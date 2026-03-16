@@ -48,13 +48,16 @@ impl Pinned {
             .trim()
             .to_string();
 
-        let mut tar = Command::new(env.tar_binary)
+        let mut tar_cmd = Command::new(env.tar_binary);
+        tar_cmd
             .args(TAR_REPRODUCIBILITY_FLAGS)
             .arg("-C")
             .arg(output_dir)
             .args(&["-c", "."])
-            .stdout(Stdio::piped())
-            .spawn()?;
+            .stdout(Stdio::piped());
+
+        eprintln!("running: {tar_cmd:?}");
+        let mut tar = tar_cmd.spawn()?;
 
         let mut hasher = Sha256::new();
         std::io::copy(&mut tar.stdout.take().unwrap(), &mut hasher)?;

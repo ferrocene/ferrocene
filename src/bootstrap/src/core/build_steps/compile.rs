@@ -33,6 +33,7 @@ use crate::core::config::{
 };
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
+use crate::ferrocene::test_variants::{TestCondition, TestVariant};
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;
@@ -726,6 +727,14 @@ pub fn std_cargo(
     // Ferrocene additions
     if target.contains("ferrocene.subset") {
         cargo.arg("--features=ferrocene_subset");
+    }
+
+    let variant = TestVariant::current(builder, target);
+
+    if let Some(target_cpu) = variant.target_cpu() {
+        if target != cargo.compiler().host {
+            target_cpu.apply(cargo);
+        }
     }
 
     if builder.config.rust_lto == RustcLto::Off {

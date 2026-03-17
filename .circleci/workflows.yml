@@ -1023,7 +1023,7 @@ workflows:
           name: x86_64-qnx-test-library
           job: test:library
           test-variant: "2021"
-          extra-args: --no-doc # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1091,7 +1091,7 @@ workflows:
           name: aarch64-qnx-test-library
           job: test:library
           test-variant: "2021"
-          extra-args: --no-doc # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

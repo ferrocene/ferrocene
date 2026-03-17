@@ -2727,6 +2727,8 @@ pub fn run_cargo(
         .unwrap() // chop off `$target`
         .join(target_root_dir.file_name().unwrap());
 
+    println!("FFFFFFFFFFF");
+
     // Spawn Cargo slurping up its JSON output. We'll start building up the
     // `deps` array of all files it generated along with a `toplevel` array of
     // files we need to probe for later.
@@ -2813,6 +2815,8 @@ pub fn run_cargo(
             toplevel.push((file_stem, extension, expected_len));
         }
     });
+
+    println!("CCCCCCCCCCCC");
 
     if !ok {
         crate::exit!(1);

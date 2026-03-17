@@ -5754,8 +5754,6 @@ core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
-core::panicking::panic_str_2015
-core::panicking::unreachable_display
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset

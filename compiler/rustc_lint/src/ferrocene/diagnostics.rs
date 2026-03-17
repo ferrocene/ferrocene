@@ -24,7 +24,8 @@ impl<'tcx> LintState<'tcx> {
         let (callee, receiver_span) = (use_.def_id(), use_.span);
 
         debug!("linting node {lint_node:?}");
-        tcx.node_span_lint(UNVALIDATED, lint_node, receiver_span, |diag| {
+
+        tcx.emit_node_span_lint(UNVALIDATED, lint_node, receiver_span, rustc_errors::DiagDecorator(|diag| {
             let callee_descr = tcx.def_descr(callee);
             let owner_descr = tcx.def_descr(owner.into());
             diag.primary_message(format!(
@@ -75,7 +76,7 @@ impl<'tcx> LintState<'tcx> {
                 self.decorate_cast(use_, diag);
                 self.decorate_instantiation(use_, diag, None);
             }
-        });
+        }));
     }
 
     fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) {

@@ -4,7 +4,7 @@
 use std::num::NonZero;
 
 use rustc_ast::NodeId;
-use rustc_errors::{Applicability, Diag, EmissionGuarantee, LintBuffer, LintDiagnostic, msg};
+use rustc_errors::{Applicability, Diag, EmissionGuarantee, LintBuffer, msg};
 use rustc_feature::GateIssue;
 use rustc_hir::attrs::{DeprecatedSince, Deprecation};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -131,15 +131,8 @@ impl<'a, G: EmissionGuarantee> rustc_errors::Diagnostic<'a, G> for Deprecated {
         dcx: rustc_errors::DiagCtxtHandle<'a>,
         level: rustc_errors::Level,
     ) -> Diag<'a, G> {
-        let mut diag = Diag::new(dcx, level, "");
-        self.decorate_lint(&mut diag);
-        diag
-    }
-}
-
-impl<'a, G: EmissionGuarantee> LintDiagnostic<'a, G> for Deprecated {
-    fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, G>) {
-        diag.primary_message(match &self.since_kind {
+        let Self { sub, kind, path, note, since_kind } = self;
+        let mut diag = Diag::new(dcx, level, match &since_kind {
             DeprecatedSinceKind::InEffect => msg!(
                 "use of deprecated {$kind} `{$path}`{$has_note ->
                     [true] : {$note}
@@ -160,21 +153,22 @@ impl<'a, G: EmissionGuarantee> LintDiagnostic<'a, G> for Deprecated {
                     }"
                 )
             }
-        });
-        diag.arg("kind", self.kind);
-        diag.arg("path", self.path);
-        if let DeprecatedSinceKind::InVersion(version) = self.since_kind {
+        })
+        .with_arg("kind", kind)
+        .with_arg("path", path);
+        if let DeprecatedSinceKind::InVersion(version) = since_kind {
             diag.arg("version", version);
         }
-        if let Some(note) = self.note {
+        if let Some(note) = note {
             diag.arg("has_note", true);
             diag.arg("note", note);
         } else {
             diag.arg("has_note", false);
         }
-        if let Some(sub) = self.sub {
+        if let Some(sub) = sub {
             diag.subdiagnostic(sub);
         }
+        diag
     }
 }
 
@@ -570,9 +564,14 @@ impl<'tcx> TyCtxt<'tcx> {
         unmarked: impl FnOnce(Span, DefId),
     ) -> bool {
         let soft_handler = |lint, span, msg: String| {
-            self.node_span_lint(lint, id.unwrap_or(hir::CRATE_HIR_ID), span, |lint| {
-                lint.primary_message(msg);
-            })
+            self.emit_node_span_lint(
+                lint,
+                id.unwrap_or(hir::CRATE_HIR_ID),
+                span,
+                rustc_errors::DiagDecorator(|lint| {
+                    lint.primary_message(msg);
+                }),
+            );
         };
         let eval_result =
             self.eval_stability_allow_unstable(def_id, id, span, method_span, allow_unstable);

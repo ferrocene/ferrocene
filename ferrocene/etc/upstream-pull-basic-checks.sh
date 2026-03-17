@@ -39,6 +39,7 @@ fi
 ./x test tidy $BLESS
 ./x check core
 ./x check core --set 'rust.std-features=["ferrocene_subset"]'
+./x test --coverage=library library/core library/alloc --tests
 
 if [ -z "$EXTENDED" ]; then
     exit 0
@@ -46,4 +47,3 @@ fi
 
 ./x test $(ferrocene/ci/split-tasks.py test:compiletest) --target thumbv7em-ferrocene.facade-eabi
 ./x test $(ferrocene/ci/split-tasks.py test:docs)
-./x test --coverage=library library/core library/alloc --no-doc

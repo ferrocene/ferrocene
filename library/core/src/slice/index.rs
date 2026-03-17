@@ -142,7 +142,7 @@ mod private_slice_index {
     #[cfg(not(feature = "ferrocene_subset"))]
     impl Sealed for range::Range<usize> {}
     #[cfg(not(feature = "ferrocene_subset"))]
-    #[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
     impl Sealed for range::RangeInclusive<usize> {}
     #[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
     #[cfg(not(feature = "ferrocene_subset"))]
@@ -744,7 +744,7 @@ unsafe impl<T> const SliceIndex<[T]> for ops::RangeInclusive<usize> {
     }
 }
 
-#[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 #[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> const SliceIndex<[T]> for range::RangeInclusive<usize> {

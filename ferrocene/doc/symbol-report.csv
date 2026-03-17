@@ -1333,13 +1333,6 @@
 <core::num::FpCategory as core::cmp::Eq>::assert_fields_are_eq
 <core::num::FpCategory as core::cmp::PartialEq>::eq
 <core::num::FpCategory as core::fmt::Debug>::fmt
-<core::num::bignum::Big32x40 as core::clone::Clone>::clone
-<core::num::bignum::Big32x40 as core::cmp::Ord>::cmp
-<core::num::bignum::Big32x40 as core::cmp::PartialEq>::eq
-<core::num::bignum::Big32x40 as core::cmp::PartialOrd>::partial_cmp
-<core::num::bignum::Big32x40 as core::fmt::Debug>::fmt
-<core::num::diy_float::Fp as core::clone::Clone>::clone
-<core::num::diy_float::Fp as core::fmt::Debug>::fmt
 <core::num::error::IntErrorKind as core::clone::Clone>::clone
 <core::num::error::IntErrorKind as core::cmp::Eq>::assert_fields_are_eq
 <core::num::error::IntErrorKind as core::cmp::PartialEq>::eq
@@ -1357,23 +1350,30 @@
 <core::num::error::TryFromIntError as core::convert::From<core::convert::Infallible>>::from
 <core::num::error::TryFromIntError as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::fmt::Display>::fmt
-<core::num::flt2dec::Sign as core::clone::Clone>::clone
-<core::num::flt2dec::Sign as core::cmp::Eq>::assert_fields_are_eq
-<core::num::flt2dec::Sign as core::cmp::PartialEq>::eq
-<core::num::flt2dec::Sign as core::fmt::Debug>::fmt
-<core::num::flt2dec::decoder::Decoded as core::clone::Clone>::clone
-<core::num::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_fields_are_eq
-<core::num::flt2dec::decoder::Decoded as core::cmp::PartialEq>::eq
-<core::num::flt2dec::decoder::Decoded as core::fmt::Debug>::fmt
-<core::num::flt2dec::decoder::FullDecoded as core::clone::Clone>::clone
-<core::num::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_fields_are_eq
-<core::num::flt2dec::decoder::FullDecoded as core::cmp::PartialEq>::eq
-<core::num::flt2dec::decoder::FullDecoded as core::fmt::Debug>::fmt
-<core::num::fmt::Formatted<'a> as core::clone::Clone>::clone
-<core::num::fmt::Part<'a> as core::clone::Clone>::clone
-<core::num::fmt::Part<'a> as core::cmp::Eq>::assert_fields_are_eq
-<core::num::fmt::Part<'a> as core::cmp::PartialEq>::eq
-<core::num::fmt::Part<'a> as core::fmt::Debug>::fmt
+<core::num::imp::bignum::Big32x40 as core::clone::Clone>::clone
+<core::num::imp::bignum::Big32x40 as core::cmp::Ord>::cmp
+<core::num::imp::bignum::Big32x40 as core::cmp::PartialEq>::eq
+<core::num::imp::bignum::Big32x40 as core::cmp::PartialOrd>::partial_cmp
+<core::num::imp::bignum::Big32x40 as core::fmt::Debug>::fmt
+<core::num::imp::diy_float::Fp as core::clone::Clone>::clone
+<core::num::imp::diy_float::Fp as core::fmt::Debug>::fmt
+<core::num::imp::flt2dec::Sign as core::clone::Clone>::clone
+<core::num::imp::flt2dec::Sign as core::cmp::Eq>::assert_fields_are_eq
+<core::num::imp::flt2dec::Sign as core::cmp::PartialEq>::eq
+<core::num::imp::flt2dec::Sign as core::fmt::Debug>::fmt
+<core::num::imp::flt2dec::decoder::Decoded as core::clone::Clone>::clone
+<core::num::imp::flt2dec::decoder::Decoded as core::cmp::Eq>::assert_fields_are_eq
+<core::num::imp::flt2dec::decoder::Decoded as core::cmp::PartialEq>::eq
+<core::num::imp::flt2dec::decoder::Decoded as core::fmt::Debug>::fmt
+<core::num::imp::flt2dec::decoder::FullDecoded as core::clone::Clone>::clone
+<core::num::imp::flt2dec::decoder::FullDecoded as core::cmp::Eq>::assert_fields_are_eq
+<core::num::imp::flt2dec::decoder::FullDecoded as core::cmp::PartialEq>::eq
+<core::num::imp::flt2dec::decoder::FullDecoded as core::fmt::Debug>::fmt
+<core::num::imp::fmt::Formatted<'a> as core::clone::Clone>::clone
+<core::num::imp::fmt::Part<'a> as core::clone::Clone>::clone
+<core::num::imp::fmt::Part<'a> as core::cmp::Eq>::assert_fields_are_eq
+<core::num::imp::fmt::Part<'a> as core::cmp::PartialEq>::eq
+<core::num::imp::fmt::Part<'a> as core::fmt::Debug>::fmt
 <core::num::niche_types::Nanoseconds as core::clone::Clone>::clone
 <core::num::niche_types::Nanoseconds as core::cmp::Ord>::cmp
 <core::num::niche_types::Nanoseconds as core::cmp::PartialEq>::eq
@@ -1921,12 +1921,12 @@
 <f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
-<f16 as core::num::dec2flt::float::RawFloat>::classify
-<f16 as core::num::dec2flt::float::RawFloat>::from_u64
-<f16 as core::num::dec2flt::float::RawFloat>::from_u64_bits
-<f16 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
-<f16 as core::num::dec2flt::float::RawFloat>::to_bits
-<f16 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f16 as core::num::imp::dec2flt::float::RawFloat>::classify
+<f16 as core::num::imp::dec2flt::float::RawFloat>::from_u64
+<f16 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
+<f16 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
+<f16 as core::num::imp::dec2flt::float::RawFloat>::to_bits
+<f16 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f16 as core::ops::arith::Add<&f16>>::add
 <f16 as core::ops::arith::Add>::add
 <f16 as core::ops::arith::AddAssign<&f16>>::add_assign
@@ -1952,12 +1952,12 @@
 <f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
-<f32 as core::num::dec2flt::float::RawFloat>::classify
-<f32 as core::num::dec2flt::float::RawFloat>::from_u64
-<f32 as core::num::dec2flt::float::RawFloat>::from_u64_bits
-<f32 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
-<f32 as core::num::dec2flt::float::RawFloat>::to_bits
-<f32 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f32 as core::num::imp::dec2flt::float::RawFloat>::classify
+<f32 as core::num::imp::dec2flt::float::RawFloat>::from_u64
+<f32 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
+<f32 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
+<f32 as core::num::imp::dec2flt::float::RawFloat>::to_bits
+<f32 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f32 as core::ops::arith::Add<&f32>>::add
 <f32 as core::ops::arith::Add>::add
 <f32 as core::ops::arith::AddAssign<&f32>>::add_assign
@@ -1983,12 +1983,12 @@
 <f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
-<f64 as core::num::dec2flt::float::RawFloat>::classify
-<f64 as core::num::dec2flt::float::RawFloat>::from_u64
-<f64 as core::num::dec2flt::float::RawFloat>::from_u64_bits
-<f64 as core::num::dec2flt::float::RawFloat>::pow10_fast_path
-<f64 as core::num::dec2flt::float::RawFloat>::to_bits
-<f64 as core::num::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f64 as core::num::imp::dec2flt::float::RawFloat>::classify
+<f64 as core::num::imp::dec2flt::float::RawFloat>::from_u64
+<f64 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
+<f64 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
+<f64 as core::num::imp::dec2flt::float::RawFloat>::to_bits
+<f64 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
 <f64 as core::ops::arith::Add<&f64>>::add
 <f64 as core::ops::arith::Add>::add
 <f64 as core::ops::arith::AddAssign<&f64>>::add_assign
@@ -3032,9 +3032,9 @@
 <u16 as core::iter::range::Step>::steps_between
 <u16 as core::iter::traits::accum::Sum<&'a u16>>::sum
 <u16 as core::iter::traits::accum::Sum>::sum
-<u16 as core::num::bignum::FullOps>::full_div_rem
-<u16 as core::num::bignum::FullOps>::full_mul_add
-<u16 as core::num::dec2flt::float::CastInto<i16>>::cast
+<u16 as core::num::imp::bignum::FullOps>::full_div_rem
+<u16 as core::num::imp::bignum::FullOps>::full_mul_add
+<u16 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
 <u16 as core::ops::arith::Add<&u16>>::add
 <u16 as core::ops::arith::Add>::add
 <u16 as core::ops::arith::AddAssign<&u16>>::add_assign
@@ -3180,9 +3180,9 @@
 <u32 as core::iter::range::Step>::steps_between
 <u32 as core::iter::traits::accum::Sum<&'a u32>>::sum
 <u32 as core::iter::traits::accum::Sum>::sum
-<u32 as core::num::bignum::FullOps>::full_div_rem
-<u32 as core::num::bignum::FullOps>::full_mul_add
-<u32 as core::num::dec2flt::float::CastInto<i16>>::cast
+<u32 as core::num::imp::bignum::FullOps>::full_div_rem
+<u32 as core::num::imp::bignum::FullOps>::full_mul_add
+<u32 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
 <u32 as core::ops::arith::Add<&u32>>::add
 <u32 as core::ops::arith::Add>::add
 <u32 as core::ops::arith::AddAssign<&u32>>::add_assign
@@ -3328,9 +3328,9 @@
 <u64 as core::iter::range::Step>::steps_between
 <u64 as core::iter::traits::accum::Sum<&'a u64>>::sum
 <u64 as core::iter::traits::accum::Sum>::sum
-<u64 as core::num::bignum::FullOps>::full_div_rem
-<u64 as core::num::bignum::FullOps>::full_mul_add
-<u64 as core::num::dec2flt::float::CastInto<i16>>::cast
+<u64 as core::num::imp::bignum::FullOps>::full_div_rem
+<u64 as core::num::imp::bignum::FullOps>::full_mul_add
+<u64 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
 <u64 as core::ops::arith::Add<&u64>>::add
 <u64 as core::ops::arith::Add>::add
 <u64 as core::ops::arith::AddAssign<&u64>>::add_assign
@@ -3476,8 +3476,8 @@
 <u8 as core::iter::range::Step>::steps_between
 <u8 as core::iter::traits::accum::Sum<&'a u8>>::sum
 <u8 as core::iter::traits::accum::Sum>::sum
-<u8 as core::num::bignum::FullOps>::full_div_rem
-<u8 as core::num::bignum::FullOps>::full_mul_add
+<u8 as core::num::imp::bignum::FullOps>::full_div_rem
+<u8 as core::num::imp::bignum::FullOps>::full_mul_add
 <u8 as core::ops::arith::Add<&u8>>::add
 <u8 as core::ops::arith::Add>::add
 <u8 as core::ops::arith::AddAssign<&u8>>::add_assign
@@ -5477,67 +5477,67 @@ core::num::<impl usize>::wrapping_neg
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
-core::num::bignum::Big32x40::add
-core::num::bignum::Big32x40::digits
-core::num::bignum::Big32x40::div_rem_small
-core::num::bignum::Big32x40::from_small
-core::num::bignum::Big32x40::from_u64
-core::num::bignum::Big32x40::is_zero
-core::num::bignum::Big32x40::mul_digits
-core::num::bignum::Big32x40::mul_digits::mul_inner
-core::num::bignum::Big32x40::mul_pow2
-core::num::bignum::Big32x40::mul_small
-core::num::bignum::Big32x40::sub
 core::num::can_not_overflow
-core::num::dec2flt::float::RawFloat::integer_decode
-core::num::dec2flt::float::pow2_to_pow10
-core::num::diy_float::Fp::mul
-core::num::diy_float::Fp::normalize
-core::num::diy_float::Fp::normalize_to
 core::num::error::ParseIntError::kind
-core::num::flt2dec::decoder::decode
-core::num::flt2dec::determine_sign
-core::num::flt2dec::digits_to_dec_str
-core::num::flt2dec::digits_to_exp_str
-core::num::flt2dec::estimate_max_buf_len
-core::num::flt2dec::estimator::estimate_scaling_factor
-core::num::flt2dec::round_up
-core::num::flt2dec::strategy::dragon::div_2pow10
-core::num::flt2dec::strategy::dragon::div_rem_upto_16
-core::num::flt2dec::strategy::dragon::format_exact
-core::num::flt2dec::strategy::dragon::format_shortest
-core::num::flt2dec::strategy::dragon::mul_pow10
-core::num::flt2dec::strategy::grisu::cached_power
-core::num::flt2dec::strategy::grisu::format_exact
-core::num::flt2dec::strategy::grisu::format_exact_opt
-core::num::flt2dec::strategy::grisu::format_exact_opt::possibly_round
-core::num::flt2dec::strategy::grisu::format_shortest
-core::num::flt2dec::strategy::grisu::format_shortest_opt
-core::num::flt2dec::strategy::grisu::format_shortest_opt::round_and_weed
-core::num::flt2dec::strategy::grisu::max_pow10_no_more_than
-core::num::flt2dec::to_exact_exp_str
-core::num::flt2dec::to_exact_fixed_str
-core::num::flt2dec::to_shortest_exp_str
-core::num::flt2dec::to_shortest_str
-core::num::fmt::Formatted::<'a>::len
-core::num::fmt::Part::<'a>::len
 core::num::from_ascii_radix_panic
 core::num::from_ascii_radix_panic::do_panic
 core::num::from_ascii_radix_panic::do_panic::compiletime
 core::num::from_ascii_radix_panic::do_panic::runtime
-core::num::int_log10::less_than_5
-core::num::int_log10::panic_for_nonpositive_argument
-core::num::int_log10::u128
-core::num::int_log10::u128_impl
-core::num::int_log10::u16
-core::num::int_log10::u16_impl
-core::num::int_log10::u32
-core::num::int_log10::u32_impl
-core::num::int_log10::u64
-core::num::int_log10::u64_impl
-core::num::int_log10::u8
-core::num::int_log10::u8_impl
-core::num::int_log10::usize
+core::num::imp::bignum::Big32x40::add
+core::num::imp::bignum::Big32x40::digits
+core::num::imp::bignum::Big32x40::div_rem_small
+core::num::imp::bignum::Big32x40::from_small
+core::num::imp::bignum::Big32x40::from_u64
+core::num::imp::bignum::Big32x40::is_zero
+core::num::imp::bignum::Big32x40::mul_digits
+core::num::imp::bignum::Big32x40::mul_digits::mul_inner
+core::num::imp::bignum::Big32x40::mul_pow2
+core::num::imp::bignum::Big32x40::mul_small
+core::num::imp::bignum::Big32x40::sub
+core::num::imp::dec2flt::float::RawFloat::integer_decode
+core::num::imp::dec2flt::float::pow2_to_pow10
+core::num::imp::diy_float::Fp::mul
+core::num::imp::diy_float::Fp::normalize
+core::num::imp::diy_float::Fp::normalize_to
+core::num::imp::flt2dec::decoder::decode
+core::num::imp::flt2dec::determine_sign
+core::num::imp::flt2dec::digits_to_dec_str
+core::num::imp::flt2dec::digits_to_exp_str
+core::num::imp::flt2dec::estimate_max_buf_len
+core::num::imp::flt2dec::estimator::estimate_scaling_factor
+core::num::imp::flt2dec::round_up
+core::num::imp::flt2dec::strategy::dragon::div_2pow10
+core::num::imp::flt2dec::strategy::dragon::div_rem_upto_16
+core::num::imp::flt2dec::strategy::dragon::format_exact
+core::num::imp::flt2dec::strategy::dragon::format_shortest
+core::num::imp::flt2dec::strategy::dragon::mul_pow10
+core::num::imp::flt2dec::strategy::grisu::cached_power
+core::num::imp::flt2dec::strategy::grisu::format_exact
+core::num::imp::flt2dec::strategy::grisu::format_exact_opt
+core::num::imp::flt2dec::strategy::grisu::format_exact_opt::possibly_round
+core::num::imp::flt2dec::strategy::grisu::format_shortest
+core::num::imp::flt2dec::strategy::grisu::format_shortest_opt
+core::num::imp::flt2dec::strategy::grisu::format_shortest_opt::round_and_weed
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than
+core::num::imp::flt2dec::to_exact_exp_str
+core::num::imp::flt2dec::to_exact_fixed_str
+core::num::imp::flt2dec::to_shortest_exp_str
+core::num::imp::flt2dec::to_shortest_str
+core::num::imp::fmt::Formatted::<'a>::len
+core::num::imp::fmt::Part::<'a>::len
+core::num::imp::int_log10::less_than_5
+core::num::imp::int_log10::panic_for_nonpositive_argument
+core::num::imp::int_log10::u128
+core::num::imp::int_log10::u128_impl
+core::num::imp::int_log10::u16
+core::num::imp::int_log10::u16_impl
+core::num::imp::int_log10::u32
+core::num::imp::int_log10::u32_impl
+core::num::imp::int_log10::u64
+core::num::imp::int_log10::u64_impl
+core::num::imp::int_log10::u8
+core::num::imp::int_log10::u8_impl
+core::num::imp::int_log10::usize
 core::num::niche_types::Nanoseconds::as_inner
 core::num::niche_types::Nanoseconds::new
 core::num::niche_types::Nanoseconds::new_unchecked

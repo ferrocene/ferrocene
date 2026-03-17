@@ -40,7 +40,7 @@ mod non_query {
             is_eval_always: false,
             key_fingerprint_style: KeyFingerprintStyle::Unit,
             force_from_dep_node_fn: Some(|tcx, _, prev_index| {
-                tcx.dep_graph.force_diagnostic_node(tcx, prev_index);
+                tcx.dep_graph.force_side_effect(tcx, prev_index);
                 true
             }),
             promote_from_disk_fn: None,
@@ -141,7 +141,7 @@ macro_rules! define_dep_kind_vtables {
                     eval_always: $eval_always:literal,
                     feedable: $feedable:literal,
                     no_hash: $no_hash:literal,
-                    return_result_from_ensure_ok: $return_result_from_ensure_ok:literal,
+                    returns_error_guaranteed: $returns_error_guaranteed:literal,
                     separate_provide_extern: $separate_provide_extern:literal,
                 }
             )*

@@ -51,8 +51,8 @@ use crate::pin::UnsafePinned;
 /// marker_impls! {
 ///     MarkerTrait for
 ///         u8, i8,
-///         {T: ?Sized} *const T,
-///         {T: ?Sized} *mut T,
+///         {T: PointeeSized} *const T,
+///         {T: PointeeSized} *mut T,
 ///         {T: MarkerTrait} PhantomData<T>,
 ///         u32,
 /// }
@@ -946,16 +946,15 @@ pub unsafe auto trait UnsafeUnpin {}
 
 #[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
-impl<T: ?Sized> !UnsafeUnpin for UnsafePinned<T> {}
-
+impl<T: PointeeSized> !UnsafeUnpin for UnsafePinned<T> {}
 marker_impls! {
 #[unstable(feature = "unsafe_unpin", issue = "125735")]
     unsafe UnsafeUnpin for
-        {T: ?Sized} PhantomData<T>,
-        {T: ?Sized} *const T,
-        {T: ?Sized} *mut T,
-        {T: ?Sized} &T,
-        {T: ?Sized} &mut T,
+        {T: PointeeSized} PhantomData<T>,
+        {T: PointeeSized} *const T,
+        {T: PointeeSized} *mut T,
+        {T: PointeeSized} &T,
+        {T: PointeeSized} &mut T,
 }
 
 /// Types that do not require any pinning guarantees.

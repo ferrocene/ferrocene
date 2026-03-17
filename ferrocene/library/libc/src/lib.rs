@@ -36,7 +36,9 @@
     feature = "rustc-dep-of-std",
     feature(link_cfg, no_core),
     // ferrocene addition
-    allow(internal_features),
+    // `link_cfg` is only used on a complicated combination of platforms;
+    // getting the exact combination right is not worth the effort.
+    allow(internal_features, unused_features),
 )]
 #![cfg_attr(feature = "rustc-dep-of-std", allow(internal_features))]
 // DIFF(1.0): The thread local references that raise this lint were removed in 1.0

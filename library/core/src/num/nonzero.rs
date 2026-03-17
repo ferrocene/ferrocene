@@ -9,6 +9,7 @@ use crate::cmp::Ordering;
 use crate::hash::{Hash, Hasher};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, Freeze, StructuralPartialEq};
+use crate::num::imp;
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{BitOr, BitOrAssign, Div, DivAssign, Neg, Rem, RemAssign};
 #[cfg(not(feature = "ferrocene_subset"))]
@@ -1888,7 +1889,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
                       without modifying the original"]
         #[inline]
         pub const fn ilog10(self) -> u32 {
-            super::int_log10::$Int(self)
+            imp::int_log10::$Int(self)
         }
 
         /// Calculates the midpoint (average) between `self` and `rhs`.

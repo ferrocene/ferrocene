@@ -1,10 +1,11 @@
 #![cfg(not(target_arch = "wasm32"))]
 
-use core::num::flt2dec::strategy::grisu::{format_exact_opt, format_shortest_opt};
-use core::num::flt2dec::{DecodableFloat, Decoded, FullDecoded, MAX_SIG_DIGITS, decode};
+use core::num::imp::flt2dec;
 use std::mem::MaybeUninit;
 use std::str;
 
+use flt2dec::strategy::grisu::{format_exact_opt, format_shortest_opt};
+use flt2dec::{DecodableFloat, Decoded, FullDecoded, MAX_SIG_DIGITS, decode};
 use rand::distr::{Distribution, Uniform};
 
 pub fn decode_finite<T: DecodableFloat>(v: T) -> Decoded {
@@ -160,7 +161,7 @@ where
 #[test]
 #[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn shortest_random_equivalence_test() {
-    use core::num::flt2dec::strategy::dragon::format_shortest as fallback;
+    use flt2dec::strategy::dragon::format_shortest as fallback;
     // Miri is too slow
     let n = if cfg!(miri) { 10 } else { 10_000 };
 
@@ -175,7 +176,7 @@ fn shortest_random_equivalence_test() {
 #[cfg(target_has_reliable_f16)]
 fn shortest_f16_exhaustive_equivalence_test() {
     // see the f32 version
-    use core::num::flt2dec::strategy::dragon::format_shortest as fallback;
+    use flt2dec::strategy::dragon::format_shortest as fallback;
     f16_exhaustive_equivalence_test(format_shortest_opt, fallback, MAX_SIG_DIGITS);
 }
 
@@ -189,7 +190,7 @@ fn shortest_f32_exhaustive_equivalence_test() {
     // with `--nocapture` (and plenty of time and appropriate rustc flags), this should print:
     // `done, ignored=17643158 passed=2121451881 failed=0`.
 
-    use core::num::flt2dec::strategy::dragon::format_shortest as fallback;
+    use flt2dec::strategy::dragon::format_shortest as fallback;
     f32_exhaustive_equivalence_test(format_shortest_opt, fallback, MAX_SIG_DIGITS);
 }
 
@@ -198,14 +199,14 @@ fn shortest_f32_exhaustive_equivalence_test() {
 fn shortest_f64_hard_random_equivalence_test() {
     // this again probably has to use appropriate rustc flags.
 
-    use core::num::flt2dec::strategy::dragon::format_shortest as fallback;
+    use flt2dec::strategy::dragon::format_shortest as fallback;
     f64_random_equivalence_test(format_shortest_opt, fallback, MAX_SIG_DIGITS, 100_000_000);
 }
 
 #[test]
 #[cfg(target_has_reliable_f16)]
 fn exact_f16_random_equivalence_test() {
-    use core::num::flt2dec::strategy::dragon::format_exact as fallback;
+    use flt2dec::strategy::dragon::format_exact as fallback;
     // Miri is too slow
     let n = if cfg!(miri) { 3 } else { 1_000 };
 
@@ -222,7 +223,7 @@ fn exact_f16_random_equivalence_test() {
 #[test]
 #[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn exact_f32_random_equivalence_test() {
-    use core::num::flt2dec::strategy::dragon::format_exact as fallback;
+    use flt2dec::strategy::dragon::format_exact as fallback;
     // Miri is too slow
     let n = if cfg!(miri) { 3 } else { 1_000 };
 
@@ -239,7 +240,7 @@ fn exact_f32_random_equivalence_test() {
 #[test]
 #[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn exact_f64_random_equivalence_test() {
-    use core::num::flt2dec::strategy::dragon::format_exact as fallback;
+    use flt2dec::strategy::dragon::format_exact as fallback;
     // Miri is too slow
     let n = if cfg!(miri) { 2 } else { 1_000 };
 

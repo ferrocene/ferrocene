@@ -1,18 +1,18 @@
 //! Manages calling a concrete function (with known MIR body) with argument passing,
 //! and returning the return value to the caller.
 
+use std::assert_matches;
 use std::borrow::Cow;
 
 use either::{Left, Right};
 use rustc_abi::{self as abi, ExternAbi, FieldIdx, Integer, VariantIdx};
-use rustc_data_structures::assert_matches;
 use rustc_errors::msg;
 use rustc_hir::def_id::DefId;
 use rustc_hir::find_attr;
 use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
 use rustc_middle::ty::{self, AdtDef, Instance, Ty, VariantDef};
 use rustc_middle::{bug, mir, span_bug};
-use rustc_target::callconv::{ArgAbi, FnAbi, PassMode};
+use rustc_target::callconv::{ArgAbi, FnAbi};
 use tracing::field::Empty;
 use tracing::{info, instrument, trace};
 
@@ -284,7 +284,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         'tcx: 'y,
     {
         assert_eq!(callee_ty, callee_abi.layout.ty);
-        if callee_abi.mode == PassMode::Ignore {
+        if callee_abi.is_ignore() {
             // This one is skipped. Still must be made live though!
             if !already_live {
                 self.storage_live(callee_arg.as_local().unwrap())?;
@@ -361,7 +361,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         } else {
             ty::List::empty()
         };
-        let callee_fn_abi = self.fn_abi_of_instance(instance, extra_tys)?;
+        let callee_fn_abi = self.fn_abi_of_instance_no_deduced_attrs(instance, extra_tys)?;
 
         if caller_fn_abi.conv != callee_fn_abi.conv {
             throw_ub_custom!(
@@ -450,7 +450,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             let mut caller_args = args
                 .iter()
                 .zip(caller_fn_abi.args.iter())
-                .filter(|arg_and_abi| !matches!(arg_and_abi.1.mode, PassMode::Ignore));
+                .filter(|arg_and_abi| !arg_and_abi.1.is_ignore());
 
             // Now we have to spread them out across the callee's locals,
             // taking into account the `spread_arg`. If we could write
@@ -480,7 +480,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
                     // Consume the remaining arguments by putting them into the variable argument
                     // list.
-                    let varargs = self.allocate_varargs(&mut caller_args, &mut callee_args_abis)?;
+                    let varargs = self.allocate_varargs(
+                        &mut caller_args,
+                        // "Ignored" arguments aren't actually passed, so the callee should also
+                        // ignore them. (`pass_argument` does this for regular arguments.)
+                        (&mut callee_args_abis).filter(|(_, abi)| !abi.is_ignore()),
+                    )?;
                     // When the frame is dropped, these variable arguments are deallocated.
                     self.frame_mut().va_list = varargs.clone();
                     let key = self.va_list_ptr(varargs.into());
@@ -899,7 +904,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 enter_trace_span!(M, resolve::resolve_drop_in_place, ty = ?place.layout.ty);
             ty::Instance::resolve_drop_in_place(*self.tcx, place.layout.ty)
         };
-        let fn_abi = self.fn_abi_of_instance(instance, ty::List::empty())?;
+        let fn_abi = self.fn_abi_of_instance_no_deduced_attrs(instance, ty::List::empty())?;
 
         let arg = self.mplace_to_ref(&place)?;
         let ret = MPlaceTy::fake_alloc_zst(self.layout_of(self.tcx.types.unit)?);

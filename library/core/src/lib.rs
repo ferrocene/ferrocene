@@ -224,7 +224,7 @@ mod macros;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
-#[stable(feature = "assert_matches", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "assert_matches", since = "1.95.0")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]
@@ -246,7 +246,7 @@ pub mod autodiff {
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod contracts;
 
-#[stable(feature = "cfg_select", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "cfg_select", since = "1.95.0")]
 pub use crate::macros::cfg_select;
 
 #[macro_use]
@@ -338,7 +338,7 @@ pub mod pin;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod random;
 #[cfg(not(feature = "ferrocene_subset"))]
-#[stable(feature = "new_range_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 pub mod range;
 pub mod result;
 pub mod sync;

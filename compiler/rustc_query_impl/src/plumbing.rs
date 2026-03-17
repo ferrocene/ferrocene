@@ -19,7 +19,8 @@ use rustc_middle::query::on_disk_cache::{
 };
 use rustc_middle::query::plumbing::QueryVTable;
 use rustc_middle::query::{
-    Key, QueryCache, QueryJobId, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra, erase,
+    QueryCache, QueryJobId, QueryKey, QueryStackDeferred, QueryStackFrame, QueryStackFrameExtra,
+    erase,
 };
 use rustc_middle::ty::codec::TyEncoder;
 use rustc_middle::ty::print::with_reduced_queries;
@@ -274,7 +275,7 @@ fn mk_query_stack_frame_extra<'tcx, Cache>(
 ) -> QueryStackFrameExtra
 where
     Cache: QueryCache,
-    Cache::Key: Key,
+    Cache::Key: QueryKey,
 {
     let def_id = key.key_as_def_id();
 
@@ -313,7 +314,7 @@ pub(crate) fn create_deferred_query_stack_frame<'tcx, C>(
 ) -> QueryStackFrame<QueryStackDeferred<'tcx>>
 where
     C: QueryCache,
-    C::Key: Key + DynSend + DynSync,
+    C::Key: QueryKey + DynSend + DynSync,
     QueryVTable<'tcx, C>: DynSync,
 {
     let kind = vtable.dep_kind;
@@ -475,7 +476,12 @@ macro_rules! define_queries {
             use super::super::*;
             use ::rustc_middle::query::erase::{self, Erased};
 
-            pub(crate) mod get_query_incr {
+            // It seems to be important that every query has its own monomorphic
+            // copy of `execute_query_incr` and `execute_query_non_incr`.
+            // Trying to inline these wrapper functions into their generic
+            // "inner" helpers tends to break `tests/run-make/short-ice`.
+
+            pub(crate) mod execute_query_incr {
                 use super::*;
 
                 // Adding `__rust_end_short_backtrace` marker to backtraces so that we emit the frames
@@ -489,7 +495,7 @@ macro_rules! define_queries {
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
                     #[cfg(debug_assertions)]
                     let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
-                    execution::get_query_incr(
+                    execution::execute_query_incr_inner(
                         &tcx.query_system.query_vtables.$name,
                         tcx,
                         span,
@@ -499,7 +505,7 @@ macro_rules! define_queries {
                 }
             }
 
-            pub(crate) mod get_query_non_incr {
+            pub(crate) mod execute_query_non_incr {
                 use super::*;
 
                 #[inline(never)]
@@ -509,7 +515,7 @@ macro_rules! define_queries {
                     key: queries::$name::Key<'tcx>,
                     __mode: QueryMode,
                 ) -> Option<Erased<queries::$name::Value<'tcx>>> {
-                    Some(execution::get_query_non_incr(
+                    Some(execution::execute_query_non_incr_inner(
                         &tcx.query_system.query_vtables.$name,
                         tcx,
                         span,
@@ -549,7 +555,7 @@ macro_rules! define_queries {
             }
 
             pub(crate) fn make_query_vtable<'tcx>(incremental: bool)
-                -> QueryVTable<'tcx, queries::$name::Storage<'tcx>>
+                -> QueryVTable<'tcx, queries::$name::Cache<'tcx>>
             {
                 QueryVTable {
                     name: stringify!($name),
@@ -604,9 +610,9 @@ macro_rules! define_queries {
                     format_value: |value| format!("{:?}", erase::restore_val::<queries::$name::Value<'tcx>>(*value)),
                     description_fn: $crate::queries::_description_fns::$name,
                     execute_query_fn: if incremental {
-                        query_impl::$name::get_query_incr::__rust_end_short_backtrace
+                        query_impl::$name::execute_query_incr::__rust_end_short_backtrace
                     } else {
-                        query_impl::$name::get_query_non_incr::__rust_end_short_backtrace
+                        query_impl::$name::execute_query_non_incr::__rust_end_short_backtrace
                     },
                 }
             }
@@ -615,7 +621,7 @@ macro_rules! define_queries {
             pub(crate) enum VTableGetter {}
 
             impl<'tcx> GetQueryVTable<'tcx> for VTableGetter {
-                type Cache = rustc_middle::queries::$name::Storage<'tcx>;
+                type Cache = rustc_middle::queries::$name::Cache<'tcx>;
 
                 #[inline(always)]
                 fn query_vtable(tcx: TyCtxt<'tcx>) -> &'tcx QueryVTable<'tcx, Self::Cache> {

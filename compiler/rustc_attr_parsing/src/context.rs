@@ -19,6 +19,7 @@ use rustc_span::{ErrorGuaranteed, Span, Symbol};
 use crate::AttributeParser;
 // Glob imports to avoid big, bitrotty import lists
 use crate::attributes::allow_unstable::*;
+use crate::attributes::autodiff::*;
 use crate::attributes::body::*;
 use crate::attributes::cfi_encoding::*;
 use crate::attributes::codegen_attrs::*;
@@ -204,6 +205,7 @@ attribute_parsers!(
         Single<ReexportTestHarnessMainParser>,
         Single<RustcAbiParser>,
         Single<RustcAllocatorZeroedVariantParser>,
+        Single<RustcAutodiffParser>,
         Single<RustcBuiltinMacroParser>,
         Single<RustcDefPathParser>,
         Single<RustcDeprecatedSafe2024Parser>,

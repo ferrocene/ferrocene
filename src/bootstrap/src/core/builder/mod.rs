@@ -15,6 +15,8 @@ use clap::ValueEnum;
 #[cfg(feature = "tracing")]
 use tracing::instrument;
 
+// Ferrocene addition: re-export RUSTFLAGS (for flip-link)
+pub use self::cargo::Rustflags;
 pub use self::cargo::{Cargo, cargo_profile_var};
 pub use crate::Compiler;
 use crate::core::build_steps::compile::{Std, StdLink};
@@ -871,6 +873,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::CheckDocumentSignatures,
                 crate::ferrocene::test::GenerateTarball,
                 crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
+                crate::ferrocene::test::FlipLink,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::BootstrapPy,

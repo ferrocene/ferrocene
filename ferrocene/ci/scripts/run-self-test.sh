@@ -8,8 +8,9 @@ IFS=$'\n\t'
 COMMIT="${COMMIT:-$(git rev-parse HEAD)}"
 SKIP_CLEANUP="${SKIP_CLEANUP:-}"
 
-BUCKET="ferrocene-ci-artifacts"
-PREFIX="ferrocene/dist/${COMMIT}"
+ARTIFACTS_BUCKET="${ARTIFACTS_BUCKET:-ferrocene-ci-artifacts}"
+ARTIFACTS_PREFIX="${ARTIFACTS_PREFIX:-ferrocene/dist}"
+PREFIX="${ARTIFACTS_PREFIX}/${COMMIT}"
 
 TAR="tar"
 FERROCENE_SELF_TEST="ferrocene-self-test"
@@ -48,7 +49,7 @@ download() {
     target="$2"
 
     echo "===> downloading ${package} for ${target}"
-    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
+    aws s3 cp "s3://${ARTIFACTS_BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
 }
 
 mkdir -p "${TEMPDIR}/archives"

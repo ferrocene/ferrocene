@@ -19,6 +19,7 @@ pub use self::unwind_safe::{AssertUnwindSafe, RefUnwindSafe, UnwindSafe};
 #[cfg(not(feature = "ferrocene_subset"))]
 use crate::any::Any;
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use panic!() instead")]
 #[allow_internal_unstable(panic_internals, const_format_args)]
@@ -66,6 +67,7 @@ pub macro panic_2021 {
     }),
 }
 
+#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "edition_panic", issue = "none", reason = "use unreachable!() instead")]
 #[allow_internal_unstable(panic_internals)]

@@ -2944,6 +2944,16 @@ impl Debug for str {
                     printable_range.start = printable_range.end + c.len_utf8();
                 }
                 printable_range.end += c.len_utf8();
+            } else {
+                #[ferrocene::annotation(
+                    "
+                    This branch is effectively unreachable as the `chars` iterator is guaranteed to
+                    have at least one element. This is because `rest` is non-empty and
+                    `non_printable_start` is guaranteed to point to a char boundary due to the
+                    definition of `needs_escape` and the fact that strings in Rust are UTF-8.
+                "
+                )]
+                {}
             }
             rest = chars.as_str();
         }

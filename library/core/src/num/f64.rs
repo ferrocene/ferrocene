@@ -1021,7 +1021,7 @@ impl f64 {
     #[inline]
     #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn max(self, other: f64) -> f64 {
-        intrinsics::maxnumf64(self, other)
+        intrinsics::maximum_number_nsz_f64(self, other)
     }
 
     /// Returns the minimum of the two numbers, ignoring NaN.
@@ -1049,7 +1049,7 @@ impl f64 {
     #[inline]
     #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn min(self, other: f64) -> f64 {
-        intrinsics::minnumf64(self, other)
+        intrinsics::minimum_number_nsz_f64(self, other)
     }
 
     /// Returns the maximum of the two numbers, propagating NaN.

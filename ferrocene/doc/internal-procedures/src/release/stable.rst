@@ -134,6 +134,20 @@ changing ``ferrocene/ci/configure.sh``. In that file, find the lines setting the
 commented uncomment them, and replace the URL with the ``s3://`` URLs of the
 reports you just uploaded.
 
+Reviewer guidance
+~~~~~~~~~~~~~~~~~
+
+The reviewer of this change has to check the following:
+
+1. Download the reports from S3 and check they are the correct ones. Correct means that the date and the version in the report matches the release.
+
+   .. code-block::
+
+      $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf path/to/compiler-report.pdf
+      $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf path/to/core-report.pdf
+
+2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``. Unfortunately it is not possible to build the documentation package including the report locally. Instead it will just contain a dead link.
+
 .. _publish-stable:
 
 Publishing a stable release

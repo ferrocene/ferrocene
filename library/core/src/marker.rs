@@ -1128,7 +1128,6 @@ marker_impls! {
         {T: ConstParamTy_, const N: usize} [T; N],
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 marker_impls! {
     #[unstable(feature = "unsized_const_params", issue = "95174")]
     #[unstable_feature_bound(unsized_const_params)]

@@ -139,7 +139,7 @@ Reviewer guidance
 
 The reviewer of this change has to check the following:
 
-1. Download the reports from S3 and check they are the correct ones
+1. Download the reports from S3 and check they are the correct ones. Correct means that the date and the version in the report matches the release.
 
    .. code-block::
 

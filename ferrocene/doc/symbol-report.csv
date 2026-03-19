@@ -4667,6 +4667,8 @@ core::intrinsics::fallback::wide_mul_u128::scalar_mul
 core::intrinsics::fallback::wide_mul_u128::to_low_high
 core::intrinsics::is_val_statically_known
 core::intrinsics::likely
+core::intrinsics::maximum_number_nsz_f32
+core::intrinsics::minimum_number_nsz_f32
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
 core::intrinsics::rotate_left

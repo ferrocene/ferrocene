@@ -3131,6 +3131,8 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize);
 
 /// Returns the minimum of two `f16` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 minimumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3144,10 +3146,19 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize);
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf16(x: f16, y: f16) -> f16;
+pub const fn minimum_number_nsz_f16(x: f16, y: f16) -> f16 {
+    if x.is_nan() || y <= x {
+        y
+    } else {
+        // Either y > x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the minimum of two `f32` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 minimumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3161,10 +3172,19 @@ pub const fn minnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-pub const fn minnumf32(x: f32, y: f32) -> f32;
+pub const fn minimum_number_nsz_f32(x: f32, y: f32) -> f32 {
+    if x.is_nan() || y <= x {
+        y
+    } else {
+        // Either y > x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the minimum of two `f64` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 minimumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3179,10 +3199,19 @@ pub const fn minnumf32(x: f32, y: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf64(x: f64, y: f64) -> f64;
+pub const fn minimum_number_nsz_f64(x: f64, y: f64) -> f64 {
+    if x.is_nan() || y <= x {
+        y
+    } else {
+        // Either y > x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the minimum of two `f128` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 minimumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3196,7 +3225,14 @@ pub const fn minnumf64(x: f64, y: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf128(x: f128, y: f128) -> f128;
+pub const fn minimum_number_nsz_f128(x: f128, y: f128) -> f128 {
+    if x.is_nan() || y <= x {
+        y
+    } else {
+        // Either y > x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the minimum of two `f16` values, propagating NaN.
 ///
@@ -3304,6 +3340,8 @@ pub const fn minimumf128(x: f128, y: f128) -> f128 {
 
 /// Returns the maximum of two `f16` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 maximumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3317,10 +3355,19 @@ pub const fn minimumf128(x: f128, y: f128) -> f128 {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf16(x: f16, y: f16) -> f16;
+pub const fn maximum_number_nsz_f16(x: f16, y: f16) -> f16 {
+    if x.is_nan() || y >= x {
+        y
+    } else {
+        // Either y < x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the maximum of two `f32` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 maximumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3334,10 +3381,19 @@ pub const fn maxnumf16(x: f16, y: f16) -> f16;
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-pub const fn maxnumf32(x: f32, y: f32) -> f32;
+pub const fn maximum_number_nsz_f32(x: f32, y: f32) -> f32 {
+    if x.is_nan() || y >= x {
+        y
+    } else {
+        // Either y < x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the maximum of two `f64` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 maximumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3352,10 +3408,19 @@ pub const fn maxnumf32(x: f32, y: f32) -> f32;
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf64(x: f64, y: f64) -> f64;
+pub const fn maximum_number_nsz_f64(x: f64, y: f64) -> f64 {
+    if x.is_nan() || y >= x {
+        y
+    } else {
+        // Either y < x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the maximum of two `f128` values, ignoring NaN.
 ///
+/// This behaves like IEEE 754-2019 maximumNumber, *except* that it does not order signed
+/// zeros deterministically. In particular:
 /// If one of the arguments is NaN (quiet or signaling), then the other argument is returned. If
 /// both arguments are NaN, returns NaN. If the inputs compare equal (such as for the case of `+0.0`
 /// and `-0.0`), either input may be returned non-deterministically.
@@ -3369,7 +3434,14 @@ pub const fn maxnumf64(x: f64, y: f64) -> f64;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf128(x: f128, y: f128) -> f128;
+pub const fn maximum_number_nsz_f128(x: f128, y: f128) -> f128 {
+    if x.is_nan() || y >= x {
+        y
+    } else {
+        // Either y < x or y is a NaN.
+        x
+    }
+}
 
 /// Returns the maximum of two `f16` values, propagating NaN.
 ///

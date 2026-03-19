@@ -65,19 +65,13 @@ pub mod arm;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64;
 
-<<<<<<< HEAD
-#[cfg(all(target_arch = "aarch64", target_feature = "outline-atomics"))]
-#[cfg(not(feature = "ferrocene_subset"))]
-||||||| a63150b9cb1
-#[cfg(all(target_arch = "aarch64", target_feature = "outline-atomics"))]
-=======
 // Note that we enable the module on "mangled-names" because that is the default feature
 // in the builtins-test tests. So this is a way of enabling the module during testing.
 #[cfg(all(
     target_arch = "aarch64",
     any(target_feature = "outline-atomics", feature = "mangled-names")
 ))]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64_outline_atomics;
 
 #[cfg(target_arch = "avr")]

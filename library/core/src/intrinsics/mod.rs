@@ -3145,12 +3145,7 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize);
 /// The stabilized version of this intrinsic is [`f16::min`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf16(x: f16, y: f16) -> f16;
-||||||| a63150b9cb1
-pub const fn minnumf16(x: f16, y: f16) -> f16;
-=======
 pub const fn minimum_number_nsz_f16(x: f16, y: f16) -> f16 {
     if x.is_nan() || y <= x {
         y
@@ -3159,7 +3154,6 @@ pub const fn minimum_number_nsz_f16(x: f16, y: f16) -> f16 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the minimum of two `f32` values, ignoring NaN.
 ///
@@ -3204,12 +3198,7 @@ pub const fn minimum_number_nsz_f32(x: f32, y: f32) -> f32 {
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf64(x: f64, y: f64) -> f64;
-||||||| a63150b9cb1
-pub const fn minnumf64(x: f64, y: f64) -> f64;
-=======
 pub const fn minimum_number_nsz_f64(x: f64, y: f64) -> f64 {
     if x.is_nan() || y <= x {
         y
@@ -3218,7 +3207,6 @@ pub const fn minimum_number_nsz_f64(x: f64, y: f64) -> f64 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the minimum of two `f128` values, ignoring NaN.
 ///
@@ -3236,12 +3224,7 @@ pub const fn minimum_number_nsz_f64(x: f64, y: f64) -> f64 {
 /// The stabilized version of this intrinsic is [`f128::min`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn minnumf128(x: f128, y: f128) -> f128;
-||||||| a63150b9cb1
-pub const fn minnumf128(x: f128, y: f128) -> f128;
-=======
 pub const fn minimum_number_nsz_f128(x: f128, y: f128) -> f128 {
     if x.is_nan() || y <= x {
         y
@@ -3250,7 +3233,6 @@ pub const fn minimum_number_nsz_f128(x: f128, y: f128) -> f128 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the minimum of two `f16` values, propagating NaN.
 ///
@@ -3372,12 +3354,7 @@ pub const fn minimumf128(x: f128, y: f128) -> f128 {
 /// The stabilized version of this intrinsic is [`f16::max`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf16(x: f16, y: f16) -> f16;
-||||||| a63150b9cb1
-pub const fn maxnumf16(x: f16, y: f16) -> f16;
-=======
 pub const fn maximum_number_nsz_f16(x: f16, y: f16) -> f16 {
     if x.is_nan() || y >= x {
         y
@@ -3386,7 +3363,6 @@ pub const fn maximum_number_nsz_f16(x: f16, y: f16) -> f16 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the maximum of two `f32` values, ignoring NaN.
 ///
@@ -3431,12 +3407,7 @@ pub const fn maximum_number_nsz_f32(x: f32, y: f32) -> f32 {
 #[rustc_nounwind]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf64(x: f64, y: f64) -> f64;
-||||||| a63150b9cb1
-pub const fn maxnumf64(x: f64, y: f64) -> f64;
-=======
 pub const fn maximum_number_nsz_f64(x: f64, y: f64) -> f64 {
     if x.is_nan() || y >= x {
         y
@@ -3445,7 +3416,6 @@ pub const fn maximum_number_nsz_f64(x: f64, y: f64) -> f64 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the maximum of two `f128` values, ignoring NaN.
 ///
@@ -3463,12 +3433,7 @@ pub const fn maximum_number_nsz_f64(x: f64, y: f64) -> f64 {
 /// The stabilized version of this intrinsic is [`f128::max`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
-<<<<<<< HEAD
 #[cfg(not(feature = "ferrocene_subset"))]
-pub const fn maxnumf128(x: f128, y: f128) -> f128;
-||||||| a63150b9cb1
-pub const fn maxnumf128(x: f128, y: f128) -> f128;
-=======
 pub const fn maximum_number_nsz_f128(x: f128, y: f128) -> f128 {
     if x.is_nan() || y >= x {
         y
@@ -3477,7 +3442,6 @@ pub const fn maximum_number_nsz_f128(x: f128, y: f128) -> f128 {
         x
     }
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Returns the maximum of two `f16` values, propagating NaN.
 ///

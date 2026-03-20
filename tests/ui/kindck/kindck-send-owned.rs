@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Test which of the builtin types are considered sendable.
 
 fn assert_send<T:Send>() { }

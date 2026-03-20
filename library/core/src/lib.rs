@@ -181,6 +181,7 @@
 // not-alphabetical-start
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(aarch64_unstable_target_feature))]
 #![feature(arm_target_feature)]
+<<<<<<< HEAD
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(avx10_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(hexagon_target_feature))]
 #![cfg_attr(not(feature = "ferrocene_subset"), feature(loongarch_target_feature))]
@@ -203,6 +204,34 @@
 #![feature(register_tool)]
 #![register_tool(ferrocene)]
 #![doc(auto_cfg(hide(feature = "ferrocene_subset")))]
+||||||| 6bdc342ddb0
+#![feature(avx10_target_feature)]
+#![feature(hexagon_target_feature)]
+#![feature(loongarch_target_feature)]
+#![feature(mips_target_feature)]
+#![feature(nvptx_target_feature)]
+#![feature(powerpc_target_feature)]
+#![feature(riscv_target_feature)]
+#![feature(rtm_target_feature)]
+#![feature(s390x_target_feature)]
+#![feature(wasm_target_feature)]
+#![feature(x86_amx_intrinsics)]
+// tidy-alphabetical-end
+=======
+#![feature(avx10_target_feature)]
+#![feature(hexagon_target_feature)]
+#![feature(loongarch_target_feature)]
+#![feature(mips_target_feature)]
+#![feature(movrs_target_feature)]
+#![feature(nvptx_target_feature)]
+#![feature(powerpc_target_feature)]
+#![feature(riscv_target_feature)]
+#![feature(rtm_target_feature)]
+#![feature(s390x_target_feature)]
+#![feature(wasm_target_feature)]
+#![feature(x86_amx_intrinsics)]
+// tidy-alphabetical-end
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // allow using `core::` in intra-doc links
 #[allow(unused_extern_crates)]

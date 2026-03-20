@@ -19,3 +19,6 @@ pub(crate) mod int_sqrt;
 pub(crate) mod libm;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub(crate) mod overflow_panic;
+mod traits;
+
+pub use traits::{Float, FloatExt, Int};

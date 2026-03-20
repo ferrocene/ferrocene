@@ -80,13 +80,8 @@ impl<'env> SignatureFiles<'env> {
         Ok(Some(tempfile))
     }
 
-    pub(crate) fn write(&mut self, name: &str, contents: &[u8]) -> Result<(), Error> {
-        let Some(s3_bucket) = &self.env.s3_bucket else {
-            panic!("uploading signatures is only supported with the s3 backend");
-        };
-        let uuid = Uuid::new_v4();
-
-        // First off, we upload the file to S3, named after the UUID.
+    // Upload the file to S3, named after the UUID.
+    fn upload_to_s3(name: &str, contents: &[u8], s3_bucket: &str, uuid: Uuid) -> Result<(), Error> {
         let mut command = Command::new("aws")
             .args(["s3", "cp", "-"])
             .arg(format!("s3://{s3_bucket}/{uuid}"))
@@ -103,6 +98,17 @@ impl<'env> SignatureFiles<'env> {
             .with_context(|| format!("failed to wait for AWS CLI completion (to upload {name})"))?;
         if !result.success() {
             bail!("uploading {name} to S3 exited with {result}");
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn write(&mut self, name: &str, contents: &[u8]) -> Result<(), Error> {
+        let uuid = Uuid::new_v4();
+
+        // First, upload to S3.
+        if let Some(bucket) = &self.env.s3_bucket {
+            Self::upload_to_s3(name, contents, bucket, uuid)?;
         }
 
         // Then we write the file in the local cache, to avoid having bootstrap read it from S3

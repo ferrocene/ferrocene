@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use anyhow::{Context, Error, anyhow};
+use anyhow::{Context, Error};
 
 use crate::Env;
 use crate::config::Config;
@@ -20,7 +20,7 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         file.read_to_end(&mut contents)?;
 
         let existing: Pinned = toml::from_slice(&contents)?;
-        let expected = Pinned::generate(env, output_dir)?;
+        let (expected, _) = Pinned::generate(env, output_dir)?;
 
         if existing != expected {
             eprintln!("Signature incorrect: {}", output_dir.display());
@@ -32,6 +32,11 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
                 eprintln!("existing tarball sha256: {}", existing.tarball_sha256);
                 eprintln!("expected tarball sha256: {}", expected.tarball_sha256);
             }
+
+            // Print a diff that explains why this broke.
+            let diff_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diff.py");
+            Command::new(diff_path).arg("local").arg(output_dir.file_name().unwrap()).status()?;
+
             anyhow::bail!("pinned documentation file outdated");
         } else {
             eprintln!("Signature correct: {}", output_dir.display());
@@ -46,10 +51,21 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
 
     let config = Config::load(source_dir)?;
     for (role_name, role) in config.roles.iter() {
-        let bundle = signature_files
+        let maybe_bundle = signature_files
             .on_disk_as_tempfile(&format!("{role_name}.cosign-bundle"))
-            .with_context(|| format!("failed to read signature for role {role_name}"))?
-            .ok_or_else(|| anyhow!("missing signature file for role {role_name}"))?;
+            .with_context(|| format!("failed to read signature for role {role_name}"))?;
+
+        let bundle = match maybe_bundle {
+            Some(present) => present,
+            None if env.allow_dev_signing => {
+                eprintln!("warning: missing signature from role {role_name}!");
+                eprintln!(
+                    "ignoring since this is a dev build, but these documents cannot be used in production"
+                );
+                continue;
+            }
+            None => anyhow::bail!("missing signature file for role {role_name}"),
+        };
 
         eprintln!("checking role {role_name}");
         let status = Command::new(&env.cosign_binary)

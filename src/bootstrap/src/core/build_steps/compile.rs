@@ -703,7 +703,10 @@ pub fn std_cargo(
         if builder.config.cmd.ferrocene_coverage_for().is_some()
             && cargo.compiler().stage == builder.top_stage
         {
-            cargo.rustflag("-Zpanic-abort-tests").rustflag("-Cpanic=abort");
+            cargo
+                .rustflag("-Zpanic-abort-tests")
+                .rustflag("-Cpanic=abort")
+                .rustdocflag("-Cpanic=abort");
         }
 
         // Help the libc crate compile by assisting it in finding various

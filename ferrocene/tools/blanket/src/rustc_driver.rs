@@ -38,12 +38,18 @@ pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<Functi
         )?);
     }
 
+    let mut saw_unused = false;
     for (filename, annotations) in annotations {
         for Annotation { start, end: _, unused } in annotations {
             if unused {
-                bail!("Unused annotation in {filename}:{start}");
+                eprintln!("Unused annotation in {filename}:{start}");
             }
+            saw_unused |= unused;
         }
+    }
+
+    if saw_unused {
+        bail!("saw 1 or more unused annotations");
     }
 
     Ok(coverage)

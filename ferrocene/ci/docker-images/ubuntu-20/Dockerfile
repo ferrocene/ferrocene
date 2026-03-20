@@ -354,3 +354,6 @@ WORKDIR /home/ci
 # We prefer uv over other solutions, it's in Rust and fast
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
+
+# Tool needed to generate SBOMs
+RUN curl -sSfL https://get.anchore.io/syft | sh -s -- -b /home/ci/.local/bin v1.41.1

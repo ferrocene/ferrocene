@@ -19,6 +19,10 @@ mod mte;
 #[cfg(not(feature = "ferrocene_subset"))]
 pub use self::mte::*;
 
+mod rand;
+#[unstable(feature = "stdarch_aarch64_rand", issue = "153514")]
+pub use self::rand::*;
+
 mod neon;
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub use self::neon::*;

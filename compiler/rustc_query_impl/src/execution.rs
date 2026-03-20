@@ -73,9 +73,10 @@ fn collect_active_query_jobs_inner<'tcx, C>(
     let mut collect_shard_jobs = |shard: &HashTable<(C::Key, ActiveKeyStatus<'tcx>)>| {
         for (key, status) in shard.iter() {
             if let ActiveKeyStatus::Started(job) = status {
-                // This function is safe to call with the shard locked because it is very simple.
-                let frame = crate::plumbing::create_query_stack_frame(query, *key);
-                job_map.insert(job.id, QueryJobInfo { frame, job: job.clone() });
+                // It's fine to call `create_tagged_key` with the shard locked,
+                // because it's just a `TaggedQueryKey` variant constructor.
+                let tagged_key = (query.create_tagged_key)(*key);
+                job_map.insert(job.id, QueryJobInfo { tagged_key, job: job.clone() });
             }
         }
     };

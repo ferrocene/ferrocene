@@ -1917,7 +1917,6 @@ symbols! {
         slice_len_fn,
         slice_patterns,
         slicing_syntax,
-        soft,
         sparc,
         sparc64,
         sparc_target_feature,

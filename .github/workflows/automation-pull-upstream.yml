@@ -93,10 +93,18 @@ jobs:
       - name: Setup uv
         run: ferrocene/ci/scripts/setup-uv.sh
 
-      - name: Configure git authorship information
+      - name: Setup git config
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+
+          # Add mergiraf as a merge driver (_choosing_ it as the merge driver is done in `.gitattributes`)
+          git config --global merge.mergiraf.name = "mergiraf"
+          git config --global merge.mergiraf.driver = "mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L --fast"
+
+          # Mergiraf doesn't currently support consuming/creating diffs in any format other than diff3.
+          # See https://codeberg.org/mergiraf/mergiraf/issues/593
+          git config --global merge.conflictstyle "diff3"
 
       # The builtin GitHub token doesn't have the "workflows" permissions, and
       # so it can't create new branches with the .github/workflows directory in

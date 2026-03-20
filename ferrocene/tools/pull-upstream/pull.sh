@@ -182,7 +182,7 @@ else
 fi
 
 git checkout "${current_branch}"
-if ! git -c merge.conflictstyle=zdiff3 merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
+if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
     # If not all conflicts were resolved, control is given back to the user.

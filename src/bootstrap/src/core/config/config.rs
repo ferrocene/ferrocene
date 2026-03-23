@@ -1931,6 +1931,9 @@ impl Config {
                         res.unwrap();
                     }
 
+                    eprintln!("WARNING: download-rustc support in Ferrocene is experimental.");
+                    eprintln!("WARNING: you may run into caching issues or other build failures.");
+
                     Some(commit.clone())
                 }
             })

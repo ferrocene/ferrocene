@@ -622,6 +622,10 @@
 #
 # Set this to `true` to always download or `false` to always use the in-tree
 # compiler.
+#
+# NOTE: Ferrocene support for this option is experimental.
+# `x test --coverage` will likely not be accurate, and you may run into various build
+# issues.
 #rust.download-rustc = false
 
 # Number of codegen units to use for each compiler invocation. A value of 0

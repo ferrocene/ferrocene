@@ -1,28 +1,15 @@
 //! Definitions of integer that is known not to equal zero.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::{IntErrorKind, ParseIntError};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::clone::{TrivialClone, UseCloned};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::cmp::Ordering;
 use crate::hash::{Hash, Hasher};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::{Destruct, Freeze, StructuralPartialEq};
 use crate::num::imp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{BitOr, BitOrAssign, Div, DivAssign, Neg, Rem, RemAssign};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::panic::{RefUnwindSafe, UnwindSafe};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, intrinsics, ptr, ub_checks};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{fmt, intrinsics, ops::Div, ub_checks};
 
 /// A marker trait for primitive types which can be zero.
 ///
@@ -138,6 +125,7 @@ impl_zeroable_primitive!(
 #[repr(transparent)]
 #[rustc_nonnull_optimization_guaranteed]
 #[rustc_diagnostic_item = "NonZero"]
+#[ferrocene::prevalidated]
 pub struct NonZero<T: ZeroablePrimitive>(T::NonZeroInner);
 
 macro_rules! impl_nonzero_fmt {
@@ -149,6 +137,7 @@ macro_rules! impl_nonzero_fmt {
                 T: ZeroablePrimitive + fmt::$Trait,
             {
                 #[inline]
+                #[ferrocene::prevalidated]
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                     self.get().fmt(f)
                 }
@@ -176,7 +165,6 @@ impl_nonzero_fmt! {
     UpperExp
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! impl_nonzero_auto_trait {
     (unsafe $Trait:ident) => {
         #[stable(feature = "nonzero", since = "1.28.0")]
@@ -190,17 +178,11 @@ macro_rules! impl_nonzero_auto_trait {
 
 // Implement auto-traits manually based on `T` to avoid docs exposing
 // the `ZeroablePrimitive::NonZeroInner` implementation detail.
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(unsafe Freeze);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(RefUnwindSafe);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(unsafe Send);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(unsafe Sync);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(Unpin);
-#[cfg(not(feature = "ferrocene_subset"))]
 impl_nonzero_auto_trait!(UnwindSafe);
 
 #[stable(feature = "nonzero", since = "1.28.0")]
@@ -209,13 +191,13 @@ where
     T: ZeroablePrimitive,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         *self
     }
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> UseCloned for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
@@ -223,7 +205,6 @@ impl<T> Copy for NonZero<T> where T: ZeroablePrimitive {}
 
 #[doc(hidden)]
 #[unstable(feature = "trivial_clone", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrivialClone for NonZero<T> where T: ZeroablePrimitive {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
@@ -233,28 +214,27 @@ where
     T: ZeroablePrimitive + [const] PartialEq,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         self.get() == other.get()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn ne(&self, other: &Self) -> bool {
         self.get() != other.get()
     }
 }
 
 #[unstable(feature = "structural_match", issue = "31434")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> StructuralPartialEq for NonZero<T> where T: ZeroablePrimitive + StructuralPartialEq {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const Eq for NonZero<T> where T: ZeroablePrimitive + [const] Eq {}
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const PartialOrd for NonZero<T>
 where
     T: ZeroablePrimitive + [const] PartialOrd,
@@ -287,7 +267,6 @@ where
 
 #[stable(feature = "nonzero", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const Ord for NonZero<T>
 where
     // FIXME(const_hack): the T: ~const Destruct should be inferred from the Self: ~const Destruct.
@@ -324,6 +303,7 @@ where
     T: ZeroablePrimitive + Hash,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
@@ -334,7 +314,6 @@ where
 
 #[stable(feature = "from_nonzero", since = "1.31.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const From<NonZero<T>> for T
 where
     T: ZeroablePrimitive,
@@ -348,7 +327,6 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const BitOr for NonZero<T>
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -364,7 +342,6 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const BitOr<T> for NonZero<T>
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -380,7 +357,6 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const BitOr<NonZero<T>> for T
 where
     T: ZeroablePrimitive + [const] BitOr<Output = T>,
@@ -396,7 +372,6 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const BitOrAssign for NonZero<T>
 where
     T: ZeroablePrimitive,
@@ -410,7 +385,6 @@ where
 
 #[stable(feature = "nonzero_bitor", since = "1.45.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const BitOrAssign<T> for NonZero<T>
 where
     T: ZeroablePrimitive,
@@ -431,6 +405,7 @@ where
     #[rustc_const_stable(feature = "const_nonzero_int_methods", since = "1.47.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(n: T) -> Option<Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -448,6 +423,7 @@ where
     #[must_use]
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(n: T) -> Self {
         match Self::new(n) {
             Some(n) => n,
@@ -473,7 +449,6 @@ where
     #[unstable(feature = "nonzero_from_mut", issue = "106290")]
     #[must_use]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn from_mut(n: &mut T) -> Option<&mut Self> {
         // SAFETY: Memory layout optimization guarantees that `Option<NonZero<T>>` has
         //         the same layout and size as `T`, with `0` representing `None`.
@@ -493,7 +468,6 @@ where
     #[must_use]
     #[inline]
     #[track_caller]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub unsafe fn from_mut_unchecked(n: &mut T) -> &mut Self {
         match Self::from_mut(n) {
             Some(n) => n,
@@ -515,6 +489,7 @@ where
     #[stable(feature = "nonzero", since = "1.28.0")]
     #[rustc_const_stable(feature = "const_nonzero_get", since = "1.34.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn get(self) -> T {
         // Rustc can set range metadata only if it loads `self` from
         // memory somewhere. If the value of `self` was from by-value argument
@@ -643,6 +618,7 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
+            #[ferrocene::prevalidated]
             pub const fn leading_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `ctlz_nonzero`.
                 unsafe {
@@ -673,6 +649,7 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
+            #[ferrocene::prevalidated]
             pub const fn trailing_zeros(self) -> u32 {
                 // SAFETY: since `self` cannot be zero, it is safe to call `cttz_nonzero`.
                 unsafe {
@@ -701,7 +678,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn isolate_highest_one(self) -> Self {
                 // SAFETY:
                 // `self` is non-zero, so masking to preserve only the most
@@ -735,7 +711,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn isolate_lowest_one(self) -> Self {
                 let n = self.get();
                 let n = n & n.wrapping_neg();
@@ -765,7 +740,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn highest_one(self) -> u32 {
                 Self::BITS - 1 - self.leading_zeros()
             }
@@ -790,7 +764,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn lowest_one(self) -> u32 {
                 self.trailing_zeros()
             }
@@ -820,7 +793,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn count_ones(self) -> NonZero<u32> {
                 // SAFETY:
                 // `self` is non-zero, which means it has at least one bit set, which means
@@ -852,7 +824,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn rotate_left(self, n: u32) -> Self {
                 let result = self.get().rotate_left(n);
                 // SAFETY: Rotating bits preserves the property int > 0.
@@ -884,7 +855,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn rotate_right(self, n: u32) -> Self {
                 let result = self.get().rotate_right(n);
                 // SAFETY: Rotating bits preserves the property int > 0.
@@ -912,7 +882,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn swap_bytes(self) -> Self {
                 let result = self.get().swap_bytes();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -941,7 +910,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn reverse_bits(self) -> Self {
                 let result = self.get().reverse_bits();
                 // SAFETY: Reversing bits preserves the property int > 0.
@@ -975,7 +943,6 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn from_be(x: Self) -> Self {
                 let result = $Int::from_be(x.get());
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -1009,7 +976,6 @@ macro_rules! nonzero_integer {
             #[unstable(feature = "nonzero_bitwise", issue = "128281")]
             #[must_use]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn from_le(x: Self) -> Self {
                 let result = $Int::from_le(x.get());
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -1043,7 +1009,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn to_be(self) -> Self {
                 let result = self.get().to_be();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -1077,7 +1042,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                         without modifying the original"]
             #[inline(always)]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn to_le(self) -> Self {
                 let result = self.get().to_le();
                 // SAFETY: Shuffling bytes preserves the property int > 0.
@@ -1115,7 +1079,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn checked_mul(self, other: Self) -> Option<Self> {
                 if let Some(result) = self.get().checked_mul(other.get()) {
                     // SAFETY:
@@ -1155,7 +1118,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn saturating_mul(self, other: Self) -> Self {
                 // SAFETY:
                 // - `saturating_mul` returns `u*::MAX`/`i*::MAX`/`i*::MIN` on overflow/underflow,
@@ -1204,7 +1166,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const unsafe fn unchecked_mul(self, other: Self) -> Self {
                 // SAFETY: The caller ensures there is no overflow.
                 unsafe { Self::new_unchecked(self.get().unchecked_mul(other.get())) }
@@ -1235,7 +1196,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn checked_pow(self, other: u32) -> Option<Self> {
                 if let Some(result) = self.get().checked_pow(other) {
                     // SAFETY:
@@ -1284,7 +1244,6 @@ macro_rules! nonzero_integer {
             #[must_use = "this returns the result of the operation, \
                           without modifying the original"]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn saturating_pow(self, other: u32) -> Self {
                 // SAFETY:
                 // - `saturating_pow` returns `u*::MAX`/`i*::MAX`/`i*::MIN` on overflow/underflow,
@@ -1336,7 +1295,6 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii(b\"1 \").is_err());")]
             /// ```
-            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
             pub const fn from_ascii(src: &[u8]) -> Result<Self, ParseIntError> {
@@ -1392,7 +1350,6 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii_radix(b\"1 \", 10).is_err());")]
             /// ```
-            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
             pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<Self, ParseIntError> {
@@ -1456,7 +1413,6 @@ macro_rules! nonzero_integer {
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_str_radix(\"1 \", 10).is_err());")]
             /// ```
-            #[cfg(not(feature = "ferrocene_subset"))]
             #[unstable(feature = "nonzero_from_str_radix", issue = "152193")]
             #[inline]
             pub const fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError> {
@@ -1464,7 +1420,6 @@ macro_rules! nonzero_integer {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[stable(feature = "nonzero_parse", since = "1.35.0")]
         impl FromStr for NonZero<$Int> {
             type Err = ParseIntError;
@@ -1547,6 +1502,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             /// part of the exact result, and cannot panic.
             #[doc(alias = "unchecked_div")]
             #[inline]
+            #[ferrocene::prevalidated]
             fn div(self, other: NonZero<$Int>) -> $Int {
                 // SAFETY: Division by zero is checked because `other` is non-zero,
                 // and MIN/-1 is checked because `self` is an unsigned int.
@@ -1554,7 +1510,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[stable(feature = "nonzero_div_assign", since = "1.79.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign<NonZero<$Int>> for $Int {
@@ -1569,7 +1524,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[stable(feature = "nonzero_div", since = "1.51.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const Rem<NonZero<$Int>> for $Int {
@@ -1584,7 +1538,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[stable(feature = "nonzero_div_assign", since = "1.79.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign<NonZero<$Int>> for $Int {
@@ -1595,7 +1548,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl NonZero<$Int> {
             /// Calculates the quotient of `self` and `rhs`, rounding the result towards positive infinity.
             ///
@@ -1627,7 +1579,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
     };
     // Impls for signed nonzero types only.
     (signed $Int:ty) => {
-        #[cfg(not(feature = "ferrocene_subset"))]
         #[stable(feature = "signed_nonzero_neg", since = "1.71.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const Neg for NonZero<$Int> {
@@ -1640,7 +1591,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             }
         }
 
-        #[cfg(not(feature = "ferrocene_subset"))]
         forward_ref_unop! { impl Neg, neg for NonZero<$Int>,
         #[stable(feature = "signed_nonzero_neg", since = "1.71.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")] }
@@ -1666,7 +1616,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[doc = concat!("assert_eq!(NonZero::<", stringify!($Int), ">::MIN.get(), 1", stringify!($Int), ");")]
         /// ```
         #[stable(feature = "nonzero_min_max", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const MIN: Self = Self::new(1).unwrap();
 
         /// The largest value that can be represented by this non-zero
@@ -1681,7 +1630,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[doc = concat!("assert_eq!(NonZero::<", stringify!($Int), ">::MAX.get(), ", stringify!($Int), "::MAX);")]
         /// ```
         #[stable(feature = "nonzero_min_max", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const MAX: Self = Self::new(<$Int>::MAX).unwrap();
 
         /// Adds an unsigned integer to a non-zero value.
@@ -1710,7 +1658,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_add(self, other: $Int) -> Option<Self> {
             if let Some(result) = self.get().checked_add(other) {
                 // SAFETY:
@@ -1750,7 +1697,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_add(self, other: $Int) -> Self {
             // SAFETY:
             // - `saturating_add` returns `u*::MAX` on overflow, which is non-zero
@@ -1789,7 +1735,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const unsafe fn unchecked_add(self, other: $Int) -> Self {
             // SAFETY: The caller ensures there is no overflow.
             unsafe { Self::new_unchecked(self.get().unchecked_add(other)) }
@@ -1823,7 +1768,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_next_power_of_two(self) -> Option<Self> {
             if let Some(nz) = self.get().checked_next_power_of_two() {
                 // SAFETY: The next power of two is positive
@@ -1859,6 +1803,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[ferrocene::prevalidated]
         pub const fn ilog2(self) -> u32 {
             Self::BITS - 1 - self.leading_zeros()
         }
@@ -1888,6 +1833,7 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[ferrocene::prevalidated]
         pub const fn ilog10(self) -> u32 {
             imp::int_log10::$Int(self)
         }
@@ -1921,7 +1867,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[doc(alias = "average_floor")]
         #[doc(alias = "average")]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn midpoint(self, rhs: Self) -> Self {
             // SAFETY: The only way to get `0` with midpoint is to have two opposite or
             // near opposite numbers: (-5, 5), (0, 1), (0, 0) which is impossible because
@@ -1953,7 +1898,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[stable(feature = "nonzero_is_power_of_two", since = "1.59.0")]
         #[rustc_const_stable(feature = "nonzero_is_power_of_two", since = "1.59.0")]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn is_power_of_two(self) -> bool {
             // LLVM 11 normalizes `unchecked_sub(x, 1) & x == 0` to the implementation seen here.
             // On the basic x86-64 target, this saves 3 instructions for the zero check.
@@ -1984,7 +1928,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn isqrt(self) -> Self {
             let result = self.get().isqrt();
 
@@ -2012,7 +1955,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn cast_signed(self) -> NonZero<$Sint> {
             // SAFETY: `self.get()` can't be zero
             unsafe { NonZero::new_unchecked(self.get().cast_signed()) }
@@ -2039,7 +1981,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn bit_width(self) -> NonZero<u32> {
             // SAFETY: Since `self.leading_zeros()` is always less than
             // `Self::BITS`, this subtraction can never be zero.
@@ -2069,7 +2010,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[doc = concat!("assert_eq!(NonZero::<", stringify!($Int), ">::MIN.get(), ", stringify!($Int), "::MIN);")]
         /// ```
         #[stable(feature = "nonzero_min_max", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const MIN: Self = Self::new(<$Int>::MIN).unwrap();
 
         /// The largest value that can be represented by this non-zero
@@ -2088,7 +2028,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[doc = concat!("assert_eq!(NonZero::<", stringify!($Int), ">::MAX.get(), ", stringify!($Int), "::MAX);")]
         /// ```
         #[stable(feature = "nonzero_min_max", since = "1.70.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const MAX: Self = Self::new(<$Int>::MAX).unwrap();
 
         /// Computes the absolute value of self.
@@ -2115,7 +2054,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn abs(self) -> Self {
             // SAFETY: This cannot overflow to zero.
             unsafe { Self::new_unchecked(self.get().abs()) }
@@ -2147,7 +2085,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_abs(self) -> Option<Self> {
             if let Some(nz) = self.get().checked_abs() {
                 // SAFETY: absolute value of nonzero cannot yield zero values.
@@ -2183,7 +2120,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_abs(self) -> (Self, bool) {
             let (nz, flag) = self.get().overflowing_abs();
             (
@@ -2221,7 +2157,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_abs(self) -> Self {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { Self::new_unchecked(self.get().saturating_abs()) }
@@ -2254,7 +2189,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_abs(self) -> Self {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { Self::new_unchecked(self.get().wrapping_abs()) }
@@ -2287,7 +2221,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn unsigned_abs(self) -> NonZero<$Uint> {
             // SAFETY: absolute value of nonzero cannot yield zero values.
             unsafe { NonZero::new_unchecked(self.get().unsigned_abs()) }
@@ -2315,7 +2248,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn is_positive(self) -> bool {
             self.get().is_positive()
         }
@@ -2342,7 +2274,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn is_negative(self) -> bool {
             self.get().is_negative()
         }
@@ -2369,7 +2300,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn checked_neg(self) -> Option<Self> {
             if let Some(result) = self.get().checked_neg() {
                 // SAFETY: negation of nonzero cannot yield zero values.
@@ -2402,7 +2332,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn overflowing_neg(self) -> (Self, bool) {
             let (result, overflow) = self.get().overflowing_neg();
             // SAFETY: negation of nonzero cannot yield zero values.
@@ -2436,7 +2365,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn saturating_neg(self) -> Self {
             if let Some(result) = self.checked_neg() {
                 return result;
@@ -2469,7 +2397,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[inline]
         #[stable(feature = "nonzero_negation_ops", since = "1.71.0")]
         #[rustc_const_stable(feature = "nonzero_negation_ops", since = "1.71.0")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn wrapping_neg(self) -> Self {
             let result = self.get().wrapping_neg();
             // SAFETY: negation of nonzero cannot yield zero values.
@@ -2492,7 +2419,6 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline(always)]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn cast_unsigned(self) -> NonZero<$Uint> {
             // SAFETY: `self.get()` can't be zero
             unsafe { NonZero::new_unchecked(self.get().cast_unsigned()) }
@@ -2600,7 +2526,6 @@ nonzero_integer! {
     reversed = "0x6a2c48091e6a2c48",
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroI8,
     Primitive = signed i8,
@@ -2613,7 +2538,6 @@ nonzero_integer! {
     reversed = "0x48",
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroI16,
     Primitive = signed i16,
@@ -2626,7 +2550,6 @@ nonzero_integer! {
     reversed = "0x2c48",
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroI32,
     Primitive = signed i32,
@@ -2639,7 +2562,6 @@ nonzero_integer! {
     reversed = "0x1e6a2c48",
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroI64,
     Primitive = signed i64,
@@ -2652,7 +2574,6 @@ nonzero_integer! {
     reversed = "0x6a2c48091e6a2c48",
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroI128,
     Primitive = signed i128,
@@ -2666,7 +2587,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "16")]
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,
@@ -2680,7 +2600,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "32")]
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,
@@ -2694,7 +2613,6 @@ nonzero_integer! {
 }
 
 #[cfg(target_pointer_width = "64")]
-#[cfg(not(feature = "ferrocene_subset"))]
 nonzero_integer! {
     Self = NonZeroIsize,
     Primitive = signed isize,

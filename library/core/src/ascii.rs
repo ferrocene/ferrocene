@@ -11,7 +11,6 @@
 
 use crate::escape::{AlwaysEscaped, EscapeIterInner};
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
 use crate::num::NonZero;
 
@@ -27,6 +26,7 @@ pub use ascii_char::AsciiChar as Char;
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct EscapeDefault(EscapeIterInner<4, AlwaysEscaped>);
 
 /// Returns an iterator that produces an escaped version of a `u8`.
@@ -92,17 +92,20 @@ pub struct EscapeDefault(EscapeIterInner<4, AlwaysEscaped>);
 /// assert_eq!(b'd', escaped.next().unwrap());
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub fn escape_default(c: u8) -> EscapeDefault {
     EscapeDefault::new(c)
 }
 
 impl EscapeDefault {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn new(c: u8) -> Self {
         Self(EscapeIterInner::ascii(c))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn empty() -> Self {
         Self(EscapeIterInner::empty())
     }
@@ -113,34 +116,38 @@ impl Iterator for EscapeDefault {
     type Item = u8;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<u8> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.0.len();
         (n, Some(n))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.0.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<u8> {
         self.0.next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl DoubleEndedIterator for EscapeDefault {
     #[inline]
     fn next_back(&mut self) -> Option<u8> {
@@ -154,7 +161,6 @@ impl DoubleEndedIterator for EscapeDefault {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl ExactSizeIterator for EscapeDefault {
     #[inline]
     fn len(&self) -> usize {
@@ -163,11 +169,11 @@ impl ExactSizeIterator for EscapeDefault {
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl FusedIterator for EscapeDefault {}
 
 #[stable(feature = "ascii_escape_display", since = "1.39.0")]
 impl fmt::Display for EscapeDefault {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
     }
@@ -175,6 +181,7 @@ impl fmt::Display for EscapeDefault {
 
 #[stable(feature = "std_debug", since = "1.16.0")]
 impl fmt::Debug for EscapeDefault {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EscapeDefault").finish_non_exhaustive()
     }

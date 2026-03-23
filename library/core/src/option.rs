@@ -584,27 +584,15 @@
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod ferrocene_test;
 
 use crate::clone::TrivialClone;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
-#[cfg(feature = "ferrocene_subset")]
-use crate::ops::{self, ControlFlow, Deref, DerefMut};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{self, ControlFlow, Deref, DerefMut, Residual, Try};
 use crate::panicking::{panic, panic_display};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::pin::Pin;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{cmp, convert, hint, mem, slice};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{convert, hint, mem};
 
 /// The `Option` type. See [the module level documentation](self) for more.
 #[doc(search_unbox)]
@@ -614,6 +602,7 @@ use crate::{convert, hint, mem};
 #[lang = "Option"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(clippy::derived_hash_with_manual_eq)] // PartialEq is manually implemented equivalently
+#[ferrocene::prevalidated]
 pub enum Option<T> {
     /// No value.
     #[lang = "None"]
@@ -649,6 +638,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_some(&self) -> bool {
         matches!(*self, Some(_))
     }
@@ -675,6 +665,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "is_some_and", since = "1.70.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn is_some_and(self, f: impl [const] FnOnce(T) -> bool + [const] Destruct) -> bool {
         match self {
             None => false,
@@ -698,6 +689,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
+    #[ferrocene::prevalidated]
     pub const fn is_none(&self) -> bool {
         !self.is_some()
     }
@@ -724,6 +716,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "is_none_or", since = "1.82.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn is_none_or(self, f: impl [const] FnOnce(T) -> bool + [const] Destruct) -> bool {
         match self {
             None => true,
@@ -758,6 +751,7 @@ impl<T> Option<T> {
     #[inline]
     #[rustc_const_stable(feature = "const_option_basics", since = "1.48.0")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_ref(&self) -> Option<&T> {
         match *self {
             Some(ref x) => Some(x),
@@ -780,6 +774,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_mut(&mut self) -> Option<&mut T> {
         match *self {
             Some(ref mut x) => Some(x),
@@ -794,7 +789,6 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_pin_ref(self: Pin<&Self>) -> Option<Pin<&T>> {
         // FIXME(const-hack): use `map` once that is possible
         match Pin::get_ref(self).as_ref() {
@@ -812,7 +806,6 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "pin", since = "1.33.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_pin_mut(self: Pin<&mut Self>) -> Option<Pin<&mut T>> {
         // SAFETY: `get_unchecked_mut` is never used to move the `Option` inside `self`.
         // `x` is guaranteed to be pinned because it comes from `self` which is pinned.
@@ -826,6 +819,7 @@ impl<T> Option<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn len(&self) -> usize {
         // Using the intrinsic avoids emitting a branch to get the 0 or 1.
         let discriminant: isize = crate::intrinsics::discriminant_value(self);
@@ -860,7 +854,6 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -916,7 +909,6 @@ impl<T> Option<T> {
     #[must_use]
     #[stable(feature = "option_as_slice", since = "1.75.0")]
     #[rustc_const_stable(feature = "const_option_ext", since = "1.84.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: When the `Option` is `Some`, we're using the actual pointer
         // to the payload, with a length of 1, so this is equivalent to
@@ -986,6 +978,7 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_expect"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn expect(self, msg: &str) -> T {
         match self {
             Some(val) => val,
@@ -1031,6 +1024,7 @@ impl<T> Option<T> {
     #[rustc_diagnostic_item = "option_unwrap"]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap(self) -> T {
         match self {
             Some(val) => val,
@@ -1056,6 +1050,7 @@ impl<T> Option<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or(self, default: T) -> T
     where
         T: [const] Destruct,
@@ -1079,6 +1074,7 @@ impl<T> Option<T> {
     #[track_caller]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or_else<F>(self, f: F) -> T
     where
         F: [const] FnOnce() -> T + [const] Destruct,
@@ -1111,6 +1107,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn unwrap_or_default(self) -> T
     where
         T: [const] Default,
@@ -1146,6 +1143,7 @@ impl<T> Option<T> {
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn unwrap_unchecked(self) -> T {
         match self {
             Some(val) => val,
@@ -1181,6 +1179,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn map<U, F>(self, f: F) -> Option<U>
     where
         F: [const] FnOnce(T) -> U + [const] Destruct,
@@ -1212,6 +1211,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "result_option_inspect", since = "1.76.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn inspect<F>(self, f: F) -> Self
     where
         F: [const] FnOnce(&T) + [const] Destruct,
@@ -1245,6 +1245,7 @@ impl<T> Option<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "if you don't need the returned value, use `if let` instead"]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn map_or<U, F>(self, default: U, f: F) -> U
     where
         F: [const] FnOnce(T) -> U + [const] Destruct,
@@ -1292,6 +1293,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn map_or_else<U, D, F>(self, default: D, f: F) -> U
     where
         D: [const] FnOnce() -> U + [const] Destruct,
@@ -1323,6 +1325,7 @@ impl<T> Option<T> {
     #[inline]
     #[unstable(feature = "result_option_map_or_default", issue = "138099")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn map_or_default<U, F>(self, f: F) -> U
     where
         U: [const] Default,
@@ -1358,6 +1361,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn ok_or<E: [const] Destruct>(self, err: E) -> Result<T, E> {
         match self {
             Some(v) => Ok(v),
@@ -1384,6 +1388,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn ok_or_else<E, F>(self, err: F) -> Result<T, E>
     where
         F: [const] FnOnce() -> E + [const] Destruct,
@@ -1411,6 +1416,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_deref", since = "1.40.0")]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    #[ferrocene::prevalidated]
     pub const fn as_deref(&self) -> Option<&T::Target>
     where
         T: [const] Deref,
@@ -1435,6 +1441,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_deref", since = "1.40.0")]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    #[ferrocene::prevalidated]
     pub const fn as_deref_mut(&mut self) -> Option<&mut T::Target>
     where
         T: [const] DerefMut,
@@ -1459,6 +1466,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn iter(&self) -> Iter<'_, T> {
         Iter { inner: Item { opt: self.as_ref() } }
     }
@@ -1480,6 +1488,7 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut { inner: Item { opt: self.as_mut() } }
     }
@@ -1518,6 +1527,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn and<U>(self, optb: Option<U>) -> Option<U>
     where
         T: [const] Destruct,
@@ -1562,6 +1572,7 @@ impl<T> Option<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("flat_map", "flatmap")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn and_then<U, F>(self, f: F) -> Option<U>
     where
         F: [const] FnOnce(T) -> Option<U> + [const] Destruct,
@@ -1599,6 +1610,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_filter", since = "1.27.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn filter<P>(self, predicate: P) -> Self
     where
         P: [const] FnOnce(&T) -> bool + [const] Destruct,
@@ -1642,6 +1654,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn or(self, optb: Option<T>) -> Option<T>
     where
         T: [const] Destruct,
@@ -1668,6 +1681,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn or_else<F>(self, f: F) -> Option<T>
     where
         F: [const] FnOnce() -> Option<T> + [const] Destruct,
@@ -1705,6 +1719,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_xor", since = "1.37.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn xor(self, optb: Option<T>) -> Option<T>
     where
         T: [const] Destruct,
@@ -1743,6 +1758,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_insert", since = "1.53.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn insert(&mut self, value: T) -> &mut T
     where
         T: [const] Destruct,
@@ -1775,7 +1791,6 @@ impl<T> Option<T> {
     /// ```
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn get_or_insert(&mut self, value: T) -> &mut T {
         self.get_or_insert_with(|| value)
     }
@@ -1800,7 +1815,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_get_or_insert_default", since = "1.83.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn get_or_insert_default(&mut self) -> &mut T
     where
         T: [const] Default,
@@ -1828,7 +1842,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where
         F: [const] FnOnce() -> T + [const] Destruct,
@@ -1883,7 +1896,6 @@ impl<T> Option<T> {
     /// assert_eq!(o2, None);
     /// ```
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "option_get_or_try_insert_with", issue = "143648")]
     pub fn get_or_try_insert_with<'a, R, F>(
         &'a mut self,
@@ -1924,6 +1936,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn take(&mut self) -> Option<T> {
         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
         mem::replace(self, None)
@@ -1956,7 +1969,6 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_take_if", since = "1.80.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn take_if<P>(&mut self, predicate: P) -> Option<T>
     where
         P: [const] FnOnce(&mut T) -> bool + [const] Destruct,
@@ -1984,6 +1996,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_replace", since = "1.31.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn replace(&mut self, value: T) -> Option<T> {
         mem::replace(self, Some(value))
     }
@@ -2005,6 +2018,7 @@ impl<T> Option<T> {
     /// ```
     #[stable(feature = "option_zip_option", since = "1.46.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn zip<U>(self, other: Option<U>) -> Option<(T, U)>
     where
         T: [const] Destruct,
@@ -2046,7 +2060,6 @@ impl<T> Option<T> {
     /// ```
     #[unstable(feature = "option_zip", issue = "70086")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn zip_with<U, F, R>(self, other: Option<U>, f: F) -> Option<R>
     where
         F: [const] FnOnce(T, U) -> R + [const] Destruct,
@@ -2081,6 +2094,7 @@ impl<T> Option<T> {
     /// assert_eq!(n.reduce(n, f), None);
     /// ```
     #[unstable(feature = "option_reduce", issue = "144273")]
+    #[ferrocene::prevalidated]
     pub fn reduce<U, R, F>(self, other: Option<U>, f: F) -> Option<R>
     where
         T: Into<R>,
@@ -2111,7 +2125,6 @@ impl<T: IntoIterator> Option<T> {
     /// assert_eq!(o1.into_flat_iter().collect::<Vec<_>>(), [1, 2]);
     /// assert_eq!(o2.into_flat_iter().collect::<Vec<_>>(), Vec::<&usize>::new());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "option_into_flat_iter", issue = "148441")]
     pub fn into_flat_iter<A>(self) -> OptionFlatten<A>
     where
@@ -2138,6 +2151,7 @@ impl<T, U> Option<(T, U)> {
     /// ```
     #[inline]
     #[stable(feature = "unzip_option", since = "1.66.0")]
+    #[ferrocene::prevalidated]
     pub fn unzip(self) -> (Option<T>, Option<U>) {
         match self {
             Some((a, b)) => (Some(a), Some(b)),
@@ -2162,6 +2176,7 @@ impl<T> Option<&T> {
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "copied", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn copied(self) -> Option<T>
     where
         T: Copy,
@@ -2188,6 +2203,7 @@ impl<T> Option<&T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn cloned(self) -> Option<T>
     where
         T: Clone,
@@ -2212,6 +2228,7 @@ impl<T> Option<&mut T> {
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "copied", since = "1.35.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn copied(self) -> Option<T>
     where
         T: Copy,
@@ -2236,6 +2253,7 @@ impl<T> Option<&mut T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(since = "1.26.0", feature = "option_ref_mut_cloned")]
+    #[ferrocene::prevalidated]
     pub fn cloned(self) -> Option<T>
     where
         T: Clone,
@@ -2265,6 +2283,7 @@ impl<T, E> Option<Result<T, E>> {
     #[stable(feature = "transpose_result", since = "1.33.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn transpose(self) -> Result<Option<T>, E> {
         match self {
             Some(Ok(x)) => Ok(Some(x)),
@@ -2278,6 +2297,7 @@ impl<T, E> Option<Result<T, E>> {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 const fn unwrap_failed() -> ! {
     panic("called `Option::unwrap()` on a `None` value")
 }
@@ -2287,6 +2307,7 @@ const fn unwrap_failed() -> ! {
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 const fn expect_failed(msg: &str) -> ! {
     panic_display(&msg)
 }
@@ -2304,6 +2325,7 @@ where
     T: [const] Clone + [const] Destruct,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         match self {
             Some(x) => Some(x.clone()),
@@ -2312,6 +2334,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone_from(&mut self, source: &Self) {
         match (self, source) {
             (Some(to), Some(from)) => to.clone_from(from),
@@ -2321,7 +2344,6 @@ where
 }
 
 #[unstable(feature = "ergonomic_clones", issue = "132290")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> crate::clone::UseCloned for Option<T> where T: crate::clone::UseCloned {}
 
 #[doc(hidden)]
@@ -2341,6 +2363,7 @@ impl<T> const Default for Option<T> {
     /// assert!(opt.is_none());
     /// ```
     #[inline]
+    #[ferrocene::prevalidated]
     fn default() -> Option<T> {
         None
     }
@@ -2366,13 +2389,13 @@ impl<T> const IntoIterator for Option<T> {
     /// assert!(v.is_empty());
     /// ```
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> IntoIter<T> {
         IntoIter { inner: Item { opt: self } }
     }
 }
 
 #[stable(since = "1.4.0", feature = "option_iter")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> IntoIterator for &'a Option<T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
@@ -2383,7 +2406,6 @@ impl<'a, T> IntoIterator for &'a Option<T> {
 }
 
 #[stable(since = "1.4.0", feature = "option_iter")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> IntoIterator for &'a mut Option<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
@@ -2405,6 +2427,7 @@ impl<T> const From<T> for Option<T> {
     ///
     /// assert_eq!(Some(67), o);
     /// ```
+    #[ferrocene::prevalidated]
     fn from(val: T) -> Option<T> {
         Some(val)
     }
@@ -2433,6 +2456,7 @@ impl<'a, T> const From<&'a Option<T>> for Option<&'a T> {
     ///
     /// assert_eq!(o, Some(18));
     /// ```
+    #[ferrocene::prevalidated]
     fn from(o: &'a Option<T>) -> Option<&'a T> {
         o.as_ref()
     }
@@ -2456,6 +2480,7 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
     ///
     /// assert_eq!(s, Some(String::from("Hello, Rustaceans!")));
     /// ```
+    #[ferrocene::prevalidated]
     fn from(o: &'a mut Option<T>) -> Option<&'a mut T> {
         o.as_mut()
     }
@@ -2465,12 +2490,12 @@ impl<'a, T> const From<&'a mut Option<T>> for Option<&'a mut T> {
 // Once https://github.com/llvm/llvm-project/issues/52622 is fixed, we can
 // go back to deriving `PartialEq`.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> crate::marker::StructuralPartialEq for Option<T> {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T: [const] PartialEq> const PartialEq for Option<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         // Spelling out the cases explicitly optimizes better than
         // `_ => false`
@@ -2488,7 +2513,6 @@ impl<T: [const] PartialEq> const PartialEq for Option<T> {
 // not optimal.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
@@ -2503,7 +2527,6 @@ impl<T: [const] PartialOrd> const PartialOrd for Option<T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: [const] Ord> const Ord for Option<T> {
     #[inline]
     fn cmp(&self, other: &Self) -> cmp::Ordering {
@@ -2521,6 +2544,7 @@ impl<T: [const] Ord> const Ord for Option<T> {
 /////////////////////////////////////////////////////////////////////////////
 
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 struct Item<A> {
     opt: Option<A>,
 }
@@ -2530,18 +2554,19 @@ impl<A> const Iterator for Item<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.opt.take()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.opt.len();
         (len, Some(len))
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> DoubleEndedIterator for Item<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {
@@ -2551,13 +2576,12 @@ impl<A> DoubleEndedIterator for Item<A> {
 
 impl<A> ExactSizeIterator for Item<A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         self.opt.len()
     }
 }
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> FusedIterator for Item<A> {}
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for Item<A> {}
 
 /// An iterator over a reference to the [`Some`] variant of an [`Option`].
@@ -2567,13 +2591,12 @@ unsafe impl<A> TrustedLen for Item<A> {}
 /// This `struct` is created by the [`Option::iter`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
+#[ferrocene::prevalidated]
 pub struct Iter<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a A>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, A> Iterator for Iter<'a, A> {
     type Item = &'a A;
 
@@ -2588,7 +2611,6 @@ impl<'a, A> Iterator for Iter<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a A> {
@@ -2597,19 +2619,15 @@ impl<'a, A> DoubleEndedIterator for Iter<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> ExactSizeIterator for Iter<'_, A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> FusedIterator for Iter<'_, A> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for Iter<'_, A> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> Clone for Iter<'_, A> {
     #[inline]
     fn clone(&self) -> Self {
@@ -2624,13 +2642,12 @@ impl<A> Clone for Iter<'_, A> {
 /// This `struct` is created by the [`Option::iter_mut`] function.
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
+#[ferrocene::prevalidated]
 pub struct IterMut<'a, A: 'a> {
-    #[cfg_attr(feature = "ferrocene_subset", expect(dead_code))]
     inner: Item<&'a mut A>,
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, A> Iterator for IterMut<'a, A> {
     type Item = &'a mut A;
 
@@ -2645,7 +2662,6 @@ impl<'a, A> Iterator for IterMut<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut A> {
@@ -2654,14 +2670,11 @@ impl<'a, A> DoubleEndedIterator for IterMut<'a, A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> ExactSizeIterator for IterMut<'_, A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> FusedIterator for IterMut<'_, A> {}
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 
 /// An iterator over the value in [`Some`] variant of an [`Option`].
@@ -2671,6 +2684,7 @@ unsafe impl<A> TrustedLen for IterMut<'_, A> {}
 /// This `struct` is created by the [`Option::into_iter`] function.
 #[derive(Clone, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct IntoIter<A> {
     inner: Item<A>,
 }
@@ -2681,17 +2695,18 @@ impl<A> const Iterator for IntoIter<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.inner.next()
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.inner.size_hint()
     }
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> DoubleEndedIterator for IntoIter<A> {
     #[inline]
     fn next_back(&mut self) -> Option<A> {
@@ -2700,26 +2715,21 @@ impl<A> DoubleEndedIterator for IntoIter<A> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> ExactSizeIterator for IntoIter<A> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A> FusedIterator for IntoIter<A> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<A> TrustedLen for IntoIter<A> {}
 
 /// The iterator produced by [`Option::into_flat_iter`]. See its documentation for more.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[derive(Clone, Debug)]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 pub struct OptionFlatten<A> {
     iter: Option<A>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: Iterator> Iterator for OptionFlatten<A> {
     type Item = A::Item;
@@ -2733,7 +2743,6 @@ impl<A: Iterator> Iterator for OptionFlatten<A> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: DoubleEndedIterator> DoubleEndedIterator for OptionFlatten<A> {
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -2741,15 +2750,12 @@ impl<A: DoubleEndedIterator> DoubleEndedIterator for OptionFlatten<A> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: ExactSizeIterator> ExactSizeIterator for OptionFlatten<A> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 impl<A: FusedIterator> FusedIterator for OptionFlatten<A> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "option_into_flat_iter", issue = "148441")]
 unsafe impl<A: TrustedLen> TrustedLen for OptionFlatten<A> {}
 
@@ -2758,7 +2764,6 @@ unsafe impl<A: TrustedLen> TrustedLen for OptionFlatten<A> {}
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
     /// Takes each element in the [`Iterator`]: if it is [`None`][Option::None],
     /// no further elements are taken, and the [`None`][Option::None] is
@@ -2833,11 +2838,13 @@ impl<T> const ops::Try for Option<T> {
     type Residual = Option<convert::Infallible>;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_output(output: Self::Output) -> Self {
         Some(output)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
         match self {
             Some(v) => ControlFlow::Continue(v),
@@ -2852,6 +2859,7 @@ impl<T> const ops::Try for Option<T> {
 // https://github.com/rust-lang/rust/issues/99940
 impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_residual(residual: Option<convert::Infallible>) -> Self {
         match residual {
             None => None,
@@ -2862,7 +2870,6 @@ impl<T> const ops::FromResidual<Option<convert::Infallible>> for Option<T> {
 #[diagnostic::do_not_recommend]
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> const ops::FromResidual<ops::Yeet<()>> for Option<T> {
     #[inline]
     fn from_residual(ops::Yeet(()): ops::Yeet<()>) -> Self {
@@ -2905,6 +2912,7 @@ impl<T> Option<Option<T>> {
     #[stable(feature = "option_flattening", since = "1.40.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn flatten(self) -> Option<T> {
         // FIXME(const-hack): could be written with `and_then`
         match self {
@@ -2914,7 +2922,6 @@ impl<T> Option<Option<T>> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Option<&'a Option<T>> {
     /// Converts from `Option<&Option<T>>` to `Option<&T>`.
     ///
@@ -2965,7 +2972,6 @@ impl<'a, T> Option<&'a mut Option<T>> {
     /// let x: Option<&mut Option<u32>> = None;
     /// assert_eq!(None, x.flatten_ref());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "option_reference_flattening", issue = "149221")]
     pub const fn flatten_ref(self) -> Option<&'a T> {
@@ -2995,7 +3001,6 @@ impl<'a, T> Option<&'a mut Option<T>> {
     /// let x: Option<&mut Option<u32>> = None;
     /// assert_eq!(None, x.flatten_mut());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     #[unstable(feature = "option_reference_flattening", issue = "149221")]
     pub const fn flatten_mut(self) -> Option<&'a mut T> {
@@ -3006,7 +3011,6 @@ impl<'a, T> Option<&'a mut Option<T>> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, const N: usize> [Option<T>; N] {
     /// Transposes a `[Option<T>; N]` into a `Option<[T; N]>`.
     ///

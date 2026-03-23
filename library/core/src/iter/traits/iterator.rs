@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::super::{
     ArrayChunks, ByRefSized, Chain, Cloned, Copied, Cycle, Enumerate, Filter, FilterMap, FlatMap,
     Flatten, Fuse, Inspect, Intersperse, IntersperseWith, Map, MapWhile, MapWindows, Peekable,
@@ -6,25 +5,11 @@ use super::super::{
     Zip, try_process,
 };
 use super::TrustedLen;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::array;
 use crate::cmp::{self, Ordering};
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use {
-    super::super::{
-        Chain, Cloned, Copied, DoubleEndedIterator, Enumerate, Filter, FlatMap, Fuse, Map, Rev,
-        Skip, StepBy, Sum, Take, TakeWhile, Zip,
-    },
-    crate::ops::{ControlFlow, Try},
-};
-
-#[cfg(not(feature = "ferrocene_subset"))]
 fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
 
 /// A trait for dealing with iterators.
@@ -48,7 +33,7 @@ fn _assert_is_dyn_compatible(_: &dyn Iterator<Item = ()>) {}
     label = "`{Self}` is not an iterator",
     message = "`{Self}` is not an iterator"
 )]
-#[cfg_attr(not(feature = "ferrocene_subset"), doc(notable_trait))]
+#[doc(notable_trait)]
 #[lang = "iterator"]
 #[rustc_diagnostic_item = "Iterator"]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
@@ -123,7 +108,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_next_chunk", issue = "98326")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn next_chunk<const N: usize>(
         &mut self,
@@ -202,6 +186,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, None)
     }
@@ -238,6 +223,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -271,11 +257,13 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn some<T>(_: Option<T>, x: T) -> Option<T> {
             Some(x)
         }
@@ -319,6 +307,7 @@ pub const trait Iterator {
     #[inline]
     #[unstable(feature = "iter_advance_by", issue = "77404")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         /// Helper trait to specialize `advance_by` via `try_fold` for `Sized` iterators.
         trait SpecAdvanceBy {
@@ -326,6 +315,7 @@ pub const trait Iterator {
         }
 
         impl<I: Iterator + ?Sized> SpecAdvanceBy for I {
+            #[ferrocene::prevalidated]
             default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 for i in 0..n {
                     if self.next().is_none() {
@@ -338,6 +328,7 @@ pub const trait Iterator {
         }
 
         impl<I: Iterator> SpecAdvanceBy for I {
+            #[ferrocene::prevalidated]
             fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let Some(n) = NonZero::new(n) else {
                     return Ok(());
@@ -397,6 +388,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.advance_by(n).ok()?;
         self.next()
@@ -448,6 +440,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,
@@ -520,6 +513,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,
@@ -639,6 +633,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,
@@ -690,7 +685,6 @@ pub const trait Iterator {
     /// [`intersperse_with`]: Iterator::intersperse_with
     #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
     where
@@ -758,7 +752,6 @@ pub const trait Iterator {
     /// [`intersperse_with`]: Iterator::intersperse_with
     #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
     where
@@ -820,6 +813,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn map<B, F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
@@ -866,12 +860,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn for_each<F>(self, f: F)
     where
         Self: Sized,
         F: FnMut(Self::Item),
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn call<T>(mut f: impl FnMut(T)) -> impl FnMut((), T) {
             move |(), item| f(item)
         }
@@ -942,6 +938,7 @@ pub const trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn filter<P>(self, predicate: P) -> Filter<Self, P>
     where
         Self: Sized,
@@ -987,7 +984,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn filter_map<B, F>(self, f: F) -> FilterMap<Self, F>
     where
@@ -1037,6 +1033,7 @@ pub const trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "enumerate_method"]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn enumerate(self) -> Enumerate<Self>
     where
         Self: Sized,
@@ -1108,7 +1105,6 @@ pub const trait Iterator {
     /// [`next`]: Iterator::next
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn peekable(self) -> Peekable<Self>
     where
@@ -1175,7 +1171,6 @@ pub const trait Iterator {
     #[inline]
     #[doc(alias = "drop_while")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn skip_while<P>(self, predicate: P) -> SkipWhile<Self, P>
     where
@@ -1256,6 +1251,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
     where
         Self: Sized,
@@ -1344,7 +1340,6 @@ pub const trait Iterator {
     /// [`fuse`]: Iterator::fuse
     #[inline]
     #[stable(feature = "iter_map_while", since = "1.57.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>
     where
@@ -1376,6 +1371,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,
@@ -1449,6 +1445,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn take(self, n: usize) -> Take<Self>
     where
         Self: Sized,
@@ -1496,7 +1493,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn scan<St, B, F>(self, initial_state: St, f: F) -> Scan<Self, St, F>
     where
@@ -1537,6 +1533,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
     where
         Self: Sized,
@@ -1621,7 +1618,6 @@ pub const trait Iterator {
     /// [`flat_map()`]: Iterator::flat_map
     #[inline]
     #[stable(feature = "iterator_flatten", since = "1.29.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn flatten(self) -> Flatten<Self>
     where
@@ -1779,7 +1775,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_map_windows", issue = "87155")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
     where
@@ -1844,6 +1839,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn fuse(self) -> Fuse<Self>
     where
         Self: Sized,
@@ -1928,7 +1924,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn inspect<F>(self, f: F) -> Inspect<Self, F>
     where
@@ -1967,6 +1962,7 @@ pub const trait Iterator {
     /// assert_eq!(of_rust, vec!["of", "Rust"]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     fn by_ref(&mut self) -> &mut Self
     where
         Self: Sized,
@@ -2090,6 +2086,7 @@ pub const trait Iterator {
     #[must_use = "if you really need to exhaust the iterator, consider `.for_each(drop)` instead"]
     #[rustc_diagnostic_item = "iterator_collect_fn"]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn collect<B: FromIterator<Self::Item>>(self) -> B
     where
         Self: Sized,
@@ -2178,7 +2175,6 @@ pub const trait Iterator {
     /// [`collect`]: Iterator::collect
     #[inline]
     #[unstable(feature = "iterator_try_collect", issue = "94047")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn try_collect<B>(&mut self) -> ChangeOutputType<Self::Item, B>
     where
@@ -2252,7 +2248,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_collect_into", issue = "94780")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn collect_into<E: Extend<Self::Item>>(self, collection: &mut E) -> &mut E
     where
@@ -2286,7 +2281,6 @@ pub const trait Iterator {
     /// assert_eq!(odd, [1, 3]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn partition<B, F>(self, f: F) -> (B, B)
     where
@@ -2350,7 +2344,6 @@ pub const trait Iterator {
     /// assert!(a[i..].iter().all(|n| n % 2 == 1)); // odds
     /// ```
     #[unstable(feature = "iter_partition_in_place", issue = "62543")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn partition_in_place<'a, T: 'a, P>(mut self, ref mut predicate: P) -> usize
     where
@@ -2409,7 +2402,6 @@ pub const trait Iterator {
     /// assert!(!"IntoIterator".chars().is_partitioned(char::is_uppercase));
     /// ```
     #[unstable(feature = "iter_is_partitioned", issue = "62544")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn is_partitioned<P>(mut self, mut predicate: P) -> bool
     where
@@ -2506,6 +2498,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -2565,6 +2558,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn try_for_each<F, R>(&mut self, f: F) -> R
     where
         Self: Sized,
@@ -2572,6 +2566,7 @@ pub const trait Iterator {
         R: Try<Output = ()>,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn call<T, R>(mut f: impl FnMut(T) -> R) -> impl FnMut((), T) -> R {
             move |(), x| f(x)
         }
@@ -2685,6 +2680,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized,
@@ -2723,6 +2719,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
         Self: Sized,
@@ -2794,7 +2791,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iterator_try_reduce", issue = "87053")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn try_reduce<R>(
         &mut self,
@@ -2855,12 +2851,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn all<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Continue(()) } else { ControlFlow::Break(()) }
@@ -2909,12 +2907,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
         F: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
             move |(), x| {
                 if f(x) { ControlFlow::Break(()) } else { ControlFlow::Continue(()) }
@@ -2983,12 +2983,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
         P: FnMut(&Self::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
             move |(), x| {
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }
@@ -3014,7 +3016,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iterator_find_map", since = "1.30.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn find_map<B, F>(&mut self, f: F) -> Option<B>
     where
@@ -3074,7 +3075,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "try_find", issue = "63178")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn try_find<R>(
         &mut self,
@@ -3160,12 +3160,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         Self: Sized,
         P: FnMut(Self::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<'a, T>(
             mut predicate: impl FnMut(T) -> bool + 'a,
             acc: &'a mut usize,
@@ -3226,6 +3228,7 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -3234,6 +3237,7 @@ pub const trait Iterator {
         // No need for an overflow check here, because `ExactSizeIterator`
         // implies that the number of elements fits into a `usize`.
         #[inline]
+        #[ferrocene::prevalidated]
         fn check<T>(
             mut predicate: impl FnMut(T) -> bool,
         ) -> impl FnMut(usize, T) -> ControlFlow<usize, usize> {
@@ -3275,7 +3279,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn max(self) -> Option<Self::Item>
     where
@@ -3313,7 +3316,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn min(self) -> Option<Self::Item>
     where
@@ -3337,7 +3339,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn max_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
     where
@@ -3373,12 +3374,14 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
             move |x, y| cmp::max_by(x, y, &mut compare)
         }
@@ -3400,7 +3403,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_cmp_by_key", since = "1.6.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn min_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
     where
@@ -3435,7 +3437,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "iter_min_by", since = "1.15.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn min_by<F>(self, compare: F) -> Option<Self::Item>
     where
@@ -3475,6 +3476,7 @@ pub const trait Iterator {
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn rev(self) -> Rev<Self>
     where
         Self: Sized + DoubleEndedIterator,
@@ -3511,7 +3513,6 @@ pub const trait Iterator {
     /// assert_eq!(z, [3, 6]);
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn unzip<A, B, FromA, FromB>(self) -> (FromA, FromB)
     where
@@ -3545,6 +3546,7 @@ pub const trait Iterator {
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn copied<'a, T>(self) -> Copied<Self>
     where
         T: Copy + 'a,
@@ -3594,6 +3596,7 @@ pub const trait Iterator {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_cloned"]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn cloned<'a, T>(self) -> Cloned<Self>
     where
         T: Clone + 'a,
@@ -3625,7 +3628,6 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn cycle(self) -> Cycle<Self>
     where
@@ -3670,7 +3672,6 @@ pub const trait Iterator {
     /// ```
     #[track_caller]
     #[unstable(feature = "iter_array_chunks", issue = "100450")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn array_chunks<const N: usize>(self) -> ArrayChunks<Self, N>
     where
@@ -3709,6 +3710,7 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn sum<S>(self) -> S
     where
         Self: Sized,
@@ -3741,7 +3743,6 @@ pub const trait Iterator {
     /// assert_eq!(factorial(5), 120);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn product<P>(self) -> P
     where
@@ -3765,6 +3766,7 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn cmp<I>(self, other: I) -> Ordering
     where
         I: IntoIterator<Item = Self::Item>,
@@ -3793,6 +3795,7 @@ pub const trait Iterator {
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn cmp_by<I, F>(self, other: I, cmp: F) -> Ordering
     where
         Self: Sized,
@@ -3800,6 +3803,7 @@ pub const trait Iterator {
         F: FnMut(Self::Item, I::Item) -> Ordering,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn compare<X, Y, F>(mut cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Ordering>
         where
             F: FnMut(X, Y) -> Ordering,
@@ -3849,7 +3853,6 @@ pub const trait Iterator {
     /// ```
     ///
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn partial_cmp<I>(self, other: I) -> Option<Ordering>
     where
@@ -3887,7 +3890,6 @@ pub const trait Iterator {
     /// );
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn partial_cmp_by<I, F>(self, other: I, partial_cmp: F) -> Option<Ordering>
     where
@@ -3923,6 +3925,7 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn eq<I>(self, other: I) -> bool
     where
         I: IntoIterator,
@@ -3947,6 +3950,7 @@ pub const trait Iterator {
     /// ```
     #[unstable(feature = "iter_order_by", issue = "64295")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::prevalidated]
     fn eq_by<I, F>(self, other: I, eq: F) -> bool
     where
         Self: Sized,
@@ -3954,6 +3958,7 @@ pub const trait Iterator {
         F: FnMut(Self::Item, I::Item) -> bool,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn compare<X, Y, F>(mut eq: F) -> impl FnMut(X, Y) -> ControlFlow<()>
         where
             F: FnMut(X, Y) -> bool,
@@ -3976,7 +3981,6 @@ pub const trait Iterator {
     /// assert_eq!([1].iter().ne([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn ne<I>(self, other: I) -> bool
     where
@@ -3999,7 +4003,6 @@ pub const trait Iterator {
     /// assert_eq!([1, 2].iter().lt([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn lt<I>(self, other: I) -> bool
     where
@@ -4022,7 +4025,6 @@ pub const trait Iterator {
     /// assert_eq!([1, 2].iter().le([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn le<I>(self, other: I) -> bool
     where
@@ -4045,7 +4047,6 @@ pub const trait Iterator {
     /// assert_eq!([1, 2].iter().gt([1, 2].iter()), false);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn gt<I>(self, other: I) -> bool
     where
@@ -4068,7 +4069,6 @@ pub const trait Iterator {
     /// assert_eq!([1, 2].iter().ge([1, 2].iter()), true);
     /// ```
     #[stable(feature = "iter_order", since = "1.5.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn ge<I>(self, other: I) -> bool
     where
@@ -4099,7 +4099,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn is_sorted(self) -> bool
     where
@@ -4127,7 +4126,6 @@ pub const trait Iterator {
     /// assert!(std::iter::empty::<i32>().is_sorted_by(|a, b| true));
     /// ```
     #[stable(feature = "is_sorted", since = "1.82.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn is_sorted_by<F>(mut self, compare: F) -> bool
     where
@@ -4173,7 +4171,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "is_sorted", since = "1.82.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     fn is_sorted_by_key<F, K>(self, f: F) -> bool
     where
@@ -4190,7 +4187,6 @@ pub const trait Iterator {
     #[inline]
     #[doc(hidden)]
     #[unstable(feature = "trusted_random_access", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[rustc_non_const_trait_method]
     unsafe fn __iterator_get_unchecked(&mut self, _idx: usize) -> Self::Item
     where
@@ -4208,6 +4204,7 @@ trait SpecIterEq<B: Iterator>: Iterator {
 
 impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
     #[inline]
+    #[ferrocene::prevalidated]
     default fn spec_iter_eq<F>(self, b: B, f: F) -> bool
     where
         F: FnMut(Self::Item, <B as Iterator>::Item) -> ControlFlow<()>,
@@ -4218,6 +4215,7 @@ impl<A: Iterator, B: Iterator> SpecIterEq<B> for A {
 
 impl<A: Iterator + TrustedLen, B: Iterator + TrustedLen> SpecIterEq<B> for A {
     #[inline]
+    #[ferrocene::prevalidated]
     fn spec_iter_eq<F>(self, b: B, f: F) -> bool
     where
         F: FnMut(Self::Item, <B as Iterator>::Item) -> ControlFlow<()>,
@@ -4247,6 +4245,7 @@ impl<A: Iterator + TrustedLen, B: Iterator + TrustedLen> SpecIterEq<B> for A {
 /// Isolates the logic shared by ['cmp_by'](Iterator::cmp_by),
 /// ['partial_cmp_by'](Iterator::partial_cmp_by), and ['eq_by'](Iterator::eq_by).
 #[inline]
+#[ferrocene::prevalidated]
 fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>
 where
     A: Iterator,
@@ -4254,6 +4253,7 @@ where
     F: FnMut(A::Item, B::Item) -> ControlFlow<T>,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn compare<'a, B, X, T>(
         b: &'a mut B,
         mut f: impl FnMut(X, B::Item) -> ControlFlow<T> + 'a,
@@ -4277,6 +4277,7 @@ where
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 fn iter_eq<A, B, F>(a: A, b: B, f: F) -> bool
 where
     A: Iterator,
@@ -4293,25 +4294,29 @@ where
 impl<I: Iterator + ?Sized> Iterator for &mut I {
     type Item = I::Item;
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<I::Item> {
         (**self).next()
     }
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (**self).size_hint()
     }
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         (**self).advance_by(n)
     }
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         (**self).nth(n)
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
     {
         self.spec_fold(init, f)
     }
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4323,7 +4328,6 @@ impl<I: Iterator + ?Sized> Iterator for &mut I {
 
 /// Helper trait to specialize `fold` and `try_fold` for `&mut I where I: Sized`
 trait IteratorRefSpec: Iterator {
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn spec_fold<B, F>(self, init: B, f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B;
@@ -4335,7 +4339,6 @@ trait IteratorRefSpec: Iterator {
 }
 
 impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
-    #[cfg(not(feature = "ferrocene_subset"))]
     default fn spec_fold<B, F>(self, init: B, mut f: F) -> B
     where
         F: FnMut(B, Self::Item) -> B,
@@ -4347,6 +4350,7 @@ impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
         accum
     }
 
+    #[ferrocene::prevalidated]
     default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,
@@ -4360,7 +4364,6 @@ impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Iterator> IteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_fold -> spec_try_fold }
 

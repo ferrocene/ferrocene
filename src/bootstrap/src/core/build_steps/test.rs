@@ -1139,6 +1139,7 @@ impl Step for RustdocJSStd {
             self.build_compiler,
             self.target,
             DocumentationFormat::Html,
+            false,
         ));
         let _guard = builder.msg_test("rustdoc-js-std", self.target, self.build_compiler.stage);
         command.run(builder);

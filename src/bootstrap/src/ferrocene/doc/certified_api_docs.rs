@@ -17,7 +17,7 @@ impl Step for CertifiedApiDocs {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        if run.target.try_subset_equivalent().is_some() {
+        if run.target.has_certified_subset() {
             run.builder.ensure(CertifiedApiDocs { target: run.target });
         } else if run.builder.was_invoked_explicitly::<CertifiedApiDocs>(crate::Kind::Doc) {
             panic!(
@@ -25,32 +25,21 @@ impl Step for CertifiedApiDocs {
                 run.target.to_string()
             )
         } else {
-            run.builder.info(&format!("No certified target for {}", run.target.to_string()));
+            run.builder.info(&format!("libcore for `{}` is not certified", run.target.to_string()));
         }
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let certified_crates = vec!["core".into()];
-        let certified_target = self.target.subset_equivalent();
-
-        // Build the docs for the certified target
-        let certified_target_doc_out = builder.ensure(
+        // Build the docs, noting which items are certified and which aren't.
+        builder.ensure(
             doc::Std::from_build_compiler(
                 builder.compiler(builder.top_stage, builder.host_target),
-                certified_target,
+                self.target,
                 doc::DocumentationFormat::Html,
+                true,
             )
             .with_crates(certified_crates),
-        );
-
-        // Remove unwanted files/dirs
-        builder.remove(&certified_target_doc_out.join("index.html"));
-
-        // Copy the files from the certified target to the host target
-        let host_target_doc_out = builder.doc_out(self.target).join("certification/api-docs");
-        builder.create_dir(&host_target_doc_out);
-        builder.cp_link_r(&certified_target_doc_out, &host_target_doc_out);
-
-        host_target_doc_out
+        )
     }
 }

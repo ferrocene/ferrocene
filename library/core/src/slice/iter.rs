@@ -5,7 +5,6 @@ mod macros;
 
 use super::{from_raw_parts, from_raw_parts_mut};
 use crate::hint::assert_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, UncheckedIterator,
 };
@@ -15,11 +14,6 @@ use crate::num::NonZero;
 use crate::ptr::{NonNull, without_provenance, without_provenance_mut};
 use crate::{cmp, fmt};
 
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::iter::{TrustedLen, UncheckedIterator};
-
 #[stable(feature = "boxed_slice_into_iter", since = "1.80.0")]
 impl<T> !Iterator for [T] {}
 
@@ -28,6 +22,7 @@ impl<'a, T> IntoIterator for &'a [T] {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> Iter<'a, T> {
         self.iter()
     }
@@ -38,6 +33,7 @@ impl<'a, T> IntoIterator for &'a mut [T] {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
 
+    #[ferrocene::prevalidated]
     fn into_iter(self) -> IterMut<'a, T> {
         self.iter_mut()
     }
@@ -72,6 +68,7 @@ impl<'a, T> IntoIterator for &'a mut [T] {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[rustc_diagnostic_item = "SliceIter"]
+#[ferrocene::prevalidated]
 pub struct Iter<'a, T: 'a> {
     /// The pointer to the next element to return, or the past-the-end location
     /// if the iterator is empty.
@@ -87,6 +84,7 @@ pub struct Iter<'a, T: 'a> {
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<T: fmt::Debug> fmt::Debug for Iter<'_, T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("Iter").field(&self.as_slice()).finish()
     }
@@ -99,6 +97,7 @@ unsafe impl<T: Sync> Send for Iter<'_, T> {}
 
 impl<'a, T> Iter<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T]) -> Self {
         let len = slice.len();
         let ptr: NonNull<T> = NonNull::from_ref(slice).cast();
@@ -140,13 +139,13 @@ impl<'a, T> Iter<'a, T> {
     #[must_use]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_slice(&self) -> &'a [T] {
         self.make_slice()
     }
 }
 
 iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, each_ref, {
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_sorted_by<F>(self, mut compare: F) -> bool
     where
         Self: Sized,
@@ -159,13 +158,13 @@ iterator! {struct Iter -> *const T, &'a T, const, {/* no mut */}, as_ref, each_r
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> Clone for Iter<'_, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         Iter { ptr: self.ptr, end_or_len: self.end_or_len, _marker: self._marker }
     }
 }
 
 #[stable(feature = "slice_iter_as_ref", since = "1.13.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> AsRef<[T]> for Iter<'_, T> {
     #[inline]
     fn as_ref(&self) -> &[T] {
@@ -199,6 +198,7 @@ impl<T> AsRef<[T]> for Iter<'_, T> {
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct IterMut<'a, T: 'a> {
     /// The pointer to the next element to return, or the past-the-end location
     /// if the iterator is empty.
@@ -214,6 +214,7 @@ pub struct IterMut<'a, T: 'a> {
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
 impl<T: fmt::Debug> fmt::Debug for IterMut<'_, T> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("IterMut").field(&self.make_slice()).finish()
     }
@@ -226,6 +227,7 @@ unsafe impl<T: Send> Send for IterMut<'_, T> {}
 
 impl<'a, T> IterMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T]) -> Self {
         let len = slice.len();
         let ptr: NonNull<T> = NonNull::from_mut(slice).cast();
@@ -281,7 +283,6 @@ impl<'a, T> IterMut<'a, T> {
     /// ```
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn into_slice(self) -> &'a mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -319,7 +320,6 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     #[stable(feature = "slice_iter_mut_as_slice", since = "1.53.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn as_slice(&self) -> &[T] {
         self.make_slice()
     }
@@ -355,6 +355,7 @@ impl<'a, T> IterMut<'a, T> {
     #[must_use]
     // FIXME: Uncomment the `AsMut<[T]>` impl when this gets stabilized.
     #[unstable(feature = "slice_iter_mut_as_mut_slice", issue = "93079")]
+    #[ferrocene::prevalidated]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: the iterator was created from a mutable slice with pointer
         // `self.ptr` and length `len!(self)`. This guarantees that all the prerequisites
@@ -364,7 +365,6 @@ impl<'a, T> IterMut<'a, T> {
 }
 
 #[stable(feature = "slice_iter_mut_as_slice", since = "1.53.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> AsRef<[T]> for IterMut<'_, T> {
     #[inline]
     fn as_ref(&self) -> &[T] {
@@ -384,7 +384,6 @@ iterator! {struct IterMut -> *mut T, &'a mut T, mut, {mut}, as_mut, each_mut, {}
 /// An internal abstraction over the splitting iterators, so that
 /// splitn, splitn_mut etc can be implemented once.
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) trait SplitIter: DoubleEndedIterator {
     /// Marks the underlying iterator as complete, extracting the remaining
     /// portion of the slice.
@@ -410,7 +409,6 @@ pub(super) trait SplitIter: DoubleEndedIterator {
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Split<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -422,7 +420,6 @@ where
     pub(crate) finished: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> Split<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a [T], pred: P) -> Self {
@@ -445,7 +442,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> Split<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for Split<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -457,7 +453,6 @@ where
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> Clone for Split<'_, T, P>
 where
     P: Clone + FnMut(&T) -> bool,
@@ -468,7 +463,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for Split<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -508,7 +502,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for Split<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -534,7 +527,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> SplitIter for Split<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -551,7 +543,6 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for Split<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An iterator over subslices separated by elements that match a predicate
@@ -574,7 +565,6 @@ impl<T, P> FusedIterator for Split<'_, T, P> where P: FnMut(&T) -> bool {}
 /// [slices]: slice
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SplitInclusive<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -584,7 +574,6 @@ where
     finished: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitInclusive<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a [T], pred: P) -> Self {
@@ -594,7 +583,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitInclusive<'a, T, P> {
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for SplitInclusive<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -609,7 +597,6 @@ where
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> Clone for SplitInclusive<'_, T, P>
 where
     P: Clone + FnMut(&T) -> bool,
@@ -620,7 +607,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for SplitInclusive<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -657,7 +643,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for SplitInclusive<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -683,7 +668,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for SplitInclusive<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An iterator over the mutable subslices of the vector which are separated
@@ -702,7 +686,6 @@ impl<T, P> FusedIterator for SplitInclusive<'_, T, P> where P: FnMut(&T) -> bool
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SplitMut<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -712,7 +695,6 @@ where
     finished: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitMut<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a mut [T], pred: P) -> Self {
@@ -721,7 +703,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitMut<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for SplitMut<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -731,7 +712,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> SplitIter for SplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -748,7 +728,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for SplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -789,7 +768,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for SplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -818,7 +796,6 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for SplitMut<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An iterator over the mutable subslices of the vector which are separated
@@ -838,7 +815,6 @@ impl<T, P> FusedIterator for SplitMut<'_, T, P> where P: FnMut(&T) -> bool {}
 /// [slices]: slice
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SplitInclusiveMut<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -848,7 +824,6 @@ where
     finished: bool,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitInclusiveMut<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a mut [T], pred: P) -> Self {
@@ -858,7 +833,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitInclusiveMut<'a, T, P> {
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for SplitInclusiveMut<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -872,7 +846,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for SplitInclusiveMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -914,7 +887,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for SplitInclusiveMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -949,7 +921,6 @@ where
 }
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for SplitInclusiveMut<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An iterator over subslices separated by elements that match a predicate
@@ -971,7 +942,6 @@ impl<T, P> FusedIterator for SplitInclusiveMut<'_, T, P> where P: FnMut(&T) -> b
 /// [slices]: slice
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RSplit<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -979,7 +949,6 @@ where
     inner: Split<'a, T, P>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplit<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a [T], pred: P) -> Self {
@@ -988,7 +957,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplit<'a, T, P> {
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for RSplit<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1003,7 +971,6 @@ where
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> Clone for RSplit<'_, T, P>
 where
     P: Clone + FnMut(&T) -> bool,
@@ -1014,7 +981,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for RSplit<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1033,7 +999,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for RSplit<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1045,7 +1010,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> SplitIter for RSplit<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1057,7 +1021,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for RSplit<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An iterator over the subslices of the vector which are separated
@@ -1076,7 +1039,6 @@ impl<T, P> FusedIterator for RSplit<'_, T, P> where P: FnMut(&T) -> bool {}
 /// [slices]: slice
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RSplitMut<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -1084,7 +1046,6 @@ where
     inner: SplitMut<'a, T, P>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitMut<'a, T, P> {
     #[inline]
     pub(super) fn new(slice: &'a mut [T], pred: P) -> Self {
@@ -1093,7 +1054,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitMut<'a, T, P> {
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for RSplitMut<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1107,7 +1067,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> SplitIter for RSplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1119,7 +1078,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> Iterator for RSplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1138,7 +1096,6 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T, P> DoubleEndedIterator for RSplitMut<'a, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1150,20 +1107,17 @@ where
 }
 
 #[stable(feature = "slice_rsplit", since = "1.27.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, P> FusedIterator for RSplitMut<'_, T, P> where P: FnMut(&T) -> bool {}
 
 /// An private iterator over subslices separated by elements that
 /// match a predicate function, splitting at most a fixed number of
 /// times.
 #[derive(Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 struct GenericSplitN<I> {
     iter: I,
     count: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T, I: SplitIter<Item = T>> Iterator for GenericSplitN<I> {
     type Item = T;
 
@@ -1211,7 +1165,6 @@ impl<T, I: SplitIter<Item = T>> Iterator for GenericSplitN<I> {
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SplitN<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -1219,7 +1172,6 @@ where
     inner: GenericSplitN<Split<'a, T, P>>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitN<'a, T, P> {
     #[inline]
     pub(super) fn new(s: Split<'a, T, P>, n: usize) -> Self {
@@ -1228,7 +1180,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitN<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for SplitN<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1258,7 +1209,6 @@ where
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RSplitN<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -1266,7 +1216,6 @@ where
     inner: GenericSplitN<RSplit<'a, T, P>>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitN<'a, T, P> {
     #[inline]
     pub(super) fn new(s: RSplit<'a, T, P>, n: usize) -> Self {
@@ -1275,7 +1224,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitN<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for RSplitN<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1301,7 +1249,6 @@ where
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct SplitNMut<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -1309,7 +1256,6 @@ where
     inner: GenericSplitN<SplitMut<'a, T, P>>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitNMut<'a, T, P> {
     #[inline]
     pub(super) fn new(s: SplitMut<'a, T, P>, n: usize) -> Self {
@@ -1318,7 +1264,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> SplitNMut<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for SplitNMut<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1345,7 +1290,6 @@ where
 /// [slices]: slice
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RSplitNMut<'a, T: 'a, P>
 where
     P: FnMut(&T) -> bool,
@@ -1353,7 +1297,6 @@ where
     inner: GenericSplitN<RSplitMut<'a, T, P>>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitNMut<'a, T, P> {
     #[inline]
     pub(super) fn new(s: RSplitMut<'a, T, P>, n: usize) -> Self {
@@ -1362,7 +1305,6 @@ impl<'a, T: 'a, P: FnMut(&T) -> bool> RSplitNMut<'a, T, P> {
 }
 
 #[stable(feature = "core_impl_debug", since = "1.9.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: fmt::Debug, P> fmt::Debug for RSplitNMut<'_, T, P>
 where
     P: FnMut(&T) -> bool,
@@ -1372,13 +1314,9 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 forward_iterator! { SplitN: T, &'a [T] }
-#[cfg(not(feature = "ferrocene_subset"))]
 forward_iterator! { RSplitN: T, &'a [T] }
-#[cfg(not(feature = "ferrocene_subset"))]
 forward_iterator! { SplitNMut: T, &'a mut [T] }
-#[cfg(not(feature = "ferrocene_subset"))]
 forward_iterator! { RSplitNMut: T, &'a mut [T] }
 
 /// An iterator over overlapping subslices of length `size`.
@@ -1401,6 +1339,7 @@ forward_iterator! { RSplitNMut: T, &'a mut [T] }
 #[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct Windows<'a, T: 'a> {
     v: &'a [T],
     size: NonZero<usize>,
@@ -1408,6 +1347,7 @@ pub struct Windows<'a, T: 'a> {
 
 impl<'a, T: 'a> Windows<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], size: NonZero<usize>) -> Self {
         Self { v: slice, size }
     }
@@ -1415,7 +1355,6 @@ impl<'a, T: 'a> Windows<'a, T> {
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for Windows<'_, T> {
     fn clone(&self) -> Self {
         Windows { v: self.v, size: self.size }
@@ -1427,6 +1366,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         if self.size.get() > self.v.len() {
             None
@@ -1438,6 +1378,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.size.get() > self.v.len() {
             (0, Some(0))
@@ -1448,11 +1389,13 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         let size = self.size.get();
         if let Some(rest) = self.v.get(n..)
@@ -1468,6 +1411,7 @@ impl<'a, T> Iterator for Windows<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.size.get() > self.v.len() {
             None
@@ -1477,7 +1421,6 @@ impl<'a, T> Iterator for Windows<'a, T> {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: since the caller guarantees that `i` is in bounds,
         // which means that `i` cannot overflow an `isize`, and the
@@ -1488,7 +1431,6 @@ impl<'a, T> Iterator for Windows<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for Windows<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -1514,21 +1456,17 @@ impl<'a, T> DoubleEndedIterator for Windows<'a, T> {
 impl<T> ExactSizeIterator for Windows<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for Windows<'_, T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for Windows<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for Windows<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Windows<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -1557,6 +1495,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Windows<'a, T> {
 #[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct Chunks<'a, T: 'a> {
     v: &'a [T],
     chunk_size: usize,
@@ -1564,6 +1503,7 @@ pub struct Chunks<'a, T: 'a> {
 
 impl<'a, T: 'a> Chunks<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], size: usize) -> Self {
         Self { v: slice, chunk_size: size }
     }
@@ -1571,7 +1511,6 @@ impl<'a, T: 'a> Chunks<'a, T> {
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for Chunks<'_, T> {
     fn clone(&self) -> Self {
         Chunks { v: self.v, chunk_size: self.chunk_size }
@@ -1583,6 +1522,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         if self.v.is_empty() {
             None
@@ -1595,6 +1535,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.v.is_empty() {
             (0, Some(0))
@@ -1605,11 +1546,13 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -1625,6 +1568,7 @@ impl<'a, T> Iterator for Chunks<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1634,7 +1578,6 @@ impl<'a, T> Iterator for Chunks<'a, T> {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: the caller guarantees that `i` is in bounds,
@@ -1652,7 +1595,6 @@ impl<'a, T> Iterator for Chunks<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for Chunks<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a [T]> {
@@ -1701,21 +1643,17 @@ impl<'a, T> DoubleEndedIterator for Chunks<'a, T> {
 impl<T> ExactSizeIterator for Chunks<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for Chunks<'_, T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for Chunks<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for Chunks<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -1740,6 +1678,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Chunks<'a, T> {
 #[derive(Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct ChunksMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -1754,6 +1693,7 @@ pub struct ChunksMut<'a, T: 'a> {
 
 impl<'a, T: 'a> ChunksMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T], size: usize) -> Self {
         Self { v: slice, chunk_size: size, _marker: PhantomData }
     }
@@ -1764,6 +1704,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     type Item = &'a mut [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a mut [T]> {
         if self.v.is_empty() {
             None
@@ -1778,6 +1719,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.v.is_empty() {
             (0, Some(0))
@@ -1788,11 +1730,13 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -1811,6 +1755,7 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         if self.v.is_empty() {
             None
@@ -1821,7 +1766,6 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
         }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.
@@ -1838,7 +1782,6 @@ impl<'a, T> Iterator for ChunksMut<'a, T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for ChunksMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
@@ -1883,31 +1826,25 @@ impl<'a, T> DoubleEndedIterator for ChunksMut<'a, T> {
 impl<T> ExactSizeIterator for ChunksMut<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for ChunksMut<'_, T> {}
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for ChunksMut<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for ChunksMut<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksMut<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Send for ChunksMut<'_, T> where T: Send {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Sync for ChunksMut<'_, T> where T: Sync {}
 
 /// An iterator over a slice in (non-overlapping) chunks (`chunk_size` elements at a
@@ -1935,6 +1872,7 @@ unsafe impl<T> Sync for ChunksMut<'_, T> where T: Sync {}
 #[derive(Debug)]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct ChunksExact<'a, T: 'a> {
     v: &'a [T],
     rem: &'a [T],
@@ -1943,6 +1881,7 @@ pub struct ChunksExact<'a, T: 'a> {
 
 impl<'a, T> ChunksExact<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a [T], chunk_size: usize) -> Self {
         let rem = slice.len() % chunk_size;
         let fst_len = slice.len() - rem;
@@ -1970,6 +1909,7 @@ impl<'a, T> ChunksExact<'a, T> {
     /// ```
     #[must_use]
     #[stable(feature = "chunks_exact", since = "1.31.0")]
+    #[ferrocene::prevalidated]
     pub fn remainder(&self) -> &'a [T] {
         self.rem
     }
@@ -1977,7 +1917,6 @@ impl<'a, T> ChunksExact<'a, T> {
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for ChunksExact<'_, T> {
     fn clone(&self) -> Self {
         ChunksExact { v: self.v, rem: self.rem, chunk_size: self.chunk_size }
@@ -1989,6 +1928,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         self.v.split_at_checked(self.chunk_size).and_then(|(chunk, rest)| {
             self.v = rest;
@@ -1997,17 +1937,20 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.v.len() / self.chunk_size;
         (n, Some(n))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -2021,11 +1964,11 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: mostly identical to `Chunks::__iterator_get_unchecked`.
@@ -2036,6 +1979,7 @@ impl<'a, T> Iterator for ChunksExact<'a, T> {
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<&'a [T]> {
         if self.v.len() < self.chunk_size {
             None
@@ -2047,6 +1991,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         let len = self.len();
         if n < len {
@@ -2064,27 +2009,24 @@ impl<'a, T> DoubleEndedIterator for ChunksExact<'a, T> {
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<T> ExactSizeIterator for ChunksExact<'_, T> {
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.v.is_empty()
     }
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for ChunksExact<'_, T> {}
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for ChunksExact<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for ChunksExact<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksExact<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -2111,6 +2053,7 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksExact<'a, T> {
 #[derive(Debug)]
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
+#[ferrocene::prevalidated]
 pub struct ChunksExactMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -2126,6 +2069,7 @@ pub struct ChunksExactMut<'a, T: 'a> {
 
 impl<'a, T> ChunksExactMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn new(slice: &'a mut [T], chunk_size: usize) -> Self {
         let rem = slice.len() % chunk_size;
         let fst_len = slice.len() - rem;
@@ -2139,6 +2083,7 @@ impl<'a, T> ChunksExactMut<'a, T> {
     /// elements.
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "chunks_exact", since = "1.31.0")]
+    #[ferrocene::prevalidated]
     pub fn into_remainder(self) -> &'a mut [T] {
         self.rem
     }
@@ -2149,6 +2094,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     type Item = &'a mut [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a mut [T]> {
         // SAFETY: we have `&mut self`, so are allowed to temporarily materialize a mut slice
         unsafe { &mut *self.v }.split_at_mut_checked(self.chunk_size).and_then(|(chunk, rest)| {
@@ -2158,17 +2104,20 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let n = self.v.len() / self.chunk_size;
         (n, Some(n))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.len()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {
         if let Some(start) = n.checked_mul(self.chunk_size)
             && start < self.v.len()
@@ -2183,11 +2132,11 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         let start = idx * self.chunk_size;
         // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.
@@ -2198,6 +2147,7 @@ impl<'a, T> Iterator for ChunksExactMut<'a, T> {
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
         if self.v.len() < self.chunk_size {
             None
@@ -2211,6 +2161,7 @@ impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         let len = self.len();
         if n < len {
@@ -2232,37 +2183,32 @@ impl<'a, T> DoubleEndedIterator for ChunksExactMut<'a, T> {
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
 impl<T> ExactSizeIterator for ChunksExactMut<'_, T> {
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.v.is_empty()
     }
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for ChunksExactMut<'_, T> {}
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for ChunksExactMut<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for ChunksExactMut<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for ChunksExactMut<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Send for ChunksExactMut<'_, T> where T: Send {}
 
 #[stable(feature = "chunks_exact", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Sync for ChunksExactMut<'_, T> where T: Sync {}
 
 /// A windowed iterator over a slice in overlapping chunks (`N` elements at a
@@ -2286,12 +2232,10 @@ unsafe impl<T> Sync for ChunksExactMut<'_, T> where T: Sync {}
 #[derive(Debug)]
 #[stable(feature = "array_windows", since = "1.94.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct ArrayWindows<'a, T: 'a, const N: usize> {
     v: &'a [T],
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, const N: usize> ArrayWindows<'a, T, N> {
     #[inline]
     pub(super) const fn new(slice: &'a [T]) -> Self {
@@ -2299,7 +2243,6 @@ impl<'a, T: 'a, const N: usize> ArrayWindows<'a, T, N> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
@@ -2308,7 +2251,6 @@ impl<T, const N: usize> Clone for ArrayWindows<'_, T, N> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     type Item = &'a [T; N];
@@ -2354,7 +2296,6 @@ impl<'a, T, const N: usize> Iterator for ArrayWindows<'a, T, N> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<'a, T, const N: usize> DoubleEndedIterator for ArrayWindows<'a, T, N> {
     #[inline]
@@ -2374,7 +2315,6 @@ impl<'a, T, const N: usize> DoubleEndedIterator for ArrayWindows<'a, T, N> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> ExactSizeIterator for ArrayWindows<'_, T, N> {
     fn is_empty(&self) -> bool {
@@ -2382,21 +2322,17 @@ impl<T, const N: usize> ExactSizeIterator for ArrayWindows<'_, T, N> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<T, const N: usize> TrustedLen for ArrayWindows<'_, T, N> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "array_windows", since = "1.94.0")]
 impl<T, const N: usize> FusedIterator for ArrayWindows<'_, T, N> {}
 
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccess for ArrayWindows<'_, T, N> {}
 
 #[doc(hidden)]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<T, const N: usize> TrustedRandomAccessNoCoerce for ArrayWindows<'_, T, N> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
@@ -2426,13 +2362,11 @@ unsafe impl<T, const N: usize> TrustedRandomAccessNoCoerce for ArrayWindows<'_, 
 #[derive(Debug)]
 #[stable(feature = "rchunks", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RChunks<'a, T: 'a> {
     v: &'a [T],
     chunk_size: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a> RChunks<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a [T], size: usize) -> Self {
@@ -2442,7 +2376,6 @@ impl<'a, T: 'a> RChunks<'a, T> {
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> Clone for RChunks<'_, T> {
     fn clone(&self) -> Self {
         RChunks { v: self.v, chunk_size: self.chunk_size }
@@ -2450,7 +2383,6 @@ impl<T> Clone for RChunks<'_, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for RChunks<'a, T> {
     type Item = &'a [T];
 
@@ -2519,7 +2451,6 @@ impl<'a, T> Iterator for RChunks<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for RChunks<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a [T]> {
@@ -2553,25 +2484,20 @@ impl<'a, T> DoubleEndedIterator for RChunks<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for RChunks<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for RChunks<'_, T> {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for RChunks<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for RChunks<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunks<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -2596,7 +2522,6 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunks<'a, T> {
 #[derive(Debug)]
 #[stable(feature = "rchunks", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RChunksMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -2609,7 +2534,6 @@ pub struct RChunksMut<'a, T: 'a> {
     _marker: PhantomData<&'a mut T>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a> RChunksMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T], size: usize) -> Self {
@@ -2618,7 +2542,6 @@ impl<'a, T: 'a> RChunksMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for RChunksMut<'a, T> {
     type Item = &'a mut [T];
 
@@ -2693,7 +2616,6 @@ impl<'a, T> Iterator for RChunksMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for RChunksMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
@@ -2733,35 +2655,28 @@ impl<'a, T> DoubleEndedIterator for RChunksMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for RChunksMut<'_, T> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for RChunksMut<'_, T> {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for RChunksMut<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for RChunksMut<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunksMut<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Send for RChunksMut<'_, T> where T: Send {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Sync for RChunksMut<'_, T> where T: Sync {}
 
 /// An iterator over a slice in (non-overlapping) chunks (`chunk_size` elements at a
@@ -2789,14 +2704,12 @@ unsafe impl<T> Sync for RChunksMut<'_, T> where T: Sync {}
 #[derive(Debug)]
 #[stable(feature = "rchunks", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RChunksExact<'a, T: 'a> {
     v: &'a [T],
     rem: &'a [T],
     chunk_size: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> RChunksExact<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a [T], chunk_size: usize) -> Self {
@@ -2833,7 +2746,6 @@ impl<'a, T> RChunksExact<'a, T> {
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Clone for RChunksExact<'a, T> {
     fn clone(&self) -> RChunksExact<'a, T> {
         RChunksExact { v: self.v, rem: self.rem, chunk_size: self.chunk_size }
@@ -2841,7 +2753,6 @@ impl<'a, T> Clone for RChunksExact<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for RChunksExact<'a, T> {
     type Item = &'a [T];
 
@@ -2894,7 +2805,6 @@ impl<'a, T> Iterator for RChunksExact<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for RChunksExact<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a [T]> {
@@ -2927,7 +2837,6 @@ impl<'a, T> DoubleEndedIterator for RChunksExact<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> ExactSizeIterator for RChunksExact<'a, T> {
     fn is_empty(&self) -> bool {
         self.v.is_empty()
@@ -2935,21 +2844,17 @@ impl<'a, T> ExactSizeIterator for RChunksExact<'a, T> {
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for RChunksExact<'_, T> {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for RChunksExact<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for RChunksExact<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunksExact<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -2976,7 +2881,6 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunksExact<'a, T> {
 #[derive(Debug)]
 #[stable(feature = "rchunks", since = "1.31.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct RChunksExactMut<'a, T: 'a> {
     /// # Safety
     /// This slice pointer must point at a valid region of `T` with at least length `v.len()`. Normally,
@@ -2989,7 +2893,6 @@ pub struct RChunksExactMut<'a, T: 'a> {
     chunk_size: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> RChunksExactMut<'a, T> {
     #[inline]
     pub(super) const fn new(slice: &'a mut [T], chunk_size: usize) -> Self {
@@ -3011,7 +2914,6 @@ impl<'a, T> RChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> Iterator for RChunksExactMut<'a, T> {
     type Item = &'a mut [T];
 
@@ -3070,7 +2972,6 @@ impl<'a, T> Iterator for RChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T> DoubleEndedIterator for RChunksExactMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<&'a mut [T]> {
@@ -3109,7 +3010,6 @@ impl<'a, T> DoubleEndedIterator for RChunksExactMut<'a, T> {
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> ExactSizeIterator for RChunksExactMut<'_, T> {
     fn is_empty(&self) -> bool {
         self.v.is_empty()
@@ -3117,53 +3017,43 @@ impl<T> ExactSizeIterator for RChunksExactMut<'_, T> {
 }
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> TrustedLen for RChunksExactMut<'_, T> {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T> FusedIterator for RChunksExactMut<'_, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for RChunksExactMut<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for RChunksExactMut<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Send for RChunksExactMut<'_, T> where T: Send {}
 
 #[stable(feature = "rchunks", since = "1.31.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<T> Sync for RChunksExactMut<'_, T> where T: Sync {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for Iter<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for Iter<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccess for IterMut<'a, T> {}
 
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<'a, T> TrustedRandomAccessNoCoerce for IterMut<'a, T> {
     const MAY_HAVE_SIDE_EFFECT: bool = false;
 }
@@ -3176,14 +3066,12 @@ unsafe impl<'a, T> TrustedRandomAccessNoCoerce for IterMut<'a, T> {
 /// [slices]: slice
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct ChunkBy<'a, T: 'a, P> {
     slice: &'a [T],
     predicate: P,
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> ChunkBy<'a, T, P> {
     pub(super) const fn new(slice: &'a [T], predicate: P) -> Self {
         ChunkBy { slice, predicate }
@@ -3191,7 +3079,6 @@ impl<'a, T: 'a, P> ChunkBy<'a, T, P> {
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> Iterator for ChunkBy<'a, T, P>
 where
     P: FnMut(&T, &T) -> bool,
@@ -3226,7 +3113,6 @@ where
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> DoubleEndedIterator for ChunkBy<'a, T, P>
 where
     P: FnMut(&T, &T) -> bool,
@@ -3249,11 +3135,9 @@ where
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> FusedIterator for ChunkBy<'a, T, P> where P: FnMut(&T, &T) -> bool {}
 
 #[stable(feature = "slice_group_by_clone", since = "1.89.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P: Clone> Clone for ChunkBy<'a, T, P> {
     fn clone(&self) -> Self {
         Self { slice: self.slice, predicate: self.predicate.clone() }
@@ -3261,7 +3145,6 @@ impl<'a, T: 'a, P: Clone> Clone for ChunkBy<'a, T, P> {
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a + fmt::Debug, P> fmt::Debug for ChunkBy<'a, T, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ChunkBy").field("slice", &self.slice).finish()
@@ -3277,14 +3160,12 @@ impl<'a, T: 'a + fmt::Debug, P> fmt::Debug for ChunkBy<'a, T, P> {
 /// [slices]: slice
 #[stable(feature = "slice_group_by", since = "1.77.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct ChunkByMut<'a, T: 'a, P> {
     slice: &'a mut [T],
     predicate: P,
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> ChunkByMut<'a, T, P> {
     pub(super) const fn new(slice: &'a mut [T], predicate: P) -> Self {
         ChunkByMut { slice, predicate }
@@ -3292,7 +3173,6 @@ impl<'a, T: 'a, P> ChunkByMut<'a, T, P> {
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> Iterator for ChunkByMut<'a, T, P>
 where
     P: FnMut(&T, &T) -> bool,
@@ -3328,7 +3208,6 @@ where
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> DoubleEndedIterator for ChunkByMut<'a, T, P>
 where
     P: FnMut(&T, &T) -> bool,
@@ -3352,11 +3231,9 @@ where
 }
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a, P> FusedIterator for ChunkByMut<'a, T, P> where P: FnMut(&T, &T) -> bool {}
 
 #[stable(feature = "slice_group_by", since = "1.77.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: 'a + fmt::Debug, P> fmt::Debug for ChunkByMut<'a, T, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ChunkByMut").field("slice", &self.slice).finish()

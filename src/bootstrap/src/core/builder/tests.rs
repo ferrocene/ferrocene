@@ -1167,7 +1167,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###
         );
     }
@@ -1301,7 +1301,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###);
     }
 
@@ -1373,7 +1373,7 @@ mod snapshot {
         [doc] style-guide (book) <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###
         );
     }
@@ -1436,7 +1436,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###
         );
     }
@@ -1518,7 +1518,7 @@ mod snapshot {
         [doc] style-guide (book) <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###
         );
     }
@@ -1737,7 +1737,7 @@ mod snapshot {
         [doc] style-guide (book) <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host.certified> crates=[core]
+        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         "###);
     }
 
@@ -3020,7 +3020,7 @@ mod snapshot {
         [doc] style-guide (book) <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-ferrocene.subset> crates=[core]
+        [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu> crates=[core]
         "###);
     }
 
@@ -3246,11 +3246,6 @@ fn normalize_target(target: TargetSelection, config: &RenderConfig) -> String {
     let mut target = target.to_string();
     if config.normalize_host {
         target = target.replace(&host_target(), "host");
-        // Ferrocene addition: makes it possible to run tests for certified targets in a
-        // platform-independent way.
-        if let Some(certified) = get_host_target().try_subset_equivalent() {
-            target = target.replace(&certified.to_string(), "host.certified");
-        }
     }
     target.replace(TEST_TRIPLE_1, "target1").replace(TEST_TRIPLE_2, "target2")
 }

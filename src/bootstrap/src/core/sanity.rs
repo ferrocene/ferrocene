@@ -38,7 +38,6 @@ pub struct Finder {
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
-    "aarch64-unknown-ferrocene.subset",
     "aarch64r82-unknown-ferrocene.facade",
     "aarch64r82-unknown-none",
     "aarch64r82-unknown-none-softfloat",
@@ -46,9 +45,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64-rhivos2-linux-gnu",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
-    "thumbv7em-ferrocene.subset-eabi",
-    "thumbv7em-ferrocene.subset-eabihf",
-    "x86_64-unknown-ferrocene.subset",
     // just a dummy comment so the list doesn't get onelined
 ];
 
@@ -352,17 +348,6 @@ than building it.
             .target_config
             .entry(*target)
             .or_insert_with(|| Target::from_triple(&target.triple));
-
-        // Ferrocene addition: set `no_std` for certified targets.
-        // FIXME: bootstrap shouldn't silently assume std if it doesn't find a target, instead it
-        // should panic ...
-        if let Some(certified_target) = target.try_subset_equivalent() {
-            build
-                .config
-                .target_config
-                .entry(certified_target)
-                .or_insert_with(|| Target::from_triple(&certified_target.triple));
-        }
 
         // compiler-rt c fallbacks for wasm cannot be built with gcc
         if target.contains("wasm")

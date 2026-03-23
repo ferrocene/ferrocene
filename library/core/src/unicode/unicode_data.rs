@@ -12,7 +12,6 @@
 // Total           :  9657 bytes
 
 #[inline(always)]
-#[cfg(not(feature = "ferrocene_subset"))]
 const fn bitset_search<
     const N: usize,
     const CHUNK_SIZE: usize,
@@ -60,12 +59,14 @@ const fn bitset_search<
 }
 
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 struct ShortOffsetRunHeader(u32);
 
 impl ShortOffsetRunHeader {
     #[ferrocene::annotation(
         "The only uses of this function are inside statics without any inner mutability. Meaning that they can't be covered"
     )]
+    #[ferrocene::prevalidated]
     const fn new(start_index: usize, prefix_sum: u32) -> Self {
         assert!(start_index < (1 << 11));
         assert!(prefix_sum < (1 << 21));
@@ -74,11 +75,13 @@ impl ShortOffsetRunHeader {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn start_index(&self) -> usize {
         (self.0 >> 21) as usize
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn prefix_sum(&self) -> u32 {
         self.0 & ((1 << 21) - 1)
     }
@@ -89,6 +92,7 @@ impl ShortOffsetRunHeader {
 /// - The last element of `short_offset_runs` must be greater than `std::char::MAX`.
 /// - The start indices of all elements in `short_offset_runs` must be less than `OFFSETS`.
 #[inline(always)]
+#[ferrocene::prevalidated]
 unsafe fn skip_search<const SOR: usize, const OFFSETS: usize>(
     needle: char,
     short_offset_runs: &[ShortOffsetRunHeader; SOR],
@@ -144,11 +148,9 @@ unsafe fn skip_search<const SOR: usize, const OFFSETS: usize>(
     offset_idx % 2 == 1
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub const UNICODE_VERSION: (u8, u8, u8) = (17, 0, 0);
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod alphabetic {
     use super::ShortOffsetRunHeader;
 
@@ -261,7 +263,6 @@ pub mod alphabetic {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod case_ignorable {
     use super::ShortOffsetRunHeader;
 
@@ -344,7 +345,6 @@ pub mod case_ignorable {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod cased {
     use super::ShortOffsetRunHeader;
 
@@ -451,12 +451,14 @@ pub mod grapheme_extend {
         7, 2, 5, 1, 0, 7, 109, 7, 0, 96, 128, 240, 0,
     ];
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         (c as u32) >= 0x300 && lookup_slow(c)
     }
 
     #[inline(never)]
+    #[ferrocene::prevalidated]
     fn lookup_slow(c: char) -> bool {
         const {
             assert!(SHORT_OFFSET_RUNS.last().unwrap().0 > char::MAX as u32);
@@ -473,7 +475,6 @@ pub mod grapheme_extend {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod lowercase {
     static BITSET_CHUNKS_MAP: [u8; 123] = [
         12, 17, 0, 0, 9, 0, 0, 13, 14, 10, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -583,7 +584,6 @@ pub mod lowercase {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod n {
     use super::ShortOffsetRunHeader;
 
@@ -648,7 +648,6 @@ pub mod n {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod uppercase {
     static BITSET_CHUNKS_MAP: [u8; 125] = [
         3, 14, 6, 6, 0, 6, 6, 2, 5, 12, 6, 15, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -742,7 +741,6 @@ pub mod uppercase {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod white_space {
     static WHITESPACE_MAP: [u8; 256] = [
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -769,7 +767,6 @@ pub mod white_space {
 }
 
 #[rustfmt::skip]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod conversions {
 
 

@@ -31,6 +31,9 @@ impl ValidatedStatus {
 }
 
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
+///
+/// This analysis needs to be conservative. If you don't have enough information to determine the
+/// status, assume it's unvalidated.
 pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.
     let owner = tcx.typeck_root_def_id(def_id);
@@ -74,6 +77,7 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         if derived {
             let self_ty = tcx.type_of(parent);
             info!("checking {self_ty:?}");
+            // FIXME: need to try to normalize this type so we handle aliases and associated types
             let unwrapped_ty = self_ty.skip_binder().peel_refs();
             match unwrapped_ty.kind() {
                 ty::Adt(adt_def, _) => {
@@ -87,12 +91,10 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
                 }
                 ty::Error(..) => {}
                 _ if unwrapped_ty.is_primitive_ty() => {}
+                // We don't know how to resolve this back to a type.
+                // For now, just assume it's unvalidated.
                 _ => {
-                    let span = tcx.def_span(parent);
-                    span_bug!(
-                        span,
-                        "don't know how to handle #[automatically_derived] for non-adt {self_ty:?}"
-                    );
+                    return ValidatedStatus::Unvalidated;
                 }
             }
         }

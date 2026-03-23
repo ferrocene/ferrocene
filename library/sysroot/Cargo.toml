@@ -37,6 +37,3 @@ panic-unwind = ["std/panic-unwind"]
 profiler = ["dep:profiler_builtins"]
 windows_raw_dylib = ["std/windows_raw_dylib"]
 llvm_enzyme = ["std/llvm_enzyme"]
-
-# Ferrocene addition: enable "ferrocene_subset" feature in the core library
-ferrocene_subset = ["std/ferrocene_subset"]

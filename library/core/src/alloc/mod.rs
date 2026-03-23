@@ -2,12 +2,10 @@
 
 #![stable(feature = "alloc_module", since = "1.28.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod global;
 mod layout;
 
 #[stable(feature = "global_alloc", since = "1.28.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::global::GlobalAlloc;
 #[stable(feature = "alloc_layout", since = "1.28.0")]
 pub use self::layout::Layout;
@@ -18,16 +16,11 @@ pub use self::layout::Layout;
     suggestion = "LayoutError"
 )]
 #[allow(deprecated, deprecated_in_future)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::layout::LayoutErr;
 #[stable(feature = "alloc_layout_error", since = "1.50.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use self::layout::LayoutError;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ptr::{self, NonNull};
 
 /// The `AllocError` error indicates an allocation failure
@@ -36,7 +29,6 @@ use crate::ptr::{self, NonNull};
 /// allocator.
 #[unstable(feature = "allocator_api", issue = "32838")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct AllocError;
 
 #[unstable(
@@ -44,12 +36,10 @@ pub struct AllocError;
     reason = "the precise API and guarantees it provides may be tweaked.",
     issue = "32838"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl Error for AllocError {}
 
 // (we need this for downstream impl of trait Error)
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl fmt::Display for AllocError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("memory allocation failed")
@@ -112,7 +102,6 @@ impl fmt::Display for AllocError {
 ///
 /// [*currently allocated*]: #currently-allocated-memory
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 pub const unsafe trait Allocator {
     /// Attempts to allocate a block of memory.
@@ -380,7 +369,6 @@ pub const unsafe trait Allocator {
 }
 
 #[unstable(feature = "allocator_api", issue = "32838")]
-#[cfg(not(feature = "ferrocene_subset"))]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 unsafe impl<A> const Allocator for &A
 where
@@ -436,7 +424,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "allocator_api", issue = "32838")]
 unsafe impl<A> Allocator for &mut A
 where

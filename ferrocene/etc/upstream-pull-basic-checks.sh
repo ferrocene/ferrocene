@@ -22,6 +22,11 @@ cd "$(git rev-parse --show-toplevel)"
 set -x
 
 ferrocene/ci/scripts/detect-conflict-markers.py
+./x run generate-help
+./x run generate-completions
+./x test tests/ui/ferrocene $BLESS
+./x test tidy $BLESS
+./x check core
 
 if [ -n "$BLESS" ]; then
     if ! ./x test bootstrap; then
@@ -33,12 +38,6 @@ else
     ./x test certified-core-symbols
 fi
 
-./x run generate-help
-./x run generate-completions
-./x test tests/ui/ferrocene $BLESS
-./x test tidy $BLESS
-./x check core
-./x check core --set 'rust.std-features=["ferrocene_subset"]'
 ./x test --coverage=library library/core library/alloc --tests
 
 if [ -z "$EXTENDED" ]; then

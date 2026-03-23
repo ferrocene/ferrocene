@@ -630,6 +630,9 @@ pub struct Std {
     target: TargetSelection,
     format: DocumentationFormat,
     crates: Vec<String>,
+
+    // Ferrocene addition
+    certified_subset: bool,
 }
 
 impl Std {
@@ -637,8 +640,9 @@ impl Std {
         build_compiler: Compiler,
         target: TargetSelection,
         format: DocumentationFormat,
+        certified_subset: bool,
     ) -> Self {
-        Std { build_compiler, target, format, crates: vec![] }
+        Std { build_compiler, target, format, crates: vec![], certified_subset }
     }
 
     // Ferrocene addition
@@ -675,6 +679,7 @@ impl Step for Std {
                 DocumentationFormat::Html
             },
             crates,
+            certified_subset: false,
         });
     }
 
@@ -694,10 +699,15 @@ impl Step for Std {
             self.crates
         };
 
-        let out = match self.format {
+        let mut out = match self.format {
             DocumentationFormat::Html => builder.doc_out(target),
             DocumentationFormat::Json => builder.json_doc_out(target),
         };
+
+        if self.certified_subset {
+            target.require_certified_subset();
+            out = out.join("certification/api-docs");
+        }
 
         t!(fs::create_dir_all(&out));
 
@@ -717,6 +727,11 @@ impl Step for Std {
             }
             DocumentationFormat::Json => vec!["--output-format", "json"],
         };
+
+        // Ferrocene addition
+        if self.certified_subset {
+            extra_args.push("--note-validated-api");
+        }
 
         if !builder.config.docs_minification {
             extra_args.push("--disable-minification");
@@ -838,11 +853,6 @@ fn doc_std(
         }
     }
 
-    // Ferrocene addition
-    if target.contains("ferrocene.subset") {
-        cargo.rustdocflag("--cfg=ferrocene_subset");
-        cargo.arg("--features").arg("ferrocene_subset");
-    }
     // Ferrocene addition
     if builder.config.library_docs_private_items {
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");

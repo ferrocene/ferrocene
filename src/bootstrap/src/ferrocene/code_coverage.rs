@@ -8,11 +8,11 @@ use std::path::PathBuf;
 use build_helper::exit;
 
 use crate::builder::Builder;
-use crate::core::builder::{Cargo, ShouldRun, Step};
+use crate::core::builder::{Cargo, Kind, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
-use crate::ferrocene::download_and_extract_ci_outcomes;
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
+use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::{BootstrapCommand, Compiler, Mode};
 
 pub(crate) fn instrument_coverage(builder: &Builder<'_>, cargo: &mut Cargo, compiler: Compiler) {
@@ -105,9 +105,11 @@ pub(super) fn instrumented_binaries(
             let mut instrumented_binaries = vec![];
             let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
 
-            let doctests_bins = builder
-                .test_target
-                .runs_doctests()
+            let collect_doctests = builder.test_target.runs_doctests()
+                && (paths.doctests_bins_dir.exists()
+                    || !builder
+                        .was_invoked_explicitly::<ferrocene::run::CoverageReport>(Kind::Run));
+            let doctests_bins = collect_doctests
                 .then(|| builder.read_dir(&paths.doctests_bins_dir))
                 .into_iter()
                 .flatten()
@@ -166,7 +168,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 
     let html_report = builder.ensure(CoverageReport {
-        certified_target: state.target.subset_equivalent(),
+        certified_target: state.target,
         profdata: paths.profdata_file,
         instrumented_binaries,
         symbol_report,
@@ -254,10 +256,7 @@ impl Step for CoverageOutcomesDir {
             FerroceneCoverageOutcomes::DownloadCi => {
                 Some(download_and_extract_ci_outcomes(builder, "coverage"))
             }
-            FerroceneCoverageOutcomes::Local => {
-                let certified_target = builder.host_target.subset_equivalent();
-                Some(coverage_dir(builder, certified_target))
-            }
+            FerroceneCoverageOutcomes::Local => Some(coverage_dir(builder, builder.host_target)),
             FerroceneCoverageOutcomes::Custom(path) => Some(path.clone()),
         }
     }

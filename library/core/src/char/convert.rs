@@ -1,18 +1,13 @@
 //! Character conversions.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::char::TryFromCharError;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::error::Error;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt;
 use crate::mem::transmute;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
 
 /// Converts a `u32` to a `char`. See [`char::from_u32`].
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[inline]
 pub(super) const fn from_u32(i: u32) -> Option<char> {
@@ -28,6 +23,7 @@ pub(super) const fn from_u32(i: u32) -> Option<char> {
 #[must_use]
 #[allow(unnecessary_transmutes)]
 #[track_caller]
+#[ferrocene::prevalidated]
 pub(super) const unsafe fn from_u32_unchecked(i: u32) -> char {
     // SAFETY: the caller must guarantee that `i` is a valid char value.
     unsafe {
@@ -40,7 +36,6 @@ pub(super) const unsafe fn from_u32_unchecked(i: u32) -> char {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_convert", since = "1.13.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<char> for u32 {
@@ -60,7 +55,6 @@ impl const From<char> for u32 {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_char_conversions", since = "1.51.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<char> for u64 {
@@ -82,7 +76,6 @@ impl const From<char> for u64 {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "more_char_conversions", since = "1.51.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const From<char> for u128 {
@@ -108,7 +101,6 @@ impl const From<char> for u128 {
 /// the same value, failing if the code point is greater than U+00FF.
 ///
 /// See [`impl From<u8> for char`](char#impl-From<u8>-for-char) for details on the encoding.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "u8_from_char", since = "1.59.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const TryFrom<char> for u8 {
@@ -139,7 +131,6 @@ impl const TryFrom<char> for u8 {
 /// with the same value, failing if the code point is greater than U+FFFF.
 ///
 /// This corresponds to the UCS-2 encoding, as specified in ISO/IEC 10646:2003.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "u16_from_char", since = "1.74.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const TryFrom<char> for u16 {
@@ -172,7 +163,6 @@ impl const TryFrom<char> for u16 {
 ///
 /// Generally speaking, this conversion can be seen as obtaining the character's corresponding
 /// UTF-32 code point to the extent representable by pointer addresses.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "usize_try_from_char", since = "1.94.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const TryFrom<char> for usize {
@@ -237,6 +227,7 @@ impl const From<u8> for char {
     /// assert!(4 == size_of_val(&c))
     /// ```
     #[inline]
+    #[ferrocene::prevalidated]
     fn from(i: u8) -> Self {
         i as char
     }
@@ -245,25 +236,21 @@ impl const From<u8> for char {
 /// An error which can be returned when parsing a char.
 ///
 /// This `struct` is created when using the [`char::from_str`] method.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_from_str", since = "1.20.0")]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseCharError {
     kind: CharErrorKind,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum CharErrorKind {
     EmptyString,
     TooManyChars,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_from_str", since = "1.20.0")]
 impl Error for ParseCharError {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_from_str", since = "1.20.0")]
 impl fmt::Display for ParseCharError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -275,7 +262,6 @@ impl fmt::Display for ParseCharError {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "char_from_str", since = "1.20.0")]
 impl FromStr for char {
     type Err = ParseCharError;
@@ -293,6 +279,7 @@ impl FromStr for char {
 
 #[inline]
 #[allow(unnecessary_transmutes)]
+#[ferrocene::prevalidated]
 const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
     // This is an optimized version of the check
     // (i > MAX as u32) || (i >= 0xD800 && i <= 0xDFFF),
@@ -314,7 +301,6 @@ const fn char_try_from_u32(i: u32) -> Result<char, CharTryFromError> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 impl const TryFrom<u32> for char {
@@ -332,9 +318,9 @@ impl const TryFrom<u32> for char {
 /// See its documentation for more.
 #[stable(feature = "try_from", since = "1.34.0")]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub struct CharTryFromError(());
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "try_from", since = "1.34.0")]
 impl fmt::Display for CharTryFromError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -343,7 +329,6 @@ impl fmt::Display for CharTryFromError {
 }
 
 /// Converts a digit in the given radix to a `char`. See [`char::from_digit`].
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 #[must_use]
 pub(super) const fn from_digit(num: u32, radix: u32) -> Option<char> {

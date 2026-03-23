@@ -1,14 +1,9 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::{SourceIter, TrustedRandomAccess, TrustedRandomAccessNoCoerce};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, InPlaceIterable, TrustedLen};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::{MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
 use crate::ops::Try;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{array, ptr};
 
 /// An iterator that copies the elements of an underlying iterator.
@@ -21,16 +16,17 @@ use crate::{array, ptr};
 #[stable(feature = "iter_copied", since = "1.36.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct Copied<I> {
     it: I,
 }
 
 impl<I> Copied<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(it: I) -> Copied<I> {
         Copied { it }
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[doc(hidden)]
     #[unstable(feature = "copied_into_inner", issue = "none")]
     pub fn into_inner(self) -> I {
@@ -38,10 +34,12 @@ impl<I> Copied<I> {
     }
 }
 
+#[ferrocene::prevalidated]
 fn copy_fold<T: Copy, Acc>(mut f: impl FnMut(Acc, T) -> Acc) -> impl FnMut(Acc, &T) -> Acc {
     move |acc, &elt| f(acc, elt)
 }
 
+#[ferrocene::prevalidated]
 fn copy_try_fold<T: Copy, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, &elt| f(acc, elt)
 }
@@ -54,11 +52,11 @@ where
 {
     type Item = T;
 
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<T> {
         self.it.next().copied()
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -68,10 +66,12 @@ where
         <I as SpecNextChunk<'_, N, T>>::spec_next_chunk(&mut self.it)
     }
 
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.it.size_hint()
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -81,6 +81,7 @@ where
         self.it.try_fold(init, copy_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -88,24 +89,27 @@ where
         self.it.fold(init, copy_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<T> {
         self.it.nth(n).copied()
     }
 
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<T> {
         self.it.last().copied()
     }
 
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.it.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_by(n)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,
@@ -122,10 +126,12 @@ where
     I: DoubleEndedIterator<Item = &'a T>,
     T: Copy,
 {
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<T> {
         self.it.next_back().copied()
     }
 
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -135,6 +141,7 @@ where
         self.it.try_rfold(init, copy_try_fold(f))
     }
 
+    #[ferrocene::prevalidated]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -143,6 +150,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.it.advance_back_by(n)
     }
@@ -154,16 +162,17 @@ where
     I: ExactSizeIterator<Item = &'a T>,
     T: Copy,
 {
+    #[ferrocene::prevalidated]
     fn len(&self) -> usize {
         self.it.len()
     }
 
+    #[ferrocene::prevalidated]
     fn is_empty(&self) -> bool {
         self.it.is_empty()
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 impl<'a, I, T: 'a> FusedIterator for Copied<I>
 where
@@ -172,12 +181,10 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccess for Copied<I> where I: TrustedRandomAccess {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Copied<I>
@@ -187,7 +194,6 @@ where
     const MAY_HAVE_SIDE_EFFECT: bool = I::MAY_HAVE_SIDE_EFFECT;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_copied", since = "1.36.0")]
 unsafe impl<'a, I, T: 'a> TrustedLen for Copied<I>
 where
@@ -196,7 +202,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 trait SpecNextChunk<'a, const N: usize, T: 'a>: Iterator<Item = &'a T>
 where
     T: Copy,
@@ -204,7 +209,6 @@ where
     fn spec_next_chunk(&mut self) -> Result<[T; N], array::IntoIter<T, N>>;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, const N: usize, I, T: 'a> SpecNextChunk<'a, N, T> for I
 where
     I: Iterator<Item = &'a T>,
@@ -215,7 +219,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, const N: usize, T: 'a> SpecNextChunk<'a, N, T> for crate::slice::Iter<'a, T>
 where
     T: Copy,
@@ -261,7 +264,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I: Default> Default for Copied<I> {
     /// Creates a `Copied` iterator from the default value of `I`
@@ -276,7 +278,6 @@ impl<I: Default> Default for Copied<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I> SourceIter for Copied<I>
 where
@@ -291,7 +292,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I: InPlaceIterable> InPlaceIterable for Copied<I> {
     const EXPAND_BY: Option<NonZero<usize>> = I::EXPAND_BY;

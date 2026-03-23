@@ -4,10 +4,9 @@ use rustc_hir::{
     ForeignItem, ForeignItemKind, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
 };
 use rustc_macros::{HashStable, TyDecodable, TyEncodable};
+use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::{Span, Symbol, sym};
 use tracing::info;
-
-use crate::ty::TyCtxt;
 
 #[derive(Clone, TyEncodable, TyDecodable, HashStable, Debug)]
 pub struct Validated {
@@ -32,6 +31,9 @@ impl ValidatedStatus {
 }
 
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
+///
+/// This analysis needs to be conservative. If you don't have enough information to determine the
+/// status, assume it's unvalidated.
 pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.
     let owner = tcx.typeck_root_def_id(def_id);
@@ -61,6 +63,40 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
                     return ValidatedStatus::Validated { annotation: None };
                 }
             _ => {},
+        }
+
+        // Check if this is an associated function from a `derive`.
+        let parent = tcx.parent(owner);
+        tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
+        #[allow(deprecated)]
+        if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
+            tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
+        }
+        let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
+            && rustc_hir::find_attr!(tcx, parent, AutomaticallyDerived { .. });
+        if derived {
+            let self_ty = tcx.type_of(parent);
+            info!("checking {self_ty:?}");
+            // FIXME: need to try to normalize this type so we handle aliases and associated types
+            let unwrapped_ty = self_ty.skip_binder().peel_refs();
+            match unwrapped_ty.kind() {
+                ty::Adt(adt_def, _) => {
+                    let self_id = adt_def.did();
+                    info!(
+                        "{} is marked #[automatically_derived], checking {}",
+                        tcx.def_path_str(def_id),
+                        tcx.def_path_str(self_id)
+                    );
+                    return item_is_validated(tcx, self_id);
+                }
+                ty::Error(..) => {}
+                _ if unwrapped_ty.is_primitive_ty() => {}
+                // We don't know how to resolve this back to a type.
+                // For now, just assume it's unvalidated.
+                _ => {
+                    return ValidatedStatus::Unvalidated;
+                }
+            }
         }
     }
 

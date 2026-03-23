@@ -3,7 +3,6 @@
 #![stable(feature = "rust1", since = "1.0.0")]
 
 use crate::panic::const_panic;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{ascii, intrinsics, mem};
@@ -44,12 +43,9 @@ mod uint_macros; // import uint_impl!
 
 mod error;
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod float_parse;
 mod nonzero;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod saturating;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod wrapping;
 
 /// 100% perma-unstable
@@ -64,7 +60,6 @@ pub use error::ParseIntError;
 pub use error::TryFromIntError;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg(not(no_fp_fmt_parse))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use float_parse::ParseFloatError;
 #[stable(feature = "generic_nonzero", since = "1.79.0")]
 pub use nonzero::NonZero;
@@ -73,18 +68,14 @@ pub use nonzero::NonZero;
     reason = "implementation detail which may disappear or be replaced at any time",
     issue = "none"
 )]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use nonzero::ZeroablePrimitive;
 #[stable(feature = "signed_nonzero", since = "1.34.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use nonzero::{NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize};
 #[stable(feature = "nonzero", since = "1.28.0")]
 pub use nonzero::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize};
 #[stable(feature = "saturating_int_impl", since = "1.74.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use saturating::Saturating;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub use wrapping::Wrapping;
 
 macro_rules! u8_xe_bytes_doc {
@@ -134,7 +125,6 @@ depending on the target pointer size.
     };
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! midpoint_impl {
     ($SelfT:ty, unsigned) => {
         /// Calculates the midpoint (average) between `self` and `rhs`.
@@ -267,7 +257,6 @@ macro_rules! widening_carryless_mul_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[cfg(not(feature = "ferrocene_subset"))]
         pub const fn widening_carryless_mul(self, rhs: $SelfT) -> $WideT {
             (self as $WideT).carryless_mul(rhs as $WideT)
         }
@@ -277,7 +266,6 @@ macro_rules! widening_carryless_mul_impl {
 macro_rules! carrying_carryless_mul_impl {
     (u128, u256) => {
         carrying_carryless_mul_impl! { @internal u128 =>
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn carrying_carryless_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
                 let x0 = self as u64;
                 let x1 = (self >> 64) as u64;
@@ -308,7 +296,6 @@ macro_rules! carrying_carryless_mul_impl {
     };
     ($SelfT:ty, $WideT:ty) => {
         carrying_carryless_mul_impl! { @internal $SelfT =>
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn carrying_carryless_mul(self, rhs: Self, carry: Self) -> (Self, Self) {
                 // Can't use widening_carryless_mul because it's not implemented for usize.
                 let p = (self as $WideT).carryless_mul(rhs as $WideT);
@@ -371,7 +358,6 @@ impl i8 {
         from_xe_bytes_doc = i8_xe_bytes_doc!(),
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { i8, i16, signed }
 }
 
@@ -396,7 +382,6 @@ impl i16 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { i16, i32, signed }
 }
 
@@ -421,7 +406,6 @@ impl i32 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { i32, i64, signed }
 }
 
@@ -446,7 +430,6 @@ impl i64 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { i64, signed }
 }
 
@@ -473,7 +456,6 @@ impl i128 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { i128, signed }
 }
 
@@ -499,7 +481,6 @@ impl isize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 16-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { isize, i32, signed }
 }
 
@@ -525,7 +506,6 @@ impl isize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 32-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { isize, i64, signed }
 }
 
@@ -551,7 +531,6 @@ impl isize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 64-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { isize, signed }
 }
 
@@ -584,7 +563,6 @@ impl u8 {
         from_xe_bytes_doc = u8_xe_bytes_doc!(),
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { u8, u16, unsigned }
     widening_carryless_mul_impl! { u8, u16 }
     carrying_carryless_mul_impl! { u8, u16 }
@@ -604,6 +582,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_u8_is_ascii", since = "1.43.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii(&self) -> bool {
         *self <= 127
     }
@@ -613,7 +592,6 @@ impl u8 {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn as_ascii(&self) -> Option<ascii::Char> {
         ascii::Char::from_u8(*self)
     }
@@ -627,7 +605,6 @@ impl u8 {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const unsafe fn as_ascii_unchecked(&self) -> ascii::Char {
         assert_unsafe_precondition!(
             check_library_ub,
@@ -659,7 +636,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn to_ascii_uppercase(&self) -> u8 {
         // Toggle the 6th bit if this is a lowercase letter
         *self ^ ((self.is_ascii_lowercase() as u8) * ASCII_CASE_MASK)
@@ -685,6 +661,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn to_ascii_lowercase(&self) -> u8 {
         // Set the 6th bit if this is an uppercase letter
         *self | (self.is_ascii_uppercase() as u8 * ASCII_CASE_MASK)
@@ -692,7 +669,6 @@ impl u8 {
 
     /// Assumes self is ascii
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(crate) const fn ascii_change_case_unchecked(&self) -> u8 {
         *self ^ ASCII_CASE_MASK
     }
@@ -712,6 +688,7 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_ascii_methods_on_intrinsics", since = "1.52.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn eq_ignore_ascii_case(&self, other: &u8) -> bool {
         self.to_ascii_lowercase() == other.to_ascii_lowercase()
     }
@@ -738,7 +715,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_ascii_uppercase(&mut self) {
         *self = self.to_ascii_uppercase();
     }
@@ -765,7 +741,6 @@ impl u8 {
     #[stable(feature = "ascii_methods_on_intrinsics", since = "1.23.0")]
     #[rustc_const_stable(feature = "const_make_ascii", since = "1.84.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn make_ascii_lowercase(&mut self) {
         *self = self.to_ascii_lowercase();
     }
@@ -802,6 +777,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_alphabetic(&self) -> bool {
         matches!(*self, b'A'..=b'Z' | b'a'..=b'z')
     }
@@ -836,6 +812,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_uppercase(&self) -> bool {
         matches!(*self, b'A'..=b'Z')
     }
@@ -870,7 +847,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_lowercase(&self) -> bool {
         matches!(*self, b'a'..=b'z')
     }
@@ -908,7 +884,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_alphanumeric(&self) -> bool {
         matches!(*self, b'0'..=b'9') | matches!(*self, b'A'..=b'Z') | matches!(*self, b'a'..=b'z')
     }
@@ -943,7 +918,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_digit(&self) -> bool {
         matches!(*self, b'0'..=b'9')
     }
@@ -975,7 +949,6 @@ impl u8 {
     #[must_use]
     #[unstable(feature = "is_ascii_octdigit", issue = "101288")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_octdigit(&self) -> bool {
         matches!(*self, b'0'..=b'7')
     }
@@ -1013,7 +986,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_hexdigit(&self) -> bool {
         matches!(*self, b'0'..=b'9') | matches!(*self, b'A'..=b'F') | matches!(*self, b'a'..=b'f')
     }
@@ -1052,7 +1024,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_punctuation(&self) -> bool {
         matches!(*self, b'!'..=b'/')
             | matches!(*self, b':'..=b'@')
@@ -1090,7 +1061,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_graphic(&self) -> bool {
         matches!(*self, b'!'..=b'~')
     }
@@ -1142,7 +1112,6 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, b'\t' | b'\n' | b'\x0C' | b'\r' | b' ')
     }
@@ -1179,6 +1148,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_control(&self) -> bool {
         matches!(*self, b'\0'..=b'\x1F' | b'\x7F')
     }
@@ -1204,11 +1174,13 @@ impl u8 {
                   without modifying the original"]
     #[stable(feature = "inherent_ascii_escape", since = "1.60.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_ascii(self) -> ascii::EscapeDefault {
         ascii::escape_default(self)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn is_utf8_char_boundary(self) -> bool {
         // This is bit magic equivalent to: b < 128 || b >= 192
         (self as i8) >= -0x40
@@ -1241,7 +1213,6 @@ impl u16 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { u16, u32, unsigned }
     widening_carryless_mul_impl! { u16, u32 }
     carrying_carryless_mul_impl! { u16, u32 }
@@ -1266,6 +1237,7 @@ impl u16 {
     #[must_use]
     #[unstable(feature = "utf16_extra", issue = "94919")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_utf16_surrogate(self) -> bool {
         matches!(self, 0xD800..=0xDFFF)
     }
@@ -1297,7 +1269,6 @@ impl u32 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { u32, u64, unsigned }
     widening_carryless_mul_impl! { u32, u64 }
     carrying_carryless_mul_impl! { u32, u64 }
@@ -1329,7 +1300,6 @@ impl u64 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { u64, u128, unsigned }
     widening_carryless_mul_impl! { u64, u128 }
     carrying_carryless_mul_impl! { u64, u128 }
@@ -1363,7 +1333,6 @@ impl u128 {
         from_xe_bytes_doc = "",
         bound_condition = "",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { u128, unsigned }
     carrying_carryless_mul_impl! { u128, u256 }
 }
@@ -1395,7 +1364,6 @@ impl usize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 16-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { usize, u32, unsigned }
     carrying_carryless_mul_impl! { usize, u32 }
 }
@@ -1427,7 +1395,6 @@ impl usize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 32-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { usize, u64, unsigned }
     carrying_carryless_mul_impl! { usize, u64 }
 }
@@ -1459,7 +1426,6 @@ impl usize {
         from_xe_bytes_doc = usize_isize_from_xe_bytes_doc!(),
         bound_condition = " on 64-bit targets",
     }
-    #[cfg(not(feature = "ferrocene_subset"))]
     midpoint_impl! { usize, u128, unsigned }
     carrying_carryless_mul_impl! { usize, u128 }
 }
@@ -1467,6 +1433,7 @@ impl usize {
 impl usize {
     /// Returns an `usize` where every byte is equal to `x`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn repeat_u8(x: u8) -> usize {
         usize::from_ne_bytes([x; size_of::<usize>()])
     }
@@ -1474,6 +1441,7 @@ impl usize {
     /// Returns an `usize` where every byte pair is equal to `x`.
     #[inline]
     #[ferrocene::annotation("This function is only being used in constants and cannot be covered")]
+    #[ferrocene::prevalidated]
     pub(crate) const fn repeat_u16(x: u16) -> usize {
         let mut r = 0usize;
         let mut i = 0;
@@ -1510,6 +1478,7 @@ impl usize {
 /// ```
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub enum FpCategory {
     /// NaN (not a number): this value results from calculations like `(-1.0).sqrt()`.
     ///
@@ -1557,6 +1526,7 @@ pub enum FpCategory {
 #[doc(hidden)]
 #[inline(always)]
 #[unstable(issue = "none", feature = "std_internals")]
+#[ferrocene::prevalidated]
 pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) -> bool {
     radix <= 16 && digits.len() <= size_of::<T>() * 2 - is_signed_ty as usize
 }
@@ -1565,6 +1535,7 @@ pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) 
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
+#[ferrocene::prevalidated]
 const fn from_ascii_radix_panic(radix: u32) -> ! {
     const_panic!(
         "from_ascii_radix: radix must lie in the range `[2, 36]`",
@@ -1577,7 +1548,6 @@ macro_rules! from_str_int_impl {
     ($signedness:ident $($int_ty:ty)+) => {$(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        #[cfg(not(feature = "ferrocene_subset"))]
         impl const FromStr for $int_ty {
             type Err = ParseIntError;
 
@@ -1666,6 +1636,7 @@ macro_rules! from_str_int_impl {
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_stable(feature = "const_int_from_str", since = "1.82.0")]
             #[inline]
+            #[ferrocene::prevalidated]
             pub const fn from_str_radix(src: &str, radix: u32) -> Result<$int_ty, ParseIntError> {
                 <$int_ty>::from_ascii_radix(src.as_bytes(), radix)
             }
@@ -1701,7 +1672,6 @@ macro_rules! from_str_int_impl {
             /// ```
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
-            #[cfg(not(feature = "ferrocene_subset"))]
             pub const fn from_ascii(src: &[u8]) -> Result<$int_ty, ParseIntError> {
                 <$int_ty>::from_ascii_radix(src, 10)
             }
@@ -1746,6 +1716,7 @@ macro_rules! from_str_int_impl {
             /// ```
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[inline]
+            #[ferrocene::prevalidated]
             pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
                 use self::IntErrorKind::*;
                 use self::ParseIntError as PIE;
@@ -1839,6 +1810,5 @@ macro_rules! from_str_int_impl {
     )*}
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 from_str_int_impl! { signed isize i8 i16 i32 i64 i128 }
 from_str_int_impl! { unsigned usize u8 u16 u32 u64 u128 }

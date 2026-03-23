@@ -201,6 +201,9 @@ Options:
         --generate-macro-expansion 
                         Add possibility to expand macros in the HTML source
                         code pages
+        --note-validated-api 
+                        Annotate validated functions in the generated API
+                        docs, similar to `doc(cfg)`
         --plugin-path DIR
                         removed, see issue #44136
                         <https://github.com/rust-lang/rust/issues/44136> for

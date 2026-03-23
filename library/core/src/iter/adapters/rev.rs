@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -13,11 +12,13 @@ use crate::ops::Try;
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Rev<T> {
     iter: T,
 }
 
 impl<T> Rev<T> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: T) -> Rev<T> {
         Rev { iter }
     }
@@ -37,7 +38,6 @@ impl<T> Rev<T> {
     /// assert_eq!(rev.into_inner().collect::<String>(), "foo");
     /// ```
     #[unstable(feature = "rev_into_inner", issue = "144277")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn into_inner(self) -> T {
         self.iter
     }
@@ -51,24 +51,29 @@ where
     type Item = <I as Iterator>::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
         self.iter.next_back()
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_back_by(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth_back(n)
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -78,6 +83,7 @@ where
         self.iter.try_rfold(init, f)
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -86,6 +92,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -100,20 +107,24 @@ where
     I: DoubleEndedIterator,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<<I as Iterator>::Item> {
         self.iter.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.iter.advance_by(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<<I as Iterator>::Item> {
         self.iter.nth(n)
     }
 
+    #[ferrocene::prevalidated]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -123,6 +134,7 @@ where
         self.iter.try_fold(init, f)
     }
 
+    #[ferrocene::prevalidated]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -130,6 +142,7 @@ where
         self.iter.fold(init, f)
     }
 
+    #[ferrocene::prevalidated]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -139,7 +152,6 @@ where
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> ExactSizeIterator for Rev<I>
 where
     I: ExactSizeIterator + DoubleEndedIterator,
@@ -154,15 +166,12 @@ where
 }
 
 #[stable(feature = "fused", since = "1.26.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I> FusedIterator for Rev<I> where I: FusedIterator + DoubleEndedIterator {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
-#[cfg(not(feature = "ferrocene_subset"))]
 unsafe impl<I> TrustedLen for Rev<I> where I: TrustedLen + DoubleEndedIterator {}
 
 #[stable(feature = "default_iters", since = "1.70.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<I: Default> Default for Rev<I> {
     /// Creates a `Rev` iterator from the default value of `I`
     /// ```

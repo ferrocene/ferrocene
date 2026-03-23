@@ -87,43 +87,27 @@
     issue = "none"
 )]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use common::BiasedFp;
-#[cfg(not(feature = "ferrocene_subset"))]
 use float::RawFloat;
-#[cfg(not(feature = "ferrocene_subset"))]
 use lemire::compute_float;
-#[cfg(not(feature = "ferrocene_subset"))]
 use parse::{parse_inf_nan, parse_number};
-#[cfg(not(feature = "ferrocene_subset"))]
 use slow::parse_long_mantissa;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::ParseFloatError;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::num::float_parse::FloatErrorKind;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 mod common;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod decimal;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod decimal_seq;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod fpu;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod slow;
-#[cfg(not(feature = "ferrocene_subset"))]
 mod table;
 // float is used in flt2dec, and all are used in unit tests.
 pub mod float;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod lemire;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod parse;
 
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) fn pfe_empty() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Empty }
 }
@@ -131,13 +115,11 @@ pub(super) fn pfe_empty() -> ParseFloatError {
 // Used in unit tests, keep public.
 // This is much better than making FloatErrorKind and ParseFloatError::kind public.
 #[inline]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn pfe_invalid() -> ParseFloatError {
     ParseFloatError { kind: FloatErrorKind::Invalid }
 }
 
 /// Converts a `BiasedFp` to the closest machine float type.
-#[cfg(not(feature = "ferrocene_subset"))]
 fn biased_fp_to_float<F: RawFloat>(x: BiasedFp) -> F {
     let mut word = x.m;
     word |= (x.p_biased as u64) << F::SIG_BITS;
@@ -146,7 +128,6 @@ fn biased_fp_to_float<F: RawFloat>(x: BiasedFp) -> F {
 
 /// Converts a decimal string into a floating point number.
 #[inline(always)] // Will be inlined into a function with `#[inline(never)]`, see above
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn dec2flt<F: RawFloat>(s: &str) -> Result<F, ParseFloatError> {
     let mut s = s.as_bytes();
     let Some(&c) = s.first() else { return Err(pfe_empty()) };

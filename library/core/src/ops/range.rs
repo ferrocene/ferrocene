@@ -1,7 +1,5 @@
 use crate::fmt;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::hash::Hash;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::marker::Destruct;
 /// An unbounded range (`..`).
 ///
@@ -43,10 +41,12 @@ use crate::marker::Destruct;
 #[derive(Copy, Hash)]
 #[derive_const(Clone, Default, PartialEq, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct RangeFull;
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for RangeFull {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")
     }
@@ -81,6 +81,7 @@ impl fmt::Debug for RangeFull {
 #[derive(Eq, Hash)]
 #[derive_const(Clone, Default, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -92,6 +93,7 @@ pub struct Range<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
         write!(fmt, "..")?;
@@ -122,6 +124,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn contains<U>(&self, item: &U) -> bool
     where
         Idx: [const] PartialOrd<U>,
@@ -150,7 +153,6 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd<Idx>,
@@ -197,6 +199,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
 #[derive(Eq, Hash)]
 #[derive_const(Clone, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -205,6 +208,7 @@ pub struct RangeFrom<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
         write!(fmt, "..")?;
@@ -212,7 +216,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -282,6 +285,7 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
 #[derive(Copy, Eq, Hash)]
 #[derive_const(Clone, PartialEq)]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct RangeTo<Idx> {
     /// The upper bound of the range (exclusive).
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -290,6 +294,7 @@ pub struct RangeTo<Idx> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..")?;
         self.end.fmt(fmt)?;
@@ -297,7 +302,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeTo<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -359,6 +363,7 @@ impl<Idx: PartialOrd<Idx>> RangeTo<Idx> {
 #[derive(Clone, Hash)]
 #[derive_const(Eq, PartialEq)] // not Copy -- see #27186
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[ferrocene::prevalidated]
 pub struct RangeInclusive<Idx> {
     // Note that the fields here are not public to allow changing the
     // representation in the future; in particular, while we could plausibly
@@ -392,6 +397,7 @@ impl<Idx> RangeInclusive<Idx> {
     #[inline]
     #[rustc_promotable]
     #[rustc_const_stable(feature = "const_range_new", since = "1.32.0")]
+    #[ferrocene::prevalidated]
     pub const fn new(start: Idx, end: Idx) -> Self {
         Self { start, end, exhausted: false }
     }
@@ -417,6 +423,7 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn start(&self) -> &Idx {
         &self.start
     }
@@ -442,6 +449,7 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[rustc_const_stable(feature = "const_inclusive_range_methods", since = "1.32.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn end(&self) -> &Idx {
         &self.end
     }
@@ -459,6 +467,7 @@ impl<Idx> RangeInclusive<Idx> {
     #[stable(feature = "inclusive_range_methods", since = "1.27.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range_bounds", issue = "108082")]
+    #[ferrocene::prevalidated]
     pub const fn into_inner(self) -> (Idx, Idx) {
         (self.start, self.end)
     }
@@ -468,6 +477,7 @@ impl RangeInclusive<usize> {
     /// Converts to an exclusive `Range` for `SliceIndex` implementations.
     /// The caller is responsible for dealing with `end == usize::MAX`.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn into_slice_range(self) -> Range<usize> {
         // If we're not exhausted, we want to simply slice `start..end + 1`.
         // If we are exhausted, then slicing with `end + 1..end + 1` gives us an
@@ -480,6 +490,7 @@ impl RangeInclusive<usize> {
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeInclusive<Idx> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
         write!(fmt, "..=")?;
@@ -524,6 +535,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn contains<U>(&self, item: &U) -> bool
     where
         Idx: [const] PartialOrd<U>,
@@ -561,6 +573,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[inline]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn is_empty(&self) -> bool
     where
         Idx: [const] PartialOrd,
@@ -612,6 +625,7 @@ impl<Idx: PartialOrd<Idx>> RangeInclusive<Idx> {
 #[derive(Copy, Hash)]
 #[derive(Clone, PartialEq, Eq)]
 #[stable(feature = "inclusive_range", since = "1.26.0")]
+#[ferrocene::prevalidated]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
     #[stable(feature = "inclusive_range", since = "1.26.0")]
@@ -620,6 +634,7 @@ pub struct RangeToInclusive<Idx> {
 
 #[stable(feature = "inclusive_range", since = "1.26.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;
         self.end.fmt(fmt)?;
@@ -627,7 +642,6 @@ impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// Returns `true` if `item` is contained in the range.
     ///
@@ -695,6 +709,7 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
 #[stable(feature = "collections_bound", since = "1.17.0")]
 #[derive(Copy, Debug, Hash)]
 #[derive_const(Clone, Eq, PartialEq)]
+#[ferrocene::prevalidated]
 pub enum Bound<T> {
     /// An inclusive bound.
     #[stable(feature = "collections_bound", since = "1.17.0")]
@@ -712,6 +727,7 @@ impl<T> Bound<T> {
     #[inline]
     #[stable(feature = "bound_as_ref_shared", since = "1.65.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn as_ref(&self) -> Bound<&T> {
         match *self {
             Included(ref x) => Included(x),
@@ -723,6 +739,7 @@ impl<T> Bound<T> {
     /// Converts from `&mut Bound<T>` to `Bound<&mut T>`.
     #[inline]
     #[unstable(feature = "bound_as_ref", issue = "80996")]
+    #[ferrocene::prevalidated]
     pub const fn as_mut(&mut self) -> Bound<&mut T> {
         match *self {
             Included(ref mut x) => Included(x),
@@ -754,6 +771,7 @@ impl<T> Bound<T> {
     /// ```
     #[inline]
     #[stable(feature = "bound_map", since = "1.77.0")]
+    #[ferrocene::prevalidated]
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Bound<U> {
         match self {
             Unbounded => Unbounded,
@@ -779,6 +797,7 @@ impl<T: Copy> Bound<&T> {
     /// ```
     #[unstable(feature = "bound_copied", issue = "145966")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn copied(self) -> Bound<T> {
         match self {
             Bound::Unbounded => Bound::Unbounded,
@@ -806,6 +825,7 @@ impl<T: Clone> Bound<&T> {
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "bound_cloned", since = "1.55.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
+    #[ferrocene::prevalidated]
     pub const fn cloned(self) -> Bound<T>
     where
         T: [const] Clone,
@@ -871,6 +891,7 @@ pub const trait RangeBounds<T: ?Sized> {
     /// ```
     #[inline]
     #[stable(feature = "range_contains", since = "1.35.0")]
+    #[ferrocene::prevalidated]
     fn contains<U>(&self, item: &U) -> bool
     where
         T: [const] PartialOrd<U>,
@@ -939,7 +960,6 @@ pub const trait RangeBounds<T: ?Sized> {
     /// assert!( (Excluded(3), Excluded(1)).is_empty());
     /// ```
     #[unstable(feature = "range_bounds_is_empty", issue = "137300")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn is_empty(&self) -> bool
     where
         T: [const] PartialOrd,
@@ -1004,7 +1024,6 @@ pub const trait IntoBounds<T>: [const] RangeBounds<T> {
     /// assert!(!(-12..387).intersect(0..256).is_empty());
     /// assert!((1..5).intersect(6..).is_empty());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn intersect<R>(self, other: R) -> (Bound<T>, Bound<T>)
     where
         Self: Sized,
@@ -1054,9 +1073,11 @@ use self::Bound::{Excluded, Included, Unbounded};
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T: ?Sized> const RangeBounds<T> for RangeFull {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Unbounded
     }
@@ -1065,6 +1086,7 @@ impl<T: ?Sized> const RangeBounds<T> for RangeFull {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for RangeFull {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Unbounded)
     }
@@ -1073,9 +1095,11 @@ impl<T> const IntoBounds<T> for RangeFull {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeFrom<T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Unbounded
     }
@@ -1084,6 +1108,7 @@ impl<T> const RangeBounds<T> for RangeFrom<T> {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for RangeFrom<T> {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Unbounded)
     }
@@ -1092,9 +1117,11 @@ impl<T> const IntoBounds<T> for RangeFrom<T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeTo<T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(&self.end)
     }
@@ -1103,6 +1130,7 @@ impl<T> const RangeBounds<T> for RangeTo<T> {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for RangeTo<T> {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Excluded(self.end))
     }
@@ -1111,9 +1139,11 @@ impl<T> const IntoBounds<T> for RangeTo<T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for Range<T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(&self.end)
     }
@@ -1122,6 +1152,7 @@ impl<T> const RangeBounds<T> for Range<T> {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for Range<T> {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Excluded(self.end))
     }
@@ -1130,9 +1161,11 @@ impl<T> const IntoBounds<T> for Range<T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeInclusive<T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         if self.exhausted {
             // When the iterator is exhausted, we usually have start == end,
@@ -1147,6 +1180,7 @@ impl<T> const RangeBounds<T> for RangeInclusive<T> {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for RangeInclusive<T> {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (
             Included(self.start),
@@ -1164,9 +1198,11 @@ impl<T> const IntoBounds<T> for RangeInclusive<T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeToInclusive<T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Included(&self.end)
     }
@@ -1175,6 +1211,7 @@ impl<T> const RangeBounds<T> for RangeToInclusive<T> {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for RangeToInclusive<T> {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Included(self.end))
     }
@@ -1183,6 +1220,7 @@ impl<T> const IntoBounds<T> for RangeToInclusive<T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for (Bound<T>, Bound<T>) {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         match *self {
             (Included(ref start), _) => Included(start),
@@ -1191,6 +1229,7 @@ impl<T> const RangeBounds<T> for (Bound<T>, Bound<T>) {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         match *self {
             (_, Included(ref end)) => Included(end),
@@ -1203,6 +1242,7 @@ impl<T> const RangeBounds<T> for (Bound<T>, Bound<T>) {
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const IntoBounds<T> for (Bound<T>, Bound<T>) {
+    #[ferrocene::prevalidated]
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         self
     }
@@ -1210,7 +1250,6 @@ impl<T> const IntoBounds<T> for (Bound<T>, Bound<T>) {
 
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, T: ?Sized + 'a> const RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
     fn start_bound(&self) -> Bound<&T> {
         self.0
@@ -1230,9 +1269,11 @@ impl<'a, T: ?Sized + 'a> const RangeBounds<T> for (Bound<&'a T>, Bound<&'a T>) {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeFrom<&T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Unbounded
     }
@@ -1247,9 +1288,11 @@ impl<T> const RangeBounds<T> for RangeFrom<&T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeTo<&T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(self.end)
     }
@@ -1264,9 +1307,11 @@ impl<T> const RangeBounds<T> for RangeTo<&T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for Range<&T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Excluded(self.end)
     }
@@ -1281,9 +1326,11 @@ impl<T> const RangeBounds<T> for Range<&T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeInclusive<&T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Included(self.end)
     }
@@ -1298,9 +1345,11 @@ impl<T> const RangeBounds<T> for RangeInclusive<&T> {
 #[stable(feature = "collections_range", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
 impl<T> const RangeBounds<T> for RangeToInclusive<&T> {
+    #[ferrocene::prevalidated]
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
+    #[ferrocene::prevalidated]
     fn end_bound(&self) -> Bound<&T> {
         Included(self.end)
     }
@@ -1310,6 +1359,7 @@ impl<T> const RangeBounds<T> for RangeToInclusive<&T> {
 /// which end a `OneSidedRange` is bounded on.
 #[unstable(feature = "one_sided_range", issue = "69780")]
 #[allow(missing_debug_implementations)]
+#[ferrocene::prevalidated]
 pub enum OneSidedRangeBound {
     /// The range is bounded inclusively from below and is unbounded above.
     StartInclusive,
@@ -1339,6 +1389,7 @@ impl<T> const OneSidedRange<T> for RangeTo<T>
 where
     Self: RangeBounds<T>,
 {
+    #[ferrocene::prevalidated]
     fn bound(self) -> (OneSidedRangeBound, T) {
         (OneSidedRangeBound::End, self.end)
     }
@@ -1350,6 +1401,7 @@ impl<T> const OneSidedRange<T> for RangeFrom<T>
 where
     Self: RangeBounds<T>,
 {
+    #[ferrocene::prevalidated]
     fn bound(self) -> (OneSidedRangeBound, T) {
         (OneSidedRangeBound::StartInclusive, self.start)
     }
@@ -1361,6 +1413,7 @@ impl<T> const OneSidedRange<T> for RangeToInclusive<T>
 where
     Self: RangeBounds<T>,
 {
+    #[ferrocene::prevalidated]
     fn bound(self) -> (OneSidedRangeBound, T) {
         (OneSidedRangeBound::EndInclusive, self.end)
     }

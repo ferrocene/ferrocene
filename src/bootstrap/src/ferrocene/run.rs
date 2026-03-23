@@ -144,23 +144,14 @@ impl Step for CertifiedCoreSymbols {
         let CertifiedCoreSymbols { build_compiler, target } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
-        let certified_target = target.subset_equivalent();
-
         // c.f. check::std
-        let mut cargo = Cargo::new(
-            builder,
-            build_compiler,
-            Mode::Std,
-            SourceType::InTree,
-            certified_target,
-            Kind::Check,
-        );
+        let mut cargo =
+            Cargo::new(builder, build_compiler, Mode::Std, SourceType::InTree, target, Kind::Check);
         let crates = vec!["core".to_owned()]; // currently, only core is certified
-        std_cargo(builder, certified_target, &mut cargo, &crates);
+        std_cargo(builder, target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);
-        let report = builder
-            .cargo_out(build_compiler, Mode::Std, certified_target)
-            .join("symbol-report.json");
+        let report =
+            builder.cargo_out(build_compiler, Mode::Std, target).join("symbol-report.json");
         cargo.env("SYMBOL_REPORT_OUT", &report);
 
         let _guard = builder.msg(
@@ -168,11 +159,11 @@ impl Step for CertifiedCoreSymbols {
             format!("symbol-report for certified library subset{}", crate_description(&crates)),
             Mode::Std,
             build_compiler,
-            certified_target,
+            target,
         );
 
-        let check_stamp = build_stamp::libstd_stamp(builder, build_compiler, certified_target)
-            .with_prefix("symbol-report");
+        let check_stamp =
+            build_stamp::libstd_stamp(builder, build_compiler, target).with_prefix("symbol-report");
 
         let tail_args = if builder.was_invoked_explicitly::<Self>(Kind::Run) {
             builder.config.free_args.clone()
@@ -213,7 +204,9 @@ impl Step for CoverageReport {
 
     fn make_run(run: RunConfig<'_>) {
         let builder = run.builder;
-        let certified_target = run.target.subset_equivalent();
+
+        run.target.require_certified_subset();
+
         let for_ = FerroceneCoverageFor::Library;
         let paths = Paths::find(builder, run.target, for_);
         // FIXME(@jyn514): this is not a good CLI interface.
@@ -236,10 +229,10 @@ impl Step for CoverageReport {
             CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
         let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
 
-        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, certified_target));
+        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target));
 
         builder.ensure(CoverageReport {
-            certified_target,
+            certified_target: run.target,
             profdata: paths.profdata_file,
             instrumented_binaries,
             symbol_report,

@@ -36,33 +36,24 @@
 // AAPCS calling convention (`extern "aapcs"`) because that's how LLVM will call them.
 
 #[cfg(test)]
-#[cfg(not(feature = "ferrocene_subset"))]
 extern crate core;
 
 #[macro_use]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod macros;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod float;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod int;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod math;
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod mem;
 pub mod sync;
 
 // `libm` expects its `support` module to be available in the crate root.
-#[cfg(not(feature = "ferrocene_subset"))]
 use math::libm_math::support;
 
 #[cfg(target_arch = "arm")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod arm;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64;
 
 // Note that we enable the module on "mangled-names" because that is the default feature
@@ -71,30 +62,23 @@ pub mod aarch64;
     target_arch = "aarch64",
     any(target_feature = "outline-atomics", feature = "mangled-names")
 ))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod aarch64_outline_atomics;
 
 #[cfg(target_arch = "avr")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod avr;
 
 #[cfg(target_arch = "hexagon")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod hexagon;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod riscv;
 
 #[cfg(target_arch = "x86")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod x86;
 
 #[cfg(target_arch = "x86_64")]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod x86_64;
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub mod probestack;
 
 // ferrocene addition: symbol needed by profiler-builtins on 32-bit ARM

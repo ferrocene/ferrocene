@@ -72,9 +72,16 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
             tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
         }
+
         let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
-            && rustc_hir::find_attr!(tcx, parent, AutomaticallyDerived { .. });
+            && tcx.is_automatically_derived(parent);
         if derived {
+            // Builtin macros are covered under our compiler qualification and considered verified.
+            // We currently don't support proc-macros; assume them to be unverified.
+            if !tcx.is_builtin_derived(parent) {
+                return ValidatedStatus::Unvalidated;
+            }
+
             let self_ty = tcx.type_of(parent);
             info!("checking {self_ty:?}");
             // FIXME: need to try to normalize this type so we handle aliases and associated types

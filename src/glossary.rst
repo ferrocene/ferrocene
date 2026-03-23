@@ -2136,8 +2136,7 @@ An :dt:`incomplete associated type` is an :t:`associated type` without an
 index expression
 ^^^^^^^^^^^^^^^^
 
-An :dt:`index expression` is an :t:`expression` that indexes into a :t:`value`
-of a :t:`type`.
+An :dt:`index expression` is an :t:`expression` that indexes into a :t:`value` of an :t:`indexable type`.
 
 See :s:`IndexExpression`.
 

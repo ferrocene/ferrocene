@@ -3367,14 +3367,14 @@ Given :t:`static` ``S`` of the form
 
 .. code-block:: rust
 
-   static S: &[&usize] = &[];
+   static S: &'static [&'static usize] = &[];
 
 :dp:`fls_f3yZ31dRuTPG`
 its :t:`lifetime` :t:`elided` form is
 
 .. code-block:: rust
 
-   static S: &'static [&'static usize] = &[];
+   static S: &[&usize] = &[];
 
 .. _fls_XTBOhK2Yk4lA:
 

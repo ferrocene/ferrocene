@@ -19,6 +19,46 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.94.0
+-------------------------------
+
+- `Impls and impl items inherit dead_code lint level of the corresponding traits and trait items <https://github.com/rust-lang/rust/pull/144113>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Stabilize additional 29 RISC-V target features including large portions of the RVA22U64 / RVA23U64 profiles <https://github.com/rust-lang/rust/pull/145948>`_
+
+  - No change: the target is outside the scope of FLS
+
+- `Add warn-by-default unused_visibilities lint for visibility on const _ declarations <https://github.com/rust-lang/rust/pull/147136>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Update to Unicode 17 <https://github.com/rust-lang/rust/pull/148321>`_
+
+  - Changed paragraphs:
+
+    - :p:`fls_jpecw46eh061`
+
+- `Avoid incorrect lifetime errors for closures <https://github.com/rust-lang/rust/pull/148329>`_
+
+  - No change: the exact machanics of the borrow checker are outside the scope of the FLS
+
+Language changes in Rust 1.93.1
+-------------------------------
+
+- `Don’t try to recover keyword as non-keyword identifier <https://github.com/rust-lang/rust/pull/150590>`_
+
+  - No change: bug fix in the compiler without visible ramifications
+
+- `Fix clippy::panicking_unwrap false-positive on field access with implicit deref <https://github.com/rust-lang/rust-clippy/pull/16196>`_
+
+  - No change: Lints are not part of the FLS
+
+- `Revert “Update wasm-related dependencies in CI” <https://github.com/rust-lang/rust/pull/152259>`_
+
+  - No change: the target is outside the scope of FLS
+
 Language changes in Rust 1.93.0
 -------------------------------
 
@@ -27,12 +67,34 @@ Language changes in Rust 1.93.0
   - No change: the target is outside the scope of FLS
 
 - `Stabilize declaration of C-style variadic functions for the system ABI <https://github.com/rust-lang/rust/pull/145954>`_
+
+  - Changed paragraph: :p:`fls_8m7pc3riokst`
+
+  - New paragraphs:
+
+    - :p:`fls_6urL6fZ5cpaA`
+    - :p:`fls_TMOzb6cYIOlH`
+
 - `Emit error when using some keyword as a cfg predicate <https://github.com/rust-lang/rust/pull/146978>`_
 
   - No change: this bug was not documented in FLS
 
 - `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
+
+  - Changed syntax: :s:`AssemblyCodeBlock`, :s:`AsmArguments`, :s:`GlobalAsmArguments`
+  - New syntax: :s:`AssemblyTemplate`, :s:`AssemblyAttributeRegisterArgument`, :s:`AssemblyAttributeAbiClobber`, :s:`AssemblyAttributeAssemblyOption`
+  - New glossary entry: :t:`inline assembly argument`
+
+  - New paragraphs:
+
+    - :p:`fls_tKj18krZ1pSt`
+    - :p:`fls_nLBhw2w6uznH`
+    - :p:`fls_cTEiqjf6haEg`
+
 - `During const-evaluation, support copying pointers byte-by-byte <https://github.com/rust-lang/rust/pull/148259>`_
+
+  * No change: Already covered by the classification of :t:`[constant expression]s`.
+
 - `LUB coercions now correctly handle function item types, and functions with differing safeties <https://github.com/rust-lang/rust/pull/148602>`_
 - `Allow const items that contain mutable references to static (which is *very* unsafe, but not *always* UB) <https://github.com/rust-lang/rust/pull/148746>`_
 
@@ -50,6 +112,18 @@ Language changes in Rust 1.93.0
 - `Add warn-by-default function_casts_as_integer lint <https://github.com/rust-lang/rust/pull/141470>`_
 
   - Lints are outside the scope of FLS
+
+FLS corrections
+---------------
+
+- Deduplicate historically reused paragraph IDs in the glossary.
+
+  - Corrected glossary `discriminant type` paragraph ID:
+    - old reused ID: ``fls_t4yeovFm83Wo``
+    - new unique ID: ``fls_kqdvWGi9cglm``
+  - Corrected glossary `local trait` paragraph ID:
+    - old reused ID: ``fls_I9JaKZelMiby``
+    - new unique ID: ``fls_H5vkbMFvzrFs``
 
 Language changes in Rust 1.92.0
 -------------------------------
@@ -100,6 +174,40 @@ Language changes in Rust 1.91.0
 
 - `Lower pattern bindings in the order they're written and base drop order on primary bindings' order <https://github.com/rust-lang/rust/pull/143764>`_
 
+  - Changed paragraphs:
+
+    - :p:`fls_g07zq3n55094`
+    - :p:`fls_8luyomzppck`
+    - :p:`fls_kv533rntni1x`
+    - :p:`fls_62626ws222op`
+    - :p:`fls_q0z46h1gnzez`
+    - :p:`fls_1r0vm6rg13o9`
+    - :p:`fls_am5h8r887bz5`
+    - :p:`fls_eppmiloh7bgg`
+    - :p:`fls_gwc08xayno7q`
+    - :p:`fls_19iygu12s315`
+    - :p:`fls_r307spfk6cs9`
+    - :p:`fls_qhdofvbso3gl`
+    - :p:`fls_drb114dtvlpt`
+    - :p:`fls_uxysntb3u03j`
+    - :p:`fls_vstdqifqipbh`
+
+  - New paragraphs:
+
+    - :p:`fls_W2S2FrkuedYC`
+    - :p:`fls_dhfIPP4yR3Tt`
+    - :p:`fls_zxFM7EoE2Xq8`
+    - :p:`fls_093YxG6YXQz2`
+    - :p:`fls_gNWXh61ZXXt8`
+    - :p:`fls_VQMmveZUfNTn`
+    - :p:`fls_72JHo343O7jp`
+    - :p:`fls_6bwTtGKb7ba7`
+    - :p:`fls_YDVgFaTQwcL8`
+    - :p:`fls_zv73CR8rplIa`
+    - :p:`fls_tZJgZDWVChJV`
+
+  - Removed paragraph: :p:`fls_67ajub7d2b4c`
+
 - `Stabilize declaration of C-style variadic functions for 'sysv64', 'win64', 'efiapi', and 'aapcs' ABIs <https://github.com/rust-lang/rust/pull/144066>`_.
   This brings these ABIs in line with the C ABI: variadic functions can be declared in extern blocks but not defined.
 
@@ -117,8 +225,6 @@ Language changes in Rust 1.91.0
     - :p:`fls_jOyZh9ujWWHQ`
     - :p:`fls_Xdr0bFwxhWiB`
     - :p:`fls_DpTFEHZAABdD`
-    - :p:`fls_6urL6fZ5cpaA`
-    - :p:`fls_TMOzb6cYIOlH`
     - :p:`fls_eHPWHrvs7ETl`
     - :p:`fls_mjCrvmikm58M`
     - :p:`fls_4EUb9zFatZ97`

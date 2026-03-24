@@ -1048,6 +1048,26 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
+          name: thumbv7em-eabihf-test-target-cpu-library
+          target: thumbv7em-ferrocene.facade-eabihf
+          test-variant: 2021-specific-cortex-m4
+          qemu-arch: qemu-arm
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabi-test-target-cpu-library
+          target: thumbv7em-ferrocene.facade-eabi
+          test-variant: 2021-specific-cortex-m4
+          qemu-arch: qemu-arm
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-compiletest
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
@@ -1061,6 +1081,26 @@ workflows:
           name: thumbv7em-eabi-test-compiletest
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
+          qemu-arch: qemu-arm
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabihf-test-target-cpu-compiletest
+          target: thumbv7em-ferrocene.facade-eabihf
+          test-variant: 2021-specific-cortex-m4
+          qemu-arch: qemu-arm
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabi-test-target-cpu-compiletest
+          target: thumbv7em-ferrocene.facade-eabi
+          test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
           job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core

@@ -488,6 +488,7 @@ macro_rules! shl_impl {
             type Output = $t;
 
             #[inline]
+            #[track_caller]
             #[rustc_inherit_overflow_checks]
             #[ferrocene::prevalidated]
             fn shl(self, other: $f) -> $t {
@@ -611,6 +612,7 @@ macro_rules! shr_impl {
             type Output = $t;
 
             #[inline]
+            #[track_caller]
             #[rustc_inherit_overflow_checks]
             #[ferrocene::prevalidated]
             fn shr(self, other: $f) -> $t {
@@ -967,6 +969,7 @@ macro_rules! shl_assign_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShlAssign<$f> for $t {
             #[inline]
+            #[track_caller]
             #[rustc_inherit_overflow_checks]
             #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
@@ -1054,6 +1057,7 @@ macro_rules! shr_assign_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShrAssign<$f> for $t {
             #[inline]
+            #[track_caller]
             #[rustc_inherit_overflow_checks]
             #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {

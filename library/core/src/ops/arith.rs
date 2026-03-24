@@ -723,6 +723,7 @@ macro_rules! neg_impl {
             type Output = $t;
 
             #[inline]
+            #[track_caller]
             #[rustc_inherit_overflow_checks]
             #[ferrocene::prevalidated]
             fn neg(self) -> $t { -self }

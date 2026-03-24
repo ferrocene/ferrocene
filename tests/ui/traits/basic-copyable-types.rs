@@ -67,15 +67,6 @@ fn test<'a, T, U: Copy>(_: &'a isize) {
     assert_copy::<Rc<isize>>(); //~ ERROR : Copy` is not satisfied
 }
 
-<<<<<<< HEAD:tests/ui/kindck/kindck-copy.rs
-pub fn main() {
-}
-
+pub fn main() {}
 // ferrocene-annotations: fls_77scxuomlbgs
 // Passing Conventions
-||||||| 6bdc342ddb0:tests/ui/kindck/kindck-copy.rs
-pub fn main() {
-}
-=======
-pub fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:tests/ui/traits/basic-copyable-types.rs

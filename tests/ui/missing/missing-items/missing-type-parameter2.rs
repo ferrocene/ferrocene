@@ -15,18 +15,10 @@ fn foo(_: T) where T: Send {}
 fn bar<const N: u8>(_: A) {}
 //~^ ERROR cannot find type `A` in this scope
 
-<<<<<<< HEAD
-fn main() {
-}
+fn main() {}
 
 // ferrocene-annotations: fls_izl8iuhoz9e0
 // Scopes
 //
 // ferrocene-annotations: fls_vhpwge5123cm
 // Generic Parameters
-||||||| 6bdc342ddb0
-fn main() {
-}
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

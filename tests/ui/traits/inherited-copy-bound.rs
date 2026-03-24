@@ -22,8 +22,7 @@ fn b() {
     //~^ ERROR E0038
 }
 
-<<<<<<< HEAD:tests/ui/kindck/kindck-inherited-copy-bound.rs
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_utuu8mdbuyxm
 // Generic Arguments
@@ -39,8 +38,3 @@ fn main() { }
 //
 // ferrocene-annotations: fls_jeoas4n6su4
 // Trait and Lifetime Bounds
-||||||| 6bdc342ddb0:tests/ui/kindck/kindck-inherited-copy-bound.rs
-fn main() { }
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:tests/ui/traits/inherited-copy-bound.rs

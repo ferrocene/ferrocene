@@ -1,5 +1,3 @@
-use core::intrinsics::fallback::FunnelShift;
-
 #[test]
 fn assume() {
     unsafe { core::hint::assert_unchecked(true) };

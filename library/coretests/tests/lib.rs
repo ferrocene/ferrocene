@@ -87,6 +87,7 @@
 #![feature(next_index)]
 #![feature(non_exhaustive_omitted_patterns_lint)]
 #![feature(nonzero_from_str_radix)]
+#![feature(num_internals)]
 #![feature(numfmt)]
 #![feature(one_sided_range)]
 #![feature(panic_internals)]
@@ -113,6 +114,7 @@
 #![feature(step_trait)]
 #![feature(str_internals)]
 #![feature(strict_provenance_lints)]
+#![feature(titlecase)]
 #![feature(trusted_len)]
 #![feature(trusted_random_access)]
 #![feature(try_blocks)]
@@ -214,7 +216,6 @@ mod const_ptr;
 mod convert;
 mod ferrocene;
 mod ffi;
-mod floats;
 mod fmt;
 mod future;
 mod hash;

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Test that cross-borrowing (implicitly converting from `Box<T>` to `&T`) is
 // forbidden when `T` is a trait.
 

@@ -1264,6 +1264,8 @@ pub struct HashIgnoredAttrId {
     pub attr_id: AttrId,
 }
 
+/// Many functions on this type have their documentation in the [`AttributeExt`] trait,
+/// since they defer their implementation directly to that trait.
 #[derive(Clone, Debug, Encodable, Decodable, HashStable_Generic)]
 pub enum Attribute {
     /// A parsed built-in attribute.
@@ -1665,19 +1667,6 @@ impl<'tcx> MaybeOwner<'tcx> {
     pub fn unwrap(self) -> &'tcx OwnerInfo<'tcx> {
         self.as_owner().unwrap_or_else(|| panic!("Not a HIR owner"))
     }
-}
-
-/// The top-level data structure that stores the entire contents of
-/// the crate currently being compiled.
-///
-/// For more details, see the [rustc dev guide].
-///
-/// [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/hir.html
-#[derive(Debug)]
-pub struct Crate<'hir> {
-    pub owners: IndexVec<LocalDefId, MaybeOwner<'hir>>,
-    // Only present when incr. comp. is enabled.
-    pub opt_hir_hash: Option<Fingerprint>,
 }
 
 #[derive(Debug, Clone, Copy, HashStable_Generic)]

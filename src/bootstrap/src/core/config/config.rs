@@ -1931,6 +1931,12 @@ impl Config {
                         res.unwrap();
                     }
 
+                    if self.stage < 2 {
+                        eprintln!("ERROR: --stage 1 is known to be buggy with download-rustc.");
+                        eprintln!("ERROR: forcing it off.");
+                        return None;
+                    }
+
                     eprintln!("WARNING: download-rustc support in Ferrocene is experimental.");
                     eprintln!("WARNING: you may run into caching issues or other build failures.");
 

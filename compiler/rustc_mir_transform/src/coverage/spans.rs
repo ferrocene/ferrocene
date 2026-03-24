@@ -29,6 +29,7 @@ pub(super) fn extract_refined_covspans<'tcx>(
     // If there somehow isn't an expansion tree node corresponding to the
     // body span, return now and don't create any mappings.
     let Some(node) = expn_tree.get(hir_info.body_span.ctxt().outer_expn()) else { return };
+    dbg!(&node.expn_kind);
 
     let mut covspans = vec![];
 
@@ -103,17 +104,21 @@ pub(super) fn extract_refined_covspans<'tcx>(
 
     // Discard spans that overlap in unwanted ways.
     let mut covspans = remove_unwanted_overlapping_spans(covspans);
+    dbg!(&covspans);
 
     // For all empty spans, either enlarge them to be non-empty, or discard them.
     let source_map = tcx.sess.source_map();
+    // TODO: the covspans get lost here; fix that
     covspans.retain_mut(|covspan| {
         let Some(span) = ensure_non_empty_span(source_map, covspan.span) else { return false };
         covspan.span = span;
         true
     });
+    dbg!(&covspans);
 
     // Merge covspans that can be merged.
     covspans.dedup_by(|b, a| a.merge_if_eligible(b));
+    dbg!(&covspans);
 
     mappings.extend(covspans.into_iter().map(|Covspan { span, bcb }| {
         // Each span produced by the refiner represents an ordinary code region.

@@ -64,6 +64,8 @@ fn instrument_function_for_coverage<'tcx>(tcx: TyCtxt<'tcx>, mir_body: &mut mir:
     let def_id = mir_body.source.def_id();
     let _span = debug_span!("instrument_function_for_coverage", ?def_id).entered();
 
+    eprintln!("\ninstrument_function_for_coverage({def_id:?})");
+
     let hir_info = hir_info::extract_hir_info(tcx, def_id.expect_local());
 
     // Build the coverage graph, which is a simplified view of the MIR control-flow
@@ -76,6 +78,7 @@ fn instrument_function_for_coverage<'tcx>(tcx: TyCtxt<'tcx>, mir_body: &mut mir:
         match mappings::extract_mappings_from_mir(tcx, mir_body, &hir_info, &graph) {
             Ok(m) => m,
             Err(error) => {
+                eprintln!("mapping extraction failed; skipping this function: {error:?}");
                 tracing::debug!(?error, "mapping extraction failed; skipping this function");
                 return;
             }

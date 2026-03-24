@@ -215,48 +215,7 @@ impl Float for f16 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 5;
     const SMALLEST_POWER_OF_TEN: i32 = -27;
 
-<<<<<<< HEAD:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
     #[ferrocene::prevalidated]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-    fn from_u64_bits(v: u64) -> Self {
-        Self::from_bits((v & 0xFFFF) as u16)
-    }
-
-    #[ferrocene::prevalidated]
-    fn pow10_fast_path(exponent: usize) -> Self {
-        #[allow(clippy::use_self)]
-        const TABLE: [f16; 8] = [1e0, 1e1, 1e2, 1e3, 1e4, 0.0, 0.0, 0.];
-        TABLE[exponent & 7]
-    }
-
-    #[ferrocene::prevalidated]
-||||||| 6bdc342ddb0:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    fn from_u64_bits(v: u64) -> Self {
-        Self::from_bits((v & 0xFFFF) as u16)
-    }
-
-    fn pow10_fast_path(exponent: usize) -> Self {
-        #[allow(clippy::use_self)]
-        const TABLE: [f16; 8] = [1e0, 1e1, 1e2, 1e3, 1e4, 0.0, 0.0, 0.];
-        TABLE[exponent & 7]
-    }
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:library/core/src/num/imp/traits.rs
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }
@@ -292,50 +251,7 @@ impl Float for f32 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 10;
     const SMALLEST_POWER_OF_TEN: i32 = -65;
 
-<<<<<<< HEAD:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
     #[ferrocene::prevalidated]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-    fn from_u64_bits(v: u64) -> Self {
-        f32::from_bits((v & 0xFFFFFFFF) as u32)
-    }
-
-    #[ferrocene::prevalidated]
-    fn pow10_fast_path(exponent: usize) -> Self {
-        #[allow(clippy::use_self)]
-        const TABLE: [f32; 16] =
-            [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 0., 0., 0., 0., 0.];
-        TABLE[exponent & 15]
-    }
-
-    #[ferrocene::prevalidated]
-||||||| 6bdc342ddb0:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    fn from_u64_bits(v: u64) -> Self {
-        f32::from_bits((v & 0xFFFFFFFF) as u32)
-    }
-
-    fn pow10_fast_path(exponent: usize) -> Self {
-        #[allow(clippy::use_self)]
-        const TABLE: [f32; 16] =
-            [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 0., 0., 0., 0., 0.];
-        TABLE[exponent & 15]
-    }
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:library/core/src/num/imp/traits.rs
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }
@@ -370,52 +286,7 @@ impl Float for f64 {
     const MAX_EXPONENT_ROUND_TO_EVEN: i32 = 23;
     const SMALLEST_POWER_OF_TEN: i32 = -342;
 
-<<<<<<< HEAD:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
     #[ferrocene::prevalidated]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-    fn from_u64_bits(v: u64) -> Self {
-        f64::from_bits(v)
-    }
-
-    #[ferrocene::prevalidated]
-    fn pow10_fast_path(exponent: usize) -> Self {
-        const TABLE: [f64; 32] = [
-            1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
-            1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22, 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-        ];
-        TABLE[exponent & 31]
-    }
-
-    #[ferrocene::prevalidated]
-||||||| 6bdc342ddb0:library/core/src/num/imp/dec2flt/float.rs
-    #[inline]
-    fn from_u64(v: u64) -> Self {
-        debug_assert!(v <= Self::MAX_MANTISSA_FAST_PATH);
-        v as _
-    }
-
-    #[inline]
-    fn from_u64_bits(v: u64) -> Self {
-        f64::from_bits(v)
-    }
-
-    fn pow10_fast_path(exponent: usize) -> Self {
-        const TABLE: [f64; 32] = [
-            1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
-            1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22, 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-        ];
-        TABLE[exponent & 31]
-    }
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:library/core/src/num/imp/traits.rs
     fn to_bits(self) -> Self::Int {
         self.to_bits()
     }

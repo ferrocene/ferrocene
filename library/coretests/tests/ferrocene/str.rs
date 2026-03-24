@@ -114,7 +114,7 @@ test_str_slice_index!(
 macro_rules! test_str_slice_index_panic {
     ( $($fn:ident => $range:expr,)*) => { $(
         #[test]
-        #[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+        #[should_panic = "byte index 100 is out of bounds for string of length 13"]
         fn $fn() {
             let str_ref = "Hello, World!";
             slice::SliceIndex::index($range, str_ref);
@@ -131,7 +131,7 @@ test_str_slice_index_panic!(
 macro_rules! test_str_slice_index_mut_panic {
     ( $($fn:ident => $range:expr,)*) => { $(
         #[test]
-        #[should_panic = "byte index 100 is out of bounds of `Hello, World!`"]
+        #[should_panic = "byte index 100 is out of bounds for string of length 13"]
         fn $fn() {
             let mut str_mut_bytes = STR_MUT_BYTES;
             let str_mut: &mut str = str::from_utf8_mut(&mut str_mut_bytes).unwrap();

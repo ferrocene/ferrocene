@@ -92,6 +92,9 @@ fn instrument_function_for_coverage<'tcx>(tcx: TyCtxt<'tcx>, mir_body: &mut mir:
         counters::prepare_bcb_counters_data(&graph);
 
     // Inject coverage statements into MIR.
+    //
+    // TODO: currently we only have entry point coverage for proc-macros since we only have one mapping;
+    // can we inject more than one instruction, so we get something like statement coverage?
     inject_coverage_statements(mir_body, &graph);
 
     mir_body.function_coverage_info = Some(Box::new(FunctionCoverageInfo {

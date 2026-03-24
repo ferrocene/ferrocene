@@ -38,6 +38,7 @@ pub(crate) fn extract_mappings_from_mir<'tcx>(
     // Extract ordinary code mappings from MIR statement/terminator spans.
     extract_refined_covspans(tcx, hir_info, graph, &expn_tree, &mut mappings);
 
+    // TODO: currently branch_spans is empty; check with a function with branches
     extract_branch_mappings(mir_body, hir_info, graph, &expn_tree, &mut mappings);
 
     if mappings.is_empty() {

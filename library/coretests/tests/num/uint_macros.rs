@@ -7,22 +7,12 @@ macro_rules! uint_module {
 
         #[test]
         fn test_overflows() {
-<<<<<<< HEAD
-            assert!(MAX > 0);
-            assert!(MIN <= 0);
-            assert!((MIN + MAX).wrapping_add(1) == 0);
-            // Ferrocene addition: cover `wrapping_add_signed`
-            assert!((MIN + MAX).wrapping_add_signed(1) == 0);
-            assert!(MIN.wrapping_add_signed(-1) == MAX);
-||||||| 6bdc342ddb0
-            assert!(MAX > 0);
-            assert!(MIN <= 0);
-            assert!((MIN + MAX).wrapping_add(1) == 0);
-=======
             assert!($T::MAX > 0);
             assert!($T::MIN <= 0);
             assert!(($T::MIN + $T::MAX).wrapping_add(1) == 0);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            // Ferrocene addition: cover `wrapping_add_signed`
+            assert!(($T::MIN + $T::MAX).wrapping_add_signed(1) == 0);
+            assert!($T::MIN.wrapping_add_signed(-1) == $T::MAX);
         }
 
         #[test]

@@ -3162,12 +3162,9 @@
 <f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
-<f16 as core::num::imp::dec2flt::float::RawFloat>::classify
-<f16 as core::num::imp::dec2flt::float::RawFloat>::from_u64
-<f16 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
-<f16 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
-<f16 as core::num::imp::dec2flt::float::RawFloat>::to_bits
 <f16 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f16 as core::num::imp::traits::Float>::classify
+<f16 as core::num::imp::traits::Float>::to_bits
 <f16 as core::ops::arith::Add<&f16>>::add
 <f16 as core::ops::arith::Add>::add
 <f16 as core::ops::arith::AddAssign<&f16>>::add_assign
@@ -3193,12 +3190,9 @@
 <f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
-<f32 as core::num::imp::dec2flt::float::RawFloat>::classify
-<f32 as core::num::imp::dec2flt::float::RawFloat>::from_u64
-<f32 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
-<f32 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
-<f32 as core::num::imp::dec2flt::float::RawFloat>::to_bits
 <f32 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f32 as core::num::imp::traits::Float>::classify
+<f32 as core::num::imp::traits::Float>::to_bits
 <f32 as core::ops::arith::Add<&f32>>::add
 <f32 as core::ops::arith::Add>::add
 <f32 as core::ops::arith::AddAssign<&f32>>::add_assign
@@ -3224,12 +3218,9 @@
 <f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
-<f64 as core::num::imp::dec2flt::float::RawFloat>::classify
-<f64 as core::num::imp::dec2flt::float::RawFloat>::from_u64
-<f64 as core::num::imp::dec2flt::float::RawFloat>::from_u64_bits
-<f64 as core::num::imp::dec2flt::float::RawFloat>::pow10_fast_path
-<f64 as core::num::imp::dec2flt::float::RawFloat>::to_bits
 <f64 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
+<f64 as core::num::imp::traits::Float>::classify
+<f64 as core::num::imp::traits::Float>::to_bits
 <f64 as core::ops::arith::Add<&f64>>::add
 <f64 as core::ops::arith::Add>::add
 <f64 as core::ops::arith::AddAssign<&f64>>::add_assign
@@ -4275,7 +4266,7 @@
 <u16 as core::iter::traits::accum::Sum>::sum
 <u16 as core::num::imp::bignum::FullOps>::full_div_rem
 <u16 as core::num::imp::bignum::FullOps>::full_mul_add
-<u16 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
+<u16 as core::num::imp::traits::CastInto<i16>>::cast
 <u16 as core::ops::arith::Add<&u16>>::add
 <u16 as core::ops::arith::Add>::add
 <u16 as core::ops::arith::AddAssign<&u16>>::add_assign
@@ -4423,7 +4414,7 @@
 <u32 as core::iter::traits::accum::Sum>::sum
 <u32 as core::num::imp::bignum::FullOps>::full_div_rem
 <u32 as core::num::imp::bignum::FullOps>::full_mul_add
-<u32 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
+<u32 as core::num::imp::traits::CastInto<i16>>::cast
 <u32 as core::ops::arith::Add<&u32>>::add
 <u32 as core::ops::arith::Add>::add
 <u32 as core::ops::arith::AddAssign<&u32>>::add_assign
@@ -4571,7 +4562,7 @@
 <u64 as core::iter::traits::accum::Sum>::sum
 <u64 as core::num::imp::bignum::FullOps>::full_div_rem
 <u64 as core::num::imp::bignum::FullOps>::full_mul_add
-<u64 as core::num::imp::dec2flt::float::CastInto<i16>>::cast
+<u64 as core::num::imp::traits::CastInto<i16>>::cast
 <u64 as core::ops::arith::Add<&u64>>::add
 <u64 as core::ops::arith::Add>::add
 <u64 as core::ops::arith::AddAssign<&u64>>::add_assign
@@ -5499,6 +5490,7 @@ core::convert::num::<impl core::convert::From<i32> for f128>::from
 core::convert::num::<impl core::convert::From<i32> for f64>::from
 core::convert::num::<impl core::convert::From<i32> for i128>::from
 core::convert::num::<impl core::convert::From<i32> for i64>::from
+core::convert::num::<impl core::convert::From<i64> for f128>::from
 core::convert::num::<impl core::convert::From<i64> for i128>::from
 core::convert::num::<impl core::convert::From<i8> for f128>::from
 core::convert::num::<impl core::convert::From<i8> for f16>::from
@@ -5525,6 +5517,7 @@ core::convert::num::<impl core::convert::From<u32> for i128>::from
 core::convert::num::<impl core::convert::From<u32> for i64>::from
 core::convert::num::<impl core::convert::From<u32> for u128>::from
 core::convert::num::<impl core::convert::From<u32> for u64>::from
+core::convert::num::<impl core::convert::From<u64> for f128>::from
 core::convert::num::<impl core::convert::From<u64> for i128>::from
 core::convert::num::<impl core::convert::From<u64> for u128>::from
 core::convert::num::<impl core::convert::From<u8> for f128>::from
@@ -6596,6 +6589,8 @@ core::num::<impl u128>::unchecked_add
 core::num::<impl u128>::unchecked_add::precondition_check
 core::num::<impl u128>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u128>::unchecked_div_exact::precondition_check
+core::num::<impl u128>::unchecked_funnel_shl::precondition_check
+core::num::<impl u128>::unchecked_funnel_shr::precondition_check
 core::num::<impl u128>::unchecked_mul::precondition_check
 core::num::<impl u128>::unchecked_shl
 core::num::<impl u128>::unchecked_shl::precondition_check
@@ -6664,6 +6659,8 @@ core::num::<impl u16>::unchecked_add
 core::num::<impl u16>::unchecked_add::precondition_check
 core::num::<impl u16>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u16>::unchecked_div_exact::precondition_check
+core::num::<impl u16>::unchecked_funnel_shl::precondition_check
+core::num::<impl u16>::unchecked_funnel_shr::precondition_check
 core::num::<impl u16>::unchecked_mul::precondition_check
 core::num::<impl u16>::unchecked_shl
 core::num::<impl u16>::unchecked_shl::precondition_check
@@ -6731,6 +6728,8 @@ core::num::<impl u32>::unchecked_add
 core::num::<impl u32>::unchecked_add::precondition_check
 core::num::<impl u32>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u32>::unchecked_div_exact::precondition_check
+core::num::<impl u32>::unchecked_funnel_shl::precondition_check
+core::num::<impl u32>::unchecked_funnel_shr::precondition_check
 core::num::<impl u32>::unchecked_mul::precondition_check
 core::num::<impl u32>::unchecked_shl
 core::num::<impl u32>::unchecked_shl::precondition_check
@@ -6798,6 +6797,8 @@ core::num::<impl u64>::unchecked_add
 core::num::<impl u64>::unchecked_add::precondition_check
 core::num::<impl u64>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u64>::unchecked_div_exact::precondition_check
+core::num::<impl u64>::unchecked_funnel_shl::precondition_check
+core::num::<impl u64>::unchecked_funnel_shr::precondition_check
 core::num::<impl u64>::unchecked_mul::precondition_check
 core::num::<impl u64>::unchecked_shl
 core::num::<impl u64>::unchecked_shl::precondition_check
@@ -6874,6 +6875,8 @@ core::num::<impl u8>::unchecked_add
 core::num::<impl u8>::unchecked_add::precondition_check
 core::num::<impl u8>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u8>::unchecked_div_exact::precondition_check
+core::num::<impl u8>::unchecked_funnel_shl::precondition_check
+core::num::<impl u8>::unchecked_funnel_shr::precondition_check
 core::num::<impl u8>::unchecked_mul::precondition_check
 core::num::<impl u8>::unchecked_shl
 core::num::<impl u8>::unchecked_shl::precondition_check
@@ -6943,6 +6946,8 @@ core::num::<impl usize>::unchecked_add
 core::num::<impl usize>::unchecked_add::precondition_check
 core::num::<impl usize>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl usize>::unchecked_div_exact::precondition_check
+core::num::<impl usize>::unchecked_funnel_shl::precondition_check
+core::num::<impl usize>::unchecked_funnel_shr::precondition_check
 core::num::<impl usize>::unchecked_mul::precondition_check
 core::num::<impl usize>::unchecked_shl
 core::num::<impl usize>::unchecked_shl::precondition_check
@@ -6988,8 +6993,6 @@ core::num::imp::bignum::tests::Big8x3::mul_digits::mul_inner
 core::num::imp::bignum::tests::Big8x3::mul_pow2
 core::num::imp::bignum::tests::Big8x3::mul_small
 core::num::imp::bignum::tests::Big8x3::sub
-core::num::imp::dec2flt::float::RawFloat::integer_decode
-core::num::imp::dec2flt::float::pow2_to_pow10
 core::num::imp::diy_float::Fp::mul
 core::num::imp::diy_float::Fp::normalize
 core::num::imp::diy_float::Fp::normalize_to
@@ -7032,6 +7035,8 @@ core::num::imp::int_log10::u64_impl
 core::num::imp::int_log10::u8
 core::num::imp::int_log10::u8_impl
 core::num::imp::int_log10::usize
+core::num::imp::traits::FloatExt::integer_decode
+core::num::imp::traits::pow2_to_pow10
 core::num::niche_types::CodePointInner::as_inner
 core::num::niche_types::CodePointInner::new
 core::num::niche_types::CodePointInner::new_unchecked

@@ -186,13 +186,7 @@
 #![feature(hexagon_target_feature)]
 #![feature(loongarch_target_feature)]
 #![feature(mips_target_feature)]
-<<<<<<< HEAD
-||||||| 6bdc342ddb0
-#![feature(nvptx_target_feature)]
-=======
 #![feature(movrs_target_feature)]
-#![feature(nvptx_target_feature)]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 #![feature(powerpc_target_feature)]
 #![feature(nvptx_target_feature)]
 #![feature(riscv_target_feature)]

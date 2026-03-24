@@ -77,7 +77,11 @@ RUN <<-EOF
         zstd \
         sudo \
         gcc-10 \
-        g++-10
+        g++-10 \
+        gcc-s390x-linux-gnu \
+        g++-s390x-linux-gnu \
+        gcc-powerpc64le-linux-gnu \
+        g++-powerpc64le-linux-gnu
 
     # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.

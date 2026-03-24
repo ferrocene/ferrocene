@@ -2974,8 +2974,7 @@ An :t:`indexable type` is a :t:`type` that implements the
 :std:`core::ops::Index` :t:`trait`.
 
 :dp:`fls_42ijvuqqqlvh`
-An :t:`index expression` is an :t:`expression` that indexes into a :t:`value`
-of an :t:`indexable type`.
+An :t:`index expression` is an :t:`expression` that indexes into a :t:`value` of an :t:`indexable type`.
 
 :dp:`fls_pc0c22asgzvw`
 An :t:`indexed operand` is an :t:`operand` which indicates the :t:`value`

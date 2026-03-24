@@ -3,6 +3,7 @@ use std::result;
 use std::sync::Arc;
 
 use rustc_ast::{LitKind, MetaItemKind, token};
+use rustc_attr_parsing::AttributeParser;
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::jobserver::{self, Proxy};

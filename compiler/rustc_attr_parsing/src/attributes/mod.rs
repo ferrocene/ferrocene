@@ -109,6 +109,29 @@ pub(crate) trait AttributeParser<S: Stage>: Default + 'static {
     fn finalize(self, cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind>;
 }
 
+pub(crate) trait DynSafeAttrParser<S: Stage> {
+    // fn accept_fns() -> Vec<AcceptMapping>;
+    fn attributes(&self) -> AcceptMapping<&dyn DynSafeAttrParser<S>, S>;
+    fn allowed_targets(&self) -> &AllowedTargets;
+    fn finalize(&mut self, cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind>;
+}
+
+impl<P: AttributeParser<S>, S: Stage> DynSafeAttrParser<S> for P {
+    fn attributes(&self) -> AcceptMapping<&dyn DynSafeAttrParser<S>, S> {
+        todo!()
+        // Self::ATTRIBUTES
+    }
+
+    fn allowed_targets(&self) -> &AllowedTargets {
+        &Self::ALLOWED_TARGETS
+    }
+
+    fn finalize(&mut self, cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind> {
+        let this = std::mem::take(self);
+        <P as AttributeParser<S>>::finalize(this, cx)
+    }
+}
+
 /// Alternative to [`AttributeParser`] that automatically handles state management.
 /// A slightly simpler and more restricted way to convert attributes.
 /// Assumes that an attribute can only appear a single time on an item,

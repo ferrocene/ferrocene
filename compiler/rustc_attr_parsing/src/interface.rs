@@ -1,4 +1,5 @@
 use std::convert::identity;
+use std::fmt::Debug;
 
 use rustc_ast as ast;
 use rustc_ast::token::DocFragmentKind;
@@ -12,6 +13,7 @@ use rustc_session::Session;
 use rustc_session::lint::{BuiltinLintDiag, LintId};
 use rustc_span::{DUMMY_SP, Span, Symbol, sym};
 
+use crate::attributes::DynSafeAttrParser;
 use crate::context::{AcceptContext, FinalizeContext, FinalizeFn, SharedContext, Stage};
 use crate::early_parsed::{EARLY_PARSED_ATTRIBUTES, EarlyParsedState};
 use crate::parser::{ArgParser, PathParser, RefPathParser};
@@ -25,6 +27,7 @@ pub struct AttributeParser<'sess, S: Stage = Late> {
     pub(crate) features: Option<&'sess Features>,
     pub(crate) sess: &'sess Session,
     pub(crate) stage: S,
+    pub(crate) parsers: Vec<Box<dyn DynSafeAttrParser<S>>>,
 
     /// *Only* parse attributes with this symbol.
     ///
@@ -32,7 +35,27 @@ pub struct AttributeParser<'sess, S: Stage = Late> {
     parse_only: Option<Symbol>,
 }
 
+impl<S: Stage> Debug for AttributeParser<'_, S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AttributeParser")
+            .field("stage", &self.stage)
+            .field("parse_only", &self.parse_only)
+            .field("tools", &self.tools)
+            .finish_non_exhaustive()
+    }
+}
+
+impl<'sess> AttributeParser<'sess, Late> {
+    pub fn register_late_parser(&mut self, parser: impl crate::attributes::AttributeParser<Late>) {
+        todo!()
+    }
+}
+
 impl<'sess> AttributeParser<'sess, Early> {
+    pub fn register_early_parser(&mut self, parser: impl crate::attributes::AttributeParser<Early>) {
+        todo!()
+    }
+
     /// This method allows you to parse attributes *before* you have access to features or tools.
     /// One example where this is necessary, is to parse `feature` attributes themselves for
     /// example.
@@ -98,6 +121,8 @@ impl<'sess> AttributeParser<'sess, Early> {
     /// `rustc_ast_lowering`. Some attributes require access to features to parse, which would
     /// crash if you tried to do so through [`parse_limited_all`](Self::parse_limited_all).
     /// Therefore, if `parse_only` is None, then features *must* be provided.
+    ///
+    /// This cannot be used to parse tool attributes.
     pub fn parse_limited_all(
         sess: &'sess Session,
         attrs: &[ast::Attribute],
@@ -109,7 +134,7 @@ impl<'sess> AttributeParser<'sess, Early> {
         emit_errors: ShouldEmit,
     ) -> Vec<Attribute> {
         let mut p =
-            Self { features, tools: Vec::new(), parse_only, sess, stage: Early { emit_errors } };
+            Self { features, tools: Vec::new(), parse_only, sess, stage: Early { emit_errors }, parsers: vec![], };
         p.parse_attribute_list(
             attrs,
             target_span,
@@ -129,6 +154,8 @@ impl<'sess> AttributeParser<'sess, Early> {
 
     /// This method parses a single attribute, using `parse_fn`.
     /// This is useful if you already know what exact attribute this is, and want to parse it.
+    ///
+    /// This cannot be used to parse tool attributes.
     pub fn parse_single<T>(
         sess: &'sess Session,
         attr: &ast::Attribute,
@@ -174,6 +201,8 @@ impl<'sess> AttributeParser<'sess, Early> {
 
     /// This method is equivalent to `parse_single`, but parses arguments using `parse_fn` using manually created `args`.
     /// This is useful when you want to parse other things than attributes using attribute parsers.
+    ///
+    /// This cannot be used to parse tool attributes.
     pub fn parse_single_args<T, I>(
         sess: &'sess Session,
         attr_span: Span,
@@ -197,6 +226,7 @@ impl<'sess> AttributeParser<'sess, Early> {
             parse_only: None,
             sess,
             stage: Early { emit_errors },
+            parsers: vec![],
         };
         let mut emit_lint = |lint_id: LintId, span: Span, kind: AttributeLintKind| {
             sess.psess.buffer_lint(
@@ -234,7 +264,7 @@ impl<'sess, S: Stage> AttributeParser<'sess, S> {
         tools: Vec<Symbol>,
         stage: S,
     ) -> Self {
-        Self { features: Some(features), tools, parse_only: None, sess, stage }
+        Self { features: Some(features), tools, parse_only: None, sess, stage, parsers: vec![] }
     }
 
     pub(crate) fn sess(&self) -> &'sess Session {

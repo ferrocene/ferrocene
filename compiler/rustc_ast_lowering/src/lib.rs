@@ -165,6 +165,15 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         resolver: &'a mut ResolverAstLowering<'hir>,
     ) -> Self {
         let registered_tools = tcx.registered_tools(()).iter().map(|x| x.name).collect();
+
+        let mut attribute_parser= AttributeParser::new(
+            tcx.sess,
+            tcx.features(),
+            registered_tools,
+            Late,
+        );
+        tcx.register_tool_attr_parsers(&mut attribute_parser);
+
         Self {
             // Pseudo-globals.
             tcx,
@@ -216,13 +225,8 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             // FIXME(gen_blocks): how does `closure_track_caller`/`async_fn_track_caller`
             // interact with `gen`/`async gen` blocks
             allow_async_iterator: [sym::gen_future, sym::async_iterator].into(),
+            attribute_parser,
 
-            attribute_parser: AttributeParser::new(
-                tcx.sess,
-                tcx.features(),
-                registered_tools,
-                Late,
-            ),
             delayed_lints: Vec::new(),
         }
     }

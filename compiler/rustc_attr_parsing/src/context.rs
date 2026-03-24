@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::ops::{Deref, DerefMut};
 use std::sync::LazyLock;
+use std::fmt::Debug;
 
 use private::Sealed;
 use rustc_ast::{AttrStyle, MetaItemLit, NodeId};
@@ -339,7 +340,7 @@ mod private {
 
 // allow because it's a sealed trait
 #[allow(private_interfaces)]
-pub trait Stage: Sized + 'static + Sealed {
+pub trait Stage: Sized + 'static + Sealed + Debug {
     type Id: Copy;
 
     fn parsers() -> &'static GroupType<Self>;
@@ -396,6 +397,7 @@ impl Stage for Late {
 }
 
 /// used when parsing attributes for miscellaneous things *before* ast lowering
+#[derive(Debug)]
 pub struct Early {
     /// Whether to emit errors or delay them as a bug
     /// For most attributes, the attribute will be parsed again in the `Late` stage and in this case the errors should be delayed
@@ -403,6 +405,7 @@ pub struct Early {
     pub emit_errors: ShouldEmit,
 }
 /// used when parsing attributes during ast lowering
+#[derive(Debug)]
 pub struct Late;
 
 /// Context given to every attribute parser when accepting

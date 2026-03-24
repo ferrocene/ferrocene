@@ -876,6 +876,7 @@ pub fn write_interface<'tcx>(tcx: TyCtxt<'tcx>) {
 
 pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     let providers = &mut Providers::default();
+    providers.hooks.register_tool_attr_parsers = |_, _| {};
     providers.queries.analysis = analysis;
     providers.queries.hir_crate = rustc_ast_lowering::lower_to_hir;
     providers.queries.resolver_for_lowering_raw = resolver_for_lowering_raw;

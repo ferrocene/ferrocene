@@ -3,6 +3,7 @@
 //! similar to queries, but queries come with a lot of machinery for caching and incremental
 //! compilation, whereas hooks are just plain function pointers without any of the query magic.
 
+use rustc_attr_parsing::AttributeParser;
 use rustc_hir::def_id::{DefId, DefPathHash};
 use rustc_session::StableCrateId;
 use rustc_span::def_id::{CrateNum, LocalDefId};
@@ -61,6 +62,13 @@ declare_hooks! {
     ///
     /// (Eligible functions might nevertheless be skipped for other reasons.)
     hook is_eligible_for_coverage(key: LocalDefId) -> bool;
+
+    /// Similar to `rustc_interface::Config::register_lints` but for attribute parsers.
+    /// Called when creating a new AST lowering context.
+    ///
+    /// Use if you're a tool with custom attributes and you want to be sure that you don't
+    /// accidentally forget to validate one.
+    hook register_tool_attr_parsers(parser: &mut AttributeParser<'_>) -> ();
 
     /// Imports all `SourceFile`s from the given crate into the current session.
     /// This normally happens automatically when we decode a `Span` from

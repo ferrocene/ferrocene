@@ -850,6 +850,7 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
+        - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
       - build-docker-x86_64:
           name: build-docker--ubuntu-20--x86_64
@@ -949,7 +950,7 @@ workflows:
             - x86_64-linux-build
       - x86_64-linux-library-coverage:
           requires:
-            - x86_64-linux-test
+            - x86_64-linux-build
 
       - facade-generic-test:
           name: aarch64-none-test-compiletest

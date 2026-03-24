@@ -75,6 +75,10 @@ jobs:
           configuration_path: .circleci/workflows.yml
           parameters: /tmp/continue-parameters.json
 
+      - run:
+          name: Wait for continuation job to complete
+          command: ferrocene/ci/wait-for-pipeline.sh
+
 workflows:
   version: 2
   setup:
@@ -82,4 +86,5 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
+        - equal: [<< pipeline.trigger_source >>, "api"]
     jobs: [setup]

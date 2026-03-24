@@ -35,132 +35,216 @@ use build_helper::metrics::FerroceneVariantMetadata;
 use crate::Subcommand;
 use crate::builder::Builder;
 use crate::core::config::TargetSelection;
+use crate::utils::exec::BootstrapCommand;
 
-// The variants are so few that setting up an OnceLock to define a global hashmap is too
-// much complexity. If we are able to test so many variants that this loop becomes a
-// bottleneck I guess congrats on Ferrocene's success :D
-#[rustfmt::skip]
-static VARIANTS: &[(&str, &[VariantCondition])] = &[
-    // FIXME: all of these point to edition 2015 instead of 2021!!!
+#[derive(Clone, Copy, Debug, clap::ValueEnum)]
+pub enum TestVariantName {
+    #[clap(name = "2021")]
+    Ed2021,
+    #[clap(name = "2021-cortex-a53")]
+    Ed2021CortexA53,
+    #[clap(name = "2021-neoverse-v1")]
+    Ed2021NeoverseV1,
+    #[clap(name = "2021-cortex-m4")]
+    Ed2021CortexM4,
+}
 
-    // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
-    // documentation, as the list of test variants currently supported.
+impl TestVariantName {
+    const fn base(&self) -> TestVariantBase {
+        // FIXME: all of these point to edition 2015 instead of 2021!!!
 
-    // INTERNAL_PROCEDURES_START_TEST_VARIANTS
-    ("2021", &[
-        VariantCondition::Edition("2015"),
-    ]),
-    ("2021-cortex-a53", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("cortex-a53"),
-    ]),
-    ("2021-neoverse-v1", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("neoverse-v1"),
-    ]),
-    ("2021-cortex-m4", &[
-        VariantCondition::Edition("2015"),
-        VariantCondition::QemuCpu("cortex-m4"),
-    ]),
-    // INTERNAL_PROCEDURES_END_TEST_VARIANTS
-];
-static DEFAULT_VARIANTS_BY_TARGET: &[(&str, &str)] = &[
-    ("aarch64-unknown-ferrocene.facade", "2021-cortex-a53"),
-    ("thumbv7em-ferrocene.facade-eabi", "2021-cortex-m4"),
-    ("thumbv7em-ferrocene.facade-eabihf", "2021-cortex-m4"),
-];
-static DEFAULT_VARIANT_FALLBACK: &str = "2021";
+        // The snippet between INTERNAL_PROCEDURES_{START,END}_TEST_VARIANTS is included in our
+        // documentation, as the list of test variants currently supported.
 
-pub(crate) enum VariantCondition {
-    Edition(&'static str),
-    QemuCpu(&'static str),
+        match self {
+            // INTERNAL_PROCEDURES_START_TEST_VARIANTS
+            Self::Ed2021 => TestVariantBase::new().edition(Edition("2015")),
+            Self::Ed2021CortexA53 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-a53"))
+            }
+            Self::Ed2021NeoverseV1 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("neoverse-v1"))
+            }
+            Self::Ed2021CortexM4 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
+            } // INTERNAL_PROCEDURES_END_TEST_VARIANTS
+        }
+    }
+
+    fn default_by_target(target: &str) -> Self {
+        match target {
+            "aarch64-unknown-ferrocene.facade" => Self::Ed2021CortexA53,
+            "thumbv7em-ferrocene.facade-eabi" | "thumbv7em-ferrocene.facade-eabihf" => {
+                Self::Ed2021CortexM4
+            }
+            _ => Self::Ed2021,
+        }
+    }
+}
+
+macro_rules! define_conditions {
+    ($($name:ident : $ty:ty,)*) => {
+        struct TestVariantBase {
+            $($name: Option<$ty>,)*
+        }
+
+        impl TestVariantBase {
+            const fn new() -> Self {
+                Self {
+                    $($name: None,)*
+                }
+            }
+
+            $(
+                const fn $name(mut self, value: $ty) -> Self {
+                    self.$name = Some(value);
+                    self
+                }
+            )*
+        }
+
+        pub(crate) struct TestVariant {
+            $($name: Option<MaskedValue<$ty>>,)*
+        }
+
+        impl TestVariant {
+            fn new(base: TestVariantBase) -> Self {
+                Self {
+                    $($name: base.$name.map(MaskedValue::new),)*
+                }
+            }
+
+            $(
+                pub(crate) fn $name(&self) -> Option<MaskedValueRef<'_, $ty>> {
+                    self.$name.as_ref()?.get()
+                }
+            )*
+
+            #[cfg(feature = "build-metrics")]
+            pub(crate) fn id(&self) -> String {
+                let mut fragments = vec![];
+
+                $(
+                    if let Some(value) = self.$name() {
+                        fragments.push(format!("{}{}", <$ty as TestCondition>::PREFIX, TestCondition::display(&*value)));
+                    }
+                )*
+
+                match fragments.into_iter().reduce(|acc, val| format!("{acc}-{val}")) {
+                    Some(id) => id,
+                    None => "empty".to_owned(),
+                }
+            }
+
+            #[cfg(feature = "build-metrics")]
+            pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
+                let mut fields = BTreeMap::new();
+
+                $(
+                    if let Some(value) = self.$name() {
+                        fields.insert(<$ty as TestCondition>::READABLE_NAME.into(), TestCondition::display(&*value).to_string());
+                    }
+                )*
+
+                FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
+            }
+        }
+
+    };
+}
+
+define_conditions! {
+    edition: Edition,
+    qemu_cpu: QemuCpu,
+}
+
+#[cfg_attr(not(feature = "build-metrics"), allow(dead_code))]
+pub(crate) trait TestCondition {
+    const PREFIX: &'static str;
+    const READABLE_NAME: &'static str;
+
+    fn apply(&self, cmd: &mut BootstrapCommand);
+
+    fn display(&self) -> impl core::fmt::Display;
+}
+
+pub(crate) struct Edition(&'static str);
+
+impl TestCondition for Edition {
+    const PREFIX: &'static str = "e";
+    const READABLE_NAME: &'static str = "Edition";
+
+    fn apply(&self, cmd: &mut BootstrapCommand) {
+        cmd.arg(&format!("--edition={}", self.0));
+    }
+
+    fn display(&self) -> impl core::fmt::Display {
+        self.0
+    }
+}
+
+pub(crate) struct QemuCpu(&'static str);
+
+impl TestCondition for QemuCpu {
+    const PREFIX: &'static str = "q";
+    const READABLE_NAME: &'static str = "Emulated CPU";
+
+    fn apply(&self, cmd: &mut BootstrapCommand) {
+        cmd.env("QEMU_CPU", self.0);
+    }
+
+    fn display(&self) -> impl core::fmt::Display {
+        self.0
+    }
 }
 
 #[derive(Clone)]
-pub(crate) struct TestVariant {
-    base: &'static [VariantCondition],
-    masks: RefCell<Vec<bool>>,
+pub(crate) struct MaskedValue<T> {
+    inner: T,
+    mask: RefCell<bool>,
+}
+
+impl<T> MaskedValue<T> {
+    const fn new(inner: T) -> Self {
+        Self { inner, mask: RefCell::new(true) }
+    }
+    fn get(&self) -> Option<MaskedValueRef<'_, T>> {
+        self.mask.borrow().then(|| MaskedValueRef { inner: &self.inner, mask: &self.mask })
+    }
+}
+
+pub(crate) struct MaskedValueRef<'a, T> {
+    inner: &'a T,
+    mask: &'a RefCell<bool>,
+}
+
+impl<'a, T> MaskedValueRef<'a, T> {
+    pub(crate) fn mark_unused(&self) {
+        *self.mask.borrow_mut() = false;
+    }
+}
+
+impl<'a, T> core::ops::Deref for MaskedValueRef<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner
+    }
+}
+
+impl<'a, T: core::fmt::Display> core::fmt::Display for MaskedValueRef<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.inner.fmt(f)
+    }
 }
 
 impl TestVariant {
     pub(crate) fn current(builder: &Builder<'_>, target: TargetSelection) -> Self {
         let name = match &builder.config.cmd {
-            Subcommand::Test { test_variant: Some(name), .. } => name,
-            _ => find_in_slice(DEFAULT_VARIANTS_BY_TARGET, &target.triple)
-                .map(|s| *s)
-                .unwrap_or(DEFAULT_VARIANT_FALLBACK),
+            Subcommand::Test { test_variant: Some(name), .. } => *name,
+            _ => TestVariantName::default_by_target(&target.triple),
         };
 
-        let base = find_in_slice(VARIANTS, name).unwrap_or_else(|| {
-            panic!(
-                "unknown test variant: {name}\nexpected one of {:?}",
-                VARIANTS.iter().map(|(k, _)| k).collect::<Vec<_>>()
-            )
-        });
-        TestVariant { masks: RefCell::new(vec![true; base.len()]), base }
+        TestVariant::new(name.base())
     }
-
-    pub(crate) fn conditions(&self) -> impl Iterator<Item = VariantConditionAccessor<'_>> {
-        self.base
-            .iter()
-            .enumerate()
-            .filter(|(idx, _)| self.masks.borrow()[*idx])
-            .map(|(index, condition)| VariantConditionAccessor { parent: self, condition, index })
-    }
-
-    #[cfg(feature = "build-metrics")]
-    pub(crate) fn id(&self) -> String {
-        let mut id = String::new();
-        for condition in self.conditions() {
-            if !id.is_empty() {
-                id.push('-');
-            }
-            match condition.get() {
-                VariantCondition::Edition(edition) => id.push_str(&format!("e{edition}")),
-                VariantCondition::QemuCpu(cpu) => id.push_str(&format!("q{cpu}")),
-            }
-        }
-        if id.is_empty() { "empty".into() } else { id }
-    }
-
-    #[cfg(feature = "build-metrics")]
-    pub(crate) fn for_metrics(&self) -> FerroceneVariantMetadata {
-        let mut fields = BTreeMap::new();
-        for condition in self.conditions() {
-            match condition.get() {
-                VariantCondition::Edition(edition) => {
-                    fields.insert("Edition".into(), edition.to_string());
-                }
-                VariantCondition::QemuCpu(cpu) => {
-                    fields.insert("Emulated CPU".into(), cpu.to_string());
-                }
-            }
-        }
-        FerroceneVariantMetadata { id: self.id(), human_readable_fields: fields }
-    }
-}
-
-pub(crate) struct VariantConditionAccessor<'a> {
-    parent: &'a TestVariant,
-    condition: &'a VariantCondition,
-    index: usize,
-}
-
-impl VariantConditionAccessor<'_> {
-    pub(crate) fn get(&self) -> &VariantCondition {
-        self.condition
-    }
-
-    pub(crate) fn mark_unused(&self) {
-        self.parent.masks.borrow_mut()[self.index] = false;
-    }
-}
-
-fn find_in_slice<'a, T>(slice: &'a [(&str, T)], expected: &str) -> Option<&'a T> {
-    for (key, value) in slice {
-        if *key == expected {
-            return Some(value);
-        }
-    }
-    None
 }

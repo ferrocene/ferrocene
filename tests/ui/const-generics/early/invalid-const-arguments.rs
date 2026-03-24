@@ -25,3 +25,5 @@ struct R<const O: u8, const G: u8, const F: u32>;
 impl<const F: u8, const H: u32> Foo for D<F, Q, D> {}
 //~^ ERROR cannot find const `Q` in this scope
 //~| ERROR unresolved item provided when a constant was expected
+
+// ferrocene-annotations: fls_utuu8mdbuyxm

@@ -104,21 +104,18 @@ pub(super) fn extract_refined_covspans<'tcx>(
 
     // Discard spans that overlap in unwanted ways.
     let mut covspans = remove_unwanted_overlapping_spans(covspans);
-    dbg!(&covspans);
 
     // For all empty spans, either enlarge them to be non-empty, or discard them.
     let source_map = tcx.sess.source_map();
-    // TODO: the covspans get lost here; fix that
+    // FIXME: there are two spans, one with the beginning and one with the end of the derive item; can we just merge them?
     covspans.retain_mut(|covspan| {
         let Some(span) = ensure_non_empty_span(source_map, covspan.span) else { return false };
         covspan.span = span;
         true
     });
-    dbg!(&covspans);
 
     // Merge covspans that can be merged.
     covspans.dedup_by(|b, a| a.merge_if_eligible(b));
-    dbg!(&covspans);
 
     mappings.extend(covspans.into_iter().map(|Covspan { span, bcb }| {
         // Each span produced by the refiner represents an ordinary code region.
@@ -267,12 +264,23 @@ fn ensure_non_empty_span(source_map: &SourceMap, span: Span) -> Option<Span> {
             // but in this case we have specifically checked that the character
             // we're skipping over is one of two specific ASCII characters, so
             // adjusting by exactly 1 byte is correct.
-            if src.as_bytes().get(end).copied() == Some(b'{') {
+            let maybe_with_bracket = if src.as_bytes().get(end).copied() == Some(b'{') {
                 Some(span.with_hi(span.hi() + BytePos(1)))
             } else if start > 0 && src.as_bytes()[start - 1] == b'}' {
                 Some(span.with_lo(span.lo() - BytePos(1)))
             } else {
                 None
+            };
+
+            // FIXME: needs a function that points to some location in `src` and if that location is within a `derive(...)` it should return the span of the item within the derive and if it is outside of a derive it should return `None`
+            const DERIVE_START: &str = "derive(";
+            let c = &src[start - DERIVE_START.len()..start];
+            if c == DERIVE_START {
+                let b = src[start..].find(')').expect("After `derive(` there must be a `)`");
+                dbg!(&src[start..start + b]);
+                Some(span.with_lo(span.lo() + BytePos(b.try_into().unwrap())))
+            } else {
+                maybe_with_bracket
             }
         })
         .ok()?

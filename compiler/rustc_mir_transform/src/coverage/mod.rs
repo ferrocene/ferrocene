@@ -83,6 +83,7 @@ fn instrument_function_for_coverage<'tcx>(tcx: TyCtxt<'tcx>, mir_body: &mut mir:
                 return;
             }
         };
+    dbg!(&mappings);
 
     // Use the coverage graph to prepare intermediate data that will eventually
     // be used to assign physical counters and counter expressions to points in

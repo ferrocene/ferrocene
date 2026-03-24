@@ -35,6 +35,8 @@ pub(crate) fn extract_mappings_from_mir<'tcx>(
 
     let mut mappings = vec![];
 
+    // FIXME: where does the span point for attribute and function-like proc macros?
+
     // Extract ordinary code mappings from MIR statement/terminator spans.
     extract_refined_covspans(tcx, hir_info, graph, &expn_tree, &mut mappings);
 

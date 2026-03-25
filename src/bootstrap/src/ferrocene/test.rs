@@ -119,7 +119,9 @@ impl Step for CheckDocumentSignatures {
             builder,
             self.target,
             |mut cmd, source, output| {
-                cmd.arg("verify").arg(source).arg(output).run(builder);
+                cmd.arg("verify").arg(source).arg(output);
+                // We intentionally delay failure so that we see all failures at once.
+                cmd.force_delay_failure().run(builder);
             },
         );
     }

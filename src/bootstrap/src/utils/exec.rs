@@ -7,6 +7,7 @@
 //! relevant to command execution in the bootstrap process. This includes settings such as
 //! dry-run mode, verbosity level, and failure behavior.
 
+use std::backtrace::{Backtrace, BacktraceStatus};
 use std::collections::HashMap;
 use std::ffi::{OsStr, OsString};
 use std::fmt::{Debug, Formatter};
@@ -34,6 +35,8 @@ pub enum BehaviorOnFailure {
     Exit,
     /// Delay failure until the end of bootstrap invocation.
     DelayFail,
+    /// Delay failure until the end of bootstrap invocation, even when `fail_fast` is enabled.
+    ForceDelayFail,
     /// Ignore the failure, the command can fail in an expected way.
     Ignore,
 }
@@ -310,6 +313,11 @@ impl<'a> BootstrapCommand {
     pub fn stdin(&mut self, stdin: std::process::Stdio) -> &mut Self {
         self.command.stdin(stdin);
         self
+    }
+
+    #[must_use]
+    pub fn force_delay_failure(self) -> Self {
+        Self { failure_behavior: BehaviorOnFailure::ForceDelayFail, ..self }
     }
 
     #[must_use]
@@ -935,8 +943,19 @@ Executed at: {executed_at}"#,
             if stderr.captures() {
                 writeln!(error_message, "\n--- STDERR vvv\n{}", output.stderr().trim()).unwrap();
             }
+            let backtrace = if exec_ctx.is_verbose() {
+                Backtrace::force_capture()
+            } else {
+                Backtrace::capture()
+            };
+            if matches!(backtrace.status(), BacktraceStatus::Captured) {
+                writeln!(error_message, "\n--- BACKTRACE vvv\n{backtrace}").unwrap();
+            }
 
             match command.failure_behavior {
+                BehaviorOnFailure::ForceDelayFail => {
+                    exec_ctx.add_to_delay_failure(error_message);
+                }
                 BehaviorOnFailure::DelayFail => {
                     if exec_ctx.fail_fast {
                         exec_ctx.fail(&error_message);

@@ -63,6 +63,7 @@ struct Env {
     s3_bucket: Option<String>,
     s3_cache_dir: PathBuf,
     tar_binary: &'static str,
+    allow_dev_signing: bool,
 }
 
 impl Env {
@@ -72,6 +73,7 @@ impl Env {
             cosign_binary: env("COSIGN_BINARY")?,
             s3_bucket: maybe_env("S3_BUCKET")?,
             s3_cache_dir: env("S3_CACHE_DIR")?,
+            allow_dev_signing: env("ALLOW_DEV_SIGNING")?,
         })
     }
 }
@@ -86,7 +88,7 @@ fn find_tar_binary() -> Result<&'static str, Error> {
     for name in ["tar", "gtar"] {
         let Ok(output) = Command::new(name).arg("--version").output() else { continue };
         if std::str::from_utf8(&output.stdout).map(|s| s.contains("GNU tar")).unwrap_or(false) {
-            dbg!(name);
+            eprintln!("note: inferred macOS GNU tar -> {name}");
             return Ok(name);
         }
     }

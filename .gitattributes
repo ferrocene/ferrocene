@@ -37,8 +37,3 @@ Cargo.lock linguist-generated=false
 # Show them by default in PR review diffs.
 # See https://docs.github.com/en/repositories/working-with-files/managing-files/customizing-how-changed-files-appear-on-github
 /ferrocene/tools/blanket/assets/*.css linguist-generated=false
-
-# When presented with a file in an unknown language, Mergiraf falls back gracefully to line-based merging,
-# Set it as the default merge driver for all languages.
-# See https://web.archive.org/web/20260308125511/https://mergiraf.org/usage.html#registration-as-a-git-merge-driver
-* merge=mergiraf

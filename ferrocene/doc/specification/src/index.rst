@@ -41,6 +41,7 @@ FLS
    licenses
    glossary
    undefined-behavior
+   dev-guide
    changelog
    background
 

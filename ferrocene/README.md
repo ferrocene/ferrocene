@@ -20,4 +20,4 @@ Once syft is installed, run the Ferrocene specific SBOM bootstrap command:
 ./x.py dist ferrocene-sbom
 ```
 
-This will generate the SBOM under `build/ferrocene-sbom` and create a tarball at `build/dist`.
+This will generate the SBOM under `build/ferrocene/sbom` and create a tarball at `build/dist`.

@@ -7282,6 +7282,10 @@ core::ptr::alignment::Alignment::new
 core::ptr::alignment::Alignment::new_unchecked
 core::ptr::alignment::Alignment::new_unchecked::precondition_check
 core::ptr::const_ptr::<impl *const T>::add
+core::ptr::const_ptr::<impl *const T>::add::precondition_check
+core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap
+core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::compiletime
+core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::runtime
 core::ptr::const_ptr::<impl *const T>::addr
 core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
@@ -7305,6 +7309,10 @@ core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge::com
 core::ptr::const_ptr::<impl *const T>::offset_from_unsigned::runtime_ptr_ge::runtime
 core::ptr::const_ptr::<impl *const T>::read
 core::ptr::const_ptr::<impl *const T>::read_unaligned
+core::ptr::const_ptr::<impl *const T>::sub::precondition_check
+core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap
+core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap::compiletime
+core::ptr::const_ptr::<impl *const T>::sub::runtime_sub_nowrap::runtime
 core::ptr::const_ptr::<impl *const T>::to_raw_parts
 core::ptr::const_ptr::<impl *const T>::try_cast_aligned
 core::ptr::const_ptr::<impl *const T>::with_metadata_of
@@ -7332,6 +7340,10 @@ core::ptr::metadata::from_raw_parts
 core::ptr::metadata::from_raw_parts_mut
 core::ptr::metadata::metadata
 core::ptr::mut_ptr::<impl *mut T>::add
+core::ptr::mut_ptr::<impl *mut T>::add::precondition_check
+core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap
+core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap::compiletime
+core::ptr::mut_ptr::<impl *mut T>::add::runtime_add_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::addr
 core::ptr::mut_ptr::<impl *mut T>::as_mut
 core::ptr::mut_ptr::<impl *mut T>::cast
@@ -7348,6 +7360,10 @@ core::ptr::mut_ptr::<impl *mut T>::offset_from_unsigned
 core::ptr::mut_ptr::<impl *mut T>::read
 core::ptr::mut_ptr::<impl *mut T>::replace
 core::ptr::mut_ptr::<impl *mut T>::sub
+core::ptr::mut_ptr::<impl *mut T>::sub::precondition_check
+core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap
+core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::compiletime
+core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::to_raw_parts
 core::ptr::mut_ptr::<impl *mut T>::wrapping_add
 core::ptr::mut_ptr::<impl *mut T>::wrapping_offset
@@ -7378,6 +7394,7 @@ core::ptr::non_null::NonNull::<T>::sub
 core::ptr::null
 core::ptr::null_mut
 core::ptr::read
+core::ptr::read::precondition_check
 core::ptr::read_unaligned
 core::ptr::read_volatile
 core::ptr::read_volatile::precondition_check
@@ -7398,6 +7415,7 @@ core::ptr::swap_nonoverlapping_const
 core::ptr::without_provenance
 core::ptr::without_provenance_mut
 core::ptr::write
+core::ptr::write::precondition_check
 core::ptr::write_bytes
 core::ptr::write_bytes::precondition_check
 core::ptr::write_unaligned

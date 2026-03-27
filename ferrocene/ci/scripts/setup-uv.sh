@@ -4,25 +4,8 @@
 
 set -xeuo pipefail
 
-# stolen from src/ci/shared.sh
-function retry {
-  echo "Attempting with retry:" "$@"
-  local n=1
-  local max=5
-  while true; do
-    "$@" && break || {
-      if [[ $n -lt $max ]]; then
-        sleep $n  # don't retry immediately
-        ((n++))
-        echo "Command failed. Attempt $n/$max:"
-      else
-        echo "The command has failed after $n attempts."
-        return 1
-      fi
-    }
-  done
-}
-
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
 retry curl --location --silent --show-error --fail --remote-name https://astral.sh/uv/0.9.26/install.sh
 retry sh install.sh
 rm install.sh

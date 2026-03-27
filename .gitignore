@@ -104,4 +104,7 @@ test-dashboard/
 flake.lock
 /default.nix
 
+## Ferrocene additions
+ferrocene/ci/mirrors/*.tar.xz
+
 # Before adding new lines, see the comment at the top.

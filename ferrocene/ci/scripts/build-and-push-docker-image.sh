@@ -12,7 +12,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-REBUILD_IMAGES_OLDER_THAN="$(( 86400 * 7 ))"  # 7 days
 ECR_REPOSITORY="ci-docker-images"
 ECR_REGION="us-east-1"
 
@@ -24,6 +23,9 @@ image="${registry}/${ECR_REPOSITORY}:${IMAGE_TAG}"
 # Authenticate with AWS ECR
 aws ecr get-login-password --region "${ECR_REGION}" \
     | docker login --username AWS --password-stdin "${registry}"
+
+
+ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
 
 # Build and push the image
 docker build --progress=plain -t "${image}" -f "ferrocene/ci/docker-images/${IMAGE_NAME}/Dockerfile" .

@@ -22,14 +22,6 @@ fn cross_crate() {
     assert!(nyan.eat());
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: fls_9ucqbbd0s2yo
-// Struct Types
-//
-// ferrocene-annotations: fls_maw4u1o8q37u
-// Crates
-||||||| 6bdc342ddb0
-=======
 fn print_out(thing: Box<dyn ToString>, expected: String) {
     let actual = (*thing).to_string();
     println!("{}", actual);
@@ -125,4 +117,30 @@ fn main() {
     multiple_types();
     cast_to_trait();
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

@@ -53,6 +53,7 @@ fn hash_non_zero() {
 }
 
 // covers `<core::ptr::alignment::Alignment as core::hash::Hash>::hash`.
+#[allow(deprecated)] // We still test this
 #[test]
 fn hash_alignment() {
     let mut hasher = TestHasher { hash: 0 };

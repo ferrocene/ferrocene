@@ -57,10 +57,6 @@ fn main() {
         "aarch64v8r-unknown-ferrocene.facade",
         "thumbv7em-ferrocene.facade-eabihf",
         "thumbv7em-ferrocene.facade-eabi",
-        "x86_64-unknown-ferrocene.subset",
-        "aarch64-unknown-ferrocene.subset",
-        "thumbv7em-ferrocene.subset-eabi",
-        "thumbv7em-ferrocene.subset-eabihf",
     ];
     let mut invalid_target_name_found = false;
     for target in &target_list {

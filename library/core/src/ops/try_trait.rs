@@ -342,7 +342,6 @@ pub const trait FromResidual<R = <Self as Try>::Residual> {
 #[track_caller] // because `Result::from_residual` has it
 #[lang = "from_yeet"]
 #[allow(unreachable_pub)] // not-exposed but still used via lang-item
-#[cfg(not(feature = "ferrocene_subset"))]
 pub fn from_yeet<T, Y>(yeeted: Y) -> T
 where
     T: FromResidual<Yeet<Y>>,
@@ -379,6 +378,7 @@ pub const trait Residual<O>: Sized {
 #[expect(unreachable_pub)]
 #[inline] // FIXME: force would be nice, but fails -- see #148915
 #[lang = "into_try_type"]
+#[ferrocene::prevalidated]
 pub const fn residual_into_try_type<R: [const] Residual<O>, O>(
     r: R,
 ) -> <R as Residual<O>>::TryType {
@@ -398,8 +398,10 @@ pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
 ///
 /// Not currently planned to be exposed publicly, so just `pub(crate)`.
 #[repr(transparent)]
+#[ferrocene::prevalidated]
 pub(crate) struct NeverShortCircuit<T>(pub T);
 // FIXME(const-hack): replace with `|a| NeverShortCircuit(f(a))` when const closures added.
+#[ferrocene::prevalidated]
 pub(crate) struct Wrapped<T, A, F: FnMut(A) -> T> {
     f: F,
     p: PhantomData<(T, A)>,
@@ -408,12 +410,14 @@ pub(crate) struct Wrapped<T, A, F: FnMut(A) -> T> {
 impl<T, A, F: [const] FnMut(A) -> T + [const] Destruct> const FnOnce<(A,)> for Wrapped<T, A, F> {
     type Output = NeverShortCircuit<T>;
 
+    #[ferrocene::prevalidated]
     extern "rust-call" fn call_once(mut self, args: (A,)) -> Self::Output {
         self.call_mut(args)
     }
 }
 #[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
 impl<T, A, F: [const] FnMut(A) -> T> const FnMut<(A,)> for Wrapped<T, A, F> {
+    #[ferrocene::prevalidated]
     extern "rust-call" fn call_mut(&mut self, (args,): (A,)) -> Self::Output {
         NeverShortCircuit((self.f)(args))
     }
@@ -425,6 +429,7 @@ impl<T> NeverShortCircuit<T> {
     /// This is useful for implementing infallible functions in terms of the `try_` ones,
     /// without accidentally capturing extra generic parameters in a closure.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn wrap_mut_1<A, F>(f: F) -> Wrapped<T, A, F>
     where
         F: [const] FnMut(A) -> T,
@@ -433,11 +438,13 @@ impl<T> NeverShortCircuit<T> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn wrap_mut_2<A, B>(mut f: impl FnMut(A, B) -> T) -> impl FnMut(A, B) -> Self {
         move |a, b| NeverShortCircuit(f(a, b))
     }
 }
 
+#[ferrocene::prevalidated]
 pub(crate) enum NeverShortCircuitResidual {}
 
 #[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
@@ -446,11 +453,13 @@ impl<T> const Try for NeverShortCircuit<T> {
     type Residual = NeverShortCircuitResidual;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn branch(self) -> ControlFlow<NeverShortCircuitResidual, T> {
         ControlFlow::Continue(self.0)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_output(x: T) -> Self {
         NeverShortCircuit(x)
     }
@@ -458,6 +467,7 @@ impl<T> const Try for NeverShortCircuit<T> {
 #[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
 impl<T> const FromResidual for NeverShortCircuit<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_residual(never: NeverShortCircuitResidual) -> Self {
         match never {}
     }
@@ -471,5 +481,4 @@ impl<T: [const] Destruct> const Residual<T> for NeverShortCircuitResidual {
 /// `do yeet expr` syntax in functions returning your type.
 #[unstable(feature = "try_trait_v2_yeet", issue = "96374")]
 #[derive(Debug)]
-#[cfg(not(feature = "ferrocene_subset"))]
 pub struct Yeet<T>(pub T);

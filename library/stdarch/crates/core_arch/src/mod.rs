@@ -11,7 +11,6 @@ mod test;
 use test::assert_eq_const;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64", doc))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod riscv_shared;
 
 #[cfg(any(
@@ -23,7 +22,6 @@ mod riscv_shared;
 mod arm_shared;
 
 #[cfg(any(target_arch = "loongarch32", target_arch = "loongarch64", doc))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod loongarch_shared;
 
 mod simd;
@@ -37,7 +35,6 @@ pub mod arch {
     #[cfg(any(target_arch = "x86", doc))]
     #[doc(cfg(target_arch = "x86"))]
     #[stable(feature = "simd_x86", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod x86 {
         #[stable(feature = "simd_x86", since = "1.27.0")]
         pub use crate::core_arch::x86::*;
@@ -49,7 +46,6 @@ pub mod arch {
     #[cfg(any(target_arch = "x86_64", doc))]
     #[doc(cfg(target_arch = "x86_64"))]
     #[stable(feature = "simd_x86", since = "1.27.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod x86_64 {
         #[stable(feature = "simd_x86", since = "1.27.0")]
         pub use crate::core_arch::x86::*;
@@ -63,7 +59,6 @@ pub mod arch {
     #[cfg(any(target_arch = "arm", doc))]
     #[doc(cfg(target_arch = "arm"))]
     #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod arm {
         #[unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")]
         pub use crate::core_arch::arm::*;
@@ -86,7 +81,6 @@ pub mod arch {
     #[cfg(any(target_arch = "riscv32", doc))]
     #[doc(cfg(any(target_arch = "riscv32")))]
     #[unstable(feature = "riscv_ext_intrinsics", issue = "114544")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod riscv32 {
         pub use crate::core_arch::riscv_shared::*;
         pub use crate::core_arch::riscv32::*;
@@ -98,7 +92,6 @@ pub mod arch {
     #[cfg(any(target_arch = "riscv64", doc))]
     #[doc(cfg(any(target_arch = "riscv64")))]
     #[unstable(feature = "riscv_ext_intrinsics", issue = "114544")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod riscv64 {
         pub use crate::core_arch::riscv64::*;
         // RISC-V RV64 supports all RV32 instructions as well in current specifications (2022-01-05).
@@ -209,7 +202,6 @@ pub mod arch {
     #[cfg(any(target_arch = "wasm32", doc))]
     #[doc(cfg(target_arch = "wasm32"))]
     #[stable(feature = "simd_wasm32", since = "1.33.0")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod wasm32 {
         #[stable(feature = "simd_wasm32", since = "1.33.0")]
         pub use crate::core_arch::wasm32::*;
@@ -221,7 +213,6 @@ pub mod arch {
     #[cfg(any(target_arch = "wasm64", doc))]
     #[doc(cfg(target_arch = "wasm64"))]
     #[unstable(feature = "simd_wasm64", issue = "90599")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod wasm64 {
         #[unstable(feature = "simd_wasm64", issue = "90599")]
         pub use crate::core_arch::wasm32::*;
@@ -233,7 +224,6 @@ pub mod arch {
     #[cfg(any(target_family = "wasm", doc))]
     #[doc(cfg(target_family = "wasm"))]
     #[unstable(feature = "simd_wasm64", issue = "90599")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod wasm {
         #[unstable(feature = "simd_wasm64", issue = "90599")]
         pub use crate::core_arch::wasm32::*;
@@ -245,7 +235,6 @@ pub mod arch {
     #[cfg(any(target_arch = "mips", doc))]
     #[doc(cfg(target_arch = "mips"))]
     #[unstable(feature = "stdarch_mips", issue = "111198")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod mips {
         pub use crate::core_arch::mips::*;
     }
@@ -256,7 +245,6 @@ pub mod arch {
     #[cfg(any(target_arch = "mips64", doc))]
     #[doc(cfg(target_arch = "mips64"))]
     #[unstable(feature = "stdarch_mips", issue = "111198")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod mips64 {
         pub use crate::core_arch::mips::*;
     }
@@ -267,7 +255,6 @@ pub mod arch {
     #[cfg(any(target_arch = "powerpc", doc))]
     #[doc(cfg(target_arch = "powerpc"))]
     #[unstable(feature = "stdarch_powerpc", issue = "111145")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod powerpc {
         pub use crate::core_arch::powerpc::*;
     }
@@ -278,7 +265,6 @@ pub mod arch {
     #[cfg(any(target_arch = "powerpc64", doc))]
     #[doc(cfg(target_arch = "powerpc64"))]
     #[unstable(feature = "stdarch_powerpc", issue = "111145")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod powerpc64 {
         pub use crate::core_arch::powerpc64::*;
     }
@@ -289,7 +275,6 @@ pub mod arch {
     #[cfg(any(target_arch = "nvptx64", doc))]
     #[doc(cfg(target_arch = "nvptx64"))]
     #[unstable(feature = "stdarch_nvptx", issue = "111199")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod nvptx {
         pub use crate::core_arch::nvptx::*;
     }
@@ -310,7 +295,6 @@ pub mod arch {
     #[cfg(any(target_arch = "loongarch32", doc))]
     #[doc(cfg(target_arch = "loongarch32"))]
     #[unstable(feature = "stdarch_loongarch", issue = "117427")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod loongarch32 {
         pub use crate::core_arch::loongarch_shared::*;
         pub use crate::core_arch::loongarch32::*;
@@ -322,7 +306,6 @@ pub mod arch {
     #[cfg(any(target_arch = "loongarch64", doc))]
     #[doc(cfg(target_arch = "loongarch64"))]
     #[unstable(feature = "stdarch_loongarch", issue = "117427")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod loongarch64 {
         pub use crate::core_arch::loongarch_shared::*;
         pub use crate::core_arch::loongarch64::*;
@@ -334,7 +317,6 @@ pub mod arch {
     #[cfg(any(target_arch = "s390x", doc))]
     #[doc(cfg(target_arch = "s390x"))]
     #[unstable(feature = "stdarch_s390x", issue = "135681")]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub mod s390x {
         pub use crate::core_arch::s390x::*;
     }
@@ -355,11 +337,9 @@ pub mod arch {
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64", doc))]
 #[doc(cfg(any(target_arch = "x86", target_arch = "x86_64")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod x86;
 #[cfg(any(target_arch = "x86_64", doc))]
 #[doc(cfg(target_arch = "x86_64"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod x86_64;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec", doc))]
@@ -367,42 +347,34 @@ mod x86_64;
 mod aarch64;
 #[cfg(any(target_arch = "arm", doc))]
 #[doc(cfg(any(target_arch = "arm")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod arm;
 
 #[cfg(any(target_arch = "riscv32", doc))]
 #[doc(cfg(any(target_arch = "riscv32")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod riscv32;
 
 #[cfg(any(target_arch = "riscv64", doc))]
 #[doc(cfg(any(target_arch = "riscv64")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod riscv64;
 
 #[cfg(any(target_family = "wasm", doc))]
 #[doc(cfg(target_family = "wasm"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod wasm32;
 
 #[cfg(any(target_arch = "mips", target_arch = "mips64", doc))]
 #[doc(cfg(any(target_arch = "mips", target_arch = "mips64")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod mips;
 
 #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64", doc))]
 #[doc(cfg(any(target_arch = "powerpc", target_arch = "powerpc64")))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod powerpc;
 
 #[cfg(any(target_arch = "powerpc64", doc))]
 #[doc(cfg(target_arch = "powerpc64"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod powerpc64;
 
 #[cfg(any(target_arch = "nvptx64", doc))]
 #[doc(cfg(target_arch = "nvptx64"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod nvptx;
 
 #[cfg(any(target_arch = "amdgpu", doc))]
@@ -411,17 +383,14 @@ mod amdgpu;
 
 #[cfg(any(target_arch = "loongarch32", doc))]
 #[doc(cfg(target_arch = "loongarch32"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod loongarch32;
 
 #[cfg(any(target_arch = "loongarch64", doc))]
 #[doc(cfg(target_arch = "loongarch64"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod loongarch64;
 
 #[cfg(any(target_arch = "s390x", doc))]
 #[doc(cfg(target_arch = "s390x"))]
-#[cfg(not(feature = "ferrocene_subset"))]
 mod s390x;
 
 #[cfg(any(target_arch = "hexagon", doc))]

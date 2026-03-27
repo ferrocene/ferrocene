@@ -3,7 +3,6 @@ use super::from_utf8_unchecked;
 use super::validations::utf8_char_width;
 use crate::fmt;
 use crate::fmt::{Formatter, Write};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::FusedIterator;
 
 impl [u8] {
@@ -43,6 +42,7 @@ impl [u8] {
     /// }
     /// ```
     #[stable(feature = "utf8_chunks", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub fn utf8_chunks(&self) -> Utf8Chunks<'_> {
         Utf8Chunks { source: self }
     }
@@ -70,6 +70,7 @@ impl [u8] {
 /// ```
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[ferrocene::prevalidated]
 pub struct Utf8Chunk<'a> {
     valid: &'a str,
     invalid: &'a [u8],
@@ -82,6 +83,7 @@ impl<'a> Utf8Chunk<'a> {
     /// broken UTF-8 characters.
     #[must_use]
     #[stable(feature = "utf8_chunks", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub fn valid(&self) -> &'a str {
         self.valid
     }
@@ -102,6 +104,7 @@ impl<'a> Utf8Chunk<'a> {
     /// [`U+FFFD REPLACEMENT CHARACTER`]: crate::char::REPLACEMENT_CHARACTER
     #[must_use]
     #[stable(feature = "utf8_chunks", since = "1.79.0")]
+    #[ferrocene::prevalidated]
     pub fn invalid(&self) -> &'a [u8] {
         self.invalid
     }
@@ -109,10 +112,12 @@ impl<'a> Utf8Chunk<'a> {
 
 #[must_use]
 #[unstable(feature = "str_internals", issue = "none")]
+#[ferrocene::prevalidated]
 pub struct Debug<'a>(&'a [u8]);
 
 #[unstable(feature = "str_internals", issue = "none")]
 impl fmt::Debug for Debug<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_char('"')?;
 
@@ -184,6 +189,7 @@ impl fmt::Debug for Debug<'_> {
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct Utf8Chunks<'a> {
     source: &'a [u8],
 }
@@ -191,6 +197,7 @@ pub struct Utf8Chunks<'a> {
 impl<'a> Utf8Chunks<'a> {
     #[doc(hidden)]
     #[unstable(feature = "str_internals", issue = "none")]
+    #[ferrocene::prevalidated]
     pub fn debug(&self) -> Debug<'_> {
         Debug(self.source)
     }
@@ -200,12 +207,14 @@ impl<'a> Utf8Chunks<'a> {
 impl<'a> Iterator for Utf8Chunks<'a> {
     type Item = Utf8Chunk<'a>;
 
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<Utf8Chunk<'a>> {
         if self.source.is_empty() {
             return None;
         }
 
         const TAG_CONT_U8: u8 = 128;
+        #[ferrocene::prevalidated]
         fn safe_get(xs: &[u8], i: usize) -> u8 {
             *xs.get(i).unwrap_or(&0)
         }
@@ -295,12 +304,12 @@ impl<'a> Iterator for Utf8Chunks<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 impl FusedIterator for Utf8Chunks<'_> {}
 
 #[stable(feature = "utf8_chunks", since = "1.79.0")]
 impl fmt::Debug for Utf8Chunks<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("Utf8Chunks").field("source", &self.debug()).finish()
     }

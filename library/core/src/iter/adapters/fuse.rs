@@ -1,14 +1,9 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::SourceIter;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::adapters::zip::try_get_unchecked;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     FusedIterator, TrustedFused, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Try;
 
 /// An iterator that yields `None` forever after the underlying iterator
@@ -19,6 +14,7 @@ use crate::ops::Try;
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Fuse<I> {
     // NOTE: for `I: FusedIterator`, we never bother setting `None`, but
     // we still have to be prepared for that state due to variance.
@@ -26,26 +22,25 @@ pub struct Fuse<I> {
     iter: Option<I>,
 }
 impl<I> Fuse<I> {
+    #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I) -> Fuse<I> {
         Fuse { iter: Some(iter) }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) fn into_inner(self) -> Option<I> {
         self.iter
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<I> FusedIterator for Fuse<I> where I: Iterator {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "trusted_fused")]
 unsafe impl<I> TrustedFused for Fuse<I> where I: TrustedFused {}
 
 // Any specialized implementation here is made internal
 // to avoid exposing default fns outside this trait.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I> Iterator for Fuse<I>
 where
@@ -131,7 +126,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I> DoubleEndedIterator for Fuse<I>
 where
@@ -177,7 +171,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<I> ExactSizeIterator for Fuse<I>
 where
@@ -198,7 +191,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I: Default> Default for Fuse<I> {
     /// Creates a `Fuse` iterator from the default value of `I`.
@@ -236,14 +228,12 @@ impl<I: Default> Default for Fuse<I> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 // SAFETY: `TrustedLen` requires that an accurate length is reported via `size_hint()`. As `Fuse`
 // is just forwarding this to the wrapped iterator `I` this property is preserved and it is safe to
 // implement `TrustedLen` here.
 unsafe impl<I> TrustedLen for Fuse<I> where I: TrustedLen {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 // SAFETY: `TrustedRandomAccess` requires that `size_hint()` must be exact and cheap to call, and
@@ -253,7 +243,6 @@ unsafe impl<I> TrustedLen for Fuse<I> where I: TrustedLen {}
 // preserves these properties.
 unsafe impl<I> TrustedRandomAccess for Fuse<I> where I: TrustedRandomAccess {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl<I> TrustedRandomAccessNoCoerce for Fuse<I>
@@ -267,7 +256,6 @@ where
 ///
 /// We only need to worry about `&mut self` methods, which
 /// may exhaust the iterator without consuming it.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 trait FuseImpl<I> {
     type Item;
@@ -304,7 +292,6 @@ trait FuseImpl<I> {
 }
 
 /// General `Fuse` impl which sets `iter = None` when exhausted.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 impl<I> FuseImpl<I> for Fuse<I>
 where
@@ -387,7 +374,6 @@ where
 
 /// Specialized `Fuse` impl which doesn't bother clearing `iter` when exhausted.
 /// However, we must still be prepared for the possibility that it was already cleared!
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 impl<I> FuseImpl<I> for Fuse<I>
 where
@@ -465,7 +451,6 @@ where
 }
 
 // This is used by Flatten's SourceIter impl
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(issue = "none", feature = "inplace_iteration")]
 unsafe impl<I> SourceIter for Fuse<I>
 where
@@ -482,7 +467,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[inline]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);

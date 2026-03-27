@@ -11,6 +11,7 @@ use crate::hint::unreachable_unchecked;
 use crate::ptr::NonNull;
 
 #[derive(Copy, Clone)]
+#[ferrocene::prevalidated]
 enum ArgumentType<'a> {
     Placeholder {
         // INVARIANT: `formatter` has type `fn(&T, _) -> _` for some `T`, and `value`
@@ -35,6 +36,7 @@ enum ArgumentType<'a> {
 #[lang = "format_argument"]
 #[derive(Copy, Clone)]
 #[repr(align(2))] // To ensure pointers to this struct always have their lowest bit cleared.
+#[ferrocene::prevalidated]
 pub struct Argument<'a> {
     ty: ArgumentType<'a>,
 }
@@ -86,10 +88,12 @@ macro_rules! argument_new {
 
 impl Argument<'_> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_display<T: Display>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Display>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_debug<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Debug>::fmt)
     }
@@ -99,39 +103,48 @@ impl Argument<'_> {
         See https://github.com/ferrocene/ferrocene/blob/205b3a16164939e0da17deb74285418b3d4991ae/compiler/rustc_ast_lowering/src/format.rs#L247."
     )]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_debug_noop<T: Debug>(x: &T) -> Argument<'_> {
         argument_new!(T, x, |_: &T, _| Ok(()))
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_octal<T: Octal>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Octal>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_lower_hex<T: LowerHex>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as LowerHex>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_upper_hex<T: UpperHex>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as UpperHex>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_pointer<T: Pointer>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Pointer>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_binary<T: Binary>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as Binary>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_lower_exp<T: LowerExp>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as LowerExp>::fmt)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new_upper_exp<T: UpperExp>(x: &T) -> Argument<'_> {
         argument_new!(T, x, <T as UpperExp>::fmt)
     }
     #[inline]
     #[track_caller]
+    #[ferrocene::prevalidated]
     pub const fn from_usize(x: &usize) -> Argument<'_> {
         if *x > u16::MAX as usize {
             panic!("Formatting argument out of range");
@@ -145,6 +158,7 @@ impl Argument<'_> {
     ///
     /// This argument must actually be a placeholder argument.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self.ty {
             // SAFETY:
@@ -164,6 +178,7 @@ impl Argument<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn as_u16(&self) -> Option<u16> {
         match self.ty {
             ArgumentType::Count(count) => Some(count),

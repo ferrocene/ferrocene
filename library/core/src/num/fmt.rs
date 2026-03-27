@@ -8,6 +8,7 @@
 
 /// Formatted parts.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[ferrocene::prevalidated]
 pub enum Part<'a> {
     /// Given number of zero digits.
     Zero(usize),
@@ -19,6 +20,7 @@ pub enum Part<'a> {
 
 impl<'a> Part<'a> {
     /// Returns the exact byte length of given part.
+    #[ferrocene::prevalidated]
     pub fn len(&self) -> usize {
         match *self {
             Part::Zero(nzeroes) => nzeroes,
@@ -30,7 +32,6 @@ impl<'a> Part<'a> {
     /// Writes a part into the supplied buffer.
     /// Returns the number of written bytes, or `None` if the buffer is not enough.
     /// (It may still leave partially written bytes in the buffer; do not rely on that.)
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write(&self, out: &mut [u8]) -> Option<usize> {
         let len = self.len();
         if out.len() >= len {
@@ -61,6 +62,7 @@ impl<'a> Part<'a> {
 /// This can be written to the byte buffer or converted to the allocated string.
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
+#[ferrocene::prevalidated]
 pub struct Formatted<'a> {
     /// A byte slice representing a sign, either `""`, `"-"` or `"+"`.
     pub sign: &'static str,
@@ -70,6 +72,7 @@ pub struct Formatted<'a> {
 
 impl<'a> Formatted<'a> {
     /// Returns the exact byte length of combined formatted result.
+    #[ferrocene::prevalidated]
     pub fn len(&self) -> usize {
         self.sign.len() + self.parts.iter().map(|part| part.len()).sum::<usize>()
     }
@@ -77,7 +80,6 @@ impl<'a> Formatted<'a> {
     /// Writes all formatted parts into the supplied buffer.
     /// Returns the number of written bytes, or `None` if the buffer is not enough.
     /// (It may still leave partially written bytes in the buffer; do not rely on that.)
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub fn write(&self, out: &mut [u8]) -> Option<usize> {
         out.get_mut(..self.sign.len())?.copy_from_slice(self.sign.as_bytes());
 

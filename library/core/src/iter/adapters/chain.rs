@@ -1,4 +1,3 @@
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
@@ -21,6 +20,7 @@ use crate::ops::Try;
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Chain<A, B> {
     // These are "fused" with `Option` so we don't need separate state to track which part is
     // already exhausted, and we may also get niche layout for `None`. We don't use the real `Fuse`
@@ -34,6 +34,7 @@ pub struct Chain<A, B> {
     b: Option<B>,
 }
 impl<A, B> Chain<A, B> {
+    #[ferrocene::prevalidated]
     pub(in super::super) fn new(a: A, b: B) -> Chain<A, B> {
         Chain { a: Some(a), b: Some(b) }
     }
@@ -61,7 +62,6 @@ impl<A, B> Chain<A, B> {
 /// assert_eq!(iter.next(), Some(6));
 /// assert_eq!(iter.next(), None);
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "iter_chain", since = "1.91.0")]
 pub fn chain<A, B>(a: A, b: B) -> Chain<A::IntoIter, B::IntoIter>
 where
@@ -80,12 +80,14 @@ where
     type Item = A::Item;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A::Item> {
         and_then_or_clear(&mut self.a, Iterator::next).or_else(|| self.b.as_mut()?.next())
     }
 
     #[inline]
     #[rustc_inherit_overflow_checks]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         let a_count = match self.a {
             Some(a) => a.count(),
@@ -98,6 +100,7 @@ where
         a_count + b_count
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         Self: Sized,
@@ -115,6 +118,7 @@ where
         try { acc }
     }
 
+    #[ferrocene::prevalidated]
     fn fold<Acc, F>(self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -129,6 +133,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -147,6 +152,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, mut n: usize) -> Option<Self::Item> {
         if let Some(ref mut a) = self.a {
             n = match a.advance_by(n) {
@@ -164,6 +170,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, mut predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -173,6 +180,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<A::Item> {
         // Must exhaust a before b.
         let a_last = self.a.and_then(Iterator::last);
@@ -181,6 +189,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
             Chain { a: Some(a), b: Some(b) } => {
@@ -203,7 +212,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<A, B> DoubleEndedIterator for Chain<A, B>
 where
@@ -291,7 +299,6 @@ where
 }
 
 // Note: *both* must be fused to handle double-ended iterators.
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl<A, B> FusedIterator for Chain<A, B>
 where
@@ -300,7 +307,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<A, B> TrustedLen for Chain<A, B>
 where
@@ -309,7 +315,6 @@ where
 {
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<A: Default, B: Default> Default for Chain<A, B> {
     /// Creates a `Chain` from the default values for `A` and `B`.
@@ -334,6 +339,7 @@ impl<A: Default, B: Default> Default for Chain<A, B> {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 fn and_then_or_clear<T, U>(opt: &mut Option<T>, f: impl FnOnce(&mut T) -> Option<U>) -> Option<U> {
     let x = f(opt.as_mut()?);
     if x.is_none() {

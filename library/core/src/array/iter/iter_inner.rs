@@ -13,12 +13,14 @@ trait PartialDrop {
     unsafe fn partial_drop(&mut self, alive: IndexRange);
 }
 impl<T> PartialDrop for [MaybeUninit<T>] {
+    #[ferrocene::prevalidated]
     unsafe fn partial_drop(&mut self, alive: IndexRange) {
         // SAFETY: We know that all elements within `alive` are properly initialized.
         unsafe { self.get_unchecked_mut(alive).assume_init_drop() }
     }
 }
 impl<T, const N: usize> PartialDrop for [MaybeUninit<T>; N] {
+    #[ferrocene::prevalidated]
     unsafe fn partial_drop(&mut self, alive: IndexRange) {
         let slice: &mut [MaybeUninit<T>] = self;
         // SAFETY: Initialized elements in the array are also initialized in the slice.
@@ -31,6 +33,7 @@ impl<T, const N: usize> PartialDrop for [MaybeUninit<T>; N] {
 /// The real `array::IntoIter<T, N>` stores a `PolymorphicIter<[MaybeUninit<T>, N]>`
 /// which it unsizes to `PolymorphicIter<[MaybeUninit<T>]>` to iterate.
 #[allow(private_bounds)]
+#[ferrocene::prevalidated]
 pub(super) struct PolymorphicIter<DATA: ?Sized>
 where
     DATA: PartialDrop,
@@ -64,6 +67,7 @@ where
     DATA: PartialDrop,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn len(&self) -> usize {
         self.alive.len()
     }
@@ -75,6 +79,7 @@ where
     DATA: PartialDrop,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         // SAFETY: by our type invariant `self.alive` is exactly the initialized
         // items, and this is drop so nothing can use the items afterwards.
@@ -84,6 +89,7 @@ where
 
 impl<T, const N: usize> PolymorphicIter<[MaybeUninit<T>; N]> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const fn empty() -> Self {
         Self { alive: IndexRange::zero_to(0), data: [const { MaybeUninit::uninit() }; N] }
     }
@@ -91,6 +97,7 @@ impl<T, const N: usize> PolymorphicIter<[MaybeUninit<T>; N]> {
     /// # Safety
     /// `data[alive]` are all initialized.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) const unsafe fn new_unchecked(alive: IndexRange, data: [MaybeUninit<T>; N]) -> Self {
         Self { alive, data }
     }
@@ -98,11 +105,13 @@ impl<T, const N: usize> PolymorphicIter<[MaybeUninit<T>; N]> {
 
 impl<T: Clone, const N: usize> Clone for PolymorphicIter<[MaybeUninit<T>; N]> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
         // Note, we don't really need to match the exact same alive range, so
         // we can just clone into offset 0 regardless of where `self` is.
         let mut new = Self::empty();
 
+        #[ferrocene::prevalidated]
         fn clone_into_new<U: Clone>(
             source: &PolymorphicIter<[MaybeUninit<U>]>,
             target: &mut PolymorphicIter<[MaybeUninit<U>]>,
@@ -125,6 +134,7 @@ impl<T: Clone, const N: usize> Clone for PolymorphicIter<[MaybeUninit<T>; N]> {
 
 impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn as_slice(&self) -> &[T] {
         // SAFETY: We know that all elements within `alive` are properly initialized.
         unsafe {
@@ -134,7 +144,6 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     pub(super) fn as_mut_slice(&mut self) -> &mut [T] {
         // SAFETY: We know that all elements within `alive` are properly initialized.
         unsafe {
@@ -146,6 +155,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
 
 impl<T: fmt::Debug> fmt::Debug for PolymorphicIter<[MaybeUninit<T>]> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Only print the elements that were not yielded yet: we cannot
         // access the yielded elements anymore.
@@ -159,6 +169,7 @@ impl<T: fmt::Debug> fmt::Debug for PolymorphicIter<[MaybeUninit<T>]> {
 /// things like `try_fold` that require `Self: Sized` (which we're not).
 impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn next(&mut self) -> Option<T> {
         // Get the next index from the front.
         //
@@ -177,12 +188,14 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // This also moves the start, which marks them as conceptually "dropped",
         // so if anything goes bad then our drop impl won't double-free them.
@@ -199,11 +212,13 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn fold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_fold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, T) -> R,
@@ -223,6 +238,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn next_back(&mut self) -> Option<T> {
         // Get the next index from the back.
         //
@@ -241,6 +257,7 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         // This also moves the end, which marks them as conceptually "dropped",
         // so if anything goes bad then our drop impl won't double-free them.
@@ -257,11 +274,13 @@ impl<T> PolymorphicIter<[MaybeUninit<T>]> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn rfold<B>(&mut self, init: B, f: impl FnMut(B, T) -> B) -> B {
         self.try_rfold(init, NeverShortCircuit::wrap_mut_2(f)).0
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         F: FnMut(B, T) -> R,

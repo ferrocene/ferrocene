@@ -86,19 +86,10 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::intrinsics::{self, type_id_vtable};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::transmute;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::mem::type_info::{TraitImpl, TypeKind};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{fmt, hash, ptr};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use crate::{fmt, intrinsics};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Any trait
@@ -147,7 +138,6 @@ pub trait Any: 'static {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<T: 'static + ?Sized> Any for T {
     fn type_id(&self) -> TypeId {
         TypeId::of::<T>()
@@ -160,6 +150,7 @@ impl<T: 'static + ?Sized> Any for T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for dyn Any {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
@@ -170,6 +161,7 @@ impl fmt::Debug for dyn Any {
 // dispatch works with upcasting.
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for dyn Any + Send {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
@@ -177,12 +169,12 @@ impl fmt::Debug for dyn Any + Send {
 
 #[stable(feature = "any_send_sync_methods", since = "1.28.0")]
 impl fmt::Debug for dyn Any + Send + Sync {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Any").finish_non_exhaustive()
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any {
     /// Returns `true` if the inner type is the same as `T`.
     ///
@@ -342,7 +334,6 @@ impl dyn Any {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send {
     /// Forwards to the method defined on the type `dyn Any`.
     ///
@@ -477,7 +468,6 @@ impl dyn Any + Send {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl dyn Any + Send + Sync {
     /// Forwards to the method defined on the type `Any`.
     ///
@@ -730,12 +720,11 @@ impl dyn Any + Send + Sync {
 ///     std::mem::forget(fake_one_ring);
 /// }
 /// ```
-#[cfg_attr(not(feature = "ferrocene_subset"), derive(Copy, PartialOrd, Ord))]
-#[cfg_attr(not(feature = "ferrocene_subset"), derive_const(Clone, Eq))]
-#[cfg_attr(feature = "ferrocene_subset", derive(Copy))]
-#[cfg_attr(feature = "ferrocene_subset", derive_const(Clone))]
+#[derive(Copy, PartialOrd, Ord)]
+#[derive_const(Clone, Eq)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[lang = "type_id"]
+#[ferrocene::prevalidated]
 pub struct TypeId {
     /// This needs to be an array of pointers, since there is provenance
     /// in the first array field. This provenance knows exactly which type
@@ -756,6 +745,7 @@ unsafe impl Sync for TypeId {}
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl const PartialEq for TypeId {
     #[inline]
+    #[ferrocene::prevalidated]
     fn eq(&self, other: &Self) -> bool {
         #[cfg(miri)]
         return crate::intrinsics::type_id_eq(*self, *other);
@@ -802,6 +792,7 @@ impl TypeId {
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_type_id", since = "1.91.0")]
+    #[ferrocene::prevalidated]
     pub const fn of<T: ?Sized + 'static>() -> TypeId {
         const { intrinsics::type_id::<T>() }
     }
@@ -821,7 +812,6 @@ impl TypeId {
     /// assert!(const { TypeId::of::<u8>().trait_info_of::<dyn Blah>() }.is_some());
     /// assert!(const { TypeId::of::<u16>().trait_info_of::<dyn Blah>() }.is_none());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
     pub const fn trait_info_of<
@@ -849,7 +839,6 @@ impl TypeId {
     /// assert!(const { TypeId::of::<u8>().trait_info_of_trait_type_id(TypeId::of::<dyn Blah>()) }.is_some());
     /// assert!(const { TypeId::of::<u16>().trait_info_of_trait_type_id(TypeId::of::<dyn Blah>()) }.is_none());
     /// ```
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[unstable(feature = "type_info", issue = "146922")]
     #[rustc_const_unstable(feature = "type_info", issue = "146922")]
     pub const fn trait_info_of_trait_type_id(
@@ -869,6 +858,7 @@ impl TypeId {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn as_u128(self) -> u128 {
         let mut bytes = [0; 16];
 
@@ -883,7 +873,6 @@ impl TypeId {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl hash::Hash for TypeId {
     #[inline]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -910,6 +899,7 @@ impl hash::Hash for TypeId {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for TypeId {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "TypeId({:#034x})", self.as_u128())
     }
@@ -945,6 +935,7 @@ impl fmt::Debug for TypeId {
 #[must_use]
 #[stable(feature = "type_name", since = "1.38.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name<T: ?Sized>() -> &'static str {
     const { intrinsics::type_name::<T>() }
 }
@@ -985,6 +976,7 @@ pub const fn type_name<T: ?Sized>() -> &'static str {
 #[must_use]
 #[stable(feature = "type_name_of_val", since = "1.76.0")]
 #[rustc_const_unstable(feature = "const_type_name", issue = "63084")]
+#[ferrocene::prevalidated]
 pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
     type_name::<T>()
 }
@@ -1022,7 +1014,6 @@ pub const fn type_name_of_val<T: ?Sized>(_val: &T) -> &'static str {
 /// let not_an_animal: Option<&dyn Animal> = try_as_dyn::<Rock, dyn Animal>(&rock);
 /// assert!(not_an_animal.is_none());
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn<
@@ -1077,7 +1068,6 @@ pub const fn try_as_dyn<
 /// let not_an_animal: Option<&mut dyn Animal> = try_as_dyn_mut::<Rock, dyn Animal>(&mut rock);
 /// assert!(not_an_animal.is_none());
 /// ```
-#[cfg(not(feature = "ferrocene_subset"))]
 #[must_use]
 #[unstable(feature = "try_as_dyn", issue = "144361")]
 pub const fn try_as_dyn_mut<

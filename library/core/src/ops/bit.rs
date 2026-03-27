@@ -60,6 +60,7 @@ macro_rules! not_impl {
             type Output = $t;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn not(self) -> $t { !self }
         }
 
@@ -73,7 +74,6 @@ not_impl! { bool usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
 
 #[stable(feature = "not_never", since = "1.60.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-#[cfg(not(feature = "ferrocene_subset"))]
 impl const Not for ! {
     type Output = !;
 
@@ -176,6 +176,7 @@ macro_rules! bitand_impl {
             type Output = $t;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand(self, rhs: $t) -> $t { self & rhs }
         }
 
@@ -280,6 +281,7 @@ macro_rules! bitor_impl {
             type Output = $t;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor(self, rhs: $t) -> $t { self | rhs }
         }
 
@@ -384,6 +386,7 @@ macro_rules! bitxor_impl {
             type Output = $t;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor(self, other: $t) -> $t { self ^ other }
         }
 
@@ -486,6 +489,7 @@ macro_rules! shl_impl {
 
             #[inline]
             #[rustc_inherit_overflow_checks]
+            #[ferrocene::prevalidated]
             fn shl(self, other: $f) -> $t {
                 self << other
             }
@@ -608,6 +612,7 @@ macro_rules! shr_impl {
 
             #[inline]
             #[rustc_inherit_overflow_checks]
+            #[ferrocene::prevalidated]
             fn shr(self, other: $f) -> $t {
                 self >> other
             }
@@ -744,6 +749,7 @@ macro_rules! bitand_assign_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitAndAssign for $t {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: $t) { *self &= other }
         }
 
@@ -819,6 +825,7 @@ macro_rules! bitor_assign_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitOrAssign for $t {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: $t) { *self |= other }
         }
 
@@ -894,6 +901,7 @@ macro_rules! bitxor_assign_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitXorAssign for $t {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: $t) { *self ^= other }
         }
 
@@ -960,6 +968,7 @@ macro_rules! shl_assign_impl {
         impl const ShlAssign<$f> for $t {
             #[inline]
             #[rustc_inherit_overflow_checks]
+            #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
                 *self <<= other
             }
@@ -1046,6 +1055,7 @@ macro_rules! shr_assign_impl {
         impl const ShrAssign<$f> for $t {
             #[inline]
             #[rustc_inherit_overflow_checks]
+            #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {
                 *self >>= other
             }

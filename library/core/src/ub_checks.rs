@@ -69,6 +69,7 @@ macro_rules! assert_unsafe_precondition {
             #[ferrocene::annotation(
                 "This code cannot be covered because it causes an non-unwinding panic, which means it cannot be caught by any means in a test."
             )]
+            #[ferrocene::prevalidated]
             const fn precondition_check($($name:$ty),*) {
                 if !$e {
                     let msg = concat!("unsafe precondition(s) violated: ", $message,
@@ -97,6 +98,7 @@ pub use intrinsics::ub_checks as check_library_ub;
 /// language UB checks which generally produce better errors.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 pub(crate) const fn check_language_ub() -> bool {
     // Only used for UB checks so we may const_eval_select.
     const_eval_select!(
@@ -119,6 +121,7 @@ pub(crate) const fn check_language_ub() -> bool {
 /// check is anyway not executed in `const`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 pub(crate) const fn maybe_is_aligned_and_not_null(
     ptr: *const (),
     align: usize,
@@ -135,6 +138,7 @@ pub(crate) const fn maybe_is_aligned_and_not_null(
 /// check is anyway not executed in `const`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 pub(crate) const fn maybe_is_aligned(ptr: *const (), align: usize) -> bool {
     // This is just for safety checks so we can const_eval_select.
     const_eval_select!(
@@ -148,6 +152,7 @@ pub(crate) const fn maybe_is_aligned(ptr: *const (), align: usize) -> bool {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
     let max_len = if size == 0 { usize::MAX } else { isize::MAX as usize / size };
     len <= max_len
@@ -160,6 +165,7 @@ pub(crate) const fn is_valid_allocation_size(size: usize, len: usize) -> bool {
 /// only be used with `assert_unsafe_precondition!`, similar to `is_aligned_and_not_null`.
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 pub(crate) const fn maybe_is_nonoverlapping(
     src: *const (),
     dst: *const (),

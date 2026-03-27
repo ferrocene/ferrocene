@@ -79,20 +79,16 @@ pub fn test_index_range_double_ended_iterator() {
 ///
 /// This is useful because within libcore there are no `println!` or `dbg!` macros available.
 ///
-/// If building the subset targets, as is done when executing `./x test library/core --no-doc --coverage=library`, it is necessary to mark those function calls with `#[cfg(not(feature = "ferrocene_subset"))]`.
 ///
 /// ```ignore (for internal use only)
 /// use crate::ferrocene_test::println;
 ///
 /// fn some_libcore_function(param_a: u32) {
-///     #[cfg(not(feature = "ferrocene_subset"))]
 ///     println::eprintln_args(format_args!("param_a={}", param_a));
 ///
 ///     if param_a > 10 {
-///         #[cfg(not(feature = "ferrocene_subset"))]
 ///         println::eprintln_str("hit branch A");
 ///     } else {
-///         #[cfg(not(feature = "ferrocene_subset"))]
 ///         println::eprintln_str("hit branch B");
 ///     }
 /// }

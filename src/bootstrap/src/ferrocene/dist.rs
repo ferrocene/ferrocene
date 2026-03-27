@@ -53,7 +53,7 @@ impl Step for Docs {
         //
         // NOTE: must be called before .add_directory, since it places the
         // certified API docs in the doc_out
-        if self.target.try_subset_equivalent().is_some() {
+        if self.target.has_certified_subset() {
             builder.ensure(CertifiedApiDocs { target: self.target });
             builder.ensure(AllCoverageReports { target: self.target });
         } else {

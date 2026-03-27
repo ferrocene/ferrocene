@@ -1,38 +1,20 @@
 //! Iterators for `str` methods.
 
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::pattern::{DoubleEndedSearcher, Pattern, ReverseSearcher, Searcher};
 use super::validations::{next_code_point, next_code_point_reverse};
-#[cfg(not(feature = "ferrocene_subset"))]
 use super::{
     BytesIsNotEmpty, CharEscapeDebugContinue, CharEscapeDefault, CharEscapeUnicode,
     IsAsciiWhitespace, IsNotEmpty, IsWhitespace, LinesMap, UnsafeBytesToStr, from_utf8_unchecked,
 };
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::fmt::{self, Write};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::iter::{
     Chain, Copied, Filter, FlatMap, Flatten, FusedIterator, Map, TrustedLen, TrustedRandomAccess,
     TrustedRandomAccessNoCoerce,
 };
 use crate::num::NonZero;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::ops::Try;
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::slice::{self, Split as SliceSplit};
-#[cfg(not(feature = "ferrocene_subset"))]
 use crate::{char as char_mod, option};
-
-// Ferrocene addition: imports for certified subset
-#[cfg(feature = "ferrocene_subset")]
-#[rustfmt::skip]
-use {
-    super::{
-        from_utf8_unchecked,
-        pattern::{Pattern, Searcher},
-    },
-    crate::{fmt, iter::Copied, slice},
-};
 
 /// An iterator over the [`char`]s of a string slice.
 ///
@@ -45,6 +27,7 @@ use {
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct Chars<'a> {
     pub(super) iter: slice::Iter<'a, u8>,
 }
@@ -54,6 +37,7 @@ impl<'a> Iterator for Chars<'a> {
     type Item = char;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
@@ -61,11 +45,13 @@ impl<'a> Iterator for Chars<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         super::count::count_chars(self.as_str())
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, mut remainder: usize) -> Result<(), NonZero<usize>> {
         const CHUNK_SIZE: usize = 32;
 
@@ -115,12 +101,14 @@ impl<'a> Iterator for Chars<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.iter.len();
         (len.div_ceil(4), Some(len))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<char> {
         // No need to go through the entire string.
         self.next_back()
@@ -129,6 +117,7 @@ impl<'a> Iterator for Chars<'a> {
 
 #[stable(feature = "chars_debug_impl", since = "1.38.0")]
 impl fmt::Debug for Chars<'_> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Chars(")?;
         f.debug_list().entries(self.clone()).finish()?;
@@ -140,6 +129,7 @@ impl fmt::Debug for Chars<'_> {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Chars<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<char> {
         // SAFETY: `str` invariant says `self.iter` is a valid UTF-8 string and
         // the resulting `ch` is a valid Unicode Scalar Value.
@@ -147,7 +137,6 @@ impl<'a> DoubleEndedIterator for Chars<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for Chars<'_> {}
 
@@ -172,6 +161,7 @@ impl<'a> Chars<'a> {
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_str(&self) -> &'a str {
         // SAFETY: `Chars` is only made from a str, which guarantees the iter is valid UTF-8.
         unsafe { from_utf8_unchecked(self.iter.as_slice()) }
@@ -188,6 +178,7 @@ impl<'a> Chars<'a> {
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub struct CharIndices<'a> {
     pub(super) front_offset: usize,
     pub(super) iter: Chars<'a>,
@@ -198,6 +189,7 @@ impl<'a> Iterator for CharIndices<'a> {
     type Item = (usize, char);
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<(usize, char)> {
         let pre_len = self.iter.iter.len();
         match self.iter.next() {
@@ -212,16 +204,19 @@ impl<'a> Iterator for CharIndices<'a> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.iter.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(mut self) -> Option<(usize, char)> {
         // No need to go through the entire string.
         self.next_back()
@@ -231,6 +226,7 @@ impl<'a> Iterator for CharIndices<'a> {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for CharIndices<'a> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<(usize, char)> {
         self.iter.next_back().map(|ch| {
             let index = self.front_offset + self.iter.iter.len();
@@ -239,7 +235,6 @@ impl<'a> DoubleEndedIterator for CharIndices<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for CharIndices<'_> {}
 
@@ -251,6 +246,7 @@ impl<'a> CharIndices<'a> {
     #[stable(feature = "iter_to_slice", since = "1.4.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_str(&self) -> &'a str {
         self.iter.as_str()
     }
@@ -287,6 +283,7 @@ impl<'a> CharIndices<'a> {
     #[inline]
     #[must_use]
     #[stable(feature = "char_indices_offset", since = "1.82.0")]
+    #[ferrocene::prevalidated]
     pub fn offset(&self) -> usize {
         self.front_offset
     }
@@ -301,6 +298,7 @@ impl<'a> CharIndices<'a> {
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Clone, Debug)]
+#[ferrocene::prevalidated]
 pub struct Bytes<'a>(pub(super) Copied<slice::Iter<'a, u8>>);
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -308,31 +306,37 @@ impl Iterator for Bytes<'_> {
     type Item = u8;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<u8> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.0.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item> {
         self.0.last()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
         self.0.nth(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn all<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -341,6 +345,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn any<F>(&mut self, f: F) -> bool
     where
         F: FnMut(Self::Item) -> bool,
@@ -349,6 +354,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         P: FnMut(&Self::Item) -> bool,
@@ -357,6 +363,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn position<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -365,6 +372,7 @@ impl Iterator for Bytes<'_> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn rposition<P>(&mut self, predicate: P) -> Option<usize>
     where
         P: FnMut(Self::Item) -> bool,
@@ -372,7 +380,6 @@ impl Iterator for Bytes<'_> {
         self.0.rposition(predicate)
     }
 
-    #[cfg(not(feature = "ferrocene_subset"))]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> u8 {
         // SAFETY: the caller must uphold the safety contract
@@ -381,7 +388,6 @@ impl Iterator for Bytes<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl DoubleEndedIterator for Bytes<'_> {
     #[inline]
@@ -403,7 +409,6 @@ impl DoubleEndedIterator for Bytes<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ExactSizeIterator for Bytes<'_> {
     #[inline]
@@ -417,20 +422,16 @@ impl ExactSizeIterator for Bytes<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for Bytes<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl TrustedLen for Bytes<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl TrustedRandomAccess for Bytes<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[doc(hidden)]
 #[unstable(feature = "trusted_random_access", issue = "none")]
 unsafe impl TrustedRandomAccessNoCoerce for Bytes<'_> {
@@ -439,7 +440,6 @@ unsafe impl TrustedRandomAccessNoCoerce for Bytes<'_> {
 
 /// This macro generates a Clone impl for string pattern API
 /// wrapper types of the form X<'a, P>
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! derive_pattern_clone {
     (clone $t:ident with |$s:ident| $e:expr) => {
         impl<'a, P> Clone for $t<'a, P>
@@ -492,7 +492,6 @@ macro_rules! derive_pattern_clone {
 /// so the two wrapper structs implement `Iterator`
 /// and `DoubleEndedIterator` depending on the concrete pattern type, leading
 /// to the complex impls seen above.
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! generate_pattern_iterators {
     {
         // Forward iterator
@@ -638,12 +637,12 @@ macro_rules! generate_pattern_iterators {
     } => {}
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 derive_pattern_clone! {
     clone SplitInternal
     with |s| SplitInternal { matcher: s.matcher.clone(), ..*s }
 }
 
+#[ferrocene::prevalidated]
 pub(super) struct SplitInternal<'a, P: Pattern> {
     pub(super) start: usize,
     pub(super) end: usize,
@@ -656,6 +655,7 @@ impl<'a, P> fmt::Debug for SplitInternal<'a, P>
 where
     P: Pattern<Searcher<'a>: fmt::Debug>,
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SplitInternal")
             .field("start", &self.start)
@@ -669,6 +669,7 @@ where
 
 impl<'a, P: Pattern> SplitInternal<'a, P> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn get_end(&mut self) -> Option<&'a str> {
         if !self.finished {
             self.finished = true;
@@ -684,7 +685,6 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next(&mut self) -> Option<&'a str> {
         if self.finished {
             return None;
@@ -703,6 +703,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_inclusive(&mut self) -> Option<&'a str> {
         if self.finished {
             return None;
@@ -723,7 +724,6 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -761,7 +761,6 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn next_back_inclusive(&mut self) -> Option<&'a str>
     where
         P::Searcher<'a>: ReverseSearcher<'a>,
@@ -805,7 +804,6 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 
     #[inline]
-    #[cfg(not(feature = "ferrocene_subset"))]
     fn remainder(&self) -> Option<&'a str> {
         // `Self::get_end` doesn't change `self.start`
         if self.finished {
@@ -817,7 +815,6 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 generate_pattern_iterators! {
     forward:
         /// Created with the method [`split`].
@@ -836,7 +833,6 @@ generate_pattern_iterators! {
     delegate double ended;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> Split<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -860,7 +856,6 @@ impl<'a, P: Pattern> Split<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> RSplit<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -884,7 +879,6 @@ impl<'a, P: Pattern> RSplit<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 generate_pattern_iterators! {
     forward:
         /// Created with the method [`split_terminator`].
@@ -903,7 +897,6 @@ generate_pattern_iterators! {
     delegate double ended;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> SplitTerminator<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -927,7 +920,6 @@ impl<'a, P: Pattern> SplitTerminator<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> RSplitTerminator<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -951,20 +943,17 @@ impl<'a, P: Pattern> RSplitTerminator<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 derive_pattern_clone! {
     clone SplitNInternal
     with |s| SplitNInternal { iter: s.iter.clone(), ..*s }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) struct SplitNInternal<'a, P: Pattern> {
     pub(super) iter: SplitInternal<'a, P>,
     /// The number of splits remaining
     pub(super) count: usize,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P> fmt::Debug for SplitNInternal<'a, P>
 where
     P: Pattern<Searcher<'a>: fmt::Debug>,
@@ -977,7 +966,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> SplitNInternal<'a, P> {
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
@@ -1018,7 +1006,6 @@ impl<'a, P: Pattern> SplitNInternal<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 generate_pattern_iterators! {
     forward:
         /// Created with the method [`splitn`].
@@ -1037,7 +1024,6 @@ generate_pattern_iterators! {
     delegate single ended;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> SplitN<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -1061,7 +1047,6 @@ impl<'a, P: Pattern> SplitN<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> RSplitN<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -1085,16 +1070,13 @@ impl<'a, P: Pattern> RSplitN<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 derive_pattern_clone! {
     clone MatchIndicesInternal
     with |s| MatchIndicesInternal(s.0.clone())
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) struct MatchIndicesInternal<'a, P: Pattern>(pub(super) P::Searcher<'a>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P> fmt::Debug for MatchIndicesInternal<'a, P>
 where
     P: Pattern<Searcher<'a>: fmt::Debug>,
@@ -1104,7 +1086,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
     #[inline]
     fn next(&mut self) -> Option<(usize, &'a str)> {
@@ -1126,7 +1107,6 @@ impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 generate_pattern_iterators! {
     forward:
         /// Created with the method [`match_indices`].
@@ -1145,16 +1125,13 @@ generate_pattern_iterators! {
     delegate double ended;
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 derive_pattern_clone! {
     clone MatchesInternal
     with |s| MatchesInternal(s.0.clone())
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 pub(super) struct MatchesInternal<'a, P: Pattern>(pub(super) P::Searcher<'a>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P> fmt::Debug for MatchesInternal<'a, P>
 where
     P: Pattern<Searcher<'a>: fmt::Debug>,
@@ -1164,7 +1141,6 @@ where
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> MatchesInternal<'a, P> {
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
@@ -1188,7 +1164,6 @@ impl<'a, P: Pattern> MatchesInternal<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 generate_pattern_iterators! {
     forward:
         /// Created with the method [`matches`].
@@ -1213,13 +1188,11 @@ generate_pattern_iterators! {
 /// See its documentation for more.
 ///
 /// [`lines`]: str::lines
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[derive(Clone, Debug)]
 pub struct Lines<'a>(pub(super) Map<SplitInclusive<'a, char>, LinesMap>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Lines<'a> {
     type Item = &'a str;
@@ -1240,7 +1213,6 @@ impl<'a> Iterator for Lines<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Lines<'a> {
     #[inline]
@@ -1249,11 +1221,9 @@ impl<'a> DoubleEndedIterator for Lines<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for Lines<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> Lines<'a> {
     /// Returns the remaining lines of the split string.
     ///
@@ -1282,7 +1252,6 @@ impl<'a> Lines<'a> {
 /// Created with the method [`lines_any`].
 ///
 /// [`lines_any`]: str::lines_any
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[deprecated(since = "1.4.0", note = "use lines()/Lines instead now")]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
@@ -1290,7 +1259,6 @@ impl<'a> Lines<'a> {
 #[allow(deprecated)]
 pub struct LinesAny<'a>(pub(super) Lines<'a>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
 impl<'a> Iterator for LinesAny<'a> {
@@ -1307,7 +1275,6 @@ impl<'a> Iterator for LinesAny<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[allow(deprecated)]
 impl<'a> DoubleEndedIterator for LinesAny<'a> {
@@ -1317,7 +1284,6 @@ impl<'a> DoubleEndedIterator for LinesAny<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 #[allow(deprecated)]
 impl FusedIterator for LinesAny<'_> {}
@@ -1329,7 +1295,6 @@ impl FusedIterator for LinesAny<'_> {}
 /// See its documentation for more.
 ///
 /// [`split_whitespace`]: str::split_whitespace
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_whitespace", since = "1.1.0")]
 #[derive(Clone, Debug)]
 pub struct SplitWhitespace<'a> {
@@ -1343,7 +1308,6 @@ pub struct SplitWhitespace<'a> {
 /// See its documentation for more.
 ///
 /// [`split_ascii_whitespace`]: str::split_ascii_whitespace
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
 #[derive(Clone, Debug)]
 pub struct SplitAsciiWhitespace<'a> {
@@ -1361,9 +1325,9 @@ pub struct SplitAsciiWhitespace<'a> {
 ///
 /// [`split_inclusive`]: str::split_inclusive
 #[stable(feature = "split_inclusive", since = "1.51.0")]
+#[ferrocene::prevalidated]
 pub struct SplitInclusive<'a, P: Pattern>(pub(super) SplitInternal<'a, P>);
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_whitespace", since = "1.1.0")]
 impl<'a> Iterator for SplitWhitespace<'a> {
     type Item = &'a str;
@@ -1384,7 +1348,6 @@ impl<'a> Iterator for SplitWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_whitespace", since = "1.1.0")]
 impl<'a> DoubleEndedIterator for SplitWhitespace<'a> {
     #[inline]
@@ -1393,11 +1356,9 @@ impl<'a> DoubleEndedIterator for SplitWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for SplitWhitespace<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> SplitWhitespace<'a> {
     /// Returns remainder of the split string
     ///
@@ -1423,7 +1384,6 @@ impl<'a> SplitWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
 impl<'a> Iterator for SplitAsciiWhitespace<'a> {
     type Item = &'a str;
@@ -1444,7 +1404,6 @@ impl<'a> Iterator for SplitAsciiWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
 impl<'a> DoubleEndedIterator for SplitAsciiWhitespace<'a> {
     #[inline]
@@ -1453,11 +1412,9 @@ impl<'a> DoubleEndedIterator for SplitAsciiWhitespace<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_ascii_whitespace", since = "1.34.0")]
 impl FusedIterator for SplitAsciiWhitespace<'_> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a> SplitAsciiWhitespace<'a> {
     /// Returns remainder of the split string.
     ///
@@ -1495,6 +1452,7 @@ impl<'a, P: Pattern> Iterator for SplitInclusive<'a, P> {
     type Item = &'a str;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a str> {
         self.0.next_inclusive()
     }
@@ -1502,13 +1460,13 @@ impl<'a, P: Pattern> Iterator for SplitInclusive<'a, P> {
 
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern<Searcher<'a>: fmt::Debug>> fmt::Debug for SplitInclusive<'a, P> {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SplitInclusive").field("0", &self.0).finish()
     }
 }
 
 // FIXME(#26925) Remove in favor of `#[derive(Clone)]`
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern<Searcher<'a>: Clone>> Clone for SplitInclusive<'a, P> {
     fn clone(&self) -> Self {
@@ -1516,7 +1474,6 @@ impl<'a, P: Pattern<Searcher<'a>: Clone>> Clone for SplitInclusive<'a, P> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern<Searcher<'a>: DoubleEndedSearcher<'a>>> DoubleEndedIterator
     for SplitInclusive<'a, P>
@@ -1527,11 +1484,9 @@ impl<'a, P: Pattern<Searcher<'a>: DoubleEndedSearcher<'a>>> DoubleEndedIterator
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "split_inclusive", since = "1.51.0")]
 impl<'a, P: Pattern> FusedIterator for SplitInclusive<'a, P> {}
 
-#[cfg(not(feature = "ferrocene_subset"))]
 impl<'a, P: Pattern> SplitInclusive<'a, P> {
     /// Returns remainder of the split string.
     ///
@@ -1561,7 +1516,6 @@ impl<'a, P: Pattern> SplitInclusive<'a, P> {
 /// See its documentation for more.
 ///
 /// [`encode_utf16`]: str::encode_utf16
-#[cfg(not(feature = "ferrocene_subset"))]
 #[derive(Clone)]
 #[stable(feature = "encode_utf16", since = "1.8.0")]
 pub struct EncodeUtf16<'a> {
@@ -1569,7 +1523,6 @@ pub struct EncodeUtf16<'a> {
     pub(super) extra: u16,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "collection_debug", since = "1.17.0")]
 impl fmt::Debug for EncodeUtf16<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1577,7 +1530,6 @@ impl fmt::Debug for EncodeUtf16<'_> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "encode_utf16", since = "1.8.0")]
 impl<'a> Iterator for EncodeUtf16<'a> {
     type Item = u16;
@@ -1618,12 +1570,10 @@ impl<'a> Iterator for EncodeUtf16<'a> {
     }
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "fused", since = "1.26.0")]
 impl FusedIterator for EncodeUtf16<'_> {}
 
 /// The return type of [`str::escape_debug`].
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "str_escape", since = "1.34.0")]
 #[derive(Clone, Debug)]
 pub struct EscapeDebug<'a> {
@@ -1634,7 +1584,6 @@ pub struct EscapeDebug<'a> {
 }
 
 /// The return type of [`str::escape_default`].
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "str_escape", since = "1.34.0")]
 #[derive(Clone, Debug)]
 pub struct EscapeDefault<'a> {
@@ -1642,14 +1591,12 @@ pub struct EscapeDefault<'a> {
 }
 
 /// The return type of [`str::escape_unicode`].
-#[cfg(not(feature = "ferrocene_subset"))]
 #[stable(feature = "str_escape", since = "1.34.0")]
 #[derive(Clone, Debug)]
 pub struct EscapeUnicode<'a> {
     pub(super) inner: FlatMap<Chars<'a>, char_mod::EscapeUnicode, CharEscapeUnicode>,
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 macro_rules! escape_types_impls {
     ($( $Name: ident ),+) => {$(
         #[stable(feature = "str_escape", since = "1.34.0")]
@@ -1689,5 +1636,4 @@ macro_rules! escape_types_impls {
     )+}
 }
 
-#[cfg(not(feature = "ferrocene_subset"))]
 escape_types_impls!(EscapeDebug, EscapeDefault, EscapeUnicode);

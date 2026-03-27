@@ -652,6 +652,15 @@ fn opts() -> Vec<RustcOptGroup> {
             "Add possibility to expand macros in the HTML source code pages",
             "",
         ),
+        // Ferrocene addition
+        opt(
+            Unstable,
+            Flag,
+            "",
+            "note-validated-api",
+            "Annotate validated functions in the generated API docs, similar to `doc(cfg)`",
+            "",
+        ),
         // deprecated / removed options
         opt(
             Stable,

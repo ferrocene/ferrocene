@@ -13,6 +13,7 @@
 /// ```
 #[stable(feature = "unit_from_iter", since = "1.23.0")]
 impl FromIterator<()> for () {
+    #[ferrocene::prevalidated]
     fn from_iter<I: IntoIterator<Item = ()>>(iter: I) -> Self {
         iter.into_iter().for_each(|()| {})
     }
@@ -23,12 +24,14 @@ pub(crate) trait IsUnit {
 }
 
 impl<T: ?Sized> IsUnit for T {
+    #[ferrocene::prevalidated]
     default fn is_unit() -> bool {
         false
     }
 }
 
 impl IsUnit for () {
+    #[ferrocene::prevalidated]
     fn is_unit() -> bool {
         true
     }

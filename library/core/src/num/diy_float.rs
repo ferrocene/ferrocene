@@ -12,6 +12,7 @@
 /// A custom 64-bit floating point type, representing `f * 2^e`.
 #[derive(Copy, Clone, Debug)]
 #[doc(hidden)]
+#[ferrocene::prevalidated]
 pub struct Fp {
     /// The integer mantissa.
     pub f: u64,
@@ -21,6 +22,7 @@ pub struct Fp {
 
 impl Fp {
     /// Returns a correctly rounded product of itself and `other`.
+    #[ferrocene::prevalidated]
     pub fn mul(self, other: Self) -> Self {
         let (lo, hi) = self.f.widening_mul(other.f);
         let f = hi + (lo >> 63) /* round */;
@@ -29,6 +31,7 @@ impl Fp {
     }
 
     /// Normalizes itself so that the resulting mantissa is at least `2^63`.
+    #[ferrocene::prevalidated]
     pub fn normalize(self) -> Self {
         let lz = self.f.leading_zeros();
         let f = self.f << lz;
@@ -39,6 +42,7 @@ impl Fp {
 
     /// Normalizes itself to have the shared exponent.
     /// It can only decrease the exponent (and thus increase the mantissa).
+    #[ferrocene::prevalidated]
     pub fn normalize_to(self, e: i16) -> Self {
         let edelta = self.e - e;
         assert!(edelta >= 0);

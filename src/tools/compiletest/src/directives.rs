@@ -993,6 +993,9 @@ pub(crate) fn make_test_description(
             decision!(ignore_gdb(config, ln));
             decision!(ignore_lldb(config, ln));
 
+            // Ferrocene addition
+            decision!(ignore_qemu(config, ln));
+
             if config.target == "wasm32-unknown-unknown"
                 && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
             {
@@ -1270,6 +1273,14 @@ fn ignore_llvm(config: &Config, line: &DirectiveLine<'_>) -> IgnoreDecision {
                 };
             }
         }
+    }
+    IgnoreDecision::Continue
+}
+
+// Ferrocene addition
+fn ignore_qemu(config: &Config, line: &DirectiveLine<'_>) -> IgnoreDecision {
+    if config.parse_name_directive(line, "ignore-qemu") && std::env::var("QEMU_CPU").is_ok() {
+        return IgnoreDecision::Ignore { reason: "QEMU is incompatible with this test".into() };
     }
     IgnoreDecision::Continue
 }

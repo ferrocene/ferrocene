@@ -1,5 +1,6 @@
 //@ run-pass
 //@ needs-threads
+//@ ignore-qemu
 
 use std::sync::mpsc::{channel, Receiver};
 use std::thread;

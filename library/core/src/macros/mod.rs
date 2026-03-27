@@ -135,8 +135,10 @@ macro_rules! assert_ne {
 /// otherwise this macro will panic.
 ///
 /// Assertions are always checked in both debug and release builds, and cannot
-/// be disabled. See `debug_assert_matches!` for assertions that are disabled in
+/// be disabled. See [`debug_assert_matches!`] for assertions that are disabled in
 /// release builds by default.
+///
+/// [`debug_assert_matches!`]: crate::debug_assert_matches
 ///
 /// On panic, this macro will print the value of the expression with its debug representation.
 ///

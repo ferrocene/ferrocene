@@ -612,14 +612,14 @@ mod slice_index {
             data: "abcdef";
             good: data[4..4] == "";
             bad: data[4..3];
-            message: "begin > end (4 > 3)";
+            message: "byte range starts at 4 but ends at 3";
         }
 
         in mod rangeinclusive_neg_width {
             data: "abcdef";
             good: data[4..=3] == "";
             bad: data[4..=2];
-            message: "begin > end (4 > 3)";
+            message: "byte range starts at 4 but ends at 3";
         }
     }
 
@@ -659,49 +659,91 @@ mod slice_index {
                 data: super::DATA;
                 bad: data[super::BAD_START..super::GOOD_END];
                 message:
+<<<<<<< HEAD
                     "byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+||||||| 6bdc342ddb0
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+=======
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod range_2 {
                 data: super::DATA;
                 bad: data[super::GOOD_START..super::BAD_END];
                 message:
+<<<<<<< HEAD
                     "byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+||||||| 6bdc342ddb0
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+=======
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod rangefrom {
                 data: super::DATA;
                 bad: data[super::BAD_START..];
                 message:
+<<<<<<< HEAD
                     "byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+||||||| 6bdc342ddb0
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+=======
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod rangeto {
                 data: super::DATA;
                 bad: data[..super::BAD_END];
                 message:
+<<<<<<< HEAD
                     "byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+||||||| 6bdc342ddb0
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+=======
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod rangeinclusive_1 {
                 data: super::DATA;
                 bad: data[super::BAD_START..=super::GOOD_END_INCL];
                 message:
+<<<<<<< HEAD
                     "byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+||||||| 6bdc342ddb0
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5) of";
+=======
+                    "start byte index 4 is not a char boundary; it is inside 'α' (bytes 3..5 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod rangeinclusive_2 {
                 data: super::DATA;
                 bad: data[super::GOOD_START..=super::BAD_END_INCL];
                 message:
+<<<<<<< HEAD
                     "byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+||||||| 6bdc342ddb0
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+=======
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
 
             in mod rangetoinclusive {
                 data: super::DATA;
                 bad: data[..=super::BAD_END_INCL];
                 message:
+<<<<<<< HEAD
                     "byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+||||||| 6bdc342ddb0
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7) of";
+=======
+                    "end byte index 6 is not a char boundary; it is inside 'β' (bytes 5..7 of string)";
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             }
         }
     }
@@ -716,14 +758,16 @@ mod slice_index {
 
     // check the panic includes the prefix of the sliced string
     #[test]
+<<<<<<< HEAD
     #[should_panic(expected = "byte index 1024 is out of bounds of `Lorem ipsum dolor sit amet")]
+||||||| 6bdc342ddb0
+    #[should_panic(
+        expected = "end byte index 1024 is out of bounds of `Lorem ipsum dolor sit amet"
+    )]
+=======
+    #[should_panic(expected = "end byte index 1024 is out of bounds for string of length 416")]
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn test_slice_fail_truncated_1() {
-        let _ = &LOREM_PARAGRAPH[..1024];
-    }
-    // check the truncation in the panic message
-    #[test]
-    #[should_panic(expected = "luctus, im`[...]")]
-    fn test_slice_fail_truncated_2() {
         let _ = &LOREM_PARAGRAPH[..1024];
     }
 }

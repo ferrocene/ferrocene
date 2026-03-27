@@ -6,7 +6,7 @@ fn main() {
     foo(42);
     //~^ ERROR type annotations needed
     //~| NOTE cannot infer type
-    //~| NOTE cannot satisfy
+    //~| NOTE the type must implement
 }
 
 // ferrocene-annotations: fls_lv7w7aalpwm5

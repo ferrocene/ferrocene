@@ -943,8 +943,16 @@ Executed at: {executed_at}"#,
             if stderr.captures() {
                 writeln!(error_message, "\n--- STDERR vvv\n{}", output.stderr().trim()).unwrap();
             }
+<<<<<<< HEAD
             let backtrace = if exec_ctx.is_verbose() {
                 Backtrace::force_capture()
+||||||| 6bdc342ddb0
+=======
+            let backtrace = if exec_ctx.verbosity > 1 {
+                Backtrace::force_capture()
+            } else if matches!(command.failure_behavior, BehaviorOnFailure::Ignore) {
+                Backtrace::disabled()
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             } else {
                 Backtrace::capture()
             };

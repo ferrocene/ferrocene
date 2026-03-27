@@ -9,7 +9,7 @@ use rustc_span::def_id::{CrateNum, LocalDefId};
 use rustc_span::{ExpnHash, ExpnId};
 
 use crate::mir;
-use crate::query::on_disk_cache::{CacheEncoder, EncodedDepNodeIndex};
+use crate::query::on_disk_cache::CacheEncoder;
 use crate::ty::{Ty, TyCtxt};
 
 macro_rules! declare_hooks {
@@ -35,8 +35,10 @@ macro_rules! declare_hooks {
 
         impl Default for Providers {
             fn default() -> Self {
+                #[allow(unused)]
                 Providers {
-                    $($name: |_, $($arg,)*| default_hook(stringify!($name), &($($arg,)*))),*
+                    $($name:
+                        |_, $($arg,)*| default_hook(stringify!($name))),*
                 }
             }
         }
@@ -109,15 +111,11 @@ declare_hooks! {
     /// Creates the MIR for a given `DefId`, including unreachable code.
     hook build_mir_inner_impl(def: LocalDefId) -> mir::Body<'tcx>;
 
-    hook encode_query_values(
-        encoder: &mut CacheEncoder<'_, 'tcx>,
-        query_result_index: &mut EncodedDepNodeIndex
-    ) -> ();
+    /// Serializes all eligible query return values into the on-disk cache.
+    hook encode_query_values(encoder: &mut CacheEncoder<'_, 'tcx>) -> ();
 }
 
 #[cold]
-fn default_hook(name: &str, args: &dyn std::fmt::Debug) -> ! {
-    bug!(
-        "`tcx.{name}{args:?}` cannot be called as `{name}` was never assigned to a provider function"
-    )
+fn default_hook(name: &str) -> ! {
+    bug!("`tcx.{name}` cannot be called as `{name}` was never assigned to a provider function")
 }

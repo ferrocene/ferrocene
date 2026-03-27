@@ -52,7 +52,7 @@ impl<'v> rustc_ast::visit::Visitor<'v> for WillCreateDefIdsVisitor {
     }
 }
 
-impl<'hir> LoweringContext<'_, 'hir> {
+impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
     fn lower_exprs(&mut self, exprs: &[Box<Expr>]) -> &'hir [hir::Expr<'hir>] {
         self.arena.alloc_from_iter(exprs.iter().map(|x| self.lower_expr_mut(x)))
     }
@@ -640,7 +640,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
     fn lower_arm(&mut self, arm: &Arm) -> hir::Arm<'hir> {
         let pat = self.lower_pat(&arm.pat);
-        let guard = arm.guard.as_ref().map(|cond| self.lower_expr(cond));
+        let guard = arm.guard.as_ref().map(|guard| self.lower_expr(&guard.cond));
         let hir_id = self.next_id();
         let span = self.lower_span(arm.span);
         self.lower_attrs(hir_id, &arm.attrs, arm.span, Target::Arm);
@@ -663,7 +663,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             } else if let Some(body) = &arm.body {
                 self.dcx().emit_err(NeverPatternWithBody { span: body.span });
             } else if let Some(g) = &arm.guard {
-                self.dcx().emit_err(NeverPatternWithGuard { span: g.span });
+                self.dcx().emit_err(NeverPatternWithGuard { span: g.span() });
             }
 
             // We add a fake `loop {}` arm body so that it typecks to `!`. The mir lowering of never
@@ -1244,7 +1244,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
         whole_span: Span,
     ) -> hir::ExprKind<'hir> {
         // Return early in case of an ordinary assignment.
-        fn is_ordinary(lower_ctx: &mut LoweringContext<'_, '_>, lhs: &Expr) -> bool {
+        fn is_ordinary<'hir>(
+            lower_ctx: &mut LoweringContext<'_, 'hir, impl ResolverAstLoweringExt<'hir>>,
+            lhs: &Expr,
+        ) -> bool {
             match &lhs.kind {
                 ExprKind::Array(..)
                 | ExprKind::Struct(..)

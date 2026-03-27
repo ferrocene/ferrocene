@@ -146,7 +146,7 @@ The reviewer of this change has to check the following:
       $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf path/to/compiler-report.pdf
       $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf path/to/core-report.pdf
 
-2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``. Unfortunately it is not possible to build the documentation package including the report locally. Instead it will just contain a dead link.
+2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``.
 
 .. _publish-stable:
 

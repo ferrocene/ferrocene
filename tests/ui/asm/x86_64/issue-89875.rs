@@ -20,14 +20,8 @@ fn foo() {
         );
     }
 }
-<<<<<<< HEAD
 
 fn main() {}
 
 // ferrocene-annotations: fls_spdmit5fy7el
 // Attribute target_feature
-||||||| 6bdc342ddb0
-
-fn main() {}
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

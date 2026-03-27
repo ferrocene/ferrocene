@@ -194,14 +194,8 @@ impl Alignment {
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
-<<<<<<< HEAD:library/core/src/ptr/alignment.rs
     #[ferrocene::prevalidated]
-    pub const fn as_nonzero(self) -> NonZero<usize> {
-||||||| 6bdc342ddb0:library/core/src/ptr/alignment.rs
-    pub const fn as_nonzero(self) -> NonZero<usize> {
-=======
     pub const fn as_nonzero_usize(self) -> NonZero<usize> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:library/core/src/mem/alignment.rs
         // This transmutes directly to avoid the UbCheck in `NonZero::new_unchecked`
         // since there's no way for the user to trip that check anyway -- the
         // validity invariant of the type would have to have been broken earlier --

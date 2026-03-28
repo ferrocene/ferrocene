@@ -2,12 +2,11 @@
    SPDX-FileCopyrightText: The Ferrocene Developers
    SPDX-FileCopyrightText: The Rust Project Contributors
 
-=======================
 Contributing to the FLS
 =======================
 
 Contribution Process
-====================
+--------------------
 
 Before contributing, it would be helpful to familiarize yourself with the
 grammar and structure of the FLS. You'll find everything you need to in `Chapter
@@ -32,7 +31,7 @@ There are three kinds of contribution that can be made:
   we'll coordinate on how to best do it.
 
 PRs and approval
-================
+----------------
 
 Whether the changes appear in the FLS will remain the responsibility and
 discretion of the `FLS team`_. Changes may be approved as is, or may be edited

@@ -999,26 +999,9 @@ pub(crate) fn make_test_description(
         decision!(ignore_lldb(config, ln));
         decision!(ignore_parallel_frontend(config, ln));
 
-<<<<<<< HEAD
-            // Ferrocene addition
-            decision!(ignore_qemu(config, ln));
+        // Ferrocene addition
+        decision!(ignore_qemu(config, ln));
 
-            if config.target == "wasm32-unknown-unknown"
-                && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
-            {
-                decision!(IgnoreDecision::Ignore {
-                    reason: "ignored on WASM as the run results cannot be checked there".into(),
-                });
-            }
-||||||| 6bdc342ddb0
-            if config.target == "wasm32-unknown-unknown"
-                && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
-            {
-                decision!(IgnoreDecision::Ignore {
-                    reason: "ignored on WASM as the run results cannot be checked there".into(),
-                });
-            }
-=======
         if config.target == "wasm32-unknown-unknown"
             && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
         {
@@ -1026,7 +1009,6 @@ pub(crate) fn make_test_description(
                 reason: "ignored on WASM as the run results cannot be checked there".into(),
             });
         }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         should_fail |= config.parse_name_directive(ln, "should-fail");
     });
@@ -1300,13 +1282,14 @@ fn ignore_llvm(config: &Config, line: &DirectiveLine<'_>) -> IgnoreDecision {
     IgnoreDecision::Continue
 }
 
-<<<<<<< HEAD
 // Ferrocene addition
 fn ignore_qemu(config: &Config, line: &DirectiveLine<'_>) -> IgnoreDecision {
     if config.parse_name_directive(line, "ignore-qemu") && std::env::var("QEMU_CPU").is_ok() {
         return IgnoreDecision::Ignore { reason: "QEMU is incompatible with this test".into() };
-||||||| 6bdc342ddb0
-=======
+    }
+    IgnoreDecision::Continue
+}
+
 fn ignore_parallel_frontend(config: &Config, line: &DirectiveLine<'_>) -> IgnoreDecision {
     if config.parallel_frontend_enabled()
         && config.parse_name_directive(line, "ignore-parallel-frontend")
@@ -1314,7 +1297,6 @@ fn ignore_parallel_frontend(config: &Config, line: &DirectiveLine<'_>) -> Ignore
         return IgnoreDecision::Ignore {
             reason: "ignored when the parallel frontend is enabled".into(),
         };
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
     IgnoreDecision::Continue
 }

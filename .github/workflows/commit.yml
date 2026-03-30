@@ -140,6 +140,12 @@ jobs:
             # HACK: work around incorrect caching for profiler_builtins.
             rm -rf build/host/stage1-std
             ./x test --stage 1 --coverage=library --tests library/core library/alloc -- --list
+            # Upstream doesn't test individual crates, so they often have warnings.
+            # See https://github.com/rust-lang/rust/issues/148266.
+            ./x test --stage 1 --ferrocene-test-one-crate-per-cargo-call compiler/ -- do-not-actually-run-the-tests
+            # We've already built the compiler, so running the rest of the UI tests is
+            # relatively cheap.
+            ./x test --stage 1 tests/ui/ tests/run-make/
           # Commit checks cannot authenticate with our AWS environment. Disable the parts of CI that
           # rely on that (for example including document signatures).
           FERROCENE_UNPRIVILEGED_CI: 1

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Continue kindck-send-object1.rs.
 
 fn assert_send<T:Send>() { }

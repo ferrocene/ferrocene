@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ run-pass
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]

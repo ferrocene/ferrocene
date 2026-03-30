@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Test which object types are considered sendable. This test
 // is broken into two parts because some errors occur in distinct
 // phases in the compiler. See kindck-send-object2.rs as well!

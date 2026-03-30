@@ -1578,7 +1578,7 @@ impl f64 {
     #[inline]
     #[ferrocene::prevalidated]
     pub const fn abs(self) -> f64 {
-        intrinsics::fabsf64(self)
+        intrinsics::fabs(self)
     }
 
     /// Returns a number that represents the sign of `self`.

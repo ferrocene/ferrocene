@@ -1397,7 +1397,7 @@ impl f16 {
     #[must_use = "method returns a new number and does not mutate the original value"]
     #[ferrocene::prevalidated]
     pub const fn abs(self) -> Self {
-        intrinsics::fabsf16(self)
+        intrinsics::fabs(self)
     }
 
     /// Returns a number that represents the sign of `self`.

@@ -472,6 +472,8 @@ declare_features! (
     (unstable, derive_from, "1.91.0", Some(144889)),
     /// Allows giving non-const impls custom diagnostic messages if attempted to be used as const
     (unstable, diagnostic_on_const, "1.93.0", Some(143874)),
+    /// Allows giving on-move borrowck custom diagnostic messages for a type
+    (unstable, diagnostic_on_move, "CURRENT_RUSTC_VERSION", Some(154181)),
     /// Allows `#[doc(cfg(...))]`.
     (unstable, doc_cfg, "1.21.0", Some(43781)),
     /// Allows `#[doc(masked)]`.
@@ -567,6 +569,8 @@ declare_features! (
     (unstable, macro_attr, "1.91.0", Some(143547)),
     /// Allow `macro_rules!` derive rules
     (unstable, macro_derive, "1.91.0", Some(143549)),
+    /// Allow `$x:guard` matcher in macros
+    (unstable, macro_guard_matcher, "CURRENT_RUSTC_VERSION", Some(153104)),
     /// Give access to additional metadata about declarative macro meta-variables.
     (unstable, macro_metavar_expr, "1.61.0", Some(83527)),
     /// Provides a way to concatenate identifiers using metavariable expressions.
@@ -689,7 +693,7 @@ declare_features! (
     /// Allows inconsistent bounds in where clauses.
     (unstable, trivial_bounds, "1.28.0", Some(48214)),
     /// Allows using `try {...}` expressions.
-    (unstable, try_blocks, "1.29.0", Some(31436)),
+    (unstable, try_blocks, "1.29.0", Some(154391)),
     /// Allows using `try bikeshed TargetType {...}` expressions.
     (unstable, try_blocks_heterogeneous, "1.94.0", Some(149488)),
     /// Allows `impl Trait` to be used inside type aliases (RFC 2515).

@@ -7,6 +7,28 @@ Working with the CI
 Ferrocene's Continuous Integration is primarily driven by a combination of
 YAML, Docker, Python and Bash scripts.
 
+Running CI without merging
+--------------------------
+
+Note that there are two "kinds" of CI.
+First, there is the "full" test suite, which is required to pass before a PR merges.
+Next, there is the "PR" test suite, which runs as soon as a PR is opened, in order to give
+developers faster feedback about failures. We do not depend on it for correctness; it's
+merely a developer aid.
+
+There are two ways to run a one-off "full" workflow.
+The first is by commenting ``bors try`` on a PR.
+See :ref:`bors-commands` for more information.
+
+The downside of using ``bors`` is that it can only handle a single ``try`` workflow at a time.
+If you need to run more than one at once, you can manually trigger another workflow from the
+CircleCI web UI. Go to
+`Ferrocene's CI overview <https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_,
+click "Trigger Pipeline", type in the branch name, and then "Run pipeline".
+This can run multiple workflows in parallel.
+See `#2217 <https://github.com/ferrocene/ferrocene/pull/2217#event-23561260114>`_ for an
+example of what the results look like in the Github UI.
+
 
 Imitating the CI
 ----------------

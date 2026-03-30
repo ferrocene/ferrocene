@@ -208,6 +208,10 @@ content in it:
 There are a lot of other options available: you can look at the documentation
 for all of them in the ``bootstrap.toml.example`` file for further details.
 
+To set ``aws-profile`` persistently without having to duplicate it in the config for each
+worktree, run ``export AWS_DEFAULT_PROFILE=ferrocene-ci`` in your shell startup file (usually
+``~/.bashrc``).
+
 .. note::
 
    Starting from Rust 1.87, upstream renamed ``config.toml`` to

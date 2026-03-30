@@ -19,8 +19,8 @@ merely a developer aid.
 There are two ways to run a one-off "full" workflow.
 The first is by commenting ``bors try`` on a PR.
 See :ref:`bors-commands` for more information.
-
 The downside of using ``bors`` is that it can only handle a single ``try`` workflow at a time.
+
 If you need to run more than one at once, you can manually trigger another workflow from the
 CircleCI web UI. Go to
 `Ferrocene's CI overview <https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_,

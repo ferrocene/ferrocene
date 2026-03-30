@@ -731,7 +731,7 @@ jobs:
                 version: default
             - run:
                 name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-docker-image.sh
+                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
                 environment:
                   IMAGE_NAME: << parameters.image >>
                   IMAGE_TAG: << parameters.tag >>
@@ -766,7 +766,7 @@ jobs:
                 version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
             - run:
                 name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-docker-image.sh
+                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
                 environment:
                   IMAGE_NAME: << parameters.image >>
                   IMAGE_TAG: << parameters.tag >>

@@ -18,10 +18,9 @@ during the docker image build.
 
 The version packaged on Ubuntu 20.04 is too old.
 
-Dockerfile: `Dockerfile-cmake`
 Build commands:
 ```
-docker build -f Dockerfile-cmake -t cmake .
+docker build -f cmake.dockerfile -t cmake .
 id=$(docker create cmake)
 docker cp $id:/cmake/cmake-3.21.1.tar.xz .
 docker rm $id
@@ -35,10 +34,9 @@ S3 paths:
 
 The version packaged on Ubuntu 20.04 is too old.
 
-Dockerfile: `Dockerfile-python`
 Build commands:
 ```
-docker build -f Dockerfile-python -t python .
+docker build -f python.dockerfile -t python .
 id=$(docker create python)
 docker cp $id:/python/python-3.12.3.tar.xz .
 docker rm $id
@@ -56,10 +54,9 @@ Upstream doesn't have very good version detection, so pin the same version that 
 We have to build from source because the binary packages have too recent a version of glibc.
 Note: this uses python 3.8, not our custom python 3.12, because distutils was removed in python 3.12.
 
-    Dockerfile: `Dockerfile-gdb`
 Build commands:
 ```
-docker build -f Dockerfile-gdb -t gdb .
+docker build -f gdb.dockerfile -t gdb .
 id=$(docker create gdb)
 docker cp $id:/gdb-12.1/gdb-12.1.tar.xz .
 docker rm $id
@@ -74,10 +71,9 @@ S3 paths:
 This allows cross-compiling a GCC that knows how to statically link MUSL programs, without
 needing a dynamically linked MUSL libc on the host.
 
-Dockerfile: `Dockerfile-musl`
 Build commands:
 ```
-docker build -f Dockerfile-musl -t musl-cross .
+docker build -f musl.dockerfile -t musl-cross .
 id=$(docker create musl-cross)
 docker cp $id:/musl-cross-make/musl-cross-make-aarch64.tar.xz .
 docker cp $id:/musl-cross-make/musl-cross-make-x86_64.tar.xz .

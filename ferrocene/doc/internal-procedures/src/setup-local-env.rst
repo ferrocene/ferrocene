@@ -126,6 +126,13 @@ the SSH key to access repositories in the Ferrocene organization.
 Configuring AWS CLI
 -------------------
 
+.. Note::
+
+   AWS CLI is not strictly required to build Ferrocene, only to reuse CI's build cache.
+   If you aren't part of the Ferrocene team, you can still build it by setting
+   `llvm.download-ci-llvm = false` and `rust.download-ci-rustc = false` in your
+   `config.toml`.
+
 To authorize the AWS CLI to access our AWS resources, you need to add the
 following snippet to the ``~/.aws/config`` (``C:\Users\USERNAME\.aws\config`` on Windows) file
 in your work device:

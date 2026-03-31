@@ -105,7 +105,6 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - setup-uv
       - run:
           name: Perform licensing checks
           command: |
@@ -297,7 +296,6 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
-            - setup-uv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -312,7 +310,6 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
-      - setup-uv
       - aws-oidc-auth
       - setup-qnx-toolchain: {}
       - run:
@@ -368,7 +365,6 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
-            - setup-uv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -419,7 +415,6 @@ jobs:
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
-      - setup-uv
       - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool

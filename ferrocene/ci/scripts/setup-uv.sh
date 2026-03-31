@@ -4,7 +4,11 @@
 
 set -xeuo pipefail
 
-curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+retry curl --location --silent --show-error --fail --remote-name https://astral.sh/uv/0.9.26/install.sh
+retry sh install.sh
+rm install.sh
 
 export PATH="$HOME/.local/bin:$PATH"
 

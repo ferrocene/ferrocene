@@ -2,11 +2,12 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 use anyhow::{Context, Error};
 use base64::Engine;
 use sha2::{Digest, Sha256};
+use tempfile::NamedTempFile;
 
 use crate::{Env, TOML_HEADER_COMMENTS};
 
@@ -42,30 +43,34 @@ pub(crate) struct Pinned {
 }
 
 impl Pinned {
-    pub(crate) fn generate(env: &Env, output_dir: &Path) -> Result<Self, Error> {
+    pub(crate) fn generate(env: &Env, output_dir: &Path) -> Result<(Self, NamedTempFile), Error> {
         let document_id = std::fs::read_to_string(output_dir.join("document-id.txt"))
             .context("failed to read document-id.txt from the output directory")?
             .trim()
             .to_string();
 
-        let mut tar = Command::new(env.tar_binary)
+        let mut saved_tarfile = NamedTempFile::new()?;
+
+        let mut tar_cmd = Command::new(env.tar_binary);
+        tar_cmd
             .args(TAR_REPRODUCIBILITY_FLAGS)
             .arg("-C")
             .arg(output_dir)
             .args(&["-c", "."])
-            .stdout(Stdio::piped())
-            .spawn()?;
+            .arg("-f")
+            .arg(saved_tarfile.path());
 
-        let mut hasher = Sha256::new();
-        std::io::copy(&mut tar.stdout.take().unwrap(), &mut hasher)?;
-        let tarball_sha256 = hex::encode(hasher.finalize());
-
-        let status = tar.wait()?;
+        eprintln!("running: {tar_cmd:?}");
+        let status = tar_cmd.status()?;
         if !status.success() {
             anyhow::bail!("failed to invoke tar to create content tarball");
         }
 
-        Ok(Self { document_id, tarball_sha256 })
+        let mut hasher = Sha256::new();
+        std::io::copy(saved_tarfile.as_file_mut(), &mut hasher)?;
+        let tarball_sha256 = hex::encode(hasher.finalize());
+
+        Ok((Self { document_id, tarball_sha256 }, saved_tarfile))
     }
 
     pub(crate) fn toml_comments(&self) -> Result<String, Error> {

@@ -4,6 +4,7 @@
 // updating everytime someone adds or removes a line.
 //@ normalize-stderr: "created at (.*?)/?compiler/(.+).rs:\d+:\d+" -> "created at compiler/$2.rs:LL:CC"
 //@ normalize-stderr: ".rs:\d+:\d+" -> ".rs:LL:CC"
+//@ normalize-stderr: "/rustc(?:-dev)?/[a-z0-9.]+/" -> ""
 
 struct A;
 struct B;

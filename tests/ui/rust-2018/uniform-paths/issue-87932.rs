@@ -11,7 +11,7 @@ impl issue_87932_a::Deserialize for A {
 
 fn main() {
     A::deserialize();
-    //~^ ERROR no function or associated item named `deserialize` found for struct `A`
+    //~^ ERROR no associated function or constant named `deserialize` found for struct `A`
 }
 
 // ferrocene-annotations: fls_fk2m2irwpeof

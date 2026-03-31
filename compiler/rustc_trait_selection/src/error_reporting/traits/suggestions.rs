@@ -1966,10 +1966,9 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
         let mut span = obligation.cause.span;
         if let DefKind::Closure = self.tcx.def_kind(obligation.cause.body_id)
-            && let parent = self.tcx.parent(obligation.cause.body_id.into())
+            && let parent = self.tcx.local_parent(obligation.cause.body_id)
             && let DefKind::Fn | DefKind::AssocFn = self.tcx.def_kind(parent)
             && self.tcx.asyncness(parent).is_async()
-            && let Some(parent) = parent.as_local()
             && let Node::Item(hir::Item { kind: hir::ItemKind::Fn { sig: fn_sig, .. }, .. })
             | Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Fn(fn_sig, _), .. })
             | Node::TraitItem(hir::TraitItem {
@@ -4037,12 +4036,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             _ => return false,
         };
         let is_derivable_trait = match diagnostic_name {
-            sym::Default => !adt.is_enum(),
+            sym::Copy | sym::Clone => true,
+            _ if adt.is_union() => false,
             sym::PartialEq | sym::PartialOrd => {
                 let rhs_ty = trait_pred.skip_binder().trait_ref.args.type_at(1);
                 trait_pred.skip_binder().self_ty() == rhs_ty
             }
-            sym::Eq | sym::Ord | sym::Clone | sym::Copy | sym::Hash | sym::Debug => true,
+            sym::Eq | sym::Ord | sym::Hash | sym::Debug | sym::Default => true,
             _ => false,
         };
         is_derivable_trait &&

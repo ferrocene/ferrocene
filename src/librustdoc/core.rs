@@ -296,7 +296,7 @@ pub(crate) fn create_config(
         file_loader: None,
         lint_caps,
         psess_created: None,
-        hash_untracked_state: None,
+        track_state: None,
         register_lints: Some(Box::new(crate::lint::register_lints)),
         override_queries: Some(|_sess, providers| {
             // We do not register late module lints, so this only runs `MissingDoc`.
@@ -309,19 +309,14 @@ pub(crate) fn create_config(
                 &EMPTY_SET
             };
             // In case typeck does end up being called, don't ICE in case there were name resolution errors
-            providers.queries.typeck = move |tcx, def_id| {
-                // Closures' tables come from their outermost function,
-                // as they are part of the same "inference environment".
-                // This avoids emitting errors for the parent twice (see similar code in `typeck_with_fallback`)
-                let typeck_root_def_id = tcx.typeck_root_def_id(def_id.to_def_id()).expect_local();
-                if typeck_root_def_id != def_id {
-                    return tcx.typeck(typeck_root_def_id);
-                }
+            providers.queries.typeck_root = move |tcx, def_id| {
+                // Panic before code below breaks in case of someone calls typeck_root directly
+                assert!(!tcx.is_typeck_child(def_id.to_def_id()));
 
                 let body = tcx.hir_body_owned_by(def_id);
                 debug!("visiting body for {def_id:?}");
                 EmitIgnoredResolutionErrors::new(tcx).visit_body(body);
-                (rustc_interface::DEFAULT_QUERY_PROVIDERS.queries.typeck)(tcx, def_id)
+                (rustc_interface::DEFAULT_QUERY_PROVIDERS.queries.typeck_root)(tcx, def_id)
             };
         }),
         extra_symbols: Vec::new(),

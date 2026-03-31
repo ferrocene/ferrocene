@@ -36,7 +36,7 @@ use rustc_hir::definitions::{DefPathData, Definitions, DisambiguatorState};
 use rustc_hir::intravisit::VisitorExt;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::limit::Limit;
-use rustc_hir::{self as hir, CRATE_HIR_ID, HirId, Node, TraitCandidate, find_attr};
+use rustc_hir::{self as hir, CRATE_HIR_ID, HirId, MaybeOwner, Node, TraitCandidate, find_attr};
 use rustc_index::IndexVec;
 use rustc_macros::Diagnostic;
 use rustc_session::Session;
@@ -61,7 +61,7 @@ use crate::middle::codegen_fn_attrs::{CodegenFnAttrs, TargetFeature};
 use crate::middle::resolve_bound_vars;
 use crate::mir::interpret::{self, Allocation, ConstAllocation};
 use crate::mir::{Body, Local, Place, PlaceElem, ProjectionKind, Promoted};
-use crate::query::{IntoQueryParam, LocalCrate, Providers, QuerySystem, TyCtxtAt};
+use crate::query::{IntoQueryKey, LocalCrate, Providers, QuerySystem, TyCtxtAt};
 use crate::thir::Thir;
 use crate::traits;
 use crate::traits::solve::{ExternalConstraints, ExternalConstraintsData, PredefinedOpaques};
@@ -657,6 +657,11 @@ impl<'tcx> TyCtxt<'tcx> {
         debug_assert_eq!(self.def_kind(key), DefKind::AnonConst);
         TyCtxtFeed { tcx: self, key }.type_of(value)
     }
+
+    /// Feeds the HIR delayed owner during AST -> HIR delayed lowering.
+    pub fn feed_delayed_owner(self, key: LocalDefId, owner: MaybeOwner<'tcx>) {
+        TyCtxtFeed { tcx: self, key }.delayed_owner(owner);
+    }
 }
 
 impl<'tcx, KEY: Copy> TyCtxtFeed<'tcx, KEY> {
@@ -894,12 +899,8 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn has_typeck_results(self, def_id: LocalDefId) -> bool {
         // Closures' typeck results come from their outermost function,
         // as they are part of the same "inference environment".
-        let typeck_root_def_id = self.typeck_root_def_id(def_id.to_def_id());
-        if typeck_root_def_id != def_id.to_def_id() {
-            return self.has_typeck_results(typeck_root_def_id.expect_local());
-        }
-
-        self.hir_node_by_def_id(def_id).body_id().is_some()
+        let root = self.typeck_root_def_id_local(def_id);
+        self.hir_node_by_def_id(root).body_id().is_some()
     }
 
     /// Expects a body and returns its codegen attributes.
@@ -1111,10 +1112,9 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Check if the given `def_id` is a `type const` (mgca)
-    pub fn is_type_const<I: Copy + IntoQueryParam<DefId>>(self, def_id: I) -> bool {
-        // No need to call the query directly in this case always false.
-        let def_kind = self.def_kind(def_id.into_query_param());
-        match def_kind {
+    pub fn is_type_const(self, def_id: impl IntoQueryKey<DefId>) -> bool {
+        let def_id = def_id.into_query_key();
+        match self.def_kind(def_id) {
             DefKind::Const { is_type_const } | DefKind::AssocConst { is_type_const } => {
                 is_type_const
             }
@@ -1168,8 +1168,8 @@ impl<'tcx> TyCtxt<'tcx> {
         self.features_query(())
     }
 
-    pub fn def_key(self, id: impl IntoQueryParam<DefId>) -> rustc_hir::definitions::DefKey {
-        let id = id.into_query_param();
+    pub fn def_key(self, id: impl IntoQueryKey<DefId>) -> rustc_hir::definitions::DefKey {
+        let id = id.into_query_key();
         // Accessing the DefKey is ok, since it is part of DefPathHash.
         if let Some(id) = id.as_local() {
             self.definitions_untracked().def_key(id)
@@ -2705,7 +2705,8 @@ impl<'tcx> TyCtxt<'tcx> {
         self.sess.opts.unstable_opts.build_sdylib_interface
     }
 
-    pub fn intrinsic(self, def_id: impl IntoQueryParam<DefId> + Copy) -> Option<ty::IntrinsicDef> {
+    pub fn intrinsic(self, def_id: impl IntoQueryKey<DefId>) -> Option<ty::IntrinsicDef> {
+        let def_id = def_id.into_query_key();
         match self.def_kind(def_id) {
             DefKind::Fn | DefKind::AssocFn => self.intrinsic_raw(def_id),
             _ => None,
@@ -2774,10 +2775,8 @@ impl<'tcx> TyCtxt<'tcx> {
         find_attr!(self, def_id, DoNotRecommend { .. })
     }
 
-    pub fn is_trivial_const<P>(self, def_id: P) -> bool
-    where
-        P: IntoQueryParam<DefId>,
-    {
+    pub fn is_trivial_const(self, def_id: impl IntoQueryKey<DefId>) -> bool {
+        let def_id = def_id.into_query_key();
         self.trivial_const(def_id).is_some()
     }
 

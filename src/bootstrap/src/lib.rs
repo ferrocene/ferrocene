@@ -885,15 +885,13 @@ impl Build {
 
     /// Gets the space-separated set of activated features for the compiler.
     fn rustc_features(&self, kind: Kind, target: TargetSelection, crates: &[String]) -> String {
-        let _possible_features_by_crates: HashSet<_> = crates
+        let possible_features_by_crates: HashSet<_> = crates
             .iter()
             .flat_map(|krate| &self.crates[krate].features)
             .map(std::ops::Deref::deref)
             .collect();
-        let check = |_feature: &str| -> bool {
-            //crates.is_empty() || possible_features_by_crates.contains(feature)
-            // change necessary while resolver is broken
-            true
+        let check = |feature: &str| -> bool {
+            crates.is_empty() || possible_features_by_crates.contains(feature)
         };
         let mut features = vec![];
         if self.config.jemalloc(target) && check("jemalloc") {
@@ -914,6 +912,12 @@ impl Build {
         }
         if self.config.compile_time_deps && kind == Kind::Check {
             features.push("check_only");
+        }
+
+        if crates.iter().any(|c| c == "rustc_transmute") {
+            // for `x test rustc_transmute`, this feature isn't enabled automatically by a
+            // dependent crate.
+            features.push("rustc");
         }
 
         // If debug logging is on, then we want the default for tracing:

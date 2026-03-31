@@ -242,7 +242,10 @@ EOF
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
+RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
+    set -eu
+
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         host_platform=x86_64
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
@@ -255,8 +258,10 @@ RUN <<-EOF
         python-3.12.3-${host_platform} \
         gdb-12.1-${host_platform}
     do
+        filename=mirrors/${tarball}.tar.xz
         echo "extracting $tarball"
-        tar -C /usr/local -xf "mirrors/${tarball}.tar.xz"
+        tar -C /usr/local -xf "$filename"
+        rm "$filename"
     done
 EOF
 

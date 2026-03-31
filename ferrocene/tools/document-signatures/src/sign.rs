@@ -20,7 +20,7 @@ pub(crate) fn sign(
     env: &Env,
 ) -> Result<(), Error> {
     let config = Config::load(source_dir)?;
-    let pinned = Pinned::generate(env, output_dir)?;
+    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir)?;
     let mut signature_files = SignatureFiles::load(source_dir, env)?;
 
     let regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml")? {
@@ -62,6 +62,33 @@ pub(crate) fn sign(
         signature_files.write("pinned.toml", &contents)?;
     }
 
+    let (role_name, contents) = if env.allow_dev_signing {
+        eprintln!(
+            "Warning: using a dev role. These signatures are not suitable for use in production."
+        );
+        let role_name = "(Testing) Ferrocene team member";
+        let contents = b"todo";
+        (role_name.to_owned(), Vec::from(contents))
+    } else {
+        generate_and_load_cosign_bundle(&signature_files, env, &config)?
+    };
+
+    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents)?;
+
+    let filename =
+        output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
+    let cached_path = Path::new("build/host/signature-diffs").join(filename);
+    let (_, tmp_path) = saved_tarfile.keep()?;
+    std::fs::rename(tmp_path, cached_path)?;
+
+    Ok(())
+}
+
+fn generate_and_load_cosign_bundle(
+    signature_files: &SignatureFiles<'_>,
+    env: &Env,
+    config: &Config,
+) -> Result<(String, Vec<u8>), Error> {
     let bundle_temp = NamedTempFile::new()?;
     let pinned_temp = signature_files.on_disk_as_tempfile("pinned.toml")?.unwrap();
     let status = Command::new(&env.cosign_binary)
@@ -88,8 +115,5 @@ pub(crate) fn sign(
         anyhow::bail!("you must authenticate with {}", role_idp.display_name);
     }
 
-    signature_files
-        .write(&format!("{role_name}.cosign-bundle"), &std::fs::read(bundle_temp.path())?)?;
-
-    Ok(())
+    Ok((role_name.to_string(), std::fs::read(bundle_temp.path())?))
 }

@@ -47,6 +47,5 @@ To gather the standard library coverage, we recommend this command:
 
 .. note::
 
-   Doctests are currently not supported when gathering the coverage of the
-   standard library. This limitation will be lifted as soon as doc tests can be
-   merged into one binary.
+   Doctests are not supported when gathering the coverage of the standard
+   library, and the build system will enforce the presence of ``--tests``.

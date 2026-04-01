@@ -80,7 +80,7 @@ s! {
     pub struct dirent_extra {
         pub d_datalen: u16,
         pub d_type: u16,
-        pub d_reserved: u32,
+        d_reserved: Padding<u32>,
     }
 
     pub struct stat {
@@ -182,14 +182,14 @@ s! {
     pub struct sched_param {
         pub sched_priority: c_int,
         pub sched_curpriority: c_int,
-        pub reserved: [c_int; 10],
+        reserved: Padding<[c_int; 10]>,
     }
 
     #[repr(align(8))]
     pub struct __sched_param {
         pub __sched_priority: c_int,
         pub __sched_curpriority: c_int,
-        pub reserved: [c_int; 10],
+        reserved: Padding<[c_int; 10]>,
     }
 
     pub struct Dl_info {
@@ -236,7 +236,7 @@ s! {
         pub _Yes: *mut c_char,
         pub _Nostr: *mut c_char,
         pub _Yesstr: *mut c_char,
-        pub _Reserved: [*mut c_char; 8],
+        _Reserved: Padding<[*mut c_char; 8]>,
     }
 
     // Does not exist in io-sock
@@ -563,7 +563,7 @@ s! {
         pub mode: mode_t,
         pub seq: c_uint,
         pub key: crate::key_t,
-        _reserved: [c_int; 4],
+        _reserved: Padding<[c_int; 4]>,
     }
 
     pub struct regex_t {
@@ -615,7 +615,7 @@ s! {
         pub bs_recv: u64,
         pub bs_drop: u64,
         pub bs_capt: u64,
-        bs_padding: [u64; 13],
+        bs_padding: Padding<[u64; 13]>,
     }
 
     #[cfg(target_env = "nto71_iosock")]
@@ -694,9 +694,9 @@ s! {
 
     pub struct sigevent {
         pub sigev_notify: c_int,
-        pub __padding1: c_int,
+        __padding1: Padding<c_int>,
         pub sigev_signo: c_int, // union
-        pub __padding2: c_int,
+        __padding2: Padding<c_int>,
         pub sigev_value: crate::sigval,
         __sigev_un2: usize, // union
     }
@@ -795,6 +795,23 @@ s_no_extra_traits! {
         pub __owner: c_uint,
         pub __spare: c_uint,
     }
+
+    // There is no canonical definition of c_longdouble in Rust. For both AArch64 and x86_64,
+    // however, the size and alignment properties are that of the gcc __int128 which corresponds (at
+    // least on rustc 1.78+ with LLVM 18, see
+    // https://blog.rust-lang.org/2024/03/30/i128-layout-update/) to i128. Use this instead until we
+    // get native f128 support.
+    //
+    // The definition was taken from the definition of the _Maxalignt struct in the QNX SDK.
+    // However, on QNX7, there is a different definition of std::max_align_t (the C++ version of
+    // this type). In practice, this doesn't make a difference for the _alignment_ properties of the
+    // type - however, it changes the size, so using in in any other form than the zero-sized array
+    // form would be bogus and it would potentially change the size of the data type. On QNX8, this
+    // got fixed and both C and C++ are using the same definition.
+    pub struct max_align_t {
+        _ll: crate::c_longlong,
+        _ld: i128,
+    }
 }
 
 pub const _SYSNAME_SIZE: usize = 256 + 1;
@@ -876,8 +893,18 @@ pub const MS_SYNC: c_int = 2;
 
 pub const SCM_RIGHTS: c_int = 0x01;
 pub const SCM_TIMESTAMP: c_int = 0x02;
+
+// QNX Network Stack Versioning:
+//
+// The `if` block targets the legacy `io-pkt` stack.
+// - target_env = "nto70": QNX 7.0
+// - target_env = "nto71": Standard QNX 7.1 (default legacy stack)
+//
+// The `else` block targets the modern `io-sock` stack.
+// - target_env = "nto71_iosock": QNX 7.1 with the optional new stack
+// - target_env = "nto80": QNX 8.0
 cfg_if! {
-    if #[cfg(not(target_env = "nto71_iosock"))] {
+    if #[cfg(any(target_env = "nto70", target_env = "nto71"))] {
         pub const SCM_CREDS: c_int = 0x04;
         pub const IFF_NOTRAILERS: c_int = 0x00000020;
         pub const AF_INET6: c_int = 24;

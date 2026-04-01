@@ -285,8 +285,8 @@ s! {
     pub struct sockaddr_storage {
         pub ss_len: c_uchar,
         pub ss_family: sa_family_t,
-        pub __ss_padding: [c_char; 122usize],
-        pub __ss_align: __uint32_t,
+        __ss_padding: Padding<[c_char; 122usize]>,
+        __ss_align: __uint32_t,
     }
 
     pub struct sockaddr_at {
@@ -431,6 +431,7 @@ s! {
         pub si_value: crate::sigval,
     }
 
+    #[derive(Default)]
     pub struct timespec {
         pub tv_sec: __time_t,
         pub tv_nsec: __syscall_slong_t,
@@ -596,7 +597,7 @@ s! {
         pub aio_offset: off_t,
         #[cfg(all(not(target_arch = "x86_64"), target_pointer_width = "32"))]
         __unused1: Padding<[c_char; 4]>,
-        __glibc_reserved: [c_char; 32],
+        __glibc_reserved: Padding<[c_char; 32]>,
     }
 
     pub struct mq_attr {
@@ -634,8 +635,8 @@ s! {
         pub __shpid: c_int,
         pub __type: c_int,
         pub __flags: c_int,
-        pub __reserved1: c_uint,
-        pub __reserved2: c_uint,
+        __reserved1: Padding<c_uint>,
+        __reserved2: Padding<c_uint>,
     }
 
     pub struct __pthread_condattr {
@@ -708,7 +709,7 @@ s! {
     }
 
     pub struct _IO_FILE {
-        _unused: [u8; 0],
+        _unused: Padding<[u8; 0]>,
     }
 
     pub struct sched_param {
@@ -1041,7 +1042,7 @@ s! {
         pub ut_tv: __timeval,
 
         pub ut_addr_v6: [i32; 4],
-        __glibc_reserved: [c_char; 20],
+        __glibc_reserved: Padding<[c_char; 20]>,
     }
 }
 
@@ -3330,8 +3331,8 @@ pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __shpid: 0,
     __type: PTHREAD_MUTEX_TIMED as c_int,
     __flags: 0,
-    __reserved1: 0,
-    __reserved2: 0,
+    __reserved1: Padding::uninit(),
+    __reserved2: Padding::uninit(),
 };
 pub const PTHREAD_COND_INITIALIZER: pthread_cond_t = pthread_cond_t {
     __lock: __PTHREAD_SPIN_LOCK_INITIALIZER,

@@ -5,15 +5,22 @@
 
 set -eux
 
+arch="$1"
+version="$2"
 old_musl=1.1.24
 new_musl=1.2.5
 
-case ${1} in
+case "$arch" in
     loongarch64) musl_version="$new_musl" ;;
     *)
-        [ -n "${RUST_LIBC_UNSTABLE_MUSL_V1_2_3:-}" ] &&
-            musl_version="$new_musl" ||
-            musl_version="$old_musl"
+        case "$version" in
+            old) musl_version="$old_musl" ;;
+            new) musl_version="$new_musl" ;;
+            *)
+                echo "musl version must be set to either 'old' or 'new'"
+                exit 1
+                ;;
+        esac
         ;;
 esac
 
@@ -94,7 +101,7 @@ rm -rf "$musl"
 
 # Alpine follows stable kernel releases, 3.20 uses Linux 6.6 headers.
 alpine_version=3.20
-alpine_git=https://gitlab.alpinelinux.org/alpine/aports
+alpine_git=https://git.alpinelinux.org/aports
 
 # This routine piggybacks on: https://git.alpinelinux.org/aports/tree/main/linux-headers?h=3.20-stable
 git clone -n --depth=1 --filter=tree:0 -b "${alpine_version}-stable" "$alpine_git"
@@ -112,10 +119,14 @@ git clone -n --depth=1 --filter=tree:0 -b "${alpine_version}-stable" "$alpine_gi
         echo "\$sha512sums" > alpine-sha512sums
 EOF
 
-    # Retrieve all the variables
-    sh APKBUILD.vars
+    # Use a mirror since kernel.org can be a bit inconsistent
+    sed -i 's|https://kernel.org/pub/linux/kernel|https://ci-mirrors.rust-lang.org/linux/kernel|g' \
+        APKBUILD.vars
 
     cat APKBUILD.vars
+
+    # Retrieve all the variables
+    sh APKBUILD.vars
 
     kernel_version=$(tr -d "[:space:]" < alpine-kernver)
     pkg_version=$(tr -d "[:space:]" < alpine-pkgver)

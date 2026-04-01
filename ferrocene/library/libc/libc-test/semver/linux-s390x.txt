@@ -99,16 +99,9 @@ SYS_utimes
 SYS_vfork
 TIOCCBRK
 TIOCSBRK
-XCASE
 __psw_t
 flock64
 fpreg_t
 fpregset_t
-getcontext
 greg_t
-makecontext
-mcontext_t
-setcontext
-swapcontext
 termios2
-ucontext_t

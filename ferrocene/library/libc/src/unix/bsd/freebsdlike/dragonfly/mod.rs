@@ -101,7 +101,7 @@ s! {
         pub time_low: u32,
         pub time_mid: u16,
         pub time_hi_and_version: u16,
-        pub clock_seq_hi_and_reserved: u8,
+        clock_seq_hi_and_reserved: Padding<u8>,
         pub clock_seq_low: u8,
         pub node: [u8; 6],
     }
@@ -140,7 +140,7 @@ s! {
         pub st_nlink: crate::nlink_t,
         pub st_dev: crate::dev_t,
         pub st_mode: crate::mode_t,
-        pub st_padding1: u16,
+        st_padding1: Padding<u16>,
         pub st_uid: crate::uid_t,
         pub st_gid: crate::gid_t,
         pub st_rdev: crate::dev_t,
@@ -215,7 +215,7 @@ s! {
         pub cr_uid: crate::uid_t,
         pub cr_ngroups: c_short,
         pub cr_groups: [crate::gid_t; 16],
-        __cr_unused1: *mut c_void,
+        __cr_unused1: Padding<*mut c_void>,
     }
 
     pub struct stack_t {
@@ -260,8 +260,8 @@ s! {
         pub cp_sys: u64,
         pub cp_intr: u64,
         pub cp_idel: u64,
-        cp_unused01: u64,
-        cp_unused02: u64,
+        cp_unused01: Padding<u64>,
+        cp_unused02: Padding<u64>,
         pub cp_sample_pc: u64,
         pub cp_sample_sp: u64,
         pub cp_msg: [c_char; 32],
@@ -382,8 +382,8 @@ s! {
         pub vm_daddr: *mut c_char,
         pub vm_maxsaddr: *mut c_char,
         pub vm_minsaddr: *mut c_char,
-        _unused1: c_int,
-        _unused2: c_int,
+        _unused1: Padding<c_int>,
+        _unused2: Padding<c_int>,
         pub vm_pagesupply: c_int,
         pub vm_holdcnt: c_uint,
         pub vm_refcnt: c_uint,
@@ -417,14 +417,14 @@ s! {
         pub ut_line: [c_char; 32],
         pub ut_host: [c_char; 256],
 
-        pub ut_unused: [u8; 16],
+        ut_unused: Padding<[u8; 16]>,
         pub ut_session: u16,
         pub ut_type: u16,
         pub ut_pid: crate::pid_t,
         ut_exit: exit_status,
         ut_ss: crate::sockaddr_storage,
         pub ut_tv: crate::timeval,
-        pub ut_unused2: [u8; 16],
+        ut_unused2: Padding<[u8; 16]>,
     }
 
     pub struct lastlogx {

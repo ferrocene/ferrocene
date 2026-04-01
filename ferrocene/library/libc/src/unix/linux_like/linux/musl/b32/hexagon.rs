@@ -12,17 +12,30 @@ s! {
         pub st_uid: c_uint,
         pub st_gid: c_uint,
         pub st_rdev: c_ulonglong,
-        __st_rdev_padding: c_ulong,
+        __st_rdev_padding: Padding<c_ulong>,
         pub st_size: c_longlong,
         pub st_blksize: crate::blksize_t,
-        __st_blksize_padding: c_int,
+        __st_blksize_padding: Padding<c_int>,
         pub st_blocks: crate::blkcnt_t,
+
         pub st_atime: crate::time_t,
+        #[cfg(all(musl32_time64, target_endian = "big"))]
+        __pad0: Padding<u32>,
         pub st_atime_nsec: c_long,
+        #[cfg(all(musl32_time64, target_endian = "little"))]
+        __pad0: Padding<u32>,
         pub st_mtime: crate::time_t,
+        #[cfg(all(musl32_time64, target_endian = "big"))]
+        __pad1: Padding<u32>,
         pub st_mtime_nsec: c_long,
+        #[cfg(all(musl32_time64, target_endian = "little"))]
+        __pad1: Padding<u32>,
         pub st_ctime: crate::time_t,
+        #[cfg(all(musl32_time64, target_endian = "big"))]
+        __pad2: Padding<u32>,
         pub st_ctime_nsec: c_long,
+        #[cfg(all(musl32_time64, target_endian = "little"))]
+        __pad2: Padding<u32>,
 
         __unused: Padding<[c_int; 2]>,
     }

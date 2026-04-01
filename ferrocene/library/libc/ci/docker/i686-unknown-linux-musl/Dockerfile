@@ -1,9 +1,6 @@
-FROM ubuntu:23.10
+FROM ubuntu:25.04
 
-# FIXME(time): we are using an EOL release because 24.04 changes to 64-bit time
-RUN sed -i -E 's/(archive|security)\.ubuntu\.com/old-releases.ubuntu.com/g' \
-        /etc/apt/sources.list && \
-    dpkg --add-architecture i386 && \
+RUN dpkg --add-architecture i386 && \
     apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -16,9 +13,10 @@ RUN sed -i -E 's/(archive|security)\.ubuntu\.com/old-releases.ubuntu.com/g' \
         rsync \
         xz-utils
 
+ARG MUSL_VERSION
 COPY install-musl.sh /
-RUN /install-musl.sh i686
+RUN /install-musl.sh i686 "$MUSL_VERSION"
 
 ENV PATH=$PATH:/musl-i686/bin:/rust/bin \
     CC_i686_unknown_linux_musl=musl-gcc \
-    RUSTFLAGS="-L /musl-i686/lib"
+    EXTRA_RUSTFLAGS="-L /musl-i686/lib"

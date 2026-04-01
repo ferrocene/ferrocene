@@ -117,7 +117,6 @@ LOGIN_PROCESS
 Lmid_t
 MADV_COLLAPSE
 MAXTC
-MAX_LINKS
 MINIX2_SUPER_MAGIC
 MINIX2_SUPER_MAGIC2
 MINIX3_SUPER_MAGIC
@@ -349,6 +348,7 @@ PR_SET_VMA_ANON_NAME
 PTHREAD_MUTEX_ADAPTIVE_NP
 PTRACE_GET_SYSCALL_INFO
 PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG
+PTRACE_SET_SYSCALL_INFO
 PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG
 PTRACE_SYSCALL_INFO_ENTRY
 PTRACE_SYSCALL_INFO_EXIT
@@ -454,6 +454,7 @@ STA_PPSWANDER
 STA_RONLY
 STA_UNSYNC
 ST_RELATIME
+SUN_LEN
 SYSFS_MAGIC
 TCA_CHAIN
 TCA_DUMP_INVISIBLE
@@ -636,9 +637,6 @@ malloc_usable_size
 mallopt
 mempcpy
 mq_notify
-nl_mmap_hdr
-nl_mmap_req
-nl_pktinfo
 ntp_adjtime
 ntp_gettime
 ntptimeval
@@ -659,6 +657,8 @@ pthread_attr_setaffinity_np
 pthread_rwlockattr_getkind_np
 pthread_rwlockattr_getpshared
 pthread_rwlockattr_setkind_np
+pthread_timedjoin_np
+pthread_tryjoin_np
 ptrace_peeksiginfo_args
 ptrace_sud_config
 ptrace_syscall_info
@@ -678,6 +678,7 @@ sgetspent_r
 statx
 statx_timestamp
 tcp_info
+tgkill
 timex
 utmpname
 utmpx

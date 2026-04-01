@@ -135,8 +135,10 @@ macro_rules! prelude {
     };
 }
 
-/// Implement `Clone` and `Copy` for a struct, as well as `Debug`, `Eq`, `Hash`, and
-/// `PartialEq` if the `extra_traits` feature is enabled.
+/// Implement `Clone`, `Copy`, and `Debug` for one or more structs, as well as `PartialEq`, `Eq`,
+/// and `Hash` if the `extra_traits` feature is enabled.
+///
+/// Also mark the type with `repr(C)`.
 ///
 /// Use [`s_no_extra_traits`] for structs where the `extra_traits` feature does not
 /// make sense, and for unions.
@@ -153,53 +155,52 @@ macro_rules! s {
     );
 
     (it: $(#[$attr:meta])* $pub:vis struct $i:ident { $($field:tt)* }) => (
-        __item! {
-            #[repr(C)]
-            #[::core::prelude::v1::derive(
-                ::core::clone::Clone,
-                ::core::marker::Copy,
-                ::core::fmt::Debug,
-            )]
-            #[cfg_attr(
-                feature = "extra_traits",
-                ::core::prelude::v1::derive(Eq, Hash, PartialEq)
-            )]
-            #[allow(deprecated)]
-            $(#[$attr])*
-            $pub struct $i { $($field)* }
-        }
+        #[repr(C)]
+        #[::core::prelude::v1::derive(
+            ::core::clone::Clone,
+            ::core::marker::Copy,
+            ::core::fmt::Debug,
+        )]
+        #[cfg_attr(
+            feature = "extra_traits",
+            ::core::prelude::v1::derive(PartialEq, Eq, Hash)
+        )]
+        #[allow(deprecated)]
+        $(#[$attr])*
+        $pub struct $i { $($field)* }
     );
 }
 
-/// Implement `Clone` and `Copy` for a tuple struct, as well as `Debug`, `Eq`, `Hash`,
-/// and `PartialEq` if the `extra_traits` feature is enabled.
+/// Implement `Clone`, `Copy`, and `Debug` for a tuple struct, as well as `PartialEq`, `Eq`,
+/// and `Hash` if the `extra_traits` feature is enabled.
 ///
-/// This is the same as [`s`] but works for tuple structs.
+/// Unlike `s!`, this does *not* mark the type with `repr(C)`. Users should provide their own
+/// `repr` attribute via `$attr` as necessary.
 macro_rules! s_paren {
     ($(
         $(#[$attr:meta])*
-        pub struct $i:ident ( $($field:tt)* );
+        $pub:vis struct $i:ident ( $($field:tt)* );
     )*) => ($(
-        __item! {
-            #[cfg_attr(
-                feature = "extra_traits",
-                ::core::prelude::v1::derive(Eq, Hash, PartialEq)
-            )]
-            #[::core::prelude::v1::derive(
-                ::core::clone::Clone,
-                ::core::marker::Copy,
-                ::core::fmt::Debug,
-            )]
-            $(#[$attr])*
-            pub struct $i ( $($field)* );
-        }
+        #[::core::prelude::v1::derive(
+            ::core::clone::Clone,
+            ::core::marker::Copy,
+            ::core::fmt::Debug,
+        )]
+        #[cfg_attr(
+            feature = "extra_traits",
+            ::core::prelude::v1::derive(PartialEq, Eq, Hash)
+        )]
+        $(#[$attr])*
+        $pub struct $i ( $($field)* );
     )*);
 }
 
-/// Implement `Clone`, `Copy`, and `Debug` since those can be derived, but exclude `PartialEq`,
+/// Implement `Clone`, `Copy`, and `Debug` for one or more structs/unions, but exclude `PartialEq`,
 /// `Eq`, and `Hash`.
 ///
-/// Most items will prefer to use [`s`].
+/// Also mark the type with `repr(C)`.
+///
+/// Most structs will prefer to use [`s`].
 macro_rules! s_no_extra_traits {
     ($(
         $(#[$attr:meta])*
@@ -209,12 +210,13 @@ macro_rules! s_no_extra_traits {
     )*);
 
     (it: $(#[$attr:meta])* $pub:vis union $i:ident { $($field:tt)* }) => (
-        __item! {
-            #[repr(C)]
-            #[::core::prelude::v1::derive(::core::clone::Clone, ::core::marker::Copy)]
-            $(#[$attr])*
-            $pub union $i { $($field)* }
-        }
+        #[repr(C)]
+        #[::core::prelude::v1::derive(
+            ::core::clone::Clone,
+            ::core::marker::Copy,
+        )]
+        $(#[$attr])*
+        $pub union $i { $($field)* }
 
         impl ::core::fmt::Debug for $i {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -224,16 +226,14 @@ macro_rules! s_no_extra_traits {
     );
 
     (it: $(#[$attr:meta])* $pub:vis struct $i:ident { $($field:tt)* }) => (
-        __item! {
-            #[repr(C)]
-            #[::core::prelude::v1::derive(
-                ::core::clone::Clone,
-                ::core::marker::Copy,
-                ::core::fmt::Debug,
-            )]
-            $(#[$attr])*
-            $pub struct $i { $($field)* }
-        }
+        #[repr(C)]
+        #[::core::prelude::v1::derive(
+            ::core::clone::Clone,
+            ::core::marker::Copy,
+            ::core::fmt::Debug,
+        )]
+        $(#[$attr])*
+        $pub struct $i { $($field)* }
     );
 }
 
@@ -268,19 +268,17 @@ macro_rules! e {
         $(#[$attr:meta])*
         pub enum $i:ident { $($field:tt)* }
     )*) => ($(
-        __item! {
-            #[cfg_attr(
-                feature = "extra_traits",
-                ::core::prelude::v1::derive(Eq, Hash, PartialEq)
-            )]
-            #[::core::prelude::v1::derive(
-                ::core::clone::Clone,
-                ::core::marker::Copy,
-                ::core::fmt::Debug,
-            )]
-            $(#[$attr])*
-            pub enum $i { $($field)* }
-        }
+        #[cfg_attr(
+            feature = "extra_traits",
+            ::core::prelude::v1::derive(Eq, Hash, PartialEq)
+        )]
+        #[::core::prelude::v1::derive(
+            ::core::clone::Clone,
+            ::core::marker::Copy,
+            ::core::fmt::Debug,
+        )]
+        $(#[$attr])*
+        pub enum $i { $($field)* }
     )*);
 }
 
@@ -407,12 +405,6 @@ macro_rules! safe_f {
     )+};
 }
 
-macro_rules! __item {
-    ($i:item) => {
-        $i
-    };
-}
-
 // This macro is used to deprecate items that should be accessed via the mach2 crate
 macro_rules! deprecated_mach {
     (pub const $id:ident: $ty:ty = $expr:expr;) => {
@@ -456,10 +448,12 @@ macro_rules! offset_of {
         let $Ty { $field: _, .. };
         let data = core::mem::MaybeUninit::<$Ty>::uninit();
         let ptr = data.as_ptr();
+        // nested unsafe, see f!
+        #[allow(unused_unsafe)]
         // SAFETY: computed address is inbounds since we have a stack alloc for T
         let fptr = unsafe { core::ptr::addr_of!((*ptr).$field) };
         let off = (fptr as usize).checked_sub(ptr as usize).unwrap();
-        assert!(off <= core::mem::size_of::<$Ty>());
+        core::assert!(off <= core::mem::size_of::<$Ty>());
         off
     }};
 }

@@ -4,3 +4,6 @@
 
 pub(crate) mod can;
 pub(crate) mod keyctl;
+pub(crate) mod membarrier;
+pub(crate) mod netlink;
+pub(crate) mod pidfd;

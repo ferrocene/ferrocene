@@ -417,7 +417,7 @@ s! {
         m_ceilings: [u32; 2],
         m_rb_link: crate::uintptr_t,
         #[cfg(target_pointer_width = "32")]
-        m_pad: u32,
+        m_pad: Padding<u32>,
         m_spare: [u32; 2],
     }
 
@@ -432,7 +432,7 @@ s! {
         pub time_low: u32,
         pub time_mid: u16,
         pub time_hi_and_version: u16,
-        pub clock_seq_hi_and_reserved: u8,
+        clock_seq_hi_and_reserved: Padding<u8>,
         pub clock_seq_low: u8,
         pub node: [u8; _UUID_NODE_LEN],
     }
@@ -559,8 +559,8 @@ s! {
         pub ksw_used: u_int,
         pub ksw_total: u_int,
         pub ksw_flags: c_int,
-        pub ksw_reserved1: u_int,
-        pub ksw_reserved2: u_int,
+        ksw_reserved1: Padding<u_int>,
+        ksw_reserved2: Padding<u_int>,
     }
 
     pub struct nlist {
@@ -1654,7 +1654,7 @@ s! {
 
 s_no_extra_traits! {
     pub union __c_anonymous_cr_pid {
-        __cr_unused: *mut c_void,
+        __cr_unused: Padding<*mut c_void>,
         pub cr_pid: crate::pid_t,
     }
 
@@ -1727,7 +1727,7 @@ s_no_extra_traits! {
     }
 
     pub struct in_addr_4in6 {
-        _ia46_pad32: [u32; 3],
+        _ia46_pad32: Padding<[u32; 3]>,
         pub ia46_addr4: crate::in_addr,
     }
 
@@ -4643,6 +4643,12 @@ extern "C" {
     pub fn pthread_spin_lock(lock: *mut pthread_spinlock_t) -> c_int;
     pub fn pthread_spin_trylock(lock: *mut pthread_spinlock_t) -> c_int;
     pub fn pthread_spin_unlock(lock: *mut pthread_spinlock_t) -> c_int;
+
+    pub fn pthread_timedjoin_np(
+        thread: crate::pthread_t,
+        retval: *mut *mut c_void,
+        abstime: *const crate::timespec,
+    ) -> c_int;
 
     #[cfg_attr(all(target_os = "freebsd", freebsd11), link_name = "statfs@FBSD_1.0")]
     pub fn statfs(path: *const c_char, buf: *mut statfs) -> c_int;

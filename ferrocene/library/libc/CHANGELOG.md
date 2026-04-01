@@ -1,5 +1,139 @@
 # Changelog
 
+## [0.2.183](https://github.com/rust-lang/libc/compare/0.2.182...0.2.183) - 2026-03-08
+
+### Added
+
+- ESP-IDF: Add `SOMAXCONN` ([#4993](https://github.com/rust-lang/libc/pull/4993))
+- Linux: Add `name_to_handle_at` and `open_by_handle_at` ([#4988](https://github.com/rust-lang/libc/pull/4988))
+- NetBSD: Add `kinfo_file`, `kinfo_pcb`, and related constants ([#4985](https://github.com/rust-lang/libc/pull/4985))
+- OpenBSD: Add `kinfo_file` and related constants ([#4991](https://github.com/rust-lang/libc/pull/4991))
+- VxWorks: Add additional structs and defines ([#5003](https://github.com/rust-lang/libc/pull/5003))
+- Various: Implement `Default` for `timeval` and `timespec` ([#4976](https://github.com/rust-lang/libc/pull/4976))
+
+### Fixed
+
+- Hexagon musl: Enable unstable 64-bit `time_t` support and `musl_v1_2_3` ([#4992](https://github.com/rust-lang/libc/pull/4992))
+- Nintendo Switch: Fix target support ([#4982](https://github.com/rust-lang/libc/pull/4982))
+- OpenBSD: Wrap an unused field in `Padding` ([#4997](https://github.com/rust-lang/libc/pull/4997))
+- Redox: Change `sigaction.sa_flags` to `c_int` ([#4986](https://github.com/rust-lang/libc/pull/4986))
+- Redox: Fix `blkcnt_t` type ([#4994](https://github.com/rust-lang/libc/pull/4994))
+
+## [0.2.182](https://github.com/rust-lang/libc/compare/0.2.181...0.2.182) - 2026-02-13
+
+### Added
+
+- Android, Linux: Add `tgkill` ([#4970](https://github.com/rust-lang/libc/pull/4970))
+- Redox: Add `RENAME_NOREPLACE` ([#4968](https://github.com/rust-lang/libc/pull/4968))
+- Redox: Add `renameat2` ([#4968](https://github.com/rust-lang/libc/pull/4968))
+
+
+## [0.2.181](https://github.com/rust-lang/libc/compare/0.2.180...0.2.181) - 2026-02-09
+
+### Added
+
+- Apple: Add `MADV_ZERO` ([#4924](https://github.com/rust-lang/libc/pull/4924))
+- Redox: Add `makedev`, `major`, and `minor` ([#4928](https://github.com/rust-lang/libc/pull/4928))
+- GLibc: Add `PTRACE_SET_SYSCALL_INFO` ([#4933](https://github.com/rust-lang/libc/pull/4933))
+- OpenBSD: Add more kqueue related constants for ([#4945](https://github.com/rust-lang/libc/pull/4945))
+- Linux: add CAN error types ([#4944](https://github.com/rust-lang/libc/pull/4944))
+- OpenBSD: Add siginfo_t::si_status ([#4946](https://github.com/rust-lang/libc/pull/4946))
+- QNX NTO: Add `max_align_t` ([#4927](https://github.com/rust-lang/libc/pull/4927))
+- Illumos: Add `_CS_PATH` ([#4956](https://github.com/rust-lang/libc/pull/4956))
+- OpenBSD: add `ppoll` ([#4957](https://github.com/rust-lang/libc/pull/4957))
+
+### Fixed
+
+- **breaking**: Redox: Fix the type of dev_t ([#4928](https://github.com/rust-lang/libc/pull/4928))
+- AIX: Change 'tv_nsec' of 'struct timespec' to type 'c_long' ([#4931](https://github.com/rust-lang/libc/pull/4931))
+- AIX: Use 'struct st_timespec' in 'struct stat{,64}' ([#4931](https://github.com/rust-lang/libc/pull/4931))
+- Glibc: Link old version of `tc{g,s}etattr` ([#4938](https://github.com/rust-lang/libc/pull/4938))
+- Glibc: Link the correct version of `cf{g,s}et{i,o}speed` on mips{32,64}r6 ([#4938](https://github.com/rust-lang/libc/pull/4938))
+- OpenBSD: Fix constness of tm.tm_zone ([#4948](https://github.com/rust-lang/libc/pull/4948))
+- OpenBSD: Fix the definition of `ptrace_thread_state` ([#4947](https://github.com/rust-lang/libc/pull/4947))
+- QuRT: Fix type visibility and defs ([#4932](https://github.com/rust-lang/libc/pull/4932))
+- Redox: Fix values for `PTHREAD_MUTEX_{NORMAL, RECURSIVE}` ([#4943](https://github.com/rust-lang/libc/pull/4943))
+- Various: Mark additional fields as private padding ([#4922](https://github.com/rust-lang/libc/pull/4922))
+
+### Changed
+
+- Fuchsia: Update `SO_*` constants ([#4937](https://github.com/rust-lang/libc/pull/4937))
+- Revert "musl: convert inline timespecs to timespec" (resolves build issues on targets only supported by Musl 1.2.3+ ) ([#4958](https://github.com/rust-lang/libc/pull/4958))
+
+
+## [0.2.180](https://github.com/rust-lang/libc/compare/0.2.179...0.2.180) - 2026-01-08
+
+### Added
+
+- QNX: Add missing BPF and ifreq structures ([#4769](https://github.com/rust-lang/libc/pull/4769))
+
+### Fixed
+
+- Linux, L4Re: address soundness issues of `CMSG_NXTHDR` ([#4903](https://github.com/rust-lang/libc/pull/4903))
+- Linux-like: Handle zero-sized payload differences in `CMSG_NXTHDR` ([#4903](https://github.com/rust-lang/libc/pull/4903))
+- Musl: Fix incorrect definitions of struct stat on some 32-bit architectures ([#4914](https://github.com/rust-lang/libc/pull/4914))
+- NetBSD: RISC-V 64: Correct `mcontext` type definitions ([#4886](https://github.com/rust-lang/libc/pull/4886))
+- uClibc: Re-enable `__SIZEOF_PTHREAD_COND_T` on non-L4Re uclibc ([#4915](https://github.com/rust-lang/libc/pull/4915))
+- uClibc: Restructure Linux `netlink` module to resolve build errors ([#4915](https://github.com/rust-lang/libc/pull/4915))
+
+
+## [0.2.179](https://github.com/rust-lang/libc/compare/0.2.178...0.2.179) - 2025-01-03
+
+With this release, we now have _unstable_ support for 64-bit `time_t` on 32-bit
+platforms with both Musl and Glibc. Testing is appreciated!
+
+For now, these can be enabled by setting environment variables during build:
+
+```text
+RUST_LIBC_UNSTABLE_MUSL_V1_2_3=1
+RUST_LIBC_UNSTABLE_GNU_TIME_BITS=64
+```
+
+Note that the exact configuration will change in the future. Setting the
+`MUSL_V1_2_3` variable also enables some newer API unrelated to `time_t`.
+
+### Added
+
+- L4Re: Add uclibc aarch64 support ([#4479](https://github.com/rust-lang/libc/pull/4479))
+- Linux, Android: Add a generic definition for `XCASE` ([#4847](https://github.com/rust-lang/libc/pull/4847))
+- Linux-like: Add `NAME_MAX` ([#4888](https://github.com/rust-lang/libc/pull/4888))
+- Linux: Add `AT_EXECVE_CHECK` ([#4422](https://github.com/rust-lang/libc/pull/4422))
+- Linux: Add the `SUN_LEN` macro ([#4269](https://github.com/rust-lang/libc/pull/4269))
+- Linux: add `getitimer` and `setitimer` ([#4890](https://github.com/rust-lang/libc/pull/4890))
+- Linux: add `pthread_tryjoin_n` and `pthread_timedjoin_np` ([#4887](https://github.com/rust-lang/libc/pull/4887))
+- Musl: Add unstable support for 64-bit `time_t` on 32-bit platforms ([#4463](https://github.com/rust-lang/libc/pull/4463))
+- NetBSD, OpenBSD: Add interface `LINK_STATE_*` definitions from `sys/net/if.h` ([#4751](https://github.com/rust-lang/libc/pull/4751))
+- QuRT: Add support for Qualcomm QuRT ([#4845](https://github.com/rust-lang/libc/pull/4845))
+- Types: Add Padding<T>::uninit() ([#4862](https://github.com/rust-lang/libc/pull/4862))
+
+### Fixed
+
+- Glibc: Link old version of `cf{g,s}et{i,o}speed` ([#4882](https://github.com/rust-lang/libc/pull/4882))
+- L4Re: Fixes for `pthread` ([#4479](https://github.com/rust-lang/libc/pull/4479))
+- L4re: Fix a wide variety of incorrect definitions ([#4479](https://github.com/rust-lang/libc/pull/4479))
+- Musl: Fix the value of `CPU_SETSIZE` on musl 1.2+ ([#4865](https://github.com/rust-lang/libc/pull/4865))
+- Musl: RISC-V: fix public padding fields in `stat/stat64` ([#4463](https://github.com/rust-lang/libc/pull/4463))
+- Musl: s390x: Fix definition of `SIGSTKSZ`/`MINSIGSTKSZ` ([#4884](https://github.com/rust-lang/libc/pull/4884))
+- NetBSD: Arm: Fix `PT_{GET,SET}FPREGS`, `_REG_TIPDR`, and `_REG_{LR,SP}` ([#4899](https://github.com/rust-lang/libc/pull/4899))
+- NetBSD: Fix `if_msghdr` alignment ([#4902](https://github.com/rust-lang/libc/pull/4902))
+- NetBSD: Fix `siginfo_t` layout on 32-bit platforms ([#4904](https://github.com/rust-lang/libc/pull/4904))
+- NetBSD: change definition of `pthread_spin_t` to allow arch redefinition. ([#4899](https://github.com/rust-lang/libc/pull/4899))
+- Newlib: Fix ambiguous glob exports and other warnings for Vita and 3DS ([#4875](https://github.com/rust-lang/libc/pull/4875))
+- QNX: Fix build error ([#4879](https://github.com/rust-lang/libc/pull/4879))
+
+### Changed
+
+- CI: Update CI images to FreeBSD 15.0-release ([#4857](https://github.com/rust-lang/libc/pull/4857))
+- L4Re: Make `pthread` struct fields private ([#4876](https://github.com/rust-lang/libc/pull/4876))
+- Linux, Fuchsia: Mark mq_attr padding area as such ([#4858](https://github.com/rust-lang/libc/pull/4858))
+- Types: Wrap a number of private fields in the `Padding` type ([#4862](https://github.com/rust-lang/libc/pull/4862))
+
+### Removed
+
+- Build: Remove `RUST_LIBC_UNSTABLE_LINUX_TIME_BITS64` ([#4865](https://github.com/rust-lang/libc/pull/4865))
+- WASI: Remove nonexistent clocks ([#4880](https://github.com/rust-lang/libc/pull/4880))
+
+
 ## [0.2.178](https://github.com/rust-lang/libc/compare/0.2.177...0.2.178) - 2025-12-01
 
 ### Added
@@ -22,11 +156,11 @@
 - VxWorks: Add missing defines/functions needed by rust stdlib ([#4779](https://github.com/rust-lang/libc/pull/4779))
 - WASI: Add more definitions for libstd ([#4747](https://github.com/rust-lang/libc/pull/4747))
 
-### Deprecated:
+### Deprecated
 
 - Apple: Deprecate `TIOCREMOTE` ([#4764](https://github.com/rust-lang/libc/pull/4764))
 
-### Fixed:
+### Fixed
 
 Note that there were a large number of fixes on NetBSD for this `libc` release, some of which include minor breakage.
 

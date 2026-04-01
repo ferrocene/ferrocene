@@ -58,6 +58,7 @@ cfg_if! {
         pub(crate) use dragonfly::*;
     } else if #[cfg(target_os = "emscripten")] {
         mod emscripten;
+        pub use emscripten::sched::*;
         pub(crate) use emscripten::*;
     } else if #[cfg(target_os = "espidf")] {
         mod espidf;
@@ -101,12 +102,15 @@ cfg_if! {
     } else if #[cfg(target_os = "openbsd")] {
         mod openbsd;
         pub(crate) use openbsd::*;
+    } else if #[cfg(target_os = "qurt")] {
+        pub mod qurt;
+        pub use qurt::*;
     } else if #[cfg(target_os = "redox")] {
         mod redox;
         // pub(crate) use redox::*;
     } else if #[cfg(target_os = "rtems")] {
         mod rtems;
-        pub(crate) use rtems::*;
+        // pub(crate) use rtems::*;
     } else if #[cfg(target_os = "solaris")] {
         mod solaris;
         pub(crate) use solaris::*;
@@ -150,6 +154,7 @@ cfg_if! {
     } else if #[cfg(any(target_env = "musl", target_env = "ohos"))] {
         // OhOS also uses the musl libc
         mod musl;
+        pub use musl::sched::*;
         pub(crate) use musl::*;
     } else if #[cfg(target_env = "newlib")] {
         mod newlib;
@@ -172,10 +177,14 @@ cfg_if! {
         pub use sys::socket::*;
     } else if #[cfg(target_os = "linux")] {
         pub use linux::can::bcm::*;
+        pub use linux::can::error::*;
         pub use linux::can::j1939::*;
         pub use linux::can::raw::*;
         pub use linux::can::*;
         pub use linux::keyctl::*;
+        pub use linux::membarrier::*;
+        pub use linux::netlink::*;
+        pub use linux::pidfd::*;
         #[cfg(target_env = "gnu")]
         pub use net::route::*;
     } else if #[cfg(target_vendor = "apple")] {
@@ -187,7 +196,9 @@ cfg_if! {
         pub use signal::*;
     } else if #[cfg(target_os = "netbsd")] {
         pub use net::if_::*;
+        pub use sys::file::*;
         pub use sys::ipc::*;
+        pub use sys::socket::*;
         pub use sys::statvfs::*;
         pub use sys::time::*;
         pub use sys::timex::*;
@@ -196,6 +207,9 @@ cfg_if! {
         pub use utmpx_::*;
     } else if #[cfg(target_os = "openbsd")] {
         pub use sys::ipc::*;
+    } else if #[cfg(target_os = "nto")] {
+        pub use net::bpf::*;
+        pub use net::if_::*;
     }
 }
 
@@ -208,7 +222,7 @@ cfg_if! {
 
 // Per-family headers we export
 cfg_if! {
-    if #[cfg(target_family = "unix")] {
+    if #[cfg(all(target_family = "unix", not(target_os = "qurt")))] {
         // FIXME(pthread): eventually all platforms should use this module
         #[cfg(any(
             target_os = "android",

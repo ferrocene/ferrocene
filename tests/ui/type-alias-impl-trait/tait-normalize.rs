@@ -1,4 +1,5 @@
 //@ revisions: current next
+//@ edition: 2015
 //@ [next] compile-flags: -Znext-solver
 //@ check-pass
 

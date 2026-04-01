@@ -3,6 +3,7 @@
 // `y` module entirely (but not the `x` module).
 
 //@ revisions:rpass1 rpass2
+//@ edition: 2015
 //@ compile-flags: -Z query-dep-graph
 //@ ignore-backends: gcc
 

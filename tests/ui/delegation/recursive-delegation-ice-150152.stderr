@@ -10,7 +10,7 @@ error[E0425]: cannot find type `S` in this scope
 LL |     impl Trait for S {
    |                    ^ not found in this scope
    |
-note: struct `first_example::S` exists but is inaccessible
+note: struct `crate::first_example::S` exists but is inaccessible
   --> $DIR/recursive-delegation-ice-150152.rs:6:5
    |
 LL |     struct S< S >;
@@ -26,10 +26,10 @@ note: these functions exist but are inaccessible
   --> $DIR/recursive-delegation-ice-150152.rs:5:20
    |
 LL |     mod to_reuse { pub fn foo() {} }
-   |                    ^^^^^^^^^^^^ `first_example::to_reuse::foo`: not accessible
+   |                    ^^^^^^^^^^^^ `crate::first_example::to_reuse::foo`: not accessible
 ...
 LL |         fn foo() {}
-   |         ^^^^^^^^ `second_example::to_reuse::foo`: not accessible
+   |         ^^^^^^^^ `crate::second_example::to_reuse::foo`: not accessible
 
 error[E0603]: function `foo` is private
   --> $DIR/recursive-delegation-ice-150152.rs:18:25

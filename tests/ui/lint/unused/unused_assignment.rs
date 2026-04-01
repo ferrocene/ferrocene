@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Unused assignments to an unused variable should trigger only the `unused_variables` lint and not
 // also the `unused_assignments` lint.  This test covers the situation where the span of the unused
 // variable identifier comes from a different scope to the binding pattern - here, from a proc

@@ -1,6 +1,7 @@
 extern crate std;
 #[attr = PreludeImport]
 use ::std::prelude::rust_2015::*;
+//@ edition: 2015
 //@ pretty-compare-only
 //@ pretty-mode:hir
 //@ pp-exact:hir-fn-params.pp

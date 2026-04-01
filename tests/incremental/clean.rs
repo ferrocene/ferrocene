@@ -1,5 +1,6 @@
 //@ revisions: rpass1 cfail2
 //@ compile-flags: -Z query-dep-graph
+//@ edition: 2015
 //@ ignore-backends: gcc
 
 #![allow(warnings)]

@@ -10,6 +10,7 @@ mod cmp;
 mod floats;
 mod fmt;
 mod hash;
+mod hint;
 mod intrinsics;
 mod iter;
 mod macros;

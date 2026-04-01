@@ -848,6 +848,10 @@ where
 
     impl<T> Drop for DropOnPanic<T> {
         #[ferrocene::prevalidated]
+        #[ferrocene::annotation(
+            "This drop implementation is being executed, as proven by `coretests::ferrocene::hint::test_select_unpredictable_runs_destructor`. \
+            The fact that is shown as uncovered is a bug in our coverage tooling."
+        )]
         fn drop(&mut self) {
             // SAFETY: Must be guaranteed on construction of local type `DropOnPanic`.
             unsafe { self.inner.drop_in_place() }

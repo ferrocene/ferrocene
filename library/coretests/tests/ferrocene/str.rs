@@ -278,3 +278,9 @@ fn foo() {
 
     assert_eq!(format!("{x:?}"), "Utf8Chunks { source: \"hello\" }");
 }
+
+// covers `core::str::count::do_count_chars`.
+#[test]
+fn test_do_count_chars_unlikely() {
+    core::str::test_do_count_chars("", 0);
+}

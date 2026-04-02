@@ -78,3 +78,11 @@ fn clone_from() {
     res.clone_from(&Err(2));
     assert_eq!(res, Err(2));
 }
+
+// covers `core::result::Result::<T, E>::unwrap`.
+#[test]
+#[should_panic = "this is an error!"]
+fn unwrap_err() {
+    let err = Result::<i32, &str>::Err("this is an error!");
+    err.unwrap();
+}

@@ -180,7 +180,12 @@ fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
 /// These functions exist only to allow code using `.subset` targets to compile,
 /// and will be removed once `#[ferrocene::certified] is implemented.
 fn should_filter_out(qualified_name: &str) -> bool {
-    const FILTER_LIST: &[&str] = &["<core::core_arch::", "core::core_arch::"];
+    const FILTER_LIST: &[&str] = &[
+        "<core::core_arch::",
+        "core::core_arch::",
+        "<core::ferrocene_test::",
+        "core::ferrocene_test::",
+    ];
 
     FILTER_LIST.iter().any(|filter| qualified_name.starts_with(filter))
 }

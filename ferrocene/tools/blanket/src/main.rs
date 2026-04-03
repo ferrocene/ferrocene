@@ -139,7 +139,7 @@ impl FunctionCoverageStatus {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum Annotated {
     Fully,
     Partially,
@@ -298,20 +298,23 @@ impl ShowCommand {
 
         let total = coverage.len();
         let mut count_fully_tested = 0;
+        let mut count_fully_annotated = 0;
         let mut count_partially_tested = 0;
         let mut count_fully_untested = 0;
         let mut count_fully_ignored = 0;
         for function in &coverage {
             match function.status {
                 FunctionCoverageStatus::FullyTested => count_fully_tested += 1,
+                FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
+                _ if function.annotated == Annotated::Fully => count_fully_annotated += 1,
                 FunctionCoverageStatus::PartiallyTested => count_partially_tested += 1,
                 FunctionCoverageStatus::FullyUntested => count_fully_untested += 1,
-                FunctionCoverageStatus::FullyIgnored => count_fully_ignored += 1,
             };
         }
         println!(
             "---\n\
             Fully Tested: {count_fully_tested}\n\
+            Fully Annotated: {count_fully_annotated}\n\
             Partially tested: {count_partially_tested}\n\
             Fully untested: {count_fully_untested}\n\
             Fully ignored: {count_fully_ignored}\n\

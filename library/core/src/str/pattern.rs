@@ -470,6 +470,8 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
                         if slice == &self.utf8_encoded[0..self.utf8_size()] {
                             return Some((found_char, self.finger));
                         }
+                    } else {
+                        panic!("flush out possible coverage tests");
                     }
                 }
             } else {

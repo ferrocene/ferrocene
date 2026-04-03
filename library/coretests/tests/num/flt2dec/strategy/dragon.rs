@@ -68,3 +68,65 @@ fn test_to_exact_exp_str() {
 fn test_to_exact_fixed_str() {
     to_exact_fixed_str_test(format_exact);
 }
+
+#[test]
+fn exhaustive_test_dragon_f32() {
+    // We only need to test finite non-zero numbers.
+    let mut buf = Vec::with_capacity(MAX_SIG_DIGITS);
+    let slice = buf.spare_capacity_mut();
+    let mut f = f32::MIN;
+    let mut i = 0;
+    eprintln!("starting");
+    while f != f32::INFINITY {
+        if i % 1_000_000 == 0 {
+            eprintln!("i={i}");
+        }
+        let (_negative, full_decoded) = decode(f);
+        if let FullDecoded::Finite(decoded) = full_decoded {
+            format_shortest(&decoded, slice);
+        }
+        f = f.next_up();
+        i += 1;
+    }
+}
+
+fn exhaustive_test_dragon_f64_range(start: f64, end: f64, thread_name: &str) {
+    // See `flt2dec::to_shortest_exp_str`.
+    // We only need to test finite non-zero numbers.
+    let mut buf = Vec::with_capacity(MAX_SIG_DIGITS);
+    let slice = buf.spare_capacity_mut();
+    let mut f = start;
+    let mut i = 0;
+    while f != end {
+        if i % 100_000_000 == 0 {
+            eprintln!("{thread_name}: i={i}");
+        }
+        let (_negative, full_decoded) = decode(f);
+        if let FullDecoded::Finite(decoded) = full_decoded {
+            format_shortest(&decoded, slice);
+        }
+        f = f.next_up();
+        i += 1;
+    }
+}
+
+#[test]
+fn exhaustive_test_dragon_f64() {
+    let cores = 31; // change this if you're running on a weaker machine
+    let bucket_size = u64::MAX / cores;
+    let ranges: Vec<_> = (0..cores).map(|bucket| (bucket*bucket_size, (bucket+1)*bucket_size)).collect();
+    eprintln!("testing ranges: {ranges:?}");
+    // Start all the threads.
+    let handles: Vec<_> = ranges.into_iter().enumerate().map(|(i, (range_start, range_end))| {
+        std::thread::spawn(move || {
+            exhaustive_test_dragon_f64_range(f64::from_bits(range_start), f64::from_bits(range_end), &i.to_string());
+        })
+    }).collect();
+    for handle in handles {
+        if let Err(e) = handle.join() {
+            eprintln!("error joining handle! {e:?}");
+        } else {
+            eprintln!("joined handle");
+        }
+    }
+}

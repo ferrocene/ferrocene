@@ -114,7 +114,7 @@ fn main() {
 
     // When statically linking `std` into `rustc_driver`, remove `-C prefer-dynamic`
     if env::var("RUSTC_LINK_STD_INTO_RUSTC_DRIVER").unwrap() == "1"
-        && crate_name == Some("rustc_driver")
+        //&& crate_name == Some("rustc_driver")
     {
         if let Some(pos) = args.iter().enumerate().position(|(i, a)| {
             a == "-C" && args.get(i + 1).map(|a| a == "prefer-dynamic").unwrap_or(false)

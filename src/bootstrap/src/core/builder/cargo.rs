@@ -1375,7 +1375,7 @@ impl Builder<'_> {
         // usage, so make sure we pass the -Cprefer-dynamic flag instead of
         // linking all deps statically into the dylib.
         if matches!(mode, Mode::Std) {
-            rustflags.arg("-Cprefer-dynamic");
+            //rustflags.arg("-Cprefer-dynamic");
         }
         if matches!(mode, Mode::Rustc) && !self.link_std_into_rustc_driver(target) {
             rustflags.arg("-Cprefer-dynamic");

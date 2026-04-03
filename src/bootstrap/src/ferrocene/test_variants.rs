@@ -34,6 +34,7 @@ use build_helper::metrics::FerroceneVariantMetadata;
 
 use crate::Subcommand;
 use crate::builder::Builder;
+use crate::core::builder::Cargo;
 use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
 
@@ -43,10 +44,14 @@ pub enum TestVariantName {
     Ed2021,
     #[clap(name = "2021-cortex-a53")]
     Ed2021CortexA53,
+    #[clap(name = "2021-specific-cortex-a53")]
+    Ed2021SpecificCortexA53,
     #[clap(name = "2021-neoverse-v1")]
     Ed2021NeoverseV1,
     #[clap(name = "2021-cortex-m4")]
     Ed2021CortexM4,
+    #[clap(name = "2021-specific-cortex-m4")]
+    Ed2021SpecificCortexM4,
 }
 
 impl TestVariantName {
@@ -62,12 +67,21 @@ impl TestVariantName {
             Self::Ed2021CortexA53 => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-a53"))
             }
+            Self::Ed2021SpecificCortexA53 => TestVariantBase::new()
+                .edition(Edition("2015"))
+                .qemu_cpu(QemuCpu("cortex-a53"))
+                .target_cpu(TargetCpu("cortex-a53")),
             Self::Ed2021NeoverseV1 => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("neoverse-v1"))
             }
             Self::Ed2021CortexM4 => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
-            } // INTERNAL_PROCEDURES_END_TEST_VARIANTS
+            }
+            Self::Ed2021SpecificCortexM4 => TestVariantBase::new()
+                .edition(Edition("2015"))
+                .qemu_cpu(QemuCpu("cortex-m4"))
+                .target_cpu(TargetCpu("cortex-m4")),
+            // INTERNAL_PROCEDURES_END_TEST_VARIANTS
         }
     }
 
@@ -156,14 +170,16 @@ macro_rules! define_conditions {
 define_conditions! {
     edition: Edition,
     qemu_cpu: QemuCpu,
+    target_cpu: TargetCpu,
 }
 
 #[cfg_attr(not(feature = "build-metrics"), allow(dead_code))]
 pub(crate) trait TestCondition {
     const PREFIX: &'static str;
     const READABLE_NAME: &'static str;
+    type Command;
 
-    fn apply(&self, cmd: &mut BootstrapCommand);
+    fn apply(&self, cmd: &mut Self::Command);
 
     fn display(&self) -> impl core::fmt::Display;
 }
@@ -173,8 +189,9 @@ pub(crate) struct Edition(&'static str);
 impl TestCondition for Edition {
     const PREFIX: &'static str = "e";
     const READABLE_NAME: &'static str = "Edition";
+    type Command = BootstrapCommand;
 
-    fn apply(&self, cmd: &mut BootstrapCommand) {
+    fn apply(&self, cmd: &mut Self::Command) {
         cmd.arg(&format!("--edition={}", self.0));
     }
 
@@ -188,9 +205,26 @@ pub(crate) struct QemuCpu(&'static str);
 impl TestCondition for QemuCpu {
     const PREFIX: &'static str = "q";
     const READABLE_NAME: &'static str = "Emulated CPU";
+    type Command = BootstrapCommand;
 
-    fn apply(&self, cmd: &mut BootstrapCommand) {
+    fn apply(&self, cmd: &mut Self::Command) {
         cmd.env("QEMU_CPU", self.0);
+    }
+
+    fn display(&self) -> impl core::fmt::Display {
+        self.0
+    }
+}
+
+pub(crate) struct TargetCpu(&'static str);
+
+impl TestCondition for TargetCpu {
+    const PREFIX: &'static str = "t";
+    const READABLE_NAME: &'static str = "Target CPU";
+    type Command = Cargo;
+
+    fn apply(&self, cmd: &mut Self::Command) {
+        cmd.rustflag(&format!("-Ctarget-cpu={}", self.0));
     }
 
     fn display(&self) -> impl core::fmt::Display {

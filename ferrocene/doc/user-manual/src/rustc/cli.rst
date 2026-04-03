@@ -297,17 +297,17 @@
       Code generation option ``metadata`` enhances symbol mangling by supplying
       additional data used in the hashed suffixes of symbols.
 
-      ``<data>`` must be a comma-separated list of string literals. The list
+      ``<data>`` must be a space-separated list of string literals. The list
       must contain at least one element.
 
       Example:
 
       .. code-block::
 
-         $ rustc -C metadata=prod,arm32 my_program.rs
+         $ rustc -C metadata="prod arm32" my_program.rs
 
       Multiple ``metadata`` code generation options are allowed on the command
-      line, where precedence increases from left to right.
+      line, and will be concatenated from left to right.
 
    .. cli:option:: -C no-vectorize-loops
       :category: unqualified

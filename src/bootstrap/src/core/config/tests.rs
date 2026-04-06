@@ -32,6 +32,13 @@ fn get_toml(file: &Path) -> Result<TomlConfig, toml::de::Error> {
     toml::from_str(&contents).and_then(|table: toml::Value| TomlConfig::deserialize(table))
 }
 
+fn modified(upstream: impl Into<String>, changes: &[&str]) -> PathFreshness {
+    PathFreshness::HasLocalModifications {
+        upstream: upstream.into(),
+        modifications: changes.iter().copied().map(PathBuf::from).collect(),
+    }
+}
+
 #[test]
 fn download_ci_llvm() {
     let config = TestCtx::new().config("check").create_config();
@@ -692,7 +699,7 @@ fn test_pr_ci_changed_in_pr() {
         let sha = ctx.create_upstream_merge(&["a"]);
         ctx.create_nonupstream_merge(&["b"]);
         let src = ctx.check_modifications(&["b"], CiEnv::GitHubActions);
-        assert_eq!(src, PathFreshness::HasLocalModifications { upstream: sha });
+        assert_eq!(src, modified(sha, &["b"]));
     });
 }
 
@@ -726,10 +733,7 @@ fn test_local_uncommitted_modifications() {
         ctx.create_branch("feature");
         ctx.modify("a");
 
-        assert_eq!(
-            ctx.check_modifications(&["a", "d"], CiEnv::None),
-            PathFreshness::HasLocalModifications { upstream: sha }
-        );
+        assert_eq!(ctx.check_modifications(&["a", "d"], CiEnv::None), modified(sha, &["a"]),);
     });
 }
 
@@ -744,10 +748,7 @@ fn test_local_committed_modifications() {
         ctx.modify("a");
         ctx.commit();
 
-        assert_eq!(
-            ctx.check_modifications(&["a", "d"], CiEnv::None),
-            PathFreshness::HasLocalModifications { upstream: sha }
-        );
+        assert_eq!(ctx.check_modifications(&["a", "d"], CiEnv::None), modified(sha, &["a"]),);
     });
 }
 
@@ -760,10 +761,7 @@ fn test_local_committed_modifications_subdirectory() {
         ctx.modify("a/b/d");
         ctx.commit();
 
-        assert_eq!(
-            ctx.check_modifications(&["a/b"], CiEnv::None),
-            PathFreshness::HasLocalModifications { upstream: sha }
-        );
+        assert_eq!(ctx.check_modifications(&["a/b"], CiEnv::None), modified(sha, &["a/b/d"]),);
     });
 }
 
@@ -839,11 +837,11 @@ fn test_local_changes_negative_path() {
         );
         assert_eq!(
             ctx.check_modifications(&[":!c"], CiEnv::None),
-            PathFreshness::HasLocalModifications { upstream: upstream.clone() }
+            modified(&upstream, &["b", "d"]),
         );
         assert_eq!(
             ctx.check_modifications(&[":!d", ":!x"], CiEnv::None),
-            PathFreshness::HasLocalModifications { upstream }
+            modified(&upstream, &["b"]),
         );
     });
 }

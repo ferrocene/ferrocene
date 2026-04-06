@@ -181,7 +181,7 @@ impl Step for CertifiedCoreSymbols {
         );
         drop(_guard);
 
-        println!("Generated report at {}", report.display());
+        builder.info(&format!("Generated report at {}", report.display()));
         report
     }
 }

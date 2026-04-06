@@ -13,6 +13,7 @@
                                   "compiler/rustc_codegen_gcc/Cargo.toml"
                                   "library/Cargo.toml"
                                   "src/bootstrap/Cargo.toml"
+                                  "ferrocene/tools/Cargo.toml"
                                   "src/tools/rust-analyzer/Cargo.toml"]
                  :rustfmt ( :overrideCommand ["build-rust-analyzer/host/rustfmt/bin/rustfmt"
                                               "--edition=2024"])

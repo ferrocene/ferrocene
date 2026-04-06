@@ -1402,6 +1402,22 @@ impl Config {
             }
         }
 
+        // Ferrocene addition
+        if download_rustc {
+            if stage < 2 {
+                eprintln!("ERROR: --stage 1 is known to be buggy with download-rustc.");
+                eprintln!("ERROR: forcing download-rustc=false.");
+                download_rustc_commit = None;
+            } else if flags_cmd.ferrocene_coverage_for().is_some() {
+                eprintln!("ERROR: --coverage is known to be buggy with download-rustc.");
+                eprintln!("ERROR: forcing download-rustc=false.");
+                download_rustc_commit = None;
+            } else {
+                eprintln!("WARNING: download-rustc support in Ferrocene is experimental.");
+                eprintln!("WARNING: you may run into caching issues or other build failures.");
+            }
+        }
+
         let with_defaults = |debuginfo_level_specific: Option<_>| {
             debuginfo_level_specific.or(rust_debuginfo_level).unwrap_or(
                 if rust_debug == Some(true) {
@@ -1899,7 +1915,9 @@ impl Config {
                         }
                     }
 
-                    if let Some(config_path) = &self.config {
+                    // Ferrocene addition: our CI builders don't currently upload builder-config.
+                    // For now, just assume it matches the local settings.
+                    if false && let Some(config_path) = &self.config {
                         let ci_config_toml = match self.get_builder_toml("ci-rustc") {
                             Ok(ci_config_toml) => ci_config_toml,
                             Err(e) if e.to_string().contains("unknown field") => {
@@ -2442,17 +2460,31 @@ pub fn download_ci_rustc_commit<'a>(
         });
         match freshness {
             PathFreshness::LastModifiedUpstream { upstream } => upstream,
-            PathFreshness::HasLocalModifications { upstream } => {
-                if if_unchanged {
-                    return None;
-                }
-
+            PathFreshness::HasLocalModifications { upstream, modifications } => {
                 if dwn_ctx.is_running_on_ci() {
                     eprintln!("CI rustc commit matches with HEAD and we are in CI.");
                     eprintln!(
                         "`rustc.download-ci` functionality will be skipped as artifacts are not available."
                     );
                     return None;
+                }
+
+                eprintln!(
+                    "NOTE: detected {} modifications that could affect a build of rustc",
+                    modifications.len()
+                );
+                for file in modifications.iter().take(10) {
+                    eprintln!("- {}", file.display());
+                }
+                if modifications.len() > 10 {
+                    eprintln!("- ...");
+                }
+
+                if if_unchanged {
+                    eprintln!("skipping rustc download due to `download-rustc = 'if-unchanged'`");
+                    return None;
+                } else {
+                    eprintln!("downloading anyway due to `download-rustc = true`");
                 }
 
                 upstream

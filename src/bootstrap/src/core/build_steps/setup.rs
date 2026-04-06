@@ -602,6 +602,10 @@ Select which editor you would like to set up [default: None]: ";
     /// A list of historical hashes of each LSP settings file
     /// New entries should be appended whenever this is updated so we can detect
     /// outdated vs. user-modified settings files.
+
+    // Ferrocene addition: all these configs were modified to add `ferrocene/tools` to
+    // `linkedWorkspaces`. You will need to update the hashes to match whenever there's a merge
+    // conflict.
     fn hashes(&self) -> &'static [&'static str] {
         PARSED_HASHES.get(self).unwrap()
     }

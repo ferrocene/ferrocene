@@ -1396,6 +1396,22 @@ impl Config {
             }
         }
 
+        // Ferrocene addition
+        if download_rustc {
+            if stage < 2 {
+                eprintln!("ERROR: --stage 1 is known to be buggy with download-rustc.");
+                eprintln!("ERROR: forcing download-rustc=false.");
+                download_rustc_commit = None;
+            } else if flags_cmd.ferrocene_coverage_for().is_some() {
+                eprintln!("ERROR: --coverage is known to be buggy with download-rustc.");
+                eprintln!("ERROR: forcing download-rustc=false.");
+                download_rustc_commit = None;
+            } else {
+                eprintln!("WARNING: download-rustc support in Ferrocene is experimental.");
+                eprintln!("WARNING: you may run into caching issues or other build failures.");
+            }
+        }
+
         let with_defaults = |debuginfo_level_specific: Option<_>| {
             debuginfo_level_specific.or(rust_debuginfo_level).unwrap_or(
                 if rust_debug == Some(true) {
@@ -1930,15 +1946,6 @@ impl Config {
 
                         res.unwrap();
                     }
-
-                    if self.stage < 2 {
-                        eprintln!("ERROR: --stage 1 is known to be buggy with download-rustc.");
-                        eprintln!("ERROR: forcing it off.");
-                        return None;
-                    }
-
-                    eprintln!("WARNING: download-rustc support in Ferrocene is experimental.");
-                    eprintln!("WARNING: you may run into caching issues or other build failures.");
 
                     Some(commit.clone())
                 }

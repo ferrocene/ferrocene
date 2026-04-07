@@ -404,6 +404,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "slice_first_last_chunk", since = "1.77.0")]
+    #[ferrocene::prevalidated]
     pub const fn split_first_chunk<const N: usize>(&self) -> Option<(&[T; N], &[T])> {
         let Some((first, tail)) = self.split_at_checked(N) else { return None };
 
@@ -434,6 +435,7 @@ impl<T> [T] {
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_first_last_chunk", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const fn split_first_chunk_mut<const N: usize>(
         &mut self,
     ) -> Option<(&mut [T; N], &mut [T])> {

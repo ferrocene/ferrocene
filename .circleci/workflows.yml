@@ -289,7 +289,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 18
+      LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
@@ -358,7 +358,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 18
+      LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
@@ -433,7 +433,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to using too much memory, decrease this number.
-      LLVM_BUILD_PARALLELISM: 18
+      LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
@@ -726,7 +726,7 @@ jobs:
                 version: default
             - run:
                 name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-docker-image.sh
+                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
                 environment:
                   IMAGE_NAME: << parameters.image >>
                   IMAGE_TAG: << parameters.tag >>
@@ -761,7 +761,7 @@ jobs:
                 version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
             - run:
                 name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-docker-image.sh
+                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
                 environment:
                   IMAGE_NAME: << parameters.image >>
                   IMAGE_TAG: << parameters.tag >>

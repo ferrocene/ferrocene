@@ -108,14 +108,3 @@ RUN curl -LsSf https://astral.sh/uv/0.9.26/install.sh | sh
 
 # Tool needed to generate SBOMs
 RUN curl -sSfL https://get.anchore.io/syft | sh -s -- -b /home/ci/.local/bin v1.41.1
-
-COPY --chown=ci:ci-usergroup ferrocene/ci/docker-images/scripts/platform-select.sh platform-select
-
-RUN <<-EOF
-    set -xe
-    curl -Lso /tmp/mergiraf.tar.gz https://codeberg.org/mergiraf/mergiraf/releases/download/v0.16.3/mergiraf_$(~/platform-select target).tar.gz
-    echo "$(~/platform-select mergiraf-hash) /tmp/mergiraf.tar.gz" | sha256sum -c
-    # extract the binary to `~/.local/bin` (should've been added to `PATH` above)
-    tar xf /tmp/mergiraf.tar.gz -C /home/ci/.local/bin
-    rm /tmp/mergiraf.tar.gz
-EOF

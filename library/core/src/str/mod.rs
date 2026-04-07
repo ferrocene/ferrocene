@@ -60,6 +60,10 @@ pub use traits::FromStr;
 #[unstable(feature = "str_internals", issue = "none")]
 pub use validations::{next_code_point, utf8_char_width};
 
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+pub use count::ferrocene_test::test_do_count_chars;
+
 #[inline(never)]
 #[cold]
 #[track_caller]

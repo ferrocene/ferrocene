@@ -1511,12 +1511,15 @@ pub const unsafe fn conjure_zst<T>() -> T {
     #[ferrocene::annotation(
         "This assertion only runs in compilation, meaning that it cannot be covered in runtime"
     )]
-    const_assert!(
-        size_of::<T>() == 0,
-        "mem::conjure_zst invoked on a non-zero-sized type",
-        "mem::conjure_zst invoked on type {name}, which is not zero-sized",
-        name: &str = crate::any::type_name::<T>()
-    );
+    // Ferrocene addition: add curly braces in order to apply annotation to whole const_assert.
+    {
+        const_assert!(
+            size_of::<T>() == 0,
+            "mem::conjure_zst invoked on a non-zero-sized type",
+            "mem::conjure_zst invoked on type {name}, which is not zero-sized",
+            name: &str = crate::any::type_name::<T>()
+        );
+    }
 
     // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,
     // there's nothing in the representation that needs to be set.

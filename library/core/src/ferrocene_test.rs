@@ -101,10 +101,12 @@ pub(crate) mod println {
         fn dprintf(fd: i32, s: *const u8, ...);
     }
 
+    #[ferrocene::prevalidated]
     pub fn eprintln_str(s: &str) {
         eprintln_args(format_args!("{s}"));
     }
 
+    #[ferrocene::prevalidated]
     pub fn eprintln_args(args: fmt::Arguments<'_>) {
         let mut buf = Buffer::new();
         let mut f = fmt::Formatter::new(&mut buf, fmt::FormattingOptions::new());
@@ -121,16 +123,19 @@ pub(crate) mod println {
     }
 
     impl Buffer {
+    #[ferrocene::prevalidated]
         fn new() -> Self {
             Self { buf: [0; _], i: 0 }
         }
 
+    #[ferrocene::prevalidated]
         fn read(&self) -> &[u8] {
             &self.buf[..self.i]
         }
     }
 
     impl fmt::Write for Buffer {
+    #[ferrocene::prevalidated]
         fn write_str(&mut self, s: &str) -> fmt::Result {
             for byte in s.as_bytes() {
                 self.buf[self.i] = *byte;

@@ -96,7 +96,7 @@ fn exhaustive_test_dragon_f64_range(start: f64, end: f64, thread_name: &str) {
     let mut buf = Vec::with_capacity(MAX_SIG_DIGITS);
     let slice = buf.spare_capacity_mut();
     let mut f = start;
-    let mut i = 0;
+    let mut i = 0_u64;
     while f != end {
         if i % 100_000_000 == 0 {
             eprintln!("{thread_name}: i={i}");

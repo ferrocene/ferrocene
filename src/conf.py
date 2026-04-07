@@ -58,4 +58,4 @@ html_short_title = "FLS"
 
 lint_alphabetical_section_titles = ["glossary"]
 
-lint_no_paragraph_ids = ["index", "changelog", "glossary"]
+lint_no_paragraph_ids = ["changelog", "dev-guide", "glossary", "index"]

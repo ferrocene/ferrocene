@@ -247,6 +247,19 @@ pub fn format_shortest<'a>(
     // i) only the rounding-up condition was triggered, or
     // ii) both conditions were triggered and tie breaking prefers rounding up.
     if up && (!down || *mant.mul_pow2(1) >= scale) {
+        #[ferrocene::annotation(
+            "If we get here, that means three things:
+                1. Our input `d` is within 1 ULP of `10.pow(k) * .999...` repeating, for some k.
+                2. We chose to round up and represent the string as `1.00000...` repeating, for `i` significant digits.
+                3. Since we are in `format_shortest`, we did something wrong. The correct representation here is `1.0`, not `1.0000...` repeating.
+
+            Therefore correctness is already out the window.
+            If the implementation is correct, this block is unreachable.
+            If it's incorrect, we do a best-effort attempt to avoid panics and memory corruption, but do not make any guarantees about the output (we can't).
+
+            Memory safety: `c` is initialized, and `buf[i]` will panic if `i` is out of bounds.
+            Panics: We statically know that `i` is in-bounds because of the `assert!(buf.len() >= MAX_SIG_DIGITS)` at the top of this function."
+        )]
         // if rounding up changes the length, the exponent should also change.
         // it seems that this condition is very hard to satisfy (possibly impossible),
         // but we are just being safe and consistent here.
@@ -255,6 +268,9 @@ pub fn format_shortest<'a>(
             buf[i] = MaybeUninit::new(c);
             i += 1;
             k += 1;
+
+            #[cfg(feature = "ferrocene_test")]
+            unreachable!();
         }
     }
 

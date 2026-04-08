@@ -12,7 +12,7 @@ The Rust compiler, ``rustc``, links to the libraries ``alloc``, ``core``, and
 ``std``. These libraries are evaluated and tested within the scope of
 Ferrocene qualification *for compiler use only*. The use of these libraries
 by end-use code is outside the scope of the current Ferrocene
-qualification. It is the end-user responsibility to qualify these libraries if
+qualification. It is the end-user responsibility to certify these libraries if
 they are used in their code.
 
 Additionally a subset of the ``core`` library is certified for use in end-use code.

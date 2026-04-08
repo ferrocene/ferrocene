@@ -172,7 +172,8 @@ Then you can just commit and push the ``deps.rs`` changes.
 Trigger an upstream pull
 ------------------------
 
-When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull` > `Run workflow`,
+When we are delayed, it is recommended to make a manual pull from Github Actions. Choose the job `Automatic upstream pull
+<https://github.com/ferrocene/ferrocene/actions/workflows/automation-pull-upstream.yml>`__ > `Run workflow`,
 and set a max number of PRs to be included (upper limit, 150). Please be aware that the more PRs are pulled, the more conflicts; so this is a judgement call.
 
 Reproduce an upstream pull

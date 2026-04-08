@@ -149,6 +149,10 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
 
         let qualified_name = get_qualified_name(tcx, def);
 
+        if should_filter_out(&qualified_name) {
+            continue;
+        }
+
         let (filename, mut start_line, end_line) = get_span(tcx, &mut vis, def);
 
         // We don't check for annotations those inside the `Visitor` implementation so we do it
@@ -170,6 +174,13 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
 
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
     with_no_visible_paths!(with_resolve_crate_name!(with_no_trimmed_paths!(tcx.def_path_str(def))))
+}
+
+/// Filter out functions that are marked prevalidated for internal use only
+fn should_filter_out(qualified_name: &str) -> bool {
+    const FILTER_LIST: &[&str] = &["<core::ferrocene_test::", "core::ferrocene_test::"];
+
+    FILTER_LIST.iter().any(|filter| qualified_name.starts_with(filter))
 }
 
 fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usize, usize) {

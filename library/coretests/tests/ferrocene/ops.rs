@@ -104,3 +104,15 @@ fn test_try_into_slice_range_end_excluded_gt_len() {
     use core::slice::SliceIndex;
     assert_eq!((Bound::Unbounded, Bound::Excluded(10)).get([0, 1].as_slice()), None);
 }
+
+// Covers `<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_nth`
+#[test]
+fn test_range_spec_nth() {
+    assert_eq!((0..5_u16).nth(u32::MAX as usize), None);
+}
+
+// Covers `<core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_nth_back`
+#[test]
+fn test_range_spec_nth_back() {
+    assert_eq!((0..5_u16).nth_back(u32::MAX as usize), None);
+}

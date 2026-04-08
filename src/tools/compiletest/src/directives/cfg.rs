@@ -6,12 +6,17 @@ use crate::directives::{DirectiveLine, IgnoreDecision};
 
 const EXTRA_ARCHS: &[&str] = &["spirv"];
 
+#[rustfmt::skip]
 const EXTERNAL_IGNORES_LIST: &[&str] = &[
     // tidy-alphabetical-start
     "ignore-backends",
     "ignore-gdb-version",
     "ignore-llvm-version",
     "ignore-pass",
+
+    // Ferrocene addition
+    "ignore-qemu",
+
     // tidy-alphabetical-end
 ];
 

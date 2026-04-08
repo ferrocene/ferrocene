@@ -930,6 +930,8 @@ impl Step for Index {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info(&format!("Building Ferrocene documentation index ({})", self.target));
+
         const PDW_PLACEHOLDER: &str = "<!-- FERROCENE-INCLUDE-PUBLIC-DOCS-WARNING -->";
 
         let doc = builder.src.join("ferrocene").join("doc");

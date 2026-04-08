@@ -19,6 +19,17 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.95.0
+-------------------------------
+
+- `Stabilize if let guards on match arms <https://github.com/rust-lang/rust/pull/141295>`_
+- `irrefutable_let_patterns lint no longer lints on let chains <https://github.com/rust-lang/rust/pull/146832>`_
+- `Support importing path-segment keywords with renaming <https://github.com/rust-lang/rust/pull/146972>`_
+- `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
+- `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
+- `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
+- `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
+
 Language changes in Rust 1.94.0
 -------------------------------
 
@@ -80,7 +91,7 @@ Language changes in Rust 1.93.0
 - `Stabilize asm_cfg <https://github.com/rust-lang/rust/pull/147736>`_
 
   - Changed syntax:
-  
+
     - :s:`AssemblyCodeBlock`
     - :s:`AsmArguments`
     - :s:`GlobalAsmArguments`
@@ -108,7 +119,7 @@ Language changes in Rust 1.93.0
 - `Allow const items that contain mutable references to static (which is *very* unsafe, but not *always* UB) <https://github.com/rust-lang/rust/pull/148746>`_
 
   - Removed paragraphs:
-  
+
     - :p:`fls_ooOYxhVh8hZo`
     - :p:`fls_zkNFeBLy80UA`
     - :p:`fls_VhzGfnWg7YrG`
@@ -533,7 +544,7 @@ Language changes in Rust 1.85.0
 - `Stabilize async closures <https://github.com/rust-lang/rust/pull/132706>`_
 
   - New paragraphs:
-  
+
     - :p:`fls_My6pMgpeFCFg`
     - :p:`fls_DSy7bPKGzyov`
 
@@ -600,7 +611,7 @@ Language changes in Rust 1.83.0
 - `Stabilize \`&mut\`, \`*mut\`, \`&Cell\`, and \`*const Cell\` in const. <https://github.com/rust-lang/rust/pull/129195>`_
 
   - Changed paragraphs:
-  
+
     - :p:`fls_to4e7imq2c0w`
     - :p:`fls_6g7c1kjrmfnr`
     - :p:`fls_hkbwa8xx2fwx`
@@ -622,7 +633,7 @@ Language changes in Rust 1.83.0
 - `Non-exhaustive structs may now be empty. <https://github.com/rust-lang/rust/pull/128934>`_
 
   - Changed paragraphs:
-  
+
     - :p:`fls_fSNrRsgzLd0E`
     - :p:`fls_S9QL6yVF5LFI`
 
@@ -641,7 +652,7 @@ Language changes in Rust 1.83.0
   - Changed syntax: :s:`MacroFragmentSpecifier`
 
   - Changed paragraphs:
-  
+
     - :p:`fls_k00bck2k8tde`
     - :p:`fls_PxR9vNHsaFnI`
 
@@ -661,7 +672,7 @@ Language changes in Rust 1.82.0
   - New section: :ref:`fls_mcxF9y5u66sZ`
 
   - Changed paragraphs:
-  
+
     - :p:`fls_9fjspnefoyvz`
     - :p:`fls_uq7ftuuq1sig`
     - :p:`fls_cfoy86mkmqa4`
@@ -689,18 +700,18 @@ Language changes in Rust 1.82.0
 - `Stabilize opaque type precise capturing (RFC 3617) <https://github.com/rust-lang/rust/pull/127672>`_
 
   - Changed syntax:
-  
+
     - :s:`ImplTraitTypeSpecification`
     - :s:`ImplTraitTypeSpecificationOneBound`
 
   - New syntax:
-  
+
     - :s:`UseCaptures`
     - :s:`UseCapturesGenericArgs`
     - :s:`UseCapturesGenericArg`
 
   - New paragraphs:
-  
+
     - :p:`fls_69hqMjvNno9u`
     - :p:`fls_OnyR0Wsfk7KI`
     - :p:`fls_KgH6c5cC4S0G`
@@ -723,7 +734,7 @@ Language changes in Rust 1.82.0
     - :s:`WeakKeyword`
 
   - Changed paragraphs:
-  
+
     - :p:`fls_g0JEluWqBpNc`
     - :p:`fls_7ucwmzqtittv`
     - :p:`fls_4dje9t5y2dia`
@@ -731,7 +742,7 @@ Language changes in Rust 1.82.0
     - :p:`fls_fo9with6xumo`
 
   - New paragraphs:
-  
+
     - :p:`fls_8ltVLtAfvy0m`
     - :p:`fls_WRpcVF1fLEpr`
     - :p:`fls_nUADhgcfvvGC`
@@ -751,7 +762,7 @@ Language changes in Rust 1.82.0
   - New syntax: :s:`ConstRegisterExpression`
 
   - New paragraphs:
-  
+
     - :p:`fls_81Ju1TEqJ48K`
     - :p:`fls_j9XOoXDmN5Dq`
     - :p:`fls_jU8zg4k8dFsY`
@@ -817,7 +828,7 @@ Language changes in Rust 1.80.0
 - `Document maximum allocation size <https://github.com/rust-lang/rust/pull/116675/>`_
 
   - New paragraphs:
-  
+
     - :p:`fls_CUJyMj0Sj8NS`
     - :p:`fls_kaomYy0Ml4Nh`
     - :p:`fls_B5cmkWfD5GNt`
@@ -842,7 +853,7 @@ Language changes in Rust 1.80.0
   - Changed paragraph: :p:`fls_8Q6NfRx4j5V7`
 
   - New paragraphs:
-  
+
     - :p:`fls_3PyquOKjA7SI`
     - :p:`fls_8bdOqkO1NuJW`
     - :p:`fls_EDL1Pi56KQ2H`
@@ -877,7 +888,7 @@ Language changes in Rust 1.79.0
 - `Propagate temporary lifetime extension into \`if\` and \`match\` expressions. <https://github.com/rust-lang/rust/pull/121346/>`_
 
   - New paragraphs:
-  
+
     - :p:`fls_Rj9zhVutfQod`
     - :p:`fls_oodpp3LpXC13`
     - :p:`fls_xGThCPoTUSAi`
@@ -903,7 +914,7 @@ Language changes in Rust 1.79.0
     - New section: :ref:`fls_8JB3SJqamdpU`
 
     - Changed glossary entries:
-    
+
       - :t:`binary crate`
       - :t:`library crate`
       - :t:`proc-macro crate`
@@ -911,13 +922,13 @@ Language changes in Rust 1.79.0
     - New glossary entry: :t:`crate type`
 
     - Changed paragraphs:
-    
+
       - :p:`fls_9ub6ks8qrang`
       - :p:`fls_Mf62VqAhoZ3c`
       - :p:`fls_d9nn4yuiw1ja`
 
     - New paragraphs:
-    
+
       - :p:`fls_unxalgMqIr3v`
       - :p:`fls_e7jGvXvTsFpC`
       - :p:`fls_kQiJPwb2Hjcc`
@@ -932,7 +943,7 @@ Language changes in Rust 1.79.0
 - `Rework \`impl Trait\` lifetime inference <https://github.com/rust-lang/rust/pull/116891/>`_
 
   - New paragraphs:
-  
+
     - :p:`fls_3aKZB0ILIkZw`
     - :p:`fls_Xo1ODwOyX7Vm`
     - :p:`fls_kTGFLFymTWch`

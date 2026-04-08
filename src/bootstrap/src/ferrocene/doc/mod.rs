@@ -586,6 +586,12 @@ macro_rules! sphinx_books {
                 // Generate the API docs for the certified crates
                 builder.ensure(CertifiedApiDocs {target: self.target});
 
+                // Generate the Traceability Matrix
+                builder.ensure(TraceabilityMatrix {
+                    target: self.target,
+                    compiler: builder.compiler(builder.top_stage, builder.host_target),
+                });
+
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in
                 // the breadcrumbs doesn't break.
                 builder.ensure(Index { target: self.target });

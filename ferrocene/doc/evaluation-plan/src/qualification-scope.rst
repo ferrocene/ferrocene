@@ -15,7 +15,9 @@ by end-use code is outside the scope of the current Ferrocene
 qualification. It is the end-user responsibility to certify these libraries if
 they are used in their code.
 
-Additionally a subset of the ``core`` library is certified for use in end-use code.
+A subset of the ``core`` library is certified for use in end-use code. See :doc:`core-certification:index`.
+
+The ``proc_macro`` library is qualified for use in end-use proc-macro crates. It is qualified and not certified because it must only be used during compilation and not execution of a program.
 
 Qualified tools
 ---------------

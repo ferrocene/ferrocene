@@ -21,8 +21,14 @@ pub struct Enumerate<I> {
     count: usize,
 }
 impl<I> Enumerate<I> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I) -> Enumerate<I> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(iter: I) -> Enumerate<I> {
+=======
+    pub(in crate::iter) const fn new(iter: I) -> Enumerate<I> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Enumerate { iter, count: 0 }
     }
 

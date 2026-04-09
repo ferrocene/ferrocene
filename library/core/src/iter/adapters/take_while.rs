@@ -22,8 +22,14 @@ pub struct TakeWhile<I, P> {
 }
 
 impl<I, P> TakeWhile<I, P> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, predicate: P) -> TakeWhile<I, P> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(iter: I, predicate: P) -> TakeWhile<I, P> {
+=======
+    pub(in crate::iter) const fn new(iter: I, predicate: P) -> TakeWhile<I, P> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         TakeWhile { iter, flag: false, predicate }
     }
 }

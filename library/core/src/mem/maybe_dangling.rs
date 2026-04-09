@@ -1,5 +1,6 @@
 #![unstable(feature = "maybe_dangling", issue = "118166")]
 
+use crate::marker::StructuralPartialEq;
 use crate::{mem, ptr};
 
 /// Allows wrapped [references] and [boxes] to dangle.
@@ -114,3 +115,5 @@ impl<P: ?Sized> MaybeDangling<P> {
         x
     }
 }
+
+impl<T: ?Sized> StructuralPartialEq for MaybeDangling<T> {}

@@ -71,10 +71,21 @@ pub struct Formatted<'a> {
 }
 
 impl<'a> Formatted<'a> {
+<<<<<<< HEAD
     /// Returns the exact byte length of combined formatted result.
     #[ferrocene::prevalidated]
+||||||| 55e86c99680
+    /// Returns the exact byte length of combined formatted result.
+=======
+    /// Returns the byte length of combined formatted result.
+    ///
+    /// Saturates at `usize::MAX` if the actual length is larger.
+    ///
+    /// This matters on 16-bit targets, where exponential formatting can exceed
+    /// `usize::MAX` by emitting `u16::MAX` trailing zeroes plus `"1."` / `"e0"`.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn len(&self) -> usize {
-        self.sign.len() + self.parts.iter().map(|part| part.len()).sum::<usize>()
+        self.parts.iter().fold(self.sign.len(), |len, part| len.saturating_add(part.len()))
     }
 
     /// Writes all formatted parts into the supplied buffer.

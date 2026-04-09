@@ -399,7 +399,6 @@ symbols! {
         anon_assoc,
         anonymous_lifetime_in_impl_trait,
         any,
-        append_const_msg,
         apx_target_feature,
         arbitrary_enum_discriminant,
         arbitrary_self_types,
@@ -1044,6 +1043,9 @@ symbols! {
         html_no_source,
         html_playground_url,
         html_root_url,
+        hvx,
+        hvx_length64b: "hvx-length64b",
+        hvx_length128b: "hvx-length128b",
         hwaddress,
         i8,
         i16,
@@ -1246,6 +1248,7 @@ symbols! {
         meta_sized,
         metadata_type,
         mgca_type_const_syntax,
+        min_adt_const_params,
         min_const_fn,
         min_const_generics,
         min_const_unsafe_fn,
@@ -1362,6 +1365,7 @@ symbols! {
         new_upper_exp,
         new_upper_hex,
         next,
+        niko,
         nll,
         no,
         no_builtins,
@@ -1981,6 +1985,12 @@ symbols! {
         suggestion,
         super_let,
         supertrait_item_shadowing,
+        sve_cast,
+        sve_tuple_create2,
+        sve_tuple_create3,
+        sve_tuple_create4,
+        sve_tuple_get,
+        sve_tuple_set,
         sym,
         sync,
         synthetic,
@@ -2217,6 +2227,7 @@ symbols! {
         volatile_store,
         vreg,
         vreg_low16,
+        vreg_pair,
         vsreg,
         vsx,
         vtable_align,
@@ -2613,7 +2624,7 @@ impl<Hcx> HashStable<Hcx> for Symbol {
 impl<Hcx> ToStableHashKey<Hcx> for Symbol {
     type KeyType = String;
     #[inline]
-    fn to_stable_hash_key(&self, _: &Hcx) -> String {
+    fn to_stable_hash_key(&self, _: &mut Hcx) -> String {
         self.as_str().to_string()
     }
 }

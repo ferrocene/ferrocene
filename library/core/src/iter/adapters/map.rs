@@ -66,8 +66,14 @@ pub struct Map<I, F> {
 }
 
 impl<I, F> Map<I, F> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I, f: F) -> Map<I, F> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(iter: I, f: F) -> Map<I, F> {
+=======
+    pub(in crate::iter) const fn new(iter: I, f: F) -> Map<I, F> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Map { iter, f }
     }
 

@@ -9,7 +9,6 @@ use crate::{BytePos, Pos, RelativeBytePos, SourceFile, SpanData};
 /// succession, and this avoids expensive `SourceMap` lookups each time the cache is hit. We used
 /// to cache multiple code positions, but caching a single position ended up being simpler and
 /// faster.
-#[derive(Clone)]
 pub struct CachingSourceMapView<'sm> {
     source_map: &'sm SourceMap,
     file: Arc<SourceFile>,
@@ -142,7 +141,7 @@ impl<'sm> CachingSourceMapView<'sm> {
             lo_line_number,
             span_data.lo - lo_line_bounds.start,
             hi_line_number,
-            span_data.hi - hi_line_bounds.start,
+            span_data.hi,
         ))
     }
 

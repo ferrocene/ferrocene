@@ -22,8 +22,14 @@ pub struct Copied<I> {
 }
 
 impl<I> Copied<I> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(it: I) -> Copied<I> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(it: I) -> Copied<I> {
+=======
+    pub(in crate::iter) const fn new(it: I) -> Copied<I> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Copied { it }
     }
 

@@ -27,6 +27,12 @@ impl S {
     extern "Rust" fn rust_method() {}
 }
 
+#[rustfmt::skip] // rustfmt will insert the implicit "C"
+#[track_caller]
+//~^ ERROR `#[track_caller]` can only be used with the Rust ABI
+pub extern fn extern_missing_abi() {}
+//~^ WARN `extern` declarations without an explicit ABI are deprecated
+
 fn main() {}
 
 // ferrocene-annotations: fls_usgd0xlijoxv

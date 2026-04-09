@@ -22,8 +22,14 @@ pub struct Fuse<I> {
     iter: Option<I>,
 }
 impl<I> Fuse<I> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: I) -> Fuse<I> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(iter: I) -> Fuse<I> {
+=======
+    pub(in crate::iter) const fn new(iter: I) -> Fuse<I> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Fuse { iter: Some(iter) }
     }
 

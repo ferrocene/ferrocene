@@ -34,8 +34,14 @@ pub struct Chain<A, B> {
     b: Option<B>,
 }
 impl<A, B> Chain<A, B> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in super::super) fn new(a: A, b: B) -> Chain<A, B> {
+||||||| 55e86c99680
+    pub(in super::super) fn new(a: A, b: B) -> Chain<A, B> {
+=======
+    pub(in super::super) const fn new(a: A, b: B) -> Chain<A, B> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Chain { a: Some(a), b: Some(b) }
     }
 }

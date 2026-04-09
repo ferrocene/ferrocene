@@ -18,8 +18,14 @@ pub struct Rev<T> {
 }
 
 impl<T> Rev<T> {
+<<<<<<< HEAD
     #[ferrocene::prevalidated]
     pub(in crate::iter) fn new(iter: T) -> Rev<T> {
+||||||| 55e86c99680
+    pub(in crate::iter) fn new(iter: T) -> Rev<T> {
+=======
+    pub(in crate::iter) const fn new(iter: T) -> Rev<T> {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Rev { iter }
     }
 

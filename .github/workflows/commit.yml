@@ -110,6 +110,7 @@ jobs:
     name: "Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 100
+    if: startsWith(github.event.pull_request.base.ref, 'automation/pull-upstream-HEAD/')
     steps:
       - name: Checkout
         uses: actions/checkout@v4

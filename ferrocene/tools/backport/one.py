@@ -60,15 +60,11 @@ def main():
     )
 
     current_branch = subprocess.run(
-        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        ["git", "rev-parse", "HEAD"],
         stdout=subprocess.PIPE,
         text=True,
         check=True,
     ).stdout.strip()
-    # The command above returns "HEAD" when we're not in any named branch, so
-    # treat that as not being in any branch.
-    if current_branch == "HEAD":
-        current_branch = ""
 
     result = subprocess.run(
         [

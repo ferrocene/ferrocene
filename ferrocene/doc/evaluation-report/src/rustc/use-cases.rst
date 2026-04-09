@@ -108,7 +108,6 @@ environment is correctly set.
 
 8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the core library are used.
 
-
 Building an Executable
 ----------------------
 
@@ -256,3 +255,85 @@ unique within the set of all directories included by compiler argument ``-L``.
 10. The linker generates a Rust executable that links to a C library.
 
 11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
+
+Building a procedural macro and using it in another crate
+---------------------------------------------------------
+
+.. note::
+   
+   The second part "Use the ``proc-macro`` crate" can be done for any crate type.
+   It will be done on the example of an ``rlib``, but this can be adapted by changing the passed ``--crate-type``.
+   For the purpose of analysing potential errors related to procedural macros, the crate type of the second part does not matter.
+
+.. id:: RUSTC_UC6_PROC_MACRO
+
+**Actor(s):** User, rustc.
+
+**Input:** Two Rust compilation units.
+
+**Output:** A static Rust library.
+
+**Environment constraints:** Ferrocene is correctly installed and the environment is correctly set.
+
+**Description:**
+
+1. Compile the ``proc-macro`` crate
+
+   1. The ``user`` calls ``rustc`` with the following command line arguments
+
+      .. code-block:: console
+
+         --edition 2021
+         --crate-name <name>
+         --crate-type proc-macro
+         --extern proc_macro
+         <proc_macro_path>
+         # <proc_macro_path> is the path to the root of the first compilation unit, as a positional argument.
+         # <name> is the name given to the proc-macro library 
+
+   2. ``rustc`` parses the command line arguments.
+
+   3. ``rustc`` parses the Rust compilation unit.
+
+   4. ``rustc`` analyzes the Rust compilation unit.
+
+   5. ``rustc`` generates LLVM IR for the Rust compilation unit.
+
+   6. ``rustc`` invokes ``LLVM``, passing the generated LLVM IR along with LLVM-related arguments.
+
+   7. ``LLVM`` generates an object file.
+
+   8. ``rustc`` invokes the linker, passing the generated object file along with linker-related arguments.
+
+   9. The linker generates a dynamic Rust library ``lib<name>.so`` that links to the ``proc_macro`` library.
+
+2. Use the ``proc-macro`` crate
+
+   1. The ``user`` calls ``rustc`` with the following command line arguments
+
+      .. code-block:: console
+
+         --edition 2021
+         --crate-type rlib
+         --extern <name>=lib<name>.so
+         <path>
+         # <path> is the path to the root of the second compilation unit, as a positional argument.
+         # <name> is the name given to the proc-macro library in the step before
+
+   2. ``rustc`` parses the command line arguments.
+
+   3. ``rustc`` parses the Rust compilation unit.
+
+   4. ``rustc`` dynamically loads ``lib<name>.so``
+
+   5. ``rustc`` executes all procedural macros on the syntax tree.
+
+   6. ``rustc`` analyzes the Rust compilation unit.
+
+   7. ``rustc`` generates LLVM IR for the Rust compilation unit.
+
+   8. ``rustc`` invokes `LLVM`, passing the generated LLVM IR along with LLVM-related arguments.
+
+   9. ``LLVM`` generates a static Rust library.
+
+   10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the ``core`` library are used.

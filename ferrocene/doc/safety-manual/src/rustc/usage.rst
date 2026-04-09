@@ -15,18 +15,18 @@ In order to prevent the use of out-of-date compilation results, users shall
 ensure that the build space (object and library directories) is empty before
 compiling.
 
-If a compilation was performed using `rustc` directly, then the user shall
+If a compilation was performed using ``rustc`` directly, then the user shall
 delete any previous compilation artifacts, as follows:
 
-* `exec` - Executables, where `exec` is the name of an executable.
+* ``exec`` - Executables, where ``exec`` is the name of an executable.
 
-* `libname.a` - Native static libraries, where `name` is the name of a library.
+* ``libname.a`` - Native static libraries, where ``name`` is the name of a library.
 
-* `libname.rlib` - Rust static libraries, where `name` is the name of a library.
+* ``libname.rlib`` - Rust static libraries, where ``name`` is the name of a library.
 
-* `libname.rmeta` - Rust metadata file, where `name` is the name of a library.
+* ``libname.rmeta`` - Rust metadata file, where ``name`` is the name of a library.
 
-* `libname.so` - Native dynamic libraries, where `name` is the name of a
+* ``libname.so`` - Native dynamic libraries, where ``name`` is the name of a
   library.
 
 

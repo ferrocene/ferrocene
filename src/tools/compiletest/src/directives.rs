@@ -211,114 +211,12 @@ pub(crate) struct TestProps {
     /// Whether pretty printers should be disabled in gdb.
     pub(crate) disable_gdb_pretty_printers: bool,
     /// Compare the output by lines, rather than as a single string.
-<<<<<<< HEAD
-    pub compare_output_by_lines: bool,
-    // Flag to execute the test within a temporary directory
-    pub ferrocene_execute_in_temp: bool,
-||||||| 55e86c99680
-    pub compare_output_by_lines: bool,
-=======
     pub(crate) compare_output_by_lines: bool,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    // Flag to execute the test within a temporary directory
+    pub(crate) ferrocene_execute_in_temp: bool,
 }
 
 mod directives {
-<<<<<<< HEAD
-    pub const ERROR_PATTERN: &'static str = "error-pattern";
-    pub const REGEX_ERROR_PATTERN: &'static str = "regex-error-pattern";
-    pub const COMPILE_FLAGS: &'static str = "compile-flags";
-    pub const RUN_FLAGS: &'static str = "run-flags";
-    pub const DOC_FLAGS: &'static str = "doc-flags";
-    pub const SHOULD_ICE: &'static str = "should-ice";
-    pub const BUILD_AUX_DOCS: &'static str = "build-aux-docs";
-    pub const UNIQUE_DOC_OUT_DIR: &'static str = "unique-doc-out-dir";
-    pub const FORCE_HOST: &'static str = "force-host";
-    pub const CHECK_STDOUT: &'static str = "check-stdout";
-    pub const CHECK_RUN_RESULTS: &'static str = "check-run-results";
-    pub const DONT_CHECK_COMPILER_STDOUT: &'static str = "dont-check-compiler-stdout";
-    pub const DONT_CHECK_COMPILER_STDERR: &'static str = "dont-check-compiler-stderr";
-    pub const DONT_REQUIRE_ANNOTATIONS: &'static str = "dont-require-annotations";
-    pub const NO_PREFER_DYNAMIC: &'static str = "no-prefer-dynamic";
-    pub const PRETTY_MODE: &'static str = "pretty-mode";
-    pub const PRETTY_COMPARE_ONLY: &'static str = "pretty-compare-only";
-    pub const AUX_BIN: &'static str = "aux-bin";
-    pub const AUX_BUILD: &'static str = "aux-build";
-    pub const AUX_CRATE: &'static str = "aux-crate";
-    pub const PROC_MACRO: &'static str = "proc-macro";
-    pub const AUX_CODEGEN_BACKEND: &'static str = "aux-codegen-backend";
-    pub const EXEC_ENV: &'static str = "exec-env";
-    pub const RUSTC_ENV: &'static str = "rustc-env";
-    pub const UNSET_EXEC_ENV: &'static str = "unset-exec-env";
-    pub const UNSET_RUSTC_ENV: &'static str = "unset-rustc-env";
-    pub const FORBID_OUTPUT: &'static str = "forbid-output";
-    pub const CHECK_TEST_LINE_NUMBERS_MATCH: &'static str = "check-test-line-numbers-match";
-    pub const IGNORE_PASS: &'static str = "ignore-pass";
-    pub const FAILURE_STATUS: &'static str = "failure-status";
-    pub const DONT_CHECK_FAILURE_STATUS: &'static str = "dont-check-failure-status";
-    pub const RUN_RUSTFIX: &'static str = "run-rustfix";
-    pub const RUSTFIX_ONLY_MACHINE_APPLICABLE: &'static str = "rustfix-only-machine-applicable";
-    pub const ASSEMBLY_OUTPUT: &'static str = "assembly-output";
-    pub const STDERR_PER_BITWIDTH: &'static str = "stderr-per-bitwidth";
-    pub const INCREMENTAL: &'static str = "incremental";
-    pub const KNOWN_BUG: &'static str = "known-bug";
-    pub const TEST_MIR_PASS: &'static str = "test-mir-pass";
-    pub const REMAP_SRC_BASE: &'static str = "remap-src-base";
-    pub const LLVM_COV_FLAGS: &'static str = "llvm-cov-flags";
-    pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
-    pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
-    pub const ADD_MINICORE: &'static str = "add-minicore";
-    pub const MINICORE_COMPILE_FLAGS: &'static str = "minicore-compile-flags";
-    pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
-    pub const COMPARE_OUTPUT_BY_LINES: &'static str = "compare-output-by-lines";
-    pub const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
-||||||| 55e86c99680
-    pub const ERROR_PATTERN: &'static str = "error-pattern";
-    pub const REGEX_ERROR_PATTERN: &'static str = "regex-error-pattern";
-    pub const COMPILE_FLAGS: &'static str = "compile-flags";
-    pub const RUN_FLAGS: &'static str = "run-flags";
-    pub const DOC_FLAGS: &'static str = "doc-flags";
-    pub const SHOULD_ICE: &'static str = "should-ice";
-    pub const BUILD_AUX_DOCS: &'static str = "build-aux-docs";
-    pub const UNIQUE_DOC_OUT_DIR: &'static str = "unique-doc-out-dir";
-    pub const FORCE_HOST: &'static str = "force-host";
-    pub const CHECK_STDOUT: &'static str = "check-stdout";
-    pub const CHECK_RUN_RESULTS: &'static str = "check-run-results";
-    pub const DONT_CHECK_COMPILER_STDOUT: &'static str = "dont-check-compiler-stdout";
-    pub const DONT_CHECK_COMPILER_STDERR: &'static str = "dont-check-compiler-stderr";
-    pub const DONT_REQUIRE_ANNOTATIONS: &'static str = "dont-require-annotations";
-    pub const NO_PREFER_DYNAMIC: &'static str = "no-prefer-dynamic";
-    pub const PRETTY_MODE: &'static str = "pretty-mode";
-    pub const PRETTY_COMPARE_ONLY: &'static str = "pretty-compare-only";
-    pub const AUX_BIN: &'static str = "aux-bin";
-    pub const AUX_BUILD: &'static str = "aux-build";
-    pub const AUX_CRATE: &'static str = "aux-crate";
-    pub const PROC_MACRO: &'static str = "proc-macro";
-    pub const AUX_CODEGEN_BACKEND: &'static str = "aux-codegen-backend";
-    pub const EXEC_ENV: &'static str = "exec-env";
-    pub const RUSTC_ENV: &'static str = "rustc-env";
-    pub const UNSET_EXEC_ENV: &'static str = "unset-exec-env";
-    pub const UNSET_RUSTC_ENV: &'static str = "unset-rustc-env";
-    pub const FORBID_OUTPUT: &'static str = "forbid-output";
-    pub const CHECK_TEST_LINE_NUMBERS_MATCH: &'static str = "check-test-line-numbers-match";
-    pub const IGNORE_PASS: &'static str = "ignore-pass";
-    pub const FAILURE_STATUS: &'static str = "failure-status";
-    pub const DONT_CHECK_FAILURE_STATUS: &'static str = "dont-check-failure-status";
-    pub const RUN_RUSTFIX: &'static str = "run-rustfix";
-    pub const RUSTFIX_ONLY_MACHINE_APPLICABLE: &'static str = "rustfix-only-machine-applicable";
-    pub const ASSEMBLY_OUTPUT: &'static str = "assembly-output";
-    pub const STDERR_PER_BITWIDTH: &'static str = "stderr-per-bitwidth";
-    pub const INCREMENTAL: &'static str = "incremental";
-    pub const KNOWN_BUG: &'static str = "known-bug";
-    pub const TEST_MIR_PASS: &'static str = "test-mir-pass";
-    pub const REMAP_SRC_BASE: &'static str = "remap-src-base";
-    pub const LLVM_COV_FLAGS: &'static str = "llvm-cov-flags";
-    pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
-    pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
-    pub const ADD_MINICORE: &'static str = "add-minicore";
-    pub const MINICORE_COMPILE_FLAGS: &'static str = "minicore-compile-flags";
-    pub const DISABLE_GDB_PRETTY_PRINTERS: &'static str = "disable-gdb-pretty-printers";
-    pub const COMPARE_OUTPUT_BY_LINES: &'static str = "compare-output-by-lines";
-=======
     pub(crate) const ERROR_PATTERN: &str = "error-pattern";
     pub(crate) const REGEX_ERROR_PATTERN: &str = "regex-error-pattern";
     pub(crate) const COMPILE_FLAGS: &str = "compile-flags";
@@ -365,7 +263,7 @@ mod directives {
     pub(crate) const MINICORE_COMPILE_FLAGS: &str = "minicore-compile-flags";
     pub(crate) const DISABLE_GDB_PRETTY_PRINTERS: &str = "disable-gdb-pretty-printers";
     pub(crate) const COMPARE_OUTPUT_BY_LINES: &str = "compare-output-by-lines";
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
 }
 
 impl TestProps {

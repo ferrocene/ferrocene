@@ -6155,6 +6155,7 @@ core::iter::traits::iterator::Iterator::cmp_by::compare
 core::iter::traits::iterator::Iterator::collect
 core::iter::traits::iterator::Iterator::copied
 core::iter::traits::iterator::Iterator::count
+core::iter::traits::iterator::Iterator::count::plus_one
 core::iter::traits::iterator::Iterator::enumerate
 core::iter::traits::iterator::Iterator::eq
 core::iter::traits::iterator::Iterator::eq_by

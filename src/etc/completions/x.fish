@@ -403,6 +403,8 @@ complete -c x -n "__fish_x_using_subcommand d" -l reproducible-artifact -d 'Addi
 complete -c x -n "__fish_x_using_subcommand d" -l set -d 'override options in bootstrap.toml' -r -f
 complete -c x -n "__fish_x_using_subcommand d" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand d" -l open -d 'open the docs in a browser'
+complete -c x -n "__fish_x_using_subcommand d" -l serve -d 'start a live-relodaing web server'
+complete -c x -n "__fish_x_using_subcommand d" -l debug-sphinx -d 'allow easier debugging of Sphinx extensions'
 complete -c x -n "__fish_x_using_subcommand d" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x -n "__fish_x_using_subcommand d" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand d" -s i -l incremental -d 'use incremental compilation'
@@ -480,6 +482,8 @@ complete -c x -n "__fish_x_using_subcommand t" -l compare-mode -d 'mode describi
 complete -c x -n "__fish_x_using_subcommand t" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x -n "__fish_x_using_subcommand t" -l run -d 'whether to execute run-* tests' -r
 complete -c x -n "__fish_x_using_subcommand t" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
+complete -c x -n "__fish_x_using_subcommand t" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
+complete -c x -n "__fish_x_using_subcommand t" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-specific-cortex-m4\t''}"
 complete -c x -n "__fish_x_using_subcommand t" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand t" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand t" -l build -d 'host target of the stage0 compiler' -r -f
@@ -512,6 +516,7 @@ complete -c x -n "__fish_x_using_subcommand t" -l only-modified -d 'only run tes
 complete -c x -n "__fish_x_using_subcommand t" -l rustfix-coverage -d 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`'
 complete -c x -n "__fish_x_using_subcommand t" -l no-capture -d 'don\'t capture stdout/stderr of tests'
 complete -c x -n "__fish_x_using_subcommand t" -l bypass-ignore-backends -d 'Ignore `//@ ignore-backends` directives'
+complete -c x -n "__fish_x_using_subcommand t" -l ferrocene-test-one-crate-per-cargo-call -d 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report'
 complete -c x -n "__fish_x_using_subcommand t" -l no-doc -d 'Deprecated. Use `--all-targets` or `--tests` instead'
 complete -c x -n "__fish_x_using_subcommand t" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand t" -s i -l incremental -d 'use incremental compilation'
@@ -769,6 +774,7 @@ complete -c x -n "__fish_x_using_subcommand r" -l llvm-profile-use -d 'use PGO p
 complete -c x -n "__fish_x_using_subcommand r" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x -n "__fish_x_using_subcommand r" -l set -d 'override options in bootstrap.toml' -r -f
 complete -c x -n "__fish_x_using_subcommand r" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
+complete -c x -n "__fish_x_using_subcommand r" -l bless -d 'update all files of failing tests'
 complete -c x -n "__fish_x_using_subcommand r" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x -n "__fish_x_using_subcommand r" -s i -l incremental -d 'use incremental compilation'
 complete -c x -n "__fish_x_using_subcommand r" -l include-default-paths -d 'include default paths in addition to the provided ones'

@@ -722,13 +722,7 @@ fn test_auto_ci_changed_in_pr() {
         let sha = ctx.create_upstream_merge(&["a"]);
         let latest = ctx.create_upstream_merge(&["b", "c"]);
         let src = ctx.check_modifications(&["c", "d"], CiEnv::GitHubActions);
-<<<<<<< HEAD
         assert_eq!(src, PathFreshness::LastModifiedUpstream { upstream: latest });
-||||||| 55e86c99680
-        assert_eq!(src, PathFreshness::HasLocalModifications { upstream: sha });
-=======
-        assert_eq!(src, modified(sha, &["c"]));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     });
 }
 

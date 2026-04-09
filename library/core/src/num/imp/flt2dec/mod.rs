@@ -254,14 +254,10 @@ fn digits_to_dec_str<'a>(
 /// it will be ignored and full digits will be printed. It is only used to print
 /// additional zeroes after rendered digits. Thus, `frac_digits == 0` means that
 /// it will only print the given digits and nothing else.
-<<<<<<< HEAD
-#[ferrocene::prevalidated]
-||||||| 55e86c99680
-=======
 ///
 /// For example, `buf = b"123", exp = 3, frac_digits = 4` yields the parts for
 /// `1.2300e2`.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+#[ferrocene::prevalidated]
 fn digits_to_exp_str<'a>(
     buf: &'a [u8],
     exp: i16,

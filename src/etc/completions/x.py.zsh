@@ -462,6 +462,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--open[open the docs in a browser]' \
+'--serve[start a live-relodaing web server]' \
+'--debug-sphinx[allow easier debugging of Sphinx extensions]' \
 '--json[render the documentation in JSON format in addition to the usual HTML format]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -556,6 +558,8 @@ _arguments "${_arguments_options[@]}" : \
 '--pass=[force {check,build,run}-pass tests to this mode]:check | build | run:_default' \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
+'--coverage=[generate coverage for tests]:COVERAGE:(library)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \
@@ -589,6 +593,7 @@ _arguments "${_arguments_options[@]}" : \
 '--rustfix-coverage[enable this to generate a Rustfix coverage file, which is saved in \`/<build_base>/rustfix_missing_coverage.txt\`]' \
 '--no-capture[don'\''t capture stdout/stderr of tests]' \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
+'--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
@@ -909,6 +914,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
+'--bless[update all files of failing tests]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \

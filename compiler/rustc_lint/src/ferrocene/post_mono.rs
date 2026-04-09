@@ -22,11 +22,11 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::unord::UnordSet;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{CRATE_HIR_ID, HirId};
-use rustc_middle::mir::mono::MonoItem;
 use rustc_middle::mir::visit::Visitor as _;
 use rustc_middle::mir::{
     self, Body, CastKind, ClearCrossCrate, Location, Rvalue, SourceInfo, Terminator, TerminatorKind,
 };
+use rustc_middle::mono::MonoItem;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
@@ -82,7 +82,7 @@ pub fn lint_validated_roots<'tcx>(tcx: TyCtxt<'tcx>, roots: UnordSet<MonoItem<'t
     let mut visited = FxHashSet::default();
 
     // We need to sort these for query stability.
-    let roots = tcx.with_stable_hashing_context(move |ref hcx| roots.into_sorted(hcx, true));
+    let roots = tcx.with_stable_hashing_context(move |mut hcx| roots.into_sorted(&mut hcx, true));
 
     // FIXME: reuse linter across roots so we don't emit duplicate diagnostics.
     // let linter = LintHelper::new(tcx, local);

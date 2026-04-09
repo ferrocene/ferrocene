@@ -77,14 +77,8 @@ pub const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/librustdoc",
     ":!src/rustdoc-json-types",
     ":!tests",
-<<<<<<< HEAD
     // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
-||||||| 55e86c99680
-    ":!triagebot.toml",
-=======
-    ":!triagebot.toml",
     ":!src/bootstrap/defaults",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ];
 
 /// Global configuration for the entire build and/or bootstrap.
@@ -2476,27 +2470,6 @@ pub fn download_ci_rustc_commit<'a>(
                     return None;
                 }
 
-<<<<<<< HEAD
-                eprintln!(
-                    "NOTE: detected {} modifications that could affect a build of rustc",
-                    modifications.len()
-                );
-                for file in modifications.iter().take(10) {
-                    eprintln!("- {}", file.display());
-                }
-                if modifications.len() > 10 {
-                    eprintln!("- ...");
-                }
-
-                if if_unchanged {
-                    eprintln!("skipping rustc download due to `download-rustc = 'if-unchanged'`");
-                    return None;
-                } else {
-                    eprintln!("downloading anyway due to `download-rustc = true`");
-                }
-
-||||||| 55e86c99680
-=======
                 eprintln!(
                     "NOTE: detected {} modifications that could affect a build of rustc",
                     modifications.len()
@@ -2515,7 +2488,6 @@ pub fn download_ci_rustc_commit<'a>(
                     eprintln!("downloading unconditionally due to `download-rustc = true`");
                 }
 
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 upstream
             }
             PathFreshness::MissingUpstream => {

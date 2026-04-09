@@ -135,14 +135,10 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     ///
     /// [`Ok(())`]: Ok
     /// [`Err(k)`]: Err
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "iter_advance_by", issue = "77404")]
-<<<<<<< HEAD
-    #[ferrocene::prevalidated]
-||||||| 55e86c99680
-=======
     #[rustc_non_const_trait_method]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         for i in 0..n {
             if self.next_back().is_none() {
@@ -194,14 +190,10 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     /// let a = [1, 2, 3];
     /// assert_eq!(a.iter().nth_back(10), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iter_nth_back", since = "1.37.0")]
-<<<<<<< HEAD
-    #[ferrocene::prevalidated]
-||||||| 55e86c99680
-=======
     #[rustc_non_const_trait_method]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         if self.advance_back_by(n).is_err() {
             return None;
@@ -377,14 +369,10 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     /// // we can still use `iter`, as there are more elements.
     /// assert_eq!(iter.next_back(), Some(&1));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iter_rfind", since = "1.27.0")]
-<<<<<<< HEAD
-    #[ferrocene::prevalidated]
-||||||| 55e86c99680
-=======
     #[rustc_non_const_trait_method]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,

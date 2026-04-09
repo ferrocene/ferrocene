@@ -25,14 +25,8 @@ pub struct Skip<I> {
 }
 
 impl<I> Skip<I> {
-<<<<<<< HEAD
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I, n: usize) -> Skip<I> {
-||||||| 55e86c99680
-    pub(in crate::iter) fn new(iter: I, n: usize) -> Skip<I> {
-=======
     pub(in crate::iter) const fn new(iter: I, n: usize) -> Skip<I> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Skip { iter, n }
     }
 }

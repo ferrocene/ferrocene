@@ -21,14 +21,8 @@ pub struct Cloned<I> {
 }
 
 impl<I> Cloned<I> {
-<<<<<<< HEAD
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(it: I) -> Cloned<I> {
-||||||| 55e86c99680
-    pub(in crate::iter) fn new(it: I) -> Cloned<I> {
-=======
     pub(in crate::iter) const fn new(it: I) -> Cloned<I> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Cloned { it }
     }
 }

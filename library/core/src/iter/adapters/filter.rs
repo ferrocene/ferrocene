@@ -25,14 +25,8 @@ pub struct Filter<I, P> {
     predicate: P,
 }
 impl<I, P> Filter<I, P> {
-<<<<<<< HEAD
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I, predicate: P) -> Filter<I, P> {
-||||||| 55e86c99680
-    pub(in crate::iter) fn new(iter: I, predicate: P) -> Filter<I, P> {
-=======
     pub(in crate::iter) const fn new(iter: I, predicate: P) -> Filter<I, P> {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Filter { iter, predicate }
     }
 }

@@ -19,7 +19,7 @@ pub struct Rev<T> {
 
 impl<T> Rev<T> {
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: T) -> Rev<T> {
+    pub(in crate::iter) const fn new(iter: T) -> Rev<T> {
         Rev { iter }
     }
 

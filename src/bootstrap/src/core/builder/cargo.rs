@@ -578,6 +578,7 @@ impl Builder<'_> {
 
         if !has_modern_jobserver {
             cargo.env_remove("MAKEFLAGS");
+            cargo.env_remove("MFLAGS");
         }
 
         cargo

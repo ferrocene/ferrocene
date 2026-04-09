@@ -23,7 +23,7 @@ pub struct Fuse<I> {
 }
 impl<I> Fuse<I> {
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I) -> Fuse<I> {
+    pub(in crate::iter) const fn new(iter: I) -> Fuse<I> {
         Fuse { iter: Some(iter) }
     }
 

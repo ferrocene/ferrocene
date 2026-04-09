@@ -1,5 +1,5 @@
 use rustc_data_structures::unord::UnordSet;
-use rustc_middle::mir::mono::MonoItem;
+use rustc_middle::mono::MonoItem;
 use rustc_middle::ty::TyCtxt;
 
 use crate::collector::{MonoItemCollectionStrategy, collect_roots};

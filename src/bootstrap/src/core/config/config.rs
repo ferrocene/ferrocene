@@ -78,6 +78,7 @@ pub const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/rustdoc-json-types",
     ":!tests",
     // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
+    ":!src/bootstrap/defaults",
 ];
 
 /// Global configuration for the entire build and/or bootstrap.
@@ -2477,14 +2478,14 @@ pub fn download_ci_rustc_commit<'a>(
                     eprintln!("- {}", file.display());
                 }
                 if modifications.len() > 10 {
-                    eprintln!("- ...");
+                    eprintln!("- ... and {} more", modifications.len() - 10);
                 }
 
                 if if_unchanged {
                     eprintln!("skipping rustc download due to `download-rustc = 'if-unchanged'`");
                     return None;
                 } else {
-                    eprintln!("downloading anyway due to `download-rustc = true`");
+                    eprintln!("downloading unconditionally due to `download-rustc = true`");
                 }
 
                 upstream

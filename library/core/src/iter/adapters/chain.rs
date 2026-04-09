@@ -35,7 +35,7 @@ pub struct Chain<A, B> {
 }
 impl<A, B> Chain<A, B> {
     #[ferrocene::prevalidated]
-    pub(in super::super) fn new(a: A, b: B) -> Chain<A, B> {
+    pub(in super::super) const fn new(a: A, b: B) -> Chain<A, B> {
         Chain { a: Some(a), b: Some(b) }
     }
 }

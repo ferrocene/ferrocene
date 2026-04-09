@@ -7,6 +7,7 @@ use super::super::{
 use super::TrustedLen;
 use crate::array;
 use crate::cmp::{self, Ordering};
+use crate::marker::Destruct;
 use crate::num::NonZero;
 use crate::ops::{ChangeOutputType, ControlFlow, FromResidual, Residual, Try};
 
@@ -108,7 +109,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_next_chunk", issue = "98326")]
-    #[rustc_non_const_trait_method]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -220,19 +220,23 @@ pub const trait Iterator {
     /// let a = [1, 2, 3, 4, 5];
     /// assert_eq!(a.iter().count(), 5);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn count(self) -> usize
     where
-        Self: Sized,
+        Self: Sized + [const] Destruct,
+        Self::Item: [const] Destruct,
     {
-        self.fold(
-            0,
-            #[rustc_inherit_overflow_checks]
-            |count, _| count + 1,
-        )
+        #[ferrocene::prevalidated]
+        // FIXME(const-hack): revert this to a const closure
+        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+        #[rustc_inherit_overflow_checks]
+        const fn plus_one<T: [const] Destruct>(accum: usize, _elem: T) -> usize {
+            accum + 1
+        }
+        self.fold(0, plus_one)
     }
 
     /// Consumes the iterator, returning the last element.
@@ -254,17 +258,22 @@ pub const trait Iterator {
     /// let a = [1, 2, 3, 4, 5];
     /// assert_eq!(a.into_iter().last(), Some(5));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn last(self) -> Option<Self::Item>
     where
-        Self: Sized,
+        Self: Sized + [const] Destruct,
+        Self::Item: [const] Destruct,
     {
-        #[inline]
         #[ferrocene::prevalidated]
-        fn some<T>(_: Option<T>, x: T) -> Option<T> {
+        #[inline]
+        #[rustc_const_unstable(feature = "const_destruct", issue = "133214")]
+        const fn some<T>(_: Option<T>, x: T) -> Option<T>
+        where
+            T: [const] Destruct,
+        {
             Some(x)
         }
 
@@ -510,14 +519,13 @@ pub const trait Iterator {
     ///
     /// [`once`]: crate::iter::once
     /// [`OsStr`]: ../../std/ffi/struct.OsStr.html
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,
-        U: IntoIterator<Item = Self::Item>,
+        U: [const] IntoIterator<Item = Self::Item>,
     {
         Chain::new(self, other.into_iter())
     }
@@ -698,7 +706,6 @@ pub const trait Iterator {
     /// [`intersperse_with`]: Iterator::intersperse_with
     #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
-    #[rustc_non_const_trait_method]
     fn intersperse(self, separator: Self::Item) -> Intersperse<Self>
     where
         Self: Sized,
@@ -778,7 +785,6 @@ pub const trait Iterator {
     /// [`intersperse_with`]: Iterator::intersperse_with
     #[inline]
     #[unstable(feature = "iter_intersperse", issue = "79524")]
-    #[rustc_non_const_trait_method]
     fn intersperse_with<G>(self, separator: G) -> IntersperseWith<Self, G>
     where
         Self: Sized,
@@ -835,11 +841,10 @@ pub const trait Iterator {
     ///     println!("{x}");
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[rustc_diagnostic_item = "IteratorMap"]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn map<B, F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
@@ -960,11 +965,10 @@ pub const trait Iterator {
     /// of these layers.
     ///
     /// Note that `iter.filter(f).next()` is equivalent to `iter.find(f)`.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_filter"]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn filter<P>(self, predicate: P) -> Filter<Self, P>
     where
         Self: Sized,
@@ -1010,7 +1014,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn filter_map<B, F>(self, f: F) -> FilterMap<Self, F>
     where
         Self: Sized,
@@ -1055,11 +1058,10 @@ pub const trait Iterator {
     /// assert_eq!(iter.next(), Some((2, 'c')));
     /// assert_eq!(iter.next(), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "enumerate_method"]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn enumerate(self) -> Enumerate<Self>
     where
         Self: Sized,
@@ -1131,7 +1133,6 @@ pub const trait Iterator {
     /// [`next`]: Iterator::next
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn peekable(self) -> Peekable<Self>
     where
         Self: Sized,
@@ -1197,7 +1198,6 @@ pub const trait Iterator {
     #[inline]
     #[doc(alias = "drop_while")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn skip_while<P>(self, predicate: P) -> SkipWhile<Self, P>
     where
         Self: Sized,
@@ -1274,10 +1274,9 @@ pub const trait Iterator {
     ///
     /// The `3` is no longer there, because it was consumed in order to see if
     /// the iteration should stop, but wasn't placed back into the iterator.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
     where
         Self: Sized,
@@ -1366,7 +1365,6 @@ pub const trait Iterator {
     /// [`fuse`]: Iterator::fuse
     #[inline]
     #[stable(feature = "iter_map_while", since = "1.57.0")]
-    #[rustc_non_const_trait_method]
     fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>
     where
         Self: Sized,
@@ -1394,10 +1392,9 @@ pub const trait Iterator {
     /// assert_eq!(iter.next(), Some(3));
     /// assert_eq!(iter.next(), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,
@@ -1467,11 +1464,10 @@ pub const trait Iterator {
     /// ```
     ///
     /// [`by_ref`]: Iterator::by_ref
+    #[ferrocene::prevalidated]
     #[doc(alias = "limit")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn take(self, n: usize) -> Take<Self>
     where
         Self: Sized,
@@ -1519,7 +1515,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn scan<St, B, F>(self, initial_state: St, f: F) -> Scan<Self, St, F>
     where
         Self: Sized,
@@ -1644,7 +1639,6 @@ pub const trait Iterator {
     /// [`flat_map()`]: Iterator::flat_map
     #[inline]
     #[stable(feature = "iterator_flatten", since = "1.29.0")]
-    #[rustc_non_const_trait_method]
     fn flatten(self) -> Flatten<Self>
     where
         Self: Sized,
@@ -1799,7 +1793,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_map_windows", issue = "87155")]
-    #[rustc_non_const_trait_method]
     fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>
     where
         Self: Sized,
@@ -1860,10 +1853,9 @@ pub const trait Iterator {
     /// assert_eq!(iter.next(), None);
     /// assert_eq!(iter.next(), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn fuse(self) -> Fuse<Self>
     where
         Self: Sized,
@@ -1948,7 +1940,6 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn inspect<F>(self, f: F) -> Inspect<Self, F>
     where
         Self: Sized,
@@ -2519,15 +2510,14 @@ pub const trait Iterator {
     /// });
     /// assert_eq!(triangular, ControlFlow::Continue(435));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
-        F: FnMut(B, Self::Item) -> R,
-        R: Try<Output = B>,
+        F: [const] FnMut(B, Self::Item) -> R + [const] Destruct,
+        R: [const] Try<Output = B>,
     {
         let mut accum = init;
         while let Some(x) = self.next() {
@@ -2700,15 +2690,14 @@ pub const trait Iterator {
     /// ```
     ///
     /// [`reduce()`]: Iterator::reduce
+    #[ferrocene::prevalidated]
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
-        Self: Sized,
-        F: FnMut(B, Self::Item) -> B,
+        Self: Sized + [const] Destruct,
+        F: [const] FnMut(B, Self::Item) -> B + [const] Destruct,
     {
         let mut accum = init;
         while let Some(x) = self.next() {
@@ -2740,14 +2729,13 @@ pub const trait Iterator {
     /// let folded: i32 = (1..10).fold(0, |acc, e| acc + e);
     /// assert_eq!(reduced, folded);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
-        Self: Sized,
-        F: FnMut(Self::Item, Self::Item) -> Self::Item,
+        Self: Sized + [const] Destruct,
+        F: [const] FnMut(Self::Item, Self::Item) -> Self::Item + [const] Destruct,
     {
         let first = self.next()?;
         Some(self.fold(first, f))
@@ -2815,14 +2803,13 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iterator_try_reduce", issue = "87053")]
-    #[rustc_non_const_trait_method]
     fn try_reduce<R>(
         &mut self,
-        f: impl FnMut(Self::Item, Self::Item) -> R,
+        f: impl [const] FnMut(Self::Item, Self::Item) -> R + [const] Destruct,
     ) -> ChangeOutputType<R, Option<R::Output>>
     where
         Self: Sized,
-        R: Try<Output = Self::Item, Residual: Residual<Option<Self::Item>>>,
+        R: [const] Try<Output = Self::Item, Residual: [const] Residual<Option<Self::Item>>>,
     {
         let first = match self.next() {
             Some(i) => i,
@@ -3496,11 +3483,10 @@ pub const trait Iterator {
     ///
     /// assert_eq!(iter.next(), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[doc(alias = "reverse")]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn rev(self) -> Rev<Self>
     where
         Self: Sized + DoubleEndedIterator,
@@ -3567,10 +3553,9 @@ pub const trait Iterator {
     /// assert_eq!(v_copied, [1, 2, 3]);
     /// assert_eq!(v_map, [1, 2, 3]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "iter_copied", since = "1.36.0")]
     #[rustc_diagnostic_item = "iter_copied"]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn copied<'a, T>(self) -> Copied<Self>
     where
         T: Copy + 'a,
@@ -3617,10 +3602,9 @@ pub const trait Iterator {
     /// let faster: Vec<_> = a.iter().filter(|s| s.len() == 1).cloned().collect();
     /// assert_eq!(&[vec![23]], &faster[..]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "iter_cloned"]
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
     fn cloned<'a, T>(self) -> Cloned<Self>
     where
         T: Clone + 'a,
@@ -3652,10 +3636,9 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-    #[rustc_non_const_trait_method]
     fn cycle(self) -> Cycle<Self>
     where
-        Self: Sized + Clone,
+        Self: Sized + [const] Clone,
     {
         Cycle::new(self)
     }
@@ -3696,7 +3679,6 @@ pub const trait Iterator {
     /// ```
     #[track_caller]
     #[unstable(feature = "iter_array_chunks", issue = "100450")]
-    #[rustc_non_const_trait_method]
     fn array_chunks<const N: usize>(self) -> ArrayChunks<Self, N>
     where
         Self: Sized,
@@ -3732,13 +3714,12 @@ pub const trait Iterator {
     /// let sum: f32 = b.iter().sum();
     /// assert_eq!(sum, -0.0_f32);
     /// ```
-    #[stable(feature = "iter_arith", since = "1.11.0")]
-    #[rustc_non_const_trait_method]
     #[ferrocene::prevalidated]
+    #[stable(feature = "iter_arith", since = "1.11.0")]
     fn sum<S>(self) -> S
     where
         Self: Sized,
-        S: Sum<Self::Item>,
+        S: [const] Sum<Self::Item>,
     {
         Sum::sum(self)
     }
@@ -3767,11 +3748,10 @@ pub const trait Iterator {
     /// assert_eq!(factorial(5), 120);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
-    #[rustc_non_const_trait_method]
     fn product<P>(self) -> P
     where
         Self: Sized,
-        P: Product<Self::Item>,
+        P: [const] Product<Self::Item>,
     {
         Product::product(self)
     }

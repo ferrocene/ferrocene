@@ -311,6 +311,7 @@
 //
 // Library features (core):
 // tidy-alphabetical-start
+#![feature(borrowed_buf_init)]
 #![feature(bstr)]
 #![feature(bstr_internals)]
 #![feature(cast_maybe_uninit)]
@@ -639,7 +640,7 @@ pub mod simd {
 }
 
 #[unstable(feature = "autodiff", issue = "124509")]
-/// This module provides support for automatic differentiation.
+#[doc = include_str!("../../core/src/autodiff.md")]
 pub mod autodiff {
     /// This macro handles automatic differentiation.
     pub use core::autodiff::{autodiff_forward, autodiff_reverse};

@@ -12,7 +12,7 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs,
 };
-use rustc_middle::mir::mono::Visibility;
+use rustc_middle::mono::Visibility;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self as ty, TyCtxt};
 use rustc_session::lint;

@@ -22,7 +22,7 @@ pub struct Take<I> {
 
 impl<I> Take<I> {
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I, n: usize) -> Take<I> {
+    pub(in crate::iter) const fn new(iter: I, n: usize) -> Take<I> {
         Take { iter, n }
     }
 }

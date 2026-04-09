@@ -22,7 +22,7 @@ pub struct Enumerate<I> {
 }
 impl<I> Enumerate<I> {
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I) -> Enumerate<I> {
+    pub(in crate::iter) const fn new(iter: I) -> Enumerate<I> {
         Enumerate { iter, count: 0 }
     }
 

@@ -26,7 +26,7 @@ pub struct Filter<I, P> {
 }
 impl<I, P> Filter<I, P> {
     #[ferrocene::prevalidated]
-    pub(in crate::iter) fn new(iter: I, predicate: P) -> Filter<I, P> {
+    pub(in crate::iter) const fn new(iter: I, predicate: P) -> Filter<I, P> {
         Filter { iter, predicate }
     }
 }

@@ -14,6 +14,13 @@ orbs:
   continuation: circleci/continuation@0.2.0
 
 jobs:
+  check-rhel-runner:
+    docker:
+      - image: cimg/base:current
+    resource_class: ferrocene/rhel-10-kubernetes
+    steps:
+      - run: echo "Hi I'm on a Container Runner!"
+
   setup:
     docker:
       - image: cimg/python:3.12
@@ -81,6 +88,11 @@ jobs:
 
 workflows:
   version: 2
+
+  test-rhel-runner:
+    jobs:
+      - check-rhel-runner
+
   setup:
     when:
       or:

@@ -17,6 +17,9 @@ they are used in their code.
 
 Additionally a subset of the ``core`` library is certified for use in end-use code.
 
+Qualified tools
+---------------
+
 Qualified tools are:
 
 * ``rustc``

@@ -44,7 +44,7 @@ This qualification is restricted to the following environment:
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
      - ``core``
-     - ``std``, ``proc_macro``, ``test``
+     - ``alloc``, ``std``, ``proc_macro``, ``test``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-pc-nto-qnx710`

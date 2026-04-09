@@ -77,6 +77,5 @@ consider the used tools in the software development plan (clause 5.1.4) and in t
 Although [|iec_62304_ref|] does not come with its own scheme of tool classification and validation, it recommends in Annex C.7
 the usage of techniques, tools and methods as defined in [|iec_61508_ref|].
 
-
 Ferrocene is accompanied by the appropriate documentation to support this
 process.

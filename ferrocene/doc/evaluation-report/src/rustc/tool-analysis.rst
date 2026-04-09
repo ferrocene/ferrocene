@@ -312,19 +312,19 @@ Detection Measures and Usage Restriction
    * - Measure identifier
      - Description
    * - .. id:: RUSTC_AVD_CHECK_INSTALL_001
-     -  The toolchain Installation shall be checked in order to ensure the validity of the build results.
+     - The toolchain Installation shall be checked in order to ensure the validity of the build results.
    * - .. id:: RUSTC_AVD_CHECK_CLEAN_ENV_002
-     -  User must verify that environment variables used by the toolchain are correctly set.
+     - User must verify that environment variables used by the toolchain are correctly set.
    * - .. id:: RUSTC_AVD_CHECK_BUILD_SCRIPT_003
-     -  User must verify that the list of build actions is correct.
+     - User must verify that the list of build actions is correct.
    * - .. id:: RUSTC_AVD_CLEAN_004
-     -  Before building, the user must ensure that the build environment is clean of former compilation artifacts.
+     - Before building, the user must ensure that the build environment is clean of former compilation artifacts.
    * - .. id:: RUSTC_AVD_WARNING_AS_ERROR_005
-     -  All Warnings should be considered errors, the build should NOT display any warning.
+     - All Warnings should be considered errors, the build should NOT display any warning.
    * - .. id:: RUSTC_AVD_PARALLEL_BUILD_006
-     -  Concurrent file updates during the build operations are prohibited.
+     - Concurrent file updates during the build operations are prohibited.
    * - .. id:: RUSTC_AVD_TEST_007
-     -  Testing must be performed on the final application or libraries, or on any parts built, using an environment as close as possible to the final build.
+     - Testing must be performed on the final application or libraries, or on any parts built, using an environment as close as possible to the final build.
    * - .. id:: CORE_AVD_SUBSET_001
      - User must verify that only the certified subset of the core library is used.
    * - .. id:: CORE_AVD_MACROS_002

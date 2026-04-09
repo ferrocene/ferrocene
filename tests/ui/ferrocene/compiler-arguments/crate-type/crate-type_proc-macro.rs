@@ -12,3 +12,4 @@ pub fn foo(input: TokenStream) -> TokenStream {
 }
 
 // ferrocene-annotations: um_rustc_crate_type
+// ferrocene-annotations: um_rustc_crate_type_proc_macro

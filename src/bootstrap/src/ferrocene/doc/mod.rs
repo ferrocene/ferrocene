@@ -586,6 +586,12 @@ macro_rules! sphinx_books {
                 // Generate the API docs for the certified crates
                 builder.ensure(CertifiedApiDocs {target: self.target});
 
+                // Generate the Traceability Matrix
+                builder.ensure(TraceabilityMatrix {
+                    target: self.target,
+                    compiler: builder.compiler(builder.top_stage, builder.host_target),
+                });
+
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in
                 // the breadcrumbs doesn't break.
                 builder.ensure(Index { target: self.target });
@@ -924,6 +930,8 @@ impl Step for Index {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info(&format!("Building Ferrocene documentation index ({})", self.target));
+
         const PDW_PLACEHOLDER: &str = "<!-- FERROCENE-INCLUDE-PUBLIC-DOCS-WARNING -->";
 
         let doc = builder.src.join("ferrocene").join("doc");

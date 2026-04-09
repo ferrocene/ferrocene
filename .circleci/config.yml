@@ -16,7 +16,7 @@ orbs:
 jobs:
   check-rhel-runner:
     docker:
-      - image: cimg/base:current
+      - image: registry.access.redhat.com/ubi10:10.1
     resource_class: ferrocene/rhel-10-kubernetes
     steps:
       - run: echo "Hi I'm on a Container Runner!"

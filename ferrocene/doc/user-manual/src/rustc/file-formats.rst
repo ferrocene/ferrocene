@@ -45,3 +45,12 @@ produces an executable with name ``name``, without a file extension.
 
 The file format of an executable is target-dependent. Consult the documentation
 of your specific target.
+
+Proc macro library
+------------------
+
+A proc macro library is a Rust library of crate type ``proc-macro``.
+If used by another Rust library or executable it will be invoked by rustc to transform parts of the AST.
+
+Compiling a source file with name ``name`` using rustc produces a proc macro library with name ``libname``, with the ``so`` file extension for a native dynamic library.
+The ``so`` file format is target-dependent. Consult the documentation of your specific target.

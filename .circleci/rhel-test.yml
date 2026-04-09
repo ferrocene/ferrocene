@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+version: 2.1
+
+jobs:
+  # Container dedicated to running ad-hoc tests that don't depend on an
+  # individual target. If you have a test you don't know where to run it, this
+  # is the place for it.
+
+  check-rhel-runner:
+    docker:
+      - image: cimg/base:current
+    resource_class: ferrocene/rhel-10-kubernetes
+    steps:
+      - run: echo "Hi I'm on a Container Runner!"
+
+workflows:
+  version: 2
+
+  test-rhel-runner:
+    jobs:
+      - check-rhel-runner

@@ -30,6 +30,9 @@ Installing Ferrocene
 Building a Library
 ------------------
 
+``rlib``
+~~~~~~~~
+
 .. id:: RUSTC_UC1_RLIB
 
 **Actor(s):** User, rustc.
@@ -65,6 +68,9 @@ environment is correctly set.
 7. ``LLVM`` generates a static Rust library.
 
 8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the core library are used.
+
+``staticlib``
+~~~~~~~~~~~~~
 
 .. id:: RUSTC_UC2_STATICLIB
 
@@ -147,6 +153,9 @@ set.
 9. The linker generates a Rust executable.
 
 10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
+
+Linked to a static Rust library
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. id:: RUSTC_UC4_EXEC_RLIB
 
@@ -247,4 +256,3 @@ unique within the set of all directories included by compiler argument ``-L``.
 10. The linker generates a Rust executable that links to a C library.
 
 11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
-

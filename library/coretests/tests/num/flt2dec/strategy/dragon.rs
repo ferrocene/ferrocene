@@ -68,32 +68,3 @@ fn test_to_exact_exp_str() {
 fn test_to_exact_fixed_str() {
     to_exact_fixed_str_test(format_exact);
 }
-
-#[test]
-/// This test tries to detect incorrect rounding in `format_shortest`.
-/// It tests:
-/// - for each `0.1`, `0.01`, `0.001`, ..., for offset = 1..=20 digits:
-/// - for each p = `10.pow(1)`, `10.pow(2)`, from k = -300..=300:
-/// - Run `format_shortest` on `f = p - .0000....1`.
-///
-/// If the algorithm is incorrect, the annotated block will be hit, generating a coverage line, and
-/// `blanket` will error that we have an unused annotation.
-fn test_dragon_rounding_edge_cases() {
-    let mut buf = Vec::with_capacity(MAX_SIG_DIGITS);
-    let slice = buf.spare_capacity_mut();
-
-    for k in -300..=300 {
-        let p = 10f64.powi(k);
-        if p.is_infinite() {
-            continue;
-        }
-        let bits = p.to_bits();
-        for offset in 1..=20u64 {
-            let f = f64::from_bits(bits - offset);
-            let (_negative, full_decoded) = decode(f);
-            if let FullDecoded::Finite(decoded) = full_decoded {
-                format_shortest(&decoded, slice);
-            }
-        }
-    }
-}

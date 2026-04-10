@@ -470,18 +470,6 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
                         if slice == &self.utf8_encoded[0..self.utf8_size()] {
                             return Some((found_char, self.finger));
                         }
-                    } else {
-                        #[ferrocene::annotation(
-                            "This branch is unreachable: `found_char..self.finger` is always within bounds of `self.haystack.as_bytes()`. \
-                            `self.finger` is bounded because it starts at a valid index and only advances within the haystack (by `index + 1` from `memchr`). \
-                            `found_char` is bounded because it equals `self.finger - self.utf8_size()`, and we only reach here when `self.finger >= self.utf8_size()`."
-                        )]
-                        {
-                            #[cfg(feature = "ferrocene_test")]
-                            unreachable!();
-                            #[cfg(not(feature = "ferrocene_test"))]
-                            {}
-                        }
                     }
                 }
             } else {

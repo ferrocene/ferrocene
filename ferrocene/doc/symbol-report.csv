@@ -7510,8 +7510,6 @@ core::slice::<impl [T]>::split_at_mut_unchecked::precondition_check
 core::slice::<impl [T]>::split_at_unchecked
 core::slice::<impl [T]>::split_at_unchecked::precondition_check
 core::slice::<impl [T]>::split_first
-core::slice::<impl [T]>::split_first_chunk
-core::slice::<impl [T]>::split_first_chunk_mut
 core::slice::<impl [T]>::split_first_mut
 core::slice::<impl [T]>::split_last
 core::slice::<impl [T]>::split_last_mut

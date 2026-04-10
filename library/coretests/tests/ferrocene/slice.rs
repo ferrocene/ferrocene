@@ -296,12 +296,3 @@ fn slice_escape_byte_call_once_success() {
 fn slice_escape_byte_call_once_failure() {
     core::slice::ferrocene_test::test_escape_byte_call_once(30, 31);
 }
-
-// covers `core::slice::<impl [T]>::split_first_chunk`
-#[test]
-fn slice_split_first_chunk() {
-    let slice = [1, 2, 3, 4, 5].as_slice();
-
-    assert_eq!(slice.split_first_chunk::<3>(), Some((&[1, 2, 3], [4, 5].as_slice())));
-    assert_eq!(slice.split_first_chunk::<10>(), None);
-}

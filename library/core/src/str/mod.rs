@@ -29,9 +29,6 @@ pub use converts::{from_raw_parts, from_raw_parts_mut};
 pub use converts::{from_utf8, from_utf8_unchecked};
 #[stable(feature = "str_mut_extras", since = "1.20.0")]
 pub use converts::{from_utf8_mut, from_utf8_unchecked_mut};
-#[doc(hidden)]
-#[unstable(feature = "ferrocene_test", issue = "none")]
-pub use count::ferrocene_test::test_do_count_chars;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use error::{ParseBoolError, Utf8Error};
 #[stable(feature = "encode_utf16", since = "1.8.0")]

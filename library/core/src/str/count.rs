@@ -140,8 +140,3 @@ fn sum_bytes_in_usize(values: usize) -> usize {
 fn char_count_general_case(s: &[u8]) -> usize {
     s.iter().filter(|&&byte| !super::validations::utf8_is_cont_byte(byte)).count()
 }
-
-/// Ferrocene addition: Hidden module to test crate-internal functionality
-#[doc(hidden)]
-#[unstable(feature = "ferrocene_test", issue = "none")]
-pub(crate) mod ferrocene_test;

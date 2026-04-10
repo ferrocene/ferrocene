@@ -301,4 +301,5 @@ class AutomatedPR(abc.ABC):
         """
         Return the API URL for the requested GitHub repository.
         """
-        return f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/{url}"
+        repo = os.environ.get('GITHUB_REPOSITORY') or 'ferrocene/ferrocene'
+        return f"https://api.github.com/repos/{repo}/{url}"

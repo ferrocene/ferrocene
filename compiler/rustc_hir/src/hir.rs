@@ -1304,19 +1304,6 @@ impl Attribute {
             Attribute::Unparsed(_) => false,
         }
     }
-
-    pub fn has_span_without_desugaring_kind(&self) -> bool {
-        let span = match self {
-            Attribute::Unparsed(attr) => attr.span,
-            Attribute::Parsed(AttributeKind::Deprecated { span, .. }) => *span,
-            Attribute::Parsed(AttributeKind::LintAttributes(sub_attrs)) => {
-                return sub_attrs.iter().any(|attr| attr.attr_span.desugaring_kind().is_none());
-            }
-            Attribute::Parsed(attr) => panic!("can't get span of parsed attr: {:?}", attr),
-        };
-
-        span.desugaring_kind().is_none()
-    }
 }
 
 impl AttributeExt for Attribute {
@@ -1391,7 +1378,6 @@ impl AttributeExt for Attribute {
             Attribute::Parsed(AttributeKind::DocComment { span, .. }) => *span,
             Attribute::Parsed(AttributeKind::Deprecated { span, .. }) => *span,
             Attribute::Parsed(AttributeKind::CfgTrace(cfgs)) => cfgs[0].1,
-            Attribute::Parsed(AttributeKind::LintAttributes(sub_attrs)) => sub_attrs[0].attr_span,
             a => panic!("can't get the span of an arbitrary parsed attribute: {a:?}"),
         }
     }
@@ -1656,9 +1642,17 @@ impl<'tcx> OwnerInfo<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug, HashStable_Generic)]
+pub enum DelayedOwnerKind {
+    Item,
+    ImplItem,
+    TraitItem,
+}
+
+#[derive(Copy, Clone, Debug, HashStable_Generic)]
 pub enum MaybeOwner<'tcx> {
     Owner(&'tcx OwnerInfo<'tcx>),
     NonOwner(HirId),
+    Delayed(DelayedOwnerKind),
     /// Used as a placeholder for unused LocalDefId.
     Phantom,
 }
@@ -1667,12 +1661,19 @@ impl<'tcx> MaybeOwner<'tcx> {
     pub fn as_owner(self) -> Option<&'tcx OwnerInfo<'tcx>> {
         match self {
             MaybeOwner::Owner(i) => Some(i),
-            MaybeOwner::NonOwner(_) | MaybeOwner::Phantom => None,
+            _ => None,
         }
     }
 
     pub fn unwrap(self) -> &'tcx OwnerInfo<'tcx> {
-        self.as_owner().unwrap_or_else(|| panic!("Not a HIR owner"))
+        self.as_owner().unwrap_or_else(|| panic!("not a HIR owner"))
+    }
+
+    pub fn expect_delayed(self) -> DelayedOwnerKind {
+        match self {
+            MaybeOwner::Delayed(delayed_owner) => delayed_owner,
+            _ => panic!("not a delayed owner"),
+        }
     }
 }
 

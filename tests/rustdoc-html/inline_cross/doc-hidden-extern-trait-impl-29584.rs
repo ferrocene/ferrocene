@@ -1,4 +1,5 @@
 //@ aux-build:issue-29584.rs
+//@ edition: 2015
 //@ ignore-cross-compile
 
 // https://github.com/rust-lang/rust/issues/29584

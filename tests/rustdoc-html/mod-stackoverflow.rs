@@ -1,4 +1,5 @@
 //@ aux-build:mod-stackoverflow.rs
+//@ edition: 2015
 //@ ignore-cross-compile
 
 extern crate mod_stackoverflow;

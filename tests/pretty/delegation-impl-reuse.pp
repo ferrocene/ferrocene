@@ -1,5 +1,4 @@
 #![feature(prelude_import)]
-#![no_std]
 //@ pretty-compare-only
 //@ pretty-mode:expanded
 //@ pp-exact:delegation-impl-reuse.pp
@@ -8,7 +7,7 @@
 #![feature(fn_delegation)]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 trait Trait<T> {
     fn foo(&self) {}

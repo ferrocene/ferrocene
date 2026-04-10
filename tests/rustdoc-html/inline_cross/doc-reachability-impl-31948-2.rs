@@ -2,6 +2,7 @@
 #![crate_name="foobar"]
 
 //@ aux-build:rustdoc-nonreachable-impls.rs
+//@ edition: 2015
 //@ build-aux-docs
 //@ ignore-cross-compile
 

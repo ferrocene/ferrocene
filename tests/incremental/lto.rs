@@ -1,5 +1,6 @@
 //@ no-prefer-dynamic
 //@ revisions:rpass1 rpass2
+//@ edition: 2015
 //@ compile-flags: -C lto
 //@ ignore-backends: gcc
 

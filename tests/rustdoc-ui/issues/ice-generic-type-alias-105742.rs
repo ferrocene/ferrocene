@@ -1,4 +1,5 @@
 //@ compile-flags: -Znormalize-docs
+//@ edition: 2015
 //@ dont-require-annotations: NOTE
 
 // https://github.com/rust-lang/rust/issues/105742

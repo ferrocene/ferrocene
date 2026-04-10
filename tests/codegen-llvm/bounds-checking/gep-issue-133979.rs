@@ -2,6 +2,7 @@
 //! Check that bounds checking are eliminated.
 
 //@ compile-flags: -Copt-level=2
+//@ edition: 2015
 
 #![crate_type = "lib"]
 

@@ -1,4 +1,5 @@
 // skip-filecheck
+//@ edition: 2015
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
 
 // Ensure that there are no drop terminators in `unwrap<T>` (except the one along the cleanup

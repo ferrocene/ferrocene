@@ -63,22 +63,22 @@ impl TestVariantName {
 
         match self {
             // INTERNAL_PROCEDURES_START_TEST_VARIANTS
-            Self::Ed2021 => TestVariantBase::new().edition(Edition("2015")),
+            Self::Ed2021 => TestVariantBase::new().edition(Edition("2021")),
             Self::Ed2021CortexA53 => {
-                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-a53"))
+                TestVariantBase::new().edition(Edition("2021")).qemu_cpu(QemuCpu("cortex-a53"))
             }
             Self::Ed2021SpecificCortexA53 => TestVariantBase::new()
-                .edition(Edition("2015"))
+                .edition(Edition("2021"))
                 .qemu_cpu(QemuCpu("cortex-a53"))
                 .target_cpu(TargetCpu("cortex-a53")),
             Self::Ed2021NeoverseV1 => {
-                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("neoverse-v1"))
+                TestVariantBase::new().edition(Edition("2021")).qemu_cpu(QemuCpu("neoverse-v1"))
             }
             Self::Ed2021CortexM4 => {
-                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
+                TestVariantBase::new().edition(Edition("2021")).qemu_cpu(QemuCpu("cortex-m4"))
             }
             Self::Ed2021SpecificCortexM4 => TestVariantBase::new()
-                .edition(Edition("2015"))
+                .edition(Edition("2021"))
                 .qemu_cpu(QemuCpu("cortex-m4"))
                 .target_cpu(TargetCpu("cortex-m4")),
             // INTERNAL_PROCEDURES_END_TEST_VARIANTS

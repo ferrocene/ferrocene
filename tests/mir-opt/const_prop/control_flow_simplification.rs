@@ -1,5 +1,6 @@
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
 //@ test-mir-pass: GVN
+//@ edition: 2015
 //@ compile-flags: -Zmir-opt-level=1
 
 trait NeedsDrop: Sized {

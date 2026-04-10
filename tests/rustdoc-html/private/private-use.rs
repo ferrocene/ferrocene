@@ -1,5 +1,6 @@
 // Regression test for <https://github.com/rust-lang/rust/pull/113374> to
 // ensure it doesn't panic.
+//@ edition: 2015
 
 mod generics {
     pub enum WherePredicate {

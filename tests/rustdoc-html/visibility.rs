@@ -1,4 +1,5 @@
 //@ compile-flags: --document-private-items
+//@ edition: 2015
 
 #![crate_name = "foo"]
 #![feature(inherent_associated_types)]

@@ -1,4 +1,5 @@
 #![crate_name = "foo"]
+//@ edition: 2015
 
 mod hidden {
     #[derive(Clone)]

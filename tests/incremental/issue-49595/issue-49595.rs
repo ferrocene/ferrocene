@@ -1,5 +1,6 @@
 //@ revisions:cfail1 cfail2 cfail3
 //@ compile-flags: -Z query-dep-graph --test
+//@ edition: 2015
 //@ build-pass
 //@ ignore-backends: gcc
 

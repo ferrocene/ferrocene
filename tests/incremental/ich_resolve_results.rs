@@ -2,6 +2,7 @@
 // `use` to something different.
 
 //@ revisions: rpass1 rpass2 rpass3
+//@ edition: 2015
 //@ compile-flags: -Z query-dep-graph
 //@ ignore-backends: gcc
 

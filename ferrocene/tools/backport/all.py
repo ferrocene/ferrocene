@@ -187,7 +187,7 @@ def list_backport_labels(repo):
 
 if __name__ == "__main__":
     dry_run = len(sys.argv) > 1 and sys.argv[1] == "--dry-run"
-    repo = os.environ["GITHUB_REPOSITORY"]
+    repo = os.environ.get("GITHUB_REPOSITORY") or 'ferrocene/ferrocene'
     labels = list_backport_labels(repo)
 
     for label in labels:

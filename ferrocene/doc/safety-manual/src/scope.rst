@@ -44,7 +44,7 @@ This qualification is restricted to the following environment:
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
      - ``core``
-     - ``std``, ``proc_macro``, ``test``
+     - ``alloc``, ``std``, ``proc_macro``, ``test``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-pc-nto-qnx710`
@@ -76,7 +76,6 @@ Additionally, according to [|iec_62304_ref|], a manufacturer of medical device s
 consider the used tools in the software development plan (clause 5.1.4) and in their configuration item control (clauses 5.1.10 and 5.1.11).
 Although [|iec_62304_ref|] does not come with its own scheme of tool classification and validation, it recommends in Annex C.7
 the usage of techniques, tools and methods as defined in [|iec_61508_ref|].
-
 
 Ferrocene is accompanied by the appropriate documentation to support this
 process.

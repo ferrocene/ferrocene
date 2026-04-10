@@ -187,10 +187,11 @@ def list_backport_labels(repo):
 
 
 if __name__ == "__main__":
+    dry_run = len(sys.argv) > 1 and sys.argv[1] == "--dry-run"
     repo = os.environ["GITHUB_REPOSITORY"]
     labels = list_backport_labels(repo)
 
     for label in labels:
         print(f"==> backporting PRs with label {label}")
         pr = BackportAllPR(repo, label, f"release/{label.removeprefix('backport:')}")
-        pr.create()
+        pr.create(dry_run=dry_run)

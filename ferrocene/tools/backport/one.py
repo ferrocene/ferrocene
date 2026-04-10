@@ -19,7 +19,7 @@ DEFAULT_REPOSITORY = "ferrocene/ferrocene"
 RUST_REPOSITORY = "rust-lang/rust"
 
 
-def get_base_and_head(token, repository, pr_number):
+def get_pr_metadata(token, repository, pr_number):
     headers = {}
     if token is not None:
         headers["Authorization"] = f"token {token}"
@@ -28,8 +28,7 @@ def get_base_and_head(token, repository, pr_number):
         headers=headers,
     )
     result.raise_for_status()
-    json = result.json()
-    return json["base"]["sha"], json["head"]["sha"]
+    return result.json()
 
 def git(*args, **kwargs):
     return subprocess.run(
@@ -42,6 +41,21 @@ def git(*args, **kwargs):
 def git_output(*args):
     return git(*args, stdout=subprocess.PIPE).stdout
 
+def handle_merge_conflict(pr_number, commit_message, author, e):
+    print(f"ERROR: failed to apply diff for {pr_number}: {e}")
+    git_dir = git_output("rev-parse", "--git-dir").rstrip()
+    msg_file = git_dir + "/COMMIT_EDITMSG.ferrocene"
+    help = f"HELP: once you have resolved the conflict, run `git commit --author='{author}' --edit "
+    try:
+        with open(msg_file, 'w') as fd:
+            fd.write(commit_message)
+        help += f"--file='{msg_file}'"
+    except Exception as e:
+        print(f"WARN: failed to write {msg_file}: {e}", file=sys.stderr)
+        help += f"--message='{commit_message}'"
+    print(help, file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -52,55 +66,54 @@ def main():
 
     pr_number = args.pr_number
     if args.rust:
-        os.environ[GITHUB_REPOSITORY_ENV] = RUST_REPOSITORY
+        repository = RUST_REPOSITORY
+    else:
+        repository = DEFAULT_REPOSITORY
 
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-
-    repository = os.environ.get(GITHUB_REPOSITORY_ENV, DEFAULT_REPOSITORY)
     try:
         token = os.environ["GITHUB_TOKEN"]
     except KeyError:
         print("warning: if no API token is set in the GITHUB_TOKEN env var, requests may be rate-limited", file=sys.stderr)
         token = None
 
-    base, head = get_base_and_head(token, repository, pr_number)
+    metadata = get_pr_metadata(token, repository, pr_number)
+    base, head = metadata["base"]["sha"], metadata["head"]["sha"]
 
     git("fetch", f"https://github.com/{repository}", base, head)
 
-    current_branch = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    ).stdout.strip()
+    authors = git_output("log", "--format=%aN <%aE>", f"{base}..{head}").splitlines()
+    primary_author = authors[0]
+    co_authors = set(authors)
+    co_authors.remove(primary_author)
+    formatted_authors = ""
+    if co_authors:
+        formatted_authors = "\n".join("Co-authored-by: {author}" for author in co_authors)
 
-    result = subprocess.run(
-        [
-            "git",
-            "rebase",
-            # Customize the list of steps executed for this rebase. The user
-            # won't be prompted with the editor to change the todo list though,
-            # since we set the editor to run custom code (see the editor script
-            # for a list of the changes we do).
-            "--interactive",
-            # The "exec" added by the editor needs to be executed successfully
-            # for the rebase to go through. Ensure it's rescheduled on failure.
-            "--reschedule-failed-exec",
-            "--onto",
-            current_branch,
-            base,
-            head,
-        ],
-        env={
-            **os.environ,
-            "FERROCENE_PR_NUMBER": pr_number,
-            "FERROCENE_CURRENT_BRANCH": current_branch,
-            "GIT_SEQUENCE_EDITOR": os.path.join(
-                current_dir, "utils", "rebase-interactive-editor.py"
-            ),
-        },
-    )
-    exit(result.returncode)
+    commits = git_output("log", "--format=%H", f"{base}..{head}")
+    commits = commits.splitlines()
+
+    repo = metadata['head']['repo']['html_url']
+    formatted_commits = ' '.join(f"[{sha}]({repo}/commit/{sha})" for sha in commits)
+
+    commit_message = f"""
+Backport {pr_number} (`{metadata['html_url']}`)
+
+{metadata['title']}
+
+{metadata['body']}{formatted_authors}
+
+Ferrocene-backport-of: {repository}#{pr_number}
+Ferrocene-backported-commits: {formatted_commits}"""
+
+    pr_diff = git_output("-c", "core.pager=", "diff", base, head)
+
+    try:
+        git("apply", "--3way", "--index", input=pr_diff)
+    except subprocess.CalledProcessError as e:
+        handle_merge_conflict(pr_number, commit_message, primary_author, e)
+        exit(e.returncode)
+
+    git("commit", "--author", primary_author, "--file=-", input=commit_message)
 
 
 if __name__ == "__main__":

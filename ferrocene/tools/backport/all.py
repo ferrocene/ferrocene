@@ -17,9 +17,6 @@ import sys
 from automations_common import AutomatedPR, AutomationResult
 
 
-TEMP_BRANCH = "backport-temp--do-not-use-for-real-code"
-
-
 class BackportAllPR(AutomatedPR):
     def __init__(self, repo, label, target):
         self.__repo = repo
@@ -32,28 +29,6 @@ class BackportAllPR(AutomatedPR):
         if not prs:
             return AutomationResult.NO_CHANGES
 
-        current_branch = self.cmd_capture(["git", "branch", "--show-current"])
-        base_branch = f"{self.origin}/{self.__target}"
-
-        # When a backport failure happens, the script leaves git in the
-        # temporary branch. If we were to delete the temporary branch to create
-        # a new one from scratch, it would fail as git prevents deleting the
-        # current branch. To handle that, if we're already in the temporary
-        # branch, we just reset to the base we want.
-        if current_branch == TEMP_BRANCH:
-            self.cmd(["git", "reset", "--hard", base_branch])
-        else:
-            self.cmd(["git", "branch", "-D", TEMP_BRANCH], check=False)
-            self.cmd(
-                [
-                    "git",
-                    "checkout",
-                    "-b",
-                    TEMP_BRANCH,
-                    base_branch,
-                ]
-            )
-
         for pr in prs:
             pr = pr["number"]
             print(f"backporting #{pr}")
@@ -65,8 +40,7 @@ class BackportAllPR(AutomatedPR):
             if result.returncode == 0:
                 self.__backported_pull_requests.append(pr)
             else:
-                self.cmd(["git", "rebase", "--abort"], check=False)
-                self.cmd(["git", "checkout", TEMP_BRANCH])
+                self.cmd(["git", "checkout", "--force", "HEAD"])
                 self.__mark_as_manual(pr)
 
         if self.__backported_pull_requests:

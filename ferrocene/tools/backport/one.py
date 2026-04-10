@@ -20,9 +20,12 @@ RUST_REPOSITORY = "rust-lang/rust"
 
 
 def get_base_and_head(token, repository, pr_number):
+    headers = {}
+    if token is not None:
+        headers["Authorization"] = f"token {token}"
     result = requests.get(
         f"https://api.github.com/repos/{repository}/pulls/{pr_number}",
-        headers={"Authorization": f"token {token}"},
+        headers=headers,
     )
     result.raise_for_status()
     json = result.json()
@@ -57,8 +60,8 @@ def main():
     try:
         token = os.environ["GITHUB_TOKEN"]
     except KeyError:
-        print("error: a GitHub API token needs to be set in the GITHUB_TOKEN env var")
-        exit(1)
+        print("warning: if no API token is set in the GITHUB_TOKEN env var, requests may be rate-limited", file=sys.stderr)
+        token = None
 
     base, head = get_base_and_head(token, repository, pr_number)
 

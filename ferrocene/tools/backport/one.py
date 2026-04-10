@@ -28,6 +28,16 @@ def get_base_and_head(token, repository, pr_number):
     json = result.json()
     return json["base"]["sha"], json["head"]["sha"]
 
+def git(*args, **kwargs):
+    return subprocess.run(
+        ["git"] + list(args),
+        text=True,
+        check=True,
+        **kwargs
+    )
+
+def git_output(*args):
+    return git(*args, stdout=subprocess.PIPE).stdout
 
 def main():
     parser = argparse.ArgumentParser()
@@ -52,12 +62,7 @@ def main():
 
     base, head = get_base_and_head(token, repository, pr_number)
 
-    subprocess.run(
-        ["git", "fetch", f"https://github.com/{repository}", base, head],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    )
+    git("fetch", f"https://github.com/{repository}", base, head)
 
     current_branch = subprocess.run(
         ["git", "rev-parse", "HEAD"],

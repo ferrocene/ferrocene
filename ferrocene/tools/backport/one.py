@@ -20,8 +20,9 @@ GITHUB_REPOSITORY_ENV = "GITHUB_REPOSITORY"
 DEFAULT_REPOSITORY = "ferrocene/ferrocene"
 RUST_REPOSITORY = "rust-lang/rust"
 
+VERBOSE = False
 
-def get_base_and_head(token, repository, pr_number):
+def get_pr_metadata(token, repository, pr_number):
     headers = {}
     if token is not None:
         headers["Authorization"] = f"token {token}"
@@ -30,80 +31,118 @@ def get_base_and_head(token, repository, pr_number):
         headers=headers,
     )
     result.raise_for_status()
-    json = result.json()
-    return json["base"]["sha"], json["head"]["sha"]
+    return result.json()
 
-def git(*args, **kwargs):
-    return subprocess.run(
-        ["git"] + list(args),
-        text=True,
+def run(*args, **kwargs):
+    if VERBOSE:
+        print("running:", *args, file=sys.stderr)
+    proc = subprocess.run(
+        list(args),
         check=True,
         **kwargs
     )
+    if VERBOSE:
+        if proc.stdout is not None:
+            print("output:", proc.stdout, file=sys.stderr)
+        if proc.stderr is not None:
+            print("error output:", proc.stderr, file=sys.stderr)
+    return proc
+
+def git(*args, **kwargs):
+    return run("git", *args, **kwargs)
 
 def git_output(*args):
-    return git(*args, stdout=subprocess.PIPE).stdout
+    return git(*args, text=True, stdout=subprocess.PIPE, stderr=sys.stderr).stdout
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--rust", help="Pull from rust-lang/rust instead", action="store_true"
     )
+    parser.add_argument("--verbose", action='store_true', help="Show invoked commands and their outputs")
     parser.add_argument("pr_number", help="The PR to backport")
     args = parser.parse_args()
+    global VERBOSE
+    if args.verbose:
+        VERBOSE = True
 
     pr_number = args.pr_number
     if args.rust:
-        os.environ[GITHUB_REPOSITORY_ENV] = RUST_REPOSITORY
+        repository = RUST_REPOSITORY
+    else:
+        repository = DEFAULT_REPOSITORY
+    pr_name = f"{repository}#{pr_number}"
 
-    current_dir = os.path.abspath(os.path.dirname(__file__))
+    if git_output("diff", "--name-only", "--cached") != "":
+        print("ERROR: this script cannot be run when you have staged changes; try running `git reset`")
+        exit(1)
 
-    repository = os.environ.get(GITHUB_REPOSITORY_ENV, DEFAULT_REPOSITORY)
     try:
         token = os.environ["GITHUB_TOKEN"]
     except KeyError:
         print("warning: if no API token is set in the GITHUB_TOKEN env var, requests may be rate-limited", file=sys.stderr)
         token = None
 
-    base, head = get_base_and_head(token, repository, pr_number)
+    metadata = get_pr_metadata(token, repository, pr_number)
+    base, head = metadata["base"]["sha"], metadata["head"]["sha"]
 
-    git("fetch", f"https://github.com/{repository}", base, head)
+    git("fetch", "--quiet", f"https://github.com/{repository}", base, head)
 
-    current_branch = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    ).stdout.strip()
+    authors = git_output("log", "--format=%aN <%aE>", f"{base}..{head}").splitlines()
+    primary_author = authors[0]
+    co_authors = set(authors)
+    co_authors.remove(primary_author)
+    formatted_coauthors = ""
+    if co_authors:
+        formatted_coauthors = "\n".join("Co-authored-by: {author}" for author in co_authors)
 
-    result = subprocess.run(
-        [
-            "git",
-            "rebase",
-            # Customize the list of steps executed for this rebase. The user
-            # won't be prompted with the editor to change the todo list though,
-            # since we set the editor to run custom code (see the editor script
-            # for a list of the changes we do).
-            "--interactive",
-            # The "exec" added by the editor needs to be executed successfully
-            # for the rebase to go through. Ensure it's rescheduled on failure.
-            "--reschedule-failed-exec",
-            "--onto",
-            current_branch,
-            base,
-            head,
-        ],
-        env={
-            **os.environ,
-            "FERROCENE_PR_NUMBER": pr_number,
-            "FERROCENE_CURRENT_BRANCH": current_branch,
-            "GIT_SEQUENCE_EDITOR": os.path.join(
-                current_dir, "utils", "rebase-interactive-editor.py"
-            ),
-        },
-    )
-    exit(result.returncode)
+    commits = git_output("log", "--format=%H", f"{base}..{head}")
+    commits = commits.splitlines()
 
+    formatted_commits = ' '.join(commits)
+
+    commit_message = f"""
+Backport {pr_name}
+
+{metadata['title']}
+
+{metadata['body']}{formatted_coauthors}
+
+Ferrocene-backport-of: {pr_name}
+Ferrocene-backported-commits: {formatted_commits}"""
+
+    # Save where we currently are.
+    # We can't unconditionally use `rev-parse HEAD` because that won't update the target
+    # branch ref once we switch back.
+    target_branch = git_output("rev-parse", "--abbrev-ref", "HEAD").rstrip()
+    if target_branch == "HEAD":
+        target_branch = git_output("rev-parse", "HEAD").rstrip()
+
+    print(f"INFO: backporting {pr_name} to {target_branch} (please do not CTRL-C)\n")
+
+    # Avoid modifying the current branch ref when we run `git reset`.
+    git("checkout", "--quiet", "--detach", "HEAD")
+    # Set the index to the PR head, without modifying the working tree.
+    git("reset", "--quiet", "--mixed", head)
+    # Set HEAD to the PR base.
+    git("reset", "--quiet", "--soft", base)
+    # Squash all the PR changes into a single commit.
+    git("commit", "--quiet", "--author", primary_author, "--file=-", input=commit_message, text=True)
+    new_commit = git_output("rev-parse", "HEAD").rstrip()
+
+    # Set HEAD and index back to the backport branch.
+    git("reset", "--quiet", "--mixed", target_branch)
+    # Reattach HEAD to the backport branch ref.
+    git("checkout", "--quiet", target_branch)
+    # Cherry-pick our squashed PR.
+    try:
+        git("-c", "advice.mergeConflict=false", "-c", "rerere.enabled=false",
+            "cherry-pick", "--ff", new_commit)
+    except subprocess.CalledProcessError:
+        print(f"ERROR: Encountered a merge conflict backporting {pr_name}")
+        print("HELP: Fix the conflicts, run 'git add/rm <filepath>', then run 'git cherry-pick --continue'.")
+        print("NOTE: Running 'git cherry-pick --abort' will put you back in your original git state.")
+        exit(1)
 
 if __name__ == "__main__":
     main()

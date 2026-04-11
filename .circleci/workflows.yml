@@ -96,7 +96,7 @@ jobs:
   # is the place for it.
   misc-checks:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -114,7 +114,7 @@ jobs:
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -127,7 +127,7 @@ jobs:
 
   x86_64-linux-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-medium # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
@@ -138,7 +138,7 @@ jobs:
 
   x86_64-linux-docs:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -157,7 +157,7 @@ jobs:
 
   x86_64-linux-dist:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-medium # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -169,7 +169,7 @@ jobs:
 
   x86_64-linux-dist-tools:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-medium # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -181,7 +181,7 @@ jobs:
 
   x86_64-linux-dist-targets:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
@@ -194,7 +194,7 @@ jobs:
 
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -227,7 +227,7 @@ jobs:
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -265,7 +265,7 @@ jobs:
 
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-medium # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -282,7 +282,7 @@ jobs:
 
   x86_64-linux-llvm:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -303,7 +303,7 @@ jobs:
 
   x86_64-linux-self-test:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
@@ -351,7 +351,7 @@ jobs:
 
   aarch64-linux-llvm:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large # 8-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -372,7 +372,7 @@ jobs:
 
   aarch64-linux-build:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large # 8-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
@@ -384,7 +384,7 @@ jobs:
 
   aarch64-linux-dist:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large # 8-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -396,7 +396,7 @@ jobs:
 
   aarch64-linux-dist-tools:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large # 8-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -408,7 +408,7 @@ jobs:
 
   aarch64-linux-self-test:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.medium # 2-core
+    resource_class: ferrocene/k8s-arm64-small # 2-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
@@ -703,7 +703,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium # 4-core
     parameters:
       image:
         description: The image that needs to be built
@@ -738,7 +738,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: arm.medium # 2-core
+    resource_class: ferrocene/k8s-arm64-mdeium # 2-core
     parameters:
       image:
         description: The image that needs to be built
@@ -784,7 +784,7 @@ jobs:
 
   finish-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
@@ -821,7 +821,7 @@ jobs:
   # run. See the `skip` workflow for more information.
   skip:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-small # 1-core
     steps:
       - run:
           name: This is a workaround for CircleCI always wanting at least a job per commit.

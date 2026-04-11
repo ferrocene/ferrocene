@@ -703,7 +703,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: ferrocene/k8s-amd64-medium # 4-core
+    resource_class: large # 4-core
     parameters:
       image:
         description: The image that needs to be built
@@ -738,7 +738,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: ferrocene/k8s-arm64-mdeium # 2-core
+    resource_class: arm.medium # 2-core
     parameters:
       image:
         description: The image that needs to be built

@@ -912,21 +912,21 @@ workflows:
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test
           job: test
-          resource-class: large # 4-core
+          resource-class: ferrocene/k8s-amd64-medium # 4-core
           test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test-library
           job: test:library
-          resource-class: large # 4-core
+          resource-class: ferrocene/k8s-amd64-medium # 4-core
           test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-compiletest
           job: test:compiletest
-          resource-class: xlarge # 8-core
+          resource-class: ferrocene/k8s-amd64-large # 8-core
           test-variant: "2021"
           requires:
             - x86_64-linux-build

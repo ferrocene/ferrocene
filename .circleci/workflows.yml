@@ -157,7 +157,7 @@ jobs:
 
   x86_64-linux-dist:
     executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-medium # 8-core
+    resource_class: ferrocene/k8s-amd64-large # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -169,7 +169,7 @@ jobs:
 
   x86_64-linux-dist-tools:
     executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-medium # 8-core
+    resource_class: ferrocene/k8s-amd64-large # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -181,7 +181,7 @@ jobs:
 
   x86_64-linux-dist-targets:
     executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-medium # 4-core
+    resource_class: ferrocene/k8s-amd64-large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
@@ -194,7 +194,7 @@ jobs:
 
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-small # 2-core
+    resource_class: ferrocene/k8s-amd64-medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |

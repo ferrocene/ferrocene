@@ -127,7 +127,7 @@ jobs:
 
   x86_64-linux-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-medium # 8-core
+    resource_class: ferrocene/k8s-amd64-large # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu

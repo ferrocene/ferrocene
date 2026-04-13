@@ -642,8 +642,9 @@
 
       .. caution::
 
-         Only the ``bin``, ``lib``, ``rlib`` and ``staticlib`` crate types can
-         be used in a safety critical context.
+         Only the ``bin``, ``lib``, ``proc-macro``, ``rlib`` and ``staticlib`` crate types can be used in a safety critical context.
+
+         For usage of ``--crate-type proc-macro`` see the next entry.
 
       Compiler argument ``--crate-type`` specifies the type of crate to build.
 
@@ -681,6 +682,15 @@
       .. code-block::
 
          $ rustc --crate-type dylib --crate-type rlib my_library.rs
+
+   .. cli:option:: --crate-type proc-macro
+      :category: narrow
+
+      All of :cli:option:`--crate-type \<types\> <rustc --crate-type <types>>` applies to ``--crate-type proc-macro`` as well.
+
+      The crate type ``proc-macro`` allows to use the ``proc_macro`` library and the proc macro attributes ``#[proc_macro]``, ``#[proc_macro_attribute]`` and ``#[proc_macro_derive]``.
+
+      The crate type ``proc-macro`` cannot be used in combination with other crate types.
 
    .. cli:option:: -D <lints>
       :category: narrow

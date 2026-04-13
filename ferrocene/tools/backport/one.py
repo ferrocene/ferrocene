@@ -21,6 +21,7 @@ DEFAULT_REPOSITORY = "ferrocene/ferrocene"
 RUST_REPOSITORY = "rust-lang/rust"
 
 VERBOSE = False
+FORCE = False
 
 def get_pr_metadata(token, repository, pr_number):
     headers = {}
@@ -54,17 +55,60 @@ def git(*args, **kwargs):
 def git_output(*args):
     return git(*args, text=True, stdout=subprocess.PIPE, stderr=sys.stderr).stdout
 
+def handle_merge_conflict(pr_name, target_branch):
+    unmerged = git_output("diff", "--name-status", "--diff-filter=U").splitlines()
+
+    unmerged_solveable = set(file.split()[1] for file in unmerged if not file.startswith("UD"))
+    unmerged = set(file.split()[1] for file in unmerged)
+
+    print(f"\nERROR: Encountered a merge conflict backporting {pr_name}")
+
+    if unmerged_solveable:
+        print(f"\nINFO: attempting to auto-solve conflicts with mergiraf")
+        if FORCE:
+            print("INFO: but first, committing the merge markers to git")
+            git("add", "--", *unmerged)
+            git("-c", "core.editor=true", "cherry-pick", "--continue")
+    for file in unmerged_solveable:
+        proc = subprocess.run(["mergiraf", "solve", file])
+        if proc.returncode == 0:
+            unmerged.remove(file)
+
+    if not unmerged:
+        print("INFO: Solved all conflicts with mergiraf")
+        if FORCE:
+            git("add", "--", *unmerged_solveable)
+            if git_output("diff", "--name-only", "--cached") == "":
+                print("INFO: mergiraf was not able to solve all conflicts")
+            else:
+                print("INFO: Committing changes")
+                git("commit", "--message", "Resolve conflicts using mergiraf")
+                exit(0)
+
+    print("HELP: Fix the conflicts, run 'git add/rm <filepath>', then run 'git cherry-pick --continue'.")
+    print("NOTE: Running 'git cherry-pick --abort' will put you back in your original git state.")
+
+    print("\nNOTE: conflicts exist in the following locations:")
+    subprocess.run("ferrocene/ci/scripts/detect-conflict-markers.py")
+    print(f"NOTE: 'HEAD' in the conflicted files refers to your current branch, {target_branch}")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--rust", help="Pull from rust-lang/rust instead", action="store_true"
     )
     parser.add_argument("--verbose", action='store_true', help="Show invoked commands and their outputs")
+    parser.add_argument("--force", action='store_true',
+                        help="Commit mergiraf changes in a separate commit, rather than"
+                             " keeping them around for inspection")
     parser.add_argument("pr_number", help="The PR to backport")
     args = parser.parse_args()
     global VERBOSE
+    global FORCE
     if args.verbose:
         VERBOSE = True
+    if args.force:
+        FORCE = True
 
     pr_number = args.pr_number
     if args.rust:
@@ -137,11 +181,10 @@ Ferrocene-backported-commits: {formatted_commits}"""
     # Cherry-pick our squashed PR.
     try:
         git("-c", "advice.mergeConflict=false", "-c", "rerere.enabled=false",
+            "-c", "merge.conflictStyle=diff3",
             "cherry-pick", "--ff", new_commit)
     except subprocess.CalledProcessError:
-        print(f"ERROR: Encountered a merge conflict backporting {pr_name}")
-        print("HELP: Fix the conflicts, run 'git add/rm <filepath>', then run 'git cherry-pick --continue'.")
-        print("NOTE: Running 'git cherry-pick --abort' will put you back in your original git state.")
+        handle_merge_conflict(pr_name, target_branch)
         exit(1)
 
 if __name__ == "__main__":

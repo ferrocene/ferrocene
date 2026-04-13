@@ -53,7 +53,7 @@ class BackportAllPR(AutomatedPR):
             restore_python_scripts(self.current_hash)
 
             result = self.cmd(
-                [f"{self.repo_root}/ferrocene/tools/backport/one.py", "--verbose", str(pr)],
+                [f"{self.repo_root}/ferrocene/tools/backport/one.py", "--verbose", "--force", str(pr)],
                 check=False,
             )
             if result.returncode == 0:

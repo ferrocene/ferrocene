@@ -387,6 +387,8 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu" --stage "2"
+        ./x build src/tools/remote-test-server --target "aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
@@ -775,6 +777,58 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
+
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-rhivos2-test-server-aarch64:
+    description: Job that builds and uploads a Docker image for a rhivos2 container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    steps:
+      - aws-cli/install
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - run:
+          name: Build and upload the Docker image
+          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+          environment:
+            IMAGE_NAME: rhivos-2.0-test-server
+            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-rhel-test-server-aarch64:
+    description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    steps:
+      - aws-cli/install
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - run:
+          name: Build and upload the Docker image
+          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+          environment:
+            IMAGE_NAME: rhel-10.1-test-server
+            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1167,6 +1221,16 @@ workflows:
             - aarch64-linux-dist-tools
             - x86_64-linux-dist-targets
             - x86_64-linux-dist
+
+      # RHEL Test Infrastructure
+      - build-docker-rhel-test-server-aarch64:
+          requires:
+            - aarch64-linux-build
+
+      # RHIVOS2 Test Infrastructure
+      - build-docker-rhivos2-test-server-aarch64:
+          requires:
+            - aarch64-linux-build
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:

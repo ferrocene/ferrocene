@@ -873,7 +873,7 @@ jobs:
           command: ferrocene/ci/scripts/build-and-push-docker-image.sh
           environment:
             IMAGE_NAME: rhel-testserver-10.1
-            IMAGE_TAG: 10.1.$CIRCLE_BUILD_NUM
+            IMAGE_TAG: 10.1.<< parameters.workflow-id >>
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1298,6 +1298,7 @@ workflows:
           requires:
             - aarch64-linux-build
       - build-docker-rhel-testserver:
+          workflow-id: $CIRCLE_BUILD_NUM
           requires:
             - aarch64-linux-build
       - aarch64-linux-generic-test-container:

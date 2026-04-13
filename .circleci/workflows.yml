@@ -258,8 +258,11 @@ jobs:
       SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
-      # - ferrocene-checkout:
-      #     llvm-subset: true
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
       - ferrocene-ci
 
   x86_64-linux-library-coverage:

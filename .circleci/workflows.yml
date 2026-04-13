@@ -244,8 +244,8 @@ jobs:
           destination: reports
 
   x86_64-linux-test-library-std:
-    executor: linux-vm
-    resource_class: large # 4-core
+    executor:  docker-x86_64-ubuntu-20
+    resource_class: ferrocene/k8s-amd64-medium # 4-core
     parameters:
       test-variant:
         type: string
@@ -258,10 +258,9 @@ jobs:
       SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
-      - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
+      # - ferrocene-checkout:
+      #     llvm-subset: true
+      - ferrocene-ci
 
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20

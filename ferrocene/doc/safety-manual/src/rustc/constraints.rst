@@ -93,6 +93,8 @@ Problem mitigation
 
 .. id:: RUSTC_CSTR_0080_KP
 
+Associated requirement ID: :id:`RUSTC_AVD_MITIGATE_KPS_009`
+
 The user shall implement mitigation strategies for known problems
 documented in the :ref:`known-problems:Known Problems` manual.
 
@@ -111,6 +113,8 @@ Ensuring memory safety
 ----------------------
 
 .. id:: RUSTC_CSTR_0100_UNSAFETY
+
+Associated requirement ID: :id:`RUSTC_AVD_ENSURE_MEMORY_SAFETY_010`
 
 The user shall identify and evaluate the risks related to all instances
 of unsafe code as defined in :doc:`specification:unsafety`, and follow
@@ -131,3 +135,29 @@ Verifying linker scripts
 .. id:: RUSTC_CSTR_0120_LINKER_SCRIPTS
 
 The user shall ensure that the linker scripts they use are interpreted correctly by ``rust-lld``.
+
+No attributes on a proc macro implementation function
+-----------------------------------------------------
+
+.. id:: RUSTC_CSTR_0130_PROC_MACRO_NO_ATTRIBUTE
+
+Associated requirement ID: :id:`RUSTC_AVD_PROC_MACRO_NO_ATTRIBUTE_008`
+
+The user shall ensure that no attributes are used on a proc macro implementation function. The only exceptions are ``proc_macro``, ``proc_macro_derive`` or ``proc_macro_attribute``.
+
+.. note::
+
+   This is a precautionary measure and will be lifted or widened in the future.
+
+No linker scripts with proc-macro crates
+----------------------------------------
+
+.. id:: RUSTC_CSTR_0150_PROC_MACRO_NO_LINKER_SCRIPT
+
+Associated requirement ID: :id:`RUSTC_AVD_PROC_MACRO_NO_LINKER_SCRIPTS_011`
+
+The user shall ensure that no linker scripts are used when compiling a proc-macro crate.
+
+.. note::
+
+   This is a precautionary measure and will be lifted or widened in the future.

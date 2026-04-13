@@ -382,6 +382,7 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
@@ -429,7 +430,6 @@ jobs:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
       - ferrocene-ci
-
 
   aarch64-linux-generic-test-container:
     executor: docker-aarch64-ubuntu-20-rhel

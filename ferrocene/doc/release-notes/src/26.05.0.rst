@@ -43,8 +43,8 @@ New features
     retired:
 
     * ``aarch64-unknown-ferrocene.subset``
-    * ``thumbv7em-ferrocene-subset.eabi``
-    * ``thumbv7em-ferrocene-subset.eabihf``
+    * ``thumbv7em-ferrocene.subset-eabi``
+    * ``thumbv7em-ferrocene.subset-eabihf``
     * ``x86_64-unknown-ferrocene.subset``
 
 New experimental features

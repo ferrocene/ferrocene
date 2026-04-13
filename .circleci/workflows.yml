@@ -1178,6 +1178,10 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
+      - aarch64-linux-test-library-std:
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist

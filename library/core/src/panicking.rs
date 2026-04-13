@@ -425,17 +425,14 @@ where
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]
 #[doc(hidden)]
-#[ferrocene::prevalidated]
 pub fn assert_matches_failed<T: fmt::Debug + ?Sized>(
     left: &T,
     right: &str,
     args: Option<fmt::Arguments<'_>>,
 ) -> ! {
     // The pattern is a string so it can be displayed directly.
-    #[ferrocene::prevalidated]
     struct Pattern<'a>(&'a str);
     impl fmt::Debug for Pattern<'_> {
-        #[ferrocene::prevalidated]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.write_str(self.0)
         }

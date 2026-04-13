@@ -914,7 +914,7 @@ workflows:
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test
           job: test
-          resource-class: ferrocene/k8s-amd64-medium # 4-core
+          resource-class: ferrocene/k8s-amd64-large # 4-core
           test-variant: "2021"
           requires:
             - x86_64-linux-build

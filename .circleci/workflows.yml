@@ -694,6 +694,41 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
+  aarch64-rhivos2-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
+      SCRIPT: |
+        RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=localhost:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - run:
+          command: |
+              ./x build src/tools/remote-test-server --target "aarch64-rhivos2-linux-gnu" --stage "1"
+              mkdir -p /tmp/emulator
+              cp aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /tmp/emulator/remote-test-server
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: registry.access.redhat.com/ubi10:10.1 # TODO: Use rhivos2
+          restore-from-job: aarch64-linux-build
+          emulator-script: "RUST_TEST_THREADS=1 /tmp/emulator/remote-test-server -v --bind 0.0.0.0:12345 --sequential"
+
+
   # Docker jobs
 
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
@@ -1033,6 +1068,33 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
+
+      - aarch64-rhivos2-generic-test-vm:
+          name: aarch64-rhivos2-test-library
+          job: test:library
+          test-variant: "2021"
+          resource-class: arm.medium
+          requires:
+            - aarch64-linux-build
+            - build-docker--ubuntu-24--aarch64
+
+      - aarch64-rhivos2-generic-test-vm:
+          name: aarch64-rhivos2-test-library-std
+          job: test:library-std
+          test-variant: "2021"
+          resource-class: arm.medium
+          requires:
+            - aarch64-linux-build
+            - build-docker--ubuntu-24--aarch64
+
+      - aarch64-rhivos2-generic-test-vm:
+          name: aarch64-rhivos2-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
+          resource-class: arm.medium
+          requires:
+            - aarch64-linux-build
+            - build-docker--ubuntu-24--aarch64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library

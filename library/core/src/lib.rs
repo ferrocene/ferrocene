@@ -210,18 +210,12 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
-<<<<<<< HEAD
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
 pub mod ferrocene_test;
 
-#[stable(feature = "assert_matches", since = "1.95.0")]
-||||||| cc969f3c457
-#[stable(feature = "assert_matches", since = "1.95.0")]
-=======
 #[unstable(feature = "assert_matches", issue = "82775")]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]

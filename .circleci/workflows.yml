@@ -1651,6 +1651,16 @@ executors:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
 #          oidc_role_arn: $AWS_ROLE_ARN
+  docker-aarch64-ubuntu-20-rhel:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+      - name: rhel-sidecar
+        image: registry.access.redhat.com/ubi10:10.1
+        command: ["sleep", "5000"]
+#          oidc_role_arn: $AWS_ROLE_ARN
   docker-x86_64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>

@@ -2855,7 +2855,6 @@
 <core::panic::panic_info::PanicMessage<'_> as core::fmt::Debug>::fmt
 <core::panic::panic_info::PanicMessage<'_> as core::fmt::Display>::fmt
 <core::panicking::AssertKind as core::fmt::Debug>::fmt
-<core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
 <core::ptr::alignment::Alignment as core::clone::Clone>::clone
 <core::ptr::alignment::Alignment as core::cmp::Eq>::assert_fields_are_eq
 <core::ptr::alignment::Alignment as core::cmp::PartialEq>::eq
@@ -7235,7 +7234,6 @@ core::panic::panic_info::PanicInfo::<'a>::new
 core::panic::panic_info::PanicMessage::<'a>::as_str
 core::panicking::assert_failed
 core::panicking::assert_failed_inner
-core::panicking::assert_matches_failed
 core::panicking::panic
 core::panicking::panic_bounds_check
 core::panicking::panic_cannot_unwind

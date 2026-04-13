@@ -866,6 +866,9 @@ jobs:
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
       - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zst
+      - run:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
       - run:

@@ -10,5 +10,5 @@ FROM --platform=$TARGETPLATFORM registry.access.redhat.com/ubi10:10.1
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-COPY aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /bin/remote-testserver
+COPY build/aarch64-unknown-linux-gnu/stage2-tools/aarch64-unknown-linux-gnu/release/remote-test-server /bin/remote-testserver
 CMD [ "/bin/remote-testserver" ]

@@ -20,36 +20,43 @@ This qualification is restricted to the following environment:
      - Target
      - Certified Libraries
      - Uncertified Libraries
+     - Qualified Libraries
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
      - ``core``
      - ``alloc``
+     -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-nto-qnx710`
      - ``core``
-     - ``alloc``, ``std``, ``proc_macro``, ``test``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
      - ``core``
      - ``alloc``
+     -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabihf`
      - ``core``
      - ``alloc``
+     -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
      - ``core``
-     - ``alloc``, ``std``, ``proc_macro``, ``test``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-pc-nto-qnx710`
      - ``core``
-     - ``alloc``, ``std``, ``proc_macro``, ``test``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
 
 
 The uncertified libraries provided are evaluated and tested within the scope of
@@ -60,6 +67,8 @@ their code.
 
 The certified libraries provided are evaluated and tested to be used in other
 projects by users of the Ferrocene compiler.
+
+The qualified libraries provided are evaluated and tested to be used in other projects by users of the Ferrocene compiler, but only on the host platform.
 
 User responsibility
 -------------------

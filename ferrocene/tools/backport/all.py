@@ -12,11 +12,20 @@
 
 import os
 import requests
+import subprocess
 
 from automations_common import AutomatedPR, AutomationResult
 
 
 TEMP_BRANCH = "backport-temp--do-not-use-for-real-code"
+
+def restore_python_scripts(from_rev):
+    # NOTE: we've checked out base_branch, which might *not* be the same branch as where
+    # we're running this script from. Sync them together.
+    # NOTE: we can't use `self.cmd` because python might have lazily imported it.
+    subprocess.run(["git", "restore", "--source", from_rev,
+                    "ferrocene/tools/automations-common"])
+    subprocess.run(["git", "restore", "--source", from_rev, "ferrocene/tools/backport"])
 
 
 class BackportAllPR(AutomatedPR):
@@ -57,6 +66,8 @@ class BackportAllPR(AutomatedPR):
             pr = pr["number"]
             print(f"backporting #{pr}")
 
+            restore_python_scripts(self.current_hash)
+
             result = self.cmd(
                 [f"{self.repo_root}/ferrocene/tools/backport/one.py", str(pr)],
                 check=False,
@@ -67,6 +78,10 @@ class BackportAllPR(AutomatedPR):
                 self.cmd(["git", "rebase", "--abort"], check=False)
                 self.cmd(["git", "checkout", TEMP_BRANCH])
                 self.__mark_as_manual(pr)
+
+        # Restore the python scripts now, so that `git checkout {current_branch}` doesn't
+        # error.
+        restore_python_scripts(base_branch)
 
         if self.__backported_pull_requests:
             return AutomationResult.SUCCESS

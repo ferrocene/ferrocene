@@ -7,6 +7,9 @@
 # dependencies = ["requests ~= 2.32"]
 # ///
 
+# WARNING: This PR is used by `all.py` via `git checkout COMMIT one.py`.
+# Backporting PRs that change `one.py` itself is not supported.
+
 import argparse
 import os
 import requests

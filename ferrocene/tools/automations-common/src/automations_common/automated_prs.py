@@ -113,6 +113,8 @@ class AutomatedPR(abc.ABC):
         self.http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
 
         self.repo_root = self.cmd_capture(["git", "rev-parse", "--show-toplevel"])
+        self.current_branch = self.cmd_capture(["git", "branch", "--show-current"])
+        self.current_hash = self.cmd_capture(["git", "rev-parse", "HEAD"])
 
         existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
         if existing_pull is not None:
@@ -123,9 +125,6 @@ class AutomatedPR(abc.ABC):
         existing_conflict_issue = self.__find_open(
             "issues", self.error_issue_title(), self.error_issue_labels()
         )
-
-        current_branch = self.cmd_capture(["git", "branch", "--show-current"])
-        current_hash = self.cmd_capture(["git", "rev-parse", "HEAD"])
 
         # A random branch name is used to avoid GitHub API errors if two PRs are
         # opened with the same branch (for example if one of the labels is removed).
@@ -138,7 +137,7 @@ class AutomatedPR(abc.ABC):
 
         result = self.run()
         if result == AutomationResult.SUCCESS:
-            self.on_success(branch_name, current_branch, existing_conflict_issue)
+            self.on_success(branch_name, existing_conflict_issue)
         elif result == AutomationResult.FAILURE:
             self.on_failure(existing_conflict_issue)
         else:
@@ -147,9 +146,9 @@ class AutomatedPR(abc.ABC):
         # Reset the commit at the state it was before the automation ran.
         # Otherwise, if multiple automations are executed in the same job,
         # the following PRs will also include the changes of the previous PRs.
-        self.cmd(["git", "reset", "--hard", current_hash], dry_run=self.dry_run)
+        self.cmd(["git", "reset", "--hard", self.current_hash], dry_run=self.dry_run)
 
-    def on_success(self, branch_name, current_branch, existing_conflict_issue):
+    def on_success(self, branch_name, existing_conflict_issue):
         self.cmd(["git", "checkout", "-B", branch_name], dry_run=self.dry_run)
         self.cmd(["git", "push", self.origin, branch_name, "-f"], dry_run=self.dry_run)
 
@@ -198,7 +197,7 @@ class AutomatedPR(abc.ABC):
                     },
                 ).raise_for_status()
 
-        self.cmd(["git", "checkout", current_branch], dry_run=self.dry_run)
+        self.cmd(["git", "checkout", self.current_branch], dry_run=self.dry_run)
         self.cmd(["git", "branch", "-D", branch_name], dry_run=self.dry_run)
 
     def on_failure(self, existing_conflict_issue):

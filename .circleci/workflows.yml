@@ -747,7 +747,7 @@ jobs:
               cp aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /tmp/emulator/remote-test-server
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          docker-image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
           run-emulator-docker-image-tag: registry.access.redhat.com/ubi10:10.1 # TODO: Use rhivos2
           restore-from-job: aarch64-linux-build
           emulator-script: "RUST_TEST_THREADS=1 /tmp/emulator/remote-test-server -v --bind 0.0.0.0:12345 --sequential"
@@ -1110,7 +1110,7 @@ workflows:
           resource-class: arm.medium
           requires:
             - aarch64-linux-build
-            - build-docker--ubuntu-24--aarch64
+            - build-docker--ubuntu-20--aarch64
 
       - aarch64-rhivos2-generic-test-vm:
           name: aarch64-rhivos2-test-library-std
@@ -1119,7 +1119,7 @@ workflows:
           resource-class: arm.medium
           requires:
             - aarch64-linux-build
-            - build-docker--ubuntu-24--aarch64
+            - build-docker--ubuntu-20--aarch64
 
       - aarch64-rhivos2-generic-test-vm:
           name: aarch64-rhivos2-test-compiletest
@@ -1128,7 +1128,7 @@ workflows:
           resource-class: arm.medium
           requires:
             - aarch64-linux-build
-            - build-docker--ubuntu-24--aarch64
+            - build-docker--ubuntu-20--aarch64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library

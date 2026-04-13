@@ -741,37 +741,111 @@ jobs:
   aarch64-rhivos2-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
-        type: string
-      test-variant:
+      script:
         type: string
       resource-class:
         type: string
-      extra-args:
-        type: string
-        default: ""
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
-      SCRIPT: |
-        RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=localhost:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
       - run:
+          name: Pull the Docker image used for CI
           command: |
-              ./x build src/tools/remote-test-server --target "aarch64-rhivos2-linux-gnu" --stage "1"
-              mkdir -p /tmp/emulator
-              cp aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /tmp/emulator/remote-test-server
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-          run-emulator-docker-image-tag: registry.access.redhat.com/ubi10:10.1 # TODO: Use rhivos2
-          restore-from-job: aarch64-linux-build
-          emulator-script: "RUST_TEST_THREADS=1 /tmp/emulator/remote-test-server -v --bind 0.0.0.0:12345 --sequential"
+            aws ecr get-login-password --region us-east-1 \
+              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+            docker pull registry.access.redhat.com/ubi10:10.1 # TODO: Use rhivos2
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - run:
+          command: |
+            mkdir -p /tmp/emulator
+      - run:
+          environment:
+            SCRIPT: |
+              ./x build src/tools/remote-test-server --target "aarch64-rhivos2-linux-gnu" --stage "2"
+              cp build/aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /tmp/emulator/remote-test-server
+          command: |
+            docker run \
+              --rm \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/emulator:/tmp/emulator \
+              --volume /tmp/ferrocene:/tmp/ferrocene \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >> \
+              ferrocene/ci/run.sh
 
+      - run:
+          name: Execute emulator in the background
+          background: true
+          environment:
+            SCRIPT: |
+                RUST_TEST_THREADS=1 /tmp/emulator/remote-test-server -v --bind 0.0.0.0:12345 --sequential
+          command: |
+            docker run \
+              --rm \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/emulator:/tmp/emulator \
+              --volume /tmp/awsjwt:/tmp/awsjwt \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --privileged \
+              --interactive \
+              --tty \
+              registry.access.redhat.com/ubi10:10.1 \
+              bash -c "$SCRIPT"
+
+      - run:
+          environment:
+            SCRIPT: << parameters.script >>
+            TEST_DEVICE_ADDR: localhost:12345
+          command: |
+            docker run \
+              --rm \
+              $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/emulator:/tmp/emulator \
+              --volume /tmp/ferrocene:/tmp/ferrocene \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >> \
+              ferrocene/ci/run.sh
+
+      - run:
+          name: Generate resource usage report
+          command: |
+            mkdir -p /tmp/metrics
+            ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
+            cp build/metrics.json /tmp/metrics/raw.json
+
+      - run:
+          name: Upload artifacts to S3
+          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+          # We want to upload artifacts even when the build is failing, to be
+          # able to retrieve and investigate them. They won't be making into a
+          # release anyway, sine the "finish-build" job will not be executed in
+          # case of a failure.
+          when: always
+
+      - store_artifacts:
+          path: /tmp/metrics
+          destination: metrics
 
   # Docker jobs
 
@@ -1155,8 +1229,8 @@ workflows:
 
       - aarch64-rhivos2-generic-test-vm:
           name: aarch64-rhivos2-test-library
-          job: test:library
-          test-variant: "2021"
+          script: |
+              ./x.py test --test-variant 2021 $(ferrocene/ci/split-tasks.py test:library)
           resource-class: arm.medium
           requires:
             - aarch64-linux-build
@@ -1164,8 +1238,8 @@ workflows:
 
       - aarch64-rhivos2-generic-test-vm:
           name: aarch64-rhivos2-test-library-std
-          job: test:library-std
-          test-variant: "2021"
+          script: |
+              ./x.py test --test-variant 2021 $(ferrocene/ci/split-tasks.py test:library-std)
           resource-class: arm.medium
           requires:
             - aarch64-linux-build
@@ -1173,8 +1247,8 @@ workflows:
 
       - aarch64-rhivos2-generic-test-vm:
           name: aarch64-rhivos2-test-compiletest
-          job: qnx:compiletest-no-only-hosts
-          test-variant: "2021"
+          script: |
+              ./x.py test --test-variant 2021 $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: arm.medium
           requires:
             - aarch64-linux-build

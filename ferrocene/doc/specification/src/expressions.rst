@@ -4796,11 +4796,6 @@ The :t:`evaluation` of a :t:`match arm matcher` proceeds as follows:
 #. :dp:`fls_yk8l9zjh7i0d`
    Otherwise the :t:`match arm matcher` fails.
 
-:dp:`fls_sbtx1l6n2tp2`
-The :t:`evaluation` of a :t:`match arm guard` evaluates its :t:`operand`. A
-:t:`match arm guard` evaluates to ``true`` when its :t:`operand` evaluates to
-``true``, otherwise it evaluates to ``false``.
-
 .. rubric:: Examples
 
 .. code-block:: rust

@@ -40,6 +40,8 @@ Language changes in Rust 1.95.0
   - :p:`fls_AAuyKfxLgJ43`
   - :p:`fls_uCDQMkWx5OMS`
 
+  Removed paragraph: :p:`fls_sbtx1l6n2tp2`
+
 - `irrefutable_let_patterns lint no longer lints on let chains <https://github.com/rust-lang/rust/pull/146832>`_
 
   - Lints are outside the scope of the FLS.

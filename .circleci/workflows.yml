@@ -417,6 +417,7 @@ jobs:
         type: string
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
+      TEST_DEVICE_ADDR: localhost:12345
       # Standard library tests need IPv6, which is not available in container
       # jobs. Because of that we need to run *just* standard library tests in a
       # virtual machine.
@@ -443,9 +444,7 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
-      TEST_DEVICE_ADDR: localhost:12345
       SCRIPT: |
-        env | grep TEST_DEVICE_ADDR
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
@@ -1384,6 +1383,22 @@ workflows:
       - build-docker-rhel-testserver:
           requires:
             - aarch64-linux-build
+      - aarch64-linux-generic-test-container:
+          name: aarch64-linux-test-library
+          job: test:library
+          resource-class: ferrocene/k8s-arm64-medium # 4-core
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - build-docker-rhel-testserver
+      - aarch64-linux-generic-test-container:
+          name: aarch64-linux-compiletest
+          job: test:compiletest
+          resource-class: ferrocene/k8s-arm64-large # 8-core
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - build-docker-rhel-testserver
       - aarch64-linux-generic-test-container:
           name: aarch64-linux-test
           job: test

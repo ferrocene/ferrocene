@@ -22,6 +22,17 @@ if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
     MAX_MERGES_PER_PR=30
 fi
 
+# Check for MacOS sed, which doesn't support `-i`.
+if [ "$(uname)" = Darwin ]; then
+    if ! gsed --version >/dev/null 2>&1; then
+        echo "Need 'gsed' installed; try 'brew install gnu-sed'"
+        exit 1
+    fi
+    sed=gsed
+else
+    sed=sed
+fi
+
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
 # `sort | uniq` is used because during merges files might show up multiple
@@ -290,7 +301,7 @@ then
             marker="$1"
             who="$2"
             for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
-                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
+                $sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
             done
         }
         handle_deleted_files DU "in Ferrocene" # DU means "deleted by us"
@@ -308,7 +319,7 @@ then
         # - prints the file name (last column of the output of `git status --porcelain=v2`)
         files=$(git status --porcelain=v2 | awk '$1 == "u" && $2 != "UD" {print $NF}')
 
-        git diff --name-only | xargs sed -i "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
+        git diff --name-only | xargs $sed -i "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
         git add .
 
         # Setting the editor to `true` prevents the actual editor from being open,

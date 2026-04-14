@@ -14,25 +14,6 @@ orbs:
   continuation: circleci/continuation@0.2.0
 
 jobs:
-  check-rhel-runner:
-    docker:
-      - image: registry.access.redhat.com/ubi10:10.1
-    resource_class: ferrocene/rhel-10-kubernetes
-    steps:
-      - run: echo "Hi I'm on a Container Runner!"
-  check-arm64-runner:
-    docker:
-      - image: registry.access.redhat.com/ubi10:10.1
-    resource_class: ferrocene/linux-rhel-10-kubernetes-arm64
-    steps:
-      - run: echo "Hi I'm on a ARM64 Container Runner!"
-  check-amd64-runner:
-    docker:
-      - image: registry.access.redhat.com/ubi10:10.1
-    resource_class: ferrocene/linux-rhel-10-kubernetes-amd64
-    steps:
-      - run: echo "Hi I'm on a AMD64 Container Runner!"
-
   setup:
     docker:
       - image: cimg/python:3.12
@@ -100,12 +81,6 @@ jobs:
 
 workflows:
   version: 2
-
-  test-rhel-runner:
-    jobs:
-      - check-rhel-runner
-      - check-amd64-runner
-      - check-arm64-runner
 
   setup:
     when:

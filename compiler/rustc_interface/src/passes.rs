@@ -119,10 +119,11 @@ impl LintStoreExpand for LintStoreExpandImpl<'_> {
         features: &Features,
         registered_tools: &RegisteredTools,
         node_id: ast::NodeId,
+        attrs: &[ast::Attribute],
         items: &[Box<ast::Item>],
         name: Symbol,
     ) {
-        pre_expansion_lint(sess, features, self.0, registered_tools, (node_id, items), name);
+        pre_expansion_lint(sess, features, self.0, registered_tools, (node_id, attrs, items), name);
     }
 }
 
@@ -1066,6 +1067,10 @@ pub fn emit_delayed_lints(tcx: TyCtxt<'_>) {
 /// Runs all analyses that we guarantee to run, even if errors were reported in earlier analyses.
 /// This function never fails.
 fn run_required_analyses(tcx: TyCtxt<'_>) {
+    // Forces all delayed owners to be lowered and drops AST crate after it.
+    // Also refetches hir_crate_items to prevent multiple threads from blocking on it later.
+    tcx.force_delayed_owners_lowering();
+
     if tcx.sess.opts.unstable_opts.input_stats {
         rustc_passes::input_stats::print_hir_stats(tcx);
     }
@@ -1073,11 +1078,6 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
     // is not defined. So we need to cfg it out.
     #[cfg(all(not(doc), debug_assertions))]
     rustc_passes::hir_id_validator::check_crate(tcx);
-
-    // Prefetch this to prevent multiple threads from blocking on it later.
-    // This is needed since the `hir_id_validator::check_crate` call above is not guaranteed
-    // to use `hir_crate_items`.
-    tcx.ensure_done().hir_crate_items(());
 
     let sess = tcx.sess;
     sess.time("misc_checking_1", || {

@@ -4176,7 +4176,7 @@ macro_rules! uint_impl {
         /// ```
         #[must_use = "this returns the truncated value and does not modify the original"]
         #[unstable(feature = "integer_extend_truncate", issue = "154330")]
-        #[rustc_const_unstable(feature = "integer_truncate_extend", issue = "154330")]
+        #[rustc_const_unstable(feature = "integer_extend_truncate", issue = "154330")]
         #[inline]
         pub const fn truncate<Target>(self) -> Target
             where Self: [const] traits::TruncateTarget<Target>
@@ -4196,7 +4196,7 @@ macro_rules! uint_impl {
         /// ```
         #[must_use = "this returns the truncated value and does not modify the original"]
         #[unstable(feature = "integer_extend_truncate", issue = "154330")]
-        #[rustc_const_unstable(feature = "integer_truncate_extend", issue = "154330")]
+        #[rustc_const_unstable(feature = "integer_extend_truncate", issue = "154330")]
         #[inline]
         pub const fn saturating_truncate<Target>(self) -> Target
             where Self: [const] traits::TruncateTarget<Target>
@@ -4216,7 +4216,7 @@ macro_rules! uint_impl {
         /// ```
         #[must_use = "this returns the truncated value and does not modify the original"]
         #[unstable(feature = "integer_extend_truncate", issue = "154330")]
-        #[rustc_const_unstable(feature = "integer_truncate_extend", issue = "154330")]
+        #[rustc_const_unstable(feature = "integer_extend_truncate", issue = "154330")]
         #[inline]
         pub const fn checked_truncate<Target>(self) -> Option<Target>
             where Self: [const] traits::TruncateTarget<Target>
@@ -4234,7 +4234,7 @@ macro_rules! uint_impl {
         /// ```
         #[must_use = "this returns the extended value and does not modify the original"]
         #[unstable(feature = "integer_extend_truncate", issue = "154330")]
-        #[rustc_const_unstable(feature = "integer_truncate_extend", issue = "154330")]
+        #[rustc_const_unstable(feature = "integer_extend_truncate", issue = "154330")]
         #[inline]
         pub const fn extend<Target>(self) -> Target
             where Self: [const] traits::ExtendTarget<Target>

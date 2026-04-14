@@ -38,6 +38,19 @@ if args.hide_diff:
 
 #### Diff all test annotations. ####
 
+class DiffKind:
+    ADDED = 'A'
+    MODIFIED = 'M'
+    DELETED = 'D'
+    RENAMED = 'R'
+
+DIFF_NAMES = {
+        DiffKind.ADDED: 'added',
+        DiffKind.MODIFIED: 'modified',
+        DiffKind.DELETED: 'deleted',
+        DiffKind.RENAMED: 'renamed',
+}
+
 base_commit = cmd_capture("git log -n1 --author=bors@rust-lang.org --pretty=%H".split())
 
 diff_tests = f"git diff -U0 --no-prefix --diff-filter=M {base_commit} -- tests/".split()
@@ -70,7 +83,7 @@ for line in test_changes:
             or change.startswith('//@ ignore-ferrocene.facade')):
         continue
 
-    if re.search('^\s*// ferrocene-annotations: ', change):
+    if re.search(r'^\s*// ferrocene-annotations: ', change):
         span = Span(file, lineno)
         id = next(reversed(change.split(' ')))
         if id.startswith('um_rustc'):
@@ -111,10 +124,14 @@ def validate_annotations():
                     load_sections(fd, sections)
 
     cli_ids = set()
-    with open('build/host/doc/qualification/traceability-matrix.html') as fd:
-        for line in fd:
-            if m := re.search(r'id="(um_rustc_[^"]*)"', line):
-                cli_ids.add(m.group(1))
+    matrix = 'build/host/doc/qualification/traceability-matrix.html'
+    try:
+        with open(matrix) as fd:
+            for line in fd:
+                if m := re.search(r'id="(um_rustc_[^"]*)"', line):
+                    cli_ids.add(m.group(1))
+    except FileNotFoundError:
+        exit(f"error: {matrix} not found. try running './x build traceaqbility-matrix'.")
 
     for id, (span, name) in annotations.items():
         if id.startswith('um_rustc_'):
@@ -127,7 +144,7 @@ def validate_annotations():
                 f"Expected '{sections[id]}', found '{name}'")
 
 if args.test:
-    print("Validating Ferrocene annotations")
+    print("Validating Ferrocene annotations against traceability matrix")
     validate_annotations()
     if not had_error:
         print("All annotations match the spec!")
@@ -150,19 +167,6 @@ filterer = IgnoreFilterManager.build(path=root_dir, global_patterns=ignored)
 
 all_changed = cmd_capture(f"git -c color.ui=never diff {base_commit} --name-status".split()).splitlines()
 changemap = defaultdict(list)
-
-class DiffKind:
-    ADDED = 'A'
-    MODIFIED = 'M'
-    DELETED = 'D'
-    RENAMED = 'R'
-
-DIFF_NAMES = {
-        DiffKind.ADDED: 'added',
-        DiffKind.MODIFIED: 'modified',
-        DiffKind.DELETED: 'deleted',
-        DiffKind.RENAMED: 'renamed',
-}
 
 IGNORED_ADDITIONS = [
     ".dockerignore",
@@ -216,7 +220,7 @@ for f, changes in test_changemap.items():
     print(f)
     print('\n'.join(kind + change for kind, change in changes))
 
-print(f"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'")
+print(fr"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'")
 
 for p in changemap['M']:
     if p.startswith('tests/'):

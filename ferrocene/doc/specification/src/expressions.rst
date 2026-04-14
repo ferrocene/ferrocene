@@ -4650,7 +4650,22 @@ Match Expressions
        OuterAttributeOrDoc* Pattern MatchArmGuard?
 
    MatchArmGuard ::=
-       $$if$$ Operand
+       $$if$$ (Operand | MatchGuardChain)
+
+   MatchGuardChain ::=
+       MatchGuardCondition ($$&&$$ MatchGuardCondition)*
+
+   MatchGuardCondition ::=
+       (MatchGuardExpression | OuterAttributeOrDoc* MatchGuardLetPattern)
+
+   MatchGuardLetPattern ::=
+       $$let$$ Pattern $$=$$ MatchGuardExpression
+
+   MatchGuardExpression ::=
+       Expression
+
+:dp:`fls_UlxLrpyPlVmv`
+A :dt:`match guard expression` is any expression in category :s:`Expression`, except :s:`LazyBooleanExpression`, :s:`RangeFromToExpression`, :s:`RangeFromExpression`, :s:`RangeInclusiveExpression`, :s:`AssignmentExpression`, and :s:`CompoundAssignmentExpression`.
 
 .. rubric:: Legality Rules
 
@@ -4719,6 +4734,15 @@ match the :t:`[subject expression]'s` :t:`type`.
 :dp:`fls_4sh2yrslszvb`
 The :t:`value` of a :t:`match expression` is the :t:`value` of the :t:`operand`
 of the selected :t:`match arm`.
+
+:dp:`fls_DT4N2rr6wpvZ`
+A :dt:`match guard chain` is a set of conditions that should each evaluate to ``true`` in the case of :t:`[match guard expression]s` or have a positive match in the case of a :t:`[match guard let pattern]s` for the :t:`match arm` to be selected.
+
+:dp:`fls_AAuyKfxLgJ43`
+A :dt:`match guard let pattern` is a construct that evaluates if a :t:`match guard expression` matches the specified :t:`pattern`.
+
+:dp:`fls_uCDQMkWx5OMS`
+Each :t:`let binding` in a :t:`match guard let pattern` is in scope for the rest of the :t:`match arm guard` as well as the :t:`match arm body`.
 
 .. rubric:: Dynamic Semantics
 

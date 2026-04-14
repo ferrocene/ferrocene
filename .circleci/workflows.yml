@@ -410,13 +410,37 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-test-library-std:
-    executor:  docker-aarch64-ubuntu-20-rhel
+    executor: docker-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-medium # 4-core
     parameters:
       test-variant:
         type: string
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
+      # Standard library tests need IPv6, which is not available in container
+      # jobs. Because of that we need to run *just* standard library tests in a
+      # virtual machine.
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - ferrocene-ci
+
+  aarch64-linux-rhivos2-test-library-std:
+    executor: docker-aarch64-ubuntu-20-rhivos2-test-server
+    resource_class: ferrocene/k8s-arm64-medium # 4-core
+    parameters:
+      test-variant:
+        type: string
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
       TEST_DEVICE_ADDR: localhost:12345
       # Standard library tests need IPv6, which is not available in container
       # jobs. Because of that we need to run *just* standard library tests in a
@@ -434,8 +458,8 @@ jobs:
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
       - ferrocene-ci
 
-  aarch64-linux-generic-test-container:
-    executor: docker-aarch64-ubuntu-20-rhel
+  aarch64-linux-rhivos2-test-container:
+    executor: aarch64-build-docker-rhivos2-test-server
     parameters:
       job:
         type: string
@@ -446,6 +470,7 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
       TEST_DEVICE_ADDR: localhost:12345
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -928,7 +953,7 @@ jobs:
           command: echo
 
   # The image gets built for every job because it needs to contain build results per job
-  build-docker-rhel-testserver:
+  aarch64-build-docker-rhivos2-test-server:
     description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
     docker:
       - image: cimg/base:current
@@ -1384,36 +1409,43 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
-      - build-docker-rhel-testserver:
+      - aarch64-build-docker-rhivos2-test-server:
           requires:
             - aarch64-linux-build
-      - aarch64-linux-generic-test-container:
+      - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-test-library
           job: test:library
           resource-class: ferrocene/k8s-arm64-medium # 4-core
           test-variant: "2021"
           requires:
             - aarch64-linux-build
-            - build-docker-rhel-testserver
-      - aarch64-linux-generic-test-container:
+            - aarch64-build-docker-rhivos2-test-server
+      - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-compiletest
           job: test:compiletest
           resource-class: ferrocene/k8s-arm64-large # 8-core
           test-variant: "2021"
           requires:
             - aarch64-linux-build
-            - build-docker-rhel-testserver
-      - aarch64-linux-generic-test-container:
+            - aarch64-build-docker-rhivos2-test-server
+      - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-test
           job: test
           resource-class: ferrocene/k8s-arm64-large # 4-core
           test-variant: "2021"
           requires:
-            - build-docker-rhel-testserver
+            - aarch64-linux-build
+            - aarch64-build-docker-rhivos2-test-server
       - aarch64-linux-test-library-std:
           test-variant: "2021"
           requires:
             - aarch64-linux-build
+            - aarch64-build-docker-rhivos2-test-server
+      - aarch64-linux-rhivos2-test-library-std:
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - aarch64-build-docker-rhivos2-test-server
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist
@@ -1909,13 +1941,14 @@ executors:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
 #          oidc_role_arn: $AWS_ROLE_ARN
-  docker-aarch64-ubuntu-20-rhel:
+  # This executor spins up a secondary container with the remote testserver running in a RHEL image
+  docker-aarch64-ubuntu-20-rhivos2-test-server:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
         aws_auth:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
-      - name: rhel-testserver
+      - name: rhivos-test-server
         image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.${CIRCLE_WORKFLOW_ID}
         command:
           - "/bin/remote-test-server"

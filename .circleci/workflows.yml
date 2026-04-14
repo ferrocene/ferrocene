@@ -422,7 +422,9 @@ jobs:
       # jobs. Because of that we need to run *just* standard library tests in a
       # virtual machine.
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+      SCRIPT: |
+        env | grep TEST_DEVICE_ADDR
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
@@ -444,8 +446,10 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
+      TEST_DEVICE_ADDR: localhost:12345
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        env | grep TEST_DEVICE_ADDR
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - ferrocene-job-test-container:

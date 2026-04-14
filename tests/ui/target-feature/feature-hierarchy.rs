@@ -62,12 +62,11 @@ fn check_sve2_includes_neon() {
     assert!(cfg!(target_feature = "neon"));
     assert!(cfg!(target_feature = "sve2"));
 }
-<<<<<<< HEAD
 
+<<<<<<< HEAD
 // ferrocene-annotations: um_rustc_C_target_feature
 ||||||| dd82fd2034e
 =======
-
 //[hexagon-v60]~? WARN unstable feature specified for `-Ctarget-feature`: `v60`
 //[hexagon-v68]~? WARN unstable feature specified for `-Ctarget-feature`: `v68`
 //[hexagon-hvxv66]~? WARN unstable feature specified for `-Ctarget-feature`: `hvxv66`

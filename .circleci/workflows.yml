@@ -445,6 +445,7 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       TEST_DEVICE_ADDR: localhost:12345
       SCRIPT: |
+        env | grep TEST_DEVICE_ADDR
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:

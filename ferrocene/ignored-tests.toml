@@ -139,5 +139,5 @@ reason = "This errata does not affect Armv8-R AArch64 processors"
 tests = [
     "tests/run-make/fix-cortex-a53-843419"
 ]
-targets = ["aarch64r82-rhivos2-linux-gnu"]
+targets = ["aarch64-rhivos2-linux-gnu"]
 reason = "This test does not work on Linux targets and is under investigation."

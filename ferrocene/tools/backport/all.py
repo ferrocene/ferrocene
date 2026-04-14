@@ -178,7 +178,7 @@ def list_backport_labels(repo):
                 backport_labels.append(label["name"])
 
         if "next" in resp.links:
-            url = response.links["next"]["url"]
+            url = resp.links["next"]["url"]
         else:
             url = None
 

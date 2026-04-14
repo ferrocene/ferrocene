@@ -120,14 +120,14 @@ def main():
 
 
 def subcommand_download(ferrocene_host, url):
-    if url == None:
+    if url is None:
         url = llvm_cache.get_s3_url(ferrocene_host).geturl()
 
     cache.retrieve(url, ".")
 
 
 def subcommand_prepare(ferrocene_host, url):
-    if url == None:
+    if url is None:
         url = llvm_cache.get_s3_url(ferrocene_host).geturl()
 
     tarball = prepare_llvm_build(ferrocene_host)

@@ -982,8 +982,8 @@ jobs:
           name: Build and upload the Docker image
           command: ferrocene/ci/scripts/build-and-push-docker-image.sh
           environment:
-            IMAGE_NAME: rhel-testserver-10.1
-            IMAGE_TAG: rhel-testserver-arm-10.1.<< pipeline.parameters.stable-workflow-id >>
+            IMAGE_NAME: rhivos-2.0-test-server
+            IMAGE_TAG: rhivos-2.0-test-server.<< pipeline.parameters.stable-workflow-id >>
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1946,7 +1946,7 @@ executors:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
       - name: rhivos-test-server
-        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.<< pipeline.parameters.stable-workflow-id >>
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhivos-2.0-test-server.<< pipeline.parameters.stable-workflow-id >>
         command:
           - "/bin/remote-test-server"
           - "-v"

@@ -7,7 +7,6 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 FERROCENE_REPO=https://github.com/ferrocene/ferrocene
-TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 X_HELP=src/etc/xhelp
 
@@ -21,6 +20,17 @@ DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 # environment.
 if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
     MAX_MERGES_PER_PR=30
+fi
+
+# Check for MacOS sed, which doesn't support `-i`.
+if [ "$(uname)" = Darwin ]; then
+    if ! gsed --version >/dev/null 2>&1; then
+        echo "Need 'gsed' installed; try 'brew install gnu-sed'"
+        exit 1
+    fi
+    sed=gsed
+else
+    sed=sed
 fi
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
@@ -51,14 +61,19 @@ automation_warning() {
     fi
 }
 
-commit_if_modified() {
+commit_if_modified_prefix() {
     file="$1"
     message="$2"
 
-    if git status --porcelain=v1 | grep "^ M ${file}$" >/dev/null; then
+    if git status --porcelain=v1 | grep "^ M ${file}" >/dev/null; then
         git add "${file}"
         git commit -m "${message}"
     fi
+}
+commit_if_modified() {
+    file="$1\$"
+    shift
+    commit_if_modified_prefix "$file" "$@"
 }
 
 if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
@@ -69,15 +84,19 @@ upstream_branch="$1"
 if [[ $# -ge 2 ]]; then
     # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
     git fetch "$FERROCENE_REPO" "$2"
-    current_branch="$(git rev-parse FETCH_HEAD)"
+    current_commit="$(git rev-parse FETCH_HEAD)"
+    branch_name="$2"
 else
-    current_branch="$(git rev-parse HEAD)"
+    current_commit="$(git rev-parse HEAD)"
+    branch_name="$(git branch --show-current)"
+    if [ -n "$branch_name" ]; then branch_name=$current_commit; fi
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"
 else
     upstream_commit="FETCH_HEAD"  # Latest commit in the branch we pull.
 fi
+TEMP_BRANCH="rust-lang/rust/${upstream_branch}--generated-by-pull-upstream"
 
 # Ensure we are using an up to date nightly toolchain during the execution of this script. This is
 # because some Cargo invocations might touch `Cargo.toml` files relying on unstable features, which
@@ -151,7 +170,7 @@ get_submodules() {
     git config --file <(git show "${ref}:.gitmodules") --get-regexp path | awk '{print($2)}'
 }
 new_submodules="$(get_submodules "${upstream_commit}")"
-for submodule in $(get_submodules "${current_branch}"); do
+for submodule in $(get_submodules "${current_commit}"); do
     if ! grep --quiet "^${submodule}\$" <(echo "${new_submodules}"); then
         echo "submodule ${submodule} is not present upstream, removing its contents"
         rm -rf "${submodule}"
@@ -162,7 +181,7 @@ git checkout -b "${TEMP_BRANCH}" "${upstream_commit}"
 
 # Delete all the files excluded from the pull. Those files are marked with the
 # `ferrocene-avoid-pulling-from-upstream` in `.gitattributes`.
-git checkout "${current_branch}" -- .gitattributes
+git checkout "${current_commit}" -- .gitattributes
 excluded_files | xargs git rm
 git checkout FETCH_HEAD -- .gitattributes
 
@@ -181,7 +200,7 @@ else
     merge_message="pull new changes from upstream"
 fi
 
-git checkout "${current_branch}"
+git checkout "${current_commit}"
 
 # - Unset some env vars to make git ignore user configuration. For example, if
 #   mergiraf is set as the merge driver globally, git would attempt to use it
@@ -197,7 +216,10 @@ git checkout "${current_branch}"
 #   See https://codeberg.org/mergiraf/mergiraf/issues/593
 export GIT_COMMITTER_NAME=$(git config --get user.name)
 export GIT_COMMITTER_EMAIL=$(git config --get user.email)
-if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
+if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 \
+    merge "${TEMP_BRANCH}" --into-name "${branch_name}" \
+    --no-edit --message "${merge_message}"
+then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
     # If not all conflicts were resolved, control is given back to the user.
@@ -208,7 +230,7 @@ if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 merge "${TEMP_BRANC
     # automatically.
     for file in $(excluded_files); do
         echo "pull-upstream: automatically resolving conflict for ${file}..."
-        git show "${current_branch}:${file}" > "${file}"
+        git show "${current_commit}:${file}" > "${file}"
         git add "${file}"
         echo "pull-upstream: automatically resolved conflict for ${file}"
     done
@@ -242,7 +264,7 @@ if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 merge "${TEMP_BRANC
         lock="${prefix}Cargo.lock"
         if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
             echo "pull-upstream: automatically resolving conflict for ${lock}..."
-            git show "${current_branch}:${lock}" > "${lock}"
+            git show "${current_commit}:${lock}" > "${lock}"
 
             # Invoking any Cargo command touching the lockfile will cause the
             # lockfile to be updated. "cargo metadata" is one of the fastest ones.
@@ -284,7 +306,7 @@ if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 merge "${TEMP_BRANC
             marker="$1"
             who="$2"
             for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
-                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
+                $sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
             done
         }
         handle_deleted_files DU "in Ferrocene" # DU means "deleted by us"
@@ -302,6 +324,7 @@ if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 merge "${TEMP_BRANC
         # - prints the file name (last column of the output of `git status --porcelain=v2`)
         files=$(git status --porcelain=v2 | awk '$1 == "u" && $2 != "UD" {print $NF}')
 
+        git diff --name-only | xargs $sed -i "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
         git add .
 
         # Setting the editor to `true` prevents the actual editor from being open,
@@ -380,7 +403,7 @@ fi
 # does not need manual intervention.
 echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
 if ./x.py run generate-completions >/dev/null; then
-    commit_if_modified "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
+    commit_if_modified_prefix "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
 else
     automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi

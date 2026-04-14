@@ -81,7 +81,7 @@ def arguments():
         "--url", help="Manually set the input `tar.zst` location"
     )
 
-    s3_url_parser = subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
+    subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
 
     return parser.parse_args()
 
@@ -104,7 +104,7 @@ def main():
 
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
-    except:
+    except KeyError:
         print("Set FERROCENE_HOST environment to a Rust triple")
         exit(1)
 
@@ -144,13 +144,10 @@ def prepare_llvm_build(ferrocene_host):
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
     build_cmd = [sys.executable, "x.py", "build", "src/llvm-project"]
-    try:
-        parallelism = os.environ["LLVM_BUILD_PARALLELISM"]
-        if parallelism:
-            build_cmd += ["-j", parallelism]
-    except:
-        pass
-    build = subprocess.run(build_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
+    parallelism = os.environ.get("LLVM_BUILD_PARALLELISM")
+    if parallelism is not None:
+        build_cmd += ["-j", parallelism]
+    subprocess.run(build_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
 
     # The llvm/build directory contains a *copy* of all the binaries, plus the
     # intermediate object files and other build artifacts we don't need. To

@@ -39,7 +39,7 @@ class ItemsWithRubricDirective(SphinxDirective):
 class RubricCollector(EnvironmentCollector):
     def clear_doc(self, app, env, docname):
         storage = get_storage(env)
-        for rubric, items in storage.items():
+        for items in storage.values():
             items[:] = (item for item in items if item.document != docname)
 
     def merge_other(self, app, env, docnames, other):

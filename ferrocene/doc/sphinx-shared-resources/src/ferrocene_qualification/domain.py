@@ -64,7 +64,7 @@ class QualificationDomain(Domain):
         }
 
     def merge_domaindata(self, docnames, otherdata):
-        for key, value in otherdata["ids"].items():
+        for value in otherdata["ids"].values():
             if value.document in docnames:
                 self.data["ids"][value.id] = value
 

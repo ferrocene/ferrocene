@@ -11,3 +11,14 @@ from .automated_prs import (
     log,
 )
 from .pr_links import PRLinker
+
+__all__ = [
+    "AutomationResult",
+    "AutomatedPR",
+    "cmd",
+    "cmd_capture",
+    "err",
+    "warn",
+    "log",
+    "PRLinker",
+]

@@ -9,7 +9,7 @@ def section_id_and_anchor(section):
         try:
             id = [name for name in section["names"] if name.startswith("fls_")][0]
         except IndexError:
-            raise NoSectionIdError()
+            raise NoSectionIdError() from None
     else:
         raise NoSectionIdError()
 

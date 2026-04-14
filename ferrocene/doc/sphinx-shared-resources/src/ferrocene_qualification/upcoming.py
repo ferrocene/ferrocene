@@ -26,8 +26,8 @@ class UpcomingRole(SphinxRole):
                     self.env.config.ferrocene_version.split(".")
                 )
                 current_version = (int(current_major), int(current_minor))
-            except ValueError:
-                raise RuntimeError("invalid Ferrocene version injected")
+            except ValueError as e:
+                raise RuntimeError("invalid Ferrocene version injected") from e
 
             # Don't render the role if we are outside of rolling and the release referenced by this
             # role is the current or a past one.

@@ -23,12 +23,18 @@ from automations_common import cmd_capture
 
 had_error = False
 def error(msg):
-    print('error: ')
+    print('error:', msg)
+    global had_error
     had_error = True
 
 parser = argparse.ArgumentParser(prog='diff-upstream', description="Diff ferrocene from upstream Rust project")
-parser.add_argument('--hide-diff', action='store_true', help="Only test ferrocene-annotations; don't run the diff")
+parser.add_argument('--hide-diff', action='store_true', help="Only test "
+                    "ferrocene-annotations; don't run the diff. Implies --test.")
+parser.add_argument('--test', action='store_true', help="Test ferrocene-annotations")
 args = parser.parse_args()
+
+if args.hide_diff:
+    args.test = True
 
 #### Diff all test annotations. ####
 
@@ -64,7 +70,7 @@ for line in test_changes:
             or change.startswith('//@ ignore-ferrocene.facade')):
         continue
 
-    if change.startswith('// ferrocene-annotations: '):
+    if re.search('^\s*// ferrocene-annotations: ', change):
         id = next(reversed(change.split(' ')))
         if id.startswith('um_rustc'):
             annotations[id] = span, ''
@@ -82,7 +88,7 @@ for line in test_changes:
     changes.append([kind, change])
 
 if missing_annotations:
-    error(f'error: found {len(missing_annotations)} ferrocene-annotations not followed by section name!')
+    error(f'found {len(missing_annotations)} ferrocene-annotations not followed by section name!')
     for span, annotation in missing_annotations.items():
         print('%s:%d' % span, annotation)
 
@@ -96,33 +102,38 @@ def load_sections(fd, sections):
             assert n.strip() == '', n
             sections[id.lower()] = next(fd).strip().replace('`', '')
 
-sections = {}
-for dir, _subdirs, files in os.walk('ferrocene/doc/specification'):
-    for file in files:
-        if file.endswith('.rst'):
-            with open(dir + '/' + file) as fd:
-                load_sections(fd, sections)
+def validate_annotations():
+    sections = {}
+    for dir, _subdirs, files in os.walk('ferrocene/doc/specification'):
+        for file in files:
+            if file.endswith('.rst'):
+                with open(dir + '/' + file) as fd:
+                    load_sections(fd, sections)
 
-cli_ids = set()
-with open('build/host/doc/qualification/traceability-matrix.html') as fd:
-    for line in fd:
-        if m := re.search(r'id="(um_rustc_[^"]*)"', line):
-            cli_ids.add(m.group(1))
+    cli_ids = set()
+    with open('build/host/doc/qualification/traceability-matrix.html') as fd:
+        for line in fd:
+            if m := re.search(r'id="(um_rustc_[^"]*)"', line):
+                cli_ids.add(m.group(1))
 
-for id, (span, name) in annotations.items():
-    if id.startswith('um_rustc_'):
-        if id not in cli_ids:
-            error("Unknown CLI spec id:", id)
-        continue
-    if id not in sections:
-        error(f"Unknown section '{id}'!")
-    elif name.lower() != sections[id].lower():
-        error("Incorrect section name on %s:%d:" % span,
-              f"Expected '{sections[id]}', found '{name}'")
+    for id, (span, name) in annotations.items():
+        if id.startswith('um_rustc_'):
+            if id not in cli_ids:
+                error("Unknown CLI spec id:", id)
+            continue
+        if id not in sections:
+            error(f"Unknown section '{id}'!")
+        elif name.lower() != sections[id].lower():
+            error("Incorrect section name on %s:%d:" % span,
+                f"Expected '{sections[id]}', found '{name}'")
+
+if args.test:
+    print("Validating Ferrocene annotations")
+    validate_annotations()
+    if not had_error:
+        print("All annotations match the spec!")
 
 if args.hide_diff:
-    if not had_error:
-        print("All good!")
     exit(had_error)
 
 #### Diff all other changes. ####
@@ -138,7 +149,7 @@ with open(root_dir / ".gitattributes") as fd:
 
 filterer = IgnoreFilterManager.build(path=root_dir, global_patterns=ignored)
 
-all_changed = cmd_capture(f"git diff {base_commit} --name-status".split()).splitlines()
+all_changed = cmd_capture(f"git -c color.ui=never diff {base_commit} --name-status".split()).splitlines()
 changemap = defaultdict(list)
 
 class DiffKind:
@@ -146,6 +157,13 @@ class DiffKind:
     MODIFIED = 'M'
     DELETED = 'D'
     RENAMED = 'R'
+
+DIFF_NAMES = {
+        DiffKind.ADDED: 'added',
+        DiffKind.MODIFIED: 'modified',
+        DiffKind.DELETED: 'deleted',
+        DiffKind.RENAMED: 'renamed',
+}
 
 IGNORED_ADDITIONS = [
         ".dockerignore",
@@ -168,13 +186,19 @@ for line in all_changed:
             path = rest.lstrip()
             # Assume files in ferrocene/ directories are always ok
             if (path.startswith("ferrocene/") or path.endswith("/ferrocene-annotations")
+                    or path.endswith('/ferrocene.rs' )
                     or path.startswith('.github') or path.startswith(".circleci")
                     or path.startswith("compiler/rustc_target/src/spec/targets/")
-                    or '/ferrocene/' in path or path in IGNORED_ADDITIONS):
+                    or path.startswith("tests/run-make/symbol-report/")
+                    or '/ferrocene/' in path or '/ferrocene_test.rs' in path
+                    or path in IGNORED_ADDITIONS):
                 continue
             val = path
         case DiffKind.MODIFIED:
-            val = rest.lstrip()
+            path = rest.lstrip()
+            if path.startswith("src/etc/completions"):
+                continue
+            val = path
         case DiffKind.RENAMED:
             val = rest.split()
         case _:
@@ -183,16 +207,17 @@ for line in all_changed:
 
 
 for kind in ['A', 'D', 'R']:
+    if changemap[kind]:
+        print(f"\nPrinting all {DIFF_NAMES[kind]} files")
     for p in changemap[kind]:
         print(f'{kind}\t{p}')
-    if changemap[kind]:
-        print()
 
+print("\nPrinting all changed tests")
 for f, changes in test_changemap.items():
     print(f)
     print('\n'.join(kind + change for kind, change in changes))
 
-print(f"\ngit diff {base_commit} --name-status -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'")
+print(f"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'")
 
 for p in changemap['M']:
     if p.startswith('tests/'):

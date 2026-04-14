@@ -166,6 +166,10 @@ if python_version=$(uv python find); then
     add --set "build.python=$python_version"
 fi
 
+# Historically we've had a bunch of hidden bugs in our python scripts.
+# We can't catch all of them, but at least try to catch the obvious ones.
+add --set build.tidy-extra-checks=auto:py
+
 # Set the targets to build. The environment variable is set from the CI
 # configuration (see the .circleci directory), and if the variable is not set
 # the host target will be used.

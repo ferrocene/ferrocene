@@ -948,7 +948,7 @@ jobs:
           name: Set IMAGE_TAG for the docker image
           command: |
             # Note: We explicity want to have env substitution here
-            echo export IMAGE_TAG="rhel-testserver-arm-10.1.${CIRCLE_BUILD_NUM}" >> "$BASH_ENV"
+            echo export IMAGE_TAG="rhel-testserver-arm-10.1.${CIRCLE_WORKFLOW_ID}" >> "$BASH_ENV"
             source "$BASH_ENV"
             env | grep IMAGE_TAG
       - run:
@@ -1896,7 +1896,7 @@ executors:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
       - name: rhel-testserver
-        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.${CIRCLE_BUILD_NUM}
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.${CIRCLE_WORKFLOW_ID}
         command:
           - "/bin/remote-test-server"
           - "-v"

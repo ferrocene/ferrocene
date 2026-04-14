@@ -7,4 +7,4 @@
 !requirements.txt
 !ferrocene/ci/docker-images
 !ferrocene/ci/mirrors
-!**remote-testserver
+!**remote-test-server

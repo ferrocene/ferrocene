@@ -1892,6 +1892,11 @@ executors:
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
       - name: rhel-testserver
         image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.$CIRCLE_BUILD_NUM
+        command:
+          - "/bin/remote-testserver"
+          - "-v"
+          - "--bind"
+          - "0.0.0.0:12345"
         aws_auth:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY

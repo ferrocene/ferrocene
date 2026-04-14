@@ -3,6 +3,7 @@
 
 from . import rust_changelog, upcoming_release
 
+
 def setup(app):
     rust_changelog.setup(app)
     upcoming_release.setup(app)
@@ -12,4 +13,3 @@ def setup(app):
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
-

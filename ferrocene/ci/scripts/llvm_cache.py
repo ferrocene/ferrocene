@@ -22,7 +22,7 @@ import logging
 
 # Note that this *ignores* symlinks. If you need a binary that's actually a
 # symlink please add to the list the binary the symlink points *to*.
-KEEP_LLVM_BINARIES=[
+KEEP_LLVM_BINARIES = [
     # Needed for the `llvm-tools` component
     "llvm-cov",
     "llvm-nm",
@@ -66,14 +66,20 @@ def arguments():
     parser = argparse.ArgumentParser(
         description="Report various data about LLVM caches",
     )
-    parser.add_argument('-v', '--verbose', action='count', default=0)
+    parser.add_argument("-v", "--verbose", action="count", default=0)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
-    prepare_parser.add_argument("--url", help="Manually set the output `tar.zst` location")
+    prepare_parser.add_argument(
+        "--url", help="Manually set the output `tar.zst` location"
+    )
 
-    download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
-    download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
+    download_parser = subparsers.add_parser(
+        "download", help="Download the existing LLVM cache"
+    )
+    download_parser.add_argument(
+        "--url", help="Manually set the input `tar.zst` location"
+    )
 
     s3_url_parser = subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
 
@@ -90,7 +96,11 @@ def main():
             log_level = logging.DEBUG
         case _:
             log_level = logging.TRACE
-    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%I:%M:%S %p", level=log_level)
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)s: %(message)s",
+        datefmt="%I:%M:%S %p",
+        level=log_level,
+    )
 
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
@@ -108,11 +118,13 @@ def main():
     else:
         print(f"Unknown command {args.subcommand}")
 
+
 def subcommand_download(ferrocene_host, url):
     if url == None:
         url = llvm_cache.get_s3_url(ferrocene_host).geturl()
 
     cache.retrieve(url, ".")
+
 
 def subcommand_prepare(ferrocene_host, url):
     if url == None:
@@ -121,9 +133,11 @@ def subcommand_prepare(ferrocene_host, url):
     tarball = prepare_llvm_build(ferrocene_host)
     cache.store(url, tarball)
 
+
 def subcommand_s3_url(ferrocene_host):
     s3_url = llvm_cache.get_s3_url(ferrocene_host)
     print(s3_url.geturl())
+
 
 def prepare_llvm_build(ferrocene_host):
     """
@@ -131,7 +145,7 @@ def prepare_llvm_build(ferrocene_host):
     """
     build_cmd = [sys.executable, "x.py", "build", "src/llvm-project"]
     try:
-        parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
+        parallelism = os.environ["LLVM_BUILD_PARALLELISM"]
         if parallelism:
             build_cmd += ["-j", parallelism]
     except:
@@ -144,7 +158,7 @@ def prepare_llvm_build(ferrocene_host):
     #
     # On Windows, we skip this pruning since it *does* need intermediate
     # object files. (Notably, `llvm/Config/llvm-config.h` and many lib objects)
-    is_windows = sys.platform.startswith('win32') or sys.platform.startswith('cygwin')
+    is_windows = sys.platform.startswith("win32") or sys.platform.startswith("cygwin")
     if not is_windows:
         shutil.rmtree(f"build/{ferrocene_host}/llvm/build")
 
@@ -152,7 +166,7 @@ def prepare_llvm_build(ferrocene_host):
         # for an existing `llvm-config` binary. Create a symlink to make sure it
         # can still detect the existing build.
         os.makedirs(f"build/{ferrocene_host}/llvm/build")
-        os.symlink(f"../bin", f"build/{ferrocene_host}/llvm/build/bin")
+        os.symlink("../bin", f"build/{ferrocene_host}/llvm/build/bin")
 
     # The LLVM distribution as of 2021-08-23 contains more than 1GB of
     # binaries, but we only need a small subset of them. This "deletes" the
@@ -174,7 +188,7 @@ def prepare_llvm_build(ferrocene_host):
         name = os.path.basename(file)
         if is_windows:
             path = pathlib.Path(name)
-            path = path.with_suffix('')
+            path = path.with_suffix("")
             name = path.as_posix()
 
         if name in KEEP_LLVM_BINARIES:

@@ -67,8 +67,12 @@ def check():
     expected = expected_branch()
 
     if current != expected:
-        print(f"error: {BRANCH_KEY} is '{current}' but must be '{expected}' in {STAGE0_PATH}")
-        print("note: the pull from upstream automation is supposed to fix this, you should check")
+        print(
+            f"error: {BRANCH_KEY} is '{current}' but must be '{expected}' in {STAGE0_PATH}"
+        )
+        print(
+            "note: the pull from upstream automation is supposed to fix this, you should check"
+        )
         print("      why it didn't update the key in the pull from beta.")
         exit(1)
 
@@ -80,8 +84,6 @@ def fix():
     stage0_file = STAGE0_PATH.open("w")
     stage0_file.write(f"{stage0.before_raw}{BRANCH_KEY}={expected}{stage0.after_raw}")
     stage0_file.close()
-
-    
 
 
 @dataclass

@@ -6,8 +6,8 @@ import subprocess
 import urllib.parse
 
 
-CACHE_BUCKET="ferrocene-ci-caches"
-CACHE_PREFIX="prebuilt-llvm"
+CACHE_BUCKET = "ferrocene-ci-caches"
+CACHE_PREFIX = "prebuilt-llvm"
 
 
 def get_s3_url(ferrocene_host):
@@ -26,10 +26,10 @@ def get_llvm_cache_hash():
     m = hashlib.sha256()
 
     files = [
-        "ferrocene/ci/scripts/llvm_cache.py", # __file__ is an absolute path
+        "ferrocene/ci/scripts/llvm_cache.py",  # __file__ is an absolute path
         "ferrocene/ci/configure.sh",
         "src/version",
-    ];
+    ]
 
     ls_files_cmd = ["git", "ls-files", "src/bootstrap", "ferrocene/ci/docker-images"]
     ls_files = subprocess.run(ls_files_cmd, check=True, capture_output=True, text=True)
@@ -47,7 +47,7 @@ def get_llvm_cache_hash():
     # the hash of the tree from git, saving time and achieving the same effect.
     ls_tree_cmd = ["git", "ls-tree", "HEAD", "src/llvm-project"]
     ls_tree = subprocess.run(ls_tree_cmd, check=True, capture_output=True, text=True)
-    ls_tree_shasum = ls_tree.stdout.split()[2];
+    ls_tree_shasum = ls_tree.stdout.split()[2]
     m.update(str.encode(ls_tree_shasum))
 
     return m.hexdigest()

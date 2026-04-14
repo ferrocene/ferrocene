@@ -293,8 +293,10 @@ def do_semver_checks(cfg: Cfg, target: Target) -> bool:
         # running on the host.
 
     if cfg.baseline_crate_dir is None:
-        eprint("Non-host target: --baseline-crate-dir must be specified to \
-            run semver-checks")
+        eprint(
+            "Non-host target: --baseline-crate-dir must be specified to \
+            run semver-checks"
+        )
         sys.exit(1)
 
     # Since semver-checks doesn't work with `--target`, we build the json ourself and

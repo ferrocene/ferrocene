@@ -33,7 +33,9 @@ class PullUpstreamPR(AutomatedPR):
         # The pull.sh script records warnings that should be displayed to the user. They will be
         # stored by the script in this file, which we can then read. The file is open in read mode
         # since the writing will be done by push.sh.
-        self._warnings_file = tempfile.NamedTemporaryFile(mode="r", delete_on_close=False)
+        self._warnings_file = tempfile.NamedTemporaryFile(
+            mode="r", delete_on_close=False
+        )
 
         super().__init__()
 
@@ -75,13 +77,19 @@ class PullUpstreamPR(AutomatedPR):
 
         raw_warnings = self._warnings_file.read().strip()
         if raw_warnings:
-            message += ":warning: **The automation reported these warnings:** :warning:\n\n"
+            message += (
+                ":warning: **The automation reported these warnings:** :warning:\n\n"
+            )
             for warning in raw_warnings.split("\n"):
                 message += f"* {warning}\n"
             message += "\n"
 
-        message += "This PR pulls the following changes from the upstream repository:\n\n"
-        message += generate_pr_body.render_changes(self.origin, self.base_branch(), branch_name)
+        message += (
+            "This PR pulls the following changes from the upstream repository:\n\n"
+        )
+        message += generate_pr_body.render_changes(
+            self.origin, self.base_branch(), branch_name
+        )
         return message
 
     def error_issue_title(self):
@@ -97,9 +105,7 @@ branch, the automation failed. The automation will not open any more pull \
 requests pulling from upstream until the merge is fixed.
 
 Check the log on GitHub Actions for more details on the cause of the failure.
-""".replace(
-            "{{upstream_branch}}", self._upstream_branch
-        )
+""".replace("{{upstream_branch}}", self._upstream_branch)
 
     def error_issue_fixed_comment(self, pull_request_url):
         return f"""

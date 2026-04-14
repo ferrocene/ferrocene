@@ -12,7 +12,6 @@
 
 import os
 import requests
-import sys
 
 from automations_common import AutomatedPR, AutomationResult
 

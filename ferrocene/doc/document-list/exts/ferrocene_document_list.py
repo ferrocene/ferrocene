@@ -6,8 +6,8 @@ from docutils import nodes
 import sphinx
 from sphinx.roles import SphinxRole
 
-class DocumentId(SphinxRole):
 
+class DocumentId(SphinxRole):
     def run(self):
         var = f"FERROCENE_DOCUMENT_ID_{self.text}"
         try:
@@ -29,8 +29,9 @@ class DocumentId(SphinxRole):
         logger.warn(message, location=self.get_location())
         return nodes.inline(text=message)
 
+
 def setup(app):
-    app.add_role('document-id', DocumentId())
+    app.add_role("document-id", DocumentId())
 
     return {
         "version": "0",

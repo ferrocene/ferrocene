@@ -1409,11 +1409,29 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
+      # - aarch64-linux-test-container:
+      #     name: aarch64-linux-test
+      #     job: test
+      #     resource-class: ferrocene/k8s-arm64-large # 4-core
+      #     test-variant: "2021"
+      #     requires:
+      #       - aarch64-linux-build
+      - aarch64-linux-test-library-std:
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-self-test:
+          requires:
+            - aarch64-linux-dist
+            - aarch64-linux-dist-tools
+            - x86_64-linux-dist-targets
+            - x86_64-linux-dist
+
       - aarch64-build-docker-rhivos2-test-server:
           requires:
             - aarch64-linux-build
       - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-test-library
+          name: aarch64-linux-rhivos2-test-library
           job: test:library
           resource-class: ferrocene/k8s-arm64-medium # 4-core
           test-variant: "2021"
@@ -1421,22 +1439,9 @@ workflows:
             - aarch64-linux-build
             - aarch64-build-docker-rhivos2-test-server
       - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-compiletest
+          name: aarch64-linux-rhivos2-compiletest
           job: test:compiletest
           resource-class: ferrocene/k8s-arm64-large # 8-core
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-            - aarch64-build-docker-rhivos2-test-server
-      - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-test
-          job: test
-          resource-class: ferrocene/k8s-arm64-large # 4-core
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-            - aarch64-build-docker-rhivos2-test-server
-      - aarch64-linux-test-library-std:
           test-variant: "2021"
           requires:
             - aarch64-linux-build
@@ -1446,12 +1451,6 @@ workflows:
           requires:
             - aarch64-linux-build
             - aarch64-build-docker-rhivos2-test-server
-      - aarch64-linux-self-test:
-          requires:
-            - aarch64-linux-dist
-            - aarch64-linux-dist-tools
-            - x86_64-linux-dist-targets
-            - x86_64-linux-dist
 
       # - aarch64-darwin-llvm: {}
       # - aarch64-darwin-build:

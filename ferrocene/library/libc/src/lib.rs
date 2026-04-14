@@ -41,6 +41,7 @@
     allow(internal_features, unused_features),
 )]
 #![cfg_attr(feature = "rustc-dep-of-std", allow(internal_features))]
+// Some targets don't need `link_cfg` and emit a warning.
 #![cfg_attr(feature = "rustc-dep-of-std", allow(unused_features))]
 // DIFF(1.0): The thread local references that raise this lint were removed in 1.0
 #![cfg_attr(feature = "rustc-dep-of-std", allow(static_mut_refs))]

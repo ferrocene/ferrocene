@@ -24,7 +24,7 @@
 - path: ferrocene/library/libc
   repo: rust-lang/libc
   # Match the libc version in library/std/Cargo.toml
-  pull: tag:0.2.183
+  pull: branch:libc-0.2
   after:
     # cargo update -p libc --manifest-path=library/Cargo.toml
     - update-cargo-lock libc library

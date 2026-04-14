@@ -110,7 +110,10 @@ jobs:
     name: "Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 100
-    if: startsWith(github.event.pull_request.base.ref, 'automation/pull-upstream-HEAD/')
+    # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idif
+    # https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#startswith
+    # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context
+    if: startsWith(github.head_ref, 'automation/pull-upstream-HEAD/')
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -74,6 +74,13 @@ struct DiagnosticOnConstOnlyForNonConstTraitImpls {
 #[diag("`#[diagnostic::on_move]` can only be applied to enums, structs or unions")]
 struct DiagnosticOnMoveOnlyForAdt;
 
+#[derive(Diagnostic)]
+#[diag("`#[diagnostic::on_unknown]` can only be applied to `use` statements")]
+struct DiagnosticOnUnknownOnlyForImports {
+    #[label("not an import")]
+    item_span: Span,
+}
+
 fn target_from_impl_item<'tcx>(tcx: TyCtxt<'tcx>, impl_item: &hir::ImplItem<'_>) -> Target {
     match impl_item.kind {
         hir::ImplItemKind::Const(..) => Target::AssocConst,
@@ -219,6 +226,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 },
                 Attribute::Parsed(AttributeKind::DoNotRecommend{attr_span}) => {self.check_do_not_recommend(*attr_span, hir_id, target, item)},
                 Attribute::Parsed(AttributeKind::OnUnimplemented{span, directive}) => {self.check_diagnostic_on_unimplemented(*span, hir_id, target,directive.as_deref())},
+                Attribute::Parsed(AttributeKind::OnUnknown { span, .. }) => { self.check_diagnostic_on_unknown(*span, hir_id, target) },
                 Attribute::Parsed(AttributeKind::OnConst{span, ..}) => {self.check_diagnostic_on_const(*span, hir_id, target, item)}
                 Attribute::Parsed(AttributeKind::OnMove { span, directive }) => {
                     self.check_diagnostic_on_move(*span, hir_id, target, directive.as_deref())
@@ -302,7 +310,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcConstStableIndirect
                     | AttributeKind::RustcConversionSuggestion
                     | AttributeKind::RustcDeallocator
-                    | AttributeKind::RustcDefPath(..)
                     | AttributeKind::RustcDelayedBugFromInsideQuery
                     | AttributeKind::RustcDenyExplicitImpl(..)
                     | AttributeKind::RustcDeprecatedSafe2024 {..}
@@ -311,9 +318,13 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcDocPrimitive(..)
                     | AttributeKind::RustcDummy
                     | AttributeKind::RustcDumpDefParents
+                    | AttributeKind::RustcDumpDefPath(..)
+                    | AttributeKind::RustcDumpHiddenTypeOfOpaques
                     | AttributeKind::RustcDumpInferredOutlives
                     | AttributeKind::RustcDumpItemBounds
+                    | AttributeKind::RustcDumpLayout(..)
                     | AttributeKind::RustcDumpPredicates
+                    | AttributeKind::RustcDumpSymbolName(..)
                     | AttributeKind::RustcDumpUserArgs
                     | AttributeKind::RustcDumpVariances
                     | AttributeKind::RustcDumpVariancesOfOpaques
@@ -323,13 +334,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcEiiForeignItem
                     | AttributeKind::RustcEvaluateWhereClauses
                     | AttributeKind::RustcHasIncoherentInherentImpls
-                    | AttributeKind::RustcHiddenTypeOfOpaques
                     | AttributeKind::RustcIfThisChanged(..)
                     | AttributeKind::RustcInheritOverflowChecks
                     | AttributeKind::RustcInsignificantDtor
                     | AttributeKind::RustcIntrinsic
                     | AttributeKind::RustcIntrinsicConstStableIndirect
-                    | AttributeKind::RustcLayout(..)
                     | AttributeKind::RustcLayoutScalarValidRangeEnd(..)
                     | AttributeKind::RustcLayoutScalarValidRangeStart(..)
                     | AttributeKind::RustcLintOptDenyFieldAccess { .. }
@@ -339,6 +348,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcMacroTransparency(_)
                     | AttributeKind::RustcMain
                     | AttributeKind::RustcMir(_)
+                    | AttributeKind::RustcMustMatchExhaustively(..)
                     | AttributeKind::RustcNeverReturnsNullPtr
                     | AttributeKind::RustcNeverTypeOptions {..}
                     | AttributeKind::RustcNoImplicitAutorefs
@@ -365,7 +375,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcSpecializationTrait(..)
                     | AttributeKind::RustcStdInternalSymbol (..)
                     | AttributeKind::RustcStrictCoherence(..)
-                    | AttributeKind::RustcSymbolName(..)
                     | AttributeKind::RustcTestMarker(..)
                     | AttributeKind::RustcThenThisWouldNeed(..)
                     | AttributeKind::RustcTrivialFieldReads
@@ -376,6 +385,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::ThreadLocal
                     | AttributeKind::TypeLengthLimit { .. }
                     | AttributeKind::UnstableFeatureBound(..)
+                    | AttributeKind::UnstableRemoved(..)
                     | AttributeKind::Used { .. }
                     | AttributeKind::WindowsSubsystem(..)
                     // tidy-alphabetical-end
@@ -542,9 +552,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     fn check_eii_impl(&self, impls: &[EiiImpl], target: Target) {
         for EiiImpl { span, inner_span, resolution, impl_marked_unsafe, is_default: _ } in impls {
             match target {
-                Target::Fn => {}
+                Target::Fn | Target::Static => {}
                 _ => {
-                    self.dcx().emit_err(errors::EiiImplNotFunction { span: *span });
+                    self.dcx().emit_err(errors::EiiImplTarget { span: *span });
                 }
             }
 
@@ -607,7 +617,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
         if let Some(directive) = directive {
             if let Node::Item(Item {
-                kind: ItemKind::Trait(_, _, _, trait_name, generics, _, _),
+                kind: ItemKind::Trait(_, _, _, _, trait_name, generics, _, _),
                 ..
             }) = self.tcx.hir_node(hir_id)
             {
@@ -724,6 +734,19 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     }
                 });
             }
+        }
+    }
+
+    /// Checks if `#[diagnostic::on_unknown]` is applied to a trait impl
+    fn check_diagnostic_on_unknown(&self, attr_span: Span, hir_id: HirId, target: Target) {
+        if !matches!(target, Target::Use) {
+            let item_span = self.tcx.hir_span(hir_id);
+            self.tcx.emit_node_span_lint(
+                MISPLACED_DIAGNOSTIC_ATTRIBUTES,
+                hir_id,
+                attr_span,
+                DiagnosticOnUnknownOnlyForImports { item_span },
+            );
         }
     }
 
@@ -1047,7 +1070,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         match item.kind {
             ItemKind::Enum(_, generics, _) | ItemKind::Struct(_, generics, _)
                 if generics.params.len() != 0 => {}
-            ItemKind::Trait(_, _, _, _, generics, _, items)
+            ItemKind::Trait(_, _, _, _, _, generics, _, items)
                 if generics.params.len() != 0
                     || items.iter().any(|item| {
                         matches!(self.tcx.def_kind(item.owner_id), DefKind::AssocTy)

@@ -492,6 +492,7 @@ _arguments "${_arguments_options[@]}" : \
 '--compare-mode=[mode describing what file the actual ui output will be compared to]:COMPARE MODE:_default' \
 '--pass=[force {check,build,run}-pass tests to this mode]:check | build | run:_default' \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
+'--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
 '--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
@@ -557,6 +558,7 @@ _arguments "${_arguments_options[@]}" : \
 '--compare-mode=[mode describing what file the actual ui output will be compared to]:COMPARE MODE:_default' \
 '--pass=[force {check,build,run}-pass tests to this mode]:check | build | run:_default' \
 '--run=[whether to execute run-* tests]:auto | always | never:_default' \
+'--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
 '--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \

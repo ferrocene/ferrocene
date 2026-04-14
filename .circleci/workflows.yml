@@ -85,6 +85,9 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
+  workflow-id:
+    type: string
+    default: ""
 
 orbs:
   aws-cli: circleci/aws-cli@4.0

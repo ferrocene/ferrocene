@@ -27,7 +27,7 @@ def error(msg):
     global had_error
     had_error = True
 
-parser = argparse.ArgumentParser(prog='diff-upstream', description="Diff ferrocene from upstream Rust project")
+parser = argparse.ArgumentParser(prog='diff-upstream', description="Diff Ferrocene from upstream Rust project")
 parser.add_argument('--hide-diff', action='store_true', help="Only test "
                     "ferrocene-annotations; don't run the diff. Implies --test.")
 parser.add_argument('--test', action='store_true', help="Test ferrocene-annotations")

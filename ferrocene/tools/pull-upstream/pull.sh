@@ -61,14 +61,19 @@ automation_warning() {
     fi
 }
 
-commit_if_modified() {
+commit_if_modified_prefix() {
     file="$1"
     message="$2"
 
-    if git status --porcelain=v1 | grep "^ M ${file}$" >/dev/null; then
+    if git status --porcelain=v1 | grep "^ M ${file}" >/dev/null; then
         git add "${file}"
         git commit -m "${message}"
     fi
+}
+commit_if_modified() {
+    file="$1\$"
+    shift
+    commit_if_modified_prefix "$file" "$@"
 }
 
 if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
@@ -398,7 +403,7 @@ fi
 # does not need manual intervention.
 echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
 if ./x.py run generate-completions >/dev/null; then
-    commit_if_modified "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
+    commit_if_modified_prefix "${GENERATED_COMPLETIONS_DIR}" "update ${GENERATED_COMPLETIONS_DIR}"
 else
     automation_warning "Couldn't regenerate the \`x.py\` completions. Please run \`./x run generate-completions\` after fixing the merge conflicts."
 fi

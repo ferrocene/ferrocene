@@ -29,4 +29,3 @@ This tool verifies that:
 2. All `// ferrocene-annotations` in the test suite are either followed by the name of that section, or correspond to a CLI-only unnamed section.
 
 It can also be run manually to view all differences between the Ferrocene compiler and the upstream Rust Project compiler.
-We plan in the future to inspect this diff on a regular basis to verify that there are no unintended differences from the upstream compiler.

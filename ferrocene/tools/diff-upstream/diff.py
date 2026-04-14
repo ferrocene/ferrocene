@@ -45,7 +45,7 @@ test_changes = peekable(cmd_capture(diff_tests).splitlines())
 
 file = None
 lineno = 0
-changes = []
+changes: list[DiffKind, str] = []
 test_changemap = {}
 missing_annotations = {}
 annotations = {}
@@ -71,13 +71,13 @@ for line in test_changes:
         continue
 
     if re.search('^\s*// ferrocene-annotations: ', change):
+        span = Span(file, lineno)
         id = next(reversed(change.split(' ')))
         if id.startswith('um_rustc'):
             annotations[id] = span, ''
             continue
         # Next line is the section name it corresponds to.
         section = test_changes.peek()
-        span = Span(file, lineno)
         if not section.startswith('+// '):
             missing_annotations[span] = id
         else:
@@ -120,8 +120,7 @@ def validate_annotations():
         if id.startswith('um_rustc_'):
             if id not in cli_ids:
                 error("Unknown CLI spec id:", id)
-            continue
-        if id not in sections:
+        elif id not in sections:
             error(f"Unknown section '{id}'!")
         elif name.lower() != sections[id].lower():
             error("Incorrect section name on %s:%d:" % span,
@@ -166,12 +165,12 @@ DIFF_NAMES = {
 }
 
 IGNORED_ADDITIONS = [
-        ".dockerignore",
-        ".python-version",
-        "bors.toml",
-        "src/bootstrap/defaults/bootstrap.ferrocene-dist.toml",
-        "src/bootstrap/src/core/config/toml/ferrocene.rs",
-        "src/tools/compiletest/src/ferrocene_annotations.rs",
+    ".dockerignore",
+    ".python-version",
+    "bors.toml",
+    "src/bootstrap/defaults/bootstrap.ferrocene-dist.toml",
+    "src/bootstrap/src/core/config/toml/ferrocene.rs",
+    "src/tools/compiletest/src/ferrocene_annotations.rs",
 ]
 
 for line in all_changed:

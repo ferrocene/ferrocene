@@ -971,7 +971,7 @@ jobs:
       - run:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
-      # We can't use an env var to set an env var, so we need to use an extra run step see 
+      # We can't use an env var to set an env var, so we need to use an extra run step see
       # https://circleci.com/docs/guides/security/set-environment-variable/#set-an-environment-variable-in-a-shell-command
       - run:
           name: Set IMAGE_TAG for the docker image
@@ -1440,7 +1440,7 @@ workflows:
             - aarch64-build-docker-rhivos2-test-server
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
-          job: test:compiletest
+          job: qnx:compiletest-no-only-hosts
           resource-class: ferrocene/k8s-arm64-large # 8-core
           test-variant: "2021"
           requires:

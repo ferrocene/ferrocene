@@ -459,7 +459,7 @@ jobs:
       - ferrocene-ci
 
   aarch64-linux-rhivos2-test-container:
-    executor: aarch64-build-docker-rhivos2-test-server
+    executor: docker-aarch64-ubuntu-20-rhivos2-test-server
     parameters:
       job:
         type: string

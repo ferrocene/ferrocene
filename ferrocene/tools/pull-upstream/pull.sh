@@ -308,6 +308,7 @@ then
         # - prints the file name (last column of the output of `git status --porcelain=v2`)
         files=$(git status --porcelain=v2 | awk '$1 == "u" && $2 != "UD" {print $NF}')
 
+        git diff --name-only | xargs sed -i "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
         git add .
 
         # Setting the editor to `true` prevents the actual editor from being open,

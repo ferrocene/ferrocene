@@ -60,3 +60,7 @@ Performing System Calls
 
 Refer to the User Manual - :doc:`user-manual:rustc/system-calls`.
 
+Building and using procedural macros
+------------------------------------
+
+Refer to the User Manual - :doc:`user-manual:rustc/proc-macro`.

@@ -11,31 +11,22 @@ Compliance with subset
 
 To prove compliance with the subset, follow these steps:
 
-1. Ensure that your code successfully compiles with your qualified compilation target.
-2. Ensure that it also compiles with the subset equivalent listed in the table below.
+1. Enable the lint at the root of each relevant crate: ``#![warn(ferrocene::unvalidated)]``
+2. Compile the code with `-D warnings` enabled.
 3. If it succeeds, your code is compliant with the subset.
 4. If it fails, do one of the following:
 
-   - Remove the non-compliant function and rewrite the code to maintain the semantics.
-   - Contact Ferrous Systems to discuss the option of adding your desired function to the certified subset.
-   - Keep using the function, but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`.
+   - If the unvalidated function is in your own crate, add ``#[ferrocene::prevalidated]``
+     above it.
 
-.. list-table::
-   :align: left
-   :header-rows: 1
+   - If the unvalidated function is in ``core``, contact Ferrous Systems to discuss the option of adding your desired function to the certified subset.
 
-   * - Compilation target
-     - Subset equivalent
-   * - | ``aarch64-unknown-none``
-       | ``aarch64-unknown-nto-qnx710``
-     - ``aarch64-unknown-ferrocene.subset``
-   * - ``thumbv7em-none-eabi``
-     - ``thumbv7em-ferrocene.subset-eabi``
-   * - ``thumbv7em-none-eabihf``
-     - ``thumbv7em-ferrocene.subset-eabihf``
-   * - | ``x86_64-unknown-linux-gnu``
-       | ``x86_64-pc-nto-qnx710``
-     - ``x86_64-unknown-ferrocene.subset``
+   - Remove the call to the non-compliant function and rewrite the code to maintain the semantics.
+
+   - Keep using the function, but prove safety yourself. See :ref:`core/subset:Use uncertified core functions`. Once you have proven the safety of the call, add ``#[allow(ferrocene::unvalidated)]`` directly above the call.
+
+See :ref:`scope:Qualification scope` for a list of targets which have a pre-certified core
+library subset.
 
 Use uncertified core functions
 ------------------------------

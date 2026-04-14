@@ -1289,7 +1289,7 @@ workflows:
             - build-docker-rhivos2-test-server-aarch64
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
-          job: test:compiletest
+          job: qnx:compiletest-no-only-hosts
           resource-class: ferrocene/k8s-arm64-large # 8-core
           test-variant: "2021"
           requires:

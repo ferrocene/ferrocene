@@ -255,6 +255,7 @@ fn sample_config() -> Config {
         override_codegen_backend: Default::default(),
         parallel_frontend_threads: Default::default(),
         iteration_count: Default::default(),
+        verbose_run_make_subprocess_output: Default::default(),
     }
 }
 

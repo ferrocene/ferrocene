@@ -63,10 +63,6 @@ fn check_sve2_includes_neon() {
     assert!(cfg!(target_feature = "sve2"));
 }
 
-<<<<<<< HEAD
-// ferrocene-annotations: um_rustc_C_target_feature
-||||||| dd82fd2034e
-=======
 //[hexagon-v60]~? WARN unstable feature specified for `-Ctarget-feature`: `v60`
 //[hexagon-v68]~? WARN unstable feature specified for `-Ctarget-feature`: `v68`
 //[hexagon-hvxv66]~? WARN unstable feature specified for `-Ctarget-feature`: `hvxv66`
@@ -102,4 +98,5 @@ fn check_hvxv66_implies_hvx_and_zreg() {
     assert!(cfg!(target_feature = "zreg"));
     assert!(cfg!(not(target_feature = "hvxv67")));
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_target_feature

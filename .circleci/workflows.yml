@@ -928,10 +928,6 @@ jobs:
     docker:
       - image: cimg/base:current
     resource_class: arm.medium # 2-core
-    parameters:
-      workflow-id:
-        description: The tag of the image that needs to be build
-        type: string
     steps:
       - aws-cli/install
       - aws-oidc-auth
@@ -945,12 +941,21 @@ jobs:
       - run:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      # We can't use an env var to set an env var, so we need to use an extra run step see 
+      # https://circleci.com/docs/guides/security/set-environment-variable/#set-an-environment-variable-in-a-shell-command
+      - run:
+          name: Set IMAGE_TAG for the docker image
+          command: |
+            # Note: We explicity want to have env substitution here
+            echo export IMAGE_TAG="rhel-testserver-arm-10.1.${CIRCLE_BUILD_NUM}" >> "$BASH_ENV"
+            source "$BASH_ENV"
+            env | grep IMAGE_TAG
       - run:
           name: Build and upload the Docker image
           command: ferrocene/ci/scripts/build-and-push-docker-image.sh
           environment:
             IMAGE_NAME: rhel-testserver-10.1
-            IMAGE_TAG: rhel-testserver-arm-10.1.<< parameters.workflow-id >>
+            #IMAGE_TAG: is set in the preceeding step
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1375,7 +1380,6 @@ workflows:
           requires:
             - aarch64-linux-build
       - build-docker-rhel-testserver:
-          workflow-id: $CIRCLE_BUILD_NUM
           requires:
             - aarch64-linux-build
       - aarch64-linux-generic-test-container:
@@ -1891,7 +1895,7 @@ executors:
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
       - name: rhel-testserver
-        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.$CIRCLE_BUILD_NUM
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhel-testserver-arm-10.1.${CIRCLE_BUILD_NUM}
         command:
           - "/bin/remote-testserver"
           - "-v"

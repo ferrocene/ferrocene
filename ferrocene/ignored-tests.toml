@@ -134,10 +134,3 @@ tests = [
 ]
 targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade"]
 reason = "This errata does not affect Armv8-R AArch64 processors"
-
-[["tests/run-make"]]
-tests = [
-    "tests/run-make/fix-cortex-a53-843419"
-]
-targets = ["aarch64-rhivos2-linux-gnu"]
-reason = "This test does not work on Linux targets and is under investigation."

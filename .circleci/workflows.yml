@@ -85,7 +85,11 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
-  workflow-id:
+  # This is a stable workflow id that doesn't change on rerun
+  #
+  # In practice, we take the setup workflow id, because its convenient, but any random id would work
+  # The stable workflow id is used to identify intermediary container used by this workflow.
+  stable-workflow-id:
     type: string
     default: ""
 

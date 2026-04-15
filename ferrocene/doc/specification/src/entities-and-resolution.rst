@@ -1164,8 +1164,6 @@ The following is a selective import. The imported functions are
    use outer_module::inner_module
        {crate_visible_function, visible_function}
 
-.. rubric:: Legality Rules
-
 .. _fls_ydmnb7qnmzzq:
 
 Shadowing

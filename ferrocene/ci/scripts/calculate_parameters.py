@@ -228,7 +228,7 @@ def prepare_parameters():
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
         "targets--": calculate_targets,
-        "workflow-id": workflow_id,
+        "stable-workflow-id": workflow_id,
     }
 
     parameters: dict[str, str] = {}

@@ -87,8 +87,15 @@ parameters:
     default: ""
   # This is a stable workflow id that doesn't change on rerun
   #
-  # In practice, we take the setup workflow id, because its convenient, but any random id would work
-  # The stable workflow id is used to identify intermediary container used by this workflow.
+  # The stable workflow id is used to identify intermediary containers used by this workflow.
+  #
+  # We can't key off the commit because we want to rebuild the test-runner image if the underlying
+  # base image is updated.
+  #
+  # We can't key off CirlceCIs workflow ID because it will change if someone uses any of the rerun
+  # options, for example "rerun with SSH", causing any step that uses an intermediary image to fail.
+  #
+  # Instead we take the setup workflow id because it's convenient, but any random id would work.
   stable-workflow-id:
     type: string
     default: ""

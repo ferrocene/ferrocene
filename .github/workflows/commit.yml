@@ -113,7 +113,7 @@ jobs:
     # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idif
     # https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#startswith
     # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context
-    if: startsWith(github.head_ref, 'automation/pull-upstream-HEAD/')
+    if: startsWith(github.head_ref, 'automation/pull-upstream-')
     steps:
       - name: Checkout
         uses: actions/checkout@v4

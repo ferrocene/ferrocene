@@ -1716,6 +1716,46 @@ executors:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
+  # This executor spins up a secondary container with the remote testserver running in a RHIVOS2 image
+  # The image is built specifically for this run.
+  docker-aarch64-ubuntu-20-rhivos2-test-server:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+      - name: rhivos-test-server
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+        command:
+          - "/bin/test-server/aarch64-rhivos2-linux-gnu/remote-test-server"
+          - "-v"
+          - "--bind"
+          - "127.0.0.1:12345"
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+  # This executor spins up a secondary container with the remote testserver running in a RHEL 10.1 image
+  # The image is built specifically for this run.
+  docker-aarch64-ubuntu-20-rhel-10-1-test-server:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+      - name: rhel-test-server
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
+        command:
+          - "/bin/test-server/aarch64-unknown-linux-gnu/remote-test-server"
+          - "-v"
+          - "--bind"
+          - "127.0.0.1:12345"
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-x86_64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>

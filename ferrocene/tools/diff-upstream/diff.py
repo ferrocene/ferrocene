@@ -172,9 +172,12 @@ IGNORED_ADDITIONS = [
     ".dockerignore",
     ".python-version",
     "bors.toml",
-    "src/bootstrap/defaults/bootstrap.ferrocene-dist.toml",
-    "src/bootstrap/src/core/config/toml/ferrocene.rs",
-    "src/tools/compiletest/src/ferrocene_annotations.rs",
+]
+IGNORED_ADDITIONS_DIRS = [
+    ".github",
+    ".circleci",
+    "compiler/rustc_target/src/spec/targets",
+    "tests/run-make/symbol-report",
 ]
 
 for line in all_changed:
@@ -187,14 +190,12 @@ for line in all_changed:
             val = path
         case DiffKind.ADDED:
             path = rest.lstrip()
-            # Assume files in ferrocene/ directories are always ok
-            if (path.startswith("ferrocene/") or path.endswith("/ferrocene-annotations")
-                    or path.endswith('/ferrocene.rs' )
-                    or path.startswith('.github') or path.startswith(".circleci")
-                    or path.startswith("compiler/rustc_target/src/spec/targets/")
-                    or path.startswith("tests/run-make/symbol-report/")
-                    or '/ferrocene/' in path or '/ferrocene_test.rs' in path
-                    or path in IGNORED_ADDITIONS):
+            if (
+                # Assume files in ferrocene/ directories are always ok
+                "ferrocene" in path
+                or path in IGNORED_ADDITIONS
+                or any(path.startswith(dir) for dir in IGNORED_ADDITIONS_DIRS)
+            ):
                 continue
             val = path
         case DiffKind.MODIFIED:

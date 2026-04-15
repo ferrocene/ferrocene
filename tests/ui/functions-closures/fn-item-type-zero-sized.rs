@@ -13,7 +13,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_airvr79xkcag
-// Function Item Type
+// Function Item Types
 //
 // ferrocene-annotations: fls_g1z6bpyjqxkz
 // Type Layout

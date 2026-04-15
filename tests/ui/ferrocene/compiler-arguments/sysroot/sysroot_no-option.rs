@@ -1,12 +1,11 @@
+//~ ERROR can't find crate for `std`
+
 // Test when --sysroot set the path to a empty sysroot. sysroot should be the
 // current path.
 //
 //@ check-fail
-//@ ignore-cross-compile The error message is different when cross-compiling
-//@ compile-flags: --sysroot=
-//@ only-x86_64 Tested stderr is x86_64-linux-gnu specific
-//@ only-linux Tested stderr is x86_64-linux-gnu specific
-//~^^^^^^^^ ERROR can't find crate for `std`
+//@ needs-llvm-components: x86
+//@ compile-flags: --sysroot= --target=x86_64-unknown-linux-gnu
 
 fn main() {}
 

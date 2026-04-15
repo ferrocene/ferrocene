@@ -22,15 +22,23 @@ from more_itertools import peekable
 from automations_common import cmd_capture
 
 had_error = False
+
+
 def error(msg):
-    print('error:', msg)
+    print("error:", msg)
     global had_error
     had_error = True
 
-parser = argparse.ArgumentParser(prog='diff-upstream', description="Diff Ferrocene from upstream Rust project")
-parser.add_argument('--hide-diff', action='store_true', help="Only test "
-                    "ferrocene-annotations; don't run the diff. Implies --test.")
-parser.add_argument('--test', action='store_true', help="Test ferrocene-annotations")
+
+parser = argparse.ArgumentParser(
+    prog="diff-upstream", description="Diff Ferrocene from upstream Rust project"
+)
+parser.add_argument(
+    "--hide-diff",
+    action="store_true",
+    help="Only test " "ferrocene-annotations; don't run the diff. Implies --test.",
+)
+parser.add_argument("--test", action="store_true", help="Test ferrocene-annotations")
 args = parser.parse_args()
 
 if args.hide_diff:
@@ -38,17 +46,19 @@ if args.hide_diff:
 
 #### Diff all test annotations. ####
 
+
 class DiffKind:
-    ADDED = 'A'
-    MODIFIED = 'M'
-    DELETED = 'D'
-    RENAMED = 'R'
+    ADDED = "A"
+    MODIFIED = "M"
+    DELETED = "D"
+    RENAMED = "R"
+
 
 DIFF_NAMES = {
-        DiffKind.ADDED: 'added',
-        DiffKind.MODIFIED: 'modified',
-        DiffKind.DELETED: 'deleted',
-        DiffKind.RENAMED: 'renamed',
+    DiffKind.ADDED: "added",
+    DiffKind.MODIFIED: "modified",
+    DiffKind.DELETED: "deleted",
+    DiffKind.RENAMED: "renamed",
 }
 
 base_commit = cmd_capture("git log -n1 --author=bors@rust-lang.org --pretty=%H".split())
@@ -63,7 +73,7 @@ test_changemap = {}
 missing_annotations = {}
 annotations = {}
 
-Span = namedtuple('Span', ['file', 'line'])
+Span = namedtuple("Span", ["file", "line"])
 
 for line in test_changes:
     if line.startswith("diff --git"):
@@ -79,69 +89,77 @@ for line in test_changes:
 
     lineno += 1
     kind, change = line[0], line[1:]
-    if (not change or change == '//'
-            or change.startswith('//@ ignore-ferrocene.facade')):
+    if not change or change == "//" or change.startswith("//@ ignore-ferrocene.facade"):
         continue
 
-    if re.search(r'^\s*// ferrocene-annotations: ', change):
+    if re.search(r"^\s*// ferrocene-annotations: ", change):
         span = Span(file, lineno)
-        id = next(reversed(change.split(' ')))
-        if id.startswith('um_rustc'):
-            annotations[id] = span, ''
+        id = next(reversed(change.split(" ")))
+        if id.startswith("um_rustc"):
+            annotations[id] = span, ""
             continue
         # Next line is the section name it corresponds to.
         section = test_changes.peek()
-        if not section.startswith('+// '):
+        if not section.startswith("+// "):
             missing_annotations[span] = id
         else:
-            annotations[id] = span, section.split(' ', 1)[1]
+            annotations[id] = span, section.split(" ", 1)[1]
             next(test_changes)  # discard section
         continue
 
     changes.append([kind, change])
 
 if missing_annotations:
-    error(f'found {len(missing_annotations)} ferrocene-annotations not followed by section name!')
+    error(
+        f"found {len(missing_annotations)} ferrocene-annotations not followed by section name!"
+    )
     for span, annotation in missing_annotations.items():
-        print('%s:%d' % span, annotation)
+        print("%s:%d" % span, annotation)
+
 
 # load all section titles
 def load_sections(fd, sections):
     for line in fd:
-        if line.startswith('.. _fls'):
+        if line.startswith(".. _fls"):
             # Get id, truncating trailing colon.
-            id = line.strip().split('.. _', 1)[1][:-1]
+            id = line.strip().split(".. _", 1)[1][:-1]
             n = next(fd)
-            assert n.strip() == '', n
-            sections[id.lower()] = next(fd).strip().replace('`', '')
+            assert n.strip() == "", n
+            sections[id.lower()] = next(fd).strip().replace("`", "")
+
 
 def validate_annotations():
     sections = {}
-    for dir, _subdirs, files in os.walk('ferrocene/doc/specification'):
+    for dir, _subdirs, files in os.walk("ferrocene/doc/specification"):
         for file in files:
-            if file.endswith('.rst'):
-                with open(dir + '/' + file) as fd:
+            if file.endswith(".rst"):
+                with open(dir + "/" + file) as fd:
                     load_sections(fd, sections)
 
     cli_ids = set()
-    matrix = 'build/host/doc/qualification/traceability-matrix.html'
+    matrix = "build/host/doc/qualification/traceability-matrix.html"
     try:
         with open(matrix) as fd:
             for line in fd:
                 if m := re.search(r'id="(um_rustc_[^"]*)"', line):
                     cli_ids.add(m.group(1))
     except FileNotFoundError:
-        exit(f"error: {matrix} not found. try running './x build traceaqbility-matrix'.")
+        exit(
+            f"error: {matrix} not found. try running './x build traceaqbility-matrix'."
+        )
 
     for id, (span, name) in annotations.items():
-        if id.startswith('um_rustc_'):
+        if id.startswith("um_rustc_"):
             if id not in cli_ids:
                 error("Unknown CLI spec id:", id)
         elif id not in sections:
             error(f"Unknown section '{id}'!")
         elif name.lower() != sections[id].lower():
-            error("Incorrect section name on %s:%d:" % span,
-                f"Expected '{sections[id]}', found '{name}'")
+            error(
+                "Incorrect section name on %s:%d:" % span,
+                f"Expected '{sections[id]}', found '{name}'",
+            )
+
 
 if args.test:
     print("Validating Ferrocene annotations against traceability matrix")
@@ -165,7 +183,9 @@ with open(root_dir / ".gitattributes") as fd:
 
 filterer = IgnoreFilterManager.build(path=root_dir, global_patterns=ignored)
 
-all_changed = cmd_capture(f"git -c color.ui=never diff {base_commit} --name-status".split()).splitlines()
+all_changed = cmd_capture(
+    f"git -c color.ui=never diff {base_commit} --name-status".split()
+).splitlines()
 changemap = defaultdict(list)
 
 IGNORED_ADDITIONS = [
@@ -210,22 +230,24 @@ for line in all_changed:
     changemap[kind].append(val)
 
 
-for kind in ['A', 'D', 'R']:
+for kind in ["A", "D", "R"]:
     if changemap[kind]:
         print(f"\nPrinting all {DIFF_NAMES[kind]} files")
     for p in changemap[kind]:
-        print(f'{kind}\t{p}')
+        print(f"{kind}\t{p}")
 
 print("\nPrinting all changed tests")
 for f, changes in test_changemap.items():
     print(f)
-    print('\n'.join(kind + change for kind, change in changes))
+    print("\n".join(kind + change for kind, change in changes))
 
-print(fr"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'")
+print(
+    rf"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- ':!tests/' ':!.github' ':!**/.github/**' ':!ferrocene'"
+)
 
-for p in changemap['M']:
-    if p.startswith('tests/'):
+for p in changemap["M"]:
+    if p.startswith("tests/"):
         continue
-    print(f'M\t{p}')
+    print(f"M\t{p}")
 
 exit(had_error)

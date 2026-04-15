@@ -33,6 +33,7 @@ target_has_atomic_load_store="ptr"
 target_has_reliable_f128
 target_has_reliable_f16
 target_has_reliable_f16_math
+target_object_format="elf"
 target_os="linux"
 target_pointer_width="64"
 target_thread_local

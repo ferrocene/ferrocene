@@ -20,7 +20,6 @@ import datetime
 import hashlib
 import json
 import os
-import subprocess
 import sys
 import urllib.parse
 import yaml
@@ -83,18 +82,30 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
 ]
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
-X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
-X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS_ALL
-AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + GENERIC_BUILD_STD_TARGETS
+X86_64_LINUX_BUILD_STD_TARGETS_ALL = (
+    X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+)
+X86_64_LINUX_SELF_TEST_TARGETS = (
+    X86_64_LINUX_BUILD_HOSTS
+    + AARCH64_LINUX_BUILD_HOSTS
+    + X86_64_LINUX_BUILD_STD_TARGETS_ALL
+)
+AARCH64_LINUX_SELF_TEST_TARGETS = (
+    X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS
+)
 
 # Targets only built (and tested!) on Mac
 AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
 AARCH64_MAC_BUILD_STD_TARGETS = []
-AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
+AARCH64_MAC_SELF_TEST_TARGETS = (
+    AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
+)
 
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_WINDOWS_SELF_TEST_TARGETS = (
+    X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+)
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -187,16 +198,22 @@ def calculate_targets(host_plus_stage: str):
             case "x86_64-unknown-linux-gnu":
                 targets = X86_64_LINUX_BUILD_HOSTS
             case "aarch64-apple-darwin":
-                targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
+                targets = (
+                    AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS
+                )  # We don't currently produce x86_64 Apple host tools, but we will one day
             case "x86_64-pc-windows-msvc":
                 targets = X86_64_WINDOWS_BUILD_HOSTS
             case _:
-                raise Exception(f"Host {host} not supported at this time, please add support")
+                raise Exception(
+                    f"Host {host} not supported at this time, please add support"
+                )
     elif stage == "std":
         if host == "x86_64-unknown-linux-gnu":
             targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
         else:
-            raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
+            raise Exception(
+                "Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage."
+            )
     elif stage == "self-test":
         match host:
             case "aarch64-unknown-linux-gnu":
@@ -208,7 +225,9 @@ def calculate_targets(host_plus_stage: str):
             case "x86_64-pc-windows-msvc":
                 targets = X86_64_WINDOWS_SELF_TEST_TARGETS
             case _:
-                raise Exception(f"Host {host} not supported at this time, please add support")
+                raise Exception(
+                    f"Host {host} not supported at this time, please add support"
+                )
     else:
         raise Exception(f"Stage {stage} not known, please add support")
 

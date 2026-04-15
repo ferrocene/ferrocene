@@ -25,19 +25,26 @@ ORIGIN = "origin"
 #                   #
 #####################
 
+
 # These log to stderr to avoid interleaving output between stdout and stderr.
 def log(*args, **kwargs):
     print("info:", *args, file=sys.stderr, **kwargs)
+
+
 def warn(*args, **kwargs):
     print("warning:", *args, file=sys.stderr, **kwargs)
+
+
 def err(*args, **kwargs):
     print("error:", *args, file=sys.stderr, **kwargs)
+
 
 def pretty_print_cmd(*args, **kwargs):
     if isinstance(args[0], list):
         args = args[0]
     # TODO: make this prettier
     return '"' + '" "'.join([str(a) for a in args]) + '"'
+
 
 def cmd(*args, dry_run=False, **kwargs):
     """
@@ -50,6 +57,7 @@ def cmd(*args, dry_run=False, **kwargs):
     else:
         log(f"run cmd: {c}")
         return subprocess.run(*args, **kwargs)
+
 
 def cmd_capture(*args, **kwargs):
     """
@@ -73,6 +81,7 @@ def cmd_capture(*args, **kwargs):
 #                   #
 #####################
 
+
 class AutomationResult(enum.Enum):
     SUCCESS = 1
     FAILURE = 2
@@ -83,6 +92,7 @@ class AutomatedPR(abc.ABC):
     # backcompat to avoid runtime errors
     def cmd(self, *args, **kwargs):
         return cmd(*args, **kwargs)
+
     def cmd_capture(self, *args, **kwargs):
         return cmd_capture(*args, **kwargs)
 
@@ -132,7 +142,7 @@ class AutomatedPR(abc.ABC):
         elif result == AutomationResult.FAILURE:
             self.on_failure(existing_conflict_issue)
         else:
-            assert(result == AutomationResult.NO_CHANGES)
+            assert result == AutomationResult.NO_CHANGES
 
         # Reset the commit at the state it was before the automation ran.
         # Otherwise, if multiple automations are executed in the same job,
@@ -171,7 +181,9 @@ class AutomatedPR(abc.ABC):
         # Close the "there is a conflict" if it's still open
         if existing_conflict_issue is not None:
             if self.dry_run:
-                log(f"dry_run: not closing existing issue {existing_conflict_issue['url']}")
+                log(
+                    f"dry_run: not closing existing issue {existing_conflict_issue['url']}"
+                )
             else:
                 self.http.post(
                     existing_conflict_issue["comments_url"],

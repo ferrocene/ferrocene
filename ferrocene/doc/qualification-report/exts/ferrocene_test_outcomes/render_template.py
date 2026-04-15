@@ -4,7 +4,6 @@
 from docutils import nodes
 from docutils.statemachine import StringList
 from sphinx.directives import SphinxDirective
-from sphinx.transforms import SphinxTransform
 import os
 import docutils
 import jinja2
@@ -38,13 +37,19 @@ class RenderOutcomesTemplate(SphinxDirective):
         )
 
         # Can be None if test outcomes were not injected.
-        outcomes = self.env.ferrocene_test_outcomes.platform(
-            tested_target,
-        ) if self.env.ferrocene_test_outcomes is not None else None
+        outcomes = (
+            self.env.ferrocene_test_outcomes.platform(
+                tested_target,
+            )
+            if self.env.ferrocene_test_outcomes is not None
+            else None
+        )
 
         if outcomes and len(outcomes.invocations):
             host = outcomes.invocations[0].host
-            assert all(inv.host == host for inv in outcomes.invocations), "Don't know how to display multiple hosts"
+            assert all(
+                inv.host == host for inv in outcomes.invocations
+            ), "Don't know how to display multiple hosts"
         else:
             host = os.environ["FERROCENE_DEFAULT_HOST"]
 
@@ -60,7 +65,9 @@ class RenderOutcomesTemplate(SphinxDirective):
             {
                 "host": host,
                 "target": self.options["target"],
-                "upcoming": self.options["upcoming"] if "upcoming" in self.options else None,
+                "upcoming": self.options["upcoming"]
+                if "upcoming" in self.options
+                else None,
                 "bare_metal_test_target": self.options.get("bare_metal_test_target"),
                 "remote_testing": "remote_testing" in self.options,
                 "platform_outcomes": outcomes,

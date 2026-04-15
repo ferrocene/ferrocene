@@ -65,7 +65,7 @@ class SignatureStatus:
         try:
             uuid = self.private_files[name]
         except KeyError:
-            raise FileNotFoundError(f"private signature file {name}")
+            raise FileNotFoundError(f"private signature file {name}") from None
         path = f"{self.app.config.ferrocene_private_signature_files_dir}/{uuid}"
         if copy:
             self.copiable_files[name] = path

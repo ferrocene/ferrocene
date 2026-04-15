@@ -342,6 +342,9 @@ fn test_apple(target: &str) {
 
             // FIXME(macos): The size is changed in recent macOSes.
             "malloc_introspection_t" if x86_64 => true,
+
+            // FIXME(macos): The size is changed in macOS 26.
+            "vm_statistics64" => true,
             _ => false,
         }
     });
@@ -358,6 +361,21 @@ fn test_apple(target: &str) {
             // https://github.com/apple-oss-distributions/xnu/commit/e6231be02a03711ca404e5121a151b24afbff733
             "TIOCREMOTE" => true,
 
+            // FIXME(macos): bumped up on macOS 26
+            // https://github.com/apple-oss-distributions/xnu/commit/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea
+            "ELAST" => true,
+
+            // FIXME(macos): bumped up on macOS 26, it's sizeof `vm_statistics64_data_t`
+            "HOST_VM_INFO64_COUNT" => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.skip_alias(move |ty| {
+        match ty.ident() {
+            // FIXME(macos): The size is changed in macOS 26.
+            "vm_statistics64_data_t" => true,
             _ => false,
         }
     });
@@ -2875,6 +2893,9 @@ fn test_freebsd(target: &str) {
             // Added in FreeBSD 15
             "AT_HWCAP3" | "AT_HWCAP4" if Some(15) > freebsd_ver => true,
 
+            // Added in FreeBSD 15
+            "DTYPE_INOTIFY" | "DTYPE_JAILDESC" if Some(15) > freebsd_ver => true,
+
             _ => false,
         }
     });
@@ -3848,12 +3869,17 @@ fn test_linux(target: &str) {
     }
     let old_musl = musl && !musl_v1_2_3;
 
+    let b32 = arm || target.contains("hexagon") || mips32 || ppc32 || x86_32;
+
     let mut cfg = ctest_cfg();
     if (musl_v1_2_3 || loongarch64 || hexagon) && musl {
         cfg.cfg("musl_v1_2_3", None);
-        if arm || hexagon || ppc32 || x86_32 || mips32 {
+        if b32 {
             cfg.cfg("musl32_time64", None);
             cfg.cfg("linux_time_bits64", None);
+        }
+        if arm || ppc32 || x86_32 || mips32 {
+            cfg.cfg("musl_redir_time64", None);
         }
     }
     cfg.define("_GNU_SOURCE", None)
@@ -3997,8 +4023,9 @@ fn test_linux(target: &str) {
             "linux/can.h",
             "linux/can/bcm.h",
             "linux/can/error.h",
-            "linux/can/raw.h",
             "linux/can/j1939.h",
+            "linux/can/netlink.h",
+            "linux/can/raw.h",
             "linux/cn_proc.h",
             "linux/connector.h",
             "linux/dccp.h",
@@ -4295,6 +4322,10 @@ fn test_linux(target: &str) {
             // FIXME(musl): New fields in newer versions
             "utmpx" if !old_musl => true,
 
+            // FIXME(linux): Requires >= 6.16 kernel headers.
+            // On 64 bits the size did not change, skip only for 32 bits.
+            "ptrace_syscall_info" if pointer_width == 32 => true,
+
             _ => false,
         }
     });
@@ -4338,6 +4369,7 @@ fn test_linux(target: &str) {
                 || name.starts_with("STATX_")
                 || name.starts_with("SW_")
                 || name.starts_with("SYS_")
+                || name.starts_with("SYS3264_")
                 || name.starts_with("TCP_")
                 || name.starts_with("UINPUT_")
                 || name.starts_with("VMADDR_")
@@ -4662,6 +4694,7 @@ fn test_linux(target: &str) {
     });
 
     let c_enums = [
+        "can_state",
         "membarrier_cmd",
         "pid_type",
         "proc_cn_event",
@@ -4862,7 +4895,9 @@ fn test_linux(target: &str) {
                 true
             }
             // the `u` field is in fact an anonymous union
-            ("ptrace_syscall_info", "u" | "pad") if gnu => true,
+            ("ptrace_syscall_info", "u") if gnu => true,
+            // FIXME(linux): `flags` requires >= 6.16 kernel headers
+            ("ptrace_syscall_info", "flags") if gnu => true,
             // the vregs field is a `__uint128_t` C's type.
             ("user_fpsimd_struct", "vregs") => true,
             // Linux >= 5.11 tweaked the `svm_zero` field of the `sockaddr_vm` struct.

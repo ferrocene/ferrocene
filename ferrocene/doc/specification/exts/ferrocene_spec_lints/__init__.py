@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 import sphinx
-import typing
 from . import alphabetical_section_titles, require_paragraph_ids
 
 

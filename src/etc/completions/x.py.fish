@@ -425,6 +425,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand test" -l extra-checks -d 'comm
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l run -d 'whether to execute run-* tests' -r
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-specific-cortex-m4\t''}"
@@ -481,6 +482,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand t" -l extra-checks -d 'comma-s
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l compare-mode -d 'mode describing what file the actual ui output will be compared to' -r
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l pass -d 'force {check,build,run}-pass tests to this mode' -r
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l run -d 'whether to execute run-* tests' -r
+complete -c x.py -n "__fish_x.py_using_subcommand t" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-specific-cortex-m4\t''}"

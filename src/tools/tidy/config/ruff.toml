@@ -51,4 +51,11 @@ ignore = [
     "E501", # line-too-long
     "F403", # undefined-local-with-import-star
     "F405", # undefined-local-with-import-star-usage
+
+    # Ferrocene addition: We use `uv run` as our shebang, not `python`.
+    # We test it through ferrocene/ci/scripts/require-uv-shebang.py, not here.
+    "EXE003",
+    # Ferrocene addition.
+    # 'Use isinstance instead of comparing types'. Too many false positives.
+    "E721",
 ]

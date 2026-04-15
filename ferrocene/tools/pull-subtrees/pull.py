@@ -37,9 +37,11 @@ import yaml
 class PullLatestTag:
     pass
 
+
 @dataclass
 class PullTag:
     name: str
+
 
 @dataclass
 class PullBranch:
@@ -149,9 +151,9 @@ def fetch_latest_commit(subtree):
         else:
             raise RuntimeError(f"no suitable tags found in {subtree.repo}")
     elif isinstance(subtree.pull, PullBranch):
-        ref = 'refs/heads/' + subtree.pull.name
+        ref = "refs/heads/" + subtree.pull.name
     elif isinstance(subtree.pull, PullTag):
-        ref = 'refs/tags/' + subtree.pull.name
+        ref = "refs/tags/" + subtree.pull.name
     else:
         raise RuntimeError(f"unknown subtree.pull: {subtree.pull}")
 
@@ -303,17 +305,21 @@ def update_subtree(repo_root, subtree):
                 path = None
                 who = None
                 if line.startswith("DU"):
-                    line.split(' ', 1)[1].strip()
-                    who = 'in Ferrocene'
+                    line.split(" ", 1)[1].strip()
+                    who = "in Ferrocene"
                 elif line.startswith("UD"):
-                    path = line.split(' ', 1)[1].strip()
-                    who = 'upstream'
+                    path = line.split(" ", 1)[1].strip()
+                    who = "upstream"
                 if path:
-                    header = "<<<PULL-UPSTREAM>>> file deleted " + who + "; move the Ferrocene annotations if any, and delete this file"
-                    with open(path, 'r') as original:
+                    header = (
+                        "<<<PULL-UPSTREAM>>> file deleted "
+                        + who
+                        + "; move the Ferrocene annotations if any, and delete this file"
+                    )
+                    with open(path, "r") as original:
                         data = original.read()
-                    with open(path, 'w') as modified:
-                        modified.write(header + '\n' + data)
+                    with open(path, "w") as modified:
+                        modified.write(header + "\n" + data)
 
             run(["git", "add", "."], cwd=subtree.path)
 
@@ -507,10 +513,18 @@ local branch to GitHub and open a PR for it.
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action='store_true', help="run git commands and fetch from GitHub API, but do not open PRs or make comments")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="run git commands and fetch from GitHub API, but do not open PRs or make comments",
+    )
     exclusive = parser.add_mutually_exclusive_group()
-    exclusive.add_argument("--automation-for-branch", help="run the automation for the provided branch")
-    exclusive.add_argument("subtree_repo", help="the subtree to pull", default=None, nargs="?")
+    exclusive.add_argument(
+        "--automation-for-branch", help="run the automation for the provided branch"
+    )
+    exclusive.add_argument(
+        "subtree_repo", help="the subtree to pull", default=None, nargs="?"
+    )
     args = parser.parse_args()
 
     config_file = Path(__file__).parent / "subtrees.yml"
@@ -522,7 +536,9 @@ if __name__ == "__main__":
         for subtree in subtrees:
             if args.automation_for_branch not in subtree.into:
                 continue
-            PullSubtreePR(subtree, args.automation_for_branch).create(dry_run=args.dry_run)
+            PullSubtreePR(subtree, args.automation_for_branch).create(
+                dry_run=args.dry_run
+            )
     # We can use an `elif` here because automation_for_branch and subtree_repo are mutually exclusive
     elif args.subtree_repo is not None:
         subtree = None

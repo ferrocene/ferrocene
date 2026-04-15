@@ -12,8 +12,9 @@ import os
 import shutil
 import logging
 
+
 def parse_s3_url(s3_url):
-    assert(s3_url.startswith("s3://"))
+    assert s3_url.startswith("s3://")
     [bucket, key] = s3_url.split("//")[1].split("/", 1)
     return [bucket, key]
 
@@ -59,9 +60,13 @@ def store(path, in_dir):
     with tempfile.NamedTemporaryFile(delete=False) as temporary_file:
         with zstd_compressor.stream_writer(temporary_file) as zstd_stream:
             logging.info(f"Began compression to `{temporary_file.name}`...")
-            with tarfile.TarFile.open(mode='w|', dereference=True, fileobj=zstd_stream) as tarball:
+            with tarfile.TarFile.open(
+                mode="w|", dereference=True, fileobj=zstd_stream
+            ) as tarball:
                 logging.info(f"Began archiving `{in_dir}`...")
-                tarball.add(in_dir, recursive=True) # Always do relative to the directory passed.
+                tarball.add(
+                    in_dir, recursive=True
+                )  # Always do relative to the directory passed.
                 tarball.close()
             zstd_stream.flush()
             zstd_stream.close()
@@ -71,7 +76,7 @@ def store(path, in_dir):
         if path.startswith("s3://"):
             [bucket, key] = parse_s3_url(path)
             logging.info(f"Beginning upload of `{temporary_file.name}` to `{path}`...")
-            s3 = boto3.client('s3')
+            s3 = boto3.client("s3")
             s3.upload_file(temporary_file.name, bucket, key)
             logging.info(f"Done upload to `{path}`.")
 

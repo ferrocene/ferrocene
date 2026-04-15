@@ -9,7 +9,6 @@ from typing import Optional
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-import docutils
 
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
@@ -101,7 +100,10 @@ class OptionDirective(ObjectDescription):
 
     def transform_content(self, content_node):
         category = None
-        if self._program_storage().qualified and self.options["category"] in ALLOWED_CATEGORIES:
+        if (
+            self._program_storage().qualified
+            and self.options["category"] in ALLOWED_CATEGORIES
+        ):
             category = self.options["category"]
 
         if category == "unqualified":

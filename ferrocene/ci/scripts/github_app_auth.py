@@ -80,7 +80,7 @@ def set_git_credentials(origin, token):
 
 
 def mask_secret(value):
-    if "GITHUB_ACTIONS" in os.environ and os.environ["GITHUB_ACTIONS"] == True:
+    if os.environ.get("GITHUB_ACTIONS"):
         print(f"::add-mask::{value}")
 
 

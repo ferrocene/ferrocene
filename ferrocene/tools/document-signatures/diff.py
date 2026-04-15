@@ -25,6 +25,7 @@ GITHUB_REPO = "ferrocene/ferrocene"
 BORS_USER_ID = 87868125
 DOCS_COMPONENTS = ["ferrocene-docs", "ferrocene-docs-signatures"]
 
+
 @dataclass
 class BorsCommit:
     hash: str
@@ -62,15 +63,20 @@ def diff_bors_artifact(pr_number: int):
     eprint(f"path to the diff: {diff_path}")
     eprint()
 
+
 def get_last_bors_build(pr: int, github: requests.Session) -> BorsCommit:
-    commits = list(commit for commit in get_bors_commits(pr, github) if pr in commit.prs)
+    commits = list(
+        commit for commit in get_bors_commits(pr, github) if pr in commit.prs
+    )
     if not commits:
         eprint(f"could not find any bors merge commit (try or auto) for PR #{pr}")
         exit(1)
     return commits[-1]
 
 
-def get_bors_commits(pr: int, github: requests.Session) -> Generator[BorsCommit, None, None]:
+def get_bors_commits(
+    pr: int, github: requests.Session
+) -> Generator[BorsCommit, None, None]:
     for event in get_pr_timeline(pr, github):
         if event["event"] != "referenced":
             continue
@@ -86,8 +92,10 @@ def get_bors_commits(pr: int, github: requests.Session) -> Generator[BorsCommit,
         if parsed:
             yield parsed
         else:
-            eprint("failed to parse bors commit message:",
-                   commit.json()["commit"]["message"])
+            eprint(
+                "failed to parse bors commit message:",
+                commit.json()["commit"]["message"],
+            )
 
 
 def get_pr_timeline(pr: int, github: requests.Session) -> Generator[Any, None, None]:
@@ -148,7 +156,9 @@ def download_docs(commit: str, github: requests.Session) -> Path:
     return tempdir
 
 
-def ferrocene_tarball_name(commit: str, component: str, github: requests.Session) -> str:
+def ferrocene_tarball_name(
+    commit: str, component: str, github: requests.Session
+) -> str:
     channel = file_for_commit(commit, "ferrocene/ci/channel", github).strip()
     if channel == "stable":
         version = file_for_commit(commit, "ferrocene/version", github).strip()
@@ -202,31 +212,35 @@ def find_sphinx_books(path: Path, *, root=None) -> Generator[Path, None, None]:
 
 ### Local diffs
 
+
 def diff_local_tarball(document_name: str):
     # Signed docs
     dir = Path("build/host/signature-diffs")
-    tarball = dir/(document_name+"-stable-archive.tar.gz")
-    extracted_dir = dir/document_name
+    tarball = dir / (document_name + "-stable-archive.tar.gz")
+    extracted_dir = dir / document_name
     extracted_dir.mkdir(parents=True, exist_ok=True)
     subprocess.run(["tar", "-xf", tarball, "-C", extracted_dir], check=True)
 
     # Local docs
     # build_all_docs()
 
-    built_dir = Path("build/host/doc/qualification")/document_name
+    built_dir = Path("build/host/doc/qualification") / document_name
 
     eprint("comparing", extracted_dir, "to", built_dir)
-    subprocess.run([
-        "diff",
-        "--unified",
-        "--recursive",
-        extracted_dir,
-        built_dir,
-        "--exclude=signature",
-    ])
+    subprocess.run(
+        [
+            "diff",
+            "--unified",
+            "--recursive",
+            extracted_dir,
+            built_dir,
+            "--exclude=signature",
+        ]
+    )
 
 
 ### Helpers
+
 
 def handle_github_api_error(response: requests.Response):
     if response.status_code >= 400:
@@ -242,7 +256,7 @@ def eprint(*args, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    subcommands = parser.add_subparsers(dest='cmd')
+    subcommands = parser.add_subparsers(dest="cmd")
     subcommands.required = True
 
     local = subcommands.add_parser("local")
@@ -254,7 +268,7 @@ if __name__ == "__main__":
     bors.set_defaults(func=diff_bors_artifact)
 
     args = parser.parse_args()
-    if args.cmd == 'local':
+    if args.cmd == "local":
         diff_local_tarball(args.document_name)
     else:
         diff_bors_artifact(args.pr_number)

@@ -3,6 +3,7 @@
 
 from docutils import nodes
 
+
 class RenderTable:
     def __init__(self, columns, *, title=None):
         # Apparently the order in which elements are created matters :/

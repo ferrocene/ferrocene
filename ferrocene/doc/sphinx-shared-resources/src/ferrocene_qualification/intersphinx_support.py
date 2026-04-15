@@ -8,11 +8,7 @@
 #
 # It also enables intersphinx by default.
 
-from sphinx.builders import Builder
-from sphinx.builders.html import StandaloneHTMLBuilder
 import json
-import sphinx
-import sphinx.ext.intersphinx
 
 
 def inject_intersphinx_mappings(app, config):

@@ -36,7 +36,7 @@ jobs:
     name: Clippy on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2025]
+        os: [ubuntu-24.04, macos-26, windows-2025]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -53,7 +53,7 @@ jobs:
     name: Verify build
     strategy:
       matrix:
-        toolchain: [stable, 1.63.0]
+        toolchain: [stable, 1.65.0]
         include:
           # Nightly has a lot of targets, so split it in half
           - toolchain: nightly
@@ -63,7 +63,7 @@ jobs:
           - toolchain: beta
             only: '(aarch64|x86_64)' # just a spot check for beta
           - toolchain: stable
-          - toolchain: 1.63.0 # msrv
+          - toolchain: 1.65.0 # msrv
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
@@ -94,7 +94,7 @@ jobs:
         run: |
           set -eux
           # Remove `-Dwarnings` at the MSRV since lints may be different
-          [ "${{ matrix.toolchain }}" = "1.63.0" ] && export RUSTFLAGS=""
+          [ "${{ matrix.toolchain }}" = "1.65.0" ] && export RUSTFLAGS=""
           python3 ci/verify-build.py \
             --toolchain "$TOOLCHAIN" \
             ${BASELINE_CRATE_DIR:+"--baseline-crate-dir" "$BASELINE_CRATE_DIR"} \
@@ -109,20 +109,18 @@ jobs:
       matrix:
         include:
           - target: aarch64-apple-darwin
-            os: macos-15
+            os: macos-26
           - target: aarch64-pc-windows-msvc
             os: windows-11-arm
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
-          # FIXME: It currently causes segfaults.
-          #- target: i686-pc-windows-gnu
-          #  env: { ARCH_BITS: 32, ARCH: i686 }
+          - target: i686-pc-windows-gnu
+            os: windows-2025
           - target: i686-pc-windows-msvc
             os: windows-2025
           - target: i686-unknown-linux-gnu
           - target: x86_64-pc-windows-gnu
             os: windows-2025
-            env: { ARCH_BITS: 64, ARCH: x86_64 }
           - target: x86_64-pc-windows-msvc
             os: windows-2025
           - target: x86_64-unknown-linux-gnu
@@ -209,7 +207,7 @@ jobs:
           - target: wasm32-wasip1
           - target: wasm32-wasip2
           - target: x86_64-apple-darwin
-            os: macos-15-intel
+            os: macos-26-intel
           - target: x86_64-linux-android
           # FIXME: Exec format error (os error 8)
           # - target: x86_64-unknown-linux-gnux32
@@ -273,7 +271,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: test on Solaris
-        uses: vmactions/solaris-vm@v1.3.1
+        uses: vmactions/solaris-vm@v1.3.2
         if: contains(matrix.target, 'solaris')
         with:
           release: "11.4-gcc"

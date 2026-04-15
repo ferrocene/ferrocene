@@ -3,6 +3,7 @@
 
 from . import outcomes, render_template, render_summary
 
+
 def setup(app):
     outcomes.setup(app)
     render_template.setup(app)

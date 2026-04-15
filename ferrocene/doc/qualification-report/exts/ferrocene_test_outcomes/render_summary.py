@@ -54,7 +54,7 @@ class InjectSummaryTransform(SphinxTransform):
                 else None
             )
 
-            def render_sum(field):
+            def render_sum(field, platform=platform):
                 if platform is not None:
                     content = sum(getattr(inv, field) for inv in platform.invocations)
                     css_class = "align-right"

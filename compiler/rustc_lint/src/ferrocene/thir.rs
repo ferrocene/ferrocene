@@ -194,7 +194,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         let typing_mode = TypingMode::typeck_for_body(tcx, self.linter.item);
         let param_env = tcx.param_env(self.linter.item);
-        TypingEnv { typing_mode, param_env }
+        TypingEnv::new(param_env, typing_mode)
     }
 }
 

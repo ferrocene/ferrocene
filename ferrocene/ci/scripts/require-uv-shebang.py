@@ -35,7 +35,7 @@ def main():
     for file in cmd.stdout.split("\0"):
         file = Path(file)
 
-        def error(message):
+        def error(message, file=file):
             nonlocal has_errors
             has_errors = True
             print(f"error: {file}: {message}", file=sys.stderr)

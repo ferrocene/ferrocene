@@ -32,14 +32,16 @@ class Hasher:
         self.string(node.tagname)
 
         if isinstance(node, nodes.Text):
-            self.state.update(b"\xFF")  # Text node
+            self.state.update(b"\xff")  # Text node
             self.string(str(node))
         else:
             self.state.update(struct.pack("<Q", len(node.non_default_attributes())))
             for name, value in node.attlist():
                 # These elements have a `source` attribute which contains absolute paths
                 # in it, breaking reproducibility.
-                may_have_source = isinstance(node, nodes.document) or isinstance(node, nodes.literal_block)
+                may_have_source = isinstance(node, nodes.document) or isinstance(
+                    node, nodes.literal_block
+                )
                 if may_have_source and name == "source":
                     continue
 
@@ -47,9 +49,9 @@ class Hasher:
                 self.string(repr(value))
 
             for child in node.children:
-                self.state.update(b"\xFE")  # Enter child node
+                self.state.update(b"\xfe")  # Enter child node
                 self.node(child)
-                self.state.update(b"\xFD")  # Exit child node
+                self.state.update(b"\xfd")  # Exit child node
 
     def finalize(self):
         return self.state.hexdigest()

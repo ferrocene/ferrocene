@@ -4,7 +4,7 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, List, Union
+from typing import Optional, Union
 import json
 import os
 import re
@@ -84,7 +84,9 @@ class Platform:
 
 @dataclass
 class Outcomes:
-    platforms: OrderedDict[tuple[str, str], Platform] = field(default_factory=OrderedDict)
+    platforms: OrderedDict[tuple[str, str], Platform] = field(
+        default_factory=OrderedDict
+    )
 
     def load_file(self, file):
         with open(file, "r", encoding="utf-8") as f:

@@ -135,7 +135,7 @@ tests = [
 targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade"]
 reason = "This errata does not affect Armv8-R AArch64 processors"
 
-[[tests/coverage-run-rustdoc]]
+[["tests/coverage-run-rustdoc"]]
 tests = [
     "tests/coverage-run-rustdoc/doctest.rs
 ]

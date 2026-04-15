@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # From the root of this repository, build with
-# `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
+# `docker build --tag rhel-10.1-test-server --file ferrocene/ci/rhel-10.1-test-server/Dockerfile .`
 
 FROM --platform=$TARGETPLATFORM registry.access.redhat.com/ubi10:10.1
 

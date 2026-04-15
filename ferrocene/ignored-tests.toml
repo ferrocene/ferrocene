@@ -137,7 +137,7 @@ reason = "This errata does not affect Armv8-R AArch64 processors"
 
 [["tests/coverage-run-rustdoc"]]
 tests = [
-    "tests/coverage-run-rustdoc/doctest.rs
+    "tests/coverage-run-rustdoc/doctest.rs"
 ]
 targets = ["aarch64-rhivos2-linux-gnu"]
 reason = "The tests generates profraw files to analyze, but remote-test is not capable of pushing those files back to the client yet"

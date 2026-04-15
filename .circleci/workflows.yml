@@ -387,8 +387,7 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
-        ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu" --stage "2"
-        ./x build src/tools/remote-test-server --target "aarch64-rhivos2-linux-gnu" --stage "2"
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
@@ -828,7 +827,7 @@ jobs:
 
   # The image gets built for every job because it needs to contain build results per job
   build-docker-rhivos2-test-server-aarch64:
-    description: Job that builds and uploads a Docker image for a rhivos2 container with a remote testserver.
+    description: Build and upload a Docker image for a rhivos2 container with a remote testserver.
     docker:
       - image: cimg/base:current
     resource_class: arm.medium # 2-core

@@ -120,7 +120,7 @@ jobs:
   # is the place for it.
   misc-checks:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -138,7 +138,7 @@ jobs:
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -151,7 +151,7 @@ jobs:
 
   x86_64-linux-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
@@ -162,7 +162,7 @@ jobs:
 
   x86_64-linux-docs:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -181,7 +181,7 @@ jobs:
 
   x86_64-linux-dist:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -193,7 +193,7 @@ jobs:
 
   x86_64-linux-dist-tools:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -205,7 +205,7 @@ jobs:
 
   x86_64-linux-dist-targets:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
@@ -218,7 +218,7 @@ jobs:
 
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -251,7 +251,7 @@ jobs:
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -268,8 +268,8 @@ jobs:
           destination: reports
 
   x86_64-linux-test-library-std:
-    executor: linux-vm
-    resource_class: large # 4-core
+    executor:  docker-x86_64-ubuntu-20
+    resource_class: ferrocene/k8s-amd64-medium # 4-core
     parameters:
       test-variant:
         type: string
@@ -282,14 +282,16 @@ jobs:
       SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
-      - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - ferrocene-ci
 
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -306,7 +308,7 @@ jobs:
 
   x86_64-linux-llvm:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -327,7 +329,7 @@ jobs:
 
   x86_64-linux-self-test:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
@@ -452,7 +454,7 @@ jobs:
 
   aarch64-linux-self-test:
     executor: docker-aarch64-ubuntu-20
-    resource_class: ferrocene/k8s-arm64-small # 2-core
+    resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>

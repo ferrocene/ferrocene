@@ -28,6 +28,14 @@ Language changes in Rust 1.95.0
   - Lints are outside the scope of the FLS.
 
 - `Support importing path-segment keywords with renaming <https://github.com/rust-lang/rust/pull/146972>`_
+
+  - New paragraphs:
+
+    - :p:`fls_sUhnfV62HJrb`
+    - :p:`fls_QGdeRTe0H1Uc`
+    - :p:`fls_aam34hsRmKU2`
+    - :p:`fls_LV94x3HlpBWk`
+
 - `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
 
   - The target is outside the scope of the FLS.

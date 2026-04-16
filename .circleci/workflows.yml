@@ -1993,12 +1993,14 @@ executors:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
         aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-aarch64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-24 >>
         aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
           aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
           aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   linux-vm:

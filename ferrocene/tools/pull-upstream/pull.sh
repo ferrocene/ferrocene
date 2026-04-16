@@ -64,16 +64,15 @@ automation_warning() {
 commit_if_modified_prefix() {
     file="$1"
     message="$2"
+    pattern="${3:-$file}"
 
-    if git status --porcelain=v1 | grep "^ M ${file}" >/dev/null; then
+    if git status --porcelain=v1 | grep "^ M ${pattern}" >/dev/null; then
         git add "${file}"
         git commit -m "${message}"
     fi
 }
 commit_if_modified() {
-    file="$1\$"
-    shift
-    commit_if_modified_prefix "$file" "$@"
+    commit_if_modified_prefix "$1" "$2" "${1}\$"
 }
 
 if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then

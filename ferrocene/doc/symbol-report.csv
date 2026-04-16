@@ -5475,6 +5475,7 @@ core::convert::num::<impl core::convert::From<bool> for u64>::from
 core::convert::num::<impl core::convert::From<bool> for u8>::from
 core::convert::num::<impl core::convert::From<bool> for usize>::from
 core::convert::num::<impl core::convert::From<f16> for f128>::from
+core::convert::num::<impl core::convert::From<f16> for f32>::from
 core::convert::num::<impl core::convert::From<f16> for f64>::from
 core::convert::num::<impl core::convert::From<f32> for f128>::from
 core::convert::num::<impl core::convert::From<f32> for f64>::from

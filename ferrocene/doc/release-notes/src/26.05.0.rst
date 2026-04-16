@@ -20,6 +20,12 @@ New features
   * :target-with-tuple:`s390x-unknown-linux-gnu`
   * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
 
+* Two qualified targets which offered target CPU features have been removed, as the base targets
+  now permit the use of `-C target-cpu` in the same capacity.
+
+  * :target-with-tuple:`thumbv7em-none-eabihf` can now be used with `-C target-cpu=cortex-m4` instead of :target-with-tuple:`thumbv7em-m4-none-eabihf`
+  * :target-with-tuple:`aarch64-unknown-none` can now be used with `-C target-cpu=cortex-a53` :target-with-tuple:`aarch64-a53-none`
+
 * Certify the ``core::fmt`` module.
 
   * This module contains the code to format Rust data structures into human-readable output. This enables customers to use this functionality in certified contexts.

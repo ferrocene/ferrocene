@@ -30,6 +30,14 @@ To use the target, the following additional flags must be provided to
 
 * ``--target=aarch64-unknown-none``
 
+Permitted compiler flags
+------------------------
+
+Specific ``-C target-cpu`` flags are tested and are permitted in
+safety critical use. They may be passed to ``rustc`` during build.
+
+- ``-C target-cpu=cortex-a53``, supporting Cortex-A53 processors only.
+
 Testing Facade (Experimental)
 -----------------------------
 

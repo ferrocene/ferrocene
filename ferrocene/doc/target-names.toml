@@ -38,3 +38,5 @@ x86_64-unknown-linux-musl         = "x86-64 Linux (musl)"
 
 # Removed targets
 x86_64-apple-darwin = "x86-64 macOS"
+"aarch64-a53-none"          = "Armv8-A bare-metal (Cortex-A53)"
+"thumbv7em-m4-none-eabihf"  = "Armv7E-M bare-metal (Cortex-M4, hard-float)"

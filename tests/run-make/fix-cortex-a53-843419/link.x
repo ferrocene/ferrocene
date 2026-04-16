@@ -10,4 +10,5 @@ SECTIONS {
     . = ALIGN(8);
     .bss : { *(.bss .bss*) } > RAM
     . = ALIGN(8);
+    /DISCARD/ : { *(.interp .interp.*); }
 }

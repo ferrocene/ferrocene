@@ -231,7 +231,11 @@ impl [u8] {
     /// Returns a byte slice with leading ASCII whitespace bytes removed.
     ///
     /// 'Whitespace' refers to the definition used by
-    /// [`u8::is_ascii_whitespace`].
+    /// [`u8::is_ascii_whitespace`]. Importantly, this definition excludes
+    /// the `\0x0B` byte even though it has the Unicode [`White_Space`] property
+    /// and is removed by [`str::trim_start`].
+    ///
+    /// [`White_Space`]: https://www.unicode.org/reports/tr44/#White_Space
     ///
     /// # Examples
     ///
@@ -260,7 +264,11 @@ impl [u8] {
     /// Returns a byte slice with trailing ASCII whitespace bytes removed.
     ///
     /// 'Whitespace' refers to the definition used by
-    /// [`u8::is_ascii_whitespace`].
+    /// [`u8::is_ascii_whitespace`]. Importantly, this definition excludes
+    /// the `\0x0B` byte even though it has the Unicode [`White_Space`] property
+    /// and is removed by [`str::trim_end`].
+    ///
+    /// [`White_Space`]: https://www.unicode.org/reports/tr44/#White_Space
     ///
     /// # Examples
     ///
@@ -290,7 +298,11 @@ impl [u8] {
     /// removed.
     ///
     /// 'Whitespace' refers to the definition used by
-    /// [`u8::is_ascii_whitespace`].
+    /// [`u8::is_ascii_whitespace`]. Importantly, this definition excludes
+    /// the `\0x0B` byte even though it has the Unicode [`White_Space`] property
+    /// and is removed by [`str::trim`].
+    ///
+    /// [`White_Space`]: https://www.unicode.org/reports/tr44/#White_Space
     ///
     /// # Examples
     ///

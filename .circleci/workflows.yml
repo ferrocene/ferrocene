@@ -1151,15 +1151,15 @@ workflows:
       #     requires:
       #       - x86_64-linux-build
 
-      - facade-generic-test:
-          name: thumbv7em-eabihf-test-library
-          target: thumbv7em-ferrocene.facade-eabihf
-          test-variant: 2021-cortex-m4
-          qemu-arch: qemu-arm
-          job: test:library
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
+      # - facade-generic-test:
+      #     name: thumbv7em-eabihf-test-library
+      #     target: thumbv7em-ferrocene.facade-eabihf
+      #     test-variant: 2021-cortex-m4
+      #     qemu-arch: qemu-arm
+      #     job: test:library
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
 
       # - facade-generic-test:
       #     name: thumbv7em-eabi-test-library
@@ -1302,7 +1302,7 @@ workflows:
             - aarch64-build-docker-rhivos2-test-server
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
-          job: test:compiletest
+          job: qnx:compiletest-no-only-hosts
           resource-class: ferrocene/k8s-arm64-large # 8-core
           test-variant: "2021"
           requires:

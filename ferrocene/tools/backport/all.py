@@ -12,6 +12,7 @@
 
 import os
 import requests
+import sys
 import subprocess
 
 from automations_common import AutomatedPR, AutomationResult
@@ -21,8 +22,9 @@ def restore_python_scripts(from_rev):
     # NOTE: we've checked out base_branch, which might *not* be the same branch as where
     # we're running this script from. Sync them together.
     # NOTE: we can't use `self.cmd` because python might have lazily imported it.
-    subprocess.run(["git", "restore", "--source", from_rev,
-                    "ferrocene/tools/automations-common"])
+    subprocess.run(
+        ["git", "restore", "--source", from_rev, "ferrocene/tools/automations-common"]
+    )
     subprocess.run(["git", "restore", "--source", from_rev, "ferrocene/tools/backport"])
 
 
@@ -39,9 +41,7 @@ class BackportAllPR(AutomatedPR):
             return AutomationResult.NO_CHANGES
 
         base_branch = f"{self.origin}/{self.__target}"
-        self.cmd(
-            ["git", "checkout", "--detach", "--quiet", base_branch]
-        )
+        self.cmd(["git", "checkout", "--detach", "--quiet", base_branch])
         restore_python_scripts(self.current_hash)
 
         for pr in prs:
@@ -53,7 +53,12 @@ class BackportAllPR(AutomatedPR):
             restore_python_scripts(self.current_hash)
 
             result = self.cmd(
-                [f"{self.repo_root}/ferrocene/tools/backport/one.py", "--verbose", "--force", str(pr)],
+                [
+                    f"{self.repo_root}/ferrocene/tools/backport/one.py",
+                    "--verbose",
+                    "--force",
+                    str(pr),
+                ],
                 check=False,
             )
             if result.returncode == 0:
@@ -187,7 +192,7 @@ def list_backport_labels(repo):
 
 if __name__ == "__main__":
     dry_run = len(sys.argv) > 1 and sys.argv[1] == "--dry-run"
-    repo = os.environ.get("GITHUB_REPOSITORY") or 'ferrocene/ferrocene'
+    repo = os.environ.get("GITHUB_REPOSITORY") or "ferrocene/ferrocene"
 
     subprocess.run(["git", "update-index", "--refresh"], check=False)
     args = ["git", "diff-index", "--quiet", "HEAD"]

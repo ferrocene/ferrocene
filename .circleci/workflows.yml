@@ -1140,7 +1140,7 @@ workflows:
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
-          name: x86_64-linux-test-library
+          name: x86_64-linux-test-library-std
           job: test:library-std
           resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"

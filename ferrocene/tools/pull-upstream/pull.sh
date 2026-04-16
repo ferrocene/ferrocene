@@ -103,7 +103,7 @@ TEMP_BRANCH="rust-lang/rust/${upstream_branch}--generated-by-pull-upstream"
 #
 # We also tell rustup to try and update the nightly toolchain to ensure the behavior of the script
 # is consistent even if you run the script in a machine with an out of date nightly.
-rustup toolchain install nightly
+rustup toolchain install --no-self-update nightly
 export RUSTUP_TOOLCHAIN=nightly
 
 # Move to the root of the repository to avoid the script from misbehaving.
@@ -229,9 +229,7 @@ then
     # automatically.
     for file in $(excluded_files); do
         echo "pull-upstream: automatically resolving conflict for ${file}..."
-        git show "${current_commit}:${file}" > "${file}"
-        git add "${file}"
-        echo "pull-upstream: automatically resolved conflict for ${file}"
+        git restore --source="${current_commit}" --staged --worktree -- "${file}"
     done
 
     # Git attempts to merge submodule bumps correctly, but it only works if one
@@ -263,7 +261,7 @@ then
         lock="${prefix}Cargo.lock"
         if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
             echo "pull-upstream: automatically resolving conflict for ${lock}..."
-            git show "${current_commit}:${lock}" > "${lock}"
+            git restore --worktree --source="${current_commit}" -- "${lock}"
 
             # Invoking any Cargo command touching the lockfile will cause the
             # lockfile to be updated. "cargo metadata" is one of the fastest ones.

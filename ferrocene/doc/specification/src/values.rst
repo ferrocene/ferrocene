@@ -111,6 +111,12 @@ The :t:`expression` of a :t:`constant initializer` shall be a
 The value of a :t:`constant` is determined by evaluating its
 :t:`constant initializer`.
 
+:dp:`fls_LmPbrh0Cba8g`
+The representation of the value of a :t:`constant initializer` or :t:`static initializer` must only contain bytes with :t:`provenance` where all bytes of some original :t:`pointer` are in the correct order.
+
+:dp:`fls_nwgIMLkvD2Ol`
+:dt:`Provenance` is the memory that a :t:`pointer` has permission to access, the timespan during which it can acesss that memory, and if it can access the memory for writes.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_xezt9hl069h4`

@@ -33,6 +33,13 @@ Language changes in Rust 1.95.0
   - The target is outside the scope of the FLS.
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
+
+  New paragraphs:
+
+  - :p:`fls_LmPbrh0Cba8g`
+  - :p:`fls_nwgIMLkvD2Ol`
+  - :p:`fls_hOIImCr1c6IF`
+
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
 
   - This implementation-specifc behavior is outside the scope of the FLS.

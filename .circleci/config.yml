@@ -29,7 +29,7 @@ jobs:
   setup:
     docker:
       - image: cimg/python:3.12
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-arm64-small # 1-core
     steps:
       - aws-cli/install
 

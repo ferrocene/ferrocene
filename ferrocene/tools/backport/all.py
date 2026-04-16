@@ -188,8 +188,13 @@ def list_backport_labels(repo):
 if __name__ == "__main__":
     dry_run = len(sys.argv) > 1 and sys.argv[1] == "--dry-run"
     repo = os.environ.get("GITHUB_REPOSITORY") or 'ferrocene/ferrocene'
-    labels = list_backport_labels(repo)
 
+    subprocess.run(["git", "update-index", "--refresh"], check=False)
+    args = ["git", "diff-index", "--quiet", "HEAD"]
+    if subprocess.run(args, check=False).returncode != 0:
+        exit("error: all.py is not safe to run if you have uncommitted changes")
+
+    labels = list_backport_labels(repo)
     for label in labels:
         print(f"==> backporting PRs with label {label}")
         pr = BackportAllPR(repo, label, f"release/{label.removeprefix('backport:')}")

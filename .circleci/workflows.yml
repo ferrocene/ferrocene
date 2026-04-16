@@ -954,7 +954,7 @@ jobs:
   # Misc jobs
   wasm-dist-oxidos:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: wasm32-unknown-unknown
@@ -966,7 +966,7 @@ jobs:
 
   finish-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
@@ -1022,7 +1022,7 @@ jobs:
   # run. See the `skip` workflow for more information.
   skip:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     steps:
       - run:
           name: This is a workaround for CircleCI always wanting at least a job per commit.

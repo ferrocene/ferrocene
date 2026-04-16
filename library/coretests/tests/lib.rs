@@ -5,6 +5,7 @@
 #![feature(array_try_map)]
 #![feature(ascii_char)]
 #![feature(ascii_char_variants)]
+#![feature(assert_matches)] // Ferrocene addition for `ferrocene/macros.rs test_assert_failed_inner_match`
 #![feature(async_iter_from_iter)]
 #![feature(async_iterator)]
 #![feature(bool_to_result)]

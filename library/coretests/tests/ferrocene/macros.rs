@@ -33,3 +33,10 @@ fn test_assert_matches_failure_none() {
 fn test_assert_failed_inner_ne() {
     assert_ne!(5, 5);
 }
+
+// Covers `core::panicking::assert_failed_inner`
+#[test]
+#[should_panic = "left matches right` failed\n  left: Some(1)\n right: None"]
+fn test_assert_failed_inner_match() {
+    std::assert_matches!(Some(1), None);
+}

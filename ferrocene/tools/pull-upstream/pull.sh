@@ -80,6 +80,24 @@ if [[ $# -lt 1 ]] || [[ $# -gt 3 ]]; then
     exit 1
 fi
 upstream_branch="$1"
+
+# Move to the root of the repository to avoid the script from misbehaving.
+cd "$(git rev-parse --show-toplevel)"
+
+# Safety check to avoid messing with uncommitted changes.
+# Submodules are updated before that, as submodules needing an update should
+# not block merging changes from upstream.
+#
+# The update-index command ensures diff-index doesn't spuriously fail.
+# https://stackoverflow.com/questions/3878624#comment108071431_3879077
+git submodule update
+git update-index --refresh || true
+if ! git diff-index --quiet HEAD; then
+    echo "pull-upstream: the current branch contains uncommitted changes!"
+    echo "pull-upstream: make sure all changes are committed before running this script."
+    exit 1
+fi
+
 if [[ $# -ge 2 ]]; then
     # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
     git fetch "$FERROCENE_REPO" "$2"
@@ -105,23 +123,6 @@ TEMP_BRANCH="rust-lang/rust/${upstream_branch}--generated-by-pull-upstream"
 # is consistent even if you run the script in a machine with an out of date nightly.
 rustup toolchain install --no-self-update nightly
 export RUSTUP_TOOLCHAIN=nightly
-
-# Move to the root of the repository to avoid the script from misbehaving.
-cd "$(git rev-parse --show-toplevel)"
-
-# Safety check to avoid messing with uncommitted changes.
-# Submodules are updated before that, as submodules needing an update should
-# not block merging changes from upstream.
-#
-# The update-index command ensures diff-index doesn't spuriously fail.
-# https://stackoverflow.com/questions/3878624#comment108071431_3879077
-git submodule update
-git update-index --refresh
-if ! git diff-index --quiet HEAD; then
-    echo "pull-upstream: the current branch contains uncommitted changes!"
-    echo "pull-upstream: make sure all changes are committed before running this script."
-    exit 1
-fi
 
 # Make sure the temporary branch doesn't exist yet.
 if git rev-parse --quiet --verify "${TEMP_BRANCH}" > /dev/null; then

@@ -397,18 +397,6 @@ jobs:
         ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
-  aarch64-linux-dist:
-    executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: aarch64-linux-build
-
   aarch64-linux-dist-tools:
     executor: docker-aarch64-ubuntu-20
     resource_class: arm.xlarge # 8-core
@@ -420,33 +408,6 @@ jobs:
     steps:
       - ferrocene-job-dist:
           restore-from-job: aarch64-linux-build
-
-  aarch64-linux-dist-targets:
-    executor: docker-aarch64-ubuntu-20
-    resource_class: ferrocene/k8s-arm64-medium
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--std >>
-      SCRIPT: |
-        ./x.py --stage 2 dist rust-std
-    steps:
-      - ferrocene-job-dist:
-          qnx: true
-          restore-from-job: aarch64-linux-build
-
-  aarch64-linux-dist-src:
-    executor: docker-aarch64-ubuntu-20
-    resource_class: ferrocene/k8s-arm64-small
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: aarch64-linux-build
-          # We need the whole LLVM clone to be able to include the full source
-          # code into the tarball we ship to customers.
-          llvm-subset: false
 
   aarch64-linux-generic-test-container:
     executor: docker-aarch64-ubuntu-20
@@ -1360,9 +1321,6 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
-      - aarch64-linux-dist-targets:
-          requires:
-            - aarch64-linux-build
       - aarch64-linux-generic-test-container:
           name: aarch64-linux-test
           job: test
@@ -1402,7 +1360,6 @@ workflows:
           requires:
             - aarch64-linux-dist
             - aarch64-linux-dist-tools
-            - aarch64-linux-dist-targets
             - x86_64-linux-dist-targets
             - x86_64-linux-dist
 

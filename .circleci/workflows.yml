@@ -1367,7 +1367,7 @@ workflows:
             - aarch64-linux-build
       - aarch64-linux-library-coverage:
           requires:
-            - aarch64-inux-build
+            - aarch64-linux-build
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist

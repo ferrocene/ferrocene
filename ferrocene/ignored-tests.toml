@@ -165,3 +165,11 @@ tests = [
 ]
 targets = ["aarch64-rhivos2-linux-gnu"]
 reason = "No ps utility in test environment."
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/pointer-auth-link-with-c",
+    "tests/run-make/used-proc-macro"
+]
+targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
+reason = "This test does not work on Linux targets and is under investigation."

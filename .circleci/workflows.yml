@@ -397,6 +397,18 @@ jobs:
         ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
+  aarch64-linux-dist:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.xlarge # 8-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: aarch64-linux-build
+
   aarch64-linux-dist-tools:
     executor: docker-aarch64-ubuntu-20
     resource_class: arm.xlarge # 8-core

@@ -1293,10 +1293,11 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker-rhivos2-test-server-aarch64
+      # notably, this job needs significantly more memory.
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
           job: qnx:compiletest-no-only-hosts
-          resource-class: ferrocene/k8s-rhel-10-arm64-medium
+          resource-class: ferrocene/k8s-rhel-10-arm64-large
           test-variant: "2021"
           requires:
             - aarch64-linux-build

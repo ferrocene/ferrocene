@@ -22,13 +22,17 @@ fn main() {
     } else {
         // This target uses GCC as the linker, and needs -nostartfiles since our program is
         // basically a startup object.
-        compile.link_arg("-Wl,link.x").link_arg("-nostartfiles");
+        compile.link_arg("-Wl,-Tlink.x").link_arg("-nostartfiles");
         LinkerType::Gnu
     };
 
     let outcome = compile.run();
     // Ensure --print=link-args shows the errata fix linker flag.
     assert!(outcome.stdout_utf8().contains("--fix-cortex-a53-843419"));
+
+    // sanity check that no prologue was injected
+    assert!(grep_instruction(0xff0, "nop"));
+    assert!(grep_instruction(0xff4, "nop"));
 
     match linker_type {
         LinkerType::Lld => {

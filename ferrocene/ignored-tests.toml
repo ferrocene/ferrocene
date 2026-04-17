@@ -168,7 +168,13 @@ reason = "No ps utility in test environment."
 
 [["tests/run-make"]]
 tests = [
-    "tests/run-make/pointer-auth-link-with-c",
+    "tests/run-make/pointer-auth-link-with-c"
+]
+targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
+reason = "This tests the interoperabilty an unstable feature of the rust compiler (enabling PAC) with newer C compilers (‘-mbranch-protection=’)."
+
+[["tests/run-make"]]
+tests = [
     "tests/run-make/used-proc-macro"
 ]
 targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]

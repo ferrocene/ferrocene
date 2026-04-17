@@ -132,7 +132,7 @@ reason = "libstd test that segfaults on QEMU 8.2.2 but works on newer QEMU versi
 tests = [
     "tests/run-make/fix-cortex-a53-843419"
 ]
-targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade"]
+targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
 reason = "This errata does not affect Armv8-R AArch64 processors"
 
 [["tests/run-make"]]

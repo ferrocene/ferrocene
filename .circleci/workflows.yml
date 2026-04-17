@@ -1396,7 +1396,7 @@ workflows:
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
           job: qnx:compiletest-no-only-hosts
-          resource-class: ferrocene/k8s-rhel-10-arm64-large
+          resource-class: ferrocene/k8s-arm64-large
           test-variant: "2021"
           requires:
             - aarch64-linux-build

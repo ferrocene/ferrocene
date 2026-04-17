@@ -172,10 +172,3 @@ tests = [
 ]
 targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
 reason = "This tests the interoperabilty an unstable feature of the rust compiler (enabling PAC) with newer C compilers (‘-mbranch-protection=’)."
-
-[["tests/run-make"]]
-tests = [
-    "tests/run-make/used-proc-macro"
-]
-targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
-reason = "This test does not work on Linux targets and is under investigation."

@@ -2,42 +2,11 @@
    SPDX-FileCopyrightText: The Ferrocene Developers
    SPDX-FileCopyrightText: The Rust Project Contributors
 
-====================================================
 Contributing to the FLS
-====================================================
-
-The FLS is released publicly under an open source license, specifically MIT and
-Apache 2.0.
-
-The specification is still a work in progress, and while we're open to
-contributions, we want to manage your expectations on how much we'll be able to
-interact with the community in this repository:
-
-* Any change made to the specification text causes extra work for us behind the
-  scenes, as we have other tooling required for qualification that consumes the
-  specification text.
-
-* Our resources are limited when it comes to reviewing PRs, especially large
-  ones.
-
-We'll try our best to review changes proposed by the community, but we might not
-be able to review all of them (or they might be out of date once we get to
-them). If there are changes you'd like to make, we recommend opening an issue
-beforehand, so that we can provide feedback on whether we'll be able to merge
-the changes.
-
-We've all dealt with those open source projects that feel open in name only, and
-have big patches and history-free source drops appearing from behind the walls
-of some large organization. We don't like that, and we're not going to do that.
-But please bear with us until we have the capacity to accept all external
-contributions.
-
-   This introduction was inspired by Oxide Computer Company's `Hubris
-   contribution guidelines
-   <https://github.com/oxidecomputer/hubris/blob/master/CONTRIBUTING.md>`_.
+=======================
 
 Contribution Process
-====================
+--------------------
 
 Before contributing, it would be helpful to familiarize yourself with the
 grammar and structure of the FLS. You'll find everything you need to in `Chapter
@@ -62,7 +31,7 @@ There are three kinds of contribution that can be made:
   we'll coordinate on how to best do it.
 
 PRs and approval
-================
+----------------
 
 Whether the changes appear in the FLS will remain the responsibility and
 discretion of the `FLS team`_. Changes may be approved as is, or may be edited

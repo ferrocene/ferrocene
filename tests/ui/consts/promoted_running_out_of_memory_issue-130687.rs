@@ -5,6 +5,7 @@
 //@ only-64bit
 // FIXME (#135952) In some cases on AArch64 Linux the diagnostic does not trigger
 //@ ignore-aarch64-unknown-linux-gnu
+//@ ignore-aarch64-rhivos2-linux-gnu
 // AIX will allow the allocation to go through, and get SIGKILL when zero initializing
 // the overcommitted page.
 //@ ignore-aix

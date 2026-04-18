@@ -30,7 +30,7 @@ tests = [
     "tests/run-make/sanitizer-dylib-link",
     "tests/run-make/sanitizer-staticlib-link"
 ]
-targets = ["aarch64-unknown-linux-gnu", "aarch64-rhivos2-linux-gnu"]
+targets = ["aarch64-unknown-linux-gnu"]
 reason = "QEMU user space emulation doesn't support most sanitizers"
 
 [["tests/run-make"]]
@@ -134,3 +134,34 @@ tests = [
 ]
 targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade"]
 reason = "This errata does not affect Armv8-R AArch64 processors"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/sanitizer-cdylib-link",
+    "tests/run-make/sanitizer-dylib-link",
+    "tests/run-make/sanitizer-staticlib-link"
+]
+targets = ["aarch64-rhivos2-linux-gnu"]
+reason = "Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs investigation."
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/sanitizer/hwaddress.rs",
+    "tests/ui/sanitizer/leak.rs",
+    "tests/ui/sanitizer/memory-eager.rs",
+    "tests/ui/sanitizer/memory-passing.rs",
+    "tests/ui/sanitizer/memory.rs",
+    "tests/ui/sanitizer/realtime-alloc.rs",
+    "tests/ui/sanitizer/realtime-blocking.rs",
+    "tests/ui/sanitizer/realtime-caller.rs",
+    "tests/ui/sanitizer/thread.rs"
+]
+targets = ["aarch64-rhivos2-linux-gnu"]
+reason = "Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs investigation."
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/process/process-spawn-failure.rs"
+]
+targets = ["aarch64-rhivos2-linux-gnu"]
+reason = "No ps utility in test environment."

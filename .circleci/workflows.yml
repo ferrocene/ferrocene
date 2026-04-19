@@ -365,7 +365,7 @@ jobs:
 
   aarch64-linux-llvm:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -386,7 +386,7 @@ jobs:
 
   aarch64-linux-build:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
@@ -399,7 +399,7 @@ jobs:
 
   aarch64-linux-dist:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -411,7 +411,7 @@ jobs:
 
   aarch64-linux-dist-tools:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |

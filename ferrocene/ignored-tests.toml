@@ -159,13 +159,6 @@ tests = [
 targets = ["aarch64-rhivos2-linux-gnu"]
 reason = "Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs investigation."
 
-[["tests/ui"]]
-tests = [
-    "tests/ui/process/process-spawn-failure.rs"
-]
-targets = ["aarch64-rhivos2-linux-gnu"]
-reason = "No ps utility in test environment."
-
 [["tests/run-make"]]
 tests = [
     "tests/run-make/pointer-auth-link-with-c"

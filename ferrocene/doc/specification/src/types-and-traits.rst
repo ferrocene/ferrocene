@@ -963,7 +963,7 @@ Closures will only capture the prefix of a :t:`capture path` that runs up to, bu
 Closures will only capture the prefix of a :t:`capture path` of a :t:`union` that runs up to union itself.
 
 :dp:`fls_fATMTNUOHsfb`
-Closures will only capture the prefix of the :t:`capture path` that runs up to, but not including, the first :t:`field access expression` into a structure that uses the :t:`attribute` ``packed`` representation, in unalidged :t:`[field]s` in a struct.
+Closures will only capture the prefix of the :t:`capture path` that runs up to, but not including, the first :t:`field access expression` into a structure that uses the :t:`attribute` ``packed`` representation, in unaligned :t:`[field]s` in a struct.
 
 :dp:`fls_fITor3jpmgrl`
 Taking the address of an unaligned :t:`field` captures the entire struct.

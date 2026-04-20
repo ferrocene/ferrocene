@@ -903,6 +903,74 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
 :t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capturing
 environment` implement the :std:`core::marker::Send` :t:`trait`.
 
+.. _fls_G64vdcIyB2Is:
+
+Closure capture precision
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rdDT7jsaOMbs`
+A :dt:`capture path` is a sequence starting with a :t:`variable` from the environment followed by zero or more :t:`[place projection]s` from that variable.
+
+:dp:`fls_j9WyKVyOLFon`
+A :dt:`place projection` is a :t:`field access expression`, tuple :t:`field access expression`, :t:`dereference`, array or slice :t:`index expression`, or :t:`pattern` destructuring applied to a variable.
+
+:dp:`fls_TbfUxVf8PKPs`
+The closure :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, which may be truncated based on these rules:
+
+- :dp:`fls_4TESOxGpEY2h`
+  When a :t:`capture path` and one of the ancestors of that path are both captured by a closure, the ancestor path is captured with the highest capture mode among the two captures, using the strict weak ordering: :t:`immutable borrow` < :t:`unique immutable borrow` < :t:`mutable borrow` < :t:`move <by move>`.
+
+- :dp:`fls_eNkZWskzznW6`
+  The :t:`capture path` is truncated at the rightmost :t:`dereference` in the capture path if the dereference is applied to a :t:`shared reference`.
+
+:dp:`fls_v8IFXHJnXhez`
+A :t:`place` is not captured when an :t:`underscore expression` is used to bind it.
+
+:dp:`fls_gujpU7p5n9Zx`
+A :t:`place` is not captured by destructuring tuples, structs, and single-variant enums.
+
+:dp:`fls_t8tFLUg8O83Q`
+A :t:`place` is not captured by being matched against a :t:`rest pattern`.
+
+:dp:`fls_RaONmCLH2KGM`
+The entire :t:`slice` or :t:`array` is always captured even if used with :t:`underscore expression`, :t:`indexing <index expression>`, or :t:`slicing <slice>`.
+
+:dp:`fls_Vt9C9mKxHOwo`
+A :t:`place` is captured by :t:`immutable borrow` if its :t:`discriminant` is read by :t:`pattern matching`.
+
+:dp:`fls_Fs12dmznjsMf`
+Matching against a variant of an enum that has more than one variant captures the :t:`place` by :t:`immutable borrow`.
+
+:dp:`fls_7EXHdE2eOVek`
+Matching against a variant of an enum that has one variant does not capture the place, unless is marked with :t:`attribute` ``non_exhaustive``, in which case the place is captured by :t:`immutable borrow`.
+
+:dp:`fls_iLH8X2U4ADHb`
+Matching against a :t:`range pattern` captures the place by :t:`immutable borrow`.
+
+:dp:`fls_HMJUXHrvOmPl`
+Matching a :t:`slice` against a slice :t:`pattern`, other than one with only a single rest pattern ``[..]``, captures the slice by :t:`immutable borrow`.
+
+:dp:`fls_Gj1znNpthHY6`
+Matching an array against a slice pattern does not capture the :t:`place`.
+
+:dp:`fls_IFyJvb6mlFU4`
+Move closures can only capture the prefix of a :t:`capture path` that runs up to, but not including, the first :t:`dereference` of a :t:`reference`.
+
+:dp:`fls_7NEEJgKSpQQ8`
+Closures will only capture the prefix of a :t:`capture path` that runs up to, but not including, the first :t:`dereference` of a :t:`raw pointer`.
+
+:dp:`fls_kYFd3p06pWWV`
+Closures will only capture the prefix of a :t:`capture path` of a :t:`union` that runs up to union itself.
+
+:dp:`fls_fATMTNUOHsfb`
+Closures will only capture the prefix of the :t:`capture path` that runs up to, but not including, the first :t:`field access expression` into a structure that uses the :t:`attribute` ``packed`` representation, in unalidged :t:`[field]s` in a struct.
+
+:dp:`fls_fITor3jpmgrl`
+Taking the address of an unaligned :t:`field` captures the entire struct.
+
+:dp:`fls_XFwPNGsVsu05`
+A :dt:`unique immutable borrow` is a capture that occurs when modifying the :t:`referent` of a :t:`mutable reference`.
+
 .. _fls_airvr79xkcag:
 
 Function Item Types

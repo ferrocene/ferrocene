@@ -52,6 +52,8 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     /// We need a separate `owner` to be able to synthesize `HirId`s from expression IDs.
     /// `item` might not be an owner if it's a closure.
     pub(super) fn check_item(tcx: TyCtxt<'tcx>, owner: OwnerId, item: LocalDefId) -> Option<()> {
+        tracing::trace!("checking {item:?}");
+
         if tcx.sess.opts.test
             && tcx.entry_fn(()).and_then(|(id, _)| id.as_local()) == Some(owner.def_id)
         {
@@ -62,8 +64,11 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 
         let linter = LintState::new(tcx, item)?;
         // thir_body can return ErrorGuaranteed if this is a const block that failed evaluation.
-        let body = tcx.thir_body(item).ok()?;
-        let thir = &body.0.borrow();
+        let body = tcx.thir_body(item).ok();
+        if body.is_none() {
+            info!("skipping item {item:?} without body");
+        }
+        let thir = &body?.0.borrow();
         let mut visitor = LintThir { linter, thir, owner };
         for expr in &*thir.exprs {
             visitor.visit_expr(expr);

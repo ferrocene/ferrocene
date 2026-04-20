@@ -904,19 +904,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-<<<<<<< ferrocene/main
 '--bless[update all files of failing tests]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
-||||||| e8e4541ff19
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
-=======
 '(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
 '(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
 '(-v --verbose)-q[use quiet output]' \
 '(-v --verbose)--quiet[use quiet output]' \
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -960,19 +952,11 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-<<<<<<< ferrocene/main
 '--bless[update all files of failing tests]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
-||||||| e8e4541ff19
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
-=======
 '(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
 '(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
 '(-v --verbose)-q[use quiet output]' \
 '(-v --verbose)--quiet[use quiet output]' \
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1415,8 +1399,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--force[Force re-signing the document even if its latest version is signed]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \

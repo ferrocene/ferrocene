@@ -1140,6 +1140,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l set -d 'override opti
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l ci -d 'Make bootstrap to behave as it\'s running on the CI environment or not' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l force -d 'Force re-signing the document even if its latest version is signed'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
+complete -c x.py -n "__fish_x.py_using_subcommand sign" -s q -l quiet -d 'use quiet output'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l include-default-paths -d 'include default paths in addition to the provided ones'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l dry-run -d 'dry run; don\'t build anything'

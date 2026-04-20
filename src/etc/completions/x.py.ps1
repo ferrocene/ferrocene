@@ -1355,6 +1355,8 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--force', '--force', [CompletionResultType]::ParameterName, 'Force re-signing the document even if its latest version is signed')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'use quiet output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'use quiet output')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')
             [CompletionResult]::new('--incremental', '--incremental', [CompletionResultType]::ParameterName, 'use incremental compilation')
             [CompletionResult]::new('--include-default-paths', '--include-default-paths', [CompletionResultType]::ParameterName, 'include default paths in addition to the provided ones')

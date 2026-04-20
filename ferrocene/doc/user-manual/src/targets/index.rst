@@ -90,17 +90,17 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :target:`aarch64-unknown-linux-gnu`
+   * - :ref:`aarch64-unknown-linux-gnu`
      - ``aarch64-unknown-linux-gnu``
      - Host platform
      - Full
      - \-
 
-   * - :target:`aarch64-rhivos2-linux-gnu`
+   * - :ref:`aarch64-rhivos2-linux-gnu`
      - ``aarch64-rhivos2-linux-gnu``
      - Cross-compilation
      - Full
-     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using using the :ref:`x86_64-unknown-linux-gnu` host compiler.
+     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
 
    * - :ref:`aarch64-unknown-nto-qnx710`
      - ``aarch64-unknown-nto-qnx710``

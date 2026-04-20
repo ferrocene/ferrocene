@@ -5,6 +5,9 @@
 
 :target:`aarch64-unknown-linux-gnu`
 ===================================
+.. note::
+
+   Only qualified when cross-compiling to :ref:`aarch64-rhivos2-linux-gnu`.
 
 The ``aarch64-unknown-linux-gnu`` Ferrocene target provides support for Linux on
 aarch64 using glibc 2.31 or higher.

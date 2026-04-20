@@ -94,7 +94,7 @@ qualified upon request.
      - ``aarch64-unknown-linux-gnu``
      - Host platform
      - Full
-     - \-
+     - Only qualified when cross-compiling to :ref:`aarch64-rhivos2-linux-gnu`.
 
    * - :ref:`aarch64-rhivos2-linux-gnu`
      - ``aarch64-rhivos2-linux-gnu``

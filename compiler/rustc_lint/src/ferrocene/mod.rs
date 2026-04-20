@@ -205,6 +205,14 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
+
+    fn check_impl_item_post(
+        &mut self,
+        cx: &LateContext<'tcx>,
+        item: &'tcx rustc_hir::ImplItem<'tcx>,
+    ) {
+        LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
 }
 
 struct LintState<'tcx> {

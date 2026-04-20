@@ -284,7 +284,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py test --coverage=library library/core library/alloc --tests
+        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
@@ -461,7 +461,7 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py test --coverage=library library/core library/alloc --tests
+        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:

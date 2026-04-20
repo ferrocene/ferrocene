@@ -468,32 +468,6 @@ jobs:
           llvm-subset: true
       - ferrocene-ci
 
-  aarch64-linux-rhivos2-test-library-std:
-    executor: docker-aarch64-ubuntu-20-rhivos2-test-server
-    resource_class: ferrocene/k8s-rhel-10-arm64-medium # 4-core
-    parameters:
-      test-variant:
-        type: string
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
-      TEST_DEVICE_ADDR: localhost:12345
-      # Standard library tests need IPv6, which is not available in container
-      # jobs. Because of that we need to run *just* standard library tests in a
-      # virtual machine.
-      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: |
-        env | grep TEST_DEVICE_ADDR
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - run:
-          name: Restore files from the aarch64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
-      - ferrocene-ci
-
   aarch64-linux-rhivos2-test-container:
     executor: docker-aarch64-ubuntu-20-rhivos2-test-server
     parameters:
@@ -1386,6 +1360,14 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker-rhivos2-test-server-aarch64
+      - aarch64-linux-rhivos2-test-container:
+          name: aarch64-linux-rhivos2-test-library-std
+          job: test:library-std
+          resource-class: ferrocene/k8s-rhel-10-arm64-medium
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - build-docker-rhivos2-test-server-aarch64
       # notably, this job needs significantly more memory.
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-compiletest
@@ -1395,12 +1377,6 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker-rhivos2-test-server-aarch64
-      - aarch64-linux-rhivos2-test-library-std:
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-            - build-docker-rhivos2-test-server-aarch64
-
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:

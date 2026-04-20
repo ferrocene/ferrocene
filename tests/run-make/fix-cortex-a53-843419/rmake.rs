@@ -10,10 +10,14 @@ fn main() {
     let mut compile = rustc();
     compile.input("main.rs").target(target()).print("link-args").panic("abort");
 
-    // we're on aarch64 in any case and we want to catch all facade and all linux-gnu targets here
-    let linker_type = if target().contains("ferrocene.facade") || target().contains("-linux-gnu") {
+    let linker_type = if target().contains("ferrocene.facade") {
         // This target directly uses LLD as the linker
         compile.link_arg("link.x").arg("-Clink-self-contained=no");
+        LinkerType::Lld
+    // we're on aarch64 in any case and we want to catch all linux-gnu targets here
+    } else if target().contains("-linux-gnu") {
+        // This target directly uses LLD as the linker
+        compile.link_arg("-Tlink.x").link_arg("-nostartfiles");
         LinkerType::Lld
     } else if target().contains("qnx") {
         // This target uses GCC as the linker, and needs -nostartup since our program is basically a

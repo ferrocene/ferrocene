@@ -3,8 +3,8 @@
 
 :upcoming-release:
 
-Next Ferrocene release
-======================
+Ferrocene 26.05.0
+=================
 
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.

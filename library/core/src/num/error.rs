@@ -7,12 +7,7 @@ use crate::fmt;
 /// The error type returned when a checked integral type conversion fails.
 #[stable(feature = "try_from", since = "1.34.0")]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-pub struct TryFromIntError(pub(crate) ());
-||||||| e8e4541ff19
-pub struct TryFromIntError(pub(crate) ());
-=======
 pub struct TryFromIntError(pub(crate) IntErrorKind);
 
 impl TryFromIntError {
@@ -23,7 +18,6 @@ impl TryFromIntError {
         &self.0
     }
 }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 #[stable(feature = "try_from", since = "1.34.0")]
 impl fmt::Display for TryFromIntError {

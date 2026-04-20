@@ -500,7 +500,12 @@ impl f16 {
     /// ```
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| e8e4541ff19
+=======
+    #[must_use]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn classify(self) -> FpCategory {
         let b = self.to_bits();
         match (b & Self::MAN_MASK, b & Self::EXP_MASK) {
@@ -605,6 +610,7 @@ impl f16 {
     #[inline]
     #[doc(alias = "nextUp")]
     #[unstable(feature = "f16", issue = "116909")]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub const fn next_up(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -659,6 +665,7 @@ impl f16 {
     #[inline]
     #[doc(alias = "nextDown")]
     #[unstable(feature = "f16", issue = "116909")]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub const fn next_down(self) -> Self {
         // Some targets violate Rust's assumption of IEEE semantics, e.g. by flushing
         // denormals to zero. This is in general unsound and unsupported, but here
@@ -902,6 +909,8 @@ impl f16 {
     #[doc(alias = "average")]
     #[unstable(feature = "f16", issue = "116909")]
     #[rustc_const_unstable(feature = "f16", issue = "116909")]
+    #[must_use = "this returns the result of the operation, \
+                  without modifying the original"]
     pub const fn midpoint(self, other: f16) -> f16 {
         const HI: f16 = f16::MAX / 2.;
 

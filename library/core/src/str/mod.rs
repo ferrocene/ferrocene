@@ -608,7 +608,12 @@ impl str {
     #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| e8e4541ff19
+=======
+    #[rustc_no_writable]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_mut_ptr(&mut self) -> *mut u8 {
         self as *mut str as *mut u8
     }

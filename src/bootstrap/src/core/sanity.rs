@@ -46,8 +46,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
-    "x86_64-unknown-linux-gnumsan",
-    "x86_64-unknown-linux-gnutsan",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

@@ -781,7 +781,12 @@ impl<T> [T] {
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| e8e4541ff19
+=======
+    #[rustc_no_writable]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         self as *mut [T] as *mut T
     }

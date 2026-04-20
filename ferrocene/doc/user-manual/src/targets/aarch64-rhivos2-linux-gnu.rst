@@ -7,9 +7,12 @@
 ===================================
 .. note::
 
-   This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
-The ``aarch64-rhivos2-linux-gnu`` Ferrocene target provides support for RedHat In Vehicle Operating System 2 (RHIVOS2) on
-aarch64 using glibc 2.31 or higher.
+   This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets
+   RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching
+   host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
+
+The ``aarch64-rhivos2-linux-gnu`` Ferrocene target provides support for RedHat In Vehicle Operating System 2
+(RHIVOS2) on aarch64 using glibc 2.31 or higher.
 
 Prerequisites
 -------------

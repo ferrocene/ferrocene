@@ -10,12 +10,12 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
-    self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, Predicate, Ty, TyCtxt,
+    self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, Ty, TyCtxt,
     TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
 use rustc_span::{DUMMY_SP, Span};
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
-use tracing::debug;
+use tracing::{debug, instrument};
 
 use super::UnvalidatedImplCause;
 use crate::ferrocene::{InstantiateResult, LintState, UseKind};
@@ -76,6 +76,7 @@ impl<'tcx> LintState<'tcx> {
     /// 4. For each method in the impl, check whether it's validated. For example, we would check
     ///    `<String as Diplay>::fmt`, see that it's unvalidated, and return its `DefId` in the
     ///    `UseKind`.
+    #[instrument(skip(self, try_instantiate, span), ret)]
     pub(super) fn check_dyn_trait_coercion(
         &self,
         dest_ty: Ty<'tcx>,
@@ -126,14 +127,22 @@ impl<'tcx> LintState<'tcx> {
             };
             let impl_ = self.find_trait_impl(trait_ref, typing_env, span);
 
-            let use_kind = match impl_ {
+            match impl_ {
                 ImplSource::UserDefined(ImplSourceUserDefinedData {
                     impl_def_id,
                     args: _,
                     nested: _,
-                }) => self.find_unvalidated_impl_fn(impl_def_id, span, coerce_src),
+                }) => {
+                    // This function in the impl needs to be marked with `prevalidated`.
+                    if let Some(impl_fn) = self.find_unvalidated_impl_fn(impl_def_id) {
+                        return Some(UseKind::TraitObjectCast(
+                            UnvalidatedImplCause::AssocFn(impl_fn),
+                            coerce_src,
+                        ));
+                    }
+                }
                 // builtin impls are always ok
-                ImplSource::Builtin(..) => return None,
+                ImplSource::Builtin(..) => continue,
                 ImplSource::Param(obligations) => {
                     // This is something like the following:
                     // ```
@@ -152,10 +161,6 @@ impl<'tcx> LintState<'tcx> {
                         coerce_src,
                     ));
                 }
-            };
-
-            if use_kind.is_some() {
-                return use_kind;
             }
         }
         None
@@ -318,7 +323,7 @@ impl<'tcx> LintState<'tcx> {
                 }
                 _ => span_bug!(
                     span,
-                    "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"
+                    "mismatched types trying to coerce from {src_ty:?} to {dst_ty:?}"
                 ),
             }
         }
@@ -352,12 +357,7 @@ impl<'tcx> LintState<'tcx> {
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
     /// FIXME: list all unvalidated functions, not just the first.
-    fn find_unvalidated_impl_fn(
-        &self,
-        impl_block: DefId,
-        span: Span,
-        coerce_src: Ty<'tcx>,
-    ) -> Option<UseKind<'tcx>> {
+    fn find_unvalidated_impl_fn(&self, impl_block: DefId) -> Option<DefId> {
         let tcx = self.tcx;
 
         let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
@@ -378,10 +378,7 @@ impl<'tcx> LintState<'tcx> {
 
             debug!("found unvalidated method {impl_fn:?}");
             // This function in the impl needs to be marked with `prevalidated`.
-            return Some(UseKind::TraitObjectCast(
-                UnvalidatedImplCause::AssocFn(impl_fn),
-                coerce_src,
-            ));
+            return Some(impl_fn);
         }
         return None;
     }

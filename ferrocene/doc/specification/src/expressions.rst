@@ -5153,7 +5153,7 @@ within the :t:`capturing expression`, as follows:
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      :t:`By immutable reference capture`.
+      :t:`By immutable reference capture` (lowest precedence).
 
    #. :dp:`fls_wmxsd0i2yemf`
       :t:`By unique immutable reference capture` mode, if the
@@ -5163,7 +5163,7 @@ within the :t:`capturing expression`, as follows:
       :t:`By mutable reference capture` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
-      :t:`By value capture`.
+      :t:`By value capture` (highest precedence).
 
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of

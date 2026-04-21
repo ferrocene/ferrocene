@@ -4713,7 +4713,7 @@ A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
 a :t:`match arm matcher`.
 
 :dp:`fls_DT4N2rr6wpvZ`
-A :dt:`match arm guard chain` is a set of conditions that should each evaluate to ``true`` in the case of :t:`[match arm guard expression]s` or have a positive match in the case of a :t:`[match arm guard let pattern]s` for the :t:`match arm` to be selected.
+A :dt:`match arm guard chain` is a set of conditions that must each evaluate to ``true`` in the case of :t:`[match arm guard expression]s`, or must each produce a positive match in the case of a :t:`[match arm guard let pattern]s` for the :t:`match arm` to be selected.
 
 :dp:`fls_RPMOAaZ6lflI`
 :t:`[Binding]s` introduced in the :t:`pattern` of a :t:`match arm matcher` are

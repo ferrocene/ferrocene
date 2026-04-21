@@ -1,0 +1,25 @@
+error: validated method calls an unvalidated function
+  --> $DIR/thir-impl-item.rs:13:9
+   |
+LL | const fn unvalidated() {}
+   |          ----------- `unvalidated` is unvalidated
+...
+LL |         unvalidated();
+   |         ^^^^^^^^^^^
+   |
+note: `A::b` is validated
+  --> $DIR/thir-impl-item.rs:12:18
+   |
+LL |     #[ferrocene::prevalidated]
+   |     -------------------------- marked as validated here
+LL |     #[inline]
+LL |     pub const fn b(&self) -> u32 {
+   |                  ^
+note: the lint level is defined here
+  --> $DIR/thir-impl-item.rs:3:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

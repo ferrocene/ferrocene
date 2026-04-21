@@ -35,7 +35,7 @@ use rustc_middle::ty::{
 use rustc_span::Span;
 use tracing::{debug, info, trace};
 
-use crate::ferrocene::{LintState, Use, UseKind};
+use crate::ferrocene::{InstantiateResult, LintState, UnvalidatedImplCause, Use, UseKind};
 
 struct LintPostMono<'a, 'tcx> {
     /// The function we are currently traversing.
@@ -131,40 +131,66 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
     }
 
     fn visit_rvalue(&mut self, rval: &Rvalue<'tcx>, location: Location) {
-        let Rvalue::Cast(
-            CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer(_), _),
-            operand,
-            _fn_ptr_ty,
-        ) = rval
-        else {
-            return;
-        };
-        let call_span = operand.span(self.body);
-
-        let Some((pre_mono_callee, generic_args)) = operand.const_fn_def() else {
-            span_bug!(
-                call_span,
-                "don't know how to handle ReifyFnPointer cast of non-constant fn {operand:?}"
-            );
-        };
-
-        let callee_instance = self.monomorphize_instance(pre_mono_callee, generic_args, call_span);
-        // FIXME: want to also check this in THIR pass
-        let use_ = self.use_(UseKind::FnPtrCast(callee_instance), call_span);
+        let Some((call_span, use_kind)) = self.find_dynamic_cast(rval) else { return };
         let source_info = self.body.source_info(location);
-        self.on_edge(use_, source_info, pre_mono_callee);
+        let use_ = self.use_(use_kind, call_span);
+        self.on_edge(use_, source_info, use_.def_id());
     }
 }
 
 impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
+    fn find_dynamic_cast(&self, rval: &Rvalue<'tcx>) -> Option<(Span, UseKind<'tcx>)> {
+        let tcx = self.linter.tcx;
+        match rval {
+            Rvalue::Cast(
+                CastKind::PointerCoercion(PointerCoercion::ReifyFnPointer(_), _),
+                operand,
+                _fn_ptr_ty,
+            ) => {
+                let call_span = operand.span(self.body);
+                let Some((pre_mono_callee, generic_args)) = operand.const_fn_def() else {
+                    span_bug!(
+                        call_span,
+                        "don't know how to handle ReifyFnPointer cast of non-constant fn {operand:?}"
+                    );
+                };
+
+                let callee_instance =
+                    self.monomorphize_instance(pre_mono_callee, generic_args, call_span);
+                // FIXME: want to also check this in THIR pass
+                Some((call_span, UseKind::FnPtrCast(callee_instance)))
+            }
+            Rvalue::Cast(
+                CastKind::PointerCoercion(PointerCoercion::Unsize, _),
+                operand,
+                dest_ty,
+            ) => {
+                let (source_ty, typing_env) = self.monomorphize_args(operand.ty(self.body, tcx));
+                let (dest_ty, _) = self.monomorphize_args(*dest_ty);
+                let call_span = operand.span(self.body);
+
+                let mut try_instantiate = |def_id, args| {
+                    InstantiateResult::Resolved(self.monomorphize_instance(def_id, args, call_span))
+                };
+
+                let use_kind = self.linter.check_dyn_trait_coercion(
+                    dest_ty,
+                    source_ty,
+                    typing_env,
+                    &mut try_instantiate,
+                    call_span,
+                )?;
+                Some((call_span, use_kind))
+            }
+            _ => None,
+        }
+    }
+
     fn use_(&self, kind: UseKind<'tcx>, span: Span) -> Use<'tcx> {
         Use { kind, span, from_instantiation: self.from_instantiation }
     }
 
     fn on_edge(&mut self, use_: Use<'tcx>, source_info: &SourceInfo, pre_mono_callee: DefId) {
-        let callee_instance = use_.expect_instance();
-
-        // Recurse into the instantiated call. Keep the call span for diagnostics.
         // Try to update the lint node if possible, but use the lint node of the caller if the
         // callee is cross-crate.
         // FIXME: we have enough info here to show a backtrace of how the function was instantiated,
@@ -184,26 +210,59 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             },
         };
 
+        // Lint this use.
         self.linter.check_use(lint_node, use_);
 
-        let site =
-            if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_in_place_fn() {
-                // We want to show a better span; drop_in_place is never interesting since the body is
-                // synthesized by a MIR shim anyway.
-                // Note that we saw it, though, so diagnostics can say "dropped here".
-                InstantiationSite {
-                    drop_fn: Some(callee_instance.def_id()),
-                    ..self.from_instantiation.unwrap()
-                }
-            } else {
-                InstantiationSite {
-                    drop_fn: None,
-                    lint_node,
-                    caller_instance: self.instance,
-                    caller_span: use_.span,
-                    pre_mono_callee,
-                }
-            };
+        // Recurse into the instantiated call.
+        let callee_instance = match use_.kind {
+            UseKind::TraitObjectCast(
+                UnvalidatedImplCause::UnresolvedGenericImpl(_, trait_ref),
+                source_ty,
+            ) => span_bug!(
+                use_.span,
+                "failed to resolve generic parameters in cast from {source_ty:?} -> {trait_ref:?}",
+            ),
+            // This can happen if we see a function like the following:
+            // ```rust
+            // fn foo<T, I: Iterator<Item = T> + 'static>(x: I) -> Box<dyn Iterator<Item = T>> {
+            //     Box::new(x)
+            // }
+            //
+            // fn main() {
+            //     let v = foo(std::iter::once(1)).collect::<Vec<_>>();
+            // }
+            // ```
+            // Here, we will notice a TraitObjectCast when we cast `x` to `dyn Iterator`,
+            // getting back a DefId for `<iter::Once as Iterator>::collect` or something like that.
+            // But we are not guaranteed that `collect` is fully monomorphized, because we can
+            // still choose its generic parameters at the call site; we won't know until we check
+            // `main`.
+            //
+            // Therefore we don't have an instance and can't check its body.
+            UseKind::TraitObjectCast(UnvalidatedImplCause::AssocFn(_), _) => return,
+            // In any other case we should have fully monomorphized the function.
+            _ => use_.opt_instance().unwrap_or_else(|| {
+                span_bug!(use_.span, "called expect_instance on a THIR-only lint kind")
+            }),
+        };
+
+        // Keep the call span for diagnostics.
+        let site = if Some(self.instance.def_id())
+            == self.linter.tcx.lang_items().drop_in_place_fn()
+        {
+            // We want to show a better span; drop_in_place is never interesting since the body is
+            // synthesized by a MIR shim anyway.
+            // Note that we saw it, though, so diagnostics can say "dropped here".
+            InstantiationSite { drop_fn: Some(use_.def_id()), ..self.from_instantiation.unwrap() }
+        } else {
+            InstantiationSite {
+                drop_fn: None,
+                lint_node,
+                caller_instance: self.instance,
+                caller_span: use_.span,
+                pre_mono_callee,
+            }
+        };
 
         if self.roots.contains(&MonoItem::Fn(callee_instance)) {
             info!("don't need to recurse into {callee_instance:?}, we'll lint it separately");
@@ -382,14 +441,5 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             EarlyBinder::bind(generic_args),
         );
         (args, env)
-    }
-}
-
-impl<'tcx> Use<'tcx> {
-    #[track_caller]
-    fn expect_instance(self) -> Instance<'tcx> {
-        self.opt_instance().unwrap_or_else(|| {
-            span_bug!(self.span, "called expect_instance on a THIR-only lint kind")
-        })
     }
 }

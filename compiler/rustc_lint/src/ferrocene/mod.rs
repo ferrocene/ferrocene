@@ -182,8 +182,8 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
 use rustc_hir::{HirId, Item};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-use rustc_middle::ty::{Instance, TraitRef, Ty, TyCtxt};
-use rustc_middle::{bug, span_bug};
+use rustc_middle::span_bug;
+use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
 use rustc_span::Span;
 use rustc_span::def_id::{DefId, LocalDefId};
@@ -312,16 +312,19 @@ struct Use<'tcx> {
 
 #[derive(Copy, Clone, Debug)]
 enum UnvalidatedImplCause<'tcx> {
+    /// A associated function from the source type's impl of one of the traits we were casting to.
+    ///
+    /// FIXME: this should have all unvalidated items in the impl, not just the first.
     AssocFn(DefId),
+    /// Only occurs pre-mono.
     UnresolvedGenericImpl(Span, rustc_middle::ty::PolyTraitRef<'tcx>),
-    // UnresolvedGenericImpl(Span, TraitRef<'tcx>),
-    // UnresolvedGenericImpl(Span, DefId),
 }
 
 #[derive(Copy, Clone, Debug)]
 enum UseKind<'tcx> {
     Called(Instance<'tcx>),
     FnPtrCast(Instance<'tcx>),
+    /// The `Ty` is the source type of the cast. We don't currently store the destination type.
     TraitObjectCast(UnvalidatedImplCause<'tcx>, Ty<'tcx>),
     /// Only occurs for consts and statics.
     ContainsFnPtr(DefId, Ty<'tcx>),

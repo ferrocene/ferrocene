@@ -11,7 +11,7 @@ use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
     self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, Ty, TyCtxt,
-    TypeSuperVisitable as _, TypeVisitable as _, TypingEnv,
+    TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
@@ -227,7 +227,7 @@ impl<'tcx> LintState<'tcx> {
         let get_adt_field = |adt_def: ty::AdtDef<'_>, args, idx: FieldIdx| {
             let variant = adt_def.variant(VariantIdx::ZERO);
             let field_ty = variant.fields[idx].ty(tcx, args);
-            tcx.normalize_erasing_regions(typing_env, field_ty)
+            tcx.normalize_erasing_regions(typing_env, Unnormalized::new(field_ty))
         };
 
         loop {
@@ -401,7 +401,7 @@ impl<'tcx> LintState<'tcx> {
         let mut selcx = SelectionContext::new(&infcx);
         let cause = ObligationCause::new(span, self.item, ObligationCauseCode::ExprAssignable);
         // Normalize the trait ref.
-        let trait_ref = tcx.normalize_erasing_regions(typing_env, trait_ref);
+        let trait_ref = tcx.normalize_erasing_regions(typing_env, Unnormalized::new(trait_ref));
         // method selection doesn't care about regions.
         let trait_ref = tcx.instantiate_bound_regions_with_erased(trait_ref);
         let obligation = Obligation::new(tcx, cause, param_env, trait_ref);

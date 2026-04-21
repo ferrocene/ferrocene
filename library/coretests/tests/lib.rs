@@ -11,14 +11,7 @@
 #![feature(borrowed_buf_init)]
 #![feature(bstr)]
 #![feature(cfg_target_has_reliable_f16_f128)]
-<<<<<<< ferrocene/main
-#![feature(char_max_len)]
-||||||| e8e4541ff19
 #![feature(char_internals)]
-#![feature(char_max_len)]
-=======
-#![feature(char_internals)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![feature(clone_to_uninit)]
 #![feature(cmp_minmax)]
 #![feature(const_array)]

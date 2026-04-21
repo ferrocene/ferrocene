@@ -498,14 +498,10 @@ impl f16 {
     /// assert_eq!(inf.classify(), FpCategory::Infinite);
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "f16", issue = "116909")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| e8e4541ff19
-=======
     #[must_use]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn classify(self) -> FpCategory {
         let b = self.to_bits();
         match (b & Self::MAN_MASK, b & Self::EXP_MASK) {

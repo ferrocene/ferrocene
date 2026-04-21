@@ -602,18 +602,14 @@ impl str {
     ///
     /// It is your responsibility to make sure that the string slice only gets
     /// modified in a way that it remains valid UTF-8.
+    #[ferrocene::prevalidated]
     #[stable(feature = "str_as_mut_ptr", since = "1.36.0")]
     #[rustc_const_stable(feature = "const_str_as_mut", since = "1.83.0")]
     #[rustc_never_returns_null_ptr]
     #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| e8e4541ff19
-=======
     #[rustc_no_writable]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_mut_ptr(&mut self) -> *mut u8 {
         self as *mut str as *mut u8
     }

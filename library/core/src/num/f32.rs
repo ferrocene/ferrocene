@@ -723,14 +723,10 @@ impl f32 {
     /// assert_eq!(num.classify(), FpCategory::Normal);
     /// assert_eq!(inf.classify(), FpCategory::Infinite);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_float_classify", since = "1.83.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| e8e4541ff19
-=======
     #[must_use]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn classify(self) -> FpCategory {
         // We used to have complicated logic here that avoids the simple bit-based tests to work
         // around buggy codegen for x87 targets (see

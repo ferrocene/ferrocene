@@ -4,11 +4,12 @@
 use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{HirId, LangItem};
+use rustc_middle::ty::TraitRef;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
-use crate::ferrocene::{LintState, UNVALIDATED, Use, UseKind};
+use crate::ferrocene::{LintState, UNVALIDATED, UnvalidatedImplCause, Use, UseKind};
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {
@@ -84,12 +85,23 @@ impl<'tcx> LintState<'tcx> {
         if matches!(use_.kind, UseKind::FnPtrCast(..)) {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
             diag.note("as a precaution, it must assume you will eventually call the function");
-        } else if let UseKind::TraitObjectCast(assoc_fn, ty) = use_.kind {
+        } else if let UseKind::TraitObjectCast(cause, ty) = use_.kind {
             diag.note(format!("once `{ty}` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated"));
-            diag.note(format!(
-                "as a precaution, it must assume you will eventually call `{}`",
-                tcx.def_path_str(assoc_fn)
-            ));
+            match cause {
+                UnvalidatedImplCause::AssocFn(assoc_fn) => {
+                    diag.note(format!(
+                        "as a precaution, it must assume you will eventually call `{}`",
+                        tcx.def_path_str(assoc_fn)
+                    ));
+                }
+                UnvalidatedImplCause::UnresolvedGenericImpl(span, trait_ref) => {
+                    diag.span_note(
+                        span,
+                        format!("Ferrocene does not know if `{trait_ref}` is validated"),
+                    );
+                    diag.note("as a precaution, it must assume it is unvalidated");
+                }
+            }
         }
     }
 

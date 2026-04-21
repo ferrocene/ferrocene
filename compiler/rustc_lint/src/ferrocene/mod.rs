@@ -182,8 +182,8 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
 use rustc_hir::{HirId, Item};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-use rustc_middle::span_bug;
-use rustc_middle::ty::{Instance, Ty, TyCtxt};
+use rustc_middle::ty::{Instance, TraitRef, Ty, TyCtxt};
+use rustc_middle::{bug, span_bug};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
 use rustc_span::Span;
 use rustc_span::def_id::{DefId, LocalDefId};
@@ -311,10 +311,18 @@ struct Use<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug)]
+enum UnvalidatedImplCause<'tcx> {
+    AssocFn(DefId),
+    UnresolvedGenericImpl(Span, rustc_middle::ty::PolyTraitRef<'tcx>),
+    // UnresolvedGenericImpl(Span, TraitRef<'tcx>),
+    // UnresolvedGenericImpl(Span, DefId),
+}
+
+#[derive(Copy, Clone, Debug)]
 enum UseKind<'tcx> {
     Called(Instance<'tcx>),
     FnPtrCast(Instance<'tcx>),
-    TraitObjectCast(DefId, Ty<'tcx>),
+    TraitObjectCast(UnvalidatedImplCause<'tcx>, Ty<'tcx>),
     /// Only occurs for consts and statics.
     ContainsFnPtr(DefId, Ty<'tcx>),
 }
@@ -324,7 +332,11 @@ impl<'tcx> Use<'tcx> {
         match self.kind {
             UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
             UseKind::ContainsFnPtr(id, _) => id,
-            UseKind::TraitObjectCast(assoc_fn, _) => assoc_fn,
+            UseKind::TraitObjectCast(UnvalidatedImplCause::AssocFn(id), _) => id,
+            UseKind::TraitObjectCast(
+                UnvalidatedImplCause::UnresolvedGenericImpl(_, trait_ref),
+                _,
+            ) => trait_ref.def_id(),
         }
     }
 

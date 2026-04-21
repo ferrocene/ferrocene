@@ -918,7 +918,7 @@ A :dt:`capture path` is a sequence starting with a :t:`variable` from the :t:`ca
 A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, which may be truncated based on these rules:
 
 - :dp:`fls_4TESOxGpEY2h`
-  When a :t:`capture path` and an ancestor :t:`capture path` are both :t:`captured <capturing>`, the ancestor :t:`capture path` is captured with the highest capture mode among the two :t:`[capture path]s`.
+  When a :t:`capture path` and an ancestor :t:`capture path` are both :t:`captured <capturing>`, the ancestor :t:`capture path` is captured with the highest :t:`capture mode` among the two :t:`[capture path]s`.
 
 - :dp:`fls_eNkZWskzznW6`
   The :t:`capture path` is truncated at the rightmost :t:`dereference` in the :t:`capture path` if the :t:`dereference` is applied to a :t:`shared reference`.

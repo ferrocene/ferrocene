@@ -2495,6 +2495,7 @@ impl str {
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
     #[stable(feature = "str_strip", since = "1.45.0")]
+    #[ferrocene::prevalidated]
     pub fn strip_suffix<P: Pattern>(&self, suffix: P) -> Option<&str>
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,

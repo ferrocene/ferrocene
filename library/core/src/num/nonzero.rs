@@ -1583,6 +1583,7 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             type Output = Self;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn neg(self) -> Self {
                 // SAFETY: negation of nonzero cannot yield zero values.
                 unsafe { Self::new_unchecked(self.get().neg()) }

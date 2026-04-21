@@ -755,6 +755,7 @@ pub mod white_space {
         0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         match c as u32 >> 8 {

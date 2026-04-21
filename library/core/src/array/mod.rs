@@ -424,6 +424,7 @@ where
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T: [const] PartialOrd, const N: usize> const PartialOrd for [T; N] {
     #[inline]
+    #[ferrocene::prevalidated]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
         PartialOrd::partial_cmp(&&self[..], &&other[..])
     }
@@ -450,6 +451,7 @@ impl<T: [const] PartialOrd, const N: usize> const PartialOrd for [T; N] {
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 impl<T: [const] Ord, const N: usize> const Ord for [T; N] {
     #[inline]
+    #[ferrocene::prevalidated]
     fn cmp(&self, other: &[T; N]) -> Ordering {
         Ord::cmp(&&self[..], &&other[..])
     }

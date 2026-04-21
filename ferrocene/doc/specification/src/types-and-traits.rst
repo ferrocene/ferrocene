@@ -921,7 +921,7 @@ A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture
   When a :t:`capture path` and one of the ancestors of that path are both captured by a closure, the ancestor path is captured with the highest capture mode among the two captures, using the strict weak ordering: :t:`immutable borrow` < :t:`unique immutable borrow` < :t:`mutable borrow` < :t:`move <by move>`.
 
 - :dp:`fls_eNkZWskzznW6`
-  The :t:`capture path` is truncated at the rightmost :t:`dereference` in the capture path if the dereference is applied to a :t:`shared reference`.
+  The :t:`capture path` is truncated at the rightmost :t:`dereference` in the :t:`capture path` if the :t:`dereference` is applied to a :t:`shared reference`.
 
 :dp:`fls_v8IFXHJnXhez`
 A :t:`place` is not captured when an :t:`underscore expression` is used to bind it.

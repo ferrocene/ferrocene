@@ -22,7 +22,7 @@ use rustc_middle::ty::{
 use rustc_span::Span;
 use tracing::{debug, info};
 
-use crate::ferrocene::{InstantiateResult, LintState, Use, UseKind};
+use crate::ferrocene::{InstantiateResult, LintState, UnvalidatedImplCause, Use, UseKind};
 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,
@@ -38,6 +38,12 @@ impl<'thir, 'tcx: 'thir> thir::visit::Visitor<'thir, 'tcx> for LintThir<'thir, '
     fn visit_expr(&mut self, expr: &'thir thir::Expr<'tcx>) {
         let use_ = match self.find_unvalidated_use(expr) {
             None => return,
+            // Didn't have all the generic parameters in scope.
+            // This will be caught later by the post-mono pass.
+            Some(Use {
+                kind: UseKind::TraitObjectCast(UnvalidatedImplCause::UnresolvedGenericImpl(..), _),
+                ..
+            }) => return,
             Some(use_) => use_,
         };
         let hir_id = HirId { owner: self.owner, local_id: expr.temp_scope_id };

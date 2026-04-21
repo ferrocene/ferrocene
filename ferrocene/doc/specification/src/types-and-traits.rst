@@ -908,11 +908,11 @@ environment` implement the :std:`core::marker::Send` :t:`trait`.
 Closure capture precision
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:dp:`fls_rdDT7jsaOMbs`
-A :dt:`capture path` is a sequence starting with a :t:`variable` from the :t:`capturing environment` followed by zero or more :t:`[place projection]s` from that :t:`variable`.
-
 :dp:`fls_j9WyKVyOLFon`
 A :dt:`place projection` is a :t:`field access expression`, :t:`dereference`, :t:`array` or :t:`slice` :t:`index expression`, or :t:`pattern` destructuring applied to a :t:`variable`.
+
+:dp:`fls_rdDT7jsaOMbs`
+A :dt:`capture path` is a sequence starting with a :t:`variable` from the :t:`capturing environment` followed by zero or more :t:`[place projection]s` from that :t:`variable`.
 
 :dp:`fls_TbfUxVf8PKPs`
 A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, which may be truncated based on these rules:

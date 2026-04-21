@@ -968,9 +968,6 @@ Closures will only capture the prefix of the :t:`capture path` that runs up to, 
 :dp:`fls_fITor3jpmgrl`
 Taking the address of an unaligned :t:`field` captures the entire struct.
 
-:dp:`fls_XFwPNGsVsu05`
-A :dt:`unique immutable borrow` is a capture that occurs when modifying the :t:`referent` of a :t:`mutable reference`.
-
 .. _fls_airvr79xkcag:
 
 Function Item Types

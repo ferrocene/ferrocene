@@ -464,6 +464,7 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_unicode(self) -> EscapeUnicode {
         EscapeUnicode::new(self)
     }
@@ -587,6 +588,7 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_default(self) -> EscapeDefault {
         match self {
             '\t' => EscapeDefault::backslash(ascii::Char::SmallT),
@@ -998,6 +1000,7 @@ impl char {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_char_classify", since = "1.87.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_whitespace(self) -> bool {
         match self {
             ' ' | '\x09'..='\x0d' => true,
@@ -1577,6 +1580,7 @@ impl char {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_ascii(&self) -> Option<ascii::Char> {
         if self.is_ascii() {
             // SAFETY: Just checked that this is ASCII.
@@ -2118,6 +2122,7 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, '\t' | '\n' | '\x0C' | '\r' | ' ')
     }

@@ -1116,6 +1116,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, b'\t' | b'\n' | b'\x0C' | b'\r' | b' ')
     }

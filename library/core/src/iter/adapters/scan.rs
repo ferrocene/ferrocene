@@ -54,12 +54,14 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R
     where
         Self: Sized,
         Fold: FnMut(Acc, Self::Item) -> R,
         R: Try<Output = Acc>,
     {
+        #[ferrocene::prevalidated]
         fn scan<'a, T, St, B, Acc, R: Try<Output = Acc>>(
             state: &'a mut St,
             f: &'a mut impl FnMut(&mut St, T) -> Option<B>,

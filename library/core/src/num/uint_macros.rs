@@ -2442,6 +2442,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline]
         #[track_caller]
+        #[ferrocene::prevalidated]
         pub const fn saturating_div(self, rhs: Self) -> Self {
             // on unsigned types, there is no overflow in integer division
             self.wrapping_div(rhs)
@@ -2588,6 +2589,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
+        #[ferrocene::prevalidated]
         pub const fn wrapping_div(self, rhs: Self) -> Self {
             self / rhs
         }
@@ -2641,6 +2643,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline(always)]
         #[track_caller]
+        #[ferrocene::prevalidated]
         pub const fn wrapping_rem(self, rhs: Self) -> Self {
             self % rhs
         }

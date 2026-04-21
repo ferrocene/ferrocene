@@ -424,6 +424,7 @@ where
 // blocked by PartialOrd
 impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
     #[inline]
+    #[ferrocene::prevalidated]
     fn partial_cmp(&self, other: &[T; N]) -> Option<Ordering> {
         PartialOrd::partial_cmp(&&self[..], &&other[..])
     }
@@ -449,6 +450,7 @@ impl<T: PartialOrd, const N: usize> PartialOrd for [T; N] {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Ord, const N: usize> Ord for [T; N] {
     #[inline]
+    #[ferrocene::prevalidated]
     fn cmp(&self, other: &[T; N]) -> Ordering {
         Ord::cmp(&&self[..], &&other[..])
     }

@@ -218,6 +218,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn add(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0.saturating_add(other.0))
             }
@@ -230,6 +231,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const AddAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: Saturating<$t>) {
                 *self = *self + other;
             }
@@ -242,6 +244,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const AddAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: $t) {
                 *self = *self + Saturating(other);
             }
@@ -256,6 +259,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0.saturating_sub(other.0))
             }
@@ -268,6 +272,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const SubAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: Saturating<$t>) {
                 *self = *self - other;
             }
@@ -280,6 +285,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const SubAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: $t) {
                 *self = *self - Saturating(other);
             }
@@ -294,6 +300,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0.saturating_mul(other.0))
             }
@@ -306,6 +313,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const MulAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: Saturating<$t>) {
                 *self = *self * other;
             }
@@ -318,6 +326,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const MulAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: $t) {
                 *self = *self * Saturating(other);
             }
@@ -347,6 +356,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn div(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0.saturating_div(other.0))
             }
@@ -359,6 +369,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: Saturating<$t>) {
                 *self = *self / other;
             }
@@ -371,6 +382,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: $t) {
                 *self = *self / Saturating(other);
             }
@@ -385,6 +397,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0.rem(other.0))
             }
@@ -397,6 +410,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: Saturating<$t>) {
                 *self = *self % other;
             }
@@ -409,6 +423,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: $t) {
                 *self = *self % Saturating(other);
             }
@@ -423,6 +438,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn not(self) -> Saturating<$t> {
                 Saturating(!self.0)
             }
@@ -437,6 +453,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0 ^ other.0)
             }
@@ -449,6 +466,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitXorAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: Saturating<$t>) {
                 *self = *self ^ other;
             }
@@ -461,6 +479,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitXorAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: $t) {
                 *self = *self ^ Saturating(other);
             }
@@ -475,6 +494,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0 | other.0)
             }
@@ -487,6 +507,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitOrAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: Saturating<$t>) {
                 *self = *self | other;
             }
@@ -499,6 +520,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitOrAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: $t) {
                 *self = *self | Saturating(other);
             }
@@ -513,6 +535,7 @@ macro_rules! saturating_impl {
             type Output = Saturating<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand(self, other: Saturating<$t>) -> Saturating<$t> {
                 Saturating(self.0 & other.0)
             }
@@ -525,6 +548,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitAndAssign for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: Saturating<$t>) {
                 *self = *self & other;
             }
@@ -537,6 +561,7 @@ macro_rules! saturating_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitAndAssign<$t> for Saturating<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: $t) {
                 *self = *self & Saturating(other);
             }
@@ -1004,6 +1029,7 @@ macro_rules! saturating_int_impl_signed {
         impl const Neg for Saturating<$t> {
             type Output = Self;
             #[inline]
+            #[ferrocene::prevalidated]
             fn neg(self) -> Self {
                 Saturating(self.0.saturating_neg())
             }

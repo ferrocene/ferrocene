@@ -223,6 +223,7 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// Returns a mutable slice of all elements that have not been yielded yet.
     #[stable(feature = "array_value_iter", since = "1.51.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         self.unsize_mut().as_mut_slice()
     }

@@ -4665,7 +4665,20 @@ Match Expressions
        Expression
 
 :dp:`fls_UlxLrpyPlVmv`
-A :dt:`match guard expression` is any expression in category :s:`Expression`, except :s:`LazyBooleanExpression`, :s:`RangeFromToExpression`, :s:`RangeFromExpression`, :s:`RangeInclusiveExpression`, :s:`AssignmentExpression`, and :s:`CompoundAssignmentExpression`.
+A :dt:`match guard expression` is any :t:`expression` in category :s:`Expression`, except:
+
+- :dp:`fls_XADcpJBUxSfv`
+  :s:`AssignmentExpression`
+- :dp:`fls_gfHe2Cy6WXsK`
+  :s:`CompoundAssignmentExpression`
+- :dp:`fls_QQep7FKA1EQX`
+  :s:`LazyBooleanExpression`
+- :dp:`fls_Wepy5R7FZQPU`
+  :s:`RangeFromExpression`
+- :dp:`fls_imEIc7PUUO1x`
+  :s:`RangeFromToExpression`
+- :dp:`fls_fs4ZpXjt0Wqt`
+  :s:`RangeInclusiveExpression`
 
 .. rubric:: Legality Rules
 

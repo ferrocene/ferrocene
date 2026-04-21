@@ -365,7 +365,8 @@
                 "directories": [],
                 "files": [
                   "doc/specification/triagebot.toml",
-                  "doc/specification/src/background.rst"
+                  "doc/specification/src/background.rst",
+                  "doc/specification/src/dev-guide.rst"
                 ],
                 "license": {
                   "copyright": [

@@ -942,7 +942,7 @@ A :t:`place` is captured by :t:`immutable borrow` if its :t:`discriminant` is re
 Matching against a variant of an enum that has more than one variant captures the :t:`place` by :t:`immutable borrow`.
 
 :dp:`fls_7EXHdE2eOVek`
-Matching against a variant of an enum that has one variant does not capture the place, unless is marked with :t:`attribute` ``non_exhaustive``, in which case the place is captured by :t:`immutable borrow`.
+Matching against a variant of an enum that has one variant does not capture the place, unless it is marked with :t:`attribute` ``non_exhaustive``, in which case the place is captured by :t:`immutable borrow`.
 
 :dp:`fls_iLH8X2U4ADHb`
 Matching against a :t:`range pattern` captures the place by :t:`immutable borrow`.
@@ -960,7 +960,7 @@ Move closures can only capture the prefix of a :t:`capture path` that runs up to
 Closures will only capture the prefix of a :t:`capture path` that runs up to, but not including, the first :t:`dereference` of a :t:`raw pointer`.
 
 :dp:`fls_kYFd3p06pWWV`
-Closures will only capture the prefix of a :t:`capture path` of a :t:`union` that runs up to union itself.
+Closures will only capture the prefix of a :t:`capture path` of a :t:`union` that runs up to the union itself.
 
 :dp:`fls_fATMTNUOHsfb`
 Closures will only capture the prefix of the :t:`capture path` that runs up to, but not including, the first :t:`field access expression` into a structure that uses the :t:`attribute` ``packed`` representation, in unaligned :t:`[field]s` in a struct.

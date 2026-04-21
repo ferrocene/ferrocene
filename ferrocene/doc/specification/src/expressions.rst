@@ -4752,10 +4752,10 @@ The :t:`value` of a :t:`match expression` is the :t:`value` of the :t:`operand`
 of the selected :t:`match arm`.
 
 :dp:`fls_AAuyKfxLgJ43`
-A :dt:`match arm guard let pattern` is a construct that evaluates if a :t:`match arm guard expression` matches the specified :t:`pattern`.
+A :dt:`match arm guard let pattern` is evaluated when its :t:`match arm guard expression` matches the specified :t:`pattern`.
 
 :dp:`fls_uCDQMkWx5OMS`
-Each :t:`let binding` in a :t:`match arm guard let pattern` is in scope for the rest of the :t:`match arm guard` as well as the :t:`match arm body`.
+Each :t:`let binding` introduced in a :t:`match arm guard let pattern` is :t:`in scope` for the rest of the :t:`match arm guard` as well as the :t:`match arm body`.
 
 .. rubric:: Dynamic Semantics
 

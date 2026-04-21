@@ -341,6 +341,8 @@ control reaches the invocation of :t:`macro` :std:`core::panic`.
 It is a static error if the evaluation of a :t:`constant expression` results in
 a :t:`value` that is unaligned.
 
+.. rubric:: Undefined Behavior
+
 :dp:`fls_hOIImCr1c6IF`
 It is undefined behavior to convert a :t:`pointer` that has :t:`provenance` into a non-:t:`pointer type` in a :t:`constant context`.
 

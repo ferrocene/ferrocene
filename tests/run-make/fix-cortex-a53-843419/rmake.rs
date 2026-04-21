@@ -12,7 +12,12 @@ fn main() {
 
     let linker_type = if target().contains("ferrocene.facade") {
         // This target directly uses LLD as the linker
-        compile.link_arg("link.x").arg("-Clink-self-contained=no");
+        compile.link_arg("-Tlink.x").arg("-Clink-self-contained=no");
+        LinkerType::Lld
+    // we're on aarch64 in any case and we want to catch all linux-gnu targets here
+    } else if target().contains("-linux-gnu") {
+        // This target uses LLD through GCC (linker driver)
+        compile.link_arg("-Wl,-Tlink.x").link_arg("-nostartfiles");
         LinkerType::Lld
     } else if target().contains("qnx") {
         // This target uses GCC as the linker, and needs -nostartup since our program is basically a
@@ -22,13 +27,17 @@ fn main() {
     } else {
         // This target uses GCC as the linker, and needs -nostartfiles since our program is
         // basically a startup object.
-        compile.link_arg("-Wl,link.x").link_arg("-nostartfiles");
+        compile.link_arg("-Wl,-Tlink.x").link_arg("-nostartfiles");
         LinkerType::Gnu
     };
 
     let outcome = compile.run();
     // Ensure --print=link-args shows the errata fix linker flag.
     assert!(outcome.stdout_utf8().contains("--fix-cortex-a53-843419"));
+
+    // sanity check that no prologue was injected
+    assert!(grep_instruction(0xff0, "nop"));
+    assert!(grep_instruction(0xff4, "nop"));
 
     match linker_type {
         LinkerType::Lld => {

@@ -915,7 +915,7 @@ A :dt:`capture path` is a sequence starting with a :t:`variable` from the :t:`ca
 A :dt:`place projection` is a :t:`field access expression`, :t:`dereference`, :t:`array` or :t:`slice` :t:`index expression`, or :t:`pattern` destructuring applied to a :t:`variable`.
 
 :dp:`fls_TbfUxVf8PKPs`
-The closure :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, which may be truncated based on these rules:
+A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, which may be truncated based on these rules:
 
 - :dp:`fls_4TESOxGpEY2h`
   When a :t:`capture path` and one of the ancestors of that path are both captured by a closure, the ancestor path is captured with the highest capture mode among the two captures, using the strict weak ordering: :t:`immutable borrow` < :t:`unique immutable borrow` < :t:`mutable borrow` < :t:`move <by move>`.

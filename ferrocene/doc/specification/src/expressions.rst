@@ -4650,22 +4650,22 @@ Match Expressions
        OuterAttributeOrDoc* Pattern MatchArmGuard?
 
    MatchArmGuard ::=
-       $$if$$ (Operand | MatchGuardChain)
+       $$if$$ (Operand | MatchArmGuardChain)
 
-   MatchGuardChain ::=
-       MatchGuardCondition ($$&&$$ MatchGuardCondition)*
+   MatchArmGuardChain ::=
+       MatchArmGuardCondition ($$&&$$ MatchArmGuardCondition)*
 
-   MatchGuardCondition ::=
-       (MatchGuardExpression | OuterAttributeOrDoc* MatchGuardLetPattern)
+   MatchArmGuardCondition ::=
+       (MatchArmGuardExpression | OuterAttributeOrDoc* MatchArmGuardLetPattern)
 
-   MatchGuardLetPattern ::=
-       $$let$$ Pattern $$=$$ MatchGuardExpression
+   MatchArmGuardLetPattern ::=
+       $$let$$ Pattern $$=$$ MatchArmGuardExpression
 
-   MatchGuardExpression ::=
+   MatchArmGuardExpression ::=
        Expression
 
 :dp:`fls_UlxLrpyPlVmv`
-A :dt:`match guard expression` is any :t:`expression` in category :s:`Expression`, except:
+A :dt:`match arm guard expression` is any :t:`expression` in category :s:`Expression`, except:
 
 - :dp:`fls_XADcpJBUxSfv`
   :s:`AssignmentExpression`
@@ -4713,7 +4713,7 @@ A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
 a :t:`match arm matcher`.
 
 :dp:`fls_DT4N2rr6wpvZ`
-A :dt:`match guard chain` is a set of conditions that should each evaluate to ``true`` in the case of :t:`[match guard expression]s` or have a positive match in the case of a :t:`[match guard let pattern]s` for the :t:`match arm` to be selected.
+A :dt:`match arm guard chain` is a set of conditions that should each evaluate to ``true`` in the case of :t:`[match arm guard expression]s` or have a positive match in the case of a :t:`[match arm guard let pattern]s` for the :t:`match arm` to be selected.
 
 :dp:`fls_RPMOAaZ6lflI`
 :t:`[Binding]s` introduced in the :t:`pattern` of a :t:`match arm matcher` are
@@ -4752,10 +4752,10 @@ The :t:`value` of a :t:`match expression` is the :t:`value` of the :t:`operand`
 of the selected :t:`match arm`.
 
 :dp:`fls_AAuyKfxLgJ43`
-A :dt:`match guard let pattern` is a construct that evaluates if a :t:`match guard expression` matches the specified :t:`pattern`.
+A :dt:`match arm guard let pattern` is a construct that evaluates if a :t:`match arm guard expression` matches the specified :t:`pattern`.
 
 :dp:`fls_uCDQMkWx5OMS`
-Each :t:`let binding` in a :t:`match guard let pattern` is in scope for the rest of the :t:`match arm guard` as well as the :t:`match arm body`.
+Each :t:`let binding` in a :t:`match arm guard let pattern` is in scope for the rest of the :t:`match arm guard` as well as the :t:`match arm body`.
 
 .. rubric:: Dynamic Semantics
 

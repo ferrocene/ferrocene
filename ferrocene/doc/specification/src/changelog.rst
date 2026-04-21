@@ -28,10 +28,10 @@ Language changes in Rust 1.95.0
 
   New syntax:
 
-  - :s:`MatchGuardChain`
-  - :s:`MatchGuardCondition`
-  - :s:`MatchGuardExpression`
-  - :s:`MatchGuardLetPattern`
+  - :s:`MatchArmGuardChain`
+  - :s:`MatchArmGuardCondition`
+  - :s:`MatchArmGuardExpression`
+  - :s:`MatchArmGuardLetPattern`
 
   New paragraphs:
 

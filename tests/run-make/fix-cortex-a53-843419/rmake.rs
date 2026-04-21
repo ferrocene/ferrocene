@@ -16,7 +16,7 @@ fn main() {
         LinkerType::Lld
     // we're on aarch64 in any case and we want to catch all linux-gnu targets here
     } else if target().contains("-linux-gnu") {
-        // This target directly uses LLD as the linker
+        // This target uses LLD through GCC (linker driver)
         compile.link_arg("-Wl,-Tlink.x").link_arg("-nostartfiles");
         LinkerType::Lld
     } else if target().contains("qnx") {

@@ -24,7 +24,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::{CRATE_HIR_ID, HirId};
 use rustc_middle::mir::visit::Visitor as _;
 use rustc_middle::mir::{
-    self, Body, CastKind, ClearCrossCrate, Location, Rvalue, SourceInfo, Terminator, TerminatorKind,
+    self, Body, CastKind, Location, Rvalue, SourceScope, Terminator, TerminatorKind,
 };
 use rustc_middle::mono::MonoItem;
 use rustc_middle::span_bug;
@@ -126,15 +126,17 @@ impl<'a, 'tcx> mir::visit::Visitor<'tcx> for LintPostMono<'a, 'tcx> {
         if let Some((callee_instance, pre_mono_call)) = self.get_call_def_mir(terminator, location)
         {
             let use_ = self.use_(UseKind::Called(callee_instance), terminator.source_info.span);
-            self.on_edge(use_, &terminator.source_info, pre_mono_call);
+            self.on_edge(use_, terminator.source_info.scope, pre_mono_call);
         }
+        self.super_terminator(terminator, location);
     }
 
     fn visit_rvalue(&mut self, rval: &Rvalue<'tcx>, location: Location) {
         let Some((call_span, use_kind)) = self.find_dynamic_cast(rval) else { return };
         let source_info = self.body.source_info(location);
         let use_ = self.use_(use_kind, call_span);
-        self.on_edge(use_, source_info, use_.def_id());
+        self.on_edge(use_, source_info.scope, use_.def_id());
+        self.super_rvalue(rval, location);
     }
 }
 
@@ -190,16 +192,14 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         Use { kind, span, from_instantiation: self.from_instantiation }
     }
 
-    fn on_edge(&mut self, use_: Use<'tcx>, source_info: &SourceInfo, pre_mono_callee: DefId) {
+    fn lint(&mut self, use_: Use<'tcx>, scope: SourceScope) -> HirId {
         // Try to update the lint node if possible, but use the lint node of the caller if the
         // callee is cross-crate.
         // FIXME: we have enough info here to show a backtrace of how the function was instantiated,
         // maybe pass that in so we can show it?
-        let lint_node = match self.body.source_scopes[source_info.scope].local_data.as_ref() {
-            ClearCrossCrate::Set(data) => data.lint_root,
-            // We assume that all roots come from the current crate.
-            // This is checked earlier in `lint_validated_roots`.
-            ClearCrossCrate::Clear => match self.from_instantiation.as_ref() {
+        let lint_node = match scope.lint_root(&self.body.source_scopes) {
+            Some(node) => node,
+            None => match self.from_instantiation.as_ref() {
                 // This is a bit odd - we use the HIR id of the caller function,
                 // not the callee that actually caused the error.
                 // The callee is in another crate so we don't have any choice here.
@@ -212,6 +212,12 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
         // Lint this use.
         self.linter.check_use(lint_node, use_);
+
+        lint_node
+    }
+
+    fn on_edge(&mut self, use_: Use<'tcx>, scope: SourceScope, pre_mono_callee: DefId) {
+        let lint_node = self.lint(use_, scope);
 
         // Recurse into the instantiated call.
         let callee_instance = match use_.kind {
@@ -333,9 +339,26 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         }
 
         let body = tcx.instance_mir(instance.def);
+        trace!(body = ?body, "visiting body");
         let mut this = LintPostMono { linter, visited, roots, instance, body, from_instantiation };
-        for (bb, data) in mir::traversal::reachable(body) {
+        for (bb, data) in mir::traversal::preorder(body) {
             this.visit_basic_block_data(bb, data);
+        }
+
+        // If the MIR inliner ran, we may not see all original function calls.
+        // Usually these are preserved in the source scopes for each statement,  but if the
+        // inliner has completely deleted every statement in the body we can't rely on that.
+        // Iterate through every source scope we know about just in case.
+        for (scope, scope_data) in body.source_scopes.iter_enumerated() {
+            trace!("saw scope {scope_data:?}");
+            if let Some((instance, span)) = scope_data.inlined {
+                debug!("saw inlined instance {instance:?}");
+                let use_ = this.use_(UseKind::Called(instance), span);
+                // NOTE: we can't use `on_edge` here because it won't properly substitute generic
+                // parameters when it recurses. That's ok: since we're visiting every source scope in
+                // this body, we'll catch all the other inlined calls when we see their `scope_data`.
+                this.lint(use_, scope);
+            }
         }
     }
 

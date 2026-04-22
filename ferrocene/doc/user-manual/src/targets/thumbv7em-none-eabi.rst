@@ -53,6 +53,8 @@ To use the target, the following additional flags must be provided to
 
 * ``--target=thumbv7em-none-eabi``
 
+.. _thumbv7em-none-eabi-permitted-flags:
+
 Permitted compiler flags
 ------------------------
 

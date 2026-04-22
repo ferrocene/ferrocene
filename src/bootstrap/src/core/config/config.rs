@@ -78,6 +78,7 @@ pub const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/rustdoc-json-types",
     ":!tests",
     // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
+    ":!ferrocene", // ferrocene addition: can't affect compiler builds
     ":!src/bootstrap/defaults",
 ];
 

@@ -1077,10 +1077,31 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64-none-test-target-cpu-compiletest
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-specific-cortex-a53
+          qemu-arch: qemu-aarch64
+          job: qnx:compiletest-no-only-hosts
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
       - facade-generic-test:
           name: aarch64-none-test-library
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
+          qemu-arch: qemu-aarch64
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64-none-test-target-cpu-library
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library
           resource-class: large # 4-core

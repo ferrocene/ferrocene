@@ -1,0 +1,25 @@
+error: validated function calls an unvalidated function
+  --> $DIR/mir-inlining.rs:17:5
+   |
+LL | pub const fn trailing_ones(_: u32) -> u32 {
+   |              ------------- `trailing_ones` is unvalidated
+...
+LL |     f(x);
+   |     ^^^^
+   |
+note: `main` is validated
+  --> $DIR/mir-inlining.rs:22:4
+   |
+LL | fn main() {
+   |    ^^^^
+LL |     call(123_u32, trailing_ones);
+   |     ---------------------------- generic function `call` instantiated by `main`
+   = note: main functions are assumed to be validated
+note: the lint level is defined here
+  --> $DIR/mir-inlining.rs:8:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

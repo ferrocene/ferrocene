@@ -394,6 +394,8 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
     // LateLintPass trait runs later than unsafety-checking, which means that normally if we try to
     // read THIR bodies we'll get an ICE. Tell unsafety-checking not to steal the THIR.
     config.opts.unstable_opts.no_steal_thir = true;
+    // `ferrocene::prevalidated` currently can't handle MIR inlining.
+    config.opts.unstable_opts.inline_mir = Some(false);
 
     // Set parallel mode before thread pool creation, which will create `Lock`s.
     rustc_data_structures::sync::set_dyn_thread_safe_mode(config.opts.unstable_opts.threads > 1);

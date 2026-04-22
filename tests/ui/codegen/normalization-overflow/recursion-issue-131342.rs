@@ -7,7 +7,7 @@ fn main() {
 
 fn problem_thingy(items: &mut impl Iterator<Item = u8>) {
     let mut peeker = items.peekable();
-    //~^ ERROR: reached the recursion limit while instantiating
+    //~? ERROR: reached the recursion limit while instantiating
     match peeker.peek() {
         Some(_) => (),
         None => return (),

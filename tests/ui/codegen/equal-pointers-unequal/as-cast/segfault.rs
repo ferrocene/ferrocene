@@ -1,3 +1,6 @@
+// Ferrocene addition: different behavior with `-Z inline-mir=no`
+//@ ignore-test
+
 //@ known-bug: #107975
 //@ compile-flags: -Copt-level=2
 //@ run-pass

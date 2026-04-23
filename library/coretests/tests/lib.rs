@@ -142,7 +142,6 @@
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
 #![feature(c_void_variant)]
-#![feature(char_internals)]
 #![feature(const_raw_ptr_comparison)]
 #![feature(control_flow_into_value)]
 #![feature(debug_closure_helpers)]

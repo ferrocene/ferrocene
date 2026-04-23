@@ -1141,7 +1141,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1151,7 +1151,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1170,7 +1170,7 @@ workflows:
           target: aarch64r82-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1189,7 +1189,7 @@ workflows:
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1229,7 +1229,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1239,7 +1239,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1249,7 +1249,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1259,7 +1259,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

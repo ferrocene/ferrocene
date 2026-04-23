@@ -137,6 +137,9 @@ JOBS_DEFINITION: JobsDefinition = {
         # Library tests are the second slowest part of a test run, so we run
         # them in a separate job to reduce the CI wall clock time.
         "library": ["library/core", "library/alloc", "library/test", "library/std"],
+
+        # This is the library without std, for all targets that have no std.
+        "library-nostd": ["library/core", "library/alloc", "library/test"],
     },
 
     "qnx": {

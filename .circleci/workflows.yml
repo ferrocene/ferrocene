@@ -85,6 +85,16 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
+  # use this parameter to disable building the windows host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in windows results
+  full-build-x86_64-pc-windows-msvc-host:
+    type: boolean
+    default: true
+  # use this parameter to disable building the darwin host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in darwin results
+  full-build-aarch64-darwin-host:
+    type: boolean
+    default: true
   # This is a stable workflow id that doesn't change on rerun
   #
   # The stable workflow id is used to identify intermediary containers used by this workflow.
@@ -506,7 +516,10 @@ jobs:
       LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+          condition:
+            and:
+              - << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+              - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
             - ferrocene-checkout
             # Darwin does not come with awscli, setup it before aws steps
@@ -533,8 +546,14 @@ jobs:
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
-      - ferrocene-job-build:
-          os: darwin
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-build:
+                os: darwin
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-dist:
     macos:
@@ -548,9 +567,15 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist rust-std
     steps:
-      - ferrocene-job-dist:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-dist-tools:
     macos:
@@ -563,9 +588,15 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-      - ferrocene-job-dist:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-self-test:
     macos:
@@ -575,18 +606,24 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      # Darwin does not come with awscli, setup it before aws steps
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            # Darwin does not come with awscli, setup it before aws steps
+            - run:
+                name: Install AWSCLIv2
+                command: brew install awscli
+            - aws-oidc-auth
+            - ferrocene-setup-darwin
+            - setup-uv
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
       - run:
-          name: Install AWSCLIv2
-          command: brew install awscli
-      - aws-oidc-auth
-      - ferrocene-setup-darwin
-      - setup-uv
-      - run:
-          name: Download dist artifacts and run the self-test tool
-          command: ferrocene/ci/scripts/run-self-test.sh
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-generic-test-runner:
     macos:
@@ -603,9 +640,15 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
-      - ferrocene-job-test-container:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-test-container:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # x86_64-pc-windows-msvc jobs
 
@@ -632,7 +675,10 @@ jobs:
           name: Make sure git autocrlf is false
           command: git config --global core.autocrlf false
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+          condition:
+            and:
+              - << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+              - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
@@ -661,8 +707,14 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std
     steps:
-      - ferrocene-job-dist:
-          os: windows
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: windows
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   x86_64-windows-self-test:
     executor:
@@ -674,15 +726,21 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - aws-oidc-auth
-      - ferrocene-setup-windows
-      - setup-uv
-      - setup-qnx-toolchain: {}
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - aws-oidc-auth
+            - ferrocene-setup-windows
+            - setup-uv
+            - setup-qnx-toolchain: {}
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
       - run:
-          name: Download dist artifacts and run the self-test tool
-          command: ferrocene/ci/scripts/run-self-test.sh
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # Test VMs
 

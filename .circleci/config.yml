@@ -9,6 +9,18 @@
 version: 2.1
 setup: true
 
+parameters:
+  # use this parameter to disable building the windows host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in windows results
+  full-build-x86_64-pc-windows-msvc-host:
+    type: boolean
+    default: true
+  # use this parameter to disable building the darwin host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in darwin results
+  full-build-aarch64-darwin-host:
+    type: boolean
+    default: true
+
 orbs:
   aws-cli: circleci/aws-cli@4.0
   continuation: circleci/continuation@0.2.0

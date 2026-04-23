@@ -135,14 +135,8 @@ JOBS_DEFINITION: JobsDefinition = {
         ),
 
         # Library tests are the second slowest part of a test run, so we run
-        # them in a separate job to reduce the CI wall clock time. Note that
-        # stdlib tests are run in a separate job, as those require IPv6 and
-        # thus can't be executed in containers due to CircleCI limitations.
-        "library": ["library/core", "library/alloc", "library/test"],
-
-        # The standard library tests require IPv6, which is not available in
-        # containers. Run them separately in a VM.
-        "library-std": ["library/std"],
+        # them in a separate job to reduce the CI wall clock time.
+        "library": ["library/core", "library/alloc", "library/test", "library/std"],
     },
 
     "qnx": {

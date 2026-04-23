@@ -1055,14 +1055,11 @@ workflows:
             - misc-checks
             - x86_64-linux-test
             - x86_64-linux-test-library
-            - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
             - x86_64-qnx-test-library
-            - x86_64-qnx-test-library-std
             - x86_64-qnx-test-compiletest
             - aarch64-qnx-test-library
-            - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-test-compiletest
@@ -1076,11 +1073,9 @@ workflows:
             - thumbv7em-eabi-test-compiletest
             - aarch64-linux-test
             - aarch64-linux-test-library
-            - aarch64-linux-test-library-std
             - aarch64-linux-compiletest
             - aarch64-linux-library-coverage
             - aarch64-linux-rhivos2-test-library
-            - aarch64-linux-rhivos2-test-library-std
             - aarch64-linux-rhivos2-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
@@ -1114,13 +1109,6 @@ workflows:
           name: x86_64-linux-compiletest
           job: test:compiletest
           resource-class: ferrocene/k8s-amd64-large
-          test-variant: "2021"
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-generic-test-container:
-          name: x86_64-linux-test-library-std
-          job: test:library-std
-          resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"
           requires:
             - x86_64-linux-build
@@ -1228,15 +1216,6 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library-std
-          job: test:library-std
-          test-variant: "2021"
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
@@ -1336,15 +1315,6 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library-std
-          job: test:library-std
-          test-variant: "2021"
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
@@ -1380,13 +1350,6 @@ workflows:
           requires:
             - aarch64-linux-build
       - aarch64-linux-generic-test-container:
-          name: aarch64-linux-test-library-std
-          job: test:library-std
-          resource-class: ferrocene/k8s-arm64-medium
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-generic-test-container:
           name: aarch64-linux-compiletest
           job: test:compiletest
           resource-class: ferrocene/k8s-arm64-large
@@ -1415,14 +1378,6 @@ workflows:
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-test-library
           job: test:library
-          resource-class: ferrocene/k8s-rhel-10-arm64-medium
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-            - build-docker-rhivos2-test-server-aarch64
-      - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-rhivos2-test-library-std
-          job: test:library-std
           resource-class: ferrocene/k8s-rhel-10-arm64-medium
           test-variant: "2021"
           requires:
@@ -1465,12 +1420,6 @@ workflows:
           resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library-std
-          job: test:library-std
-          resource-class: m4pro.medium # 6 cores
-          requires:
-            - aarch64-darwin-build
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
@@ -1502,7 +1451,6 @@ workflows:
             - aarch64-darwin-self-test
             - aarch64-darwin-test
             - aarch64-darwin-test-library
-            - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
             - sbom-gen
 

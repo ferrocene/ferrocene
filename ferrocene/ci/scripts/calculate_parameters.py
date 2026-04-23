@@ -259,7 +259,7 @@ def prepare_parameters():
                 # Anything after the prefix gets passed as a parameter
                 parameters[parameter] = func(parameter[len(prefix) :])
                 break
-            if parameter.startswith('full-build-'):
+            if parameter.startswith("full-build-"):
                 # ignore these parameters, they'll be passed straight on.
                 break
         # In Python, the `else` is executed when the for loop finished

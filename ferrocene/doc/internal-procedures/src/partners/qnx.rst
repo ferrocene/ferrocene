@@ -149,7 +149,7 @@ Creating a CI/CD deployment
 ---------------------------
 
 .. note::
-    These instructions are are intended to be run on a x86_64 Linux host only.
+    These instructions are intended to be run on a x86_64 Linux host only.
     `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/install>`_ or `Lima
     <https://github.com/lima-vm/lima>`_ work sufficiently if needed.
 

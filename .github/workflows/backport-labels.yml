@@ -5,6 +5,13 @@
 # to drive the automation. This workflow is responsible for updating them
 # whenever something relevant happens.
 
+# For documentation of github-script, see [its
+# README](https://github.com/actions/github-script?tab=readme-ov-file).
+# For documentation of the `github` object, see
+# [octokit](https://octokit.github.io/rest.js/v22/).
+# For documentation of the `context` object, see [the source
+# code](https://github.com/actions/toolkit/blob/main/packages/github/src/context.ts).
+
 ---
 
 name: Backport labels
@@ -43,8 +50,10 @@ jobs:
               });
             }
 
-  # Remove the backport:1.NN label once a PR with the "Ferrocene-backport-of"
+  # Remove the `backport:1.NN` label once a PR with the "Ferrocene-backport-of"
   # message in the commit is merged into the release/1.NN branch.
+  # Add `merged-in:1.NN` to all child PRs.
+  # Finally, remove any `backport:manual` labels from child PRs.
   mark-backport-as-succeeded:
     name: Mark backport as succeeded
     runs-on: ubuntu-latest
@@ -82,6 +91,12 @@ jobs:
                   owner: context.payload.repository.owner.login,
                   repo: context.payload.repository.name,
                   name: "backport:" + version,
+                });
+                github.rest.issues.addLabels({
+                  issue_number: pr,
+                  owner: context.payload.repository.owner.login,
+                  repo: context.payload.repository.name,
+                  labels: ["merged-in:" + version],
                 });
                 context.payload.pull_request.labels.forEach(label => {
                   if (label.name === "backport:manual") {

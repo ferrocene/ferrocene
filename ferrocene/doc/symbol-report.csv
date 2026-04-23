@@ -8249,6 +8249,7 @@ core::slice::<impl [T]>::is_empty
 core::slice::<impl [T]>::iter
 core::slice::<impl [T]>::iter_mut
 core::slice::<impl [T]>::last
+core::slice::<impl [T]>::last_chunk
 core::slice::<impl [T]>::last_mut
 core::slice::<impl [T]>::len
 core::slice::<impl [T]>::reverse
@@ -8274,9 +8275,12 @@ core::slice::<impl [T]>::swap
 core::slice::<impl [T]>::swap_unchecked::precondition_check
 core::slice::<impl [T]>::windows
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks::eq_ignore_ascii_inner
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
 core::slice::ascii::<impl [u8]>::escape_ascii
 core::slice::ascii::<impl [u8]>::is_ascii
+core::slice::ascii::is_ascii
 core::slice::ascii::is_ascii::compiletime
 core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii_simple

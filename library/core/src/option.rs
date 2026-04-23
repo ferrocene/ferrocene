@@ -1842,6 +1842,7 @@ impl<T> Option<T> {
     #[inline]
     #[stable(feature = "option_entry", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
+    #[ferrocene::prevalidated]
     pub const fn get_or_insert_with<F>(&mut self, f: F) -> &mut T
     where
         F: [const] FnOnce() -> T + [const] Destruct,

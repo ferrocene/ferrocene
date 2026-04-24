@@ -93,12 +93,8 @@ impl<'tcx> LintState<'tcx> {
                         tcx.def_path_str(assoc_fn)
                     ));
                 }
-                UnvalidatedImplCause::UnresolvedGenericImpl(span, trait_ref) => {
-                    diag.span_note(
-                        span,
-                        format!("Ferrocene does not know if `{trait_ref}` is validated"),
-                    );
-                    diag.note("as a precaution, it must assume it is unvalidated");
+                UnvalidatedImplCause::UnresolvedGenericImpl(..) => {
+                    unreachable!("all generics should be resolved by post-mono")
                 }
             }
         }

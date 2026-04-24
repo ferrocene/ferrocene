@@ -1414,6 +1414,10 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         rustc_scalable_vector, Normal, template!(List: &["count"]), WarnFollowing, EncodeCrossCrate::Yes,
         "`#[rustc_scalable_vector]` defines a scalable vector type"
     ),
+    rustc_attr!(
+        rustc_must_match_exhaustively, Normal, template!(Word), WarnFollowing, EncodeCrossCrate::Yes,
+        "enums with `#[rustc_must_match_exhaustively]` must be matched on with a match block that mentions all variants explicitly"
+    ),
 
     // ==========================================================================
     // Internal attributes, Testing:
@@ -1449,11 +1453,11 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
-        TEST, rustc_hidden_type_of_opaques, Normal, template!(Word),
+        TEST, rustc_dump_hidden_type_of_opaques, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
-        TEST, rustc_layout, Normal, template!(List: &["field1, field2, ..."]),
+        TEST, rustc_dump_layout, Normal, template!(List: &["field1, field2, ..."]),
         WarnFollowing, EncodeCrossCrate::Yes
     ),
     rustc_attr!(
@@ -1504,11 +1508,11 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         EncodeCrossCrate::No
     ),
     rustc_attr!(
-        TEST, rustc_symbol_name, Normal, template!(Word),
+        TEST, rustc_dump_symbol_name, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
-        TEST, rustc_def_path, Normal, template!(Word),
+        TEST, rustc_dump_def_path, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
@@ -1588,6 +1592,7 @@ pub fn is_stable_diagnostic_attribute(sym: Symbol, features: &Features) -> bool 
         sym::on_unimplemented | sym::do_not_recommend => true,
         sym::on_const => features.diagnostic_on_const(),
         sym::on_move => features.diagnostic_on_move(),
+        sym::on_unknown => features.diagnostic_on_unknown(),
         _ => false,
     }
 }

@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
   "blanket",
+  "flip-link",
   "document-signatures",
   "generate-tarball",
   "self-test",

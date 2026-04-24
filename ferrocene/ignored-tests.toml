@@ -44,7 +44,7 @@ reason = "<assert.h> is not available for inclusion on this platform"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710"]
+targets = ["aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710", "x86_64-pc-nto-qnx800"]
 reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
 
 [["tests/run-make"]]

@@ -187,48 +187,52 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-
-  x86_64-linux-dist-tools:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-large
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-
-  x86_64-linux-dist-targets:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-large
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
-      SCRIPT: |
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx: true
           restore-from-job: x86_64-linux-build
-
-  x86_64-linux-dist-src:
-    executor: docker-x86_64-ubuntu-20
-    resource_class: ferrocene/k8s-amd64-medium
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-          # We need the whole LLVM clone to be able to include the full source
-          # code into the tarball we ship to customers.
           llvm-subset: false
+
+  # x86_64-linux-dist-tools:
+  #   executor: docker-x86_64-ubuntu-20
+  #   resource_class: ferrocene/k8s-amd64-large
+  #   environment:
+  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
+  #     SCRIPT: |
+  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+  #   steps:
+  #     - ferrocene-job-dist:
+  #         restore-from-job: x86_64-linux-build
+
+  # x86_64-linux-dist-targets:
+  #   executor: docker-x86_64-ubuntu-20
+  #   resource_class: ferrocene/k8s-amd64-large
+  #   environment:
+  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
+  #     FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
+  #     SCRIPT: |
+  #       ./x.py --stage 2 dist rust-std
+  #   steps:
+  #     - ferrocene-job-dist:
+  #         qnx: true
+  #         restore-from-job: x86_64-linux-build
+
+  # x86_64-linux-dist-src:
+  #   executor: docker-x86_64-ubuntu-20
+  #   resource_class: ferrocene/k8s-amd64-medium
+  #   environment:
+  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
+  #     SCRIPT: |
+  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
+  #   steps:
+  #     - ferrocene-job-dist:
+  #         restore-from-job: x86_64-linux-build
+  #         # We need the whole LLVM clone to be able to include the full source
+  #         # code into the tarball we ship to customers.
+  #         llvm-subset: false
 
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
@@ -395,21 +399,22 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: aarch64-linux-build
-
-  aarch64-linux-dist-tools:
-    executor: docker-aarch64-ubuntu-20
-    resource_class: ferrocene/k8s-arm64-large
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - ferrocene-job-dist:
           restore-from-job: aarch64-linux-build
+
+  # aarch64-linux-dist-tools:
+  #   executor: docker-aarch64-ubuntu-20
+  #   resource_class: ferrocene/k8s-arm64-large
+  #   environment:
+  #     FERROCENE_HOST: aarch64-unknown-linux-gnu
+  #     SCRIPT: |
+  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+  #   steps:
+  #     - ferrocene-job-dist:
+  #         restore-from-job: aarch64-linux-build
 
   aarch64-linux-generic-test-container:
     executor: docker-aarch64-ubuntu-20
@@ -1082,15 +1087,15 @@ workflows:
       - x86_64-linux-dist:
           requires:
             - x86_64-linux-build
-      - x86_64-linux-dist-tools:
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-dist-targets:
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-dist-src:
-          requires:
-            - x86_64-linux-build
+      # - x86_64-linux-dist-tools:
+      #     requires:
+      #       - x86_64-linux-build
+      # - x86_64-linux-dist-targets:
+      #     requires:
+      #       - x86_64-linux-build
+      # - x86_64-linux-dist-src:
+      #     requires:
+      #       - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test
           job: test
@@ -1201,8 +1206,8 @@ workflows:
       - x86_64-linux-self-test:
           requires:
             - x86_64-linux-dist
-            - x86_64-linux-dist-tools
-            - x86_64-linux-dist-targets
+            # - x86_64-linux-dist-tools
+            # - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
       - x86_64-qnx-generic-test-vm:
@@ -1332,9 +1337,9 @@ workflows:
       - aarch64-linux-dist:
           requires:
             - aarch64-linux-build
-      - aarch64-linux-dist-tools:
-          requires:
-            - aarch64-linux-build
+      # - aarch64-linux-dist-tools:
+      #     requires:
+      #       - aarch64-linux-build
       - aarch64-linux-generic-test-container:
           name: aarch64-linux-test
           job: test
@@ -1362,8 +1367,8 @@ workflows:
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist
-            - aarch64-linux-dist-tools
-            - x86_64-linux-dist-targets
+            # - aarch64-linux-dist-tools
+            # - x86_64-linux-dist-targets
             - x86_64-linux-dist
 
       # RHEL Test Infrastructure
@@ -1424,7 +1429,8 @@ workflows:
           requires:
             - aarch64-darwin-dist
             - aarch64-darwin-dist-tools
-            - x86_64-linux-dist-targets
+            - x86_64-linux-dist
+            # - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
@@ -1433,7 +1439,8 @@ workflows:
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
-            - x86_64-linux-dist-targets
+            - x86_64-linux-dist
+            # - x86_64-linux-dist-targets
 
       - sbom-gen:
           requires:
@@ -1442,7 +1449,7 @@ workflows:
       - finish-build:
           requires:
             - x86_64-linux-docs
-            - x86_64-linux-dist-src
+            # - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test

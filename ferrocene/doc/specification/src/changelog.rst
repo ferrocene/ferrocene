@@ -34,6 +34,9 @@ Language changes in Rust 1.95.0
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
+
+  - This implementation-specifc behavior is outside the scope of the FLS.
+
 - `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
 
 Language changes in Rust 1.94.0

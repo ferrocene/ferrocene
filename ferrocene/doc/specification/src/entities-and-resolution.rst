@@ -1135,6 +1135,18 @@ same :t:`namespace` but refer to different :t:`entities <entity>` if the
 If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
 the :t:`visibility` of the :t:`name` is the most permissive one.
 
+:dp:`fls_sUhnfV62HJrb`
+When :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` is used to import the current :t:`crate`, a :t:`renaming` must be used to define the :t:`binding` name.
+
+:dp:`fls_QGdeRTe0H1Uc`
+When :t:`keyword` ``super`` is used to import a parent :t:`module`, a :t:`renaming` must be used to define the :t:`binding` name.
+
+:dp:`fls_aam34hsRmKU2`
+An :t:`external prelude` cannot be imported.
+
+:dp:`fls_LV94x3HlpBWk`
+A :t:`simple import` cannot refer to :t:`[enum variant]s` through a :t:`type alias`.
+
 .. rubric:: Examples
 
 :dp:`fls_5dlnffim6fso`
@@ -1163,8 +1175,6 @@ The following is a selective import. The imported functions are
 
    use outer_module::inner_module
        {crate_visible_function, visible_function}
-
-.. rubric:: Legality Rules
 
 .. _fls_ydmnb7qnmzzq:
 

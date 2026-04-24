@@ -23,18 +23,89 @@ Language changes in Rust 1.95.0
 -------------------------------
 
 - `Stabilize if let guards on match arms <https://github.com/rust-lang/rust/pull/141295>`_
+
+  Changed syntax: :s:`MatchArmGuard`
+
+  New syntax:
+
+  - :s:`MatchArmGuardChain`
+  - :s:`MatchArmGuardCondition`
+  - :s:`MatchArmGuardExpression`
+  - :s:`MatchArmGuardLetPattern`
+
+  New paragraphs:
+
+  - :p:`fls_UlxLrpyPlVmv`
+  - :p:`fls_XADcpJBUxSfv`
+  - :p:`fls_gfHe2Cy6WXsK`
+  - :p:`fls_QQep7FKA1EQX`
+  - :p:`fls_Wepy5R7FZQPU`
+  - :p:`fls_imEIc7PUUO1x`
+  - :p:`fls_fs4ZpXjt0Wqt`
+  - :p:`fls_DT4N2rr6wpvZ`
+  - :p:`fls_AAuyKfxLgJ43`
+  - :p:`fls_uCDQMkWx5OMS`
+
+  Removed paragraph: :p:`fls_sbtx1l6n2tp2`
+
 - `irrefutable_let_patterns lint no longer lints on let chains <https://github.com/rust-lang/rust/pull/146832>`_
 
   - Lints are outside the scope of the FLS.
 
 - `Support importing path-segment keywords with renaming <https://github.com/rust-lang/rust/pull/146972>`_
+
+  - New paragraphs:
+
+    - :p:`fls_sUhnfV62HJrb`
+    - :p:`fls_QGdeRTe0H1Uc`
+    - :p:`fls_aam34hsRmKU2`
+    - :p:`fls_LV94x3HlpBWk`
+
 - `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
 
   - The target is outside the scope of the FLS.
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
+
+  New paragraphs:
+
+  - :p:`fls_LmPbrh0Cba8g`
+  - :p:`fls_nwgIMLkvD2Ol`
+  - :p:`fls_hOIImCr1c6IF`
+
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
+
+  - This implementation-specifc behavior is outside the scope of the FLS.
+
 - `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_33hfay24hx8u`
+  - :p:`fls_uqy5w9uc8gla`
+
+  New paragraphs, which mostly document behavior that existed before this release:
+
+  - :p:`fls_rdDT7jsaOMbs`
+  - :p:`fls_j9WyKVyOLFon`
+  - :p:`fls_TbfUxVf8PKPs`
+  - :p:`fls_4TESOxGpEY2h`
+  - :p:`fls_eNkZWskzznW6`
+  - :p:`fls_v8IFXHJnXhez`
+  - :p:`fls_gujpU7p5n9Zx`
+  - :p:`fls_t8tFLUg8O83Q`
+  - :p:`fls_RaONmCLH2KGM`
+  - :p:`fls_Vt9C9mKxHOwo`
+  - :p:`fls_Fs12dmznjsMf`
+  - :p:`fls_7EXHdE2eOVek`
+  - :p:`fls_iLH8X2U4ADHb`
+  - :p:`fls_HMJUXHrvOmPl`
+  - :p:`fls_Gj1znNpthHY6`
+  - :p:`fls_IFyJvb6mlFU4`
+  - :p:`fls_7NEEJgKSpQQ8`
+  - :p:`fls_kYFd3p06pWWV`
+  - :p:`fls_fATMTNUOHsfb`
+  - :p:`fls_fITor3jpmgrl`
 
 Language changes in Rust 1.94.0
 -------------------------------

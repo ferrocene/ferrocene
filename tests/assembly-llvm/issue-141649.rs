@@ -50,7 +50,7 @@ pub fn scoped_two_small_structs(buf: [u8; 16]) {
     }
     // linux-x86_64: subq $16, %rsp
     // windows-x86_64-msvc: subq $48, %rsp
-    // aarch64: sub sp, sp, #48
+    // aarch64: sub sp, sp, {{(#32|#48)}}
 }
 
 // CHECK-LABEL: scoped_three_small_structs

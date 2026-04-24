@@ -39,7 +39,7 @@ You must have a C compiler which:
 - Supplies to ``ld.lld`` only those linker arguments specified in the
   :doc:`Safety Manual <safety-manual:rustc/options>`
 
-Please refer to the RedHat Enterprise Linux 10 documentation for installation instructions.
+Please refer to the Red Hat Enterprise Linux 10 documentation for installation instructions.
 
 Archives to install
 -------------------

@@ -347,6 +347,37 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
+  x86_64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
@@ -882,6 +913,8 @@ workflows:
             - x86_64-qnx-test-library
             - x86_64-qnx-test-library-std
             - x86_64-qnx-test-compiletest
+            - x86_64-qnx8-test-library
+            - x86_64-qnx8-test-compiletest
             - aarch64-qnx-test-library
             - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
@@ -1027,6 +1060,25 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - x86_64-qnx8-generic-test-vm:
+          name: x86_64-qnx8-test-library
+          job: test:library
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - x86_64-qnx8-generic-test-vm:
+          name: x86_64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
           resource-class: xlarge # 8-core
@@ -1337,6 +1389,7 @@ commands:
             equal: [<<parameters.qnx>>, true]
           steps:
             - setup-qnx-toolchain: {}
+            # - setup-qnx8-toolchain: {} # XXX potential PATH collision
       - ferrocene-ci
 
   ferrocene-job-test-container:
@@ -1601,6 +1654,25 @@ commands:
             - run:
                 name: Set PATH to include QNX710 tools
                 command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
+
+  setup-qnx8-toolchain:
+    description: Setup QNX8 Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
+    steps:
+      - run:
+          name: Fetch QNX800 toolchain
+          # On Windows, the virtualenv detection seems to struggle at times.
+          command: |
+            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX800 tools
+                command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

@@ -8,19 +8,20 @@
 .. note::
 
    This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets
-   RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching
-   host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
+   Red Hat In-Vehicle Operating System 2 (RHIVOS 2). As per the RHIVOS 2 guidelines, qualified use requires
+   compilation on the matching host platform Red Hat Enterprise Linux 10 using using the
+   :ref:`aarch64-unknown-linux-gnu` host compiler.
 
-The ``aarch64-rhivos2-linux-gnu`` Ferrocene target provides support for RedHat In Vehicle Operating System 2
-(RHIVOS2) on aarch64 using glibc 2.31 or higher.
+The ``aarch64-rhivos2-linux-gnu`` Ferrocene target provides support for Red Hat In-Vehicle Operating System 2
+(RHIVOS 2) on aarch64 using glibc 2.31 or higher.
 
 Prerequisites
 -------------
 
 While this target is technically a full linux and capable of hosting a compiler,
 the target is only qualified if cross-compiled from RHEL 10 on aarch64 in the
-version specified by the RHIVOS2 documentation. This requirement stems from the
-RHIVOS assumptions of use. The host compiler is :target:`aarch64-unknown-linux-gnu`.
+version specified by the RHIVOS 2 documentation. This requirement stems from the
+RHIVOS 2 assumptions of use. The host compiler is :target:`aarch64-unknown-linux-gnu`.
 
 This target uses the LLVM ``ld.lld`` linker. To locate the system C libraries
 required to create a functional Linux binary, this target drives the ``ld.lld``

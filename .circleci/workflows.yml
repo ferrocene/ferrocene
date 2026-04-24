@@ -968,34 +968,53 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
-      - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - run:
-          name: Restore files from the x86_64-linux-build
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - run:
-          name: Configure
-          command: ferrocene/ci/configure.sh
-      - run:
-          name: Checkout the submodules
-          command: ferrocene/ci/scripts/checkout-submodules.sh
-      - run:
-          name: Generate build metadata
-          command: ./x.py dist ferrocene-build-metadata
-      # From this point onwards, the commit can be released by the release process.
-      - run:
-          name: Upload metadata files to S3
-          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
-      # Unfortunately the validation script for packages.toml has to be executed after the build
-      # metadata has been uploaded, as it needs to retrieve some of it from S3.
-      #
-      # In theory this means a release could be published even when this step failed to execute. In
-      # practice it's not a problem, as the failures detected by this script also result in errors
-      # during the release process.
-      - run:
-          name: Verify that all of the expected artifacts were uploaded
-          command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
+      # if at least one of the conditions is set to false, we're not building the
+      # whole set and we want to fail the build
+      - when:
+          condition:
+            or:
+              - not: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+              - not: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - run:
+                name: Fail build as incomplete
+                command: "false"
+      # only if both windows and darwin builds are enabled we want to continue the build and
+      # do the final checks
+      - when:
+          condition:
+            and:
+              - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+              - << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - run:
+                name: Restore files from the x86_64-linux-build
+                command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+            - run:
+                name: Configure
+                command: ferrocene/ci/configure.sh
+            - run:
+                name: Checkout the submodules
+                command: ferrocene/ci/scripts/checkout-submodules.sh
+            - run:
+                name: Generate build metadata
+                command: ./x.py dist ferrocene-build-metadata
+            # From this point onwards, the commit can be released by the release process.
+            - run:
+                name: Upload metadata files to S3
+                command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+            # Unfortunately the validation script for packages.toml has to be executed after the build
+            # metadata has been uploaded, as it needs to retrieve some of it from S3.
+            #
+            # In theory this means a release could be published even when this step failed to execute. In
+            # practice it's not a problem, as the failures detected by this script also result in errors
+            # during the release process.
+            - run:
+                name: Verify that all of the expected artifacts were uploaded
+                command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
 
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.

@@ -12,11 +12,20 @@
 
 import os
 import requests
+import sys
+import subprocess
 
 from automations_common import AutomatedPR, AutomationResult
 
 
-TEMP_BRANCH = "backport-temp--do-not-use-for-real-code"
+def restore_python_scripts(from_rev):
+    # NOTE: we've checked out base_branch, which might *not* be the same branch as where
+    # we're running this script from. Sync them together.
+    # NOTE: we can't use `self.cmd` because python might have lazily imported it.
+    subprocess.run(
+        ["git", "restore", "--source", from_rev, "ferrocene/tools/automations-common"]
+    )
+    subprocess.run(["git", "restore", "--source", from_rev, "ferrocene/tools/backport"])
 
 
 class BackportAllPR(AutomatedPR):
@@ -31,42 +40,38 @@ class BackportAllPR(AutomatedPR):
         if not prs:
             return AutomationResult.NO_CHANGES
 
-        current_branch = self.cmd_capture(["git", "branch", "--show-current"])
         base_branch = f"{self.origin}/{self.__target}"
-
-        # When a backport failure happens, the script leaves git in the
-        # temporary branch. If we were to delete the temporary branch to create
-        # a new one from scratch, it would fail as git prevents deleting the
-        # current branch. To handle that, if we're already in the temporary
-        # branch, we just reset to the base we want.
-        if current_branch == TEMP_BRANCH:
-            self.cmd(["git", "reset", "--hard", base_branch])
-        else:
-            self.cmd(["git", "branch", "-D", TEMP_BRANCH], check=False)
-            self.cmd(
-                [
-                    "git",
-                    "checkout",
-                    "-b",
-                    TEMP_BRANCH,
-                    base_branch,
-                ]
-            )
+        self.cmd(["git", "checkout", "--detach", "--quiet", base_branch])
+        restore_python_scripts(self.current_hash)
 
         for pr in prs:
             pr = pr["number"]
-            print(f"backporting #{pr}")
+            print(f"\n==> backporting #{pr}")
+
+            backport_progress = self.cmd_capture(["git", "rev-parse", "HEAD"]).rstrip()
+
+            restore_python_scripts(self.current_hash)
 
             result = self.cmd(
-                [f"{self.repo_root}/ferrocene/tools/backport/one.py", str(pr)],
+                [
+                    f"{self.repo_root}/ferrocene/tools/backport/one.py",
+                    "--verbose",
+                    "--force",
+                    str(pr),
+                ],
                 check=False,
             )
             if result.returncode == 0:
                 self.__backported_pull_requests.append(pr)
             else:
-                self.cmd(["git", "rebase", "--abort"], check=False)
-                self.cmd(["git", "checkout", TEMP_BRANCH])
+                print(f"\nINFO: failed to backport {pr}, marking as manual backport")
+                self.cmd(["git", "checkout", "--force", backport_progress])
+                restore_python_scripts(self.current_hash)
                 self.__mark_as_manual(pr)
+
+        # Restore the python scripts now, so that `git checkout {current_branch}` doesn't
+        # error.
+        restore_python_scripts(base_branch)
 
         if self.__backported_pull_requests:
             return AutomationResult.SUCCESS
@@ -186,10 +191,16 @@ def list_backport_labels(repo):
 
 
 if __name__ == "__main__":
-    repo = os.environ["GITHUB_REPOSITORY"]
-    labels = list_backport_labels(repo)
+    dry_run = len(sys.argv) > 1 and sys.argv[1] == "--dry-run"
+    repo = os.environ.get("GITHUB_REPOSITORY") or "ferrocene/ferrocene"
 
+    subprocess.run(["git", "update-index", "--refresh"], check=False)
+    args = ["git", "diff-index", "--quiet", "HEAD"]
+    if subprocess.run(args, check=False).returncode != 0:
+        exit("error: all.py is not safe to run if you have uncommitted changes")
+
+    labels = list_backport_labels(repo)
     for label in labels:
         print(f"==> backporting PRs with label {label}")
         pr = BackportAllPR(repo, label, f"release/{label.removeprefix('backport:')}")
-        pr.create()
+        pr.create(dry_run=dry_run)

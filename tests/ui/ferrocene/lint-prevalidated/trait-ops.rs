@@ -12,7 +12,7 @@
 #![deny(ferrocene::unvalidated)]
 #![feature(try_trait_v2)]
 
-use core::ops::*;
+use core::{convert::Infallible, ops::*};
 
 #[derive(Copy, Clone)]
 struct Unvalidated;
@@ -106,13 +106,21 @@ fn ops() {
 
 impl Try for Unvalidated {
     type Output = ();
-    type Residual = ();
-    fn from_output(x: Self::Output) -> Self { Unvalidated }
-    fn branch(self) -> ControlFlow<(), Self::Output> { ControlFlow::Continue(()) }
+    type Residual = Option<Infallible>;
+
+    fn from_output(_x: Self::Output) -> Self {
+        Unvalidated
+    }
+
+    fn branch(self) -> ControlFlow<Option<Infallible>> {
+        ControlFlow::Continue(())
+    }
 }
 
-impl FromResidual<()> for Unvalidated {
-    fn from_residual(_: ()) -> Self { Unvalidated }
+impl FromResidual<Option<Infallible>> for Unvalidated {
+    fn from_residual(_: Option<Infallible>) -> Self {
+        Unvalidated
+    }
 }
 
 #[ferrocene::prevalidated]

@@ -849,7 +849,7 @@ impl<T: PointeeSized> Copy for PhantomData<T> {}
 impl<T: PointeeSized> Clone for PhantomData<T> {
     #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
-        Self
+        *self
     }
 }
 

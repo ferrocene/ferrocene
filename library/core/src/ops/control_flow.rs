@@ -269,8 +269,8 @@ impl<B, C> ControlFlow<B, C> {
     /// assert_eq!(res, Ok(&5));
     /// ```
     #[inline]
-    #[stable(feature = "control_flow_ok", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "control_flow_ok", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "control_flow_ok", since = "1.96.0")]
+    #[rustc_const_stable(feature = "control_flow_ok", since = "1.96.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[ferrocene::prevalidated]
     pub const fn break_ok(self) -> Result<B, C> {
@@ -384,8 +384,8 @@ impl<B, C> ControlFlow<B, C> {
     /// assert_eq!(res, Err("too big value detected"));
     /// ```
     #[inline]
-    #[stable(feature = "control_flow_ok", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "control_flow_ok", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "control_flow_ok", since = "1.96.0")]
+    #[rustc_const_stable(feature = "control_flow_ok", since = "1.96.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[ferrocene::prevalidated]
     pub const fn continue_ok(self) -> Result<C, B> {

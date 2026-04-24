@@ -880,7 +880,7 @@ macro_rules! uint_impl {
         /// # Safety
         ///
         /// This results in undefined behavior when
-        #[doc = concat!("`self + rhs > ", stringify!($SelfT), "::MAX` or `self + rhs < ", stringify!($SelfT), "::MIN`,")]
+        #[doc = concat!("`self + rhs > ", stringify!($SelfT), "::MAX`,")]
         /// i.e. when [`checked_add`] would return `None`.
         ///
         /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked
@@ -1061,7 +1061,7 @@ macro_rules! uint_impl {
         /// # Safety
         ///
         /// This results in undefined behavior when
-        #[doc = concat!("`self - rhs > ", stringify!($SelfT), "::MAX` or `self - rhs < ", stringify!($SelfT), "::MIN`,")]
+        #[doc = concat!("`self - rhs < ", stringify!($SelfT), "::MIN`,")]
         /// i.e. when [`checked_sub`] would return `None`.
         ///
         /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked
@@ -1272,7 +1272,7 @@ macro_rules! uint_impl {
         /// # Safety
         ///
         /// This results in undefined behavior when
-        #[doc = concat!("`self * rhs > ", stringify!($SelfT), "::MAX` or `self * rhs < ", stringify!($SelfT), "::MIN`,")]
+        #[doc = concat!("`self * rhs > ", stringify!($SelfT), "::MAX`,")]
         /// i.e. when [`checked_mul`] would return `None`.
         ///
         /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked

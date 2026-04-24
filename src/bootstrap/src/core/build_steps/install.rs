@@ -45,7 +45,11 @@ fn sanitize_sh(path: &Path, is_cygwin: bool) -> String {
     }
 }
 
-fn is_dir_writable_for_user(dir: &Path) -> bool {
+fn is_dir_writable_for_user(dir: &Path, builder: &Builder<'_>) -> bool {
+    if builder.config.dry_run() {
+        return true;
+    }
+
     let tmp = dir.join(".tmp");
     match fs::create_dir_all(&tmp) {
         Ok(_) => {
@@ -87,14 +91,17 @@ fn install_sh(
     // this case, we only need to check the `DESTDIR` path, disregarding the
     // `prefix` and `sysconfdir` paths.
     if let Some(destdir) = &destdir_env {
-        assert!(is_dir_writable_for_user(destdir), "User doesn't have write access on DESTDIR.");
+        assert!(
+            is_dir_writable_for_user(destdir, builder),
+            "User doesn't have write access on DESTDIR."
+        );
     } else {
         assert!(
-            is_dir_writable_for_user(&prefix),
+            is_dir_writable_for_user(&prefix, builder),
             "User doesn't have write access on `install.prefix` path in the `bootstrap.toml`.",
         );
         assert!(
-            is_dir_writable_for_user(&sysconfdir),
+            is_dir_writable_for_user(&sysconfdir, builder),
             "User doesn't have write access on `install.sysconfdir` path in `bootstrap.toml`."
         );
     }

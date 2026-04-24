@@ -267,28 +267,6 @@ jobs:
           path: build/x86_64-unknown-linux-gnu/ferrocene/traceability-matrix.html
           destination: reports
 
-  # x86_64-linux-test-library-std:
-  #   executor:  docker-x86_64-ubuntu-20
-  #   resource_class: ferrocene/k8s-amd64-medium # 4-core
-  #   parameters:
-  #     test-variant:
-  #       type: string
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     # Standard library tests need IPv6, which is not available in container
-  #     # jobs. Because of that we need to run *just* standard library tests in a
-  #     # virtual machine.
-  #     # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-  #     SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
-  #   steps:
-  #     - aws-oidc-auth
-  #     - ferrocene-checkout:
-  #         llvm-subset: true
-  #     - run:
-  #         name: Restore files from the x86_64-linux-build job
-  #         command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-  #     - ferrocene-ci
-
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large

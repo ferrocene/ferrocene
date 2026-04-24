@@ -312,12 +312,12 @@ struct Use<'tcx> {
 
 #[derive(Copy, Clone, Debug)]
 enum UnvalidatedImplCause<'tcx> {
-    /// A associated function from the source type's impl of one of the traits we were casting to.
+    /// An associated function from the source type's impl of one of the traits we were casting to.
     ///
     /// FIXME: this should have all unvalidated items in the impl, not just the first.
     AssocFn(DefId),
     /// Only occurs pre-mono.
-    UnresolvedGenericImpl(Span, rustc_middle::ty::PolyTraitRef<'tcx>),
+    UnresolvedGenericImpl(rustc_middle::ty::PolyTraitRef<'tcx>),
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -336,10 +336,9 @@ impl<'tcx> Use<'tcx> {
             UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
             UseKind::ContainsFnPtr(id, _) => id,
             UseKind::TraitObjectCast(UnvalidatedImplCause::AssocFn(id), _) => id,
-            UseKind::TraitObjectCast(
-                UnvalidatedImplCause::UnresolvedGenericImpl(_, trait_ref),
-                _,
-            ) => trait_ref.def_id(),
+            UseKind::TraitObjectCast(UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref), _) => {
+                trait_ref.def_id()
+            }
         }
     }
 

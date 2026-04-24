@@ -13,7 +13,7 @@ use rustc_middle::ty::{
     self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, Ty, TyCtxt,
     TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
-use rustc_span::{DUMMY_SP, Span};
+use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
 use tracing::{debug, instrument};
 
@@ -143,7 +143,7 @@ impl<'tcx> LintState<'tcx> {
                 }
                 // builtin impls are always ok
                 ImplSource::Builtin(..) => continue,
-                ImplSource::Param(obligations) => {
+                ImplSource::Param(_obligations) => {
                     // This is something like the following:
                     // ```
                     // fn foo<T: Display + 'static>(x: T) -> Box<dyn Display> {
@@ -155,9 +155,8 @@ impl<'tcx> LintState<'tcx> {
 
                     // NOTE: this can give an empty list of obligations in weird cases like
                     // `core::mem::DiscriminantKind`, which is automatically implemented for any Sized type.
-                    let span = obligations.first().copied().unwrap_or(DUMMY_SP);
                     return Some(UseKind::TraitObjectCast(
-                        UnvalidatedImplCause::UnresolvedGenericImpl(span, trait_ref),
+                        UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref),
                         coerce_src,
                     ));
                 }

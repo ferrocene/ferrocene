@@ -216,7 +216,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         // Recurse into the instantiated call.
         let callee_instance = match use_.kind {
             UseKind::TraitObjectCast(
-                UnvalidatedImplCause::UnresolvedGenericImpl(_, trait_ref),
+                UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref),
                 source_ty,
             ) => span_bug!(
                 use_.span,

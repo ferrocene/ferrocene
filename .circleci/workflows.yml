@@ -187,10 +187,7 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-        ./x.py --stage 2 dist rust-std
+        ./x.py --stage 2 dist
     steps:
       - ferrocene-job-dist:
           qnx: true

@@ -551,6 +551,7 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std
     steps:
       - when:
@@ -563,26 +564,26 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  aarch64-darwin-dist-tools:
-    macos:
-      xcode: "26.0.1"
-    resource_class: m4pro.medium # 6 cores
-    environment:
-      FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-    steps:
-      - when:
-          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
-          steps:
-            - ferrocene-job-dist:
-                os: darwin
-                restore-from-job: aarch64-darwin-build
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
+  # aarch64-darwin-dist-tools:
+  #   macos:
+  #     xcode: "26.0.1"
+  #   resource_class: m4pro.medium # 6 cores
+  #   environment:
+  #     FERROCENE_HOST: aarch64-apple-darwin
+  #     FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
+  #     SCRIPT: |
+  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+  #   steps:
+  #     - when:
+  #         condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+  #         steps:
+  #           - ferrocene-job-dist:
+  #               os: darwin
+  #               restore-from-job: aarch64-darwin-build
+  #     - run:
+  #         name: Empty step to make sure the job always has steps
+  #         command: echo
 
   aarch64-darwin-self-test:
     macos:
@@ -1405,9 +1406,9 @@ workflows:
       - aarch64-darwin-dist:
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-dist-tools:
-          requires:
-            - aarch64-darwin-build
+      # - aarch64-darwin-dist-tools:
+      #     requires:
+      #       - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
@@ -1429,7 +1430,7 @@ workflows:
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
-            - aarch64-darwin-dist-tools
+            # - aarch64-darwin-dist-tools
             - x86_64-linux-dist
             # - x86_64-linux-dist-targets
 

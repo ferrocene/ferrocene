@@ -193,6 +193,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
+          qnx: true
           restore-from-job: x86_64-linux-build
           llvm-subset: false
 

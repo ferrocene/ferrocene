@@ -6967,6 +6967,7 @@ core::num::<impl i128>::saturating_div
 core::num::<impl i128>::saturating_mul
 core::num::<impl i128>::saturating_neg
 core::num::<impl i128>::saturating_sub
+core::num::<impl i128>::swap_bytes
 core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
@@ -7027,6 +7028,7 @@ core::num::<impl i16>::saturating_div
 core::num::<impl i16>::saturating_mul
 core::num::<impl i16>::saturating_neg
 core::num::<impl i16>::saturating_sub
+core::num::<impl i16>::swap_bytes
 core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
@@ -7087,6 +7089,7 @@ core::num::<impl i32>::saturating_div
 core::num::<impl i32>::saturating_mul
 core::num::<impl i32>::saturating_neg
 core::num::<impl i32>::saturating_sub
+core::num::<impl i32>::swap_bytes
 core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
@@ -7147,6 +7150,7 @@ core::num::<impl i64>::saturating_div
 core::num::<impl i64>::saturating_mul
 core::num::<impl i64>::saturating_neg
 core::num::<impl i64>::saturating_sub
+core::num::<impl i64>::swap_bytes
 core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
@@ -7207,6 +7211,7 @@ core::num::<impl i8>::saturating_div
 core::num::<impl i8>::saturating_mul
 core::num::<impl i8>::saturating_neg
 core::num::<impl i8>::saturating_sub
+core::num::<impl i8>::swap_bytes
 core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
@@ -7267,6 +7272,7 @@ core::num::<impl isize>::saturating_div
 core::num::<impl isize>::saturating_mul
 core::num::<impl isize>::saturating_neg
 core::num::<impl isize>::saturating_sub
+core::num::<impl isize>::swap_bytes
 core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes

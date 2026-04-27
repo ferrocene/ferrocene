@@ -10,4 +10,9 @@ SECTIONS {
     . = ALIGN(8);
     .bss : { *(.bss .bss*) } > RAM
     . = ALIGN(8);
+    /* discard metadata sections not relevant to the silicon errata */
+    /DISCARD/ : {
+      /* QNX8's C toolchain produces this section; whereas QNX7 did not */
+      *(.note.gnu.*);
+    }
 }

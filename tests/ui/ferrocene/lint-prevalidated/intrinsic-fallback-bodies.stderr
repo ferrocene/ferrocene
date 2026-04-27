@@ -19,6 +19,11 @@ note: the lint level is defined here
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the function as validated
+   |
+LL + #[ferrocene::prevalidated]
+LL | const fn unvalidated() {}
+   |
 
 error: validated function calls an unvalidated function
   --> $DIR/intrinsic-fallback-bodies.rs:28:5
@@ -36,6 +41,11 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | fn uses_unvalidated_intrinsic() {
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the function as validated
+   |
+LL + #[ferrocene::prevalidated]
+LL | const fn prefetch_read<T>(_ptr: *const T, _locality: Locality) {}
+   |
 
 error: aborting due to 2 previous errors
 

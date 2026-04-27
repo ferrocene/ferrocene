@@ -104,13 +104,12 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
                 UseKind::ContainsFnPtr(def_id, unknown_fn)
             }
             thir::ExprKind::Call { ty, .. } => {
-                let instance = self.instance_of_ty_ignoring_validated(ty, expr.span)?;
+                let use_ = self.check_call(ty, expr.span)?;
                 // we use a custom narrowed span here. it's the receiver that's unvalidated, not the
                 // arguments.
                 span = tcx.sess.source_map().span_until_char(expr.span, '(');
 
-                debug!("saw call to {instance:?}");
-                UseKind::Called(instance)
+                use_
             }
             // We assume all closure definitions in this function are also validated.
             // However, we still need to check the closure body to make sure it doesn't call
@@ -158,23 +157,33 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
         Some(Use { kind: use_kind, span, from_instantiation: None })
     }
 
-    fn instance_of_ty_ignoring_validated(
-        &self,
-        ty: Ty<'tcx>,
-        span: Span,
-    ) -> Option<Instance<'tcx>> {
+    fn check_call(&self, ty: Ty<'tcx>, span: Span) -> Option<UseKind<'tcx>> {
+        let tcx = self.linter.tcx;
         let mut try_instantiate = |def_id, args| self.try_instantiate(def_id, args, span);
 
-        self.linter.instance_of_ty(ty, None, &mut try_instantiate, span).filter(|instance| {
+        let resolved = self.linter.instance_of_ty(ty, None, &mut try_instantiate, span);
+        match (resolved, ty.kind()) {
             // Skip trait functions. These happen when we're calling the vtable of a `dyn` unsized
             // object. This case is caught below in `PointerCoercion::Unsize`.
-            if matches!(instance.def, ty::InstanceKind::Virtual(..)) {
+            (Some(instance @ Instance { def: ty::InstanceKind::Virtual(..), .. }), _) => {
                 info!("skipping dyn assoc item {instance:?}");
-                false
-            } else {
-                true
+                None
             }
-        })
+            (Some(instance), _) => {
+                debug!("saw call to {instance:?}");
+                Some(UseKind::Called(instance))
+            }
+            // We don't have enough information yet to resolve the generic parameters.
+            // What we can do, though, is check whether the *trait* declaration is marked with
+            // `prevalidated`. If so, we'll lint if someone tries to define an impl without the
+            // annotation, so we don't need to lint here. If not, we need to lint here in case the
+            // impl doesn't add the annotation itself.
+            (None, &ty::FnDef(trait_fn, _)) if tcx.trait_of_assoc(trait_fn).is_some() => {
+                Some(UseKind::CalledPreMonoTraitFn(trait_fn))
+            }
+            // Otherwise, this is fine. We'll catch really weird cases in the post-mono pass.
+            (None, _) => None,
+        }
     }
 
     fn try_instantiate(

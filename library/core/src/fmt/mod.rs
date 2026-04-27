@@ -2062,9 +2062,12 @@ impl<'a> Formatter<'a> {
             } else {
                 // Padding widths are capped at `u16`, so reaching this branch means
                 // the formatted output is also shorter than `u16::MAX`.
+                #[ferrocene::annotation("The `Err(_)` branch is explicitly marked unreachable, causing it be reached would be a bug")]
                 let len = match u16::try_from(len) {
                     Ok(len) => len,
-                    Err(_) => unreachable!(),
+                    Err(_) => {
+                        unreachable!()
+                    },
                 };
                 let post_padding = self.padding(width - len, Alignment::Right)?;
                 // SAFETY: Per the precondition.

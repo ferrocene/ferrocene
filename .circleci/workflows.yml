@@ -184,13 +184,11 @@ jobs:
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      STD_FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-        export FERROCENE_TARGETS=$STD_FERROCENE_TARGETS
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:

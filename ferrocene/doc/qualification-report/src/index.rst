@@ -22,6 +22,8 @@ qualification, in accordance to the standards above.
    :maxdepth: 2
 
    rustc/index
+   rustc/aarch64-unknown-linux-gnu
+   rustc/aarch64-rhivos2-linux-gnu
    rustc/aarch64-unknown-none
    rustc/aarch64-unknown-nto-qnx710
    rustc/thumbv7em-none-eabi

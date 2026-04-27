@@ -215,6 +215,11 @@ def calculate_targets(host_plus_stage: str):
     return ",".join(targets)
 
 
+# We need `*dummy` since below in `prepare_paremeters` calls this with args.
+def workflow_id(*dummy):
+    return os.environ.get("CIRCLE_WORKFLOW_ID")
+
+
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
         config: dict[str, dict[str, str]] = yaml.safe_load(f)
@@ -225,6 +230,7 @@ def prepare_parameters():
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
         "targets--": calculate_targets,
+        "stable-workflow-id": workflow_id,
     }
 
     parameters: dict[str, str] = {}

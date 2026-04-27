@@ -1,12 +1,10 @@
 error: validated method calls an unvalidated function
   --> $DIR/thir-impl-item.rs:15:9
    |
-LL | const fn unvalidated() {}
-   |          ----------- `unvalidated` is unvalidated
-...
 LL |         unvalidated();
    |         ^^^^^^^^^^^
    |
+   = note: `unvalidated` is unvalidated
 note: `A::b` is validated
   --> $DIR/thir-impl-item.rs:14:18
    |

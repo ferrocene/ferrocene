@@ -142,6 +142,8 @@ pub use rustc_errors::BufferedEarlyLint;
 pub use rustc_session::lint::Level::{self, *};
 pub use rustc_session::lint::{FutureIncompatibleInfo, Lint, LintId, LintPass, LintVec};
 
+use crate::ferrocene::{KNOWN_UNVALIDATED, POSSIBLY_UNVALIDATED};
+
 pub fn provide(providers: &mut Providers) {
     levels::provide(providers);
     expect::provide(providers);
@@ -358,6 +360,9 @@ fn register_builtins(store: &mut LintStore) {
         MISPLACED_DIAGNOSTIC_ATTRIBUTES,
         UNKNOWN_DIAGNOSTIC_ATTRIBUTES
     );
+
+    // Ferrocene addition.
+    add_lint_group!("ferrocene::unvalidated", KNOWN_UNVALIDATED, POSSIBLY_UNVALIDATED);
 
     // Register renamed and removed lints.
     store.register_renamed("single_use_lifetime", "single_use_lifetimes");

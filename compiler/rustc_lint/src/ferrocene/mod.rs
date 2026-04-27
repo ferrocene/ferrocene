@@ -154,7 +154,7 @@
 
 // NOTE: UNVALIDATED is public.
 declare_tool_lint! {
-    /// The `ferrocene::unvalidated` lint detects verified code that calls unverified functions.
+    /// The `ferrocene::known_unvalidated` lint detects verified code that calls unverified functions.
     /// This may result in unverified code running in a safety critical context.
     ///
     /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
@@ -162,14 +162,30 @@ declare_tool_lint! {
     /// This lint is allowed-by-default, to avoid loud warnings for people using Ferrocene as a
     /// "normal" compiler. To enable it, add `#![warn(ferrocene::unvalidated)]` to each crate in
     /// your build, or add it to `[lints]` in Cargo.toml.
-    pub ferrocene::UNVALIDATED,
+    pub ferrocene::KNOWN_UNVALIDATED,
     Allow,
     "a verified function called an unverified function",
     report_in_external_macro: true
 }
 
+declare_tool_lint! {
+    /// The `ferrocene::possibly_unvalidated` lint detects verified code that may end up calling an unverified functions.
+    /// More information may be available from the `KNOWN_UNVALIDATED` lint if you delay until
+    /// later in compilation.
+    ///
+    /// This lint is a Ferrocene addition, and does not exist in upstream rustc.
+    ///
+    /// This lint is allowed-by-default, to avoid loud warnings for people using Ferrocene as a
+    /// "normal" compiler. To enable it, add `#![warn(ferrocene::unvalidated)]` to each crate in
+    /// your build, or add it to `[lints]` in Cargo.toml.
+    pub ferrocene::POSSIBLY_UNVALIDATED,
+    Allow,
+    "a verified function might call an unverified function",
+    report_in_external_macro: true
+}
+
 // NOTE: LintUnvalidated is public.
-declare_lint_pass!(LintUnvalidated => [UNVALIDATED]);
+declare_lint_pass!(LintUnvalidated => [KNOWN_UNVALIDATED, POSSIBLY_UNVALIDATED]);
 
 pub use post_mono::lint_validated_roots;
 

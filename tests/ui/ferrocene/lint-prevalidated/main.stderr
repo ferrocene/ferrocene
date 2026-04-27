@@ -1,12 +1,10 @@
 error: validated function calls an unvalidated function
   --> $DIR/main.rs:7:5
    |
-LL | fn normal_def() {}
-   |    ---------- `normal_def` is unvalidated
-...
 LL |     normal_def();
    |     ^^^^^^^^^^
    |
+   = note: `normal_def` is unvalidated
 note: `main` is validated
   --> $DIR/main.rs:6:4
    |

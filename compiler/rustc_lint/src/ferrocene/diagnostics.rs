@@ -2,8 +2,9 @@
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
 use rustc_errors::{Applicability, Diag, MultiSpan};
-use rustc_hir::def_id::{DefId, LOCAL_CRATE};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{HirId, LangItem};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
@@ -11,6 +12,31 @@ use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::{
     KNOWN_UNVALIDATED, LintState, POSSIBLY_UNVALIDATED, UnvalidatedImplCause, Use, UseKind,
 };
+
+pub(super) fn lint_unvalidated_impl(
+    tcx: TyCtxt<'_>,
+    impl_item: LocalDefId,
+    trait_decl: DefId,
+    annotation: Span,
+) {
+    let lint_node = HirId::make_owner(impl_item);
+    let impl_span = tcx.def_span(impl_item);
+    let trait_span = annotation.until(tcx.def_span(trait_decl));
+
+    tcx.emit_node_span_lint(
+        KNOWN_UNVALIDATED,
+        lint_node,
+        impl_span,
+        rustc_errors::DiagDecorator(|diag| {
+            diag.primary_message("unvalidated implementation of validated trait");
+            diag.span_note(trait_span, "trait marked as validated here");
+            diag.note(format!(
+                "callers of `{}` require every impl to be validated for safety",
+                tcx.def_path_str(impl_item)
+            ));
+        }),
+    );
+}
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {
@@ -103,11 +129,14 @@ impl<'tcx> LintState<'tcx> {
             " ".repeat(col)
         };
 
-        let suggestion_msg = if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
-            format!("if you know all implementations of this trait will be validated, mark `{}` as validated",
-                tcx.def_path_str(trait_fn))
+        let (suggestion_msg, attr) = if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
+            let msg = format!(
+                "if you know all implementations of this trait will be validated, mark `{}` as requiring validation",
+                tcx.def_path_str(trait_fn)
+            );
+            (msg, "requires_validation")
         } else {
-            format!("consider marking the {callee_descr} as validated")
+            (format!("consider marking the {callee_descr} as validated"), "prevalidated")
         };
 
         if callee.krate == LOCAL_CRATE {
@@ -115,7 +144,7 @@ impl<'tcx> LintState<'tcx> {
             diag.span_suggestion_verbose(
                 header.shrink_to_lo(),
                 suggestion_msg,
-                format!("#[ferrocene::prevalidated]\n{}", indent(header)),
+                format!("#[ferrocene::{attr}]\n{}", indent(header)),
                 Applicability::MaybeIncorrect,
             );
             shown_span = true;

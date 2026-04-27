@@ -24,7 +24,7 @@ LL |     #![warn(ferrocene::possibly_unvalidated)]
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: you can delay this warning until the compiler knows which implementation will be picked
    |
-LL ~     #[allow(ferrocene::possible_unvalidated_calls)]
+LL ~     #[allow(ferrocene::possible_unvalidated)]
 LL ~     f();
    |
 
@@ -34,7 +34,7 @@ error: validated function calls an unvalidated associated function
 LL |     f();
    |     ^^^
    |
-   = note: `<HasValidations as Trait>::default_unvalidated` is unvalidated
+   = note: `<HasValidations as Trait>::default_validated` is unvalidated
 note: `indirect_checks` is validated
   --> $DIR/traits.rs:63:8
    |
@@ -42,9 +42,8 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | pub fn indirect_checks() { // only checked in post-mono
    |        ^^^^^^^^^^^^^^^
-...
-LL |     call(HasValidations::default_unvalidated);
-   |     ----------------------------------------- generic function `call` instantiated by `indirect_checks`
+LL |     call(HasValidations::default_validated); // OK
+   |     --------------------------------------- generic function `call` instantiated by `indirect_checks`
 note: the lint level is defined here
   --> $DIR/traits.rs:5:9
    |
@@ -54,8 +53,26 @@ LL | #![deny(ferrocene::unvalidated)]
 help: consider marking the associated function as validated
    |
 LL ~     #[ferrocene::prevalidated]
+LL ~     fn default_validated() {}
+   |
+
+error: validated function calls an unvalidated associated function
+  --> $DIR/traits.rs:59:5
+   |
+LL |     f();
+   |     ^^^
+   |
+   = note: `<HasValidations as Trait>::default_unvalidated` is unvalidated
+note: generic function `call` instantiated by `indirect_checks`, which is called from a validated entrypoint
+  --> $DIR/traits.rs:67:5
+   |
+LL |     call(HasValidations::default_unvalidated);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the associated function as validated
+   |
+LL ~     #[ferrocene::prevalidated]
 LL ~     fn default_unvalidated() {}
    |
 
-error: aborting due to 1 previous error; 1 warning emitted
+error: aborting due to 2 previous errors; 1 warning emitted
 

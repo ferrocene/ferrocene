@@ -1,3 +1,37 @@
+error: unvalidated implementation of validated trait
+  --> $DIR/traits.rs:21:5
+   |
+LL |     fn default_validated() {}
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: trait marked as validated here
+  --> $DIR/traits.rs:10:5
+   |
+LL | /     #[ferrocene::requires_validation]
+LL | |     fn default_validated() {}
+   | |____^
+   = note: callers of `<MissingValidations as Trait>::default_validated` require every impl to be validated for safety
+note: the lint level is defined here
+  --> $DIR/traits.rs:5:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
+
+error: unvalidated implementation of validated trait
+  --> $DIR/traits.rs:23:5
+   |
+LL |     fn validated() {}
+   |     ^^^^^^^^^^^^^^
+   |
+note: trait marked as validated here
+  --> $DIR/traits.rs:14:5
+   |
+LL | /     #[ferrocene::requires_validation]
+LL | |     fn validated();
+   | |____^
+   = note: callers of `<MissingValidations as Trait>::validated` require every impl to be validated for safety
+
 error: validated function calls an unvalidated associated function
   --> $DIR/traits.rs:50:5
    |
@@ -12,21 +46,34 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | fn generics_checks<T: Trait>(_: T) {
    |    ^^^^^^^^^^^^^^^
-note: the lint level is defined here
-  --> $DIR/traits.rs:5:9
-   |
-LL | #![deny(ferrocene::unvalidated)]
-   |         ^^^^^^^^^^^^^^^^^^^^^^
    = note: `#[deny(ferrocene::possibly_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
-help: if you know all implementations of this trait will be validated, mark `Trait::default_unvalidated` as validated
+help: if you know all implementations of this trait will be validated, mark `Trait::default_unvalidated` as requiring validation
    |
-LL ~     #[ferrocene::prevalidated]
+LL ~     #[ferrocene::requires_validation]
 LL ~     fn default_unvalidated() {}
    |
 help: you can delay this warning until the compiler knows which implementation will be picked
    |
-LL ~     #[allow(ferrocene::possible_unvalidated_calls)]
+LL ~     #[allow(ferrocene::possible_unvalidated)]
 LL ~     T::default_unvalidated();
+   |
+
+error: validated function calls an unvalidated associated function
+  --> $DIR/traits.rs:53:5
+   |
+LL |     T::default_validated(); // ok
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: the Ferrocene compiler does not know if the implementation of `Trait::default_validated` will be validated or not
+help: if you know all implementations of this trait will be validated, mark `Trait::default_validated` as requiring validation
+   |
+LL ~     #[ferrocene::requires_validation]
+LL ~     fn default_validated() {}
+   |
+help: you can delay this warning until the compiler knows which implementation will be picked
+   |
+LL ~     #[allow(ferrocene::possible_unvalidated)]
+LL ~     T::default_validated(); // ok
    |
 
 warning: validated function calls an unvalidated method
@@ -55,9 +102,9 @@ LL |     #![warn(ferrocene::possibly_unvalidated)]
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: you can delay this warning until the compiler knows which implementation will be picked
    |
-LL ~     #[allow(ferrocene::possible_unvalidated_calls)]
+LL ~     #[allow(ferrocene::possible_unvalidated)]
 LL ~     f();
    |
 
-error: aborting due to 1 previous error; 1 warning emitted
+error: aborting due to 4 previous errors; 1 warning emitted
 

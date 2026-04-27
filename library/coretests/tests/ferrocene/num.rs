@@ -450,3 +450,411 @@ fn non_zero_ne() {
     assert!(lhs != rhs);
     assert!(!(lhs != lhs));
 }
+
+// covers
+// - <core::num::saturating::Saturating<T> as core::ops::arith::AddAssign>::add_assign
+// - <core::num::saturating::Saturating<T> as core::ops::arith::DivAssign>::div_assign
+// - <core::num::saturating::Saturating<T> as core::ops::arith::MulAssign>::mul_assign
+// - <core::num::saturating::Saturating<T> as core::ops::arith::Neg>::neg
+// - <core::num::saturating::Saturating<T> as core::ops::arith::Rem>::rem
+// - <core::num::saturating::Saturating<T> as core::ops::arith::RemAssign<T>>::rem_assign
+// - <core::num::saturating::Saturating<T> as core::ops::arith::RemAssign>::rem_assign
+// - <core::num::saturating::Saturating<T> as core::ops::arith::SubAssign>::sub_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitAnd>::bitand
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitAndAssign<T>>::bitand_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitAndAssign>::bitand_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitOr>::bitor
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitOrAssign<T>>::bitor_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitOrAssign>::bitor_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitXor>::bitxor
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitXorAssign<T>>::bitxor_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::BitXorAssign>::bitxor_assign
+// - <core::num::saturating::Saturating<T> as core::ops::bit::Not>::not
+macro_rules! test_saturating_ops {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                use core::num::Saturating;
+
+
+                // add_assign (Saturating)
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max += Saturating(1 as $T);
+                    assert_eq!(max, Saturating(<$T>::MAX), "add_assign (Saturating)");
+                }
+
+                // add_assign
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max += 1 as $T;
+                    assert_eq!(max, Saturating(<$T>::MAX), "add_assign");
+                }
+
+                // add (Saturating)
+                {
+                    let added_max = Saturating(<$T>::MAX) + Saturating(1 as $T);
+                    assert_eq!(added_max, Saturating(<$T>::MAX), "add (Saturating)");
+                }
+
+                // sub_assign (Saturating)
+                {
+                    let mut min = Saturating(<$T>::MIN);
+                    min -= Saturating(1 as $T);
+                    assert_eq!(min, Saturating(<$T>::MIN), "sub_assign (Saturating)");
+                }
+
+                // sub_assign
+                {
+                    let mut min = Saturating(<$T>::MIN);
+                    min -= 1 as $T;
+                    assert_eq!(min, Saturating(<$T>::MIN), "sub_assign");
+                }
+
+                // sub (Saturating)
+                {
+                    let subbed_min = Saturating(<$T>::MIN) - Saturating(1 as $T);
+                    assert_eq!(subbed_min, Saturating(<$T>::MIN), "sub (Saturating)");
+                }
+
+                // mul_assign (Saturating)
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max *= Saturating(2);
+                    assert_eq!(max, Saturating(<$T>::MAX), "mul_assign (Saturating)");
+                }
+
+                // mul_assign
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max *= 2;
+                    assert_eq!(max, Saturating(<$T>::MAX), "mul_assign");
+                }
+
+                // div_assign (Saturating)
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max /= Saturating(2);
+                    assert_eq!(max, Saturating(<$T>::MAX / 2), "div_assign (Saturating)");
+                }
+
+                // div_assign
+                {
+                    let mut max = Saturating(<$T>::MAX);
+                    max /= 2;
+                    assert_eq!(max, Saturating(<$T>::MAX / 2), "div_assign");
+                }
+
+                // rem_assign (Saturating)
+                {
+                    let mut suspect = Saturating(15 as $T);
+                    suspect %= Saturating(2);
+                    assert_eq!(suspect, Saturating(1), "rem_assign (Saturating)");
+                }
+
+                // rem_assign
+                {
+                    let mut suspect = Saturating(15 as $T);
+                    suspect %= 2;
+                    assert_eq!(suspect, Saturating(1), "rem_assign");
+                }
+
+                // rem (Saturating)
+                {
+                    let suspect = Saturating(15 as $T) % Saturating(2 as $T);
+                    assert_eq!(suspect, Saturating(1), "rem (Saturating)");
+                }
+
+                // bit_or (Saturating)
+                {
+                    let suspect = Saturating(5 as $T) | Saturating(2 as $T);
+                    assert_eq!(suspect, Saturating(7), "bit_or (Saturating)");
+                }
+
+                // bit_or_assign (Saturating)
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect |= Saturating(2 as $T);
+                    assert_eq!(suspect, Saturating(7), "bit_or_assign (Saturating)");
+                }
+
+                // bit_or_assign
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect |= 2 as $T;
+                    assert_eq!(suspect, Saturating(7), "bit_or_assign");
+                }
+
+                // bit_and (Saturating)
+                {
+                    let suspect = Saturating(5 as $T) & Saturating(2 as $T);
+                    assert_eq!(suspect, Saturating(0), "bit_and (Saturating)");
+                }
+
+                // bit_and_assign (Saturating)
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect &= Saturating(2 as $T);
+                    assert_eq!(suspect, Saturating(0), "bit_and_assign (Saturating)");
+                }
+
+                // bit_and_assign
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect &= 2 as $T;
+                    assert_eq!(suspect, Saturating(0), "bit_and_assign");
+                }
+
+                // bit_xor (Saturating)
+                {
+                    let suspect = Saturating(5 as $T) ^ Saturating(1 as $T);
+                    assert_eq!(suspect, Saturating(4), "bit_xor");
+                }
+
+                // bit_xor_assign (Saturating)
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect ^= Saturating(1 as $T);
+                    assert_eq!(suspect, Saturating(4), "bit_xor_assign (Saturating)");
+                }
+
+                // bit_xor_assign
+                {
+                    let mut suspect = Saturating(5 as $T);
+                    suspect ^= 1 as $T;
+                    assert_eq!(suspect, Saturating(4), "bit_xor_assign");
+                }
+
+                // not
+                {
+                    let suspect = Saturating(<$T>::MAX);
+                    assert_eq!(!suspect, Saturating(<$T>::MIN), "not");
+                }
+            }
+
+        )*
+    };
+}
+test_saturating_ops! {
+    i128 => saturating_i128_ops,
+    i64 => saturating_i64_ops,
+    i32 => saturating_i32_ops,
+    i8 => saturating_i8_ops,
+    isize => saturating_isize_ops,
+    u128 => saturating_u128_ops,
+    u64 => saturating_u64_ops,
+    u32 => saturating_u32_ops,
+    u8 => saturating_u8_ops,
+    usize => saturating_usize_ops,
+}
+
+// covers
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::AddAssign>::add_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::DivAssign>::div_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::MulAssign>::mul_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::Neg>::neg
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::Rem>::rem
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::RemAssign<T>>::rem_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::RemAssign>::rem_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::arith::SubAssign>::sub_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitAnd>::bitand
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitAndAssign<T>>::bitand_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitAndAssign>::bitand_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitOr>::bitor
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitOrAssign<T>>::bitor_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitOrAssign>::bitor_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitXor>::bitxor
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitXorAssign<T>>::bitxor_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::BitXorAssign>::bitxor_assign
+// - <core::num::wrapping::Wrapping<T> as core::ops::bit::Not>::not
+// - <core::num::saturating::Saturating<T> as core::ops::arith::Neg>::neg
+macro_rules! test_wrapping_ops {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+            #[test]
+            fn $fn() {
+                use core::num::Wrapping;
+
+
+                // add_assign (Wrapping)
+                {
+                    let mut max = Wrapping(<$T>::MAX);
+                    max += Wrapping(1 as $T);
+                    assert_eq!(max, Wrapping(<$T>::MIN), "add_assign (Wrapping)");
+                }
+
+                // add_assign
+                {
+                    let mut max = Wrapping(<$T>::MAX);
+                    max += 1 as $T;
+                    assert_eq!(max, Wrapping(<$T>::MIN), "add_assign");
+                }
+
+                // add (Wrapping)
+                {
+                    let added_max = Wrapping(<$T>::MAX) + Wrapping(1 as $T);
+                    assert_eq!(added_max, Wrapping(<$T>::MIN), "add (Wrapping)");
+                }
+
+                // sub_assign (Wrapping)
+                {
+                    let mut min = Wrapping(<$T>::MIN);
+                    min -= Wrapping(1 as $T);
+                    assert_eq!(min, Wrapping(<$T>::MAX), "sub_assign (Wrapping)");
+                }
+
+                // sub_assign (Wrapping)
+                {
+                    let mut min = Wrapping(<$T>::MIN);
+                    min -= 1 as $T;
+                    assert_eq!(min, Wrapping(<$T>::MAX), "sub_assign (Wrapping)");
+                }
+
+                // sub (Wrapping)
+                {
+                    let subbed_min = Wrapping(<$T>::MIN) - Wrapping(1 as $T);
+                    assert_eq!(subbed_min, Wrapping(<$T>::MAX), "sub (Wrapping)");
+                }
+
+                // mul_assign (Wrapping)
+                {
+                    let mut max = Wrapping(24 as $T);
+                    max *= Wrapping(2); // Other functions test the correctness of mul in general, just worry about covering this convienence wrapper
+                    assert_eq!(max, Wrapping(48), "mul_assign (Wrapping)");
+                }
+
+                // mul_assign
+                {
+                    let mut max = Wrapping(24 as $T);
+                    max *= 2; // Other functions test the correctness of mul in general, just worry about covering this convienence wrapper
+                    assert_eq!(max, Wrapping(48), "mul_assign");
+                }
+
+                // div_assign (Wrapping)
+                {
+                    let mut max = Wrapping(<$T>::MAX);
+                    max /= Wrapping(2);
+                    assert_eq!(max, Wrapping(<$T>::MAX / 2), "div_assign (Wrapping)");
+                }
+
+                // div_assign
+                {
+                    let mut max = Wrapping(<$T>::MAX);
+                    max /= 2;
+                    assert_eq!(max, Wrapping(<$T>::MAX / 2), "div_assign");
+                }
+
+                // rem_assign (Wrapping)
+                {
+                    let mut suspect = Wrapping(15 as $T);
+                    suspect %= Wrapping(2);
+                    assert_eq!(suspect, Wrapping(1), "rem_assign (Wrapping)");
+                }
+
+                // rem_assign
+                {
+                    let mut suspect = Wrapping(15 as $T);
+                    suspect %= 2;
+                    assert_eq!(suspect, Wrapping(1), "rem_assign");
+                }
+
+                // rem (Wrapping)
+                {
+                    let suspect = Wrapping(15 as $T) % Wrapping(2 as $T);
+                    assert_eq!(suspect, Wrapping(1), "rem (Wrapping)");
+                }
+
+                // bit_or (Wrapping)
+                {
+                    let suspect = Wrapping(5 as $T) | Wrapping(2 as $T);
+                    assert_eq!(suspect, Wrapping(7), "bit_or (Wrapping)");
+                }
+
+                // bit_or_assign (Wrapping)
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect |= Wrapping(2 as $T);
+                    assert_eq!(suspect, Wrapping(7), "bit_or_assign (Wrapping)");
+                }
+
+
+                // bit_or_assign
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect |= 2 as $T;
+                    assert_eq!(suspect, Wrapping(7), "bit_or_assign");
+                }
+
+                // bit_and (Wrapping)
+                {
+                    let suspect = Wrapping(5 as $T) & Wrapping(2 as $T);
+                    assert_eq!(suspect, Wrapping(0), "bit_and (Wrapping)");
+                }
+
+                // bit_and_assign (Wrapping)
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect &= Wrapping(2 as $T);
+                    assert_eq!(suspect, Wrapping(0), "bit_and_assign (Wrapping)");
+                }
+
+                // bit_and_assign (Wrapping)
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect &= 2 as $T;
+                    assert_eq!(suspect, Wrapping(0), "bit_and_assign");
+                }
+
+                // bit_xor (Wrapping)
+                {
+                    let suspect = Wrapping(5 as $T) ^ Wrapping(1 as $T);
+                    assert_eq!(suspect, Wrapping(4), "bit_xor (Wrapping)");
+                }
+
+                // bit_xor_assign (Wrapping)
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect ^= Wrapping(1 as $T);
+                    assert_eq!(suspect, Wrapping(4), "bit_xor_assign (Wrapping)");
+                }
+
+                // bit_xor_assign
+                {
+                    let mut suspect = Wrapping(5 as $T);
+                    suspect ^= 1 as $T;
+                    assert_eq!(suspect, Wrapping(4), "bit_xor_assign");
+                }
+
+                // not
+                {
+                    let suspect = Wrapping(<$T>::MAX);
+                    assert_eq!(!suspect, Wrapping(<$T>::MIN), "not");
+                }
+            }
+
+        )*
+    };
+}
+test_wrapping_ops! {
+    i128 => wrapping_i128_ops,
+    i64 => wrapping_i64_ops,
+    i32 => wrapping_i32_ops,
+    i8 => wrapping_i8_ops,
+    isize => wrapping_isize_ops,
+    u128 => wrapping_u128_ops,
+    u64 => wrapping_u64_ops,
+    u32 => wrapping_u32_ops,
+    u8 => wrapping_u8_ops,
+    usize => wrapping_usize_ops,
+}
+
+// Covers `<core::num::saturating::Saturating<T> as core::ops::arith::Neg>::neg`
+#[test]
+fn test_saturating_neg() {
+    use core::num::Saturating;
+    assert_eq!(-Saturating(42 as i128), Saturating(-42 as i128));
+    assert_eq!(-Saturating(42 as i64), Saturating(-42 as i64));
+    assert_eq!(-Saturating(42 as i32), Saturating(-42 as i32));
+    assert_eq!(-Saturating(42 as i8), Saturating(-42 as i8));
+}

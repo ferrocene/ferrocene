@@ -7,20 +7,20 @@
 
 trait Trait {
     fn default_unvalidated() {}
-    #[ferrocene::prevalidated]
+    #[ferrocene::requires_validation]
     fn default_validated() {}
 
     fn unvalidated();
-    #[ferrocene::prevalidated]
+    #[ferrocene::requires_validation]
     fn validated();
 }
 
 struct MissingValidations;
 #[cfg(pre_mono)]
 impl Trait for MissingValidations {
-    fn default_validated() {} //~ ERROR unvalidated
+    fn default_validated() {} //~[pre-mono] ERROR unvalidated
     fn unvalidated() {}
-    fn validated() {} //~ ERROR unvalidated
+    fn validated() {} //~[pre-mono] ERROR unvalidated
 }
 
 struct HasValidations;

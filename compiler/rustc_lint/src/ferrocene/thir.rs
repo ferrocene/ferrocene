@@ -12,6 +12,7 @@ use std::ops::ControlFlow;
 
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem, OwnerId};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::PointerCoercion;
@@ -19,10 +20,12 @@ use rustc_middle::ty::{
     self, Binder, ExistentialTraitRef, GenericArgs, Instance, Ty, TyCtxt, TypeSuperVisitable as _,
     TypeVisitable as _, TypeVisitor, TypingEnv,
 };
-use rustc_span::Span;
+use rustc_span::{Span, sym};
 use tracing::{debug, info};
 
-use crate::ferrocene::{InstantiateResult, LintState, UnvalidatedImplCause, Use, UseKind};
+use crate::ferrocene::{
+    InstantiateResult, LintState, UnvalidatedImplCause, Use, UseKind, diagnostics,
+};
 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,
@@ -68,7 +71,21 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
             return None;
         }
 
-        let linter = LintState::new(tcx, item)?;
+        let linter = LintState::new(tcx, item);
+
+        // Check if this is an unvalidated implementation for a validated trait.
+        if linter.is_none()
+            && let Some(trait_item) = tcx.trait_item_of(item)
+            && let Some(attr) = tcx
+                .get_attrs_by_path(trait_item, &[sym::ferrocene, sym::requires_validation])
+                .next()
+        // && let ValidatedStatus::Validated { annotation: Some(annotation) } = item_is_validated(tcx, trait_item)
+        {
+            diagnostics::lint_unvalidated_impl(tcx, item, trait_item, attr.span());
+        }
+
+        let linter = linter?;
+
         // thir_body can return ErrorGuaranteed if this is a const block that failed evaluation.
         let body = tcx.thir_body(item).ok();
         if body.is_none() {

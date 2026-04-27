@@ -1094,7 +1094,7 @@ workflows:
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test
           job: test
-          resource-class: ferrocene/k8s-amd64-medium
+          resource-class: ferrocene/k8s-amd64-large
           test-variant: "2021"
           requires:
             - x86_64-linux-build
@@ -1338,7 +1338,7 @@ workflows:
       - aarch64-linux-generic-test-container:
           name: aarch64-linux-test
           job: test
-          resource-class: ferrocene/k8s-arm64-medium
+          resource-class: ferrocene/k8s-arm64-large
           test-variant: "2021"
           requires:
             - aarch64-linux-build

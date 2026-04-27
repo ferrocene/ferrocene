@@ -1,3 +1,28 @@
+warning: validated function calls an unvalidated method
+  --> $DIR/lint-levels.rs:29:5
+   |
+LL |     val.clone();
+   |     ^^^^^^^^^
+   |
+  --> $SRC_DIR/core/src/clone.rs:LL:COL
+   |
+   = note: `clone` is unvalidated
+   |
+   = note: the Ferrocene compiler does not know if the implementation of `clone` will be validated or not
+   = help: contact Ferrocene support to see if this method is possible to certify
+note: `uninstantiated_generic_direct` is validated
+  --> $DIR/lint-levels.rs:27:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn uninstantiated_generic_direct<T: Clone>(val: T) {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/lint-levels.rs:28:12
+   |
+LL |     #[warn(ferrocene::unvalidated)]
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
 warning: validated function calls an unvalidated function
   --> $DIR/lint-levels.rs:49:5
    |
@@ -19,6 +44,11 @@ note: the lint level is defined here
    |
 LL |     #[warn(ferrocene::unvalidated)]
    |            ^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the function as validated
+   |
+LL + #[ferrocene::prevalidated]
+LL | fn unvalidated() {}
+   |
 
 warning: validated function calls an unvalidated method
   --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
@@ -43,6 +73,12 @@ note: the lint level is defined here
    |
 LL | #[warn(ferrocene::unvalidated)]
    |        ^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the method as validated
+  --> $DIR/lint-levels.rs:15:5
+   |
+LL ~     #[ferrocene::prevalidated]
+LL ~     fn drop(&mut self) {}
+   |
 
 warning: validated function calls an unvalidated method
   --> $DIR/lint-levels.rs:29:5
@@ -58,11 +94,11 @@ note: generic function `uninstantiated_generic_direct` instantiated by `reachabl
    |
 LL |     uninstantiated_generic_direct(Unvalidated);
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-note: the lint level is defined here
-  --> $DIR/lint-levels.rs:28:12
+help: consider marking the method as validated
    |
-LL |     #[warn(ferrocene::unvalidated)]
-   |            ^^^^^^^^^^^^^^^^^^^^^^
+LL ~     #[ferrocene::prevalidated]
+LL ~     fn clone(&self) -> Self { Unvalidated }
+   |
 
-warning: 3 warnings emitted
+warning: 4 warnings emitted
 

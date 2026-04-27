@@ -1,8 +1,8 @@
 //! ## Recommended reading
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
-use rustc_errors::{Diag, MultiSpan};
-use rustc_hir::def_id::DefId;
+use rustc_errors::{Applicability, Diag, MultiSpan};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::{HirId, LangItem};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
@@ -33,22 +33,24 @@ impl<'tcx> LintState<'tcx> {
                 use_.present_tense()
             ));
 
-            // Need to do this lazily or `with_no_trimmed_paths` will panic :/
+            let added_suggestion = self.suggest_annotation(use_, diag);
+
             let name = match use_.opt_instance() {
                 None => tcx.def_path_str(callee),
                 Some(instance) => tcx.def_path_str_with_args(callee, instance.args),
             };
-            diag.span_label(self.func_span(callee), format!("`{name}` is unvalidated"));
+            let msg = format!("`{name}` is unvalidated");
+            if added_suggestion {
+                diag.label(msg);
+            } else {
+                diag.span_label(self.func_span(callee));
+            }
 
             if let UseKind::ContainsFnPtr(_, ty) = use_.kind {
                 diag.note(format!("`{name}` contains a function pointer that might be called at runtime"));
                 diag.note(format!("the Ferrocene compiler does not know if the `{ty}` was verified, so it must assume it is unverified"));
-            }
-
-            if STDLIB_STABLE_CRATES.contains(&tcx.crate_name(callee.krate)) {
-                diag.help_once(format!(
-                    "contact Ferrocene support to see if this {callee_descr} is possible to certify"
-                ));
+            } else if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
+                diag.note(format!("the Ferrocene compiler does not know if the implementation of `{}` will be validated or not", tcx.def_path_str(trait_fn)));
             }
 
             // Don't show this "takes place in a validated function" label more than once per function.
@@ -77,6 +79,47 @@ impl<'tcx> LintState<'tcx> {
                 self.decorate_instantiation(use_, diag, None);
             }
         }));
+    }
+
+    /// Returns whether this showed the `callee` span.
+    fn suggest_annotation(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) -> bool {
+        let tcx = self.tcx;
+        let mut shown_span = false;
+
+        let indent = |span| {
+            let col = tcx.sess.source_map().lookup_char_pos(span.lo()).col_display;
+            " ".repeat(col)
+        };
+
+        let suggestion_msg = if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
+            format!("if you know all implementations of this trait will be validated, mark `{}` as validated",
+                tcx.def_path_str(trait_fn))
+        } else {
+            format!("consider marking the {callee_descr} as validated")
+        };
+
+        if callee.krate == LOCAL_CRATE {
+            let header = tcx.def_span(callee);
+            diag.span_suggestion_verbose(
+                header.shrink_to_lo(),
+                suggestion_msg,
+                format!("#[ferrocene::prevalidated]\n{}", indent(header)),
+                Applicability::MaybeIncorrect,
+            );
+            shown_span = true;
+        } else if STDLIB_STABLE_CRATES.contains(&tcx.crate_name(callee.krate)) {
+            diag.help_once(format!(
+                "contact Ferrocene support to see if this {callee_descr} is possible to certify"
+            ));
+        }
+
+        if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
+            let msg = "delay this warning until the compiler knows which implementation will be picked";
+            let suggestion = format!("#[allow(ferrocene::possible_unvalidated_calls)]\n{}", indent(use_.span));
+            diag.span_suggestion(use_.span, msg, suggestion, Applicability::MaybeIncorrect);
+        }
+
+        shown_span
     }
 
     fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) {
@@ -156,7 +199,7 @@ impl<'tcx> LintState<'tcx> {
 impl<'tcx> Use<'tcx> {
     fn present_tense(self) -> &'static str {
         match self.kind {
-            UseKind::Called(..) => "calls",
+            UseKind::Called(..) | UseKind::CalledPreMonoTraitFn(..) => "calls",
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear
             // that it actually helps understanding.
             UseKind::TraitObjectCast(..) | UseKind::FnPtrCast(..) => "possibly calls",

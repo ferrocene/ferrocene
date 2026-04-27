@@ -323,6 +323,7 @@ enum UnvalidatedImplCause<'tcx> {
 #[derive(Copy, Clone, Debug)]
 enum UseKind<'tcx> {
     Called(Instance<'tcx>),
+    CalledPreMonoTraitFn(DefId),
     FnPtrCast(Instance<'tcx>),
     /// The `Ty` is the source type of the cast. We don't currently store the destination type.
     TraitObjectCast(UnvalidatedImplCause<'tcx>, Ty<'tcx>),
@@ -334,7 +335,7 @@ impl<'tcx> Use<'tcx> {
     fn def_id(self) -> DefId {
         match self.kind {
             UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
-            UseKind::ContainsFnPtr(id, _) => id,
+            UseKind::ContainsFnPtr(id, _) | UseKind::CalledPreMonoTraitFn(id) => id,
             UseKind::TraitObjectCast(UnvalidatedImplCause::AssocFn(id), _) => id,
             UseKind::TraitObjectCast(UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref), _) => {
                 trait_ref.def_id()
@@ -345,7 +346,9 @@ impl<'tcx> Use<'tcx> {
     fn opt_instance(self) -> Option<Instance<'tcx>> {
         match self.kind {
             UseKind::FnPtrCast(instance) | UseKind::Called(instance) => Some(instance),
-            UseKind::TraitObjectCast(..) | UseKind::ContainsFnPtr(..) => None,
+            UseKind::TraitObjectCast(..)
+            | UseKind::ContainsFnPtr(..)
+            | UseKind::CalledPreMonoTraitFn(..) => None,
         }
     }
 }

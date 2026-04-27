@@ -20,6 +20,11 @@ note: the lint level is defined here
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the function as validated
+   |
+LL + #[ferrocene::prevalidated]
+LL | fn unvalidated_panic_hook(_: &PanicHookInfo) {}
+   |
 
 error: aborting due to 1 previous error
 

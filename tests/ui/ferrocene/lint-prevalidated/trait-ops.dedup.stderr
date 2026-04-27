@@ -19,6 +19,11 @@ note: the lint level is defined here
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:86:5
@@ -28,6 +33,12 @@ LL |         | AddAssign => fn add_assign(&mut self, Self);
 ...
 LL |     x += x;
    |     ^^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:87:5
@@ -37,6 +48,12 @@ LL |         | Sub => type Output; fn sub(self, Self) -> Self;
 ...
 LL |     x - x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:88:5
@@ -46,6 +63,12 @@ LL |         | Mul => type Output; fn mul(self, Self) -> Self;
 ...
 LL |     x * x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:89:5
@@ -55,6 +78,12 @@ LL |         | Div => type Output; fn div(self, Self) -> Self;
 ...
 LL |     x / x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:90:5
@@ -64,6 +93,12 @@ LL |         | BitOr => type Output; fn bitor(self, Self) -> Self;
 ...
 LL |     x | x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:91:5
@@ -73,6 +108,12 @@ LL |         | BitAnd => type Output; fn bitand(self, Self) -> Self;
 ...
 LL |     x & x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:92:5
@@ -82,6 +123,12 @@ LL |         | BitXor => type Output; fn bitxor(self, Self) -> Self;
 ...
 LL |     x ^ x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:93:5
@@ -91,6 +138,12 @@ LL |         | Rem => type Output; fn rem(self, Self) -> Self;
 ...
 LL |     x % x;
    |     ^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:94:5
@@ -100,6 +153,12 @@ LL |         | Shl => type Output; fn shl(self, Self) -> Self;
 ...
 LL |     x << x;
    |     ^^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:95:5
@@ -109,6 +168,12 @@ LL |         | Shr => type Output; fn shr(self, Self) -> Self;
 ...
 LL |     x >> x;
    |     ^^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:96:5
@@ -118,6 +183,12 @@ LL |         | Neg => type Output; fn neg(self) -> Self;
 ...
 LL |     -x;
    |     ^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:97:5
@@ -127,6 +198,12 @@ LL |         | Not => type Output; fn not(self) -> Self;
 ...
 LL |     !x;
    |     ^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:98:5
@@ -136,6 +213,12 @@ LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> 
 ...
 LL |     x == x;
    |     ^^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:99:5
@@ -145,6 +228,12 @@ LL |         | Deref => type Target; fn deref(&self) -> &Self;
 ...
 LL |     *x;
    |     ^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:100:5
@@ -154,6 +243,12 @@ LL |         | DerefMut => fn deref_mut(&mut self) -> &mut Self;
 ...
 LL |     *x = Unvalidated;
    |     ^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:102:5
@@ -163,6 +258,12 @@ LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> 
 ...
 LL |     x != x;
    |     ^^^^^^
+   |
+help: consider marking the method as validated
+   |
+LL ~                 #[ferrocene::prevalidated]
+LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+   |
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:129:5

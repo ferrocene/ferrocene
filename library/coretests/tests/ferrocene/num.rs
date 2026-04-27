@@ -858,3 +858,28 @@ fn test_saturating_neg() {
     assert_eq!(-Saturating(42 as i32), Saturating(-42 as i32));
     assert_eq!(-Saturating(42 as i8), Saturating(-42 as i8));
 }
+
+// Cover `core::num::<T>::saturating_div`.
+#[test]
+fn test_saturating_div() {
+    assert_eq!(
+        i128::saturating_div(i128::MIN, -1 as i128),
+        i128::MAX,
+        "i128",
+    );
+    assert_eq!(
+        i64::saturating_div(i64::MIN, -1 as i64),
+        i64::MAX,
+        "i64",
+    );
+    assert_eq!(
+        i32::saturating_div(i32::MIN, -1 as i32),
+        i32::MAX,
+        "i32",
+    );
+    assert_eq!(
+        i8::saturating_div(i8::MIN, -1 as i8),
+        i8::MAX,
+        "i8",
+    );
+}

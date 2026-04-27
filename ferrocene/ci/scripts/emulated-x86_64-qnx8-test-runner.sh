@@ -5,8 +5,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source ~/qnx800/qnxsdp-env.sh
-
 # qcc resides in `somewhere/qnx800/host/linux/x86_64/usr/bin`
 qnxdir="$(realpath $(dirname $(which qcc))/../../../../..)"
 emulatordir=/tmp/emulator

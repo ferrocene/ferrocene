@@ -8,7 +8,9 @@ use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
-use crate::ferrocene::{LintState, UNVALIDATED, UnvalidatedImplCause, Use, UseKind};
+use crate::ferrocene::{
+    KNOWN_UNVALIDATED, LintState, POSSIBLY_UNVALIDATED, UnvalidatedImplCause, Use, UseKind,
+};
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {
@@ -25,7 +27,10 @@ impl<'tcx> LintState<'tcx> {
 
         debug!("linting node {lint_node:?}");
 
-        tcx.emit_node_span_lint(UNVALIDATED, lint_node, receiver_span, rustc_errors::DiagDecorator(|diag| {
+        let pre_mono = matches!(use_.kind, UseKind::CalledPreMonoTraitFn(..));
+        let lint = if pre_mono { POSSIBLY_UNVALIDATED } else { KNOWN_UNVALIDATED };
+
+        tcx.emit_node_span_lint(lint, lint_node, receiver_span, rustc_errors::DiagDecorator(|diag| {
             let callee_descr = tcx.def_descr(callee);
             let owner_descr = tcx.def_descr(owner.into());
             diag.primary_message(format!(
@@ -41,9 +46,13 @@ impl<'tcx> LintState<'tcx> {
             };
             let msg = format!("`{name}` is unvalidated");
             if added_suggestion {
-                diag.label(msg);
+                // do nothing for pre-mono functions -- we'll print "does not know" in a second,
+                // and the added diagnostic isn't very helpful.
+                if !pre_mono {
+                    diag.note(msg);
+                }
             } else {
-                diag.span_label(self.func_span(callee));
+                diag.span_label(self.func_span(callee), msg);
             }
 
             if let UseKind::ContainsFnPtr(_, ty) = use_.kind {
@@ -84,9 +93,12 @@ impl<'tcx> LintState<'tcx> {
     /// Returns whether this showed the `callee` span.
     fn suggest_annotation(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) -> bool {
         let tcx = self.tcx;
+        let callee = use_.def_id();
+        let callee_descr = tcx.def_descr(callee);
+
         let mut shown_span = false;
 
-        let indent = |span| {
+        let indent = |span: Span| {
             let col = tcx.sess.source_map().lookup_char_pos(span.lo()).col_display;
             " ".repeat(col)
         };
@@ -113,10 +125,16 @@ impl<'tcx> LintState<'tcx> {
             ));
         }
 
-        if let UseKind::CalledPreMonoTraitFn(trait_fn) = use_.kind {
-            let msg = "delay this warning until the compiler knows which implementation will be picked";
-            let suggestion = format!("#[allow(ferrocene::possible_unvalidated_calls)]\n{}", indent(use_.span));
-            diag.span_suggestion(use_.span, msg, suggestion, Applicability::MaybeIncorrect);
+        if let UseKind::CalledPreMonoTraitFn(_) = use_.kind {
+            let msg = "you can delay this warning until the compiler knows which implementation will be picked";
+            let suggestion =
+                format!("#[allow(ferrocene::possible_unvalidated)]\n{}", indent(use_.span));
+            diag.span_suggestion(
+                use_.span.shrink_to_lo(),
+                msg,
+                suggestion,
+                Applicability::MaybeIncorrect,
+            );
         }
 
         shown_span

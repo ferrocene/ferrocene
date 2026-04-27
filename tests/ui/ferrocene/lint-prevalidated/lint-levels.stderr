@@ -8,8 +8,8 @@ LL |     val.clone();
    |
    = note: `clone` is unvalidated
    |
-   = note: the Ferrocene compiler does not know if the implementation of `clone` will be validated or not
    = help: contact Ferrocene support to see if this method is possible to certify
+   = note: the Ferrocene compiler does not know if the implementation of `clone` will be validated or not
 note: `uninstantiated_generic_direct` is validated
   --> $DIR/lint-levels.rs:27:4
    |
@@ -22,16 +22,19 @@ note: the lint level is defined here
    |
 LL |     #[warn(ferrocene::unvalidated)]
    |            ^^^^^^^^^^^^^^^^^^^^^^
+help: you can delay this warning until the compiler knows which implementation will be picked
+   |
+LL ~     #[allow(ferrocene::possible_unvalidated_calls)]
+LL ~     val.clone();
+   |
 
 warning: validated function calls an unvalidated function
   --> $DIR/lint-levels.rs:49:5
    |
-LL | fn unvalidated() {}
-   |    ----------- `unvalidated` is unvalidated
-...
 LL |     unvalidated();
    |     ^^^^^^^^^^^
    |
+   = note: `unvalidated` is unvalidated
 note: `unreachable` is validated
   --> $DIR/lint-levels.rs:47:4
    |
@@ -53,11 +56,7 @@ LL | fn unvalidated() {}
 warning: validated function calls an unvalidated method
   --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
    |
-  ::: $DIR/lint-levels.rs:15:8
-   |
-LL |     fn drop(&mut self) {}
-   |        ---- `<Unvalidated as Drop>::drop` is unvalidated
-   |
+   = note: `<Unvalidated as Drop>::drop` is unvalidated
 note: `reachable` is validated
   --> $DIR/lint-levels.rs:36:8
    |
@@ -83,12 +82,10 @@ LL ~     fn drop(&mut self) {}
 warning: validated function calls an unvalidated method
   --> $DIR/lint-levels.rs:29:5
    |
-LL |     fn clone(&self) -> Self { Unvalidated }
-   |        ----- `<Unvalidated as Clone>::clone` is unvalidated
-...
 LL |     val.clone();
    |     ^^^^^^^^^^^
    |
+   = note: `<Unvalidated as Clone>::clone` is unvalidated
 note: generic function `uninstantiated_generic_direct` instantiated by `reachable`, which is called from a validated entrypoint
   --> $DIR/lint-levels.rs:39:5
    |

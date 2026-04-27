@@ -1,12 +1,10 @@
 error: validated function possibly calls an unvalidated function
   --> $DIR/panic-hook.rs:7:14
    |
-LL | fn unvalidated_panic_hook(_: &PanicHookInfo) {}
-   |    ---------------------- `unvalidated_panic_hook` is unvalidated
-LL | fn main() {
 LL |     set_hook(Box::new(unvalidated_panic_hook));
    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
+   = note: `unvalidated_panic_hook` is unvalidated
    = note: once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call the function
 note: `main` is validated

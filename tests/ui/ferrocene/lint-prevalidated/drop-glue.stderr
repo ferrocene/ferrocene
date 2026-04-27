@@ -1,11 +1,7 @@
 error: validated function calls an unvalidated method
   --> $SRC_DIR/core/src/ptr/mod.rs:LL:COL
    |
-  ::: $DIR/drop-glue.rs:29:8
-   |
-LL |     fn drop(&mut self) {}
-   |        ---- `<ExplicitDropImpl as Drop>::drop` is unvalidated
-   |
+   = note: `<ExplicitDropImpl as Drop>::drop` is unvalidated
 note: `has_drop_reachable` is validated
   --> $DIR/drop-glue.rs:21:8
    |

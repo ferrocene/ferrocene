@@ -1,12 +1,10 @@
 error: validated function possibly calls an unvalidated method
   --> $DIR/supertrait.rs:16:29
    |
-LL |     fn foo(&self) {}
-   |        --- `<Unvalidated as SuperTrait>::foo` is unvalidated
-...
 LL |     let x: &dyn BaseTrait = &Unvalidated;
    |                             ^^^^^^^^^^^^
    |
+   = note: `<Unvalidated as SuperTrait>::foo` is unvalidated
    = note: once `Unvalidated` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as SuperTrait>::foo`
 note: `validated` is validated

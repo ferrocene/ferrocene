@@ -1,12 +1,10 @@
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:85:5
    |
-LL |         | Add => type Output; fn add(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Add>::add` is unvalidated
-...
 LL |     x + x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::Add>::add` is unvalidated
 note: `ops` is validated
   --> $DIR/trait-ops.rs:83:4
    |
@@ -28,12 +26,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:86:5
    |
-LL |         | AddAssign => fn add_assign(&mut self, Self);
-   |                           ---------- `<Unvalidated as core::ops::AddAssign>::add_assign` is unvalidated
-...
 LL |     x += x;
    |     ^^^^^^
    |
+   = note: `<Unvalidated as core::ops::AddAssign>::add_assign` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -43,12 +39,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:87:5
    |
-LL |         | Sub => type Output; fn sub(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Sub>::sub` is unvalidated
-...
 LL |     x - x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::Sub>::sub` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -58,12 +52,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:88:5
    |
-LL |         | Mul => type Output; fn mul(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Mul>::mul` is unvalidated
-...
 LL |     x * x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::Mul>::mul` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -73,12 +65,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:89:5
    |
-LL |         | Div => type Output; fn div(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Div>::div` is unvalidated
-...
 LL |     x / x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::Div>::div` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -88,12 +78,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:90:5
    |
-LL |         | BitOr => type Output; fn bitor(self, Self) -> Self;
-   |                                    ----- `<Unvalidated as core::ops::BitOr>::bitor` is unvalidated
-...
 LL |     x | x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::BitOr>::bitor` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -103,12 +91,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:91:5
    |
-LL |         | BitAnd => type Output; fn bitand(self, Self) -> Self;
-   |                                     ------ `<Unvalidated as core::ops::BitAnd>::bitand` is unvalidated
-...
 LL |     x & x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::BitAnd>::bitand` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -118,12 +104,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:92:5
    |
-LL |         | BitXor => type Output; fn bitxor(self, Self) -> Self;
-   |                                     ------ `<Unvalidated as core::ops::BitXor>::bitxor` is unvalidated
-...
 LL |     x ^ x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::BitXor>::bitxor` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -133,12 +117,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:93:5
    |
-LL |         | Rem => type Output; fn rem(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Rem>::rem` is unvalidated
-...
 LL |     x % x;
    |     ^^^^^
    |
+   = note: `<Unvalidated as core::ops::Rem>::rem` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -148,12 +130,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:94:5
    |
-LL |         | Shl => type Output; fn shl(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Shl>::shl` is unvalidated
-...
 LL |     x << x;
    |     ^^^^^^
    |
+   = note: `<Unvalidated as core::ops::Shl>::shl` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -163,12 +143,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:95:5
    |
-LL |         | Shr => type Output; fn shr(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Shr>::shr` is unvalidated
-...
 LL |     x >> x;
    |     ^^^^^^
    |
+   = note: `<Unvalidated as core::ops::Shr>::shr` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -178,12 +156,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:96:5
    |
-LL |         | Neg => type Output; fn neg(self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Neg>::neg` is unvalidated
-...
 LL |     -x;
    |     ^^
    |
+   = note: `<Unvalidated as core::ops::Neg>::neg` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -193,12 +169,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:97:5
    |
-LL |         | Not => type Output; fn not(self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Not>::not` is unvalidated
-...
 LL |     !x;
    |     ^^
    |
+   = note: `<Unvalidated as core::ops::Not>::not` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -208,12 +182,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:98:5
    |
-LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
-   |                           -- `<Unvalidated as PartialEq>::eq` is unvalidated
-...
 LL |     x == x;
    |     ^^^^^^
    |
+   = note: `<Unvalidated as PartialEq>::eq` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -223,12 +195,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:99:5
    |
-LL |         | Deref => type Target; fn deref(&self) -> &Self;
-   |                                    ----- `<Unvalidated as core::ops::Deref>::deref` is unvalidated
-...
 LL |     *x;
    |     ^^
    |
+   = note: `<Unvalidated as core::ops::Deref>::deref` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -238,12 +208,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:100:5
    |
-LL |         | DerefMut => fn deref_mut(&mut self) -> &mut Self;
-   |                          --------- `<Unvalidated as core::ops::DerefMut>::deref_mut` is unvalidated
-...
 LL |     *x = Unvalidated;
    |     ^^
    |
+   = note: `<Unvalidated as core::ops::DerefMut>::deref_mut` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -253,12 +221,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:102:5
    |
-LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
-   |                                                        -- `<Unvalidated as PartialEq>::ne` is unvalidated
-...
 LL |     x != x;
    |     ^^^^^^
    |
+   = note: `<Unvalidated as PartialEq>::ne` is unvalidated
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -268,12 +234,10 @@ LL ~                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:129:5
    |
-LL |     fn branch(self) -> ControlFlow<Option<Infallible>> {
-   |        ------ `<Unvalidated as core::ops::Try>::branch` is unvalidated
-...
 LL |     x?;
    |     ^^
    |
+   = note: `<Unvalidated as core::ops::Try>::branch` is unvalidated
 note: `ops2` is validated
   --> $DIR/trait-ops.rs:127:4
    |
@@ -285,11 +249,10 @@ LL | fn ops2() -> Unvalidated {
 error: validated function calls an unvalidated associated function
   --> $DIR/trait-ops.rs:129:5
    |
-LL |     fn from_residual(_: Option<Infallible>) -> Self {
-   |        ------------- `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
-...
 LL |     x?;
    |     ^^
+   |
+   = note: `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
 
 error: aborting due to 19 previous errors
 

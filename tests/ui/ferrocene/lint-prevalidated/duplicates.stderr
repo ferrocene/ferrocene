@@ -1,12 +1,10 @@
 error: validated function calls an unvalidated function
   --> $DIR/duplicates.rs:35:5
    |
-LL | fn normal_def() {}
-   |    ---------- `normal_def` is unvalidated
-...
 LL |     normal_def();
    |     ^^^^^^^^^^
    |
+   = note: `normal_def` is unvalidated
 note: `deduplication` is validated
   --> $DIR/duplicates.rs:34:4
    |
@@ -28,12 +26,10 @@ LL | fn normal_def() {}
 error: validated function calls an unvalidated method
   --> $DIR/duplicates.rs:38:5
    |
-LL |     fn inherent_fn(&self) {}
-   |        ----------- `Unvalidated::inherent_fn` is unvalidated
-...
 LL |     Unvalidated.inherent_fn();
    |     ^^^^^^^^^^^^^^^^^^^^^^^
    |
+   = note: `Unvalidated::inherent_fn` is unvalidated
 help: consider marking the method as validated
    |
 LL ~     #[ferrocene::prevalidated]
@@ -43,12 +39,10 @@ LL ~     fn inherent_fn(&self) {}
 error: validated function calls an unvalidated associated function
   --> $DIR/duplicates.rs:42:5
    |
-LL |     fn fancy_clone() {}
-   |        ----------- `<Unvalidated as FancyClone>::fancy_clone` is unvalidated
-...
 LL |     Unvalidated::fancy_clone();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^
    |
+   = note: `<Unvalidated as FancyClone>::fancy_clone` is unvalidated
 help: consider marking the associated function as validated
    |
 LL ~     #[ferrocene::prevalidated]

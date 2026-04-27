@@ -1,12 +1,10 @@
 error: validated function possibly calls an unvalidated method
   --> $DIR/dyn-cast-post-mono.rs:42:16
    |
-LL |     fn collect<C>(self) -> C where Self: Sized {
-   |        ------- `MyIterator::collect` is unvalidated
-...
 LL |     MyBox::new(&x)
    |                ^^
    |
+   = note: `MyIterator::collect` is unvalidated
    = note: once `Once<i32>` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `MyIterator::collect`
 note: `main` is validated

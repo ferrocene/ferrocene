@@ -47,15 +47,16 @@ fn direct_checks() {
 #[cfg(pre_mono)]
 #[ferrocene::prevalidated]
 fn generics_checks<T: Trait>(_: T) {
-    T::default_unvalidated(); //~ ERROR unvalidated
-    T::unvalidated(); //~ ERROR unvalidated
+    T::default_unvalidated(); //[pre-mono]~ ERROR unvalidated
+    T::unvalidated(); //[pre-mono]~ ERROR unvalidated
     T::validated(); // ok
     T::default_validated(); // ok
 }
 
 #[ferrocene::prevalidated]
 fn call(f: impl Fn()) {
-    f();
+    #![warn(ferrocene::possibly_unvalidated)]
+    f(); //~ WARN unvalidated
 }
 
 #[ferrocene::prevalidated]

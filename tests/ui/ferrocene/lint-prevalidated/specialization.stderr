@@ -1,12 +1,10 @@
 error: validated function calls an unvalidated method
   --> $DIR/specialization.rs:25:5
    |
-LL |     fn foo(&self) -> usize { 1 }
-   |        --- `<bool as SpecializeMe>::foo` is unvalidated
-...
 LL |     true.foo();
    |     ^^^^^^^^
    |
+   = note: `<bool as SpecializeMe>::foo` is unvalidated
 note: `bar` is validated
   --> $DIR/specialization.rs:23:4
    |

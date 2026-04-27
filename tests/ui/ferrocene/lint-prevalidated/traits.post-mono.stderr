@@ -1,0 +1,61 @@
+warning: validated function calls an unvalidated method
+  --> $DIR/traits.rs:59:5
+   |
+LL |     f();
+   |     ^
+   |
+  --> $SRC_DIR/core/src/ops/function.rs:LL:COL
+   |
+   = note: `std::ops::Fn::call` is unvalidated
+   |
+   = help: contact Ferrocene support to see if this method is possible to certify
+   = note: the Ferrocene compiler does not know if the implementation of `std::ops::Fn::call` will be validated or not
+note: `call` is validated
+  --> $DIR/traits.rs:57:4
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | fn call(f: impl Fn()) {
+   |    ^^^^
+note: the lint level is defined here
+  --> $DIR/traits.rs:58:13
+   |
+LL |     #![warn(ferrocene::possibly_unvalidated)]
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: you can delay this warning until the compiler knows which implementation will be picked
+   |
+LL ~     #[allow(ferrocene::possible_unvalidated_calls)]
+LL ~     f();
+   |
+
+error: validated function calls an unvalidated associated function
+  --> $DIR/traits.rs:59:5
+   |
+LL |     f();
+   |     ^^^
+   |
+   = note: `<HasValidations as Trait>::default_unvalidated` is unvalidated
+note: `indirect_checks` is validated
+  --> $DIR/traits.rs:63:8
+   |
+LL | #[ferrocene::prevalidated]
+   | -------------------------- marked as validated here
+LL | pub fn indirect_checks() { // only checked in post-mono
+   |        ^^^^^^^^^^^^^^^
+...
+LL |     call(HasValidations::default_unvalidated);
+   |     ----------------------------------------- generic function `call` instantiated by `indirect_checks`
+note: the lint level is defined here
+  --> $DIR/traits.rs:5:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
+help: consider marking the associated function as validated
+   |
+LL ~     #[ferrocene::prevalidated]
+LL ~     fn default_unvalidated() {}
+   |
+
+error: aborting due to 1 previous error; 1 warning emitted
+

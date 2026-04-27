@@ -1,12 +1,10 @@
 error: validated function calls an unvalidated function
   --> $DIR/intrinsic-fallback-bodies.rs:14:5
    |
-LL | const fn unvalidated() {}
-   |          ----------- `unvalidated` is unvalidated
-...
 LL |     unvalidated();
    |     ^^^^^^^^^^^
    |
+   = note: `unvalidated` is unvalidated
 note: `prefetch_read_data` is validated
   --> $DIR/intrinsic-fallback-bodies.rs:13:10
    |
@@ -28,12 +26,10 @@ LL | const fn unvalidated() {}
 error: validated function calls an unvalidated function
   --> $DIR/intrinsic-fallback-bodies.rs:28:5
    |
-LL | const fn prefetch_read<T>(_ptr: *const T, _locality: Locality) {}
-   |          ------------- `prefetch_read::<i32>` is unvalidated
-...
 LL |     prefetch_read(&x, Locality::L3);
    |     ^^^^^^^^^^^^^
    |
+   = note: `prefetch_read::<i32>` is unvalidated
 note: `uses_unvalidated_intrinsic` is validated
   --> $DIR/intrinsic-fallback-bodies.rs:26:4
    |

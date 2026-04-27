@@ -19,16 +19,10 @@ mod baz {
     pub use crate::foo2::bar::core; //~ ERROR crate import `core` is private
 }
 
-<<<<<<< ferrocene/main
-fn main() {}
-
-// ferrocene-annotations: fls_maw4u1o8q37u
-// Crates
-||||||| e22c616e4e8
-fn main() {}
-=======
 fn main() {
     // Check that `foo1::core2` has the reexport's visibility and is accessible.
     foo1::core2::mem::drop(());
 }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ check-pass
 //@ compile-flags:-D bogus -D dead_cod
 //@ dont-require-annotations: HELP

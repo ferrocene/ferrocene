@@ -1,5 +1,11 @@
+<<<<<<< ferrocene/main
 //@ ignore-test The test is extremely slow due to debug assertions being enabled
 // skip-filecheck
+||||||| e22c616e4e8
+// skip-filecheck
+=======
+//@ skip-filecheck
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 // Make sure that the MIR inliner does not loop indefinitely on polymorphic recursion.
 //@ compile-flags: --crate-type lib
 

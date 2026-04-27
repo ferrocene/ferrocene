@@ -21,6 +21,7 @@ note: the lint level is defined here
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
 
 error: validated closure calls an unvalidated function
   --> $DIR/basic.rs:90:42

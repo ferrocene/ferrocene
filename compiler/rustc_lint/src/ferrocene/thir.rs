@@ -12,7 +12,6 @@ use std::ops::ControlFlow;
 
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem, OwnerId};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
 use rustc_middle::thir::visit::Visitor as _;
 use rustc_middle::thir::{self, Thir};
 use rustc_middle::ty::adjustment::PointerCoercion;

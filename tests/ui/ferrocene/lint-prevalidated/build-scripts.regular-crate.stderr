@@ -1,0 +1,22 @@
+error: validated function calls an unvalidated function
+  --> $DIR/build-scripts.rs:11:13
+   |
+LL | fn unvalidated() {}
+   |    ----------- `unvalidated` is unvalidated
+LL | fn main() { unvalidated(); }
+   |             ^^^^^^^^^^^
+   |
+note: `main` is validated
+  --> $DIR/build-scripts.rs:11:4
+   |
+LL | fn main() { unvalidated(); }
+   |    ^^^^
+   = note: main functions are assumed to be validated
+note: the lint level is defined here
+  --> $DIR/build-scripts.rs:8:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

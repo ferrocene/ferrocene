@@ -314,7 +314,7 @@ struct Use<'tcx> {
 enum UnvalidatedImplCause<'tcx> {
     /// An associated function from the source type's impl of one of the traits we were casting to.
     ///
-    /// FIXME: this should have all unvalidated items in the impl, not just the first.
+    /// FIXME(diagnostics): this should have all unvalidated items in the impl, not just the first.
     AssocFn(DefId),
     /// Only occurs pre-mono.
     UnresolvedGenericImpl(rustc_middle::ty::PolyTraitRef<'tcx>),

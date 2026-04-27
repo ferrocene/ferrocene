@@ -96,12 +96,15 @@ use crate::{cmp, fmt};
 /// assert_eq!("abcdef_z".find(|ch| ch > 'd' && ch < 'y'), Some(4));
 /// assert_eq!("abcddd_z".find(|ch| ch > 'd' && ch < 'y'), None);
 /// ```
+
+// Ferrocene addition: Pattern is unstable so we can require all implementations to be validated.
 pub trait Pattern: Sized {
     /// Associated searcher for this pattern
     type Searcher<'a>: Searcher<'a>;
 
     /// Constructs the associated searcher from
     /// `self` and the `haystack` to search in.
+    #[ferrocene::requires_validation]
     fn into_searcher(self, haystack: &str) -> Self::Searcher<'_>;
 
     /// Checks whether the pattern matches anywhere in the haystack
@@ -112,6 +115,7 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the front of the haystack
     #[inline]
+    #[ferrocene::requires_validation]
     #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         matches!(self.into_searcher(haystack).next(), SearchStep::Match(0, _))
@@ -119,6 +123,7 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
+    #[ferrocene::requires_validation]
     #[ferrocene::prevalidated]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where

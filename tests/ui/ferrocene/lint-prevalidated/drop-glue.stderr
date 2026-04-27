@@ -16,6 +16,7 @@ note: the lint level is defined here
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
 help: consider marking the method as validated
   --> $DIR/drop-glue.rs:29:5
    |

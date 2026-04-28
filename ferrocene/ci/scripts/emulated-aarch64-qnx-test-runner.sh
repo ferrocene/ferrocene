@@ -5,21 +5,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# this file resides in `/ferrocene/ci/scripts/(here)`
-basedir="$(realpath $(dirname $0)/../../..)"
-qnxdir="$(realpath $(dirname $(which qcc))/../../../../..)"
-emulatordir=/tmp/emulator
+. "$(dirname $0)"/qnx-common.sh
+
 nto_target=aarch64-unknown-nto-qnx710
 
-panic() {
-    echo "error:" "${@}" >&2
-    exit 1
-}
-
 start_vm() {
-    echo
-    echo "===> setting up QEMU bridge network"
-    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf
+    qnx7_set_up_bridge_network
 
     echo
     echo "===> creating virtual SD card"
@@ -35,9 +26,8 @@ start_vm() {
 
     echo
     echo "===> starting QEMU"
-    if [ -f "${emulatordir}"/qemu.pid ]; then
-        panic a previous instance of the emulator may already be running
-    fi
+    check_no_other_emulator_is_running
+    check_ip_address_is_free
 
     # NOTE(-net nic): the (real) ZCU102 has 4 NICs; only the 4th one can be used in QEMU
     # the unused NICs need to be listed in the command line invocation
@@ -58,11 +48,7 @@ start_vm() {
 }
 
 cmd_prepare() {
-    if ! [[ -d "${emulatordir}" ]]; then
-        echo "error: directory ${emulatordir} does not exist"
-        echo
-        exit 1
-    fi
+    check_emulatordir_exists
 
     echo
     echo "===> building BSP"

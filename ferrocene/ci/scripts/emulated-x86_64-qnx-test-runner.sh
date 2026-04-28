@@ -5,31 +5,19 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# qcc resides in `somewhere/qnx710/host/linux/x86_64/usr/bin`
-qnxdir="$(realpath $(dirname $(which qcc))/../../../../..)"
-emulatordir=/tmp/emulator
+. "$(dirname $0)"/qnx-common.sh
+
 nto_target=x86_64-pc-nto-qnx710
 vm_hostname=x86_64-qnx-vm
 ssh_id=id_ed25519
 
-# static IP configuration relied on by circle CI workflow
-vm_ipv4_addr=172.31.1.11
-
-panic() {
-    echo "error:" "${@}" >&2
-    exit 1
-}
-
 start_vm() {
-    echo
-    echo "===> setting up QEMU bridge network"
-    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf
+    qnx7_set_up_bridge_network
 
     echo
     echo "===> starting QEMU"
-    if [ -f "${emulatordir}"/qemu.pid ]; then
-        panic a previous instance of the emulator may already be running
-    fi
+    check_no_other_emulator_is_running
+    check_ip_address_is_free
 
     qemu-system-x86_64 \
         -smp 2 \
@@ -51,11 +39,7 @@ start_vm() {
 }
 
 cmd_prepare() {
-    if ! [[ -d "${emulatordir}" ]]; then
-        echo "error: directory ${emulatordir} does not exist"
-        echo
-        exit 1
-    fi
+    check_emulatordir_exists
 
     echo
     echo "===> creating SSH key pair"

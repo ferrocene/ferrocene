@@ -119,6 +119,7 @@ impl<A: Step> Iterator for RangeIter<A> {
         self.0.advance_by(n)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where

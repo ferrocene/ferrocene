@@ -290,6 +290,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
         self.unsize_mut().advance_by(n)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: The caller must provide an idx that is in bound of the remainder.

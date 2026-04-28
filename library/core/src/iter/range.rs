@@ -1079,6 +1079,7 @@ impl<A: Step> Iterator for ops::Range<A> {
         self.spec_advance_by(n)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where

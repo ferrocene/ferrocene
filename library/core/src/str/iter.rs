@@ -380,6 +380,7 @@ impl Iterator for Bytes<'_> {
         self.0.rposition(predicate)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> u8 {
         // SAFETY: the caller must uphold the safety contract

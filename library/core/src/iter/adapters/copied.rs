@@ -110,6 +110,7 @@ where
         self.it.advance_by(n)
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> T
     where
         Self: TrustedRandomAccessNoCoerce,

@@ -167,6 +167,7 @@ where
         NonZero::new(n).map_or(Ok(()), Err)
     }
 
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
     where

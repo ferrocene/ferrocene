@@ -4193,6 +4193,8 @@ pub const trait Iterator {
     #[doc(hidden)]
     #[unstable(feature = "trusted_random_access", issue = "none")]
     #[rustc_non_const_trait_method]
+    #[ferrocene::requires_validation]
+    #[ferrocene::prevalidated]
     unsafe fn __iterator_get_unchecked(&mut self, _idx: usize) -> Self::Item
     where
         Self: TrustedRandomAccessNoCoerce,

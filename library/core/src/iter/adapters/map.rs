@@ -138,6 +138,7 @@ where
         self.iter.fold(init, map_fold(self.f, g))
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> B
     where

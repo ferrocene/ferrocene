@@ -621,6 +621,7 @@ pub unsafe trait TrustedRandomAccessNoCoerce: Sized {
 /// ## Safety
 ///
 /// Same requirements calling `get_unchecked` directly.
+#[ferrocene::prevalidated]
 #[doc(hidden)]
 #[inline]
 pub(in crate::iter::adapters) unsafe fn try_get_unchecked<I>(it: &mut I, idx: usize) -> I::Item

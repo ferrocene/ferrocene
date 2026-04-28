@@ -423,6 +423,7 @@ macro_rules! casemappingiter_impls {
                 self.0.advance_by(n)
             }
 
+            #[ferrocene::prevalidated]
             unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
                 // SAFETY: just forwarding requirements to caller
                 unsafe { self.0.__iterator_get_unchecked(idx) }
@@ -582,6 +583,7 @@ impl Iterator for CaseMappingIter {
         self.0.advance_by(n)
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {
         // SAFETY: just forwarding requirements to caller
         unsafe { self.0.__iterator_get_unchecked(idx) }

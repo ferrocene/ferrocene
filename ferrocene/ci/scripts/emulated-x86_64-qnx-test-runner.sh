@@ -44,7 +44,6 @@ start_vm() {
         -object rng-random,filename=/dev/urandom,id=rng0 \
         -device virtio-rng-pci,rng=rng0 \
         -serial mon:stdio \
-        -hdb fat:rw:"${emulatordir}"/shared \
         &> "${emulatordir}"/qemu.out &
     echo "QEMU running in background. logs at ${emulatordir}/qemu.out"
 
@@ -89,10 +88,8 @@ lib/libpci.so.2.3|' "${ifsbuild}"
 
     echo
     echo "===> building and copying remote-test-server into rootfs"
-    stage="${REMOTE_TEST_SERVER_STAGE-1}"
-    ./x build src/tools/remote-test-server --target "${nto_target}" --stage "${stage}"
-    mkdir -p "${emulatordir}"/shared/
-    cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/shared/
+    ./x build src/tools/remote-test-server --target "${nto_target}"
+    cp build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/
 }
 
 on_vm() {
@@ -105,8 +102,17 @@ on_vm() {
         root@$vm_ipv4_addr "${@}"
 }
 
+copy_to_vm() {
+    # same flags as `on_vm`
+    scp \
+        -i "${emulatordir}"/$ssh_id \
+        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        -o LogLevel=ERROR \
+        "$1" root@$vm_ipv4_addr:"$2"
+}
+
 cmd_run() {
-    if ! [[ -f "${emulatordir}/shared/remote-test-server" ]]; then
+    if ! [[ -f "${emulatordir}/remote-test-server" ]]; then
         echo "error: preparation is needed before running the emulator; run:"
         echo
         echo "    $0 prepare"
@@ -118,12 +124,9 @@ cmd_run() {
 
     echo
     echo "===> starting remote-test-server"
+    copy_to_vm "${emulatordir}"/remote-test-server /tmp/
     # `std::net` tests need this
     on_vm 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts'
-
-    on_vm mount -t dos /dev/hd1t6 /mnt
-    on_vm cp /mnt/remote-test-server /tmp/
-    on_vm chmod +x /tmp/remote-test-server
 
     on_vm env RUST_TEST_THREADS=1 /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
 }

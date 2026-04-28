@@ -1404,11 +1404,7 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker-rhivos2-test-server-aarch64
-      - aarch64-darwin-llvm:
-          requires:
-            - x86_64-linux-test
-            - x86_64-linux-test-library
-            - x86_64-linux-compiletest
+      - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
             - aarch64-darwin-llvm
@@ -1445,11 +1441,7 @@ workflows:
             - aarch64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
-      - x86_64-windows-llvm:
-          requires:
-            - x86_64-linux-test
-            - x86_64-linux-test-library
-            - x86_64-linux-compiletest
+      - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
           requires:
             - x86_64-windows-llvm

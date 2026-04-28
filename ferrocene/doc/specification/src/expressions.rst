@@ -5227,7 +5227,7 @@ A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture
   The :t:`capture path` is truncated at the rightmost :t:`dereference` in the :t:`capture path` if the :t:`dereference` is applied to a :t:`shared reference`.
 
 :dp:`fls_v8IFXHJnXhez`
-A :t:`place` is not captured when an :t:`underscore expression` is used to bind it.
+A :t:`place` is not :t:`captured` when an :t:`underscore pattern` is used to bind it.
 
 :dp:`fls_gujpU7p5n9Zx`
 A :t:`place` is not captured by destructuring tuples, structs, and single-variant enums.

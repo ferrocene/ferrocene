@@ -9,7 +9,8 @@ New features
 
 * A new target is now supported and qualified for safety critical use. The new target is:
 
-  * :target-with-tuple:`aarch64-rhivos2-linux-gnu`
+  * :target-with-tuple:`aarch64-rhivos2-linux-gnu` (from a :target-with-tuple:`aarch64-unknown-linux-gnu` host)
+  * :target-with-tuple:`aarch64-unknown-linux-gnu` (to a :target-with-tuple:`aarch64-unknown-linux-gnu` target)
 
 * New Supported targets have been added. Supported targets can often be qualified or quality
   managed upon request. The new targets are:
@@ -30,10 +31,10 @@ New features
   * This module contains the code to format Rust data structures into human-readable output. This enables customers to use this functionality in certified contexts.
   * Retired "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are now obsolete. Following targets are now retired:
 
-    * ``aarch64-ferrocene-none``
-    * ``thumbv7em-ferrocene-none-eabi``
-    * ``thumbv7em-ferrocene-none-eabihf``
-    * ``x86_64-ferrocene-none``
+    * ``aarch64-ferrocene-none`` can be replaced with :target-with-tuple:`aarch64-unknown-none`
+    * ``thumbv7em-ferrocene-none-eabi`` can be replaced with :target-with-tuple:`thumbv7em-none-eabi`
+    * ``thumbv7em-ferrocene-none-eabihf`` can be replaced with :target-with-tuple:`thumbv7em-none-eabihf`
+    * ``x86_64-ferrocene-none`` can be replaced with :target-with-tuple:`x86_64-unknown-none`
 
 * Added a ``ferrocene::unvalidated`` lint which detects whether your code uses functions that
   are not in the certified subset of the standard library.

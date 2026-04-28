@@ -886,14 +886,16 @@ jobs:
     steps:
       - aws-cli/install
       - aws-oidc-auth
-      - setup-qnx-toolchain: {}
-      - ferrocene-git-shallow-clone:
-          depth: 1
+      - ferrocene-checkout:
+          llvm-subset: true
+        # - ferrocene-git-shallow-clone:
+        #     depth: 1
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
       - run:
           name: Install required packages
           command: sudo apt update && sudo apt install zstd
+      - setup-qnx-toolchain: {}
       - run:
           name: Restore files from the x86_64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build

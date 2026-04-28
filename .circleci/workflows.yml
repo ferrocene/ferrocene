@@ -895,6 +895,7 @@ jobs:
       - run:
           name: Install required packages
           command: sudo apt update && sudo apt install zstd
+      - setup-uv
       - setup-qnx-toolchain: {}
       - run:
           name: Restore files from the x86_64-linux-build job

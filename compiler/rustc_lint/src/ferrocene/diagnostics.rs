@@ -157,7 +157,7 @@ impl<'tcx> LintState<'tcx> {
         if let UseKind::CalledPreMonoTraitFn(_) = use_.kind {
             let msg = "you can delay this warning until the compiler knows which implementation will be picked";
             let suggestion =
-                format!("#[allow(ferrocene::possible_unvalidated)]\n{}", indent(use_.span));
+                format!("#[allow(ferrocene::possibly_unvalidated)]\n{}", indent(use_.span));
             diag.span_suggestion(
                 use_.span.shrink_to_lo(),
                 msg,

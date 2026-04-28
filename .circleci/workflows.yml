@@ -195,18 +195,6 @@ jobs:
           restore-from-job: x86_64-linux-build
           llvm-subset: false
 
-  # x86_64-linux-dist-tools:
-  #   executor: docker-x86_64-ubuntu-20
-  #   resource_class: ferrocene/k8s-amd64-large
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     SCRIPT: |
-  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-  #   steps:
-  #     - ferrocene-job-dist:
-  #         restore-from-job: x86_64-linux-build
-
   x86_64-linux-dist-targets:
     executor: docker-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
@@ -219,20 +207,6 @@ jobs:
       - ferrocene-job-dist:
           qnx: true
           restore-from-job: x86_64-linux-build
-
-  # x86_64-linux-dist-src:
-  #   executor: docker-x86_64-ubuntu-20
-  #   resource_class: ferrocene/k8s-amd64-medium
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     SCRIPT: |
-  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-  #   steps:
-  #     - ferrocene-job-dist:
-  #         restore-from-job: x86_64-linux-build
-  #         # We need the whole LLVM clone to be able to include the full source
-  #         # code into the tarball we ship to customers.
-  #         llvm-subset: false
 
   x86_64-linux-generic-test-container:
     executor: docker-x86_64-ubuntu-20
@@ -404,18 +378,6 @@ jobs:
       - ferrocene-job-dist:
           restore-from-job: aarch64-linux-build
 
-  # aarch64-linux-dist-tools:
-  #   executor: docker-aarch64-ubuntu-20
-  #   resource_class: ferrocene/k8s-arm64-large
-  #   environment:
-  #     FERROCENE_HOST: aarch64-unknown-linux-gnu
-  #     SCRIPT: |
-  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-  #   steps:
-  #     - ferrocene-job-dist:
-  #         restore-from-job: aarch64-linux-build
-
   aarch64-linux-generic-test-container:
     executor: docker-aarch64-ubuntu-20
     parameters:
@@ -562,27 +524,6 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
-
-  # aarch64-darwin-dist-tools:
-  #   macos:
-  #     xcode: "26.0.1"
-  #   resource_class: m4pro.medium # 6 cores
-  #   environment:
-  #     FERROCENE_HOST: aarch64-apple-darwin
-  #     FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
-  #     SCRIPT: |
-  #       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-  #       ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
-  #   steps:
-  #     - when:
-  #         condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
-  #         steps:
-  #           - ferrocene-job-dist:
-  #               os: darwin
-  #               restore-from-job: aarch64-darwin-build
-  #     - run:
-  #         name: Empty step to make sure the job always has steps
-  #         command: echo
 
   aarch64-darwin-self-test:
     macos:

@@ -4,17 +4,17 @@
 Ferrocene 26.05.0
 =================
 
-This page contains the changes to be introduced in the upcoming Ferrocene
-release.
-
 New features
 ------------
+
+* A new target is now supported and qualified for safety critical use. The new target is:
+
+  * :target-with-tuple:`aarch64-rhivos2-linux-gnu`
 
 * New Supported targets have been added. Supported targets can often be qualified or quality
   managed upon request. The new targets are:
 
   * :target-with-tuple:`aarch64v8r-unknown-none`
-  * :target-with-tuple:`aarch64-rhivos2-linux-gnu`
   * :target-with-tuple:`s390x-unknown-linux-gnu`
   * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
 
@@ -25,17 +25,17 @@ New features
   * :target-with-tuple:`thumbv7em-none-eabihf` can be used with ``-C target-cpu=cortex-m4`` in place of :target-with-tuple:`thumbv7em-m4-none-eabihf`
   * :target-with-tuple:`aarch64-unknown-none` can be used with ``-C target-cpu=cortex-a53`` in place of :target-with-tuple:`aarch64-a53-none`
 
-* Certify the ``core::fmt`` module.
+* The ``core::fmt`` module has been certified to ISO 26262 (ASIL B) and IEC 61508 (SIL 2)
 
   * This module contains the code to format Rust data structures into human-readable output. This enables customers to use this functionality in certified contexts.
-  * Retire "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are now obsolete. Following targets are being retired:
+  * Retired "certified panic runtime" compilation targets. They were used to certify panicking without certifying the formatting code, but are now obsolete. Following targets are now retired:
 
     * ``aarch64-ferrocene-none``
     * ``thumbv7em-ferrocene-none-eabi``
     * ``thumbv7em-ferrocene-none-eabihf``
     * ``x86_64-ferrocene-none``
 
-* Add a ``ferrocene::unvalidated`` lint which detects whether your code uses functions that
+* Added a ``ferrocene::unvalidated`` lint which detects whether your code uses functions that
   are not in the certified subset of the standard library.
 
   * For information on how to use this lint, see :doc:`safety-manual:core/subset`.
@@ -43,7 +43,7 @@ New features
   * For more background on why this change is being made, see
     `Callgraph Analysis <https://ferrous-systems.com/blog/callgraph-analysis/>`_.
 
-  * Retire "certified subset" compilation targets. They were used to detect use of
+  * Retired "certified subset" compilation targets. They were used to detect use of
     uncertified functionality, but are now obsolete. The following targets are being
     retired:
 
@@ -62,3 +62,15 @@ shipped as a preview.
   not qualified for safety critical use. The new target is:
 
   * :target-with-tuple:`aarch64v8r-unknown-none-softfloat`
+
+Rust changes
+------------
+
+This release includes the following changes introduced by the upstream Rust
+project. Note that this changelog is maintained by upstream. The target support
+changes described here describe Rust's support levels, and have no correlation
+to the targets and platforms supported by Ferrocene.
+
+.. rust-changelog::
+    :from: 1.92.0
+    :to: 1.95.0

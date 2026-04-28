@@ -55,6 +55,7 @@ RUN <<-EOF
         bridge-utils \
         dnsmasq \
         net-tools \
+        iputils-ping \
         sudo
 
     # let regular users run sudo without password

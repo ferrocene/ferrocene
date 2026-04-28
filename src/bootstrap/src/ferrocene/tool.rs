@@ -100,6 +100,8 @@ impl Step for SymbolReport {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.require_submodule("ferrocene/tools/flip-link", None);
+
         let mode = Mode::ToolRustcPrivate;
         let compilers = RustcPrivateCompilers::from_target_compiler(builder, self.target_compiler);
         let tool_build = ToolBuild {

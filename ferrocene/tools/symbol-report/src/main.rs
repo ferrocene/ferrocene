@@ -1,6 +1,7 @@
 #![feature(rustc_private)]
 
 extern crate rustc_driver;
+extern crate rustc_lint_defs;
 extern crate rustc_hir;
 extern crate rustc_interface;
 extern crate rustc_middle;
@@ -13,6 +14,7 @@ use std::io::{self, Write};
 use std::process::ExitCode;
 use std::sync::LazyLock;
 
+use rustc_lint_defs::Applicability;
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
@@ -144,7 +146,20 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
 
         match item_is_validated(tcx, def.into()) {
             ValidatedStatus::Validated { annotation: Some(_) } => {}
-            _ => continue,
+            _ => {
+                let header = tcx.def_span(def);
+                let indent = tcx.sess.source_map().lookup_char_pos(header.lo()).col_display;
+                let mut diag = tcx.dcx().struct_span_warn(header, "mark this item as not in the subset");
+                diag.span_suggestion_verbose(
+                    header.shrink_to_lo(),
+                    "here",
+                    format!("#[cfg(not(feature = \"ferrocene_subset\"))]\n{}", " ".repeat(indent)),
+                    Applicability::MachineApplicable,
+                );
+                diag.emit();
+
+                continue;
+            }
         }
 
         let qualified_name = get_qualified_name(tcx, def);

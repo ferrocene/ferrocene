@@ -1224,6 +1224,7 @@ workflows:
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
+            - misc-checks
             - x86_64-linux-build
             - x86_64-linux-test
             - x86_64-linux-test-library
@@ -1317,6 +1318,7 @@ workflows:
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
+            - misc-checks
             - x86_64-linux-build
             - x86_64-linux-test
             - x86_64-linux-test-library
@@ -1329,6 +1331,7 @@ workflows:
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
+            - misc-checks
             - x86_64-linux-build
             - x86_64-linux-test
             - x86_64-linux-test-library
@@ -1407,6 +1410,7 @@ workflows:
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
+            - misc-checks
             - aarch64-darwin-llvm
             - x86_64-linux-test
             - x86_64-linux-test-library
@@ -1444,6 +1448,7 @@ workflows:
       - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
           requires:
+            - misc-checks
             - x86_64-windows-llvm
             - x86_64-linux-test
             - x86_64-linux-test-library

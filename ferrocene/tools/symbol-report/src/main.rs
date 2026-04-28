@@ -1,12 +1,15 @@
 #![feature(rustc_private)]
 
+extern crate rustc_ast;
 extern crate rustc_driver;
 extern crate rustc_lint_defs;
+extern crate rustc_lint;
 extern crate rustc_hir;
 extern crate rustc_interface;
 extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
+extern crate rustc_data_structures;
 
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -14,18 +17,22 @@ use std::io::{self, Write};
 use std::process::ExitCode;
 use std::sync::LazyLock;
 
-use rustc_lint_defs::Applicability;
+use rustc_span::sym;
+use rustc_ast::ast;
+use rustc_data_structures::sync::{DynSend, DynSync};
+use rustc_lint_defs::{Applicability, declare_tool_lint, declare_lint_pass};
+use rustc_lint::{EarlyLintPass, EarlyContext, LintContext};
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{AttrId, Attribute, HirId};
-use rustc_interface::interface::Compiler;
+use rustc_interface::interface::{Compiler, Config};
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
 };
-use rustc_session::EarlyDiagCtxt;
+use rustc_session::{EarlyDiagCtxt, Session};
 use rustc_session::config::ErrorOutputType;
 use rustc_span::{Span, Symbol};
 
@@ -94,9 +101,59 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     }
 }
 
+declare_tool_lint!(
+    pub ferrocene::USE_CFG_SUBSET,
+    Allow,
+    "Suggest turning functions without `#[ferrocene::prevalidated]` into `#[cfg(not(ferrocene_subset))`.
+     This is only meant to be used internally by Ferrocene during release week."
+);
+declare_lint_pass!(SuggestCfgSubset => [USE_CFG_SUBSET]);
+
+fn suggest_cfg(sess: &Session, span: Span) {
+    let indent = sess.source_map().lookup_char_pos(span.lo()).col_display;
+    let mut diag = sess.dcx().struct_span_warn(span, "mark this item as not in the subset");
+    diag.span_suggestion_verbose(
+        span.shrink_to_lo(),
+        "here",
+        format!("#[cfg(not(feature = \"ferrocene_subset\"))]\n{}", " ".repeat(indent)),
+        Applicability::MachineApplicable,
+    );
+    diag.emit();
+}
+
+/// Almost all of this is handled in our `after_expansion` pass,
+/// but to distinguish `use {a, b, c}` from `use a; use b; use c;`
+/// we have a special early lint pass that works directly on the AST.
+impl EarlyLintPass for SuggestCfgSubset {
+    // fn visit_use_tree( // not part of EarlyLintPass, part of AstVisitor or whatever it's called
+    fn check_item(&mut self, cx: &EarlyContext<'_>, item: &ast::Item) {
+        let ast::ItemKind::Use(_) = &item.kind
+            // Anything else is checked by the HIR pass, which can properly handle synthetic
+            // functions and functions without a body.
+            else { return };
+
+        if item.attrs.iter().any(|attr| {
+            attr.path_matches(&[sym::ferrocene, sym::prevalidated])
+        }) {
+            return; // validated, no need to lint
+        }
+
+        suggest_cfg(cx.sess(), item.span);
+    }
+}
+
 struct LoadCoreSymbols;
 
 impl Callbacks for LoadCoreSymbols {
+    fn config(&mut self, config: &mut Config) {
+        config.register_lints = Some(Box::new(move |_, lint_store| {
+            let early_lints: [Box<dyn Fn() -> Box<dyn EarlyLintPass + 'static> + DynSend + DynSync>; _] = [
+                Box::new(move || Box::new(SuggestCfgSubset)),
+            ];
+            lint_store.early_passes.extend(early_lints);
+        }));
+    }
+
     fn after_expansion(&mut self, _: &Compiler, tcx: TyCtxt<'_>) -> Compilation {
         // NOTE: this can't be in main because it shouldn't execute when only running
         // --print=file-names
@@ -147,17 +204,10 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         match item_is_validated(tcx, def.into()) {
             ValidatedStatus::Validated { annotation: Some(_) } => {}
             _ => {
-                let header = tcx.def_span(def);
-                let indent = tcx.sess.source_map().lookup_char_pos(header.lo()).col_display;
-                let mut diag = tcx.dcx().struct_span_warn(header, "mark this item as not in the subset");
-                diag.span_suggestion_verbose(
-                    header.shrink_to_lo(),
-                    "here",
-                    format!("#[cfg(not(feature = \"ferrocene_subset\"))]\n{}", " ".repeat(indent)),
-                    Applicability::MachineApplicable,
-                );
-                diag.emit();
-
+                // Uses are checked separately in an early pass.
+                if tcx.def_kind(def) != DefKind::Use {
+                    suggest_cfg(tcx.sess, tcx.def_span(def));
+                }
                 continue;
             }
         }

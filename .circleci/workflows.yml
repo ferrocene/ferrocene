@@ -784,11 +784,6 @@ jobs:
         type: string
         default: ""
     resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
-      SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -882,6 +877,11 @@ jobs:
     description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
     docker:
       - image: cimg/base:current
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      SCRIPT: |
+        ./x build src/tools/remote-test-server --target "x86_64-unknown-nto-qnx710,aarch64-unknown-nto-qnx710" --stage "2"
     resource_class: medium # 2-core
     steps:
       - aws-cli/install
@@ -900,9 +900,10 @@ jobs:
       - run:
           name: Restore files from the x86_64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - run:
-          name: Build Remote testserver
-          command:  ./x build src/tools/remote-test-server --target "x86_64-unknown-nto-qnx710,aarch64-unknown-nto-qnx710" --stage "2"
+      - ferrocene-ci
+      # - run:
+      #     name: Build Remote testserver
+      #     command:  ./x build src/tools/remote-test-server --target "x86_64-unknown-nto-qnx710,aarch64-unknown-nto-qnx710" --stage "2"
       # - run:
       #     name: Build and upload the Docker image
       #     command: ferrocene/ci/scripts/build-and-push-docker-image.sh

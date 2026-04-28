@@ -9,15 +9,10 @@ New features
 
 * A new target is now supported and qualified for safety critical use. The new target is:
 
-  * :target-with-tuple:`aarch64-rhivos2-linux-gnu` (from a :target-with-tuple:`aarch64-unknown-linux-gnu` host)
-  * :target-with-tuple:`aarch64-unknown-linux-gnu` (to a :target-with-tuple:`aarch64-unknown-linux-gnu` target)
+  * :target-with-tuple:`aarch64-rhivos2-linux-gnu` (only when compiled by a :target-with-tuple:`aarch64-unknown-linux-gnu` host)
+  * :target-with-tuple:`aarch64-unknown-linux-gnu` (only when compiled from a :target-with-tuple:`aarch64-unknown-linux-gnu` target)
 
-* New Supported targets have been added. Supported targets can often be qualified or quality
-  managed upon request. The new targets are:
-
-  * :target-with-tuple:`aarch64v8r-unknown-none`
-  * :target-with-tuple:`s390x-unknown-linux-gnu`
-  * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
+* The `proc_macro` crate type is now permitted.
 
 * Two qualified targets which offered target CPU features have been removed, as the base targets
   now permit the use of ``-C target-cpu`` in the same capacity. For more information, see the
@@ -52,6 +47,13 @@ New features
     * ``thumbv7em-ferrocene.subset-eabi``
     * ``thumbv7em-ferrocene.subset-eabihf``
     * ``x86_64-unknown-ferrocene.subset``
+
+* New Supported targets have been added. Supported targets can often be qualified or quality
+  managed upon request. The new targets are:
+
+    * :target-with-tuple:`aarch64v8r-unknown-none`
+    * :target-with-tuple:`s390x-unknown-linux-gnu`
+    * :target-with-tuple:`powerpc64le-unknown-linux-gnu`
 
 New experimental features
 -------------------------

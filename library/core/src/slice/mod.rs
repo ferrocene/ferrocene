@@ -525,6 +525,7 @@ impl<T> [T] {
     /// let w: &[i32] = &[];
     /// assert_eq!(Some(&[]), w.last_chunk::<0>());
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_last_chunk", since = "1.80.0")]
@@ -862,6 +863,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr_range(&mut self) -> Range<*mut T> {
         let start = self.as_mut_ptr();
         // SAFETY: See as_ptr_range() above for why `add` here is safe.
@@ -1007,6 +1009,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_reverse", since = "1.90.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn reverse(&mut self) {
         let half_len = self.len() / 2;
         let Range { start, end } = self.as_mut_ptr_range();
@@ -1030,6 +1033,7 @@ impl<T> [T] {
         revswap(front_half, back_half, half_len);
 
         #[inline]
+        #[ferrocene::prevalidated]
         const fn revswap<T>(a: &mut [T], b: &mut [T], n: usize) {
             debug_assert!(a.len() == n);
             debug_assert!(b.len() == n);

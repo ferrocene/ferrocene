@@ -350,6 +350,7 @@ impl const Default for Alignment {
 #[derive(Copy)]
 #[derive_const(Clone, PartialEq, Eq)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -373,6 +374,7 @@ enum AlignmentEnum {
 #[derive(Copy)]
 #[derive_const(Clone, PartialEq, Eq)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,

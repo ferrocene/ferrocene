@@ -9,11 +9,16 @@
 
 fn unvalidated() {} //~ NOTE unvalidated
 
+#[ferrocene::prevalidated]
+fn call(f: impl FnOnce()) {
+    f(); //~ ERROR calls
+}
+
 struct Validated;
 impl Drop for Validated {
     #[ferrocene::prevalidated] //~ NOTE marked
     fn drop(&mut self) { //~ NOTE validated
-        unvalidated(); //~ ERROR calls
+        call(unvalidated); //~ NOTE instantiated
     }
 }
 

@@ -4,7 +4,7 @@ use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_hir::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::traits::{
-    ImplSource, ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
+    ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
 };
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 use rustc_middle::span_bug;
@@ -15,9 +15,12 @@ use rustc_middle::ty::{
 };
 use rustc_span::Span;
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
-use tracing::debug;
+use tracing::{debug, instrument};
 
+use super::UnvalidatedImplCause;
 use crate::ferrocene::{InstantiateResult, LintState, UseKind};
+
+type ImplSource<'tcx> = rustc_infer::traits::ImplSource<'tcx, Span>;
 
 impl<'tcx> LintState<'tcx> {
     pub(super) fn check_fn_ptr_coercion(
@@ -73,6 +76,7 @@ impl<'tcx> LintState<'tcx> {
     /// 4. For each method in the impl, check whether it's validated. For example, we would check
     ///    `<String as Diplay>::fmt`, see that it's unvalidated, and return its `DefId` in the
     ///    `UseKind`.
+    #[instrument(skip(self, try_instantiate, span), ret)]
     pub(super) fn check_dyn_trait_coercion(
         &self,
         dest_ty: Ty<'tcx>,
@@ -122,8 +126,40 @@ impl<'tcx> LintState<'tcx> {
                 continue;
             };
             let impl_ = self.find_trait_impl(trait_ref, typing_env, span);
-            if let Some(unvalidated) = self.find_unvalidated_impl_fn(impl_, span) {
-                return Some(UseKind::TraitObjectCast(unvalidated, coerce_src));
+
+            match impl_ {
+                ImplSource::UserDefined(ImplSourceUserDefinedData {
+                    impl_def_id,
+                    args: _,
+                    nested: _,
+                }) => {
+                    // This function in the impl needs to be marked with `prevalidated`.
+                    if let Some(impl_fn) = self.find_unvalidated_impl_fn(impl_def_id) {
+                        return Some(UseKind::TraitObjectCast(
+                            UnvalidatedImplCause::AssocFn(impl_fn),
+                            coerce_src,
+                        ));
+                    }
+                }
+                // builtin impls are always ok
+                ImplSource::Builtin(..) => continue,
+                ImplSource::Param(_obligations) => {
+                    // This is something like the following:
+                    // ```
+                    // fn foo<T: Display + 'static>(x: T) -> Box<dyn Display> {
+                    //     Box::new(x)
+                    // }
+                    // ```
+                    // We can't resolve `x.fmt` until post-mono, so we can't point to the reason
+                    // the cast is disallowed.
+
+                    // NOTE: this can give an empty list of obligations in weird cases like
+                    // `core::mem::DiscriminantKind`, which is automatically implemented for any Sized type.
+                    return Some(UseKind::TraitObjectCast(
+                        UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref),
+                        coerce_src,
+                    ));
+                }
             }
         }
         None
@@ -286,7 +322,7 @@ impl<'tcx> LintState<'tcx> {
                 }
                 _ => span_bug!(
                     span,
-                    "mismatched types trying to coerce from {src_inner:?} to {dst_inner:?}"
+                    "mismatched types trying to coerce from {src_ty:?} to {dst_ty:?}"
                 ),
             }
         }
@@ -309,9 +345,10 @@ impl<'tcx> LintState<'tcx> {
         match tcx.codegen_select_candidate(
             ty::TypingEnv::fully_monomorphized().as_query_input(trait_ref),
         ) {
-            Ok(ImplSource::UserDefined(ImplSourceUserDefinedData { impl_def_id, .. })) => {
-                Some(tcx.coerce_unsized_info(*impl_def_id).unwrap().custom_kind.unwrap())
-            }
+            Ok(rustc_infer::traits::ImplSource::UserDefined(ImplSourceUserDefinedData {
+                impl_def_id,
+                ..
+            })) => Some(tcx.coerce_unsized_info(*impl_def_id).unwrap().custom_kind.unwrap()),
             _ => None,
         }
     }
@@ -319,25 +356,8 @@ impl<'tcx> LintState<'tcx> {
     /// Given an `impl`, find the first associated function that isn't validated.
     ///
     /// FIXME: list all unvalidated functions, not just the first.
-    fn find_unvalidated_impl_fn(
-        &self,
-        impl_source: ImplSource<'tcx, ()>,
-        span: Span,
-    ) -> Option<DefId> {
+    fn find_unvalidated_impl_fn(&self, impl_block: DefId) -> Option<DefId> {
         let tcx = self.tcx;
-
-        let impl_block = match impl_source {
-            ImplSource::UserDefined(ImplSourceUserDefinedData {
-                impl_def_id,
-                args: _,
-                nested: _,
-            }) => impl_def_id,
-            // builtin impls are always ok
-            ImplSource::Builtin(..) => return None,
-            param @ ImplSource::Param(_) => {
-                span_bug!(span, "don't know how to handle nested obligations in {param:?}")
-            }
-        };
 
         let trait_to_impl_map = tcx.impl_item_implementor_ids(impl_block);
         for trait_item in tcx.associated_item_def_ids(tcx.impl_trait_id(impl_block)) {
@@ -367,7 +387,7 @@ impl<'tcx> LintState<'tcx> {
         trait_ref: PolyTraitRef<'tcx>,
         typing_env: TypingEnv<'tcx>,
         span: Span,
-    ) -> ImplSource<'tcx, ()> {
+    ) -> ImplSource<'tcx> {
         match self.try_find_trait_impl(trait_ref, typing_env, span) {
             Some(found) => found,
             None => span_bug!(span, "failed to resolve impl: {trait_ref:?}"),
@@ -389,7 +409,7 @@ impl<'tcx> LintState<'tcx> {
         trait_ref: PolyTraitRef<'tcx>,
         typing_env: TypingEnv<'tcx>,
         span: Span,
-    ) -> Option<ImplSource<'tcx, ()>> {
+    ) -> Option<ImplSource<'tcx>> {
         use rustc_infer::infer::TyCtxtInferExt;
 
         let tcx = self.tcx;
@@ -418,7 +438,9 @@ impl<'tcx> LintState<'tcx> {
         let ocx = ObligationCtxt::new(&infcx);
         let impl_source = selection.map(|o| {
             debug!("registering obligation {o:?}");
-            ocx.register_obligation(o)
+            let span = o.cause.span;
+            ocx.register_obligation(o);
+            span
         });
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {

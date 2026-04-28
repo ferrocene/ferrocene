@@ -150,6 +150,8 @@ pub trait Pattern: Sized {
 
     /// Removes the pattern from the back of haystack, if it matches.
     #[inline]
+    #[ferrocene::requires_validation]
+    #[ferrocene::prevalidated]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
         Self::Searcher<'a>: ReverseSearcher<'a>,
@@ -637,6 +639,7 @@ impl Pattern for char {
         self.encode_utf8(&mut [0u8; 4]).is_suffix_of(haystack)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
@@ -703,6 +706,7 @@ struct MultiCharEqSearcher<'a, C: MultiCharEq> {
 impl<C: MultiCharEq> Pattern for MultiCharEqPattern<C> {
     type Searcher<'a> = MultiCharEqSearcher<'a, C>;
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn into_searcher(self, haystack: &str) -> MultiCharEqSearcher<'_, C> {
         MultiCharEqSearcher { haystack, char_eq: self.0, char_indices: haystack.char_indices() }
@@ -762,6 +766,7 @@ macro_rules! pattern_methods {
     ($a:lifetime, $t:ty, $pmap:expr, $smap:expr) => {
         type Searcher<$a> = $t;
 
+        #[ferrocene::prevalidated]
         #[inline]
         fn into_searcher<$a>(self, haystack: &$a str) -> $t {
             ($smap)(($pmap)(self).into_searcher(haystack))
@@ -772,6 +777,7 @@ macro_rules! pattern_methods {
             ($pmap)(self).is_contained_in(haystack)
         }
 
+        #[ferrocene::prevalidated]
         #[inline]
         fn is_prefix_of<$a>(self, haystack: &$a str) -> bool {
             ($pmap)(self).is_prefix_of(haystack)
@@ -782,6 +788,7 @@ macro_rules! pattern_methods {
             ($pmap)(self).strip_prefix_of(haystack)
         }
 
+        #[ferrocene::prevalidated]
         #[inline]
         fn is_suffix_of<$a>(self, haystack: &$a str) -> bool
         where
@@ -790,6 +797,7 @@ macro_rules! pattern_methods {
             ($pmap)(self).is_suffix_of(haystack)
         }
 
+        #[ferrocene::prevalidated]
         #[inline]
         fn strip_suffix_of<$a>(self, haystack: &$a str) -> Option<&$a str>
         where
@@ -1066,6 +1074,7 @@ impl<'b> Pattern for &'b str {
     }
 
     /// Removes the pattern from the back of haystack, if it matches.
+    #[ferrocene::prevalidated]
     #[inline]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where

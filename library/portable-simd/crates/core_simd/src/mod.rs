@@ -1,3 +1,5 @@
+#![allow(ferrocene::unvalidated)]
+
 #[macro_use]
 mod swizzle;
 

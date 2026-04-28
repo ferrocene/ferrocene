@@ -601,6 +601,8 @@ pub const trait Shr<Rhs = Self> {
     /// ```
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
+    #[ferrocene::requires_validation]
     fn shr(self, rhs: Rhs) -> Self::Output;
 }
 

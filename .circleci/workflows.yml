@@ -784,11 +784,6 @@ jobs:
         type: string
         default: ""
     resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
-      SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -876,6 +871,45 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
+
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-qnx-test-server-x86_64:
+    description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      SCRIPT: |
+        ./x build src/tools/remote-test-server --target "x86_64-unknown-nto-qnx710,aarch64-unknown-nto-qnx710" --stage "2"
+    resource_class: medium # 2-core
+    steps:
+      - aws-cli/install
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+        # - ferrocene-git-shallow-clone:
+        #     depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - setup-uv
+      - setup-qnx-toolchain: {}
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - ferrocene-ci
+      # - run:
+      #     name: Build Remote testserver
+      #     command:  ./x build src/tools/remote-test-server --target "x86_64-unknown-nto-qnx710,aarch64-unknown-nto-qnx710" --stage "2"
+      # - run:
+      #     name: Build and upload the Docker image
+      #     command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+      #     environment:
+      #       IMAGE_NAME: qnx-7.1-test-server
+      #       IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.qnx-7.1-test-server
 
   # The image gets built for every job because it needs to contain build results per job
   build-docker-rhivos2-test-server-aarch64:
@@ -1205,6 +1239,11 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
+      - build-docker-qnx-test-server-x86_64:
+          requires:
+            - x86_64-linux-dist
+            - x86_64-linux-dist-targets
+
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library
           job: test:library
@@ -1214,6 +1253,7 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
+            - build-docker-qnx-test-server-x86_64
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
@@ -1223,6 +1263,7 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
+            - build-docker-qnx-test-server-x86_64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library

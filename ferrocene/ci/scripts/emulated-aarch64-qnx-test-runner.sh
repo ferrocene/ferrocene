@@ -5,46 +5,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# this file resides in `/ferrocene/ci/scripts/(here)`
-basedir="$(realpath $(dirname $0)/../../..)"
-qnxdir="$(realpath $(dirname $(which qcc))/../../../../..)"
-emulatordir=/tmp/emulator
+. "$(dirname $0)"/qnx-common.sh
+
 nto_target=aarch64-unknown-nto-qnx710
 
-panic() {
-    echo "error:" "${@}" >&2
-    exit 1
-}
-
-on_vm() {
-    echo >"${emulatordir}"/pipe.in
-    echo "${@}" >"${emulatordir}"/pipe.in
-    echo 'echo "===$?==="' >"${emulatordir}"/pipe.in
-
-    while read -r line; do
-        if [[ "$line" = "==="*"==="* ]]; then
-            ret=$(echo "$line" | cut -d'=' -f4)
-
-            if [ "$ret" -eq 0  ]; then
-                break
-            else
-                panic failed to run "${@}" on VM. exit code: "$ret"
-            fi
-        fi
-
-        echo "QEMU: $line"
-    done <"${emulatordir}"/pipe.out
-}
-
-on_vm_nowait() {
-    echo >"${emulatordir}"/pipe.in
-    echo "${@}" >"${emulatordir}"/pipe.in
-}
-
 start_vm() {
-    echo
-    echo "===> setting up QEMU bridge network"
-    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf
+    qnx7_set_up_bridge_network
 
     echo
     echo "===> creating virtual SD card"
@@ -60,11 +26,8 @@ start_vm() {
 
     echo
     echo "===> starting QEMU"
-    if [ -f "${emulatordir}"/qemu.pid ]; then
-        panic a previous instance of the emulator may already be running
-    fi
-    rm -f "${emulatordir}"/pipe.*
-    mkfifo "${emulatordir}"/pipe.in "${emulatordir}"/pipe.out
+    check_no_other_emulator_is_running
+    check_ip_address_is_free
 
     # NOTE(-net nic): the (real) ZCU102 has 4 NICs; only the 4th one can be used in QEMU
     # the unused NICs need to be listed in the command line invocation
@@ -81,24 +44,11 @@ start_vm() {
         -no-reboot \
         -nographic \
         -pidfile "${emulatordir}"/qemu.pid \
-        -serial pipe:"${emulatordir}"/pipe &
-
-    while read -r line; do
-        # last boot message
-        if [[ "$line" = "Boot complete"* ]]; then
-            break
-        fi
-
-        echo "QEMU: ${line}"
-    done <"${emulatordir}"/pipe.out
+        -serial mon:stdio
 }
 
 cmd_prepare() {
-    if ! [[ -d "${emulatordir}" ]]; then
-        echo "error: directory ${emulatordir} does not exist"
-        echo
-        exit 1
-    fi
+    check_emulatordir_exists
 
     echo
     echo "===> building BSP"
@@ -113,9 +63,8 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
-    stage="${REMOTE_TEST_SERVER_STAGE-1}"
-    ./x build src/tools/remote-test-server --target "${nto_target}" --stage "${stage}"
-    cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
+    ./x build src/tools/remote-test-server --target "${nto_target}"
+    cp build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
 
     echo
     echo "===> building IFS"
@@ -151,8 +100,8 @@ cmd_prepare() {
 /bin/sh=sh\
 /bin/echo=echo' "${buildscript}"
 
-    # signal that boot is complete
-    sed -i '326i echo "Boot complete"' "${buildscript}"
+    # run remote-test-server instead of console
+    sed -i '326i RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' "${buildscript}"
 
     # use virtual SD card as TMPDIR
     sed -i '268i export TMPDIR=/mnt/tmp' "${buildscript}"
@@ -183,14 +132,6 @@ cmd_run() {
     fi
 
     start_vm
-
-    echo
-    echo "===> starting remote-test-server"
-    on_vm_nowait RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential
-
-    while read -r line; do
-        echo "QEMU: $line"
-    done <"${emulatordir}"/pipe.out
 }
 
 if [[ $# -eq 1 ]] && [[ "$1" = "prepare" ]]; then

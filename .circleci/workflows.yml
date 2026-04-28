@@ -1213,6 +1213,9 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
             - build-docker--ubuntu-24--x86_64
 
       - x86_64-qnx-generic-test-vm:
@@ -1221,7 +1224,11 @@ workflows:
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
+            - misc-checks
             - x86_64-linux-build
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
             - build-docker--ubuntu-24--x86_64
 
       - facade-generic-test:
@@ -1311,7 +1318,11 @@ workflows:
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
+            - misc-checks
             - x86_64-linux-build
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
             - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
@@ -1320,7 +1331,11 @@ workflows:
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
+            - misc-checks
             - x86_64-linux-build
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
             - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
@@ -1395,7 +1410,11 @@ workflows:
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
+            - misc-checks
             - aarch64-darwin-llvm
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
       - aarch64-darwin-dist:
           requires:
             - aarch64-darwin-build
@@ -1429,7 +1448,11 @@ workflows:
       - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
           requires:
+            - misc-checks
             - x86_64-windows-llvm
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-compiletest
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist

@@ -12,9 +12,7 @@ nto_target=x86_64-pc-nto-qnx710
 vm_hostname=x86_64-qnx-vm
 ssh_id=id_ed25519
 
-# QNX network stack needs these to be hardcoded in the image
-vm_mac_addr=52:54:00:83:26:e0
-# br0 has netmask 172.31.1.1/24
+# static IP configuration relied on by circle CI workflow
 vm_ipv4_addr=172.31.1.11
 
 panic() {
@@ -37,7 +35,7 @@ start_vm() {
         -smp 2 \
         -m 1G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
-        -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0,mac="${vm_mac_addr}" \
+        -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0 \
         -pidfile "${emulatordir}"/qemu.pid \
         -nographic \
         -kernel "${emulatordir}"/ifs.bin \

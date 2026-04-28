@@ -10,6 +10,7 @@ qnxdir="$(realpath $(dirname $(which qcc))/../../../../..)"
 emulatordir=/tmp/emulator
 nto_target=x86_64-pc-nto-qnx710
 vm_hostname=x86_64-qnx-vm
+ssh_id=id_ed25519
 
 # QNX network stack needs these to be hardcoded in the image
 vm_mac_addr=52:54:00:83:26:e0
@@ -19,31 +20,6 @@ vm_ipv4_addr=172.31.1.11
 panic() {
     echo "error:" "${@}" >&2
     exit 1
-}
-
-on_vm() {
-    echo >"${emulatordir}"/pipe.in
-    echo "${@}" >"${emulatordir}"/pipe.in
-    echo 'echo "===$?==="' >"${emulatordir}"/pipe.in
-
-    while read -r line; do
-        if [[ "$line" = "==="*"==="* ]]; then
-            ret=$(echo "$line" | cut -d'=' -f4)
-
-            if [ "$ret" -eq 0  ]; then
-                break
-            else
-                panic failed to run "${@}" on VM. exit code: "$ret"
-            fi
-        fi
-
-        echo "QEMU: $line"
-    done <"${emulatordir}"/pipe.out
-}
-
-on_vm_nowait() {
-    echo >"${emulatordir}"/pipe.in
-    echo "${@}" >"${emulatordir}"/pipe.in
 }
 
 start_vm() {
@@ -56,8 +32,7 @@ start_vm() {
     if [ -f "${emulatordir}"/qemu.pid ]; then
         panic a previous instance of the emulator may already be running
     fi
-    rm -f "${emulatordir}"/pipe.*
-    mkfifo "${emulatordir}"/pipe.in "${emulatordir}"/pipe.out
+
     qemu-system-x86_64 \
         -smp 2 \
         -m 1G \
@@ -68,18 +43,14 @@ start_vm() {
         -kernel "${emulatordir}"/ifs.bin \
         -object rng-random,filename=/dev/urandom,id=rng0 \
         -device virtio-rng-pci,rng=rng0 \
-        -serial pipe:"${emulatordir}"/pipe \
-        -hdb fat:rw:"${emulatordir}"/shared &
+        -serial mon:stdio \
+        -hdb fat:rw:"${emulatordir}"/shared \
+        &> "${emulatordir}"/qemu.out &
+    echo "QEMU running in background. logs at ${emulatordir}/qemu.out"
 
-    # wait until boot process completes
-    while read -r line; do
-        echo "QEMU: $line"
-
-        # last boot message
-        if [[ "$line" = "QNX ${vm_hostname} "*"x86pc x86_64"*  ]]; then
-          break
-        fi
-    done <"${emulatordir}"/pipe.out
+    echo
+    echo "===> wait for VM's network to go online"
+    ping -i3 -c4 ${vm_ipv4_addr}
 }
 
 cmd_prepare() {
@@ -90,6 +61,10 @@ cmd_prepare() {
     fi
 
     echo
+    echo "===> creating SSH key pair"
+    ssh-keygen -q -t ed25519 -N '' -f "${emulatordir}"/$ssh_id
+
+    echo
     echo "===> creating rootfs"
     tmpdir="$(mktemp -d)"
     pushd "$tmpdir"
@@ -97,7 +72,7 @@ cmd_prepare() {
     QNX_TARGET="${qnxdir}/target/qnx7" mkqnximage \
         --data-size=5000 --data-inodes=40000 --noprompt \
         --hostname="${vm_hostname}" --type=qemu --arch=x86_64 \
-        --ip="${vm_ipv4_addr}" --ssh-ident=none
+        --ip="${vm_ipv4_addr}" --ssh-ident="${emulatordir}"/$ssh_id.pub
 
     # as per https://www.qnx.com/support/knowledgebase.html?id=5015Y000001gM7T
     # the ifs.build script needs to include the libpci.so.2.3 file in the IFS
@@ -120,6 +95,16 @@ lib/libpci.so.2.3|' "${ifsbuild}"
     cp build/host/"stage${stage}-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/shared/
 }
 
+on_vm() {
+    # disable user prompts around host key checking
+    # suppress warnings about adding $vm_ipv4_addr to list of known hosts
+    ssh \
+        -i "${emulatordir}"/$ssh_id \
+        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        -o LogLevel=ERROR \
+        root@$vm_ipv4_addr "${@}"
+}
+
 cmd_run() {
     if ! [[ -f "${emulatordir}/shared/remote-test-server" ]]; then
         echo "error: preparation is needed before running the emulator; run:"
@@ -140,11 +125,7 @@ cmd_run() {
     on_vm cp /mnt/remote-test-server /tmp/
     on_vm chmod +x /tmp/remote-test-server
 
-    on_vm_nowait RUST_TEST_THREADS=1 /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
-
-    while read -r line; do
-        echo "QEMU: $line"
-    done <"${emulatordir}"/pipe.out
+    on_vm env RUST_TEST_THREADS=1 /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
 }
 
 if [[ $# -eq 1 ]] && [[ "$1" = "prepare" ]]; then

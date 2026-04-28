@@ -63,3 +63,9 @@ pub fn main() {
     let _ = GenericStruct { foo: (), bar: (), baz: 1 }.clone();
     let _ = GenericTupleStruct(1, ()).clone();
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions

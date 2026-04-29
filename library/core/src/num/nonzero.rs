@@ -1132,7 +1132,10 @@ macro_rules! nonzero_integer {
             /// assuming overflow cannot occur.
             /// Overflow is unchecked, and it is undefined behavior to overflow
             /// *even if the result would wrap to a non-zero value*.
-            /// The behavior is undefined as soon as
+            ///
+            /// # Safety
+            ///
+            /// This results in undefined behavior when
             #[doc = sign_dependent_expr!{
                 $signedness ?
                 if signed {
@@ -1710,7 +1713,10 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         /// assuming overflow cannot occur.
         /// Overflow is unchecked, and it is undefined behavior to overflow
         /// *even if the result would wrap to a non-zero value*.
-        /// The behavior is undefined as soon as
+        ///
+        /// # Safety
+        ///
+        /// This results in undefined behavior when
         #[doc = concat!("`self + rhs > ", stringify!($Int), "::MAX`.")]
         ///
         /// # Examples

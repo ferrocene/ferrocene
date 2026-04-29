@@ -143,7 +143,8 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
 
                 let (param_count, c_variadic) = self.param_count(sig_id);
 
-                let mut generics = self.uplift_delegation_generics(delegation, sig_id, item_id);
+                let mut generics =
+                    self.uplift_delegation_generics(delegation, sig_id, item_id, is_method);
 
                 let body_id = self.lower_delegation_body(
                     delegation,
@@ -301,6 +302,8 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                 hir::InferDelegationSig::Output(self.arena.alloc(hir::DelegationGenerics {
                     child_args_segment_id: generics.child.args_segment_id,
                     parent_args_segment_id: generics.parent.args_segment_id,
+                    self_ty_id: generics.self_ty_id,
+                    propagate_self_ty: generics.propagate_self_ty,
                 })),
             )),
             span,
@@ -505,7 +508,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
 
             // FIXME(fn_delegation): proper support for parent generics propagation
             // in method call scenario.
-            let segment = self.process_segment(span, &segment, &mut generics.child, false);
+            let segment = self.process_segment(span, &segment, &mut generics.child);
             let segment = self.arena.alloc(segment);
 
             self.arena.alloc(hir::Expr {
@@ -531,14 +534,10 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
 
                     new_path.segments = self.arena.alloc_from_iter(
                         new_path.segments.iter().enumerate().map(|(idx, segment)| {
-                            let mut process_segment = |result, add_lifetimes| {
-                                self.process_segment(span, segment, result, add_lifetimes)
-                            };
-
                             if idx + 2 == len {
-                                process_segment(&mut generics.parent, true)
+                                self.process_segment(span, segment, &mut generics.parent)
                             } else if idx + 1 == len {
-                                process_segment(&mut generics.child, false)
+                                self.process_segment(span, segment, &mut generics.child)
                             } else {
                                 segment.clone()
                             }
@@ -548,11 +547,17 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                     hir::QPath::Resolved(ty, self.arena.alloc(new_path))
                 }
                 hir::QPath::TypeRelative(ty, segment) => {
-                    let segment = self.process_segment(span, segment, &mut generics.child, false);
+                    let segment = self.process_segment(span, segment, &mut generics.child);
 
                     hir::QPath::TypeRelative(ty, self.arena.alloc(segment))
                 }
             };
+
+            generics.self_ty_id = match new_path {
+                hir::QPath::Resolved(ty, _) => ty,
+                hir::QPath::TypeRelative(ty, _) => Some(ty),
+            }
+            .map(|ty| ty.hir_id);
 
             let callee_path = self.arena.alloc(self.mk_expr(hir::ExprKind::Path(new_path), span));
             self.arena.alloc(self.mk_expr(hir::ExprKind::Call(callee_path, args), span))
@@ -575,13 +580,12 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         span: Span,
         segment: &hir::PathSegment<'hir>,
         result: &mut GenericsGenerationResult<'hir>,
-        add_lifetimes: bool,
     ) -> hir::PathSegment<'hir> {
         let details = result.generics.args_propagation_details();
 
         let segment = if details.should_propagate {
             let generics = result.generics.into_hir_generics(self, span);
-            let args = generics.into_generic_args(self, add_lifetimes, span);
+            let args = generics.into_generic_args(self, span);
 
             // Needed for better error messages (`trait-impl-wrong-args-count.rs` test).
             let args = if args.is_empty() { None } else { Some(args) };

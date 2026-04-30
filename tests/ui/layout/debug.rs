@@ -88,8 +88,8 @@ union EmptyUnion {} //~ ERROR: has an unknown layout
 // (this error is never emitted to users).
 #[rustc_dump_layout(debug)]
 type TooGeneric<T> = T; //~ ERROR: does not have a fixed layout
-<<<<<<< ferrocene/main
 
+<<<<<<< ferrocene/main
 // ferrocene-annotations: fls_rjxpof29a3nl
 // Struct Type Representation
 //
@@ -97,7 +97,6 @@ type TooGeneric<T> = T; //~ ERROR: does not have a fixed layout
 // Union Type Representation
 ||||||| 597d9e43be8
 =======
-
 #[rustc_dump_layout(debug)]
 type OptBool = Option<bool>; //~ ERROR: layout_of
 

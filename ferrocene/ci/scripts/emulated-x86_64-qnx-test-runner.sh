@@ -9,7 +9,6 @@ IFS=$'\n\t'
 
 nto_target=x86_64-pc-nto-qnx710
 vm_hostname=x86_64-qnx-vm
-ssh_id=id_ed25519
 
 start_vm() {
     qnx7_set_up_bridge_network
@@ -29,72 +28,55 @@ start_vm() {
         -kernel "${emulatordir}"/ifs.bin \
         -object rng-random,filename=/dev/urandom,id=rng0 \
         -device virtio-rng-pci,rng=rng0 \
-        -serial mon:stdio \
-        &> "${emulatordir}"/qemu.out &
-    echo "QEMU running in background. logs at ${emulatordir}/qemu.out"
-
-    echo
-    echo "===> wait for VM's network to go online"
-    ping -i3 -c4 ${vm_ipv4_addr}
+        -serial mon:stdio
 }
 
 cmd_prepare() {
     check_emulatordir_exists
 
     echo
-    echo "===> creating SSH key pair"
-    ssh-keygen -q -t ed25519 -N '' -f "${emulatordir}"/$ssh_id
+    echo "===> building remote-test-server"
+    ./x build src/tools/remote-test-server --target "${nto_target}"
 
     echo
-    echo "===> creating rootfs"
+    echo "===> creating initial IFS"
     tmpdir="$(mktemp -d)"
     pushd "$tmpdir"
     # NOTE `--data-size=5000 --data-inodes=40000` are required to make the test `std::fs::tests::read_large_dir` pass
     QNX_TARGET="${qnxdir}/target/qnx7" mkqnximage \
         --data-size=5000 --data-inodes=40000 --noprompt \
         --hostname="${vm_hostname}" --type=qemu --arch=x86_64 \
-        --ip="${vm_ipv4_addr}" --ssh-ident="${emulatordir}"/$ssh_id.pub
+        --ip="${vm_ipv4_addr}" --ssh-ident=none
 
+    echo
+    echo "===> re-building a custom IFS that includes remote-test-server"
     # as per https://www.qnx.com/support/knowledgebase.html?id=5015Y000001gM7T
     # the ifs.build script needs to include the libpci.so.2.3 file in the IFS
     # but the stock version does not so patch it and then re-generate ifs.bin
     local ifsbuild=output/build/ifs.build
     grep 'lib/libpci.so.2.3' "${ifsbuild}" || sed -i 's|lib/libpci.so|lib/libpci.so\
 lib/libpci.so.2.3|' "${ifsbuild}"
+
+    # add remote-test-servere binary to IFS
+    cp "$basedir"/build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${tmpdir}"/output/build/
+    echo 'remote-test-server=output/build/remote-test-server' >> "${ifsbuild}"
+
+    # run remote-test-server once startup is complete
+    local startup=output/build/startup.sh
+    # UI tests and libstd tests will try to resolve 'localhost'
+    echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
+    echo 'RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin
 
     cp output/{disk-qemu{,.vmdk},ifs.bin} "${emulatordir}/"
     popd
     rm -rf "${tmpdir}"
-
-    echo
-    echo "===> building and copying remote-test-server into rootfs"
-    ./x build src/tools/remote-test-server --target "${nto_target}"
-    cp build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/
-}
-
-on_vm() {
-    # disable user prompts around host key checking
-    # suppress warnings about adding $vm_ipv4_addr to list of known hosts
-    ssh \
-        -i "${emulatordir}"/$ssh_id \
-        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        -o LogLevel=ERROR \
-        root@$vm_ipv4_addr "${@}"
-}
-
-copy_to_vm() {
-    # same flags as `on_vm`
-    scp \
-        -i "${emulatordir}"/$ssh_id \
-        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        -o LogLevel=ERROR \
-        "$1" root@$vm_ipv4_addr:"$2"
 }
 
 cmd_run() {
-    if ! [[ -f "${emulatordir}/remote-test-server" ]]; then
+    if ! [[ -f "${emulatordir}/ifs.bin" ]]; then
         echo "error: preparation is needed before running the emulator; run:"
         echo
         echo "    $0 prepare"
@@ -103,14 +85,6 @@ cmd_run() {
     fi
 
     start_vm
-
-    echo
-    echo "===> starting remote-test-server"
-    copy_to_vm "${emulatordir}"/remote-test-server /tmp/
-    # `std::net` tests need this
-    on_vm 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts'
-
-    on_vm env RUST_TEST_THREADS=1 /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
 }
 
 if [[ $# -eq 1 ]] && [[ "$1" = "prepare" ]]; then

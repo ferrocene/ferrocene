@@ -10,7 +10,9 @@ use rustc_data_structures::base_n::{CASE_INSENSITIVE, ToBaseN};
 use rustc_data_structures::flock;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_data_structures::profiling::{SelfProfiler, SelfProfilerRef};
-use rustc_data_structures::sync::{DynSend, DynSync, Lock, MappedReadGuard, ReadGuard, RwLock};
+use rustc_data_structures::sync::{
+    AppendOnlyVec, DynSend, DynSync, Lock, MappedReadGuard, ReadGuard, RwLock,
+};
 use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
 use rustc_errors::codes::*;
 use rustc_errors::emitter::{DynEmitter, HumanReadableErrorType, OutputTheme, stderr_destination};
@@ -20,6 +22,7 @@ use rustc_errors::{
     Diag, DiagCtxt, DiagCtxtHandle, DiagMessage, Diagnostic, ErrorGuaranteed, FatalAbort,
     TerminalUrl,
 };
+use rustc_feature::UnstableFeatures;
 use rustc_hir::limit::Limit;
 use rustc_macros::HashStable_Generic;
 pub use rustc_span::def_id::StableCrateId;
@@ -36,8 +39,9 @@ use rustc_target::spec::{
 use crate::code_stats::CodeStats;
 pub use crate::code_stats::{DataTypeKind, FieldInfo, FieldKind, SizeKind, VariantInfo};
 use crate::config::{
-    self, CoverageLevel, CoverageOptions, CrateType, DebugInfo, ErrorOutputType, FunctionReturn,
-    Input, InstrumentCoverage, OptLevel, OutFileName, OutputType, SwitchWithOptPath,
+    self, Cfg, CheckCfg, CoverageLevel, CoverageOptions, CrateType, DebugInfo, ErrorOutputType,
+    FunctionReturn, Input, InstrumentCoverage, OptLevel, OutFileName, OutputType,
+    SwitchWithOptPath,
 };
 use crate::filesearch::FileSearch;
 use crate::lint::LintId;
@@ -91,6 +95,13 @@ pub struct Session {
     pub opts: config::Options,
     pub target_tlib_path: Arc<SearchPath>,
     pub psess: ParseSess,
+    pub unstable_features: UnstableFeatures,
+    pub config: Cfg,
+    pub check_config: CheckCfg,
+    /// Spans passed to `proc_macro::quote_span`. Each span has a numerical
+    /// identifier represented by its position in the vector.
+    proc_macro_quoted_spans: AppendOnlyVec<Span>,
+
     /// Input, input file path and output file path to this compilation process.
     pub io: CompilerIO,
 
@@ -300,6 +311,16 @@ impl Session {
     #[inline]
     pub fn source_map(&self) -> &SourceMap {
         self.psess.source_map()
+    }
+
+    pub fn proc_macro_quoted_spans(&self) -> impl Iterator<Item = (usize, Span)> {
+        // This is equivalent to `.iter().copied().enumerate()`, but that isn't possible for
+        // AppendOnlyVec, so we resort to this scheme.
+        self.proc_macro_quoted_spans.iter_enumerated()
+    }
+
+    pub fn save_proc_macro_span(&self, span: Span) -> usize {
+        self.proc_macro_quoted_spans.push(span)
     }
 
     /// Returns `true` if internal lints should be added to the lint store - i.e. if
@@ -1045,8 +1066,7 @@ pub fn build_session(
         None
     };
 
-    let mut psess = ParseSess::with_dcx(dcx, source_map);
-    psess.assume_incomplete_release = sopts.unstable_opts.assume_incomplete_release;
+    let psess = ParseSess::with_dcx(dcx, source_map);
 
     let host_triple = config::host_tuple();
     let target_triple = sopts.target_triple.tuple();
@@ -1090,6 +1110,10 @@ pub fn build_session(
         opts: sopts,
         target_tlib_path,
         psess,
+        unstable_features: UnstableFeatures::from_environment(None),
+        config: Cfg::default(),
+        check_config: CheckCfg::default(),
+        proc_macro_quoted_spans: Default::default(),
         io,
         incr_comp_session: RwLock::new(IncrCompSession::NotInitialized),
         prof,

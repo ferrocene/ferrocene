@@ -458,11 +458,11 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
             let cfg = parse_cfg(sess.dcx(), config.crate_cfg);
             let mut cfg = config::build_configuration(&sess, cfg);
             util::add_configuration(&mut cfg, &mut sess, &*codegen_backend);
-            sess.psess.config = cfg;
+            sess.config = cfg;
 
             let mut check_cfg = parse_check_cfg(sess.dcx(), config.crate_check_cfg);
             check_cfg.fill_well_known(&sess.target);
-            sess.psess.check_config = check_cfg;
+            sess.check_config = check_cfg;
 
             if let Some(psess_created) = config.psess_created {
                 psess_created(&mut sess.psess);

@@ -18,6 +18,7 @@ pub use rustc_ast::{
 };
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
+use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::TaggedRef;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
 use rustc_index::IndexVec;
@@ -1304,6 +1305,15 @@ impl Attribute {
             Attribute::Unparsed(_) => false,
         }
     }
+
+    pub fn is_prefix_attr_for_suggestions(&self) -> bool {
+        match self {
+            Attribute::Unparsed(attr) => attr.span.desugaring_kind().is_none(),
+            // Other parsed attributes that can appear on expressions originate from source and
+            // should make suggestions treat the expression like a prefixed form.
+            Attribute::Parsed(_) => true,
+        }
+    }
 }
 
 impl AttributeExt for Attribute {
@@ -1411,14 +1421,6 @@ impl AttributeExt for Attribute {
     fn doc_str(&self) -> Option<Symbol> {
         match &self {
             Attribute::Parsed(AttributeKind::DocComment { comment, .. }) => Some(*comment),
-            _ => None,
-        }
-    }
-
-    #[inline]
-    fn deprecation_note(&self) -> Option<Ident> {
-        match &self {
-            Attribute::Parsed(AttributeKind::Deprecated { deprecation, .. }) => deprecation.note,
             _ => None,
         }
     }
@@ -1635,7 +1637,7 @@ pub struct OwnerInfo<'hir> {
     /// WARNING: The delayed lints are not hashed as a part of the `OwnerInfo`, and therefore
     ///          should only be accessed in `eval_always` queries.
     #[stable_hasher(ignore)]
-    pub delayed_lints: DelayedLints,
+    pub delayed_lints: Steal<DelayedLints>,
 }
 
 impl<'tcx> OwnerInfo<'tcx> {
@@ -2388,9 +2390,9 @@ impl fmt::Display for ConstContext {
 impl IntoDiagArg for ConstContext {
     fn into_diag_arg(self, _: &mut Option<std::path::PathBuf>) -> DiagArgValue {
         DiagArgValue::Str(Cow::Borrowed(match self {
-            ConstContext::ConstFn => "const_fn",
+            ConstContext::ConstFn => "constant function",
             ConstContext::Static(_) => "static",
-            ConstContext::Const { .. } => "const",
+            ConstContext::Const { .. } => "constant",
         }))
     }
 }
@@ -4466,7 +4468,7 @@ impl<'hir> Item<'hir> {
                 GenericBounds<'hir>,
                 &'hir [TraitItemId]
             ),
-            ItemKind::Trait(impl_restriction, constness, is_auto, safety, ident, generics, bounds, items),
+            ItemKind::Trait { impl_restriction, constness, is_auto, safety, ident, generics, bounds, items },
             (impl_restriction, *constness, *is_auto, *safety, *ident, generics, bounds, items);
 
         expect_trait_alias, (Constness, Ident, &'hir Generics<'hir>, GenericBounds<'hir>),
@@ -4658,16 +4660,16 @@ pub enum ItemKind<'hir> {
     /// A union definition, e.g., `union Foo<A, B> {x: A, y: B}`.
     Union(Ident, &'hir Generics<'hir>, VariantData<'hir>),
     /// A trait definition.
-    Trait(
-        &'hir ImplRestriction<'hir>,
-        Constness,
-        IsAuto,
-        Safety,
-        Ident,
-        &'hir Generics<'hir>,
-        GenericBounds<'hir>,
-        &'hir [TraitItemId],
-    ),
+    Trait {
+        impl_restriction: &'hir ImplRestriction<'hir>,
+        constness: Constness,
+        is_auto: IsAuto,
+        safety: Safety,
+        ident: Ident,
+        generics: &'hir Generics<'hir>,
+        bounds: GenericBounds<'hir>,
+        items: &'hir [TraitItemId],
+    },
     /// A trait alias.
     TraitAlias(Constness, Ident, &'hir Generics<'hir>, GenericBounds<'hir>),
 
@@ -4713,7 +4715,7 @@ impl ItemKind<'_> {
             | ItemKind::Enum(ident, ..)
             | ItemKind::Struct(ident, ..)
             | ItemKind::Union(ident, ..)
-            | ItemKind::Trait(_, _, _, _, ident, ..)
+            | ItemKind::Trait { ident, .. }
             | ItemKind::TraitAlias(_, ident, ..) => Some(ident),
 
             ItemKind::Use(_, UseKind::Glob | UseKind::ListStem)
@@ -4731,7 +4733,7 @@ impl ItemKind<'_> {
             | ItemKind::Enum(_, generics, _)
             | ItemKind::Struct(_, generics, _)
             | ItemKind::Union(_, generics, _)
-            | ItemKind::Trait(_, _, _, _, _, generics, _, _)
+            | ItemKind::Trait { generics, .. }
             | ItemKind::TraitAlias(_, _, generics, _)
             | ItemKind::Impl(Impl { generics, .. }) => generics,
             _ => return None,

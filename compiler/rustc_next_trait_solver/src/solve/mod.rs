@@ -158,10 +158,7 @@ where
         if self.may_use_unstable_feature(param_env, symbol) {
             self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         } else {
-            self.evaluate_added_goals_and_make_canonical_response(Certainty::Maybe {
-                cause: MaybeCause::Ambiguity,
-                opaque_types_jank: OpaqueTypesJank::AllGood,
-            })
+            self.evaluate_added_goals_and_make_canonical_response(Certainty::AMBIGUOUS)
         }
     }
 
@@ -279,21 +276,16 @@ where
 
     fn bail_with_ambiguity(&mut self, candidates: &[Candidate<I>]) -> CanonicalResponse<I> {
         debug_assert!(candidates.len() > 1);
-        let (cause, opaque_types_jank) = candidates.iter().fold(
-            (MaybeCause::Ambiguity, OpaqueTypesJank::AllGood),
-            |(c, jank), candidates| {
-                // We pull down the certainty of `Certainty::Yes` to ambiguity when combining
-                // these responses, b/c we're combining more than one response and this we
-                // don't know which one applies.
-                match candidates.result.value.certainty {
-                    Certainty::Yes => (c, jank),
-                    Certainty::Maybe { cause, opaque_types_jank } => {
-                        (c.or(cause), jank.or(opaque_types_jank))
-                    }
-                }
-            },
-        );
-        self.make_ambiguous_response_no_constraints(cause, opaque_types_jank)
+        let maybe = candidates.iter().fold(MaybeInfo::AMBIGUOUS, |maybe, candidate| {
+            // We pull down the certainty of `Certainty::Yes` to ambiguity when combining
+            // these responses, b/c we're combining more than one response and this we
+            // don't know which one applies.
+            match candidate.result.value.certainty {
+                Certainty::Yes => maybe,
+                Certainty::Maybe(cand_maybe) => maybe.or(cand_maybe),
+            }
+        });
+        self.make_ambiguous_response_no_constraints(maybe)
     }
 
     /// If we fail to merge responses we flounder and return overflow or ambiguity.

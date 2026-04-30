@@ -75,6 +75,13 @@
 //!
 //! This is equivalent to `#[repr(C, packed)]` and results in a single `AttributeKind::Repr`
 //! containing both `C` and `packed` annotations.
+//!
+//! ## Early attribute parsing
+//!
+//! While lowering to the HIR, all attributes are parsed using the attribute parsers.
+//! However, sometimes an attributes' parsed form is needed before the HIR is constructed.
+//! This is referred to as "early" attribute parsing,
+//! and is performed using the `parse_limited_*` family of functions on `AttributeParser`.
 
 // tidy-alphabetical-start
 #![feature(decl_macro)]
@@ -112,6 +119,7 @@ pub use attributes::cfg::{
 };
 pub use attributes::cfg_select::*;
 pub use attributes::util::{is_builtin_attr, parse_version};
-pub use context::{Early, Late, OmitDoc, ShouldEmit};
+pub use context::{OmitDoc, ShouldEmit};
 pub use interface::{AttributeParser, EmitAttribute};
+pub use rustc_parse::parser::Recovery;
 pub use session_diagnostics::ParsedDescription;

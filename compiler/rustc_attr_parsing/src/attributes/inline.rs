@@ -9,9 +9,9 @@ use super::prelude::*;
 
 pub(crate) struct InlineParser;
 
-impl<S: Stage> SingleAttributeParser<S> for InlineParser {
+impl SingleAttributeParser for InlineParser {
     const PATH: &[Symbol] = &[sym::inline];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::WarnButFutureError;
+    const ON_DUPLICATE: OnDuplicate = OnDuplicate::WarnButFutureError;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
         Allow(Target::Fn),
         Allow(Target::Method(MethodKind::Inherent)),
@@ -33,14 +33,11 @@ impl<S: Stage> SingleAttributeParser<S> for InlineParser {
         "https://doc.rust-lang.org/reference/attributes/codegen.html#the-inline-attribute"
     );
 
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         match args {
             ArgParser::NoArgs => Some(AttributeKind::Inline(InlineAttr::Hint, cx.attr_span)),
             ArgParser::List(list) => {
-                let Some(l) = list.single() else {
-                    cx.adcx().expected_single_argument(list.span, list.len());
-                    return None;
-                };
+                let l = cx.expect_single(list)?;
 
                 match l.meta_item().and_then(|i| i.path().word_sym()) {
                     Some(sym::always) => {
@@ -65,7 +62,7 @@ impl<S: Stage> SingleAttributeParser<S> for InlineParser {
 
 pub(crate) struct RustcForceInlineParser;
 
-impl<S: Stage> SingleAttributeParser<S> for RustcForceInlineParser {
+impl SingleAttributeParser for RustcForceInlineParser {
     const PATH: &[Symbol] = &[sym::rustc_force_inline];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
         Allow(Target::Fn),
@@ -74,14 +71,11 @@ impl<S: Stage> SingleAttributeParser<S> for RustcForceInlineParser {
 
     const TEMPLATE: AttributeTemplate = template!(Word, List: &["reason"], NameValueStr: "reason");
 
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let reason = match args {
             ArgParser::NoArgs => None,
             ArgParser::List(list) => {
-                let Some(l) = list.single() else {
-                    cx.adcx().expected_single_argument(list.span, list.len());
-                    return None;
-                };
+                let l = cx.expect_single(list)?;
 
                 let Some(reason) = l.lit().and_then(|i| i.kind.str()) else {
                     cx.adcx().expected_string_literal(l.span(), l.lit());

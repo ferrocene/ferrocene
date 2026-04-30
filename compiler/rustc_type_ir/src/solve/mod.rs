@@ -289,7 +289,39 @@ impl<I: Interner> NestedNormalizationGoals<I> {
 #[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
 pub enum Certainty {
     Yes,
-    Maybe { cause: MaybeCause, opaque_types_jank: OpaqueTypesJank },
+    Maybe(MaybeInfo),
+}
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+pub struct MaybeInfo {
+    pub cause: MaybeCause,
+    pub opaque_types_jank: OpaqueTypesJank,
+    pub stalled_on_coroutines: StalledOnCoroutines,
+}
+
+impl MaybeInfo {
+    pub const AMBIGUOUS: MaybeInfo = MaybeInfo {
+        cause: MaybeCause::Ambiguity,
+        opaque_types_jank: OpaqueTypesJank::AllGood,
+        stalled_on_coroutines: StalledOnCoroutines::No,
+    };
+
+    fn and(self, other: MaybeInfo) -> MaybeInfo {
+        MaybeInfo {
+            cause: self.cause.and(other.cause),
+            opaque_types_jank: self.opaque_types_jank.and(other.opaque_types_jank),
+            stalled_on_coroutines: self.stalled_on_coroutines.and(other.stalled_on_coroutines),
+        }
+    }
+
+    pub fn or(self, other: MaybeInfo) -> MaybeInfo {
+        MaybeInfo {
+            cause: self.cause.or(other.cause),
+            opaque_types_jank: self.opaque_types_jank.or(other.opaque_types_jank),
+            stalled_on_coroutines: self.stalled_on_coroutines.or(other.stalled_on_coroutines),
+        }
+    }
 }
 
 /// Supporting not-yet-defined opaque types in HIR typeck is somewhat
@@ -348,11 +380,33 @@ impl OpaqueTypesJank {
     }
 }
 
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+pub enum StalledOnCoroutines {
+    Yes,
+    No,
+}
+
+impl StalledOnCoroutines {
+    fn and(self, other: StalledOnCoroutines) -> StalledOnCoroutines {
+        match (self, other) {
+            (StalledOnCoroutines::No, StalledOnCoroutines::No) => StalledOnCoroutines::No,
+            (StalledOnCoroutines::Yes, _) | (_, StalledOnCoroutines::Yes) => {
+                StalledOnCoroutines::Yes
+            }
+        }
+    }
+
+    pub fn or(self, other: StalledOnCoroutines) -> StalledOnCoroutines {
+        // `StalledOnCoroutines::Yes` is contagious: obtaining `Certainty::Maybe`
+        // while a candidate is stalled on a coroutine might have been
+        // `Certainty::Yes` or `NoSolution` if it were not stalled.
+        StalledOnCoroutines::and(self, other)
+    }
+}
+
 impl Certainty {
-    pub const AMBIGUOUS: Certainty = Certainty::Maybe {
-        cause: MaybeCause::Ambiguity,
-        opaque_types_jank: OpaqueTypesJank::AllGood,
-    };
+    pub const AMBIGUOUS: Certainty = Certainty::Maybe(MaybeInfo::AMBIGUOUS);
 
     /// Use this function to merge the certainty of multiple nested subgoals.
     ///
@@ -371,21 +425,18 @@ impl Certainty {
             (Certainty::Yes, Certainty::Yes) => Certainty::Yes,
             (Certainty::Yes, Certainty::Maybe { .. }) => other,
             (Certainty::Maybe { .. }, Certainty::Yes) => self,
-            (
-                Certainty::Maybe { cause: a_cause, opaque_types_jank: a_jank },
-                Certainty::Maybe { cause: b_cause, opaque_types_jank: b_jank },
-            ) => Certainty::Maybe {
-                cause: a_cause.and(b_cause),
-                opaque_types_jank: a_jank.and(b_jank),
-            },
+            (Certainty::Maybe(a_maybe), Certainty::Maybe(b_maybe)) => {
+                Certainty::Maybe(a_maybe.and(b_maybe))
+            }
         }
     }
 
     pub const fn overflow(suggest_increasing_limit: bool) -> Certainty {
-        Certainty::Maybe {
+        Certainty::Maybe(MaybeInfo {
             cause: MaybeCause::Overflow { suggest_increasing_limit, keep_constraints: false },
             opaque_types_jank: OpaqueTypesJank::AllGood,
-        }
+            stalled_on_coroutines: StalledOnCoroutines::No,
+        })
     }
 }
 

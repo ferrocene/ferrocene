@@ -533,7 +533,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                     ty::FnDef(def_id, _) => {
                         let name = self.infcx.tcx.item_name(*def_id);
                         let identity_args = GenericArgs::identity_for_item(self.infcx.tcx, *def_id);
-                        let desc = format!("a function pointer to `{name}`");
+                        let desc = format!("the function item type defined by `{name}`");
                         let note = format!(
                             "the function `{name}` is invariant over the parameter `{}`",
                             identity_args[param_index as usize]
@@ -1085,8 +1085,9 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
         }
 
         // Build a new closure where the return type is an owned value, instead of a ref.
-        let fn_sig_kind =
-            FnSigKind::default().set_safe(true).set_c_variadic(liberated_sig.c_variadic());
+        let fn_sig_kind = FnSigKind::default()
+            .set_safety(hir::Safety::Safe)
+            .set_c_variadic(liberated_sig.c_variadic());
         let closure_sig_as_fn_ptr_ty = Ty::new_fn_ptr(
             tcx,
             ty::Binder::dummy(tcx.mk_fn_sig(

@@ -11,7 +11,7 @@ use rustc_middle::traits::query::NoSolution;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_next_trait_solver::solve::{GoalEvaluation, SolverDelegateEvalExt as _};
+use rustc_next_trait_solver::solve::{GoalEvaluation, MaybeInfo, SolverDelegateEvalExt as _};
 use tracing::{instrument, trace};
 
 use crate::solve::delegate::SolverDelegate;
@@ -96,16 +96,22 @@ pub(super) fn fulfillment_error_for_stalled<'tcx>(
             None,
         ) {
             Ok(GoalEvaluation {
-                certainty: Certainty::Maybe { cause: MaybeCause::Ambiguity, .. },
+                certainty:
+                    Certainty::Maybe(MaybeInfo {
+                        cause: MaybeCause::Ambiguity,
+                        opaque_types_jank: _,
+                        stalled_on_coroutines: _,
+                    }),
                 ..
             }) => (FulfillmentErrorCode::Ambiguity { overflow: None }, true),
             Ok(GoalEvaluation {
                 certainty:
-                    Certainty::Maybe {
+                    Certainty::Maybe(MaybeInfo {
                         cause:
                             MaybeCause::Overflow { suggest_increasing_limit, keep_constraints: _ },
-                        ..
-                    },
+                        opaque_types_jank: _,
+                        stalled_on_coroutines: _,
+                    }),
                 ..
             }) => (
                 FulfillmentErrorCode::Ambiguity { overflow: Some(suggest_increasing_limit) },
@@ -271,7 +277,14 @@ impl<'tcx> BestObligation<'tcx> {
             );
             // Skip nested goals that aren't the *reason* for our goal's failure.
             match (self.consider_ambiguities, nested_goal.result()) {
-                (true, Ok(Certainty::Maybe { cause: MaybeCause::Ambiguity, .. }))
+                (
+                    true,
+                    Ok(Certainty::Maybe(MaybeInfo {
+                        cause: MaybeCause::Ambiguity,
+                        opaque_types_jank: _,
+                        stalled_on_coroutines: _,
+                    })),
+                )
                 | (false, Err(_)) => {}
                 _ => continue,
             }
@@ -413,8 +426,15 @@ impl<'tcx> ProofTreeVisitor<'tcx> for BestObligation<'tcx> {
         let tcx = goal.infcx().tcx;
         // Skip goals that aren't the *reason* for our goal's failure.
         match (self.consider_ambiguities, goal.result()) {
-            (true, Ok(Certainty::Maybe { cause: MaybeCause::Ambiguity, .. })) | (false, Err(_)) => {
-            }
+            (
+                true,
+                Ok(Certainty::Maybe(MaybeInfo {
+                    cause: MaybeCause::Ambiguity,
+                    opaque_types_jank: _,
+                    stalled_on_coroutines: _,
+                })),
+            )
+            | (false, Err(_)) => {}
             _ => return ControlFlow::Continue(()),
         }
 

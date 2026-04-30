@@ -173,6 +173,16 @@ fn make_format_args(
         style: fmt_style,
         uncooked_symbol: uncooked_fmt_str,
     } = {
+        // Extract snippet so that we can check cases `{}`, `{:?}` and `{:#?}` and emit help for
+        // them later.
+        let snippet = if let ExprKind::Block(b, None) = &efmt.kind
+            && b.stmts.len() <= 1
+        {
+            Some(ecx.sess.source_map().span_to_snippet(unexpanded_fmt_span))
+        } else {
+            None
+        };
+
         let ExpandResult::Ready(mac) = expr_to_spanned_string(ecx, efmt.clone(), msg) else {
             return ExpandResult::Retry(());
         };
@@ -222,12 +232,26 @@ fn make_format_args(
                                     });
                                 }
                                 sugg_fmt = sugg_fmt.trim_end().to_string();
-                                err.span_suggestion(
+                                err.span_suggestion_verbose(
                                     unexpanded_fmt_span.shrink_to_lo(),
                                     "you might be missing a string literal to format with",
                                     format!("\"{sugg_fmt}\", "),
                                     Applicability::MaybeIncorrect,
                                 );
+
+                                if let Some(Ok(snippet)) = snippet.as_ref() {
+                                    match snippet.as_str() {
+                                        "{}" | "{:?}" | "{:#?}" => {
+                                            err.span_suggestion_verbose(
+                                                unexpanded_fmt_span,
+                                                format!("you might want to enclose `{snippet}` with `\"\"`"),
+                                                format!("\"{snippet}\""),
+                                                Applicability::MaybeIncorrect,
+                                            );
+                                        }
+                                        _ => {}
+                                    };
+                                }
                             }
                         }
                         err.emit()
@@ -611,7 +635,7 @@ fn make_format_args(
                 span: Some(arg_name.span.into()),
                 node_id: rustc_ast::CRATE_NODE_ID,
                 lint_id: LintId::of(NAMED_ARGUMENTS_USED_POSITIONALLY),
-                diagnostic: DecorateDiagCompat::Dynamic(Box::new(move |dcx, level, sess| {
+                diagnostic: DecorateDiagCompat(Box::new(move |dcx, level, sess| {
                     let (suggestion, name) =
                         if let Some(positional_arg_to_replace) = position_sp_to_replace {
                             let mut name = arg_name.name.to_string();

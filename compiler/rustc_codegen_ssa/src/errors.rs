@@ -541,6 +541,12 @@ pub(crate) struct InsufficientVSCodeProduct;
 pub(crate) struct CpuRequired;
 
 #[derive(Diagnostic)]
+#[diag("target cpu `{$target_cpu}` is known but unsupported")]
+pub(crate) struct CpuUnsupported {
+    pub target_cpu: String,
+}
+
+#[derive(Diagnostic)]
 #[diag("processing debug info with `dsymutil` failed: {$status}")]
 #[note("{$output}")]
 pub(crate) struct ProcessingDymutilFailed {
@@ -669,6 +675,18 @@ pub(crate) struct ArchiveBuildFailure {
 #[diag("don't know how to build archive of type: {$kind}")]
 pub(crate) struct UnknownArchiveKind<'a> {
     pub kind: &'a str,
+}
+
+#[derive(Diagnostic)]
+#[diag("archive `{$path}` was built as {$actual} format, but the target expects {$expected}")]
+#[help(
+    "this often occurs when using BSD-format archive tools on a Linux target; \
+    rebuild the archive with the correct format for the target platform"
+)]
+pub(crate) struct IncompatibleArchiveFormat {
+    pub path: PathBuf,
+    pub actual: String,
+    pub expected: String,
 }
 
 #[derive(Diagnostic)]

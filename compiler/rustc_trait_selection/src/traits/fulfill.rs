@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::ops::ControlFlow;
 
 use rustc_data_structures::obligation_forest::{
     Error, ForestObligation, ObligationForest, ObligationProcessor, Outcome, ProcessResult,
@@ -13,10 +14,9 @@ use rustc_middle::bug;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{
-    self, Binder, Const, GenericArgsRef, TypeVisitable, TypeVisitableExt, TypingMode,
-    may_use_unstable_feature,
+    self, Binder, Const, DelayedSet, GenericArgsRef, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable,
+    TypeVisitableExt, TypeVisitor, TypingMode, may_use_unstable_feature,
 };
-use rustc_span::DUMMY_SP;
 use thin_vec::{ThinVec, thin_vec};
 use tracing::{debug, debug_span, instrument};
 
@@ -29,7 +29,6 @@ use super::{
 };
 use crate::error_reporting::InferCtxtErrorExt;
 use crate::infer::{InferCtxt, TyOrConstInferVar};
-use crate::solve::StalledOnCoroutines;
 use crate::traits::normalize::normalize_with_depth_to;
 use crate::traits::project::{PolyProjectionObligation, ProjectionCacheKeyExt as _};
 use crate::traits::query::evaluate_obligation::InferCtxtExt;
@@ -207,11 +206,37 @@ where
             type OUT = Outcome<Self::Obligation, Self::Error>;
 
             fn needs_process_obligation(&self, pending_obligation: &Self::Obligation) -> bool {
+                struct StalledOnCoroutines<'tcx> {
+                    pub stalled_coroutines: &'tcx ty::List<LocalDefId>,
+                    pub cache: DelayedSet<Ty<'tcx>>,
+                }
+
+                impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for StalledOnCoroutines<'tcx> {
+                    type Result = ControlFlow<()>;
+
+                    fn visit_ty(&mut self, ty: Ty<'tcx>) -> Self::Result {
+                        if !self.cache.insert(ty) {
+                            return ControlFlow::Continue(());
+                        }
+
+                        if let ty::Coroutine(def_id, _) = ty.kind()
+                            && def_id
+                                .as_local()
+                                .is_some_and(|def_id| self.stalled_coroutines.contains(&def_id))
+                        {
+                            ControlFlow::Break(())
+                        } else if ty.has_coroutines() {
+                            ty.super_visit_with(self)
+                        } else {
+                            ControlFlow::Continue(())
+                        }
+                    }
+                }
+
                 self.infcx
                     .resolve_vars_if_possible(pending_obligation.obligation.predicate)
                     .visit_with(&mut StalledOnCoroutines {
                         stalled_coroutines: self.stalled_coroutines,
-                        span: DUMMY_SP,
                         cache: Default::default(),
                     })
                     .is_break()

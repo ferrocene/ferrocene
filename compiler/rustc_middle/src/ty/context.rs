@@ -18,13 +18,12 @@ use std::{fmt, iter, mem};
 use rustc_abi::{ExternAbi, FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
 use rustc_ast as ast;
 use rustc_data_structures::defer;
-use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::intern::Interned;
 use rustc_data_structures::jobserver::Proxy;
 use rustc_data_structures::profiling::SelfProfilerRef;
 use rustc_data_structures::sharded::{IntoPointer, ShardedHashMap};
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+use rustc_data_structures::stable_hasher::HashStable;
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::sync::{
     self, DynSend, DynSync, FreezeReadGuard, Lock, RwLock, WorkerLocal,
@@ -47,9 +46,7 @@ use rustc_span::def_id::{CRATE_DEF_ID, DefPathHash, StableCrateId};
 use rustc_span::{DUMMY_SP, Ident, Span, Symbol, kw, sym};
 use rustc_type_ir::TyKind::*;
 pub use rustc_type_ir::lift::Lift;
-use rustc_type_ir::{
-    CollectAndApply, FnSigKind, TypeFlags, WithCachedTypeInfo, elaborate, search_graph,
-};
+use rustc_type_ir::{CollectAndApply, WithCachedTypeInfo, elaborate, search_graph};
 use tracing::{debug, instrument};
 
 use crate::arena::Arena;
@@ -69,11 +66,11 @@ use crate::traits;
 use crate::traits::solve::{ExternalConstraints, ExternalConstraintsData, PredefinedOpaques};
 use crate::ty::predicate::ExistentialPredicateStableCmpExt as _;
 use crate::ty::{
-    self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Clauses, Const, GenericArg, GenericArgs,
-    GenericArgsRef, GenericParamDefKind, List, ListWithCachedTypeInfo, ParamConst, Pattern,
-    PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate, PredicateKind, PredicatePolarity,
-    Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVid, ValTree, ValTreeKind,
-    Visibility,
+    self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Clauses, Const, FnSigKind, GenericArg,
+    GenericArgs, GenericArgsRef, GenericParamDefKind, List, ListWithCachedTypeInfo, ParamConst,
+    Pattern, PatternKind, PolyExistentialPredicate, PolyFnSig, Predicate, PredicateKind,
+    PredicatePolarity, Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVid,
+    ValTree, ValTreeKind, Visibility,
 };
 
 impl<'tcx> rustc_type_ir::inherent::DefId<TyCtxt<'tcx>> for DefId {
@@ -83,50 +80,6 @@ impl<'tcx> rustc_type_ir::inherent::DefId<TyCtxt<'tcx>> for DefId {
 
     fn as_local(self) -> Option<LocalDefId> {
         self.as_local()
-    }
-}
-
-impl<'tcx> rustc_type_ir::inherent::FSigKind<TyCtxt<'tcx>> for FnSigKind {
-    fn fn_sig_kind(self) -> Self {
-        self
-    }
-
-    fn new(abi: ExternAbi, safety: hir::Safety, c_variadic: bool) -> Self {
-        FnSigKind::default().set_abi(abi).set_safe(safety.is_safe()).set_c_variadic(c_variadic)
-    }
-
-    fn abi(self) -> ExternAbi {
-        self.abi()
-    }
-
-    fn safety(self) -> hir::Safety {
-        if self.is_safe() { hir::Safety::Safe } else { hir::Safety::Unsafe }
-    }
-
-    fn c_variadic(self) -> bool {
-        self.c_variadic()
-    }
-}
-
-impl<'tcx> rustc_type_ir::inherent::Abi<TyCtxt<'tcx>> for ExternAbi {
-    fn abi(self) -> Self {
-        self
-    }
-
-    fn rust() -> Self {
-        ExternAbi::Rust
-    }
-
-    fn is_rust(self) -> bool {
-        matches!(self, ExternAbi::Rust)
-    }
-
-    fn pack_abi(self) -> u8 {
-        self.as_packed()
-    }
-
-    fn unpack_abi(abi_index: u8) -> Self {
-        Self::from_packed(abi_index)
     }
 }
 
@@ -247,16 +200,13 @@ impl<'tcx> CtxtInterners<'tcx> {
     /// Interns a type. (Use `mk_*` functions instead, where possible.)
     #[allow(rustc::usage_of_ty_tykind)]
     #[inline(never)]
-    fn intern_ty(&self, kind: TyKind<'tcx>, sess: &Session, untracked: &Untracked) -> Ty<'tcx> {
+    fn intern_ty(&self, kind: TyKind<'tcx>) -> Ty<'tcx> {
         Ty(Interned::new_unchecked(
             self.type_
                 .intern(kind, |kind| {
                     let flags = ty::FlagComputation::<TyCtxt<'tcx>>::for_kind(&kind);
-                    let stable_hash = self.stable_hash(&flags, sess, untracked, &kind);
-
                     InternedInSet(self.arena.alloc(WithCachedTypeInfo {
                         internee: kind,
-                        stable_hash,
                         flags: flags.flags,
                         outer_exclusive_binder: flags.outer_exclusive_binder,
                     }))
@@ -268,21 +218,13 @@ impl<'tcx> CtxtInterners<'tcx> {
     /// Interns a const. (Use `mk_*` functions instead, where possible.)
     #[allow(rustc::usage_of_ty_tykind)]
     #[inline(never)]
-    fn intern_const(
-        &self,
-        kind: ty::ConstKind<'tcx>,
-        sess: &Session,
-        untracked: &Untracked,
-    ) -> Const<'tcx> {
+    fn intern_const(&self, kind: ty::ConstKind<'tcx>) -> Const<'tcx> {
         Const(Interned::new_unchecked(
             self.const_
                 .intern(kind, |kind: ty::ConstKind<'_>| {
                     let flags = ty::FlagComputation::<TyCtxt<'tcx>>::for_const_kind(&kind);
-                    let stable_hash = self.stable_hash(&flags, sess, untracked, &kind);
-
                     InternedInSet(self.arena.alloc(WithCachedTypeInfo {
                         internee: kind,
-                        stable_hash,
                         flags: flags.flags,
                         outer_exclusive_binder: flags.outer_exclusive_binder,
                     }))
@@ -291,43 +233,15 @@ impl<'tcx> CtxtInterners<'tcx> {
         ))
     }
 
-    fn stable_hash<'a, T: HashStable<StableHashingContext<'a>>>(
-        &self,
-        flags: &ty::FlagComputation<TyCtxt<'tcx>>,
-        sess: &'a Session,
-        untracked: &'a Untracked,
-        val: &T,
-    ) -> Fingerprint {
-        // It's impossible to hash inference variables (and will ICE), so we don't need to try to cache them.
-        // Without incremental, we rarely stable-hash types, so let's not do it proactively.
-        if flags.flags.intersects(TypeFlags::HAS_INFER) || sess.opts.incremental.is_none() {
-            Fingerprint::ZERO
-        } else {
-            let mut hasher = StableHasher::new();
-            let mut hcx = StableHashingContext::new(sess, untracked);
-            val.hash_stable(&mut hcx, &mut hasher);
-            hasher.finish()
-        }
-    }
-
     /// Interns a predicate. (Use `mk_predicate` instead, where possible.)
     #[inline(never)]
-    fn intern_predicate(
-        &self,
-        kind: Binder<'tcx, PredicateKind<'tcx>>,
-        sess: &Session,
-        untracked: &Untracked,
-    ) -> Predicate<'tcx> {
+    fn intern_predicate(&self, kind: Binder<'tcx, PredicateKind<'tcx>>) -> Predicate<'tcx> {
         Predicate(Interned::new_unchecked(
             self.predicate
                 .intern(kind, |kind| {
                     let flags = ty::FlagComputation::<TyCtxt<'tcx>>::for_predicate(kind);
-
-                    let stable_hash = self.stable_hash(&flags, sess, untracked, &kind);
-
                     InternedInSet(self.arena.alloc(WithCachedTypeInfo {
                         internee: kind,
-                        stable_hash,
                         flags: flags.flags,
                         outer_exclusive_binder: flags.outer_exclusive_binder,
                     }))
@@ -463,12 +377,8 @@ pub struct CommonConsts<'tcx> {
 }
 
 impl<'tcx> CommonTypes<'tcx> {
-    fn new(
-        interners: &CtxtInterners<'tcx>,
-        sess: &Session,
-        untracked: &Untracked,
-    ) -> CommonTypes<'tcx> {
-        let mk = |ty| interners.intern_ty(ty, sess, untracked);
+    fn new(interners: &CtxtInterners<'tcx>) -> CommonTypes<'tcx> {
+        let mk = |ty| interners.intern_ty(ty);
 
         let ty_vars =
             (0..NUM_PREINTERNED_TY_VARS).map(|n| mk(Infer(ty::TyVar(TyVid::from(n))))).collect();
@@ -584,18 +494,8 @@ impl<'tcx> CommonLifetimes<'tcx> {
 }
 
 impl<'tcx> CommonConsts<'tcx> {
-    fn new(
-        interners: &CtxtInterners<'tcx>,
-        types: &CommonTypes<'tcx>,
-        sess: &Session,
-        untracked: &Untracked,
-    ) -> CommonConsts<'tcx> {
-        let mk_const = |c| {
-            interners.intern_const(
-                c, sess, // This is only used to create a stable hashing context.
-                untracked,
-            )
-        };
+    fn new(interners: &CtxtInterners<'tcx>, types: &CommonTypes<'tcx>) -> CommonConsts<'tcx> {
+        let mk_const = |c| interners.intern_const(c);
 
         let mk_valtree = |v| {
             ty::ValTree(Interned::new_unchecked(
@@ -1088,9 +988,9 @@ impl<'tcx> TyCtxt<'tcx> {
             s.dcx().emit_fatal(err);
         });
         let interners = CtxtInterners::new(arena);
-        let common_types = CommonTypes::new(&interners, s, &untracked);
+        let common_types = CommonTypes::new(&interners);
         let common_lifetimes = CommonLifetimes::new(&interners);
-        let common_consts = CommonConsts::new(&interners, &common_types, s, &untracked);
+        let common_consts = CommonConsts::new(&interners, &common_types);
 
         let gcx = gcx_cell.get_or_init(|| GlobalCtxt {
             sess: s,
@@ -1391,7 +1291,7 @@ impl<'tcx> TyCtxt<'tcx> {
         let caller_features = &self.body_codegen_attrs(caller).target_features;
         if self.is_target_feature_call_safe(&fun_features, &caller_features) {
             return Some(fun_sig.map_bound(|sig| ty::FnSig {
-                fn_sig_kind: fun_sig.fn_sig_kind().set_safe(true),
+                fn_sig_kind: fun_sig.fn_sig_kind().set_safety(hir::Safety::Safe),
                 ..sig
             }));
         }
@@ -1472,12 +1372,12 @@ impl<'tcx> TyCtxt<'tcx> {
         self,
         stable_crate_id: StableCrateId,
     ) -> Result<TyCtxtFeed<'tcx, CrateNum>, CrateNum> {
-        if let Some(&existing) = self.untracked().stable_crate_ids.read().get(&stable_crate_id) {
+        let mut lock = self.untracked().stable_crate_ids.write();
+        if let Some(&existing) = lock.get(&stable_crate_id) {
             return Err(existing);
         }
-
-        let num = CrateNum::new(self.untracked().stable_crate_ids.read().len());
-        self.untracked().stable_crate_ids.write().insert(stable_crate_id, num);
+        let num = CrateNum::new(lock.len());
+        lock.insert(stable_crate_id, num);
         Ok(TyCtxtFeed { key: num, tcx: self })
     }
 
@@ -2160,7 +2060,10 @@ impl<'tcx> TyCtxt<'tcx> {
         assert!(sig.safety().is_safe());
         Ty::new_fn_ptr(
             self,
-            sig.map_bound(|sig| ty::FnSig { fn_sig_kind: sig.fn_sig_kind.set_safe(false), ..sig }),
+            sig.map_bound(|sig| ty::FnSig {
+                fn_sig_kind: sig.fn_sig_kind.set_safety(hir::Safety::Unsafe),
+                ..sig
+            }),
         )
     }
 
@@ -2169,7 +2072,10 @@ impl<'tcx> TyCtxt<'tcx> {
     /// unsafe.
     pub fn safe_to_unsafe_sig(self, sig: PolyFnSig<'tcx>) -> PolyFnSig<'tcx> {
         assert!(sig.safety().is_safe());
-        sig.map_bound(|sig| ty::FnSig { fn_sig_kind: sig.fn_sig_kind.set_safe(false), ..sig })
+        sig.map_bound(|sig| ty::FnSig {
+            fn_sig_kind: sig.fn_sig_kind.set_safety(hir::Safety::Unsafe),
+            ..sig
+        })
     }
 
     /// Given the def_id of a Trait `trait_def_id` and the name of an associated item `assoc_name`
@@ -2214,19 +2120,14 @@ impl<'tcx> TyCtxt<'tcx> {
             self.mk_fn_sig(
                 params,
                 s.output(),
-                s.fn_sig_kind.set_safe(safety.is_safe()).set_abi(ExternAbi::Rust),
+                s.fn_sig_kind.set_safety(safety).set_abi(ExternAbi::Rust),
             )
         })
     }
 
     #[inline]
     pub fn mk_predicate(self, binder: Binder<'tcx, PredicateKind<'tcx>>) -> Predicate<'tcx> {
-        self.interners.intern_predicate(
-            binder,
-            self.sess,
-            // This is only used to create a stable hashing context.
-            &self.untracked,
-        )
+        self.interners.intern_predicate(binder)
     }
 
     #[inline]
@@ -2347,24 +2248,14 @@ impl<'tcx> TyCtxt<'tcx> {
 
     #[inline]
     pub fn mk_ct_from_kind(self, kind: ty::ConstKind<'tcx>) -> Const<'tcx> {
-        self.interners.intern_const(
-            kind,
-            self.sess,
-            // This is only used to create a stable hashing context.
-            &self.untracked,
-        )
+        self.interners.intern_const(kind)
     }
 
     // Avoid this in favour of more specific `Ty::new_*` methods, where possible.
     #[allow(rustc::usage_of_ty_tykind)]
     #[inline]
     pub fn mk_ty_from_kind(self, st: TyKind<'tcx>) -> Ty<'tcx> {
-        self.interners.intern_ty(
-            st,
-            self.sess,
-            // This is only used to create a stable hashing context.
-            &self.untracked,
-        )
+        self.interners.intern_ty(st)
     }
 
     pub fn mk_param_from_def(self, param: &ty::GenericParamDef) -> GenericArg<'tcx> {
@@ -2416,10 +2307,10 @@ impl<'tcx> TyCtxt<'tcx> {
     /// to build a full `Place` it's just a convenient way to grab a projection and modify it in
     /// flight.
     pub fn mk_place_elem(self, place: Place<'tcx>, elem: PlaceElem<'tcx>) -> Place<'tcx> {
-        let mut projection = place.projection.to_vec();
-        projection.push(elem);
-
-        Place { local: place.local, projection: self.mk_place_elems(&projection) }
+        Place {
+            local: place.local,
+            projection: self.mk_place_elems_from_iter(place.projection.iter().chain([elem])),
+        }
     }
 
     pub fn mk_poly_existential_predicates(
@@ -2488,7 +2379,12 @@ impl<'tcx> TyCtxt<'tcx> {
     // IntoIterator` instead of `I: Iterator`, and it doesn't have a slice
     // variant, because of the need to combine `inputs` and `output`. This
     // explains the lack of `_from_iter` suffix.
-    pub fn mk_fn_sig<I, T>(self, inputs: I, output: I::Item, fn_sig_kind: FnSigKind) -> T::Output
+    pub fn mk_fn_sig<I, T>(
+        self,
+        inputs: I,
+        output: I::Item,
+        fn_sig_kind: FnSigKind<'tcx>,
+    ) -> T::Output
     where
         I: IntoIterator<Item = T>,
         T: CollectAndApply<Ty<'tcx>, ty::FnSig<'tcx>>,
@@ -2510,7 +2406,7 @@ impl<'tcx> TyCtxt<'tcx> {
         I: IntoIterator<Item = T>,
         T: CollectAndApply<Ty<'tcx>, ty::FnSig<'tcx>>,
     {
-        self.mk_fn_sig(inputs, output, FnSigKind::default().set_safe(safety.is_safe()))
+        self.mk_fn_sig(inputs, output, FnSigKind::default().set_safety(safety))
     }
 
     /// `mk_fn_sig`, but with a safe Rust ABI, and no C-variadic argument.
@@ -2519,7 +2415,7 @@ impl<'tcx> TyCtxt<'tcx> {
         I: IntoIterator<Item = T>,
         T: CollectAndApply<Ty<'tcx>, ty::FnSig<'tcx>>,
     {
-        self.mk_fn_sig(inputs, output, FnSigKind::default().set_safe(true))
+        self.mk_fn_sig(inputs, output, FnSigKind::default().set_safety(hir::Safety::Safe))
     }
 
     pub fn mk_poly_existential_predicates_from_iter<I, T>(self, iter: I) -> T::Output

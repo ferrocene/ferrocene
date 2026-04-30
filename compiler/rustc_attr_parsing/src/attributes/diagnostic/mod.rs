@@ -16,13 +16,14 @@ use rustc_session::lint::builtin::{
 use rustc_span::{Ident, InnerSpan, Span, Symbol, kw, sym};
 use thin_vec::{ThinVec, thin_vec};
 
-use crate::context::{AcceptContext, Stage};
+use crate::context::AcceptContext;
 use crate::errors::{
     FormatWarning, IgnoredDiagnosticOption, MalFormedDiagnosticAttributeLint,
     MissingOptionsForDiagnosticAttribute, NonMetaItemDiagnosticAttribute, WrappedParserError,
 };
 use crate::parser::{ArgParser, MetaItemListParser, MetaItemOrLitParser, MetaItemParser};
 
+pub(crate) mod check_cfg;
 pub(crate) mod do_not_recommend;
 pub(crate) mod on_const;
 pub(crate) mod on_move;
@@ -111,8 +112,8 @@ impl Mode {
     }
 }
 
-fn merge_directives<S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn merge_directives(
+    cx: &mut AcceptContext<'_, '_>,
     first: &mut Option<(Span, Directive)>,
     later: (Span, Directive),
 ) {
@@ -129,8 +130,8 @@ fn merge_directives<S: Stage>(
     }
 }
 
-fn merge<T, S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn merge<T>(
+    cx: &mut AcceptContext<'_, '_>,
     first: &mut Option<(Span, T)>,
     later: Option<(Span, T)>,
     option_name: Symbol,
@@ -139,7 +140,7 @@ fn merge<T, S: Stage>(
         (Some(_) | None, None) => {}
         (Some((first_span, _)), Some((later_span, _))) => {
             let first_span = *first_span;
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| {
                     IgnoredDiagnosticOption { first_span, later_span, option_name }
@@ -154,8 +155,8 @@ fn merge<T, S: Stage>(
     }
 }
 
-fn parse_list<'p, S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn parse_list<'p>(
+    cx: &mut AcceptContext<'_, '_>,
     args: &'p ArgParser,
     mode: Mode,
 ) -> Option<&'p MetaItemListParser> {
@@ -166,14 +167,14 @@ fn parse_list<'p, S: Stage>(
             // We're dealing with `#[diagnostic::attr()]`.
             // This can be because that is what the user typed, but that's also what we'd see
             // if the user used non-metaitem syntax. See `ArgParser::from_attr_args`.
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| NonMetaItemDiagnosticAttribute.into_diag(dcx, level),
                 list.span,
             );
         }
         ArgParser::NoArgs => {
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| {
                     MissingOptionsForDiagnosticAttribute {
@@ -186,7 +187,7 @@ fn parse_list<'p, S: Stage>(
             );
         }
         ArgParser::NameValue(_) => {
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| {
                     MalFormedDiagnosticAttributeLint {
@@ -203,8 +204,8 @@ fn parse_list<'p, S: Stage>(
     None
 }
 
-fn parse_directive_items<'p, S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn parse_directive_items<'p>(
+    cx: &mut AcceptContext<'_, '_>,
     mode: Mode,
     items: impl Iterator<Item = &'p MetaItemOrLitParser>,
     is_root: bool,
@@ -220,7 +221,7 @@ fn parse_directive_items<'p, S: Stage>(
         let span = item.span();
 
         macro malformed() {{
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| {
                     MalFormedDiagnosticAttributeLint {
@@ -236,9 +237,11 @@ fn parse_directive_items<'p, S: Stage>(
         }}
 
         macro or_malformed($($code:tt)*) {{
-            let Some(ret) = (||{
-                Some($($code)*)
-            })() else {
+            let Some(ret) = (
+                try {
+                    $($code)*
+                }
+            ) else {
                 malformed!()
             };
             ret
@@ -246,7 +249,7 @@ fn parse_directive_items<'p, S: Stage>(
 
         macro duplicate($name: ident, $($first_span:tt)*) {{
             let first_span = $($first_span)*;
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| IgnoredDiagnosticOption {
                     first_span,
@@ -267,7 +270,7 @@ fn parse_directive_items<'p, S: Stage>(
         // But we don't assert its presence yet because we don't want to mention it
         // if someone does something like `#[diagnostic::on_unimplemented(doesnt_exist)]`.
         // That happens in the big `match` below.
-        let value: Option<Ident> = match item.args().name_value() {
+        let value: Option<Ident> = match item.args().as_name_value() {
             Some(nv) => Some(or_malformed!(nv.value_as_ident()?)),
             None => None,
         };
@@ -282,7 +285,7 @@ fn parse_directive_items<'p, S: Stage>(
                         | FormatWarning::PositionalArgument { span }
                         | FormatWarning::IndexedArgument { span }
                         | FormatWarning::DisallowedPlaceholder { span, .. }) = warning;
-                        cx.emit_dyn_lint(
+                        cx.emit_lint(
                             MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
                             move |dcx, level| warning.into_diag(dcx, level),
                             span,
@@ -292,7 +295,7 @@ fn parse_directive_items<'p, S: Stage>(
                     f
                 }
                 Err(e) => {
-                    cx.emit_dyn_lint(
+                    cx.emit_lint(
                         MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
                         move |dcx, level| {
                             WrappedParserError {
@@ -344,7 +347,7 @@ fn parse_directive_items<'p, S: Stage>(
             }
             (Mode::RustcOnUnimplemented, sym::on) => {
                 if is_root {
-                    let items = or_malformed!(item.args().list()?);
+                    let items = or_malformed!(item.args().as_list()?);
                     let mut iter = items.mixed();
                     let condition: &MetaItemOrLitParser = match iter.next() {
                         Some(c) => c,
@@ -554,7 +557,7 @@ fn parse_predicate(input: &MetaItemOrLitParser) -> Result<Predicate, InvalidOnCl
             sym::any => Ok(Predicate::Any(parse_predicate_sequence(mis)?)),
             sym::all => Ok(Predicate::All(parse_predicate_sequence(mis)?)),
             sym::not => {
-                if let Some(single) = mis.single() {
+                if let Some(single) = mis.as_single() {
                     Ok(Predicate::Not(Box::new(parse_predicate(single)?)))
                 } else {
                     Err(InvalidOnClause::ExpectedOnePredInNot { span: mis.span })

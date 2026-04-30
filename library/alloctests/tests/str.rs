@@ -164,7 +164,7 @@ fn test_join_for_different_lengths_with_long_separator() {
 }
 
 #[test]
-fn test_join_issue_80335() {
+fn test_join_inconsistent_borrow_shrink() {
     use core::borrow::Borrow;
     use core::cell::Cell;
 
@@ -191,7 +191,26 @@ fn test_join_issue_80335() {
     }
 
     let arr: [WeirdBorrow; 3] = Default::default();
-    test_join!("0-0-0", arr, "-");
+    test_join!("123456-0-0", arr, "-");
+}
+
+#[test]
+#[should_panic(expected = "mid > len")]
+fn test_join_inconsistent_borrow_grow() {
+    use std::borrow::Borrow;
+    use std::cell::Cell;
+
+    struct E(Cell<u32>);
+
+    impl Borrow<str> for E {
+        fn borrow(&self) -> &str {
+            let count = self.0.get();
+            self.0.set(count + 1);
+            if count == 0 { "" } else { "longer string" }
+        }
+    }
+
+    let _s = [E(Cell::new(0)), E(Cell::new(0))].join("");
 }
 
 #[test]

@@ -270,8 +270,6 @@ enum ResolutionError<'ra> {
     IdentifierBoundMoreThanOnceInSamePattern(Ident),
     /// Error E0426: use of undeclared label.
     UndeclaredLabel { name: Symbol, suggestion: Option<LabelSuggestion> },
-    /// Error E0429: `self` imports are only allowed within a `{ }` list.
-    SelfImportsOnlyAllowedWithin { root: bool, span_with_rename: Span },
     /// Error E0433: failed to resolve.
     FailedToResolve {
         segment: Symbol,
@@ -931,7 +929,13 @@ struct DeclData<'ra> {
     warn_ambiguity: CmCell<bool>,
     expansion: LocalExpnId,
     span: Span,
-    vis: CmCell<Visibility<DefId>>,
+    initial_vis: Visibility<DefId>,
+    /// If the declaration refers to an ambiguous glob set, then this is the most visible
+    /// declaration from the set, if its visibility is different from `initial_vis`.
+    ambiguity_vis_max: CmCell<Option<Decl<'ra>>>,
+    /// If the declaration refers to an ambiguous glob set, then this is the least visible
+    /// declaration from the set, if its visibility is different from `initial_vis`.
+    ambiguity_vis_min: CmCell<Option<Decl<'ra>>>,
     parent_module: Option<Module<'ra>>,
 }
 
@@ -1051,7 +1055,13 @@ struct AmbiguityError<'ra> {
 
 impl<'ra> DeclData<'ra> {
     fn vis(&self) -> Visibility<DefId> {
-        self.vis.get()
+        // Select the maximum visibility if there are multiple ambiguous glob imports.
+        self.ambiguity_vis_max.get().map(|d| d.vis()).unwrap_or_else(|| self.initial_vis)
+    }
+
+    fn min_vis(&self) -> Visibility<DefId> {
+        // Select the minimum visibility if there are multiple ambiguous glob imports.
+        self.ambiguity_vis_min.get().map(|d| d.vis()).unwrap_or_else(|| self.initial_vis)
     }
 
     fn res(&self) -> Res {
@@ -1507,7 +1517,9 @@ impl<'ra> ResolverArenas<'ra> {
             kind: DeclKind::Def(res),
             ambiguity: CmCell::new(None),
             warn_ambiguity: CmCell::new(false),
-            vis: CmCell::new(vis),
+            initial_vis: vis,
+            ambiguity_vis_max: CmCell::new(None),
+            ambiguity_vis_min: CmCell::new(None),
             span,
             expansion,
             parent_module,
@@ -1908,6 +1920,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 Some(StrippedCfgItem { parent_scope, ident: item.ident, cfg: item.cfg })
             })
             .collect();
+        let disambiguators = self
+            .disambiguators
+            .into_items()
+            .map(|(def_id, disamb)| (def_id, Steal::new(disamb)))
+            .collect();
 
         let global_ctxt = ResolverGlobalCtxt {
             expn_that_defined,
@@ -1939,7 +1956,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             lifetime_elision_allowed: self.lifetime_elision_allowed,
             lint_buffer: Steal::new(self.lint_buffer),
             delegation_infos: self.delegation_infos,
-            disambiguators: Steal::new(self.disambiguators),
+            disambiguators,
         };
         ResolverOutputs { global_ctxt, ast_lowering }
     }

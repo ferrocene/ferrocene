@@ -190,7 +190,7 @@ fn visit_implementation_of_const_param_ty(checker: &Checker<'_>) -> Result<(), E
                 let struct_vis = tcx.visibility(adt.did());
                 for variant in adt.variants() {
                     for field in &variant.fields {
-                        if !field.vis.is_at_least(struct_vis, tcx) {
+                        if struct_vis.greater_than(field.vis, tcx) {
                             let span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;
                             return Err(tcx
                                 .dcx()
@@ -220,6 +220,12 @@ fn visit_implementation_of_const_param_ty(checker: &Checker<'_>) -> Result<(), E
         Err(ConstParamTyImplementationError::NotAnAdtOrBuiltinAllowed) => {
             let span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;
             Err(tcx.dcx().emit_err(errors::ConstParamTyImplOnNonAdt { span }))
+        }
+        Err(ConstParamTyImplementationError::NonExhaustive(attr_span)) => {
+            let defn_span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;
+            Err(tcx
+                .dcx()
+                .emit_err(errors::ConstParamTyImplOnNonExhaustive { defn_span, attr_span }))
         }
         Err(ConstParamTyImplementationError::InvalidInnerTyOfBuiltinTy(infringing_tys)) => {
             let span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;

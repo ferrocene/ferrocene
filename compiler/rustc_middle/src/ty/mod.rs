@@ -11,6 +11,7 @@
 
 #![allow(rustc::usage_of_ty_tykind)]
 
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -227,7 +228,7 @@ pub struct ResolverAstLowering<'tcx> {
     // Information about delegations which is used when handling recursive delegations
     pub delegation_infos: LocalDefIdMap<DelegationInfo>,
 
-    pub disambiguators: Steal<LocalDefIdMap<PerParentDisambiguatorState>>,
+    pub disambiguators: LocalDefIdMap<Steal<PerParentDisambiguatorState>>,
 }
 
 #[derive(Debug)]
@@ -337,18 +338,39 @@ impl TyCtxt<'_> {
         self.parent(id.into().to_def_id()).expect_local()
     }
 
-    pub fn is_descendant_of(self, mut descendant: DefId, ancestor: DefId) -> bool {
-        if descendant.krate != ancestor.krate {
-            return false;
+    /// Compare def-ids based on their position in def-id tree, ancestor def-ids are considered
+    /// larger than descendant def-ids, and two different def-ids are considered unordered if
+    /// neither of them is an ancestor of the other.
+    fn def_id_partial_cmp(self, lhs: DefId, rhs: DefId) -> Option<Ordering> {
+        // Def-ids from different crates are always unordered.
+        if lhs.krate != rhs.krate {
+            return None;
         }
 
-        while descendant != ancestor {
-            match self.opt_parent(descendant) {
-                Some(parent) => descendant = parent,
-                None => return false,
+        // Def-ids of parent nodes are always created before def-ids of child nodes
+        // and have a smaller index, so we only need to search in one direction,
+        // either from lhs to rhs, or vice versa.
+        let search = |mut start: DefId, finish: DefId, ord| {
+            while start.index != finish.index {
+                match self.opt_parent(start) {
+                    Some(parent) => start.index = parent.index,
+                    None => return None,
+                }
             }
+            Some(ord)
+        };
+        match lhs.index.cmp(&rhs.index) {
+            Ordering::Equal => Some(Ordering::Equal),
+            Ordering::Less => search(rhs, lhs, Ordering::Greater),
+            Ordering::Greater => search(lhs, rhs, Ordering::Less),
         }
-        true
+    }
+
+    pub fn is_descendant_of(self, descendant: DefId, ancestor: DefId) -> bool {
+        matches!(
+            self.def_id_partial_cmp(descendant, ancestor),
+            Some(Ordering::Less | Ordering::Equal)
+        )
     }
 }
 
@@ -379,18 +401,38 @@ impl<Id: Into<DefId>> Visibility<Id> {
         }
     }
 
-    /// Returns `true` if this visibility is at least as accessible as the given visibility
-    pub fn is_at_least(self, vis: Visibility<impl Into<DefId>>, tcx: TyCtxt<'_>) -> bool {
-        match vis {
-            Visibility::Public => self.is_public(),
-            Visibility::Restricted(id) => self.is_accessible_from(id, tcx),
+    pub fn partial_cmp(
+        self,
+        vis: Visibility<impl Into<DefId>>,
+        tcx: TyCtxt<'_>,
+    ) -> Option<Ordering> {
+        match (self, vis) {
+            (Visibility::Public, Visibility::Public) => Some(Ordering::Equal),
+            (Visibility::Public, Visibility::Restricted(_)) => Some(Ordering::Greater),
+            (Visibility::Restricted(_), Visibility::Public) => Some(Ordering::Less),
+            (Visibility::Restricted(lhs_id), Visibility::Restricted(rhs_id)) => {
+                let (lhs_id, rhs_id) = (lhs_id.into(), rhs_id.into());
+                tcx.def_id_partial_cmp(lhs_id, rhs_id)
+            }
         }
     }
 }
 
-impl<Id: Into<DefId> + Copy> Visibility<Id> {
-    pub fn min(self, vis: Visibility<Id>, tcx: TyCtxt<'_>) -> Visibility<Id> {
-        if self.is_at_least(vis, tcx) { vis } else { self }
+impl<Id: Into<DefId> + Debug + Copy> Visibility<Id> {
+    /// Returns `true` if this visibility is strictly larger than the given visibility.
+    #[track_caller]
+    pub fn greater_than(
+        self,
+        vis: Visibility<impl Into<DefId> + Debug + Copy>,
+        tcx: TyCtxt<'_>,
+    ) -> bool {
+        match self.partial_cmp(vis, tcx) {
+            Some(ord) => ord.is_gt(),
+            None => {
+                tcx.dcx().delayed_bug(format!("unordered visibilities: {self:?} and {vis:?}"));
+                false
+            }
+        }
     }
 }
 

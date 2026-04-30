@@ -5,7 +5,8 @@ use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::SolverTraitLangItem;
 use rustc_type_ir::solve::{
-    AliasBoundKind, CandidatePreferenceMode, CanonicalResponse, SizedTraitKind,
+    AliasBoundKind, CandidatePreferenceMode, CanonicalResponse, MaybeInfo, OpaqueTypesJank,
+    SizedTraitKind,
 };
 use rustc_type_ir::{
     self as ty, FieldInfo, Interner, Movability, PredicatePolarity, TraitPredicate, TraitRef,
@@ -21,7 +22,8 @@ use crate::solve::assembly::{
 use crate::solve::inspect::ProbeKind;
 use crate::solve::{
     BuiltinImplSource, CandidateSource, Certainty, EvalCtxt, Goal, GoalSource, MaybeCause,
-    MergeCandidateInfo, NoSolution, ParamEnvSource, QueryResult, has_only_region_constraints,
+    MergeCandidateInfo, NoSolution, ParamEnvSource, QueryResult, StalledOnCoroutines,
+    has_only_region_constraints,
 };
 
 impl<D, I> assembly::GoalKind<D> for TraitPredicate<I>
@@ -372,7 +374,7 @@ where
                 goal_kind,
             )?
         else {
-            return ecx.forced_ambiguity(MaybeCause::Ambiguity);
+            return ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS);
         };
         let (inputs, output) = ecx.instantiate_binder_with_infer(tupled_inputs_and_output);
 
@@ -671,7 +673,7 @@ where
         // Match the old solver by treating unresolved inference variables as
         // ambiguous until `rustc_transmute` can compute their layout.
         if goal.has_non_region_infer() {
-            return ecx.forced_ambiguity(MaybeCause::Ambiguity);
+            return ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS);
         }
 
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
@@ -823,7 +825,7 @@ where
                 (ty::Infer(ty::TyVar(..)), ..) => panic!("unexpected infer {a_ty:?} {b_ty:?}"),
 
                 (_, ty::Infer(ty::TyVar(..))) => {
-                    result_to_single(ecx.forced_ambiguity(MaybeCause::Ambiguity))
+                    result_to_single(ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS))
                 }
 
                 // Trait upcasting, or `dyn Trait + Auto + 'a` -> `dyn Trait + 'b`.
@@ -1248,7 +1250,7 @@ where
             // we probably don't want to treat an `impl !AutoTrait for i32` as
             // disqualifying the built-in auto impl for `i64: AutoTrait` either.
             ty::Infer(ty::IntVar(_) | ty::FloatVar(_)) => {
-                Some(self.forced_ambiguity(MaybeCause::Ambiguity))
+                Some(self.forced_ambiguity(MaybeInfo::AMBIGUOUS))
             }
 
             // Backward compatibility for default auto traits.
@@ -1564,7 +1566,11 @@ where
                 } => {
                     if def_id.as_local().is_some_and(|def_id| stalled_generators.contains(&def_id))
                     {
-                        return Some(self.forced_ambiguity(MaybeCause::Ambiguity));
+                        return Some(self.forced_ambiguity(MaybeInfo {
+                            cause: MaybeCause::Ambiguity,
+                            opaque_types_jank: OpaqueTypesJank::AllGood,
+                            stalled_on_coroutines: StalledOnCoroutines::Yes,
+                        }));
                     }
                 }
                 TypingMode::Coherence

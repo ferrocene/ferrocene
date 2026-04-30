@@ -162,6 +162,7 @@
 #![feature(no_core)]
 #![feature(optimize_attribute)]
 #![feature(pattern_types)]
+#![feature(pin_macro_internals)]
 #![feature(prelude_import)]
 #![feature(repr_simd)]
 #![feature(rustc_attrs)]
@@ -213,12 +214,18 @@ use prelude::rust_2024::*;
 #[macro_use]
 mod macros;
 
+<<<<<<< ferrocene/main
 /// Ferrocene addition: Hidden module to test crate-internal functionality
 #[doc(hidden)]
 #[unstable(feature = "ferrocene_test", issue = "none")]
 pub mod ferrocene_test;
 
 #[stable(feature = "assert_matches", since = "1.95.0")]
+||||||| 597d9e43be8
+#[stable(feature = "assert_matches", since = "1.95.0")]
+=======
+#[stable(feature = "assert_matches", since = "1.96.0")]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]

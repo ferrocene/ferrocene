@@ -6,7 +6,6 @@ mod opaque_types;
 use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::{SolverAdtLangItem, SolverLangItem, SolverTraitLangItem};
-use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::{
     self as ty, FieldInfo, Interner, NormalizesTo, PredicateKind, Unnormalized, Upcast as _,
 };
@@ -17,8 +16,8 @@ use crate::solve::assembly::structural_traits::{self, AsyncCallableRelevantTypes
 use crate::solve::assembly::{self, Candidate};
 use crate::solve::inspect::ProbeKind;
 use crate::solve::{
-    BuiltinImplSource, CandidateSource, Certainty, EvalCtxt, Goal, GoalSource, MaybeCause,
-    NoSolution, QueryResult,
+    BuiltinImplSource, CandidateSource, Certainty, EvalCtxt, Goal, GoalSource, MaybeInfo,
+    NoSolution, QueryResult, SizedTraitKind,
 };
 
 impl<D, I> EvalCtxt<'_, D>
@@ -460,7 +459,7 @@ where
                 goal_kind,
             )?
         else {
-            return ecx.forced_ambiguity(MaybeCause::Ambiguity);
+            return ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS);
         };
         let (inputs, output) = ecx.instantiate_binder_with_infer(tupled_inputs_and_output);
 
@@ -588,7 +587,7 @@ where
 
         // Bail if the upvars haven't been constrained.
         if tupled_upvars_ty.expect_ty().is_ty_var() {
-            return ecx.forced_ambiguity(MaybeCause::Ambiguity);
+            return ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS);
         }
 
         let Some(closure_kind) = closure_fn_kind_ty.expect_ty().to_opt_closure_kind() else {

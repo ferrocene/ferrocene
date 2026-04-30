@@ -9,7 +9,7 @@ use derive_where::derive_where;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::SolverTraitLangItem;
 use rustc_type_ir::search_graph::CandidateHeadUsages;
-use rustc_type_ir::solve::{AliasBoundKind, SizedTraitKind};
+use rustc_type_ir::solve::{AliasBoundKind, MaybeInfo, SizedTraitKind, StalledOnCoroutines};
 use rustc_type_ir::{
     self as ty, AliasTy, Interner, TypeFlags, TypeFoldable, TypeFolder, TypeSuperFoldable,
     TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode, Unnormalized,
@@ -501,7 +501,7 @@ where
 
     pub(super) fn forced_ambiguity(
         &mut self,
-        cause: MaybeCause,
+        maybe: MaybeInfo,
     ) -> Result<Candidate<I>, NoSolution> {
         // This may fail if `try_evaluate_added_goals` overflows because it
         // fails to reach a fixpoint but ends up getting an error after
@@ -512,7 +512,7 @@ where
         // created a minimization for an ICE in typenum, but that one no
         // longer fails here. cc trait-system-refactor-initiative#105.
         let source = CandidateSource::BuiltinImpl(BuiltinImplSource::Misc);
-        let certainty = Certainty::Maybe { cause, opaque_types_jank: OpaqueTypesJank::AllGood };
+        let certainty = Certainty::Maybe(maybe);
         self.probe_trait_candidate(source)
             .enter(|this| this.evaluate_added_goals_and_make_canonical_response(certainty))
     }
@@ -1031,7 +1031,7 @@ where
         };
 
         if opaque_types.is_empty() {
-            candidates.extend(self.forced_ambiguity(MaybeCause::Ambiguity));
+            candidates.extend(self.forced_ambiguity(MaybeInfo::AMBIGUOUS));
             return;
         }
 
@@ -1122,10 +1122,11 @@ where
 
         if candidates.is_empty() {
             let source = CandidateSource::BuiltinImpl(BuiltinImplSource::Misc);
-            let certainty = Certainty::Maybe {
+            let certainty = Certainty::Maybe(MaybeInfo {
                 cause: MaybeCause::Ambiguity,
                 opaque_types_jank: OpaqueTypesJank::ErrorIfRigidSelfTy,
-            };
+                stalled_on_coroutines: StalledOnCoroutines::No,
+            });
             candidates
                 .extend(self.probe_trait_candidate(source).enter(|this| {
                     this.evaluate_added_goals_and_make_canonical_response(certainty)
@@ -1178,7 +1179,7 @@ where
             //
             // We use `forced_ambiguity` here over `make_ambiguous_response_no_constraints`
             // because the former will also record a built-in candidate in the inspector.
-            return self.forced_ambiguity(MaybeCause::Ambiguity).map(|cand| cand.result);
+            return self.forced_ambiguity(MaybeInfo::AMBIGUOUS).map(|cand| cand.result);
         };
 
         match proven_via {
@@ -1326,13 +1327,14 @@ where
             {
                 self.recursion_depth += 1;
                 if self.recursion_depth > self.ecx.cx().recursion_limit() {
-                    return ControlFlow::Break(Ok(Certainty::Maybe {
+                    return ControlFlow::Break(Ok(Certainty::Maybe(MaybeInfo {
                         cause: MaybeCause::Overflow {
                             suggest_increasing_limit: true,
                             keep_constraints: false,
                         },
                         opaque_types_jank: OpaqueTypesJank::AllGood,
-                    }));
+                        stalled_on_coroutines: StalledOnCoroutines::No,
+                    })));
                 }
                 let result = ty.super_visit_with(self);
                 self.recursion_depth -= 1;

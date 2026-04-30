@@ -1,22 +1,17 @@
-use std::mem;
-use std::sync::Arc;
-
 use rustc_abi::ExternAbi;
 use rustc_ast::visit::AssocCtxt;
 use rustc_ast::*;
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_data_structures::steal::Steal;
 use rustc_errors::{E0570, ErrorGuaranteed, struct_span_code_err};
 use rustc_hir::attrs::{AttributeKind, EiiImplResolution};
 use rustc_hir::def::{DefKind, PerNS, Res};
-use rustc_hir::def_id::{CRATE_DEF_ID, LocalDefId, LocalDefIdMap};
-use rustc_hir::definitions::PerParentDisambiguatorState;
+use rustc_hir::def_id::{CRATE_DEF_ID, LocalDefId};
 use rustc_hir::{
     self as hir, HirId, ImplItemImplKind, LifetimeSource, PredicateOrigin, Target, find_attr,
 };
 use rustc_index::{IndexSlice, IndexVec};
 use rustc_middle::span_bug;
-use rustc_middle::ty::TyCtxt;
+use rustc_middle::ty::{ResolverAstLowering, TyCtxt};
 use rustc_span::def_id::DefId;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::{DUMMY_SP, DesugaringKind, Ident, Span, Symbol, kw, sym};
@@ -51,21 +46,11 @@ impl<'hir> Owners<'_, 'hir> {
     }
 }
 
-/// Default disambiguators are used during default lowering, when we lower
-/// AST owners in a loop we can use the whole map, in contrast delayed lowering
-/// lowers each AST owner separately, so we use readonly disambiguators map
-/// with `Steal`s to get disambiguators.
-pub(super) enum Disambiguators {
-    Default(LocalDefIdMap<PerParentDisambiguatorState>),
-    Delayed(Arc<LocalDefIdMap<Steal<PerParentDisambiguatorState>>>),
-}
-
-pub(super) struct ItemLowerer<'a, 'hir, R> {
+pub(super) struct ItemLowerer<'a, 'hir> {
     pub(super) tcx: TyCtxt<'hir>,
-    pub(super) resolver: &'a mut R,
+    pub(super) resolver: &'a ResolverAstLowering<'hir>,
     pub(super) ast_index: &'a IndexSlice<LocalDefId, AstOwner<'a>>,
     pub(super) owners: Owners<'a, 'hir>,
-    pub(super) disambiguators: &'a mut Disambiguators,
 }
 
 /// When we have a ty alias we *may* have two where clauses. To give the best diagnostics, we set the span
@@ -87,13 +72,13 @@ fn add_ty_alias_where_clause(
         if before.0 || !after.0 { before } else { after };
 }
 
-impl<'hir, R: ResolverAstLoweringExt<'hir>> ItemLowerer<'_, 'hir, R> {
+impl<'hir> ItemLowerer<'_, 'hir> {
     fn with_lctx(
         &mut self,
         owner: NodeId,
-        f: impl FnOnce(&mut LoweringContext<'_, 'hir, R>) -> hir::OwnerNode<'hir>,
+        f: impl for<'a> FnOnce(&mut LoweringContext<'a, 'hir>) -> hir::OwnerNode<'hir>,
     ) {
-        let mut lctx = LoweringContext::new(self.tcx, self.resolver, self.disambiguators);
+        let mut lctx = LoweringContext::new(self.tcx, self.resolver);
         lctx.with_hir_id_owner(owner, |lctx| f(lctx));
 
         for (def_id, info) in lctx.children {
@@ -135,7 +120,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> ItemLowerer<'_, 'hir, R> {
     }
 }
 
-impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
+impl<'hir> LoweringContext<'_, 'hir> {
     pub(super) fn lower_mod(
         &mut self,
         items: &[Box<Item>],
@@ -391,7 +376,6 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                         body.as_deref(),
                         attrs,
                         contract.as_deref(),
-                        header.constness,
                     );
 
                     let itctx = ImplTraitContext::Universal;
@@ -585,16 +569,16 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                         (safety, items, bounds)
                     },
                 );
-                hir::ItemKind::Trait(
+                hir::ItemKind::Trait {
                     impl_restriction,
                     constness,
-                    *is_auto,
+                    is_auto: *is_auto,
                     safety,
                     ident,
                     generics,
                     bounds,
                     items,
-                )
+                }
             }
             ItemKind::TraitAlias(box TraitAlias { constness, ident, generics, bounds }) => {
                 let constness = self.lower_constness(*constness);
@@ -648,7 +632,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
     }
 
     fn lower_path_simple_eii(&mut self, id: NodeId, path: &Path) -> Option<DefId> {
-        let res = self.resolver.get_partial_res(id)?;
+        let res = self.get_partial_res(id)?;
         let Some(did) = res.expect_full_res().opt_def_id() else {
             self.dcx().span_delayed_bug(path.span, "should have errored in resolve");
             return None;
@@ -1081,7 +1065,6 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                     Some(body),
                     attrs,
                     contract.as_deref(),
-                    sig.header.constness,
                 );
                 let (generics, sig) = self.lower_method_sig(
                     generics,
@@ -1275,7 +1258,6 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                     body.as_deref(),
                     attrs,
                     contract.as_deref(),
-                    sig.header.constness,
                 );
                 let (generics, sig) = self.lower_method_sig(
                     generics,
@@ -1349,7 +1331,6 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
                 ImplItemImplKind::Trait {
                     defaultness,
                     trait_item_def_id: self
-                        .resolver
                         .get_partial_res(i.id)
                         .and_then(|r| r.expect_full_res().opt_def_id())
                         .ok_or_else(|| {
@@ -1405,13 +1386,11 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         f: impl FnOnce(&mut Self) -> (&'hir [hir::Param<'hir>], hir::Expr<'hir>),
     ) -> hir::BodyId {
         let prev_coroutine_kind = self.coroutine_kind.take();
-        let prev_is_in_const_context = mem::take(&mut self.is_in_const_context);
         let task_context = self.task_context.take();
         let (parameters, result) = f(self);
         let body_id = self.record_body(parameters, result);
         self.task_context = task_context;
         self.coroutine_kind = prev_coroutine_kind;
-        self.is_in_const_context = prev_is_in_const_context;
         body_id
     }
 
@@ -1430,13 +1409,9 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         &mut self,
         decl: &FnDecl,
         contract: Option<&FnContract>,
-        constness: Const,
         body: impl FnOnce(&mut Self) -> hir::Expr<'hir>,
     ) -> hir::BodyId {
         self.lower_body(|this| {
-            if let Const::Yes(_) = constness {
-                this.is_in_const_context = true;
-            }
             let params =
                 this.arena.alloc_from_iter(decl.inputs.iter().map(|x| this.lower_param(x)));
 
@@ -1454,9 +1429,8 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         decl: &FnDecl,
         body: &Block,
         contract: Option<&FnContract>,
-        constness: Const,
     ) -> hir::BodyId {
-        self.lower_fn_body(decl, contract, constness, |this| this.lower_block_expr(body))
+        self.lower_fn_body(decl, contract, |this| this.lower_block_expr(body))
     }
 
     pub(super) fn lower_const_body(&mut self, span: Span, expr: Option<&Expr>) -> hir::BodyId {
@@ -1464,10 +1438,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
             (
                 &[],
                 match expr {
-                    Some(expr) => {
-                        this.is_in_const_context = true;
-                        this.lower_expr_mut(expr)
-                    }
+                    Some(expr) => this.lower_expr_mut(expr),
                     None => this.expr_err(span, this.dcx().span_delayed_bug(span, "no block")),
                 },
             )
@@ -1486,13 +1457,12 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         body: Option<&Block>,
         attrs: &'hir [hir::Attribute],
         contract: Option<&FnContract>,
-        constness: Const,
     ) -> hir::BodyId {
         let Some(body) = body else {
             // Functions without a body are an error, except if this is an intrinsic. For those we
             // create a fake body so that the entire rest of the compiler doesn't have to deal with
             // this as a special case.
-            return self.lower_fn_body(decl, contract, constness, |this| {
+            return self.lower_fn_body(decl, contract, |this| {
                 if find_attr!(attrs, RustcIntrinsic) || this.tcx.is_sdylib_interface_build() {
                     let span = this.lower_span(span);
                     let empty_block = hir::Block {
@@ -1517,7 +1487,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         };
         let Some(coroutine_kind) = coroutine_kind else {
             // Typical case: not a coroutine.
-            return self.lower_fn_body_block(decl, body, contract, constness);
+            return self.lower_fn_body_block(decl, body, contract);
         };
         // FIXME(contracts): Support contracts on async fn.
         self.lower_body(|this| {
@@ -1545,7 +1515,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
     pub(crate) fn lower_coroutine_body_with_moved_arguments(
         &mut self,
         decl: &FnDecl,
-        lower_body: impl FnOnce(&mut LoweringContext<'_, 'hir, R>) -> hir::Expr<'hir>,
+        lower_body: impl FnOnce(&mut LoweringContext<'_, 'hir>) -> hir::Expr<'hir>,
         fn_decl_span: Span,
         body_span: Span,
         coroutine_kind: CoroutineKind,
@@ -1682,7 +1652,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
             parameters.push(new_parameter);
         }
 
-        let mkbody = |this: &mut LoweringContext<'_, 'hir, R>| {
+        let mkbody = |this: &mut LoweringContext<'_, 'hir>| {
             // Create a block from the user's function body:
             let user_body = lower_body(this);
 
@@ -1867,7 +1837,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         let kind = match &r.kind {
             RestrictionKind::Unrestricted => hir::RestrictionKind::Unrestricted,
             RestrictionKind::Restricted { path, id, shorthand: _ } => {
-                let res = self.resolver.get_partial_res(*id);
+                let res = self.get_partial_res(*id);
                 if let Some(did) = res.and_then(|res| res.expect_full_res().opt_def_id()) {
                     hir::RestrictionKind::Restricted(self.arena.alloc(hir::Path {
                         res: did,
@@ -1933,7 +1903,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
 
         // Introduce extra lifetimes if late resolution tells us to.
         let extra_lifetimes = self.resolver.extra_lifetime_params(parent_node_id);
-        params.extend(extra_lifetimes.into_iter().filter_map(|(ident, node_id, res)| {
+        params.extend(extra_lifetimes.into_iter().filter_map(|&(ident, node_id, res)| {
             self.lifetime_res_to_generic_param(
                 ident,
                 node_id,
@@ -1975,7 +1945,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
             return;
         };
         let define_opaque = define_opaque.iter().filter_map(|(id, path)| {
-            let res = self.resolver.get_partial_res(*id);
+            let res = self.get_partial_res(*id);
             let Some(did) = res.and_then(|res| res.expect_full_res().opt_def_id()) else {
                 self.dcx().span_delayed_bug(path.span, "should have errored in resolve");
                 return None;

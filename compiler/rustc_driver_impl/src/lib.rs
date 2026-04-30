@@ -734,7 +734,6 @@ fn print_crate_info(
             }
             Cfg => {
                 let mut cfgs = sess
-                    .psess
                     .config
                     .iter()
                     .filter_map(|&(name, value)| {
@@ -763,7 +762,7 @@ fn print_crate_info(
 
                 // INSTABILITY: We are sorting the output below.
                 #[allow(rustc::potential_query_instability)]
-                for (name, expected_values) in &sess.psess.check_config.expecteds {
+                for (name, expected_values) in &sess.check_config.expecteds {
                     use crate::config::ExpectedValues;
                     match expected_values {
                         ExpectedValues::Any => {
@@ -791,9 +790,7 @@ fn print_crate_info(
                 }
 
                 check_cfgs.sort_unstable();
-                if !sess.psess.check_config.exhaustive_names
-                    && sess.psess.check_config.exhaustive_values
-                {
+                if !sess.check_config.exhaustive_names && sess.check_config.exhaustive_values {
                     println_info!("cfg(any())");
                 }
                 for check_cfg in check_cfgs {
@@ -803,6 +800,9 @@ fn print_crate_info(
             CallingConventions => {
                 let calling_conventions = rustc_abi::all_names();
                 println_info!("{}", calling_conventions.join("\n"));
+            }
+            BackendHasMnemonic => {
+                codegen_backend.print(req, &mut crate_info, sess);
             }
             BackendHasZstd => {
                 let has_zstd: bool = codegen_backend.has_zstd();

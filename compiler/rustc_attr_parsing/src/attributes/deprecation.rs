@@ -7,8 +7,8 @@ use crate::session_diagnostics::{
     DeprecatedItemSuggestion, InvalidSince, MissingNote, MissingSince,
 };
 
-fn get<S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn get(
+    cx: &mut AcceptContext<'_, '_>,
     name: Symbol,
     param_span: Span,
     arg: &ArgParser,
@@ -18,21 +18,17 @@ fn get<S: Stage>(
         cx.adcx().duplicate_key(param_span, name);
         return None;
     }
-    if let Some(v) = arg.name_value() {
-        if let Some(value_str) = v.value_as_ident() {
-            Some(value_str)
-        } else {
-            cx.adcx().expected_string_literal(v.value_span, Some(&v.value_as_lit()));
-            None
-        }
+    let v = cx.expect_name_value(arg, param_span, Some(name))?;
+    if let Some(value_str) = v.value_as_ident() {
+        Some(value_str)
     } else {
-        cx.adcx().expected_name_value(param_span, Some(name));
+        cx.adcx().expected_string_literal(v.value_span, Some(&v.value_as_lit()));
         None
     }
 }
 
 pub(crate) struct DeprecatedParser;
-impl<S: Stage> SingleAttributeParser<S> for DeprecatedParser {
+impl SingleAttributeParser for DeprecatedParser {
     const PATH: &[Symbol] = &[sym::deprecated];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowListWarnRest(&[
         Allow(Target::Fn),
@@ -66,7 +62,7 @@ impl<S: Stage> SingleAttributeParser<S> for DeprecatedParser {
         NameValueStr: "reason"
     );
 
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let features = cx.features();
 
         let mut since = None;

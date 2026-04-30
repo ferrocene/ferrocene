@@ -20,7 +20,7 @@ use rustc_middle::ty::{TyCtxt, VisitorResult, try_visit};
 use rustc_middle::{bug, ty};
 use rustc_next_trait_solver::canonical::instantiate_canonical_state;
 use rustc_next_trait_solver::resolve::eager_resolve_vars;
-use rustc_next_trait_solver::solve::{MaybeCause, SolverDelegateEvalExt as _, inspect};
+use rustc_next_trait_solver::solve::{MaybeCause, MaybeInfo, SolverDelegateEvalExt as _, inspect};
 use rustc_span::Span;
 use tracing::instrument;
 
@@ -332,7 +332,11 @@ impl<'a, 'tcx> InspectGoal<'a, 'tcx> {
                 inspect::ProbeStep::MakeCanonicalResponse { shallow_certainty: c } => {
                     assert_matches!(
                         shallow_certainty.replace(c),
-                        None | Some(Certainty::Maybe { cause: MaybeCause::Ambiguity, .. })
+                        None | Some(Certainty::Maybe(MaybeInfo {
+                            cause: MaybeCause::Ambiguity,
+                            opaque_types_jank: _,
+                            stalled_on_coroutines: _,
+                        }))
                     );
                 }
                 inspect::ProbeStep::NestedProbe(ref probe) => {

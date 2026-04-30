@@ -1,13 +1,12 @@
 use std::num::IntErrorKind;
 
-use rustc_ast::LitKind;
-use rustc_ast::attr::AttributeExt;
+use rustc_ast::{LitKind, ast};
 use rustc_feature::is_builtin_attr_name;
 use rustc_hir::RustcVersion;
 use rustc_hir::limit::Limit;
 use rustc_span::Symbol;
 
-use crate::context::{AcceptContext, Stage};
+use crate::context::AcceptContext;
 use crate::parser::{ArgParser, NameValueParser};
 use crate::session_diagnostics::LimitInvalid;
 
@@ -27,8 +26,8 @@ pub fn parse_version(s: Symbol) -> Option<RustcVersion> {
     Some(RustcVersion { major, minor, patch })
 }
 
-pub fn is_builtin_attr(attr: &impl AttributeExt) -> bool {
-    attr.is_doc_comment().is_some() || attr.name().is_some_and(|name| is_builtin_attr_name(name))
+pub fn is_builtin_attr(attr: &ast::Attribute) -> bool {
+    attr.is_doc_comment() || attr.name().is_some_and(|name| is_builtin_attr_name(name))
 }
 
 /// Parse a single integer.
@@ -37,11 +36,11 @@ pub fn is_builtin_attr(attr: &impl AttributeExt) -> bool {
 /// `#[link_ordinal]` and `#[rustc_layout_scalar_valid_range_start]`.
 /// `cx` is the context given to the attribute.
 /// `args` is the parser for the attribute arguments.
-pub(crate) fn parse_single_integer<S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+pub(crate) fn parse_single_integer(
+    cx: &mut AcceptContext<'_, '_>,
     args: &ArgParser,
 ) -> Option<u128> {
-    let single = cx.single_element_list(args, cx.attr_span)?;
+    let single = cx.expect_single_element_list(args, cx.attr_span)?;
     let Some(lit) = single.lit() else {
         cx.adcx().expected_integer_literal(single.span());
         return None;
@@ -53,7 +52,7 @@ pub(crate) fn parse_single_integer<S: Stage>(
     Some(num.0)
 }
 
-impl<S: Stage> AcceptContext<'_, '_, S> {
+impl AcceptContext<'_, '_> {
     pub(crate) fn parse_limit_int(&mut self, nv: &NameValueParser) -> Option<Limit> {
         let Some(limit) = nv.value_as_str() else {
             self.adcx().expected_string_literal(nv.value_span, Some(nv.value_as_lit()));

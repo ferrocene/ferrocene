@@ -257,7 +257,7 @@ where
 
 // This internal type isn't publicly exposed, because it is an implementation detail.
 // But it's a public field of FnSig (which has a public mirror type), so allow conversions.
-impl<'tcx> Stable<'tcx> for ty::FnSigKind {
+impl<'tcx> Stable<'tcx> for ty::FnSigKind<'tcx> {
     type T = (bool /*c_variadic*/, crate::mir::Safety, crate::ty::Abi);
     fn stable<'cx>(
         &self,
@@ -506,13 +506,14 @@ impl<'tcx> Stable<'tcx> for ty::Pattern<'tcx> {
     ) -> Self::T {
         match **self {
             ty::PatternKind::Range { start, end } => crate::ty::Pattern::Range {
-                // FIXME(SMIR): update data structures to not have an Option here anymore
-                start: Some(start.stable(tables, cx)),
-                end: Some(end.stable(tables, cx)),
+                start: start.stable(tables, cx),
+                end: end.stable(tables, cx),
                 include_end: true,
             },
-            ty::PatternKind::NotNull => todo!(),
-            ty::PatternKind::Or(_) => todo!(),
+            ty::PatternKind::NotNull => crate::ty::Pattern::NotNull,
+            ty::PatternKind::Or(pats) => {
+                crate::ty::Pattern::Or(pats.iter().map(|pat| pat.stable(tables, cx)).collect())
+            }
         }
     }
 }

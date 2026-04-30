@@ -14,14 +14,13 @@ use rustc_errors::{
     BufferedEarlyLint, ColorConfig, DecorateDiagCompat, Diag, DiagCtxt, DiagCtxtHandle,
     DiagMessage, EmissionGuarantee, Level, MultiSpan, StashKey,
 };
-use rustc_feature::{GateIssue, UnstableFeatures, find_feature_issue};
+use rustc_feature::{GateIssue, find_feature_issue};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::ExpnId;
 use rustc_span::source_map::{FilePathMapping, SourceMap};
 use rustc_span::{Span, Symbol, sym};
 
 use crate::Session;
-use crate::config::{Cfg, CheckCfg};
 use crate::errors::{
     CliFeatureDiagnosticHelp, FeatureDiagnosticForIssue, FeatureDiagnosticHelp,
     FeatureDiagnosticSuggestion, FeatureGateError, SuggestUpgradeCompiler,
@@ -182,7 +181,7 @@ pub fn add_feature_diagnostics_for_issue<G: EmissionGuarantee>(
     }
 
     // #23973: do not suggest `#![feature(...)]` if we are in beta/stable
-    if sess.psess.unstable_features.is_nightly_build() {
+    if sess.unstable_features.is_nightly_build() {
         if feature_from_cli {
             err.subdiagnostic(CliFeatureDiagnosticHelp { feature });
         } else if let Some(span) = inject_span {
@@ -226,7 +225,7 @@ pub fn feature_err_unstable_feature_bound(
     let mut err = sess.dcx().create_err(FeatureGateError { span, explain: explain.into() });
 
     // #23973: do not suggest `#![feature(...)]` if we are in beta/stable
-    if sess.psess.unstable_features.is_nightly_build() {
+    if sess.unstable_features.is_nightly_build() {
         err.subdiagnostic(FeatureDiagnosticHelp { feature });
 
         if feature == sym::rustc_attrs {
@@ -245,9 +244,6 @@ pub fn feature_err_unstable_feature_bound(
 /// Info about a parsing session.
 pub struct ParseSess {
     dcx: DiagCtxt,
-    pub unstable_features: UnstableFeatures,
-    pub config: Cfg,
-    pub check_config: CheckCfg,
     pub edition: Edition,
     /// Places where raw identifiers were used. This is used to avoid complaining about idents
     /// clashing with keywords in new editions.
@@ -264,11 +260,6 @@ pub struct ParseSess {
     pub ambiguous_block_expr_parse: Lock<FxIndexMap<Span, Span>>,
     pub gated_spans: GatedSpans,
     pub symbol_gallery: SymbolGallery,
-    /// Whether cfg(version) should treat the current release as incomplete
-    pub assume_incomplete_release: bool,
-    /// Spans passed to `proc_macro::quote_span`. Each span has a numerical
-    /// identifier represented by its position in the vector.
-    proc_macro_quoted_spans: AppendOnlyVec<Span>,
     /// Used to generate new `AttrId`s. Every `AttrId` is unique.
     pub attr_id_generator: AttrIdGenerator,
 }
@@ -288,9 +279,6 @@ impl ParseSess {
     pub fn with_dcx(dcx: DiagCtxt, source_map: Arc<SourceMap>) -> Self {
         Self {
             dcx,
-            unstable_features: UnstableFeatures::from_environment(None),
-            config: Cfg::default(),
-            check_config: CheckCfg::default(),
             edition: ExpnId::root().expn_data().edition,
             raw_identifier_spans: Default::default(),
             bad_unicode_identifiers: Lock::new(Default::default()),
@@ -299,8 +287,6 @@ impl ParseSess {
             ambiguous_block_expr_parse: Lock::new(Default::default()),
             gated_spans: GatedSpans::default(),
             symbol_gallery: SymbolGallery::default(),
-            assume_incomplete_release: false,
-            proc_macro_quoted_spans: Default::default(),
             attr_id_generator: AttrIdGenerator::new(),
         }
     }
@@ -344,7 +330,30 @@ impl ParseSess {
             lint,
             Some(span.into()),
             node_id,
-            DecorateDiagCompat::Dynamic(Box::new(|dcx, level, _| callback(dcx, level))),
+            DecorateDiagCompat(Box::new(|dcx, level, _| callback(dcx, level))),
+        )
+    }
+
+    pub fn dyn_buffer_lint_sess<
+        F: for<'a> FnOnce(DiagCtxtHandle<'a>, Level, &Session) -> Diag<'a, ()>
+            + DynSync
+            + DynSend
+            + 'static,
+    >(
+        &self,
+        lint: &'static Lint,
+        span: impl Into<MultiSpan>,
+        node_id: NodeId,
+        callback: F,
+    ) {
+        self.opt_span_buffer_lint(
+            lint,
+            Some(span.into()),
+            node_id,
+            DecorateDiagCompat(Box::new(|dcx, level, sess| {
+                let sess = sess.downcast_ref::<Session>().expect("expected a `Session`");
+                callback(dcx, level, sess)
+            })),
         )
     }
 
@@ -363,16 +372,6 @@ impl ParseSess {
                 diagnostic,
             });
         });
-    }
-
-    pub fn save_proc_macro_span(&self, span: Span) -> usize {
-        self.proc_macro_quoted_spans.push(span)
-    }
-
-    pub fn proc_macro_quoted_spans(&self) -> impl Iterator<Item = (usize, Span)> {
-        // This is equivalent to `.iter().copied().enumerate()`, but that isn't possible for
-        // AppendOnlyVec, so we resort to this scheme.
-        self.proc_macro_quoted_spans.iter_enumerated()
     }
 
     pub fn dcx(&self) -> DiagCtxtHandle<'_> {

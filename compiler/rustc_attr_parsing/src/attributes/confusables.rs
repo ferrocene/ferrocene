@@ -7,16 +7,12 @@ pub(crate) struct ConfusablesParser {
     first_span: Option<Span>,
 }
 
-impl<S: Stage> AttributeParser<S> for ConfusablesParser {
-    const ATTRIBUTES: AcceptMapping<Self, S> = &[(
+impl AttributeParser for ConfusablesParser {
+    const ATTRIBUTES: AcceptMapping<Self> = &[(
         &[sym::rustc_confusables],
         template!(List: &[r#""name1", "name2", ..."#]),
         |this, cx, args| {
-            let Some(list) = args.list() else {
-                let attr_span = cx.attr_span;
-                cx.adcx().expected_list(attr_span, args);
-                return;
-            };
+            let Some(list) = cx.expect_list(args, cx.attr_span) else { return };
 
             if list.is_empty() {
                 cx.emit_err(EmptyConfusables { span: cx.attr_span });
@@ -39,7 +35,7 @@ impl<S: Stage> AttributeParser<S> for ConfusablesParser {
     const ALLOWED_TARGETS: AllowedTargets =
         AllowedTargets::AllowList(&[Allow(Target::Method(MethodKind::Inherent))]);
 
-    fn finalize(self, _cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind> {
+    fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
         if self.confusables.is_empty() {
             return None;
         }

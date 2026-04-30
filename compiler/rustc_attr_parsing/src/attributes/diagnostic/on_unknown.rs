@@ -14,12 +14,7 @@ pub(crate) struct OnUnknownParser {
 }
 
 impl OnUnknownParser {
-    fn parse<'sess, S: Stage>(
-        &mut self,
-        cx: &mut AcceptContext<'_, 'sess, S>,
-        args: &ArgParser,
-        mode: Mode,
-    ) {
+    fn parse<'sess>(&mut self, cx: &mut AcceptContext<'_, 'sess>, args: &ArgParser, mode: Mode) {
         if let Some(features) = cx.features
             && !features.diagnostic_on_unknown()
         {
@@ -30,12 +25,12 @@ impl OnUnknownParser {
         self.span = Some(span);
 
         // At early parsing we get passed `Target::Crate` regardless of the item we're on.
-        // Only do target checking if we're late.
-        let early = matches!(cx.stage.should_emit(), ShouldEmit::Nothing);
+        // Therefore, only do target checking if we can emit.
+        let early = matches!(cx.should_emit, ShouldEmit::Nothing);
 
         if !early && !matches!(cx.target, Target::Use) {
             let target_span = cx.target_span;
-            cx.emit_dyn_lint(
+            cx.emit_lint(
                 MISPLACED_DIAGNOSTIC_ATTRIBUTES,
                 move |dcx, level| {
                     DiagnosticOnUnknownOnlyForImports { target_span }.into_diag(dcx, level)
@@ -53,8 +48,8 @@ impl OnUnknownParser {
     }
 }
 
-impl<S: Stage> AttributeParser<S> for OnUnknownParser {
-    const ATTRIBUTES: AcceptMapping<Self, S> = &[(
+impl AttributeParser for OnUnknownParser {
+    const ATTRIBUTES: AcceptMapping<Self> = &[(
         &[sym::diagnostic, sym::on_unknown],
         template!(List: &[r#"/*opt*/ message = "...", /*opt*/ label = "...", /*opt*/ note = "...""#]),
         |this, cx, args| {
@@ -64,7 +59,7 @@ impl<S: Stage> AttributeParser<S> for OnUnknownParser {
     // "Allowed" for all targets, but noop for all but use statements.
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
 
-    fn finalize(self, _cx: &FinalizeContext<'_, '_, S>) -> Option<AttributeKind> {
+    fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
         if let Some(span) = self.span {
             Some(AttributeKind::OnUnknown {
                 span,

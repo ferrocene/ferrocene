@@ -11,12 +11,12 @@ use std::thread;
 use std::time::Duration;
 
 use libc_utils::*;
-use utils::check_nondet;
 
 const TEST_BYTES: &[u8] = b"these are some test bytes!";
 
 fn main() {
     test_create_close();
+    test_create_close_tcp();
     test_bind_ipv4();
     test_bind_ipv4_reuseaddr();
     test_set_reuseaddr_invalid_len();
@@ -36,7 +36,6 @@ fn main() {
 
     test_accept_connect();
     test_send_peek_recv();
-    test_partial_send_recv();
     test_write_read();
 
     test_getsockname_ipv4();
@@ -52,6 +51,21 @@ fn main() {
 fn test_create_close() {
     let sockfd =
         unsafe { errno_result(libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0)).unwrap() };
+
+    let flags = unsafe { errno_result(libc::fcntl(sockfd, libc::F_GETFL, 0)).unwrap() };
+
+    // Ensure that socket is initially blocking.
+    assert_eq!(flags & libc::O_NONBLOCK, 0);
+
+    unsafe { errno_check(libc::close(sockfd)) };
+}
+
+/// Test creating a socket and then closing it afterwards but we explicitly
+/// specify that the TCP protocol should be used.
+fn test_create_close_tcp() {
+    let sockfd = unsafe {
+        errno_result(libc::socket(libc::AF_INET, libc::SOCK_STREAM, libc::IPPROTO_TCP)).unwrap()
+    };
 
     let flags = unsafe { errno_result(libc::fcntl(sockfd, libc::F_GETFL, 0)).unwrap() };
 
@@ -291,50 +305,6 @@ fn test_send_peek_recv() {
         .unwrap()
     };
     assert_eq!(&buffer, TEST_BYTES);
-
-    server_thread.join().unwrap();
-}
-
-/// Test that we actually do partial sends and partial receives for sockets.
-fn test_partial_send_recv() {
-    let (server_sockfd, addr) = net::make_listener_ipv4().unwrap();
-    let client_sockfd =
-        unsafe { errno_result(libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0)).unwrap() };
-
-    // Spawn the server thread.
-    let server_thread = thread::spawn(move || {
-        let (peerfd, _) = net::accept_ipv4(server_sockfd).unwrap();
-
-        // Yield back to client to test that we do incomplete writes.
-        thread::sleep(Duration::from_millis(10));
-
-        // We know the buffer contains enough bytes to test incomplete reads.
-
-        // Ensure we sometimes do incomplete reads.
-        check_nondet(|| {
-            let mut buffer = [0u8; 4];
-            let bytes_read =
-                unsafe { errno_result(libc::read(peerfd, buffer.as_mut_ptr().cast(), 4)).unwrap() };
-            bytes_read == 4
-        });
-    });
-
-    net::connect_ipv4(client_sockfd, addr).unwrap();
-
-    // Ensure we sometimes do incomplete writes.
-    check_nondet(|| {
-        let bytes_written =
-            unsafe { errno_result(libc::write(client_sockfd, [0; 4].as_ptr().cast(), 4)).unwrap() };
-        bytes_written == 4
-    });
-
-    let buffer = [0u8; 100_000];
-    // Write a lot of bytes into the socket such that we can test
-    // incomplete reads.
-    unsafe {
-        errno_result(libc_utils::write_all(client_sockfd, buffer.as_ptr().cast(), buffer.len()))
-            .unwrap()
-    };
 
     server_thread.join().unwrap();
 }

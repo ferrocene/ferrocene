@@ -211,6 +211,18 @@ where
         } else {
             // For placeholders which were already part of the input, we simply map this
             // universal bound variable back the placeholder of the input.
+            //
+            // For `CanonicalVarKind::PlaceholderRegion`, this differs slightly: we
+            // canonicalize all free regions from the input into placeholders. This is
+            // unlike types or consts, where only input placeholders remain placeholders
+            // in the canonical form.
+            //
+            // We can still map these back to the original input regions, as we
+            // just instantiate the canonical variable with its corresponding
+            // `original_value`.
+            //
+            // For more information on why we canonicalize all input regions as
+            // placeholders, see the comment in `Canonicalizer::fold_region`.
             original_values[kind.expect_placeholder_index()]
         }
     })

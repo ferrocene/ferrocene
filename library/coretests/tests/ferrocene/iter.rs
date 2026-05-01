@@ -1114,3 +1114,11 @@ fn test_map_while_try_fold() {
     let folded = iter.try_fold(0, |_acc, _x| None);
     assert_eq!(folded, Some(0));
 }
+
+// Covers `core::array::<impl core::cmp::PartialOrd for [T; N]>::partial_cmp`
+#[test]
+fn test_partialord_slice_partialcmp() {
+    let x = [1, 2, 3];
+    let y = [4, 5, 6];
+    assert!(x.partial_cmp(&y).is_some());
+}

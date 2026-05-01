@@ -1717,6 +1717,9 @@ macro_rules! uint_impl {
             // Note: Like all optimizations, this is not guaranteed to be
             // applied by the compiler. If you want those specific bases,
             // use `.checked_ilog2()` or `.checked_ilog10()` directly.
+            #[ferrocene::annotation(
+                "The uncovered } at the end of this statement is a tooling bug, since the lines after are covered, the else case here is also covered."
+            )]
             if core::intrinsics::is_val_statically_known(base) {
                 if base == 2 {
                     return self.checked_ilog2();

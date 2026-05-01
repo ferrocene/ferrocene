@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 
 #[cfg(feature = "nightly")]
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+use rustc_data_structures::stable_hasher::{HashStable, HashStableContext, StableHasher};
 use rustc_type_ir_macros::GenericTypeVisitable;
 
 use crate::{DebruijnIndex, TypeFlags};
@@ -83,8 +83,8 @@ impl<T: Hash> Hash for WithCachedTypeInfo<T> {
 }
 
 #[cfg(feature = "nightly")]
-impl<T: HashStable<Hcx>, Hcx> HashStable<Hcx> for WithCachedTypeInfo<T> {
-    fn hash_stable(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+impl<T: HashStable> HashStable for WithCachedTypeInfo<T> {
+    fn hash_stable<Hcx: HashStableContext>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
         self.internee.hash_stable(hcx, hasher);
     }
 }

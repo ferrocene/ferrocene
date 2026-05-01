@@ -1131,3 +1131,14 @@ fn test_ref_spec_try_rfold() {
     let folded: Result<_, core::str::Utf8Error> = <&mut core::slice::IterMut<'_, _> as DoubleEndedIterator>::try_rfold(&mut &mut abstracted, 0, |acc, &mut x| Ok(acc + x));
     assert_eq!(folded, Ok(15));
 }
+
+// Covers `<core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::try_fold`
+#[test]
+fn test_scan_iterator_try_fold() {
+    let mut iter: core::iter::Scan<_, _, _> = [1, 2, 3, 4, 5].iter().scan(0, |acc: &mut usize, x: &usize| {
+        *acc += *x;
+        None
+    });
+    let folded = iter.try_fold(0, |_acc, _x: usize| None);
+    assert_eq!(folded, Some(0));
+}

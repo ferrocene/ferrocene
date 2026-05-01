@@ -1122,3 +1122,12 @@ fn test_partialord_slice_partialcmp() {
     let y = [4, 5, 6];
     assert!(x.partial_cmp(&y).is_some());
 }
+
+// Covers `<&mut I as core::iter::traits::double_ended::DoubleEndedIteratorRefSpec>::spec_try_rfold`
+#[test]
+fn test_ref_spec_try_rfold() {
+    let mut suspect = [1, 2, 3, 4, 5];
+    let mut abstracted = suspect.iter_mut();
+    let folded: Result<_, core::str::Utf8Error> = <&mut core::slice::IterMut<'_, _> as DoubleEndedIterator>::try_rfold(&mut &mut abstracted, 0, |acc, &mut x| Ok(acc + x));
+    assert_eq!(folded, Ok(15));
+}

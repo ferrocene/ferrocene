@@ -456,6 +456,7 @@ impl<I: DoubleEndedIterator + ?Sized> DoubleEndedIteratorRefSpec for &mut I {
 impl<I: DoubleEndedIterator> DoubleEndedIteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_rfold -> spec_try_rfold }
 
+    #[ferrocene::prevalidated]
     fn spec_try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,

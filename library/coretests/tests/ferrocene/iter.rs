@@ -1092,3 +1092,11 @@ fn test_filter_spec_assume_count_default() {
     let no_trusted_len: &mut dyn Iterator<Item = &i32> = &mut yes_trusted_len;
     assert_eq!(no_trusted_len.filter(|a| *a % 2 == 0).count(), 2);
 }
+
+
+// Covers `<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::count`
+#[test]
+fn test_char_indices_count() {
+    let suspect = "Hello there, I'm a code coverage test";
+    assert_eq!(suspect.char_indices().count(), 37);
+}

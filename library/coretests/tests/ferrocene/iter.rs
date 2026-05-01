@@ -1100,3 +1100,17 @@ fn test_char_indices_count() {
     let suspect = "Hello there, I'm a code coverage test";
     assert_eq!(suspect.char_indices().count(), 37);
 }
+
+// Covers `<core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold`
+#[test]
+fn test_map_while_try_fold() {
+    let mut iter = [1, 2, 3, 4, 5].iter().map_while(|x| {
+        if *x % 2 == 0 {
+            Some(*x)
+        } else {
+            None
+        }
+    });
+    let folded = iter.try_fold(0, |_acc, _x| None);
+    assert_eq!(folded, Some(0));
+}

@@ -305,3 +305,17 @@ fn slice_split_first_chunk() {
     assert_eq!(slice.split_first_chunk::<3>(), Some((&[1, 2, 3], [4, 5].as_slice())));
     assert_eq!(slice.split_first_chunk::<10>(), None);
 }
+
+// covers `core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks`
+#[test]
+fn test_eq_ignore_ascii_case_chunks() {
+    // Two equal sized (16 chunked) values with an inequality at the end.
+    let x = b"absentmindednessabsentmindednessabsentmindednessabsentmindedness";
+    let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNES0";
+    assert!(!x.eq_ignore_ascii_case(y));
+
+    // Two inequal sized (16 chunked) values with an inequality at the end.
+    let x = b"absentmindednessabsentmindednessabsentmindednessabsentmindedness00";
+    let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESS01";
+    assert!(!x.eq_ignore_ascii_case(y));
+}

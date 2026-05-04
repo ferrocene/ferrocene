@@ -157,6 +157,9 @@ impl [u8] {
 
         // If there are remaining tails, load the last N bytes in the slices to
         // avoid falling back to per-byte checking.
+        #[ferrocene::annotation("
+            A tooling bug marks the trailing `}` as uncovered, but since the `true` below is covered, we know we test the fall-through. See `test_eq_ignore_ascii_case_chunks`.
+        ")]
         if !self_rem.is_empty() {
             if let (Some(a_rem), Some(b_rem)) = (self.last_chunk::<N>(), other.last_chunk::<N>()) {
                 if !eq_ignore_ascii_inner(a_rem, b_rem) {

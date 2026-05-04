@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-pub(crate) mod update_certified_core_symbols;
-
 use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};

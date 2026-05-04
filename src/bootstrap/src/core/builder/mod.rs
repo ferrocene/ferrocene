@@ -1069,7 +1069,6 @@ impl<'a> Builder<'a> {
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
                 crate::ferrocene::run::CoverageReport,
-                crate::ferrocene::run::update_certified_core_symbols::UpdateCertifiedCoreSymbols,
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,

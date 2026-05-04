@@ -8,8 +8,9 @@ use build_helper::symbol_report::SymbolReport;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::run::update_certified_core_symbols::TRACKED_FILE;
-use crate::ferrocene::run::{self, update_certified_core_symbols};
+use crate::ferrocene::run;
+
+const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.csv";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols;
@@ -41,7 +42,7 @@ impl Step for CertifiedCoreSymbols {
         }
 
         // load the expected list of qualified functions
-        let expected_path = Path::new(update_certified_core_symbols::TRACKED_FILE);
+        let expected_path = Path::new(TRACKED_FILE);
         let mut expected: Vec<String> = Default::default();
         let reader = builder.read(expected_path);
         for qualified_name in reader.lines() {
@@ -57,22 +58,32 @@ impl Step for CertifiedCoreSymbols {
         // compare the two
         if actual == expected {
             builder.info(&format!("The certified core symbol report is up to date."));
-        } else {
-            builder.info(&format!(
-                "Diff of {} and {}:",
-                expected_path.display(),
-                actual_symbol_report_path.display(),
-            ));
-
-            let actual_content = actual.join("\n");
-            let expected_content = builder.read(expected_path);
-            diff_text(&expected_content, &actual_content);
-
-            builder.info(&format!(
-                "The certified core symbol report is out of date. \
-                Run `./x run update-certified-core-symbols` to update it."
-            ));
-            crate::exit!(1);
+            return;
         }
+
+        if builder.config.cmd.bless() {
+            let qualified_name_list = actual_symbol_report.to_qualified_fn_list();
+            std::fs::write(TRACKED_FILE, qualified_name_list.join("\n")).unwrap();
+
+            eprintln!("Updated {TRACKED_FILE}");
+
+            return;
+        }
+
+        builder.info(&format!(
+            "Diff of {} and {}:",
+            expected_path.display(),
+            actual_symbol_report_path.display(),
+        ));
+
+        let actual_content = actual.join("\n");
+        let expected_content = builder.read(expected_path);
+        diff_text(&expected_content, &actual_content);
+
+        builder.info(&format!(
+            "The certified core symbol report is out of date. \
+            Run `./x run update-certified-core-symbols` to update it."
+        ));
+        crate::exit!(1);
     }
 }

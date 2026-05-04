@@ -3164,6 +3164,12 @@ pub const fn minimum_number_nsz_f16(x: f16, y: f16) -> f16 {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[ferrocene::prevalidated]
+#[ferrocene::annotation(
+    "This function is replaced by an LLVM instrinsic in LLVM 22 or later (which Ferrocene uses). \
+    See `codegen_intrinsic_call` in `compiler/rustc_codegen_llvm/src/intrinsic.rs. \
+    A manual test was done with this functions forcibly included and it was fully covered,
+    see `test_minimum_number_nsz_f32` in `library/coretests/tests/ferrocene/intrinsics.rs`."
+)]
 pub const fn minimum_number_nsz_f32(x: f32, y: f32) -> f32 {
     if x.is_nan() || y <= x {
         y
@@ -3367,6 +3373,12 @@ pub const fn maximum_number_nsz_f16(x: f16, y: f16) -> f16 {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[ferrocene::prevalidated]
+#[ferrocene::annotation(
+    "This function is replaced by an LLVM instrinsic in LLVM 22 or later (which Ferrocene uses). \
+    See `codegen_intrinsic_call` in `compiler/rustc_codegen_llvm/src/intrinsic.rs. \
+    A manual test was done with this functions forcibly included and it was fully covered,
+    see `test_maximum_number_nsz_f32` in `library/coretests/tests/ferrocene/intrinsics.rs`."
+)]
 pub const fn maximum_number_nsz_f32(x: f32, y: f32) -> f32 {
     if x.is_nan() || y >= x {
         y

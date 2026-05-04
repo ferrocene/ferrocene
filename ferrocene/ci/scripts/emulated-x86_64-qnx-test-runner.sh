@@ -36,7 +36,7 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
-    ./x build src/tools/remote-test-server --target "${nto_target}"
+    ./x build src/tools/remote-test-server --stage 2 --target "${nto_target}"
 
     echo
     echo "===> creating initial IFS"

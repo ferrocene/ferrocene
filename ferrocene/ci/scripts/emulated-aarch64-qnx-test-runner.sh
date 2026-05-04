@@ -63,7 +63,7 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
-    ./x build src/tools/remote-test-server --target "${nto_target}"
+    ./x build src/tools/remote-test-server --stage 2 --target "${nto_target}"
     cp build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
 
     echo

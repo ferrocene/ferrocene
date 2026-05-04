@@ -230,36 +230,63 @@ struct LintState<'tcx> {
 impl<'tcx> LintState<'tcx> {
     /// Check whether `item` needs to be linted at all. If so, return a new `LintState`.
     fn new(tcx: TyCtxt<'tcx>, item: LocalDefId) -> Option<Self> {
-        let ValidatedStatus::Validated { annotation } = item_is_validated(tcx, item.into()) else {
+        let ValidatedStatus::Validated { annotation, inherited } =
+            item_is_validated(tcx, item.into())
+        else {
             return None;
         };
 
-        if tcx.hir_node_by_def_id(item).associated_body().is_none() {
-            match tcx.def_kind(item) {
-                // We don't care if types are unvalidated, only the functions that are called.
-                DefKind::Struct | DefKind::Enum | DefKind::Union => {}
-                kind => {
-                    let item_span = tcx.def_span(item);
-                    let span = match annotation {
-                        Some(ref span) => span.with_hi(item_span.hi()),
-                        None => item_span,
-                    };
-                    // FIXME: this should probably be `WARN unused attibute` instead?
-                    span_bug!(span, "annotated validated with no body? {kind:?} {item:?}");
-                }
-            }
-            debug!("ignoring validated item with no body: {item:?}");
-            return None;
+        enum Check {
+            Yes,
+            Ignore,
+            Error,
         }
 
-        debug!("check {item:?}");
-        Some(LintState {
-            tcx,
-            item,
-            annotation,
-            shown_item: false,
-            shown_lints: FxHashSet::default(),
-        })
+        let kind = tcx.def_kind(item);
+        let should_check = match kind {
+            // We allow types to be validated: the semantics are that builtin `derive`s are
+            // assumed to be validated.
+            DefKind::Struct | DefKind::Enum | DefKind::Union => Check::Ignore,
+            // We allow some parents to be marked as validated:
+            // The semantics are that this implies every child is also validated.
+            DefKind::Mod | DefKind::Trait | DefKind::Impl { .. } => Check::Ignore,
+            // Macros can have bodies, but we never check them.
+            // Allow them if they're directly annotated, error otherwise.
+            DefKind::Macro(..) if inherited => Check::Ignore,
+            DefKind::Macro(..) => Check::Error,
+            // Any function we check the body of.
+            _ if tcx.hir_node_by_def_id(item).associated_body().is_some() => Check::Yes,
+            // Anything else is allowed as long as it's not directly annotated.
+            _ if inherited => Check::Ignore,
+            // Otherwise error.
+            _ => Check::Error,
+        };
+
+        match should_check {
+            Check::Error => {
+                let item_span = tcx.def_span(item);
+                let span = match annotation {
+                    Some(ref span) => span.with_hi(item_span.hi()),
+                    None => item_span,
+                };
+                // FIXME: this should probably be `WARN unused attibute` instead?
+                span_bug!(span, "annotated validated with no defined meaning: {kind:?} {item:?}");
+            }
+            Check::Ignore => {
+                debug!("ignoring validated item: {item:?}");
+                return None;
+            }
+            Check::Yes => {
+                debug!("check {item:?}");
+                Some(LintState {
+                    tcx,
+                    item,
+                    annotation,
+                    shown_item: false,
+                    shown_lints: FxHashSet::default(),
+                })
+            }
+        }
     }
 
     /// Check whether an item use needs to be linted. If so, lint it.

@@ -139,6 +139,10 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        if !builder.config.std_debug_assertions {
+            panic!("generating the core symbol report requires `rust.debug-assertions-std=true`");
+        }
+
         let CertifiedCoreSymbols { build_compiler, target } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 

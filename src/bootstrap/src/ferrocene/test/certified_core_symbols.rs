@@ -31,10 +31,6 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        if !builder.config.std_debug_assertions && !builder.config.dry_run() {
-            panic!("x t {TRACKED_FILE} requires `rust.debug-assertions-std=true`");
-        }
-
         builder.info(&format!("Testing {TRACKED_FILE}"));
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
         let actual_symbol_report_path =

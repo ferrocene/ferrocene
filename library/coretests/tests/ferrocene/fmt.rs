@@ -526,9 +526,9 @@ fn test_formatter_align() {
         fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             let s = if let Some(s) = formatter.align() {
                 match s {
-                    Alignment::Left    => "left",
-                    Alignment::Right   => "right",
-                    Alignment::Center  => "center",
+                    Alignment::Left => "left",
+                    Alignment::Right => "right",
+                    Alignment::Center => "center",
                 }
             } else {
                 "into the void"

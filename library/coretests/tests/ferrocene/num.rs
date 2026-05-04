@@ -862,70 +862,22 @@ fn test_saturating_neg() {
 // Cover `core::num::<T>::saturating_div`.
 #[test]
 fn test_saturating_div() {
-    assert_eq!(
-        i128::saturating_div(i128::MIN, -1 as i128),
-        i128::MAX,
-        "i128",
-    );
-    assert_eq!(
-        i64::saturating_div(i64::MIN, -1 as i64),
-        i64::MAX,
-        "i64",
-    );
-    assert_eq!(
-        i32::saturating_div(i32::MIN, -1 as i32),
-        i32::MAX,
-        "i32",
-    );
-    assert_eq!(
-        i8::saturating_div(i8::MIN, -1 as i8),
-        i8::MAX,
-        "i8",
-    );
+    assert_eq!(i128::saturating_div(i128::MIN, -1 as i128), i128::MAX, "i128",);
+    assert_eq!(i64::saturating_div(i64::MIN, -1 as i64), i64::MAX, "i64",);
+    assert_eq!(i32::saturating_div(i32::MIN, -1 as i32), i32::MAX, "i32",);
+    assert_eq!(i8::saturating_div(i8::MIN, -1 as i8), i8::MAX, "i8",);
 }
 
 // Cover `core::num::<T>::saturating_mul`.
 #[test]
 fn test_saturating_mul() {
-    assert_eq!(
-        i128::saturating_mul(i128::MIN, 10),
-        i128::MIN,
-        "i128",
-    );
-    assert_eq!(
-        i64::saturating_mul(i64::MIN, 10),
-        i64::MIN,
-        "i64",
-    );
-    assert_eq!(
-        i32::saturating_mul(i32::MIN, 10),
-        i32::MIN,
-        "i32",
-    );
-    assert_eq!(
-        i8::saturating_mul(i8::MIN, 10),
-        i8::MIN,
-        "i8",
-    );
+    assert_eq!(i128::saturating_mul(i128::MIN, 10), i128::MIN, "i128",);
+    assert_eq!(i64::saturating_mul(i64::MIN, 10), i64::MIN, "i64",);
+    assert_eq!(i32::saturating_mul(i32::MIN, 10), i32::MIN, "i32",);
+    assert_eq!(i8::saturating_mul(i8::MIN, 10), i8::MIN, "i8",);
 
-    assert_eq!(
-        i128::saturating_mul(2 as i128, 4),
-        8 as i128,
-        "i128",
-    );
-    assert_eq!(
-        i64::saturating_mul(2 as i64, 4),
-        8 as i64,
-        "i64",
-    );
-    assert_eq!(
-        i32::saturating_mul(2 as i32, 4),
-        8 as i32,
-        "i32",
-    );
-    assert_eq!(
-        i8::saturating_mul(2 as i8, 4),
-        8 as i8,
-        "i8",
-    );
+    assert_eq!(i128::saturating_mul(2 as i128, 4), 8 as i128, "i128",);
+    assert_eq!(i64::saturating_mul(2 as i64, 4), 8 as i64, "i64",);
+    assert_eq!(i32::saturating_mul(2 as i32, 4), 8 as i32, "i32",);
+    assert_eq!(i8::saturating_mul(2 as i8, 4), 8 as i8, "i8",);
 }

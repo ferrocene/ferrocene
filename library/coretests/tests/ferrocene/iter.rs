@@ -1093,7 +1093,6 @@ fn test_filter_spec_assume_count_default() {
     assert_eq!(no_trusted_len.filter(|a| *a % 2 == 0).count(), 2);
 }
 
-
 // Covers `<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::count`
 #[test]
 fn test_char_indices_count() {
@@ -1104,13 +1103,7 @@ fn test_char_indices_count() {
 // Covers `<core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold`
 #[test]
 fn test_map_while_try_fold() {
-    let mut iter = [1, 2, 3, 4, 5].iter().map_while(|x| {
-        if *x % 2 == 0 {
-            Some(*x)
-        } else {
-            None
-        }
-    });
+    let mut iter = [1, 2, 3, 4, 5].iter().map_while(|x| if *x % 2 == 0 { Some(*x) } else { None });
     let folded = iter.try_fold(0, |_acc, _x| None);
     assert_eq!(folded, Some(0));
 }
@@ -1128,17 +1121,23 @@ fn test_partialord_slice_partialcmp() {
 fn test_ref_spec_try_rfold() {
     let mut suspect = [1, 2, 3, 4, 5];
     let mut abstracted = suspect.iter_mut();
-    let folded: Result<_, core::str::Utf8Error> = <&mut core::slice::IterMut<'_, _> as DoubleEndedIterator>::try_rfold(&mut &mut abstracted, 0, |acc, &mut x| Ok(acc + x));
+    let folded: Result<_, core::str::Utf8Error> =
+        <&mut core::slice::IterMut<'_, _> as DoubleEndedIterator>::try_rfold(
+            &mut &mut abstracted,
+            0,
+            |acc, &mut x| Ok(acc + x),
+        );
     assert_eq!(folded, Ok(15));
 }
 
 // Covers `<core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::try_fold`
 #[test]
 fn test_scan_iterator_try_fold() {
-    let mut iter: core::iter::Scan<_, _, _> = [1, 2, 3, 4, 5].iter().scan(0, |acc: &mut usize, x: &usize| {
-        *acc += *x;
-        None
-    });
+    let mut iter: core::iter::Scan<_, _, _> =
+        [1, 2, 3, 4, 5].iter().scan(0, |acc: &mut usize, x: &usize| {
+            *acc += *x;
+            None
+        });
     let folded = iter.try_fold(0, |_acc, _x: usize| None);
     assert_eq!(folded, Some(0));
 }

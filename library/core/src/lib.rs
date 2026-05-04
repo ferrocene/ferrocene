@@ -217,7 +217,7 @@ mod macros;
 #[unstable(feature = "ferrocene_test", issue = "none")]
 pub mod ferrocene_test;
 
-#[stable(feature = "assert_matches", since = "1.95.0")]
+#[stable(feature = "assert_matches", since = "1.96.0")]
 pub use crate::macros::{assert_matches, debug_assert_matches};
 
 #[unstable(feature = "derive_from", issue = "144889")]

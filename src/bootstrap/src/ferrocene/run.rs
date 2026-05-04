@@ -13,7 +13,7 @@ use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::tool::{Blanket, SYMBOL_PATH, SymbolReport};
+use crate::ferrocene::tool::{Blanket, SymbolReport};
 use crate::utils::channel::GitInfo;
 use crate::utils::exec::{self, BootstrapCommand};
 use crate::utils::{build_stamp, helpers};
@@ -126,14 +126,12 @@ impl CertifiedCoreSymbols {
     }
 }
 
-pub(super) const CERTIFIED_CORE_SYMBOLS_ALIAS: &str = "certified-core-symbols";
-
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(SYMBOL_PATH).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

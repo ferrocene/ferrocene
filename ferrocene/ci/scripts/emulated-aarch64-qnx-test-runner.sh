@@ -63,6 +63,7 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
+    # for rationale on chosen stage; see `emulated-x86_64-qnx-test-runner.sh` script
     ./x build src/tools/remote-test-server --stage 2 --target "${nto_target}"
     cp build/host/"stage2-tools"/"${nto_target}"/release/remote-test-server "${emulatordir}"/src/install/aarch64le/sbin
 
@@ -72,6 +73,17 @@ cmd_prepare() {
 
     buildscript="${emulatordir}"/src/images/zcu102.build
 
+    # the chosen BSP can be run on a QEMU emulator; that's the reason it was chosen over
+    # other options. however, the build scripts for the QNX images ("IFS" files) are set
+    # up to run on actual hardware, not an emulator
+    #
+    # because the QEMU machine model does not, or not faithfully enough, emulate the hardware
+    # some services that rely on hardware features need to be disabled in the .build scripts or
+    # they'll hang the startup process
+    #
+    # if the .build script changes then the new version needs to be re-reviewed for
+    # QEMU compatibility and all the patches below adjusted. this command checks for
+    # such build script changes
     sha256sum "${buildscript}" | grep -q '^5cb44fba650dfd69d8ad00e4f2d684a8f7bb97bdbad5cd246e17097c05d99e3b ' || \
         panic "upstream file zcu102.build appears to have changed; this cmd_prepare function may need to be updated"
 

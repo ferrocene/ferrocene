@@ -36,6 +36,16 @@ cmd_prepare() {
 
     echo
     echo "===> building remote-test-server"
+    # a stage $N tool is built using a stage $(N-1) compiler
+    # when cross compiling a stage0 compiler cannot be used as it does not
+    # include cross-compiled stage0 libraries
+    # in that case, bootstrap bumps the stage by one so that the minimum is stage1
+    # what that means for this command is that both `--stage 1` and `--stage 2` produce the same
+    # outcome; remote-test-server will be built using a stage1 compiler
+    # see https://github.com/ferrocene/ferrocene/blob/2118a6927233a45998e02c1fc341beb21a15c1b6/src/bootstrap/src/core/build_steps/tool.rs#L332
+    #
+    # also this is a testing tool, not the code under test so the stage used is not critical so long
+    # the tool adheres to the remote-test protocol
     ./x build src/tools/remote-test-server --stage 2 --target "${nto_target}"
 
     echo

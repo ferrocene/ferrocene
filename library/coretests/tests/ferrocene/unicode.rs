@@ -33,3 +33,14 @@ fn test_unicode_skip_search() {
     // 0x300 makes `binary_search_by_key` return `Ok`
     assert_eq!(string('\u{300}'), "\\u{300}");
 }
+
+// Cover `core::unicode::unicode_data::white_space::lookup`
+#[test]
+fn test_white_space_lookup() {
+    assert!("\u{1680}".chars().all(|c| c.is_whitespace())); // ogham space mark
+    assert!("\u{3000}".chars().all(|c| c.is_whitespace())); // ideographic space
+
+    assert!("\u{1681}".chars().all(|c| !c.is_whitespace())); // Fall through
+    assert!("\u{2060}".chars().all(|c| !c.is_whitespace())); // Fall through
+    assert!("\u{FEFF}".chars().all(|c| !c.is_whitespace())); // Fall through
+}

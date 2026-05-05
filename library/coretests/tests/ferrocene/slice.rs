@@ -314,6 +314,11 @@ fn test_eq_ignore_ascii_case_chunks() {
     let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNES0";
     assert!(!x.eq_ignore_ascii_case(y));
 
+    // Two equal sized (16 chunked) values that are equal.
+    let x = b"absentmindednessabsentmindednessabsentmindednessabsentmindedness";
+    let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESS";
+    assert!(x.eq_ignore_ascii_case(y));
+
     // Two inequal sized (16 chunked) values with an inequality at the end.
     let x = b"absentmindednessabsentmindednessabsentmindednessabsentmindedness00";
     let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESS01";

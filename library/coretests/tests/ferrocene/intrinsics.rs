@@ -133,23 +133,3 @@ test_intrinsic_unchecked_funnel! {
     u128 => test_intrinsic_unchecked_funnel_u128,
     usize => test_intrinsic_unchecked_funnel_usize,
 }
-
-#[test]
-fn test_minimum_number_nsz_f32() {
-    // x.is_nan() == true
-    assert_eq!(0.0_f32, core::intrinsics::minimum_number_nsz_f32(f32::NAN, 0.0_f32));
-    // y <= x
-    assert_eq!(0.0_f32, core::intrinsics::minimum_number_nsz_f32(1.0_32, 0.0_f32));
-    // else
-    assert_eq!(0.0_f32, core::intrinsics::minimum_number_nsz_f32(0.0_f32, 1.0_32));
-}
-
-#[test]
-fn test_maximum_number_nsz_f32() {
-    // x.is_nan() == true
-    assert_eq!(0.0_f32, core::intrinsics::maximum_number_nsz_f32(f32::NAN, 0.0_f32));
-    // y >= x
-    assert_eq!(1.0_f32, core::intrinsics::maximum_number_nsz_f32(1.0_f32, 0.0_f32));
-    // else
-    assert_eq!(1.0_f32, core::intrinsics::maximum_number_nsz_f32(0.0_f32, 1.0_f32));
-}

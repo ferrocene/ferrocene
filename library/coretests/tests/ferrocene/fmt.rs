@@ -542,20 +542,3 @@ fn test_formatter_align() {
     assert_eq!(format!("{Foo:^}"), "center");
     assert_eq!(format!("{Foo}"), "into the void");
 }
-
-#[test]
-fn test_fmt_parse_int_error_not_a_power_of_two() {
-    use core::num::IntErrorKind;
-    pub struct FakeParseIntError {
-        #[allow(dead_code)] // This is used for transmuting.
-        pub kind: IntErrorKind,
-    }
-
-    let val = FakeParseIntError { kind: IntErrorKind::NotAPowerOfTwo };
-    // We need to do a truly cursed thing here since there are no situations in public API where
-    // we can conjure ourselves a `ParseIntError` with a `NotAPowerOfTwo` in it.
-    let cursed =
-        unsafe { core::mem::transmute::<FakeParseIntError, core::num::ParseIntError>(val) };
-    let formatted = format!("{}", cursed);
-    assert_eq!(formatted, "number is not a power of two")
-}

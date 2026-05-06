@@ -1145,7 +1145,7 @@ When :t:`keyword` ``super`` is used to import a parent :t:`module`, a :t:`renami
 An :t:`external prelude` cannot be imported.
 
 :dp:`fls_LV94x3HlpBWk`
-A :t:`simple import` cannot refer to :t:`[enum variant]s` through a :t:`type alias`.
+A :t:`simple import` shall not refer to :t:`[enum variant]s` through a :t:`type alias`.
 
 .. rubric:: Examples
 

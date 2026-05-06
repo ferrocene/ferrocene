@@ -2065,11 +2065,9 @@ impl<'a> Formatter<'a> {
                 let len = match u16::try_from(len) {
                     Ok(len) => len,
                     #[ferrocene::annotation(
-                        "The `Err(_)` branch is explicitly marked unreachable, causing it be reached would be a bug"
+                        "The `Err(_)` branch is explicitly marked unreachable, causing it to be reached would be a bug"
                     )]
-                    Err(_) => {
-                        unreachable!()
-                    }
+                    Err(_) => unreachable!(),
                 };
                 let post_padding = self.padding(width - len, Alignment::Right)?;
                 // SAFETY: Per the precondition.

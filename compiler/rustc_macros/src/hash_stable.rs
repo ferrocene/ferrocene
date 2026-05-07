@@ -1,6 +1,5 @@
 use proc_macro2::Ident;
 use quote::quote;
-use syn::parse_quote;
 
 struct Attributes {
     ignore: bool,
@@ -42,12 +41,6 @@ pub(crate) fn hash_stable_derive(s: synstructure::Structure<'_>) -> proc_macro2:
     hash_stable_derive_with_mode(s, HashStableMode::Normal)
 }
 
-pub(crate) fn hash_stable_generic_derive(
-    s: synstructure::Structure<'_>,
-) -> proc_macro2::TokenStream {
-    hash_stable_derive_with_mode(s, HashStableMode::Generic)
-}
-
 pub(crate) fn hash_stable_no_context_derive(
     s: synstructure::Structure<'_>,
 ) -> proc_macro2::TokenStream {
@@ -55,13 +48,19 @@ pub(crate) fn hash_stable_no_context_derive(
 }
 
 enum HashStableMode {
-    // Use the query-system aware stable hashing context.
+    // Do a normal derive, where any generic type parameter gets a `StableHash` bound.
+    // For example, in `struct Abc<T, U>(T, U)` the added bounds are `T: StableHash` and
+    // `U: StableHash`.
     Normal,
-    // Emit a generic implementation that uses a crate-local `StableHashingContext`
-    // trait, when the crate is upstream of `rustc_middle`.
-    Generic,
-    // Emit a hash-stable implementation that takes no context,
-    // and emits per-field where clauses for (almost-)perfect derives.
+
+    // Do an (almost-)perfect derive, where any field with a generic type parameter gets a
+    // `StableHash` bound. For example, in `struct Def<T, U>(T, U::Assoc)` the added bounds are
+    // `T::StableHash` and `U::Assoc: StableHash` (not `U: StableHash`).
+    //
+    // This is used most commonly in `rustc_type_ir` for types like `TyKind<I: Interner>`.
+    // `Interner` does not impl `StableHash`, but the fields of `TyKind` do not use `I` itself,
+    // instead only using associated types from `I` such as `I::Region`. On types like `TyKind` we
+    // typically also see the use of `derive_where` for built-in traits such as `Debug`.
     NoContext,
 }
 
@@ -69,50 +68,25 @@ fn hash_stable_derive_with_mode(
     mut s: synstructure::Structure<'_>,
     mode: HashStableMode,
 ) -> proc_macro2::TokenStream {
-    let generic: syn::GenericParam = match mode {
-        HashStableMode::Normal => parse_quote!('__ctx),
-        HashStableMode::Generic | HashStableMode::NoContext => parse_quote!(__CTX),
+    let add_bounds = match mode {
+        HashStableMode::Normal => synstructure::AddBounds::Generics,
+        HashStableMode::NoContext => synstructure::AddBounds::Fields,
     };
 
-    // no_context impl is able to derive by-field, which is closer to a perfect derive.
-    s.add_bounds(match mode {
-        HashStableMode::Normal | HashStableMode::Generic => synstructure::AddBounds::Generics,
-        HashStableMode::NoContext => synstructure::AddBounds::Fields,
-    });
-
-    // For generic impl, add `where __CTX: HashStableContext`.
-    match mode {
-        HashStableMode::Normal => {}
-        HashStableMode::Generic => {
-            s.add_where_predicate(parse_quote! { __CTX: ::rustc_span::HashStableContext });
-        }
-        HashStableMode::NoContext => {}
-    }
-
-    s.add_impl_generic(generic);
+    s.add_bounds(add_bounds);
 
     let discriminant = hash_stable_discriminant(&mut s);
     let body = hash_stable_body(&mut s);
 
-    let context: syn::Type = match mode {
-        HashStableMode::Normal => {
-            parse_quote!(::rustc_middle::ich::StableHashingContext<'__ctx>)
-        }
-        HashStableMode::Generic | HashStableMode::NoContext => parse_quote!(__CTX),
-    };
-
     s.bound_impl(
-        quote!(
-            ::rustc_data_structures::stable_hasher::HashStable<
-                #context
-            >
-        ),
+        quote!(::rustc_data_structures::stable_hasher::StableHash),
         quote! {
             #[inline]
-            fn hash_stable(
+            fn stable_hash<__Hcx: ::rustc_data_structures::stable_hasher::StableHashCtxt>(
                 &self,
-                __hcx: &mut #context,
-                __hasher: &mut ::rustc_data_structures::stable_hasher::StableHasher) {
+                __hcx: &mut __Hcx,
+                __hasher: &mut ::rustc_data_structures::stable_hasher::StableHasher
+            ) {
                 #discriminant
                 match *self { #body }
             }
@@ -123,7 +97,7 @@ fn hash_stable_derive_with_mode(
 fn hash_stable_discriminant(s: &mut synstructure::Structure<'_>) -> proc_macro2::TokenStream {
     match s.ast().data {
         syn::Data::Enum(_) => quote! {
-            ::std::mem::discriminant(self).hash_stable(__hcx, __hasher);
+            ::std::mem::discriminant(self).stable_hash(__hcx, __hasher);
         },
         syn::Data::Struct(_) => quote! {},
         syn::Data::Union(_) => panic!("cannot derive on union"),
@@ -137,11 +111,11 @@ fn hash_stable_body(s: &mut synstructure::Structure<'_>) -> proc_macro2::TokenSt
             quote! {}
         } else if let Some(project) = attrs.project {
             quote! {
-                (&#bi.#project).hash_stable(__hcx, __hasher);
+                (&#bi.#project).stable_hash(__hcx, __hasher);
             }
         } else {
             quote! {
-                #bi.hash_stable(__hcx, __hasher);
+                #bi.stable_hash(__hcx, __hasher);
             }
         }
     })

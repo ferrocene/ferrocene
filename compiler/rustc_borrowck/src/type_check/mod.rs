@@ -461,7 +461,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             let projected_ty = curr_projected_ty.projection_ty_core(
                 tcx,
                 proj,
-                |ty| self.structurally_resolve(ty, locations),
+                |ty| self.normalize(ty, locations),
                 |ty, variant_index, field, ()| PlaceTy::field_ty(tcx, ty, variant_index, field),
                 |_| unreachable!(),
             );
@@ -697,7 +697,6 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             | StatementKind::FakeRead(..)
             | StatementKind::StorageLive(..)
             | StatementKind::StorageDead(..)
-            | StatementKind::Retag { .. }
             | StatementKind::Coverage(..)
             | StatementKind::ConstEvalCounter
             | StatementKind::PlaceMention(..)
@@ -1652,7 +1651,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 .unwrap();
             }
 
-            Rvalue::Use(_)
+            Rvalue::Use(_, _)
             | Rvalue::UnaryOp(_, _)
             | Rvalue::CopyForDeref(_)
             | Rvalue::BinaryOp(..)
@@ -2215,8 +2214,8 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
     /// rvalue and will be unified with the inferred type.
     fn rvalue_user_ty(&self, rvalue: &Rvalue<'tcx>) -> Option<UserTypeAnnotationIndex> {
         match rvalue {
-            Rvalue::Use(_)
-            | Rvalue::ThreadLocalRef(_)
+            Rvalue::Use(..)
+            | Rvalue::ThreadLocalRef(..)
             | Rvalue::Repeat(..)
             | Rvalue::Ref(..)
             | Rvalue::RawPtr(..)

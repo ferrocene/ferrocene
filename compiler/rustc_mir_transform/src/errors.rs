@@ -1,6 +1,7 @@
 use rustc_errors::codes::*;
 use rustc_errors::{
-    Applicability, Diag, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level, Subdiagnostic, msg,
+    Applicability, Diag, DiagCtxtHandle, DiagSymbolList, Diagnostic, EmissionGuarantee, Level,
+    Subdiagnostic, msg,
 };
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::mir::AssertKind;
@@ -118,6 +119,12 @@ pub(crate) struct UnalignedPackedRef {
 #[diag("MIR pass `{$name}` is unknown and will be ignored")]
 pub(crate) struct UnknownPassName<'a> {
     pub(crate) name: &'a str,
+}
+
+#[derive(Diagnostic)]
+#[diag("valid MIR pass names are: {$valid_passes}")]
+pub(crate) struct ValidPassNames<'a> {
+    pub(crate) valid_passes: DiagSymbolList<&'a str>,
 }
 
 pub(crate) struct AssertLint<P> {

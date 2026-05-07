@@ -7,13 +7,15 @@ use rustc_abi::{FIRST_VARIANT, FieldIdx, ReprOptions, VariantIdx};
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::intern::Interned;
-use rustc_data_structures::stable_hasher::{HashStable, HashingControls, StableHasher};
+use rustc_data_structures::stable_hasher::{
+    HashingControls, StableHash, StableHashCtxt, StableHasher,
+};
 use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem, find_attr};
 use rustc_index::{IndexSlice, IndexVec};
-use rustc_macros::{HashStable, TyDecodable, TyEncodable};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_session::DataTypeKind;
 use rustc_span::sym;
 use rustc_type_ir::FieldInfo;
@@ -23,12 +25,11 @@ use tracing::{debug, info, trace};
 use super::{
     AsyncDestructor, Destructor, FieldDef, GenericPredicates, Ty, TyCtxt, VariantDef, VariantDiscr,
 };
-use crate::ich::StableHashingContext;
 use crate::mir::interpret::ErrorHandled;
 use crate::ty::util::{Discr, IntTypeExt};
 use crate::ty::{self, ConstKind};
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, HashStable, TyEncodable, TyDecodable)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, StableHash, TyEncodable, TyDecodable)]
 pub struct AdtFlags(u16);
 bitflags::bitflags! {
     impl AdtFlags: u16 {
@@ -151,8 +152,8 @@ impl Hash for AdtDefData {
     }
 }
 
-impl<'a> HashStable<StableHashingContext<'a>> for AdtDefData {
-    fn hash_stable(&self, hcx: &mut StableHashingContext<'a>, hasher: &mut StableHasher) {
+impl StableHash for AdtDefData {
+    fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
         thread_local! {
             static CACHE: RefCell<FxHashMap<(usize, HashingControls), Fingerprint>> = Default::default();
         }
@@ -164,20 +165,20 @@ impl<'a> HashStable<StableHashingContext<'a>> for AdtDefData {
                 let ty::AdtDefData { did, ref variants, ref flags, ref repr } = *self;
 
                 let mut hasher = StableHasher::new();
-                did.hash_stable(hcx, &mut hasher);
-                variants.hash_stable(hcx, &mut hasher);
-                flags.hash_stable(hcx, &mut hasher);
-                repr.hash_stable(hcx, &mut hasher);
+                did.stable_hash(hcx, &mut hasher);
+                variants.stable_hash(hcx, &mut hasher);
+                flags.stable_hash(hcx, &mut hasher);
+                repr.stable_hash(hcx, &mut hasher);
 
                 hasher.finish()
             })
         });
 
-        hash.hash_stable(hcx, hasher);
+        hash.stable_hash(hcx, hasher);
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, HashStable)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, StableHash)]
 #[rustc_pass_by_value]
 pub struct AdtDef<'tcx>(pub Interned<'tcx, AdtDefData>);
 
@@ -315,7 +316,7 @@ impl<'tcx> rustc_type_ir::inherent::AdtDef<TyCtxt<'tcx>> for AdtDef<'tcx> {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, HashStable, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, StableHash, TyEncodable, TyDecodable)]
 pub enum AdtKind {
     Struct,
     Union,
@@ -348,7 +349,7 @@ impl AdtDefData {
             debug!("found non-exhaustive variant list for {:?}", did);
             flags = flags | AdtFlags::IS_VARIANT_LIST_NON_EXHAUSTIVE;
         }
-        if find_attr!(tcx, did, PinV2(..)) {
+        if find_attr!(tcx, did, PinV2) {
             debug!("found pin-project type {:?}", did);
             flags |= AdtFlags::IS_PIN_PROJECT;
         }

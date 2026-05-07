@@ -69,7 +69,7 @@ pub(crate) fn check_liveness<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> Den
     // Don't run unused pass for #[derive]
     let parent = tcx.local_parent(tcx.typeck_root_def_id_local(def_id));
     if let DefKind::Impl { of_trait: true } = tcx.def_kind(parent)
-        && find_attr!(tcx, parent, AutomaticallyDerived(..))
+        && find_attr!(tcx, parent, AutomaticallyDerived)
     {
         return DenseBitSet::new_empty(0);
     }
@@ -391,7 +391,7 @@ fn find_self_assignments<'tcx>(
                     let Some(assign) = body.basic_blocks[*target].statements.first() else {
                         continue;
                     };
-                    let StatementKind::Assign(box (dest, Rvalue::Use(Operand::Move(temp)))) =
+                    let StatementKind::Assign(box (dest, Rvalue::Use(Operand::Move(temp), _))) =
                         assign.kind
                     else {
                         continue;
@@ -709,8 +709,7 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                     | StatementKind::SetDiscriminant { box place, .. } => {
                         check_place(*place, AccessKind::Assign, statement.source_info, live);
                     }
-                    StatementKind::Retag(_, _)
-                    | StatementKind::StorageLive(_)
+                    StatementKind::StorageLive(_)
                     | StatementKind::StorageDead(_)
                     | StatementKind::Coverage(_)
                     | StatementKind::Intrinsic(_)

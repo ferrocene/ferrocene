@@ -799,14 +799,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     && let hir::StmtKind::Expr(_) = stmt.kind
                     && self.is_next_stmt_expr_continuation(stmt.hir_id)
                 {
-                    err.multipart_suggestion(
-                        "parentheses are required to parse this as an expression",
-                        vec![
-                            (stmt.span.shrink_to_lo(), "(".to_string()),
-                            (stmt.span.shrink_to_hi(), ")".to_string()),
-                        ],
-                        Applicability::MachineApplicable,
-                    );
+                    err.subdiagnostic(ExprParenthesesNeeded::surrounding(stmt.span));
                 } else {
                     err.span_suggestion(
                         expression.span.shrink_to_hi(),
@@ -843,14 +836,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     // wrapping in parentheses. We find the statement or expression following the
                     // `if` (`&& true`) and see if it is something that can reasonably be
                     // interpreted as a binop following an expression.
-                    err.multipart_suggestion(
-                        "parentheses are required to parse this as an expression",
-                        vec![
-                            (stmt.span.shrink_to_lo(), "(".to_string()),
-                            (stmt.span.shrink_to_hi(), ")".to_string()),
-                        ],
-                        Applicability::MachineApplicable,
-                    );
+                    err.subdiagnostic(ExprParenthesesNeeded::surrounding(stmt.span));
                 }
             }
         }

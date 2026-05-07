@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_feature::{AttributeTemplate, template};
 use rustc_hir::Target;
 use rustc_hir::attrs::AttributeKind;
@@ -26,7 +25,7 @@ impl SingleAttributeParser for DoNotRecommendParser {
         if !matches!(args, ArgParser::NoArgs) {
             cx.emit_lint(
                 MALFORMED_DIAGNOSTIC_ATTRIBUTES,
-                |dcx, level| crate::errors::DoNotRecommendDoesNotExpectArgs.into_diag(dcx, level),
+                crate::errors::DoNotRecommendDoesNotExpectArgs,
                 attr_span,
             );
         }
@@ -35,14 +34,12 @@ impl SingleAttributeParser for DoNotRecommendParser {
             let target_span = cx.target_span;
             cx.emit_lint(
                 MISPLACED_DIAGNOSTIC_ATTRIBUTES,
-                move |dcx, level| {
-                    IncorrectDoNotRecommendLocation { target_span }.into_diag(dcx, level)
-                },
+                IncorrectDoNotRecommendLocation { target_span },
                 attr_span,
             );
             return None;
         }
 
-        Some(AttributeKind::DoNotRecommend { attr_span })
+        Some(AttributeKind::DoNotRecommend)
     }
 }

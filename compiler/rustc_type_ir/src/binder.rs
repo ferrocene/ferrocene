@@ -5,7 +5,7 @@ use std::ops::{ControlFlow, Deref};
 
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash, StableHash_NoContext};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
 };
@@ -28,7 +28,7 @@ use crate::{self as ty, DebruijnIndex, Interner, UniverseIndex, Unnormalized};
 /// `Decodable` and `Encodable` are implemented for `Binder<T>` using the `impl_binder_encode_decode!` macro.
 #[derive_where(Clone, Copy, Hash, PartialEq, Debug; I: Interner, T)]
 #[derive(GenericTypeVisitable)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct Binder<I: Interner, T> {
     value: T,
     bound_vars: I::BoundVarKinds,
@@ -45,11 +45,11 @@ where
 {
     type Lifted = Binder<U, T::Lifted>;
 
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(Binder {
-            value: self.value.lift_to_interner(cx)?,
-            bound_vars: self.bound_vars.lift_to_interner(cx)?,
-        })
+    fn lift_to_interner(self, cx: U) -> Self::Lifted {
+        Binder {
+            value: self.value.lift_to_interner(cx),
+            bound_vars: self.bound_vars.lift_to_interner(cx),
+        }
     }
 }
 
@@ -365,7 +365,7 @@ impl<I: Interner> TypeVisitor<I> for ValidateBoundVars<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct EarlyBinder<I: Interner, T> {
     value: T,
@@ -951,10 +951,7 @@ impl<'a, I: Interner> ArgFolder<'a, I> {
 /// solver, canonicalization is hot and there are some pathological cases where
 /// this is needed (`post-mono-higher-ranked-hang`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(Encodable_NoContext, Decodable_NoContext, StableHash))]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
 pub enum BoundVarIndexKind {
     Bound(DebruijnIndex),
@@ -968,7 +965,7 @@ pub enum BoundVarIndexKind {
 #[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct Placeholder<I: Interner, T> {
     pub universe: UniverseIndex,
@@ -994,12 +991,12 @@ where
 {
     type Lifted = Placeholder<U, T::Lifted>;
 
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(Placeholder {
+    fn lift_to_interner(self, cx: U) -> Self::Lifted {
+        Placeholder {
             universe: self.universe,
-            bound: self.bound.lift_to_interner(cx)?,
+            bound: self.bound.lift_to_interner(cx),
             _tcx: PhantomData,
-        })
+        }
     }
 }
 
@@ -1007,9 +1004,8 @@ where
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
-
 pub enum BoundRegionKind<I: Interner> {
     /// An anonymous region parameter for a given fn (&T)
     Anon,
@@ -1070,7 +1066,7 @@ impl<I: Interner> BoundRegionKind<I> {
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum BoundTyKind<I: Interner> {
     Anon,
@@ -1081,7 +1077,7 @@ pub enum BoundTyKind<I: Interner> {
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum BoundVariableKind<I: Interner> {
     Ty(BoundTyKind<I>),
@@ -1116,7 +1112,7 @@ impl<I: Interner> BoundVariableKind<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, HashStable_NoContext, Decodable_NoContext)
+    derive(Encodable_NoContext, StableHash_NoContext, Decodable_NoContext)
 )]
 pub struct BoundRegion<I: Interner> {
     pub var: ty::BoundVar,
@@ -1177,7 +1173,7 @@ impl<I: Interner> PlaceholderRegion<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct BoundTy<I: Interner> {
     pub var: ty::BoundVar,
@@ -1190,8 +1186,8 @@ where
 {
     type Lifted = BoundTy<U>;
 
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(BoundTy { var: self.var, kind: self.kind.lift_to_interner(cx)? })
+    fn lift_to_interner(self, cx: U) -> Self::Lifted {
+        BoundTy { var: self.var, kind: self.kind.lift_to_interner(cx) }
     }
 }
 
@@ -1243,7 +1239,7 @@ impl<I: Interner> PlaceholderType<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct BoundConst<I: Interner> {
     pub var: ty::BoundVar,

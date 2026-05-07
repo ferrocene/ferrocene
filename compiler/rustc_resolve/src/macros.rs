@@ -23,11 +23,11 @@ use rustc_hir::{Attribute, StabilityLevel};
 use rustc_middle::middle::stability;
 use rustc_middle::ty::{RegisteredTools, TyCtxt};
 use rustc_session::Session;
+use rustc_session::errors::feature_err;
 use rustc_session::lint::builtin::{
     LEGACY_DERIVE_HELPERS, OUT_OF_SCOPE_MACRO_CALLS, UNKNOWN_DIAGNOSTIC_ATTRIBUTES,
     UNUSED_MACRO_RULES, UNUSED_MACROS,
 };
-use rustc_session::parse::feature_err;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::{self, AstPass, ExpnData, ExpnKind, LocalExpnId, MacroKind};
@@ -133,7 +133,7 @@ pub fn registered_tools_ast(
 ) -> RegisteredTools {
     let mut registered_tools = RegisteredTools::default();
 
-    if let Some(Attribute::Parsed(AttributeKind::RegisterTool(tools, _))) =
+    if let Some(Attribute::Parsed(AttributeKind::RegisterTool(tools))) =
         AttributeParser::parse_limited(sess, pre_configured_attrs, &[sym::register_tool])
     {
         for tool in tools {
@@ -883,7 +883,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 }
                 _ => None,
             },
-            None => self.get_macro(res).map(|macro_data| Arc::clone(&macro_data.ext)),
+            None => self.get_macro(res).map(Arc::clone),
         };
         Ok((ext, res))
     }
@@ -1186,7 +1186,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 self.get_mut().record_use(ident, fallback_binding, Used::Other);
             } else {
                 let location = match parent_scope.module.kind {
-                    ModuleKind::Def(kind, def_id, name) => {
+                    ModuleKind::Def(kind, def_id, _, name) => {
                         if let Some(name) = name {
                             format!("{} `{name}`", kind.descr(def_id))
                         } else {
@@ -1213,7 +1213,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         // Reserve some names that are not quite covered by the general check
         // performed on `Resolver::builtin_attrs`.
         if name == sym::cfg || name == sym::cfg_attr {
-            let macro_kinds = self.get_macro(res).map(|macro_data| macro_data.ext.macro_kinds());
+            let macro_kinds = res.macro_kinds();
             if macro_kinds.is_some() && sub_namespace_match(macro_kinds, Some(MacroKind::Attr)) {
                 self.dcx().emit_err(errors::NameReservedInAttributeNamespace { span, ident: name });
             }

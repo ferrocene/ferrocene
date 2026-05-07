@@ -810,17 +810,6 @@ impl Debug for StatementKind<'_> {
             FakeRead(box (ref cause, ref place)) => {
                 write!(fmt, "FakeRead({cause:?}, {place:?})")
             }
-            Retag(ref kind, ref place) => write!(
-                fmt,
-                "Retag({}{:?})",
-                match kind {
-                    RetagKind::FnEntry => "[fn entry] ",
-                    RetagKind::TwoPhase => "[2phase] ",
-                    RetagKind::Raw => "[raw] ",
-                    RetagKind::Default => "",
-                },
-                place,
-            ),
             StorageLive(ref place) => write!(fmt, "StorageLive({place:?})"),
             StorageDead(ref place) => write!(fmt, "StorageDead({place:?})"),
             SetDiscriminant { ref place, variant_index } => {
@@ -1095,7 +1084,10 @@ impl<'tcx> Debug for Rvalue<'tcx> {
         use self::Rvalue::*;
 
         match *self {
-            Use(ref place) => write!(fmt, "{place:?}"),
+            Use(ref operand, with_retag) => {
+                // With retag is more common so we only print when it's without.
+                write!(fmt, "{}{operand:?}", if with_retag.no() { "no_retag " } else { "" })
+            }
             Repeat(ref a, b) => {
                 write!(fmt, "[{a:?}; ")?;
                 pretty_print_const(b, fmt, false)?;
@@ -1165,7 +1157,7 @@ impl<'tcx> Debug for Rvalue<'tcx> {
                     AggregateKind::Adt(adt_did, variant, args, _user_ty, _) => {
                         ty::tls::with(|tcx| {
                             let variant_def = &tcx.adt_def(adt_did).variant(variant);
-                            let args = tcx.lift(args).expect("could not lift for printing");
+                            let args = tcx.lift(args);
                             let name = FmtPrinter::print_string(tcx, Namespace::ValueNS, |p| {
                                 p.print_def_path(variant_def.def_id, args)
                             })?;
@@ -1187,7 +1179,7 @@ impl<'tcx> Debug for Rvalue<'tcx> {
                     AggregateKind::Closure(def_id, args)
                     | AggregateKind::CoroutineClosure(def_id, args) => ty::tls::with(|tcx| {
                         let name = if tcx.sess.opts.unstable_opts.span_free_formats {
-                            let args = tcx.lift(args).unwrap();
+                            let args = tcx.lift(args);
                             format!("{{closure@{}}}", tcx.def_path_str_with_args(def_id, args),)
                         } else {
                             let span = tcx.def_span(def_id);
@@ -1911,8 +1903,6 @@ fn pretty_print_const_value_tcx<'tcx>(
         // E.g. `transmute([0usize; 2]): (u8, *mut T)` needs to know `T: Sized`
         // to be able to destructure the tuple into `(0u8, *mut T)`
         (_, ty::Array(..) | ty::Tuple(..) | ty::Adt(..)) if !ty.has_non_region_param() => {
-            let ct = tcx.lift(ct).unwrap();
-            let ty = tcx.lift(ty).unwrap();
             if let Some(contents) = tcx.try_destructure_mir_constant_for_user_output(ct, ty) {
                 let fields: Vec<(ConstValue, Ty<'_>)> = contents.fields.to_vec();
                 match *ty.kind() {
@@ -1937,7 +1927,6 @@ fn pretty_print_const_value_tcx<'tcx>(
                             .variant
                             .expect("destructed mir constant of adt without variant idx");
                         let variant_def = &def.variant(variant_idx);
-                        let args = tcx.lift(args).unwrap();
                         let mut p = FmtPrinter::new(tcx, Namespace::ValueNS);
                         p.print_alloc_ids = true;
                         p.pretty_print_value_path(variant_def.def_id, args)?;
@@ -1974,7 +1963,6 @@ fn pretty_print_const_value_tcx<'tcx>(
         (ConstValue::Scalar(scalar), _) => {
             let mut p = FmtPrinter::new(tcx, Namespace::ValueNS);
             p.print_alloc_ids = true;
-            let ty = tcx.lift(ty).unwrap();
             p.pretty_print_const_scalar(scalar, ty)?;
             fmt.write_str(&p.into_buffer())?;
             return Ok(());
@@ -2000,8 +1988,7 @@ pub(crate) fn pretty_print_const_value<'tcx>(
     fmt: &mut Formatter<'_>,
 ) -> fmt::Result {
     ty::tls::with(|tcx| {
-        let ct = tcx.lift(ct).unwrap();
-        let ty = tcx.lift(ty).unwrap();
+        let ty = tcx.lift(ty);
         pretty_print_const_value_tcx(tcx, ct, ty, fmt)
     })
 }

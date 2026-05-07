@@ -147,6 +147,14 @@ impl<'tcx> FnCtxt<'_, 'tcx> {
     /// foo(1.0);
     /// ```
     fn calculate_fallback_to_f32(&self, unresolved_variables: &[Ty<'tcx>]) -> UnordSet<FloatVid> {
+        // Short-circuit: if no unresolved variable is a float, no f32 fallback can apply,
+        // so we can skip the (potentially very expensive) work in `from_float_for_f32_root_vids`.
+        // Under the new solver, that function walks `visit_proof_tree` for every pending
+        // obligation, which is O(N × proof_tree_size) and can dominate type-checking on crates
+        // with many large pending obligations and no f32 involvement.
+        if unresolved_variables.iter().all(|ty| ty.float_vid().is_none()) {
+            return UnordSet::new();
+        }
         let roots: UnordSet<ty::FloatVid> = self.from_float_for_f32_root_vids();
         if roots.is_empty() {
             // Most functions have no `f32: From<{float}>` predicates, so short-circuit and return
@@ -211,8 +219,8 @@ impl<'tcx> FnCtxt<'_, 'tcx> {
         let diverging_roots: UnordSet<ty::TyVid> = self
             .diverging_type_vars
             .borrow()
-            .items()
-            .map(|&ty| self.shallow_resolve(ty))
+            .iter()
+            .map(|&ty_id| self.shallow_resolve(Ty::new_var(self.tcx, ty_id)))
             .filter_map(|ty| ty.ty_vid())
             .map(|vid| self.root_var(vid))
             .collect();

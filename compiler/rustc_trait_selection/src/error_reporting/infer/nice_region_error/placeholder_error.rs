@@ -28,7 +28,7 @@ pub(crate) struct Highlighted<'tcx, T> {
 
 impl<'tcx, T> IntoDiagArg for Highlighted<'tcx, T>
 where
-    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>>,
+    T: for<'a> Print<FmtPrinter<'a, 'tcx>>,
 {
     fn into_diag_arg(self, _: &mut Option<std::path::PathBuf>) -> rustc_errors::DiagArgValue {
         rustc_errors::DiagArgValue::Str(self.to_string().into())
@@ -43,7 +43,7 @@ impl<'tcx, T> Highlighted<'tcx, T> {
 
 impl<'tcx, T> fmt::Display for Highlighted<'tcx, T>
 where
-    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>>,
+    T: for<'a> Print<FmtPrinter<'a, 'tcx>>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut p = ty::print::FmtPrinter::new(self.tcx, self.ns);

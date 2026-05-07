@@ -2269,6 +2269,8 @@ options! {
         themselves (default: no)"),
     direct_access_external_data: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "Direct or use GOT indirect to reference external data symbols"),
+    disable_fast_paths: bool = (false, parse_bool, [TRACKED],
+        "disable various performance optimizations in trait solving"),
     dual_proc_macros: bool = (false, parse_bool, [TRACKED],
         "load proc macros for both target and host, but only link to the target (default: no)"),
     dump_dep_graph: bool = (false, parse_bool, [UNTRACKED],
@@ -2450,9 +2452,6 @@ options! {
         "align all functions to at least this many bytes. Must be a power of 2"),
     min_recursion_limit: Option<usize> = (None, parse_opt_number, [TRACKED],
         "set a minimum recursion limit (final limit = max(this, recursion_limit_from_crate))"),
-    mir_emit_retag: bool = (false, parse_bool, [TRACKED],
-        "emit Retagging MIR statements, interpreted e.g., by miri; implies -Zmir-opt-level=0 \
-        (default: no)"),
     mir_enable_passes: Vec<(String, bool)> = (Vec::new(), parse_list_with_polarity, [TRACKED],
         "use like `-Zmir-enable-passes=+DestinationPropagation,-InstSimplify`. Forces the \
         specified passes to be enabled, overriding all other checks. In particular, this will \

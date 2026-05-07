@@ -1,5 +1,5 @@
 use rustc_data_structures::intern::Interned;
-use rustc_macros::HashStable;
+use rustc_macros::StableHash;
 use rustc_type_ir as ir;
 pub use rustc_type_ir::solve::*;
 
@@ -14,10 +14,12 @@ pub type QueryResult<'tcx> = ir::solve::QueryResult<TyCtxt<'tcx>>;
 pub type CandidateSource<'tcx> = ir::solve::CandidateSource<TyCtxt<'tcx>>;
 pub type CanonicalInput<'tcx, P = ty::Predicate<'tcx>> = ir::solve::CanonicalInput<TyCtxt<'tcx>, P>;
 pub type CanonicalResponse<'tcx> = ir::solve::CanonicalResponse<TyCtxt<'tcx>>;
+pub type FetchEligibleAssocItemResponse<'tcx> =
+    ir::solve::FetchEligibleAssocItemResponse<TyCtxt<'tcx>>;
 
 pub type PredefinedOpaques<'tcx> = &'tcx ty::List<(ty::OpaqueTypeKey<'tcx>, Ty<'tcx>)>;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash, HashStable)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash, StableHash)]
 pub struct ExternalConstraints<'tcx>(
     pub(crate) Interned<'tcx, ExternalConstraintsData<TyCtxt<'tcx>>>,
 );

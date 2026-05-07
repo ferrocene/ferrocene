@@ -3,7 +3,7 @@ use std::{fmt, iter};
 
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash, StableHash_NoContext};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
 };
@@ -20,7 +20,7 @@ use crate::{self as ty, AliasTyKind, Interner};
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct OutlivesPredicate<I: Interner, A>(pub A, pub I::Region);
 
@@ -35,8 +35,8 @@ where
 {
     type Lifted = OutlivesPredicate<U, A::Lifted>;
 
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(OutlivesPredicate(self.0.lift_to_interner(cx)?, self.1.lift_to_interner(cx)?))
+    fn lift_to_interner(self, cx: U) -> Self::Lifted {
+        OutlivesPredicate(self.0.lift_to_interner(cx), self.1.lift_to_interner(cx))
     }
 }
 
@@ -48,7 +48,7 @@ where
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct RegionEqPredicate<I: Interner>(pub I::Region, pub I::Region);
 
@@ -63,7 +63,7 @@ impl<I: Interner> RegionEqPredicate<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub enum RegionConstraint<I: Interner> {
     Outlives(OutlivesPredicate<I, I::GenericArg>),
@@ -123,7 +123,7 @@ impl<I: Interner> RegionConstraint<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct TraitRef<I: Interner> {
     pub def_id: I::TraitId,
@@ -200,7 +200,7 @@ impl<I: Interner> ty::Binder<I, TraitRef<I>> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct TraitPredicate<I: Interner> {
     pub trait_ref: TraitRef<I>,
@@ -270,10 +270,7 @@ impl<I: Interner> fmt::Debug for TraitPredicate<I> {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(Decodable_NoContext, Encodable_NoContext, StableHash))]
 pub enum ImplPolarity {
     /// `impl Trait for Type`
     Positive,
@@ -313,10 +310,7 @@ impl ImplPolarity {
 /// Distinguished from [`ImplPolarity`] since we never compute goals with
 /// "reservation" level.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(Decodable_NoContext, Encodable_NoContext, StableHash))]
 pub enum PredicatePolarity {
     /// `Type: Trait`
     Positive,
@@ -347,7 +341,7 @@ impl fmt::Display for PredicatePolarity {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub enum ExistentialPredicate<I: Interner> {
     /// E.g., `Iterator`.
@@ -406,7 +400,7 @@ impl<I: Interner> ty::Binder<I, ExistentialPredicate<I>> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct ExistentialTraitRef<I: Interner> {
     pub def_id: I::TraitId,
@@ -475,7 +469,7 @@ impl<I: Interner> ty::Binder<I, ExistentialTraitRef<I>> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct ExistentialProjection<I: Interner> {
     pub def_id: I::DefId,
@@ -564,7 +558,7 @@ impl<I: Interner> ty::Binder<I, ExistentialProjection<I>> {
 #[derive(Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum AliasTermKind<I: Interner> {
     /// A projection `<Type as Trait>::AssocType`.
@@ -671,7 +665,7 @@ impl<I: Interner> From<ty::AliasTyKind<I>> for AliasTermKind<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct AliasTerm<I: Interner> {
     /// The parameters of the associated or opaque item.
@@ -732,14 +726,30 @@ impl<I: Interner> AliasTerm<I> {
             AliasTermKind::InherentTy { def_id } => AliasTyKind::Inherent { def_id },
             AliasTermKind::OpaqueTy { def_id } => AliasTyKind::Opaque { def_id },
             AliasTermKind::FreeTy { def_id } => AliasTyKind::Free { def_id },
-            AliasTermKind::InherentConst { .. }
+            kind @ (AliasTermKind::InherentConst { .. }
             | AliasTermKind::FreeConst { .. }
             | AliasTermKind::UnevaluatedConst { .. }
-            | AliasTermKind::ProjectionConst { .. } => {
-                panic!("Cannot turn `UnevaluatedConst` into `AliasTy`")
+            | AliasTermKind::ProjectionConst { .. }) => {
+                panic!("Cannot turn `{}` into `AliasTy`", kind.descr())
             }
         };
         ty::AliasTy { kind, args: self.args, _use_alias_ty_new_instead: () }
+    }
+
+    pub fn expect_ct(self, interner: I) -> ty::UnevaluatedConst<I> {
+        let def_id = match self.kind(interner) {
+            AliasTermKind::InherentConst { def_id }
+            | AliasTermKind::FreeConst { def_id }
+            | AliasTermKind::UnevaluatedConst { def_id }
+            | AliasTermKind::ProjectionConst { def_id } => def_id,
+            kind @ (AliasTermKind::ProjectionTy { .. }
+            | AliasTermKind::InherentTy { .. }
+            | AliasTermKind::OpaqueTy { .. }
+            | AliasTermKind::FreeTy { .. }) => {
+                panic!("Cannot turn `{}` into `UnevaluatedConst`", kind.descr())
+            }
+        };
+        ty::UnevaluatedConst { def: def_id.try_into().unwrap(), args: self.args }
     }
 
     // FIXME: remove this function (access the field instead)
@@ -883,7 +893,7 @@ impl<I: Interner> From<ty::AliasTy<I>> for AliasTerm<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct ProjectionPredicate<I: Interner> {
     pub projection_term: AliasTerm<I>,
@@ -946,7 +956,7 @@ impl<I: Interner> fmt::Debug for ProjectionPredicate<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct NormalizesTo<I: Interner> {
     pub alias: AliasTerm<I>,
@@ -983,7 +993,7 @@ impl<I: Interner> fmt::Debug for NormalizesTo<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct HostEffectPredicate<I: Interner> {
     pub trait_ref: ty::TraitRef<I>,
@@ -1029,7 +1039,7 @@ impl<I: Interner> ty::Binder<I, HostEffectPredicate<I>> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct SubtypePredicate<I: Interner> {
     pub a_is_expected: bool,
@@ -1044,7 +1054,7 @@ impl<I: Interner> Eq for SubtypePredicate<I> {}
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct CoercePredicate<I: Interner> {
     pub a: I::Ty,
@@ -1054,10 +1064,7 @@ pub struct CoercePredicate<I: Interner> {
 impl<I: Interner> Eq for CoercePredicate<I> {}
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(Encodable_NoContext, Decodable_NoContext, StableHash))]
 pub enum BoundConstness {
     /// `Type: const Trait`
     ///

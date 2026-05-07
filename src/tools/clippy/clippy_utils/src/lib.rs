@@ -548,7 +548,12 @@ fn is_default_equivalent_ctor(cx: &LateContext<'_>, def_id: DefId, path: &QPath<
     if let QPath::TypeRelative(_, method) = path
         && method.ident.name == sym::new
         && let Some(impl_did) = cx.tcx.impl_of_assoc(def_id)
-        && let Some(adt) = cx.tcx.type_of(impl_did).instantiate_identity().skip_norm_wip().ty_adt_def()
+        && let Some(adt) = cx
+            .tcx
+            .type_of(impl_did)
+            .instantiate_identity()
+            .skip_norm_wip()
+            .ty_adt_def()
     {
         return Some(adt.did()) == cx.tcx.lang_items().string()
             || (cx.tcx.get_diagnostic_name(adt.did())).is_some_and(|adt_name| std_types_symbols.contains(&adt_name));
@@ -1489,7 +1494,12 @@ pub fn return_ty<'tcx>(cx: &LateContext<'tcx>, fn_def_id: OwnerId) -> Ty<'tcx> {
 
 /// Convenience function to get the nth argument type of a function.
 pub fn nth_arg<'tcx>(cx: &LateContext<'tcx>, fn_def_id: OwnerId, nth: usize) -> Ty<'tcx> {
-    let arg = cx.tcx.fn_sig(fn_def_id).instantiate_identity().skip_norm_wip().input(nth);
+    let arg = cx
+        .tcx
+        .fn_sig(fn_def_id)
+        .instantiate_identity()
+        .skip_norm_wip()
+        .input(nth);
     cx.tcx.instantiate_bound_regions_with_erased(arg)
 }
 
@@ -1736,8 +1746,9 @@ pub fn in_automatically_derived(tcx: TyCtxt<'_>, id: HirId) -> bool {
         .filter(|(_, node)| matches!(node, OwnerNode::Item(item) if matches!(item.kind, ItemKind::Impl(_))))
         .any(|(id, _)| {
             find_attr!(
-                tcx.hir_attrs(tcx.local_def_id_to_hir_id(id.def_id)),
-                AutomaticallyDerived(..)
+                tcx,
+                id.def_id,
+                AutomaticallyDerived
             )
         })
 }
@@ -2101,11 +2112,11 @@ pub fn std_or_core(cx: &LateContext<'_>) -> Option<&'static str> {
 }
 
 pub fn is_no_std_crate(cx: &LateContext<'_>) -> bool {
-    find_attr!(cx.tcx, crate, NoStd(..))
+    find_attr!(cx.tcx, crate, NoStd)
 }
 
 pub fn is_no_core_crate(cx: &LateContext<'_>) -> bool {
-    find_attr!(cx.tcx, crate, NoCore(..))
+    find_attr!(cx.tcx, crate, NoCore)
 }
 
 /// Check if parent of a hir node is a trait implementation block.

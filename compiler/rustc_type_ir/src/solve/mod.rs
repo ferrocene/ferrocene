@@ -1,17 +1,21 @@
 pub mod inspect;
 
+use std::fmt::Debug;
 use std::hash::Hash;
 
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash, StableHash_NoContext};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
 };
+use tracing::debug;
 
 use crate::lang_items::SolverTraitLangItem;
 use crate::search_graph::PathKind;
-use crate::{self as ty, Canonical, CanonicalVarValues, Interner, Upcast};
+use crate::{
+    self as ty, Canonical, CanonicalVarValues, CantBeErased, Interner, TypingMode, Upcast,
+};
 
 pub type CanonicalInput<I, T = <I as Interner>::Predicate> =
     ty::CanonicalQueryInput<I, QueryInput<I, T>>;
@@ -25,8 +29,303 @@ pub type CanonicalResponse<I> = Canonical<I, Response<I>>;
 pub type QueryResult<I> = Result<CanonicalResponse<I>, NoSolution>;
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub struct NoSolution;
+
+pub enum NoSolutionOrOpaquesAccessed {
+    NoSolution(NoSolution),
+    /// A bit like [`NoSolution`], but for functions that normally cannot fail *unless* they accessed
+    /// opaues. (See [`TypingMode::ErasedNotCoherence`]). Getting `OpaquesAccessed` doesn't mean there
+    /// truly is no solution. It just means that we want to bail out of the current query as fast as
+    /// possible, possibly by returning `NoSolution` if that's fastest. This is okay because when you get
+    /// `OpaquesAccessed` we're guaranteed that we're going to retry this query in the original typing
+    /// mode to get the correct answer.
+    OpaquesAccessed,
+}
+
+/// This conversion is sound, because even in we're in `OpaquesAccessed`,
+/// we're going to retry so `NoSolution` is a valid response to give..
+impl From<NoSolutionOrOpaquesAccessed> for NoSolution {
+    fn from(
+        (NoSolutionOrOpaquesAccessed::NoSolution(_) | NoSolutionOrOpaquesAccessed::OpaquesAccessed): NoSolutionOrOpaquesAccessed,
+    ) -> Self {
+        NoSolution
+    }
+}
+
+impl From<NoSolution> for NoSolutionOrOpaquesAccessed {
+    fn from(value: NoSolution) -> Self {
+        Self::NoSolution(value)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
+pub enum SmallCopyList<T: Copy + Debug + Hash + Eq> {
+    Empty,
+    One([T; 1]),
+    Two([T; 2]),
+    Three([T; 3]),
+}
+
+impl<T: Copy + Debug + Hash + Eq> SmallCopyList<T> {
+    fn empty() -> Self {
+        Self::Empty
+    }
+
+    fn new(first: T) -> Self {
+        Self::One([first])
+    }
+
+    /// Computes the union of two lists. Duplicates are removed.
+    fn union(self, other: Self) -> Option<Self> {
+        match (self, other) {
+            (Self::Empty, other) | (other, Self::Empty) => Some(other),
+
+            (Self::One([a]), Self::One([b])) if a == b => Some(Self::One([a])),
+            (Self::One([a]), Self::One([b])) => Some(Self::Two([a, b])),
+            (Self::One([a]), Self::Two([b, c])) | (Self::Two([a, b]), Self::One([c]))
+                if a == b && b == c =>
+            {
+                Some(Self::One([a]))
+            }
+            (Self::One([a]), Self::Two([b, c])) | (Self::Two([a, b]), Self::One([c])) if a == b => {
+                Some(Self::Two([a, c]))
+            }
+            (Self::One([a]), Self::Two([b, c])) | (Self::Two([a, b]), Self::One([c])) if a == c => {
+                Some(Self::Two([a, b]))
+            }
+            (Self::One([a]), Self::Two([b, c])) | (Self::Two([a, b]), Self::One([c])) if b == c => {
+                Some(Self::Two([a, b]))
+            }
+            (Self::One([a]), Self::Two([b, c])) | (Self::Two([a, b]), Self::One([c])) => {
+                Some(Self::Three([a, b, c]))
+            }
+            _ => None,
+        }
+    }
+}
+
+impl<T: Copy + Debug + Hash + Eq> AsRef<[T]> for SmallCopyList<T> {
+    fn as_ref(&self) -> &[T] {
+        match self {
+            Self::Empty => &[],
+            Self::One(l) => l,
+            Self::Two(l) => l,
+            Self::Three(l) => l,
+        }
+    }
+}
+
+/// Information about how we accessed opaque types
+/// This is what the trait solver does when each states is encountered:
+///
+/// |                         | bail? | rerun goal?                                                                                                          |
+/// | ----------------------- | ----- | -------------------------------------------------------------------------------------------------------------------- |
+/// | never                   | no    | no                                                                                                                   |
+/// | always                  | yes   | yes                                                                                                                  |
+/// | [defid in storage]      | no    | only if any of the defids in the list is in the opaque type storage OR if TypingMode::PostAnalysis                   |
+/// | opaque with hidden type | no    | only if any of the the opaques in the opaque type storage has a hidden type in this list AND if TypingMode::Analysis |
+///
+/// - "bail" is implemented with [`should_bail`](Self::should_bail).
+///   If true, we're abandoning our attempt to canonicalize in [`TypingMode::ErasedNotCoherence`],
+///   and should try to return as soon as possible to waste as little time as possible.
+///   A rerun will be attempted in the original typing mode.
+///
+/// - Rerun goal is implemented with `should_rerun_after_erased_canonicalization`, on the `EvalCtxt`.
+///
+/// Some variant names contain an `Or` here. They rerun when any of the two conditions applies
+#[derive_where(Copy, Clone, Debug, Hash, PartialEq, Eq; I: Interner)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
+pub enum RerunCondition<I: Interner> {
+    Never,
+
+    /// Note that this only reruns according to the condition *if* we are in [`TypingMode::Analysis`].
+    AnyOpaqueHasInferAsHidden,
+    /// Note: unconditionally reruns in postanalysis
+    OpaqueInStorage(SmallCopyList<I::LocalDefId>),
+
+    /// Merges [`Self::AnyOpaqueHasInferAsHidden`] and [`Self::OpaqueInStorage`].
+    /// Note that just like the unmerged [`Self::OpaqueInStorage`], that part of the
+    /// condition only matters in [`TypingMode::Analysis`]
+    OpaqueInStorageOrAnyOpaqueHasInferAsHidden(SmallCopyList<I::LocalDefId>),
+
+    Always,
+}
+
+impl<I: Interner> RerunCondition<I> {
+    /// Merge two rerun states according to the following transition diagram
+    /// (some cells are empty because the table is symmetric, i.e. `a.merge(b)` == `b.merge(a)`).
+    ///
+    /// - "self" here means the current state, i.e. the state of the current column
+    /// - square brackets represents that this is a list of things. Even if the state doesn't
+    /// change, we might grow the list to effectively end up in a different state anyway
+    /// - `[o. in s.]` abbreviates "opaque in storage"
+    ///
+    ///
+    /// |                                 | never  | always | [opaque in storage] | opaque has infer as hidden | [o. in s.] or i. as hidden |
+    /// | ------------------------------- | ------ | ------ | ------------------- | -------------------------- | -------------------------- |
+    /// | never                           | self   | self   | self                | self                       | self                       |
+    /// | always                          |        | always | always              | always                     | always                     |
+    /// | [opaque in storage]             |        |        | concat self         | [o. in s.] or i. as hidden | concat to self             |
+    /// | opaque has infer as hidden type |        |        |                     | self                       | to self                    |
+    ///
+    fn merge(self, other: Self) -> Self {
+        let merged = match (self, other) {
+            (Self::Never, other) | (other, Self::Never) => other,
+            (Self::Always, _) | (_, Self::Always) => Self::Always,
+
+            (Self::OpaqueInStorage(a), Self::OpaqueInStorage(b)) => {
+                a.union(b).map(Self::OpaqueInStorage).unwrap_or(Self::Always)
+            }
+            (Self::AnyOpaqueHasInferAsHidden, Self::AnyOpaqueHasInferAsHidden) => {
+                Self::AnyOpaqueHasInferAsHidden
+            }
+            (
+                Self::AnyOpaqueHasInferAsHidden,
+                Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(a),
+            )
+            | (
+                Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(a),
+                Self::AnyOpaqueHasInferAsHidden,
+            ) => Self::OpaqueInStorage(a),
+
+            (
+                Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(a),
+                Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(b),
+            ) => a
+                .union(b)
+                .map(Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden)
+                .unwrap_or(Self::Always),
+
+            (Self::OpaqueInStorage(a), Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(b))
+            | (Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(b), Self::OpaqueInStorage(a)) => a
+                .union(b)
+                .map(Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden)
+                .unwrap_or(Self::Always),
+
+            (Self::OpaqueInStorage(a), Self::AnyOpaqueHasInferAsHidden)
+            | (Self::AnyOpaqueHasInferAsHidden, Self::OpaqueInStorage(a)) => {
+                Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(a)
+            }
+        };
+        debug!("merging rerun state {self:?} + {other:?} => {merged:?}");
+        merged
+    }
+
+    #[must_use]
+    fn should_bail(&self) -> bool {
+        match self {
+            Self::Always => true,
+            Self::Never
+            | Self::OpaqueInStorage(_)
+            | Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(_)
+            | Self::AnyOpaqueHasInferAsHidden => false,
+        }
+    }
+
+    /// Returns true when any access of opaques was attempted.
+    /// i.e. when `self != Self::Never`
+    #[must_use]
+    fn might_rerun(&self) -> bool {
+        match self {
+            Self::Never => false,
+            Self::Always
+            | Self::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(_)
+            | Self::OpaqueInStorage(_)
+            | Self::AnyOpaqueHasInferAsHidden => true,
+        }
+    }
+}
+
+/// Mainly for debugging, to keep track of the source of the rerunning
+/// in [`TypingMode::ErasedNotCoherence`].
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(TypeVisitable_Generic, GenericTypeVisitable)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
+pub enum RerunReason {
+    NormalizeOpaqueTypeRemoteCrate,
+    NormalizeOpaqueType,
+    MayUseUnstableFeature,
+    EvaluateConst,
+    SkipErasedAttempt,
+    SelfTyInfer,
+    FetchEligibleAssocItem,
+    AutoTraitLeakage,
+    TryStallCoroutine,
+}
+
+#[derive_where(Copy, Clone, Debug, Hash, PartialEq, Eq; I: Interner)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
+pub struct AccessedOpaques<I: Interner> {
+    #[cfg_attr(feature = "nightly", type_visitable(ignore))]
+    #[type_foldable(identity)]
+    pub reason: Option<RerunReason>,
+    pub rerun: RerunCondition<I>,
+}
+
+impl<I: Interner> Default for AccessedOpaques<I> {
+    fn default() -> Self {
+        Self { reason: None, rerun: RerunCondition::Never }
+    }
+}
+
+impl<I: Interner> AccessedOpaques<I> {
+    pub fn update(&mut self, other: Self) {
+        *self = Self {
+            // prefer the newest reason
+            reason: other.reason.or(self.reason),
+            // merging accessed states can only result in MultipleOrUnknown
+            rerun: self.rerun.merge(other.rerun),
+        };
+    }
+
+    #[must_use]
+    pub fn might_rerun(&self) -> bool {
+        self.rerun.might_rerun()
+    }
+
+    #[must_use]
+    pub fn should_bail(&self) -> bool {
+        self.rerun.should_bail()
+    }
+
+    pub fn rerun_always(&mut self, reason: RerunReason) {
+        debug!("set rerun always");
+        self.update(AccessedOpaques { reason: Some(reason), rerun: RerunCondition::Always });
+    }
+
+    pub fn rerun_if_in_post_analysis(&mut self, reason: RerunReason) {
+        debug!("set rerun if post analysis");
+        self.update(AccessedOpaques {
+            reason: Some(reason),
+            rerun: RerunCondition::OpaqueInStorage(SmallCopyList::empty()),
+        });
+    }
+
+    pub fn rerun_if_opaque_in_opaque_type_storage(
+        &mut self,
+        reason: RerunReason,
+        defid: I::LocalDefId,
+    ) {
+        debug!("set rerun if opaque type {defid:?} in storage");
+        self.update(AccessedOpaques {
+            reason: Some(reason),
+            rerun: RerunCondition::OpaqueInStorage(SmallCopyList::new(defid)),
+        });
+    }
+
+    pub fn rerun_if_any_opaque_has_infer_as_hidden_type(&mut self, reason: RerunReason) {
+        debug!("set rerun if any opaque in the storage has a hidden type that is an infer var");
+        self.update(AccessedOpaques {
+            reason: Some(reason),
+            rerun: RerunCondition::AnyOpaqueHasInferAsHidden,
+        });
+    }
+}
 
 /// A goal is a statement, i.e. `predicate`, we want to prove
 /// given some assumptions, i.e. `param_env`.
@@ -35,10 +334,10 @@ pub struct NoSolution;
 /// we're currently typechecking while the `predicate` is some trait bound.
 #[derive_where(Clone, Hash, PartialEq, Debug; I: Interner, P)]
 #[derive_where(Copy; I: Interner, P: Copy)]
-#[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct Goal<I: Interner, P> {
     pub param_env: I::ParamEnv,
@@ -67,7 +366,7 @@ impl<I: Interner, P> Goal<I, P> {
 ///
 /// It is also used by proof tree visitors, e.g. for diagnostics purposes.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum GoalSource {
     Misc,
     /// A nested goal required to prove that types are equal/subtypes.
@@ -97,10 +396,10 @@ pub enum GoalSource {
 
 #[derive_where(Clone, Hash, PartialEq, Debug; I: Interner, Goal<I, P>)]
 #[derive_where(Copy; I: Interner, Goal<I, P>: Copy)]
-#[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct QueryInput<I: Interner, P> {
     pub goal: Goal<I, P>,
@@ -217,10 +516,7 @@ pub enum AliasBoundKind {
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(HashStable_NoContext, Encodable_NoContext, Decodable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(StableHash, Encodable_NoContext, Decodable_NoContext))]
 pub enum BuiltinImplSource {
     /// A built-in impl that is considered trivial, without any nested requirements. They
     /// are preferred over where-clauses, and we want to track them explicitly.
@@ -236,9 +532,17 @@ pub enum BuiltinImplSource {
     TraitUpcasting(usize),
 }
 
+#[derive_where(Copy, Clone, Debug; I: Interner)]
+pub enum FetchEligibleAssocItemResponse<I: Interner> {
+    Err(I::ErrorGuaranteed),
+    Found(I::DefId),
+    NotFound(TypingMode<I, CantBeErased>),
+    NotFoundBecauseErased,
+}
+
 #[derive_where(Clone, Copy, Hash, PartialEq, Debug; I: Interner)]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct Response<I: Interner> {
     pub certainty: Certainty,
     pub var_values: CanonicalVarValues<I>,
@@ -251,9 +555,9 @@ impl<I: Interner> Eq for Response<I> {}
 /// Additional constraints returned on success.
 #[derive_where(Clone, Hash, PartialEq, Debug, Default; I: Interner)]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct ExternalConstraintsData<I: Interner> {
-    pub region_constraints: Vec<ty::RegionConstraint<I>>,
+    pub region_constraints: Vec<(ty::RegionConstraint<I>, VisibleForLeakCheck)>,
     pub opaque_types: Vec<(ty::OpaqueTypeKey<I>, I::Ty)>,
     pub normalization_nested_goals: NestedNormalizationGoals<I>,
 }
@@ -268,9 +572,50 @@ impl<I: Interner> ExternalConstraintsData<I> {
     }
 }
 
+/// Whether the given region constraint should be considered/ignored for
+/// leak check. In most part of the compiler, this should be `Yes`, except
+/// for applying constraints from the nested goals in next-solver.
+/// `Unreachable` is used in places in which leak check isn't done, e.g.
+/// borrowck.
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
+pub enum VisibleForLeakCheck {
+    Yes,
+    No,
+    Unreachable,
+}
+
+impl VisibleForLeakCheck {
+    pub fn and(self, other: VisibleForLeakCheck) -> VisibleForLeakCheck {
+        match (self, other) {
+            // Make sure that we never overwrite that constraints shouldn't
+            // be encountered by the leak checked
+            (VisibleForLeakCheck::Unreachable, _) | (_, VisibleForLeakCheck::Unreachable) => {
+                VisibleForLeakCheck::Unreachable
+            }
+            (VisibleForLeakCheck::No, _) | (_, VisibleForLeakCheck::No) => VisibleForLeakCheck::No,
+            (VisibleForLeakCheck::Yes, VisibleForLeakCheck::Yes) => VisibleForLeakCheck::Yes,
+        }
+    }
+
+    pub fn or(self, other: VisibleForLeakCheck) -> VisibleForLeakCheck {
+        match (self, other) {
+            // Make sure that we never overwrite that constraints shouldn't
+            // be encountered by the leak checked
+            (VisibleForLeakCheck::Unreachable, _) | (_, VisibleForLeakCheck::Unreachable) => {
+                VisibleForLeakCheck::Unreachable
+            }
+            (VisibleForLeakCheck::Yes, _) | (_, VisibleForLeakCheck::Yes) => {
+                VisibleForLeakCheck::Yes
+            }
+            (VisibleForLeakCheck::No, VisibleForLeakCheck::No) => VisibleForLeakCheck::No,
+        }
+    }
+}
+
 #[derive_where(Clone, Hash, PartialEq, Debug, Default; I: Interner)]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct NestedNormalizationGoals<I: Interner>(pub Vec<(GoalSource, Goal<I, I::Predicate>)>);
 
 impl<I: Interner> Eq for NestedNormalizationGoals<I> {}
@@ -286,14 +631,14 @@ impl<I: Interner> NestedNormalizationGoals<I> {
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum Certainty {
     Yes,
     Maybe(MaybeInfo),
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct MaybeInfo {
     pub cause: MaybeCause,
     pub opaque_types_jank: OpaqueTypesJank,
@@ -353,7 +698,7 @@ impl MaybeInfo {
 /// a goal. It is good enough for now and only matters for very rare type inference
 /// edge cases. We can improve this later on if necessary.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum OpaqueTypesJank {
     AllGood,
     ErrorIfRigidSelfTy,
@@ -381,7 +726,7 @@ impl OpaqueTypesJank {
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub enum StalledOnCoroutines {
     Yes,
     No,
@@ -442,7 +787,7 @@ impl Certainty {
 
 /// Why we failed to evaluate a goal.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum MaybeCause {
     /// We failed due to ambiguity. This ambiguity can either
     /// be a true ambiguity, i.e. there are multiple different answers,
@@ -515,7 +860,7 @@ pub enum AdtDestructorKind {
 /// Which sizedness trait - `Sized`, `MetaSized`? `PointeeSized` is omitted as it is removed during
 /// lowering.
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum SizedTraitKind {
     /// `Sized` trait
     Sized,

@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_hir::attrs::diagnostic::Directive;
 use rustc_session::lint::builtin::MISPLACED_DIAGNOSTIC_ATTRIBUTES;
 
@@ -20,7 +19,7 @@ impl OnUnimplementedParser {
         if !matches!(cx.target, Target::Trait) {
             cx.emit_lint(
                 MISPLACED_DIAGNOSTIC_ATTRIBUTES,
-                move |dcx, level| DiagnosticOnUnimplementedOnlyForTraits.into_diag(dcx, level),
+                DiagnosticOnUnimplementedOnlyForTraits,
                 span,
             );
             return;
@@ -55,9 +54,8 @@ impl AttributeParser for OnUnimplementedParser {
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
 
     fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
-        if let Some(span) = self.span {
+        if let Some(_span) = self.span {
             Some(AttributeKind::OnUnimplemented {
-                span,
                 directive: self.directive.map(|d| Box::new(d.1)),
             })
         } else {

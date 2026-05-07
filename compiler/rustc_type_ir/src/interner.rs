@@ -11,7 +11,9 @@ use crate::inherent::*;
 use crate::ir_print::IrPrint;
 use crate::lang_items::{SolverAdtLangItem, SolverLangItem, SolverTraitLangItem};
 use crate::relate::Relate;
-use crate::solve::{CanonicalInput, Certainty, ExternalConstraintsData, QueryResult, inspect};
+use crate::solve::{
+    AccessedOpaques, CanonicalInput, Certainty, ExternalConstraintsData, QueryResult, inspect,
+};
 use crate::visit::{Flags, TypeVisitable};
 use crate::{self as ty, CanonicalParamEnvCacheEntry, search_graph};
 
@@ -203,6 +205,7 @@ pub trait Interner:
     fn type_of(self, def_id: Self::DefId) -> ty::EarlyBinder<Self, Self::Ty>;
     fn type_of_opaque_hir_typeck(self, def_id: Self::LocalDefId)
     -> ty::EarlyBinder<Self, Self::Ty>;
+    fn is_type_const(self, def_id: Self::DefId) -> bool;
     fn const_of_item(self, def_id: Self::DefId) -> ty::EarlyBinder<Self, Self::Const>;
     fn anon_const_kind(self, def_id: Self::DefId) -> ty::AnonConstKind;
 
@@ -557,7 +560,7 @@ impl<T, R, E> CollectAndApply<T, R> for Result<T, E> {
 
 impl<I: Interner> search_graph::Cx for I {
     type Input = CanonicalInput<I>;
-    type Result = QueryResult<I>;
+    type Result = (QueryResult<I>, AccessedOpaques<I>);
     type AmbiguityInfo = Certainty;
 
     type DepNodeIndex = I::DepNodeIndex;

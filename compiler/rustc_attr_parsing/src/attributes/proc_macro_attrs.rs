@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_session::lint::builtin::AMBIGUOUS_DERIVE_HELPERS;
 
 use super::prelude::*;
@@ -10,14 +9,14 @@ pub(crate) struct ProcMacroParser;
 impl NoArgsAttributeParser for ProcMacroParser {
     const PATH: &[Symbol] = &[sym::proc_macro];
     const ALLOWED_TARGETS: AllowedTargets = PROC_MACRO_ALLOWED_TARGETS;
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::ProcMacro;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::ProcMacro;
 }
 
 pub(crate) struct ProcMacroAttributeParser;
 impl NoArgsAttributeParser for ProcMacroAttributeParser {
     const PATH: &[Symbol] = &[sym::proc_macro_attribute];
     const ALLOWED_TARGETS: AllowedTargets = PROC_MACRO_ALLOWED_TARGETS;
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::ProcMacroAttribute;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::ProcMacroAttribute;
 }
 
 pub(crate) struct ProcMacroDeriveParser;
@@ -34,7 +33,6 @@ impl SingleAttributeParser for ProcMacroDeriveParser {
         Some(AttributeKind::ProcMacroDerive {
             trait_name: trait_name.expect("Trait name is mandatory, so it is present"),
             helper_attrs,
-            span: cx.attr_span,
         })
     }
 }
@@ -48,7 +46,7 @@ impl SingleAttributeParser for RustcBuiltinMacroParser {
 
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let (builtin_name, helper_attrs) = parse_derive_like(cx, args, false)?;
-        Some(AttributeKind::RustcBuiltinMacro { builtin_name, helper_attrs, span: cx.attr_span })
+        Some(AttributeKind::RustcBuiltinMacro { builtin_name, helper_attrs })
     }
 }
 
@@ -59,7 +57,7 @@ fn parse_derive_like(
 ) -> Option<(Option<Symbol>, ThinVec<Symbol>)> {
     let Some(list) = args.as_list() else {
         // For #[rustc_builtin_macro], it is permitted to leave out the trait name
-        if args.no_args().is_ok() && !trait_name_mandatory {
+        if args.as_no_args().is_ok() && !trait_name_mandatory {
             return Some((None, ThinVec::new()));
         }
         let attr_span = cx.attr_span;
@@ -85,10 +83,7 @@ fn parse_derive_like(
         cx.adcx().expected_identifier(trait_ident.span);
         return None;
     }
-    if let Err(e) = trait_attr.args().no_args() {
-        cx.adcx().expected_no_args(e);
-        return None;
-    };
+    cx.expect_no_args(trait_attr.args())?;
 
     // Parse optional attributes
     let mut attributes = ThinVec::new();
@@ -109,10 +104,7 @@ fn parse_derive_like(
                 cx.adcx().expected_identifier(attr.span());
                 return None;
             };
-            if let Err(e) = attr.args().no_args() {
-                cx.adcx().expected_no_args(e);
-                return None;
-            };
+            cx.expect_no_args(attr.args())?;
             let Some(ident) = attr.path().word() else {
                 cx.adcx().expected_identifier(attr.path().span());
                 return None;
@@ -124,7 +116,7 @@ fn parse_derive_like(
             if rustc_feature::is_builtin_attr_name(ident.name) {
                 cx.emit_lint(
                     AMBIGUOUS_DERIVE_HELPERS,
-                    |dcx, level| crate::errors::AmbiguousDeriveHelpers.into_diag(dcx, level),
+                    crate::errors::AmbiguousDeriveHelpers,
                     ident.span,
                 );
             }

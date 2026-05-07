@@ -321,8 +321,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         for a in &adj {
             match a.kind {
                 Adjust::NeverToAny => {
-                    if a.target.is_ty_var() {
-                        self.diverging_type_vars.borrow_mut().insert(a.target);
+                    if let ty::Infer(ty::TyVar(a_id)) = a.target.kind() {
+                        self.diverging_type_vars.borrow_mut().push(*a_id);
                         debug!("apply_adjustments: adding `{:?}` as diverging type var", a.target);
                     }
                 }
@@ -470,13 +470,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let tail = self.tcx.struct_tail_raw(
                 ty,
                 &self.misc(span),
-                |ty| {
-                    if self.next_trait_solver() {
-                        self.try_structurally_resolve_type(span, ty)
-                    } else {
-                        self.normalize(span, Unnormalized::new_wip(ty))
-                    }
-                },
+                |ty| self.normalize(span, Unnormalized::new_wip(ty)),
                 || {},
             );
             // Sized types have static alignment, and so do slices.
@@ -1013,10 +1007,24 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 debug!(?def_id, ?container, ?container_id);
                 match container {
                     ty::AssocContainer::Trait => {
+                        let arg_span = if let hir::Node::Expr(call_expr) =
+                            self.tcx.parent_hir_node(hir_id)
+                            && let hir::ExprKind::Call(_, args) = call_expr.kind
+                            && let Some(first_arg) = args.first()
+                        {
+                            let mut arg = first_arg;
+                            while let hir::ExprKind::AddrOf(_, _, inner) = arg.kind {
+                                arg = inner;
+                            }
+                            Some(arg.span)
+                        } else {
+                            None
+                        };
+
                         if let Err(e) = callee::check_legal_trait_for_method_call(
                             tcx,
                             path_span,
-                            None,
+                            arg_span,
                             span,
                             container_id,
                             self.body_id.to_def_id(),
@@ -1432,35 +1440,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    /// Try to resolve `ty` to a structural type, normalizing aliases.
-    ///
-    /// In case there is still ambiguity, the returned type may be an inference
-    /// variable. This is different from `structurally_resolve_type` which errors
-    /// in this case.
-    #[instrument(level = "debug", skip(self, sp), ret)]
-    pub(crate) fn try_structurally_resolve_type(&self, sp: Span, ty: Ty<'tcx>) -> Ty<'tcx> {
-        if self.next_trait_solver()
-            && let ty::Alias(..) = ty.kind()
-        {
-            // We need to use a separate variable here as otherwise the temporary for
-            // `self.fulfillment_cx.borrow_mut()` is alive in the `Err` branch, resulting
-            // in a reentrant borrow, causing an ICE.
-            let result = self.at(&self.misc(sp), self.param_env).structurally_normalize_ty(
-                Unnormalized::new_wip(ty),
-                &mut **self.fulfillment_cx.borrow_mut(),
-            );
-            match result {
-                Ok(normalized_ty) => normalized_ty,
-                Err(errors) => {
-                    let guar = self.err_ctxt().report_fulfillment_errors(errors);
-                    return Ty::new_error(self.tcx, guar);
-                }
-            }
-        } else {
-            self.resolve_vars_with_obligations(ty)
-        }
-    }
-
     #[instrument(level = "debug", skip(self, sp), ret)]
     pub(crate) fn try_structurally_resolve_const(
         &self,
@@ -1502,7 +1481,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// If no resolution is possible, then an error is reported.
     /// Numeric inference variables may be left unresolved.
     pub(crate) fn structurally_resolve_type(&self, sp: Span, ty: Ty<'tcx>) -> Ty<'tcx> {
-        let ty = self.try_structurally_resolve_type(sp, ty);
+        let ty = self.resolve_vars_with_obligations(ty);
 
         if !ty.is_ty_var() { ty } else { self.type_must_be_known_at_this_point(sp, ty) }
     }

@@ -85,4 +85,11 @@ rustflags = [
 rustc-std-workspace-core = { path = 'rustc-std-workspace-core' }
 rustc-std-workspace-alloc = { path = 'rustc-std-workspace-alloc' }
 rustc-std-workspace-std = { path = 'rustc-std-workspace-std' }
+<<<<<<< ferrocene/main
 libc = { path = '../ferrocene/library/libc' }
+||||||| a021a7796f6
+=======
+
+# See comments in `library/windows-sys/Cargo.toml` for why this is patched
+windows-sys = { path = 'windows-sys' }
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_hir::attrs::{CrateType, WindowsSubsystemKind};
 use rustc_session::lint::builtin::UNKNOWN_CRATE_TYPES;
 use rustc_span::Symbol;
@@ -61,12 +60,8 @@ impl CombineAttributeParser for CrateTypeParser {
                 let span = n.value_span;
                 cx.emit_lint(
                     UNKNOWN_CRATE_TYPES,
-                    move |dcx, level| {
-                        UnknownCrateTypes {
-                            sugg: candidate
-                                .map(|s| UnknownCrateTypesSuggestion { span, snippet: s }),
-                        }
-                        .into_diag(dcx, level)
+                    UnknownCrateTypes {
+                        sugg: candidate.map(|s| UnknownCrateTypesSuggestion { span, snippet: s }),
                     },
                     span,
                 );
@@ -89,11 +84,7 @@ impl SingleAttributeParser for RecursionLimitParser {
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let nv = cx.expect_name_value(args, cx.attr_span, None)?;
 
-        Some(AttributeKind::RecursionLimit {
-            limit: cx.parse_limit_int(nv)?,
-            attr_span: cx.attr_span,
-            limit_span: nv.value_span,
-        })
+        Some(AttributeKind::RecursionLimit { limit: cx.parse_limit_int(nv)? })
     }
 }
 
@@ -107,11 +98,7 @@ impl SingleAttributeParser for MoveSizeLimitParser {
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let nv = cx.expect_name_value(args, cx.attr_span, None)?;
 
-        Some(AttributeKind::MoveSizeLimit {
-            limit: cx.parse_limit_int(nv)?,
-            attr_span: cx.attr_span,
-            limit_span: nv.value_span,
-        })
+        Some(AttributeKind::MoveSizeLimit { limit: cx.parse_limit_int(nv)? })
     }
 }
 
@@ -126,11 +113,7 @@ impl SingleAttributeParser for TypeLengthLimitParser {
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let nv = cx.expect_name_value(args, cx.attr_span, None)?;
 
-        Some(AttributeKind::TypeLengthLimit {
-            limit: cx.parse_limit_int(nv)?,
-            attr_span: cx.attr_span,
-            limit_span: nv.value_span,
-        })
+        Some(AttributeKind::TypeLengthLimit { limit: cx.parse_limit_int(nv)? })
     }
 }
 
@@ -144,11 +127,7 @@ impl SingleAttributeParser for PatternComplexityLimitParser {
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let nv = cx.expect_name_value(args, cx.attr_span, None)?;
 
-        Some(AttributeKind::PatternComplexityLimit {
-            limit: cx.parse_limit_int(nv)?,
-            attr_span: cx.attr_span,
-            limit_span: nv.value_span,
-        })
+        Some(AttributeKind::PatternComplexityLimit { limit: cx.parse_limit_int(nv)? })
     }
 }
 
@@ -157,7 +136,7 @@ pub(crate) struct NoCoreParser;
 impl NoArgsAttributeParser for NoCoreParser {
     const PATH: &[Symbol] = &[sym::no_core];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::NoCore;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::NoCore;
 }
 
 pub(crate) struct NoStdParser;
@@ -166,7 +145,7 @@ impl NoArgsAttributeParser for NoStdParser {
     const PATH: &[Symbol] = &[sym::no_std];
     const ON_DUPLICATE: OnDuplicate = OnDuplicate::Warn;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::NoStd;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::NoStd;
 }
 
 pub(crate) struct NoMainParser;
@@ -183,7 +162,7 @@ pub(crate) struct RustcCoherenceIsCoreParser;
 impl NoArgsAttributeParser for RustcCoherenceIsCoreParser {
     const PATH: &[Symbol] = &[sym::rustc_coherence_is_core];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::RustcCoherenceIsCore;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcCoherenceIsCore;
 }
 
 pub(crate) struct WindowsSubsystemParser;
@@ -209,7 +188,7 @@ impl SingleAttributeParser for WindowsSubsystemParser {
             }
         };
 
-        Some(AttributeKind::WindowsSubsystem(kind, cx.attr_span))
+        Some(AttributeKind::WindowsSubsystem(kind))
     }
 }
 
@@ -299,11 +278,9 @@ impl CombineAttributeParser for FeatureParser {
                 cx.adcx().expected_identifier(elem.span());
                 continue;
             };
-            if let Err(arg_span) = elem.args().no_args() {
-                cx.adcx().expected_no_args(arg_span);
+            let Some(()) = cx.expect_no_args(elem.args()) else {
                 continue;
-            }
-
+            };
             let path = elem.path();
             let Some(ident) = path.word() else {
                 cx.adcx().expected_identifier(path.span());
@@ -321,7 +298,7 @@ pub(crate) struct RegisterToolParser;
 impl CombineAttributeParser for RegisterToolParser {
     const PATH: &[Symbol] = &[sym::register_tool];
     type Item = Ident;
-    const CONVERT: ConvertFn<Self::Item> = AttributeKind::RegisterTool;
+    const CONVERT: ConvertFn<Self::Item> = |tools, _span| AttributeKind::RegisterTool(tools);
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
     const TEMPLATE: AttributeTemplate = template!(List: &["tool1, tool2, ..."]);
 
@@ -345,10 +322,9 @@ impl CombineAttributeParser for RegisterToolParser {
                 cx.adcx().expected_identifier(elem.span());
                 continue;
             };
-            if let Err(arg_span) = elem.args().no_args() {
-                cx.adcx().expected_no_args(arg_span);
+            let Some(()) = cx.expect_no_args(elem.args()) else {
                 continue;
-            }
+            };
 
             let path = elem.path();
             let Some(ident) = path.word() else {

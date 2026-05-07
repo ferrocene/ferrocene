@@ -13,8 +13,8 @@ use rustc_errors::{
     Level, msg,
 };
 use rustc_macros::{Diagnostic, Subdiagnostic};
+use rustc_middle::ty::Ty;
 use rustc_middle::ty::layout::LayoutError;
-use rustc_middle::ty::{FloatTy, Ty};
 use rustc_span::{Span, Symbol};
 
 use crate::assert_module_sources::CguReuse;
@@ -748,7 +748,7 @@ pub enum InvalidMonomorphization<'tcx> {
         #[primary_span]
         span: Span,
         name: Symbol,
-        f_ty: FloatTy,
+        f_ty: String,
         in_ty: Ty<'tcx>,
     },
 
@@ -1212,9 +1212,10 @@ pub(crate) struct UnknownCTargetFeature<'a> {
 
 #[derive(Diagnostic)]
 #[diag("unstable feature specified for `-Ctarget-feature`: `{$feature}`")]
-#[note("this feature is not stably supported; its behavior can change in the future")]
+#[note("{$note}; its behavior can change in the future")]
 pub(crate) struct UnstableCTargetFeature<'a> {
     pub feature: &'a str,
+    pub note: &'a str,
 }
 
 #[derive(Diagnostic)]

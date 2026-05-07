@@ -6,7 +6,7 @@ use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, DefKind, Namespace};
 use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::lang_items::LangItem;
-use rustc_macros::{HashStable, Lift, TyDecodable, TyEncodable};
+use rustc_macros::{Lift, StableHash, TyDecodable, TyEncodable};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
@@ -29,7 +29,7 @@ use crate::ty::{
 /// Note: the `Lift` impl is currently not used by rustc, but is used by
 /// rustc_codegen_cranelift when the `jit` feature is enabled.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, TyEncodable, TyDecodable)]
-#[derive(HashStable, Lift, TypeFoldable, TypeVisitable)]
+#[derive(StableHash, Lift, TypeFoldable, TypeVisitable)]
 pub struct Instance<'tcx> {
     pub def: InstanceKind<'tcx>,
     pub args: GenericArgsRef<'tcx>,
@@ -41,7 +41,7 @@ pub struct Instance<'tcx> {
 /// Currently, this is only used when KCFI is enabled, as only KCFI needs to treat those two
 /// `ReifyShim`s differently.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-#[derive(TyEncodable, TyDecodable, HashStable)]
+#[derive(TyEncodable, TyDecodable, StableHash)]
 pub enum ReifyReason {
     /// The `ReifyShim` was created to produce a function pointer. This happens when:
     /// * A vtable entry is directly converted to a function call (e.g. creating a fn ptr from a
@@ -58,7 +58,7 @@ pub enum ReifyReason {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-#[derive(TyEncodable, TyDecodable, HashStable, TypeFoldable, TypeVisitable, Lift)]
+#[derive(TyEncodable, TyDecodable, StableHash, TypeFoldable, TypeVisitable, Lift)]
 pub enum InstanceKind<'tcx> {
     /// A user-defined callable item.
     ///
@@ -147,11 +147,10 @@ pub enum InstanceKind<'tcx> {
     /// Proxy shim for async drop of future (def_id, proxy_cor_ty, impl_cor_ty)
     FutureDropPollShim(DefId, Ty<'tcx>, Ty<'tcx>),
 
-    /// `core::ptr::drop_in_place::<T>`.
+    /// `core::ptr::drop_glue::<T>`.
     ///
-    /// The `DefId` is for `core::ptr::drop_in_place`.
-    /// The `Option<Ty<'tcx>>` is either `Some(T)`, or `None` for empty drop
-    /// glue.
+    /// The `DefId` is for `core::ptr::drop_glue`.
+    /// The `Option<Ty<'tcx>>` is either `Some(T)`, or `None` for empty drop glue.
     DropGlue(DefId, Option<Ty<'tcx>>),
 
     /// Compiler-generated `<T as Clone>::clone` implementation.
@@ -381,8 +380,7 @@ impl<'tcx> fmt::Display for Instance<'tcx> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ty::tls::with(|tcx| {
             let mut p = FmtPrinter::new(tcx, Namespace::ValueNS);
-            let instance = tcx.lift(*self).expect("could not lift for printing");
-            instance.print(&mut p)?;
+            tcx.lift(*self).print(&mut p)?;
             let s = p.into_buffer();
             f.write_str(&s)
         })
@@ -717,8 +715,8 @@ impl<'tcx> Instance<'tcx> {
         }
     }
 
-    pub fn resolve_drop_in_place(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ty::Instance<'tcx> {
-        let def_id = tcx.require_lang_item(LangItem::DropInPlace, DUMMY_SP);
+    pub fn resolve_drop_glue(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ty::Instance<'tcx> {
+        let def_id = tcx.require_lang_item(LangItem::DropGlue, DUMMY_SP);
         let args = tcx.mk_args(&[ty.into()]);
         Instance::expect_resolve(
             tcx,

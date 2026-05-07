@@ -101,7 +101,7 @@ where
         goal: Goal<I, ty::OutlivesPredicate<I, I::Region>>,
     ) -> QueryResult<I> {
         let ty::OutlivesPredicate(a, b) = goal.predicate;
-        self.register_region_outlives(a, b);
+        self.register_region_outlives(a, b, VisibleForLeakCheck::Yes);
         self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
     }
 
@@ -358,7 +358,11 @@ where
     }
 
     fn opaque_type_is_rigid(&self, def_id: I::DefId) -> bool {
-        match self.typing_mode() {
+        match self
+            .typing_mode()
+            // Caller should handle erased mode
+            .assert_not_erased()
+        {
             // Opaques are never rigid outside of analysis mode.
             TypingMode::Coherence | TypingMode::PostAnalysis => false,
             // During analysis, opaques are rigid unless they may be defined by

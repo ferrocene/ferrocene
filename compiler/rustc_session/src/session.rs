@@ -24,7 +24,7 @@ use rustc_errors::{
 };
 use rustc_feature::UnstableFeatures;
 use rustc_hir::limit::Limit;
-use rustc_macros::HashStable_Generic;
+use rustc_macros::StableHash;
 pub use rustc_span::def_id::StableCrateId;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::{FilePathMapping, SourceMap};
@@ -45,7 +45,7 @@ use crate::config::{
 };
 use crate::filesearch::FileSearch;
 use crate::lint::LintId;
-use crate::parse::{ParseSess, add_feature_diagnostics};
+use crate::parse::ParseSess;
 use crate::search_paths::SearchPath;
 use crate::{errors, filesearch, lint};
 
@@ -61,7 +61,7 @@ pub enum CtfeBacktrace {
     Immediate,
 }
 
-#[derive(Clone, Copy, Debug, HashStable_Generic)]
+#[derive(Clone, Copy, Debug, StableHash)]
 pub struct Limits {
     /// The maximum recursion limit for potentially infinitely recursive
     /// operations such as auto-dereference and monomorphization.
@@ -282,7 +282,7 @@ impl Session {
         if err.code.is_none() {
             err.code(E0658);
         }
-        add_feature_diagnostics(&mut err, self, feature);
+        errors::add_feature_diagnostics(&mut err, self, feature);
         err
     }
 

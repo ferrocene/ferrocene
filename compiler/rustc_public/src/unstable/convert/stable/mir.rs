@@ -157,9 +157,6 @@ impl<'tcx> Stable<'tcx> for mir::StatementKind<'tcx> {
             mir::StatementKind::StorageDead(place) => {
                 crate::mir::StatementKind::StorageDead(place.stable(tables, cx))
             }
-            mir::StatementKind::Retag(retag, place) => {
-                crate::mir::StatementKind::Retag(retag.stable(tables, cx), place.stable(tables, cx))
-            }
             mir::StatementKind::PlaceMention(place) => {
                 crate::mir::StatementKind::PlaceMention(place.stable(tables, cx))
             }
@@ -195,7 +192,9 @@ impl<'tcx> Stable<'tcx> for mir::Rvalue<'tcx> {
     ) -> Self::T {
         use rustc_middle::mir::Rvalue::*;
         match self {
-            Use(op) => crate::mir::Rvalue::Use(op.stable(tables, cx)),
+            Use(op, retag) => {
+                crate::mir::Rvalue::Use(op.stable(tables, cx), retag.stable(tables, cx))
+            }
             Repeat(op, len) => {
                 let len = len.stable(tables, cx);
                 crate::mir::Rvalue::Repeat(op.stable(tables, cx), len)
@@ -462,15 +461,13 @@ impl<'tcx> Stable<'tcx> for mir::Local {
     }
 }
 
-impl<'tcx> Stable<'tcx> for mir::RetagKind {
-    type T = crate::mir::RetagKind;
+impl<'tcx> Stable<'tcx> for mir::WithRetag {
+    type T = crate::mir::WithRetag;
     fn stable(&self, _: &mut Tables<'_, BridgeTys>, _: &CompilerCtxt<'_, BridgeTys>) -> Self::T {
-        use rustc_middle::mir::RetagKind;
+        use rustc_middle::mir::WithRetag;
         match self {
-            RetagKind::FnEntry => crate::mir::RetagKind::FnEntry,
-            RetagKind::TwoPhase => crate::mir::RetagKind::TwoPhase,
-            RetagKind::Raw => crate::mir::RetagKind::Raw,
-            RetagKind::Default => crate::mir::RetagKind::Default,
+            WithRetag::Yes => crate::mir::WithRetag::Yes,
+            WithRetag::No => crate::mir::WithRetag::No,
         }
     }
 }
@@ -864,7 +861,7 @@ impl<'tcx> Stable<'tcx> for rustc_middle::mir::Const<'tcx> {
         tables: &mut Tables<'cx, BridgeTys>,
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
-        let id = tables.intern_mir_const(cx.lift(*self).unwrap());
+        let id = tables.intern_mir_const(cx.lift(*self));
         match *self {
             mir::Const::Ty(ty, c) => MirConst::new(
                 crate::ty::ConstantKind::Ty(c.stable(tables, cx)),
@@ -885,8 +882,8 @@ impl<'tcx> Stable<'tcx> for rustc_middle::mir::Const<'tcx> {
                 MirConst::new(ConstantKind::ZeroSized, ty, id)
             }
             mir::Const::Val(val, ty) => {
-                let ty = cx.lift(ty).unwrap();
-                let val = cx.lift(val).unwrap();
+                let ty = cx.lift(ty);
+                let val = cx.lift(val);
                 let kind = ConstantKind::Allocated(alloc::new_allocation(ty, val, tables, cx));
                 let ty = ty.stable(tables, cx);
                 MirConst::new(kind, ty, id)

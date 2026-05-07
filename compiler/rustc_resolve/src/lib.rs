@@ -248,7 +248,8 @@ enum ResolutionError<'ra> {
         outer_res: Res,
         has_generic_params: HasGenericParams,
         def_kind: DefKind,
-        inner_item: Option<(Span, ast::ItemKind)>,
+        /// 1. label span, 2. item span, 3. item kind
+        inner_item: Option<(Span, Span, ast::ItemKind)>,
         current_self_ty: Option<String>,
     },
     /// Error E0403: the name is already used for a type or const parameter in this generic
@@ -336,8 +337,9 @@ enum ResolutionError<'ra> {
     BindingInNeverPattern,
 }
 
-enum VisResolutionError<'a> {
-    Relative2018(Span, &'a ast::Path),
+#[derive(Debug)]
+enum VisResolutionError {
+    Relative2018(Span, ast::Path),
     AncestorOnly(Span),
     FailedToResolve(Span, Symbol, String, Option<Suggestion>, String),
     ExpectedFound(Span, String, Res),
@@ -541,7 +543,7 @@ enum ModuleKind {
     ///   The crate root will have `None` for the symbol.
     /// * A trait or an enum (it implicitly contains associated types, methods and variant
     ///   constructors).
-    Def(DefKind, DefId, Option<Symbol>),
+    Def(DefKind, DefId, NodeId, Option<Symbol>),
 }
 
 impl ModuleKind {
@@ -555,7 +557,7 @@ impl ModuleKind {
 
     fn opt_def_id(&self) -> Option<DefId> {
         match self {
-            ModuleKind::Def(_, def_id, _) => Some(*def_id),
+            ModuleKind::Def(_, def_id, _, _) => Some(*def_id),
             _ => None,
         }
     }
@@ -724,7 +726,7 @@ impl<'ra> ModuleData<'ra> {
         self_decl: Option<Decl<'ra>>,
     ) -> Self {
         let is_foreign = match kind {
-            ModuleKind::Def(_, def_id, _) => !def_id.is_local(),
+            ModuleKind::Def(_, def_id, _, _) => !def_id.is_local(),
             ModuleKind::Block => false,
         };
         ModuleData {
@@ -754,7 +756,7 @@ impl<'ra> ModuleData<'ra> {
 
     fn res(&self) -> Option<Res> {
         match self.kind {
-            ModuleKind::Def(kind, def_id, _) => Some(Res::Def(kind, def_id)),
+            ModuleKind::Def(kind, def_id, _, _) => Some(Res::Def(kind, def_id)),
             _ => None,
         }
     }
@@ -811,11 +813,11 @@ impl<'ra> Module<'ra> {
 
     // `self` resolves to the first module ancestor that `is_normal`.
     fn is_normal(self) -> bool {
-        matches!(self.kind, ModuleKind::Def(DefKind::Mod, _, _))
+        matches!(self.kind, ModuleKind::Def(DefKind::Mod, _, _, _))
     }
 
     fn is_trait(self) -> bool {
-        matches!(self.kind, ModuleKind::Def(DefKind::Trait, _, _))
+        matches!(self.kind, ModuleKind::Def(DefKind::Trait, _, _, _))
     }
 
     fn nearest_item_scope(self) -> Module<'ra> {
@@ -831,8 +833,17 @@ impl<'ra> Module<'ra> {
     /// This may be the crate root.
     fn nearest_parent_mod(self) -> DefId {
         match self.kind {
-            ModuleKind::Def(DefKind::Mod, def_id, _) => def_id,
+            ModuleKind::Def(DefKind::Mod, def_id, _, _) => def_id,
             _ => self.parent.expect("non-root module without parent").nearest_parent_mod(),
+        }
+    }
+
+    /// The [`NodeId`] of the nearest `mod` item ancestor (which may be this module).
+    /// This may be the crate root.
+    fn nearest_parent_mod_node_id(self) -> NodeId {
+        match self.kind {
+            ModuleKind::Def(DefKind::Mod, _, node_id, _) => node_id,
+            _ => self.parent.expect("non-root module without parent").nearest_parent_mod_node_id(),
         }
     }
 
@@ -850,7 +861,7 @@ impl<'ra> Module<'ra> {
     #[track_caller]
     fn expect_local(self) -> LocalModule<'ra> {
         match self.kind {
-            ModuleKind::Def(_, def_id, _) if !def_id.is_local() => {
+            ModuleKind::Def(_, def_id, _, _) if !def_id.is_local() => {
                 panic!("`Module::expect_local` is called on a non-local module: {self:?}")
             }
             ModuleKind::Def(..) | ModuleKind::Block => LocalModule(self.0),
@@ -860,7 +871,7 @@ impl<'ra> Module<'ra> {
     #[track_caller]
     fn expect_extern(self) -> ExternModule<'ra> {
         match self.kind {
-            ModuleKind::Def(_, def_id, _) if !def_id.is_local() => ExternModule(self.0),
+            ModuleKind::Def(_, def_id, _, _) if !def_id.is_local() => ExternModule(self.0),
             ModuleKind::Def(..) | ModuleKind::Block => {
                 panic!("`Module::expect_extern` is called on a local module: {self:?}")
             }
@@ -990,8 +1001,8 @@ struct UseError<'a> {
     err: Diag<'a>,
     /// Candidates which user could `use` to access the missing type.
     candidates: Vec<ImportSuggestion>,
-    /// The `DefId` of the module to place the use-statements in.
-    def_id: DefId,
+    /// The `NodeId` of the module to place the use-statements in.
+    node_id: NodeId,
     /// Whether the diagnostic should say "instead" (as in `consider importing ... instead`).
     instead: bool,
     /// Extra free-form suggestion.
@@ -1001,6 +1012,13 @@ struct UseError<'a> {
     path: Vec<Segment>,
     /// Whether the expected source is a call
     is_call: bool,
+}
+
+#[derive(Debug)]
+struct DelayedVisResolutionError<'ra> {
+    vis: ast::Visibility,
+    parent_scope: ParentScope<'ra>,
+    error: VisResolutionError,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -1363,6 +1381,8 @@ pub struct Resolver<'ra, 'tcx> {
     issue_145575_hack_applied: bool = false,
     /// `use` injections are delayed for better placement and deduplication.
     use_injections: Vec<UseError<'tcx>> = Vec::new(),
+    /// Visibility path resolution failures are delayed until all modules are collected.
+    delayed_vis_resolution_errors: Vec<DelayedVisResolutionError<'ra>> = Vec::new(),
     /// Crate-local macro expanded `macro_export` referred to by a module-relative path.
     macro_expanded_macro_export_errors: BTreeSet<(Span, Span)> = BTreeSet::new(),
 
@@ -1381,7 +1401,7 @@ pub struct Resolver<'ra, 'tcx> {
     extern_macro_map: CacheRefCell<FxHashMap<DefId, &'ra MacroData>>,
     dummy_ext_bang: Arc<SyntaxExtension>,
     dummy_ext_derive: Arc<SyntaxExtension>,
-    non_macro_attr: &'ra MacroData,
+    non_macro_attr: Arc<SyntaxExtension>,
     local_macro_def_scopes: FxHashMap<LocalDefId, LocalModule<'ra>> = default::fx_hash_map(),
     ast_transform_scopes: FxHashMap<LocalExpnId, LocalModule<'ra>> = default::fx_hash_map(),
     unused_macros: FxIndexMap<LocalDefId, (NodeId, Ident)>,
@@ -1540,7 +1560,7 @@ impl<'ra> ResolverArenas<'ra> {
         no_implicit_prelude: bool,
     ) -> Module<'ra> {
         let self_decl = match kind {
-            ModuleKind::Def(def_kind, def_id, _) => Some(self.new_def_decl(
+            ModuleKind::Def(def_kind, def_id, _, _) => Some(self.new_def_decl(
                 Res::Def(def_kind, def_id),
                 vis,
                 span,
@@ -1721,7 +1741,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let root_def_id = CRATE_DEF_ID.to_def_id();
         let graph_root = arenas.new_module(
             None,
-            ModuleKind::Def(DefKind::Mod, root_def_id, None),
+            ModuleKind::Def(DefKind::Mod, root_def_id, CRATE_NODE_ID, None),
             Visibility::Public,
             ExpnId::root(),
             crate_span,
@@ -1732,7 +1752,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let local_module_map = FxIndexMap::from_iter([(CRATE_DEF_ID, graph_root)]);
         let empty_module = arenas.new_module(
             None,
-            ModuleKind::Def(DefKind::Mod, root_def_id, None),
+            ModuleKind::Def(DefKind::Mod, root_def_id, CRATE_NODE_ID, None),
             Visibility::Public,
             ExpnId::root(),
             DUMMY_SP,
@@ -1801,8 +1821,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             extern_macro_map: Default::default(),
             dummy_ext_bang: Arc::new(SyntaxExtension::dummy_bang(edition)),
             dummy_ext_derive: Arc::new(SyntaxExtension::dummy_derive(edition)),
-            non_macro_attr: arenas
-                .alloc_macro(MacroData::new(Arc::new(SyntaxExtension::non_macro_attr(edition)))),
+            non_macro_attr: Arc::new(SyntaxExtension::non_macro_attr(edition)),
             unused_macros: Default::default(),
             unused_macro_rules: Default::default(),
             single_segment_macro_resolutions: Default::default(),
@@ -1973,7 +1992,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         match macro_kind {
             MacroKind::Bang => Arc::clone(&self.dummy_ext_bang),
             MacroKind::Derive => Arc::clone(&self.dummy_ext_derive),
-            MacroKind::Attr => Arc::clone(&self.non_macro_attr.ext),
+            MacroKind::Attr => Arc::clone(&self.non_macro_attr),
         }
     }
 
@@ -2002,11 +2021,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn is_builtin_macro(&self, res: Res) -> bool {
-        self.get_macro(res).is_some_and(|macro_data| macro_data.ext.builtin_name.is_some())
+        self.get_macro(res).is_some_and(|ext| ext.builtin_name.is_some())
     }
 
     fn is_specific_builtin_macro(&self, res: Res, symbol: Symbol) -> bool {
-        self.get_macro(res).is_some_and(|macro_data| macro_data.ext.builtin_name == Some(symbol))
+        self.get_macro(res).is_some_and(|ext| ext.builtin_name == Some(symbol))
     }
 
     fn macro_def(&self, mut ctxt: SyntaxContext) -> DefId {
@@ -2730,6 +2749,8 @@ struct ImportSummary {
     vis: Visibility,
     nearest_parent_mod: LocalDefId,
     is_single: bool,
+    priv_macro_use: bool,
+    span: Span,
 }
 
 /// Invariant: if `Finalize` is used, expansion and import resolution must be complete.

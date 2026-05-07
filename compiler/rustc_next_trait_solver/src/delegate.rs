@@ -1,6 +1,8 @@
 use std::ops::Deref;
 
-use rustc_type_ir::solve::{Certainty, Goal, NoSolution};
+use rustc_type_ir::solve::{
+    Certainty, FetchEligibleAssocItemResponse, Goal, NoSolution, VisibleForLeakCheck,
+};
 use rustc_type_ir::{self as ty, InferCtxtLike, Interner, TypeFoldable};
 
 pub trait SolverDelegate: Deref<Target = Self::Infcx> + Sized {
@@ -45,7 +47,9 @@ pub trait SolverDelegate: Deref<Target = Self::Infcx> + Sized {
         term: <Self::Interner as Interner>::Term,
     ) -> Option<Vec<Goal<Self::Interner, <Self::Interner as Interner>::Predicate>>>;
 
-    fn make_deduplicated_region_constraints(&self) -> Vec<ty::RegionConstraint<Self::Interner>>;
+    fn make_deduplicated_region_constraints(
+        &self,
+    ) -> Vec<(ty::RegionConstraint<Self::Interner>, VisibleForLeakCheck)>;
 
     fn instantiate_canonical<V>(
         &self,
@@ -77,10 +81,7 @@ pub trait SolverDelegate: Deref<Target = Self::Infcx> + Sized {
         goal_trait_ref: ty::TraitRef<Self::Interner>,
         trait_assoc_def_id: <Self::Interner as Interner>::DefId,
         impl_def_id: <Self::Interner as Interner>::ImplId,
-    ) -> Result<
-        Option<<Self::Interner as Interner>::DefId>,
-        <Self::Interner as Interner>::ErrorGuaranteed,
-    >;
+    ) -> FetchEligibleAssocItemResponse<Self::Interner>;
 
     fn is_transmutable(
         &self,

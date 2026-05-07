@@ -17,7 +17,7 @@ use rustc_type_ir::inherent::*;
 use rustc_type_ir::relate::solver_relating::RelateExt;
 use rustc_type_ir::{
     self as ty, Canonical, CanonicalVarKind, CanonicalVarValues, InferCtxtLike, Interner,
-    TypeFoldable, TypingModeEqWrapper,
+    TypeFoldable, TypingMode, TypingModeEqWrapper,
 };
 use tracing::instrument;
 
@@ -25,7 +25,7 @@ use crate::delegate::SolverDelegate;
 use crate::resolve::eager_resolve_vars;
 use crate::solve::{
     CanonicalInput, CanonicalResponse, Certainty, ExternalConstraintsData, Goal,
-    NestedNormalizationGoals, QueryInput, Response, inspect,
+    NestedNormalizationGoals, QueryInput, Response, VisibleForLeakCheck, inspect,
 };
 
 pub mod canonicalizer;
@@ -54,6 +54,7 @@ pub(super) fn canonicalize_goal<D, I>(
     delegate: &D,
     goal: Goal<I, I::Predicate>,
     opaque_types: &[(ty::OpaqueTypeKey<I>, I::Ty)],
+    typing_mode: TypingMode<I>,
 ) -> (Vec<I::GenericArg>, CanonicalInput<I, I::Predicate>)
 where
     D: SolverDelegate<Interner = I>,
@@ -66,10 +67,9 @@ where
             predefined_opaques_in_body: delegate.cx().mk_predefined_opaques_in_body(opaque_types),
         },
     );
-    let query_input = ty::CanonicalQueryInput {
-        canonical,
-        typing_mode: TypingModeEqWrapper(delegate.typing_mode()),
-    };
+
+    let query_input =
+        ty::CanonicalQueryInput { canonical, typing_mode: TypingModeEqWrapper(typing_mode) };
     (orig_values, query_input)
 }
 
@@ -99,6 +99,7 @@ pub(super) fn instantiate_and_apply_query_response<D, I>(
     param_env: I::ParamEnv,
     original_values: &[I::GenericArg],
     response: CanonicalResponse<I>,
+    visible_for_leak_check: VisibleForLeakCheck,
     span: I::Span,
 ) -> (NestedNormalizationGoals<I>, Certainty)
 where
@@ -116,7 +117,11 @@ where
     let ExternalConstraintsData { region_constraints, opaque_types, normalization_nested_goals } =
         &*external_constraints;
 
-    register_region_constraints(delegate, region_constraints, span);
+    register_region_constraints(
+        delegate,
+        region_constraints.iter().map(|(c, vis)| (*c, vis.and(visible_for_leak_check))),
+        span,
+    );
     register_new_opaque_types(delegate, opaque_types, span);
 
     (normalization_nested_goals.clone(), certainty)
@@ -262,21 +267,21 @@ fn unify_query_var_values<D, I>(
 
 fn register_region_constraints<D, I>(
     delegate: &D,
-    constraints: &[ty::RegionConstraint<I>],
+    constraints: impl IntoIterator<Item = (ty::RegionConstraint<I>, VisibleForLeakCheck)>,
     span: I::Span,
 ) where
     D: SolverDelegate<Interner = I>,
     I: Interner,
 {
-    for &constraint in constraints {
+    for (constraint, vis) in constraints {
         match constraint {
             ty::RegionConstraint::Outlives(ty::OutlivesPredicate(lhs, rhs)) => match lhs.kind() {
-                ty::GenericArgKind::Lifetime(lhs) => delegate.sub_regions(rhs, lhs, span),
+                ty::GenericArgKind::Lifetime(lhs) => delegate.sub_regions(rhs, lhs, vis, span),
                 ty::GenericArgKind::Type(lhs) => delegate.register_ty_outlives(lhs, rhs, span),
                 ty::GenericArgKind::Const(_) => panic!("const outlives: {lhs:?}: {rhs:?}"),
             },
             ty::RegionConstraint::Eq(ty::RegionEqPredicate(lhs, rhs)) => {
-                delegate.equate_regions(lhs, rhs, span)
+                delegate.equate_regions(lhs, rhs, vis, span)
             }
         }
     }

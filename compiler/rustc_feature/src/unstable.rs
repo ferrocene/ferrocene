@@ -5,6 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use rustc_data_structures::AtomicRef;
 use rustc_data_structures::fx::FxHashSet;
+use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHasher};
 use rustc_span::{Span, Symbol, sym};
 
 use super::{Feature, to_nonzero};
@@ -119,6 +120,32 @@ impl Features {
     }
 }
 
+impl StableHash for Features {
+    fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+        // `enabled_features` is skipped because it's the sum of the lang and lib features.
+        let Features { enabled_lang_features, enabled_lib_features, enabled_features: _ } = self;
+        enabled_lang_features.stable_hash(hcx, hasher);
+        enabled_lib_features.stable_hash(hcx, hasher);
+    }
+}
+
+impl StableHash for EnabledLangFeature {
+    fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+        let EnabledLangFeature { gate_name, attr_sp, stable_since } = self;
+        gate_name.stable_hash(hcx, hasher);
+        attr_sp.stable_hash(hcx, hasher);
+        stable_since.stable_hash(hcx, hasher);
+    }
+}
+
+impl StableHash for EnabledLibFeature {
+    fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+        let EnabledLibFeature { gate_name, attr_sp } = self;
+        gate_name.stable_hash(hcx, hasher);
+        attr_sp.stable_hash(hcx, hasher);
+    }
+}
+
 macro_rules! declare_features {
     ($(
         $(#[doc = $doc:tt])* ($status:ident, $feature:ident, $ver:expr, $issue:expr),
@@ -229,6 +256,8 @@ declare_features! (
     (internal, cfg_target_has_reliable_f16_f128, "1.88.0", None),
     /// Allows identifying the `compiler_builtins` crate.
     (internal, compiler_builtins, "1.13.0", None),
+    /// Allows skipping `ConstParamTy_` trait implementation checks
+    (internal, const_param_ty_unchecked, "CURRENT_RUSTC_VERSION", None),
     /// Allows writing custom MIR
     (internal, custom_mir, "1.65.0", None),
     /// Implementation details of externally implementable items
@@ -393,6 +422,9 @@ declare_features! (
     (unstable, bpf_target_feature, "1.54.0", Some(150247)),
     /// Allows using C-variadics.
     (unstable, c_variadic, "1.34.0", Some(44930)),
+    /// Allows defining c-variadic functions on targets where this feature has not yet
+    /// undergone sufficient testing for stabilization.
+    (unstable, c_variadic_experimental_arch, "CURRENT_RUSTC_VERSION", Some(155973)),
     /// Allows defining c-variadic naked functions with any extern ABI that is allowed
     /// on c-variadic foreign functions.
     (unstable, c_variadic_naked_functions, "1.93.0", Some(148767)),
@@ -531,8 +563,9 @@ declare_features! (
     /// Allows defining gen blocks and `gen fn`.
     (unstable, gen_blocks, "1.75.0", Some(117078)),
     /// Allows using generics in more complex const expressions, based on definitional equality.
-    (unstable, generic_const_args, "1.95.0", Some(151972)),
-    /// Allows non-trivial generic constants which have to have wfness manually propagated to callers
+    (incomplete, generic_const_args, "1.95.0", Some(151972)),
+    /// Allows non-trivial generic constants which have to be shown to successfully evaluate
+    /// to a value by being part of an item signature.
     (incomplete, generic_const_exprs, "1.56.0", Some(76560)),
     /// Allows generic parameters and where-clauses on free & associated const items.
     (incomplete, generic_const_items, "1.73.0", Some(113521)),
@@ -594,7 +627,8 @@ declare_features! (
     /// Allows additional const parameter types, such as [u8; 10] or user defined types.
     /// User defined types must not have fields more private than the type itself.
     (unstable, min_adt_const_params, "1.96.0", Some(154042)),
-    /// Enables the generic const args MVP (only bare paths, not arbitrary computation).
+    /// Enables the generic const args MVP (paths to type const items and constructors
+    /// for ADTs and primitives).
     (incomplete, min_generic_const_args, "1.84.0", Some(132980)),
     /// A minimal, sound subset of specialization intended to be used by the
     /// standard library until the soundness issues with specialization
@@ -723,6 +757,8 @@ declare_features! (
     (internal, unsized_fn_params, "1.49.0", Some(48055)),
     /// Allows using the `#[used(linker)]` (or `#[used(compiler)]`) attribute.
     (unstable, used_with_arg, "1.60.0", Some(93798)),
+    /// Allows view types.
+    (unstable, view_types, "CURRENT_RUSTC_VERSION", Some(155938)),
     /// Target features on wasm.
     (unstable, wasm_target_feature, "1.30.0", Some(150260)),
     /// Allows use of attributes in `where` clauses.

@@ -142,9 +142,9 @@ impl<'sess> AttributeParser<'sess> {
                 };
 
                 let attr_span = cx.attr_span;
-                cx.emit_lint(
+                cx.emit_lint_with_sess(
                     lint,
-                    move |dcx, level| {
+                    move |dcx, level, _| {
                         InvalidTargetLint {
                             name: name.to_string(),
                             target: target.plural_name(),
@@ -188,14 +188,11 @@ impl<'sess> AttributeParser<'sess> {
 
         cx.emit_lint(
             rustc_session::lint::builtin::UNUSED_ATTRIBUTES,
-            move |dcx, level| {
-                crate::errors::InvalidAttrStyle {
-                    name: &name,
-                    is_used_as_inner,
-                    target_span: (!is_used_as_inner).then_some(target_span),
-                    target: target.name(),
-                }
-                .into_diag(dcx, level)
+            crate::errors::InvalidAttrStyle {
+                name,
+                is_used_as_inner,
+                target_span: (!is_used_as_inner).then_some(target_span),
+                target: target.name(),
             },
             attr_span,
         );

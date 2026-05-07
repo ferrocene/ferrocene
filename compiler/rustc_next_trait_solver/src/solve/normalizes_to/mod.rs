@@ -6,6 +6,7 @@ mod opaque_types;
 use rustc_type_ir::fast_reject::DeepRejectCtxt;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::{SolverAdtLangItem, SolverLangItem, SolverTraitLangItem};
+use rustc_type_ir::solve::{FetchEligibleAssocItemResponse, RerunReason};
 use rustc_type_ir::{
     self as ty, FieldInfo, Interner, NormalizesTo, PredicateKind, Unnormalized, Upcast as _,
 };
@@ -74,13 +75,17 @@ where
                         None
                     },
                     |ecx| {
-                        ecx.probe(|&result| ProbeKind::RigidAlias { result }).enter(|this| {
-                            this.structurally_instantiate_normalizes_to_term(
-                                goal,
-                                goal.predicate.alias,
-                            );
-                            this.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
-                        })
+                        ecx.probe(|&result| ProbeKind::RigidAlias { result })
+                            .enter(|this| {
+                                this.structurally_instantiate_normalizes_to_term(
+                                    goal,
+                                    goal.predicate.alias,
+                                );
+                                this.evaluate_added_goals_and_make_canonical_response(
+                                    Certainty::Yes,
+                                )
+                            })
+                            .map_err(Into::into)
                     },
                 )
             }
@@ -280,9 +285,9 @@ where
                 goal.predicate.def_id(),
                 impl_def_id,
             ) {
-                Ok(Some(target_item_def_id)) => target_item_def_id,
-                Ok(None) => {
-                    match ecx.typing_mode() {
+                FetchEligibleAssocItemResponse::Found(target_item_def_id) => target_item_def_id,
+                FetchEligibleAssocItemResponse::NotFound(tm) => {
+                    match tm {
                         // In case the associated item is hidden due to specialization,
                         // normalizing this associated item is always ambiguous. Treating
                         // the associated item as rigid would be incomplete and allow for
@@ -313,7 +318,11 @@ where
                         }
                     };
                 }
-                Err(guar) => return error_response(ecx, guar),
+                FetchEligibleAssocItemResponse::Err(guar) => return error_response(ecx, guar),
+                FetchEligibleAssocItemResponse::NotFoundBecauseErased => {
+                    ecx.opaque_accesses.rerun_always(RerunReason::FetchEligibleAssocItem);
+                    return Err(NoSolution);
+                }
             };
 
             if !cx.has_item_definition(target_item_def_id) {
@@ -323,7 +332,7 @@ where
                 // delay a bug because we can have trivially false where clauses, so we
                 // treat it as rigid.
                 if cx.impl_self_is_guaranteed_unsized(impl_def_id) {
-                    match ecx.typing_mode() {
+                    if ecx.typing_mode().is_coherence() {
                         // Trying to normalize such associated items is always ambiguous
                         // during coherence to avoid cyclic reasoning. See the example in
                         // tests/ui/traits/trivial-unsized-projection-in-coherence.rs.
@@ -334,20 +343,11 @@ where
                         // would be relevant if any of the nested goals refer to the `term`.
                         // This is not the case here and we only prefer adding an ambiguous
                         // nested goal for consistency.
-                        ty::TypingMode::Coherence => {
-                            ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous));
-                            return then(ecx, Certainty::Yes);
-                        }
-                        ty::TypingMode::Analysis { .. }
-                        | ty::TypingMode::Borrowck { .. }
-                        | ty::TypingMode::PostBorrowckAnalysis { .. }
-                        | ty::TypingMode::PostAnalysis => {
-                            ecx.structurally_instantiate_normalizes_to_term(
-                                goal,
-                                goal.predicate.alias,
-                            );
-                            return then(ecx, Certainty::Yes);
-                        }
+                        ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous));
+                        return then(ecx, Certainty::Yes);
+                    } else {
+                        ecx.structurally_instantiate_normalizes_to_term(goal, goal.predicate.alias);
+                        return then(ecx, Certainty::Yes);
                     }
                 } else {
                     return error_response(ecx, cx.delay_bug("missing item"));
@@ -383,19 +383,30 @@ where
 
             // Finally we construct the actual value of the associated type.
             let term = match goal.predicate.alias.kind(cx) {
-                ty::AliasTermKind::ProjectionTy { .. } => {
-                    cx.type_of(target_item_def_id).map_bound(|ty| ty.into())
+                ty::AliasTermKind::ProjectionTy { .. } => cx
+                    .type_of(target_item_def_id)
+                    .instantiate(cx, target_args)
+                    .skip_norm_wip()
+                    .into(),
+                ty::AliasTermKind::ProjectionConst { .. }
+                    if cx.is_type_const(target_item_def_id) =>
+                {
+                    cx.const_of_item(target_item_def_id)
+                        .instantiate(cx, target_args)
+                        .skip_norm_wip()
+                        .into()
                 }
                 ty::AliasTermKind::ProjectionConst { .. } => {
-                    cx.const_of_item(target_item_def_id).map_bound(|ct| ct.into())
+                    let uv = ty::UnevaluatedConst::new(
+                        target_item_def_id.try_into().unwrap(),
+                        target_args,
+                    );
+                    return ecx.evaluate_const_and_instantiate_normalizes_to_term(goal, uv);
                 }
                 kind => panic!("expected projection, found {kind:?}"),
             };
 
-            ecx.instantiate_normalizes_to_term(
-                goal,
-                term.instantiate(cx, target_args).skip_norm_wip(),
-            );
+            ecx.instantiate_normalizes_to_term(goal, term);
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         })
     }

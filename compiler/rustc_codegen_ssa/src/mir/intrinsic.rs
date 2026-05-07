@@ -148,8 +148,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 return Ok(());
             }
 
+            // va_end uses the fallback body (a no-op).
             sym::va_start => bx.va_start(args[0].immediate()),
-            sym::va_end => bx.va_end(args[0].immediate()),
+
             sym::size_of_val => {
                 let tp_ty = fn_args.type_at(0);
                 let (_, meta) = args[0].val.pointer_parts();

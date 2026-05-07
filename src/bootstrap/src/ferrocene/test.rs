@@ -3,8 +3,6 @@
 
 pub(crate) mod certified_core_symbols;
 
-use serde_json::Value;
-
 use super::tool::flip_link::PATH as FLIP_LINK_PATH;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::Std;
@@ -229,12 +227,14 @@ impl Step for FlipLink {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let host = builder.config.host_target;
-        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
         let compiler = builder.compiler(builder.top_stage, host);
         builder.ensure(Std::new(compiler, host));
+        // The flip link tests require a thumbv7em-none-eabi target to exist
+        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
+        builder.ensure(Std::new(compiler, thumb));
 
-        builder.info("Compiling flip-link test binaries");
-        let out = tool::prepare_tool_cargo(
+        builder.info("Testing ferrocene/tools/flip-link");
+        let mut cmd = tool::prepare_tool_cargo(
             builder,
             compiler,
             Mode::ToolTarget,
@@ -244,71 +244,9 @@ impl Step for FlipLink {
             SourceType::Submodule,
             &[],
         )
-        .into_cmd()
-        // Compile these tests separately from running them so that bootstrap's flags don't
-        // interfere. It passes a lot of things that are only valid for `host`, but the tests will
-        // end up running for the thumb target.
-        .args(["--no-run", "--message-format", "json"])
-        .run_capture_stdout(builder);
-
-        let mut test_artifacts = vec![];
-        for line in out.stdout().lines() {
-            let parsed: serde_json::Value = serde_json::from_str(&line).unwrap();
-
-            // We only care about flip-link
-            let Some(package_id) = parsed.pointer("/package_id").and_then(Value::as_str) else {
-                continue;
-            };
-            if !package_id.contains("flip-link") {
-                continue;
-            }
-
-            // Ensure we only get test binaries, not the actual `flip-link`.
-            let Some(test) = parsed.pointer("/profile/test").and_then(Value::as_bool) else {
-                continue;
-            };
-            if !test {
-                continue;
-            }
-
-            let Some(kind) = parsed
-                .pointer("/target/kind")
-                .and_then(Value::as_array)
-                .and_then(|v| v.first())
-                .and_then(Value::as_str)
-            else {
-                continue;
-            };
-            if !(kind == "test" || kind == "bin") {
-                continue;
-            }
-
-            let Some(executable) = parsed.pointer("/executable").and_then(Value::as_str) else {
-                panic!(
-                    "\
-                    No executable found in cargo line that should include executable\n\
-                    {line}\
-                "
-                );
-            };
-
-            test_artifacts.push(executable.to_string());
-        }
-
-        if !builder.config.dry_run() && test_artifacts.is_empty() {
-            panic!("cargo test --no-run {FLIP_LINK_PATH} did not compile any test binaries");
-        }
-
-        // The flip link tests require a thumbv7em-none-eabi target to exist
-        builder.ensure(Std::new(compiler, thumb));
-
-
-        for artifact in test_artifacts {
-            builder.info(&format!("Testing flip-link test binary ({artifact})"));
-
-            BootstrapCommand::new(artifact)
-                .current_dir(FLIP_LINK_PATH)
-                .run(builder);
-        }
+        .into_cmd();
+        // Since flip-link tests the target, unsetting RUSTFLAGS prevents us from passing invalid args into the build.
+        cmd.env_remove("RUSTFLAGS");
+        cmd.run(builder);
     }
 }

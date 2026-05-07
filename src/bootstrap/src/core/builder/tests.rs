@@ -1134,7 +1134,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1175,6 +1175,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###
         );
     }
@@ -1247,7 +1248,7 @@ mod snapshot {
                 "--set",
                 "rust.lld=true",
             ])
-            .render_steps(), @r"
+            .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> LldWrapper 1 <host>
@@ -1309,6 +1310,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###);
     }
 
@@ -1320,7 +1322,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1381,6 +1383,8 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###
         );
     }
@@ -1393,7 +1397,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1444,6 +1448,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###
         );
     }
@@ -1456,7 +1461,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1526,6 +1531,8 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###
         );
     }
@@ -1538,7 +1545,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1551,7 +1558,7 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        ");
+        "###);
     }
 
     #[test]
@@ -1648,6 +1655,8 @@ mod snapshot {
                 "build.extended=true",
                 "--set",
                 "build.docs=false",
+                "--exclude",
+                "flip-link", // Ferrocene addition: Flip link forces a rustc
             ])
             .get_steps();
 
@@ -1705,7 +1714,7 @@ mod snapshot {
             ctx
                 .config("dist")
                 .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
-                .render_steps(), @r"
+                .render_steps(), @r###"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
@@ -1749,6 +1758,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###);
     }
 
@@ -2090,15 +2100,17 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-                .render_steps(), @r"
+                .render_steps(), @"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <thumbv7em-none-eabi>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
-        [build] rustc 1 <host> -> std 1 <host>
         [test] compiletest-ui 1 <host>
         [test] compiletest-crashes 1 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
@@ -2267,7 +2279,7 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-                .render_steps(), @r"
+                .render_steps(), @"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -2275,9 +2287,12 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustdoc 2 <host>
+        [build] rustc 1 <host> -> std 1 <thumbv7em-none-eabi>
+        [build] rustc 2 <host> -> std 2 <thumbv7em-none-eabi>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
-        [build] rustc 2 <host> -> std 2 <host>
         [test] compiletest-ui 2 <host>
         [test] compiletest-crashes 2 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>

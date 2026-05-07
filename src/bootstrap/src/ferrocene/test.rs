@@ -211,9 +211,6 @@ impl Step for DiffUpstream {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct FlipLink {
-    host: TargetSelection,
-}
 pub(crate) struct FlipLink {}
 
 impl Step for FlipLink {

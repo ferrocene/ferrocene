@@ -22,12 +22,10 @@ use crate::{
 /// `rustc_parse::parser::Parser`. See `rustc_builtin_macros::cmdline_attrs::inject` for more
 /// information.
 #[derive(Debug, Clone)]
-// Ferrocene addition: make the first field public
-pub struct Rustflags(pub String, TargetSelection);
+pub struct Rustflags(String, TargetSelection);
 
 impl Rustflags {
-    // Ferrocene addition: make this public
-    pub fn new(target: TargetSelection) -> Rustflags {
+    fn new(target: TargetSelection) -> Rustflags {
         Rustflags(String::new(), target)
     }
 
@@ -53,8 +51,7 @@ impl Rustflags {
         }
     }
 
-    // Ferrocene addition: make this public
-    pub fn arg(&mut self, arg: &str) -> &mut Self {
+    fn arg(&mut self, arg: &str) -> &mut Self {
         assert_eq!(arg.split(' ').count(), 1);
         if !self.0.is_empty() {
             self.0.push(' ');

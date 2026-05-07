@@ -3,12 +3,10 @@
 
 pub(crate) mod certified_core_symbols;
 
-use std::env;
-
 use serde_json::Value;
 
 use super::tool::flip_link::PATH as FLIP_LINK_PATH;
-use crate::builder::{Builder, RunConfig, Rustflags, ShouldRun, Step};
+use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
@@ -234,7 +232,6 @@ impl Step for FlipLink {
         let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
         let compiler = builder.compiler(builder.top_stage, host);
         builder.ensure(Std::new(compiler, host));
-        let flip_link = builder.ensure(super::tool::flip_link::FlipLink { target: host });
 
         builder.info("Compiling flip-link test binaries");
         let out = tool::prepare_tool_cargo(
@@ -305,23 +302,12 @@ impl Step for FlipLink {
         // The flip link tests require a thumbv7em-none-eabi target to exist
         builder.ensure(Std::new(compiler, thumb));
 
-        let old_path = env::var_os("PATH").unwrap_or_default();
-        let flip_link_dir = flip_link.parent().unwrap().to_path_buf();
-        let new_path =
-            env::join_paths(std::iter::once(flip_link_dir).chain(env::split_paths(&old_path)))
-                .expect("could not add flip-link to PATH");
 
         for artifact in test_artifacts {
             builder.info(&format!("Testing flip-link test binary ({artifact})"));
 
-            let mut rustflags = Rustflags::new(thumb);
-            rustflags
-                .arg(&format!("-Clinker={}", flip_link.to_str().unwrap()))
-                .arg("-Clink-arg=-Tlink.x");
-
             BootstrapCommand::new(artifact)
                 .current_dir(FLIP_LINK_PATH)
-                .env("PATH", &new_path)
                 .run(builder);
         }
     }

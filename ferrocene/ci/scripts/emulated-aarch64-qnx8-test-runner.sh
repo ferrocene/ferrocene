@@ -64,7 +64,9 @@ cmd_prepare() {
     local startup=output/build/startup.sh
     # UI tests and libstd tests will try to resolve 'localhost'
     echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    # for the rationale of using a custom TMPDIR, see the sibling x86_64-qnx8 script
+    echo 'mkdir -p /data/tmp' >> "${startup}"
+    echo 'RUST_TEST_THREADS=1 TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

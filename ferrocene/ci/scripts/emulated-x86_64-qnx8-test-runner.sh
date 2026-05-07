@@ -63,7 +63,12 @@ cmd_prepare() {
     local startup=output/build/startup.sh
     # UI tests and libstd tests will try to resolve 'localhost'
     echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    # the default `TMPDIR` (`/tmp`) uses the `shmem` filesystem which has a
+    # number of limitations around symlink support and the creation of
+    # directories. use a directory in `/data` (QNX6 FS) as `TMPDIR` to avoid
+    # failing tests due to FS limitations
+    echo 'mkdir -p /data/tmp' >> "${startup}"
+    echo 'RUST_TEST_THREADS=1 TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

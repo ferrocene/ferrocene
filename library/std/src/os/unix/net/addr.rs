@@ -54,7 +54,15 @@ pub(super) fn sockaddr_un(path: &Path) -> io::Result<(libc::sockaddr_un, libc::s
     let mut len = SUN_PATH_OFFSET + bytes.len();
     match bytes.get(0) {
         Some(&0) | None => {}
-        Some(_) => len += 1,
+        Some(_) => {
+            // on QNX7.1 and QNX8 the `len` value returned by the SUN_LEN
+            // macro in its libc does not include the null byte in the count so
+            // don't add it here to match what a C program passes to bind(2) and
+            // similar functions
+            if cfg!(not(any(target_env = "nto80", target_env = "nto71"))) {
+                len += 1
+            }
+        }
     }
     Ok((addr, len as libc::socklen_t))
 }
@@ -124,6 +132,13 @@ impl SocketAddr {
                 io::ErrorKind::InvalidInput,
                 "file descriptor did not correspond to a Unix socket",
             ));
+        } else if cfg!(any(target_env = "nto71", target_env = "nto80")) {
+            // the value returned by getsockname(2) and similar on QNX7.1 and
+            // QNX8 does not count the NUL byte terminator of the path string,
+            // which matches the behavior of the SUN_LEN macro in libc, but
+            // other OSes do count the NUL byte so add one to fulfill the
+            // expectation of the `SocketAddr.len` field
+            len += 1;
         }
 
         Ok(SocketAddr { addr, len })

@@ -32,6 +32,7 @@ fn basic() {
     let msg2 = b"world!";
 
     let listener = or_panic!(UnixListener::bind(&socket_path));
+    assert_eq!(Some(&*socket_path), listener.local_addr().unwrap().as_pathname());
     let thread = thread::spawn(move || {
         let mut stream = or_panic!(listener.accept()).0;
         let mut buf = [0; 5];
@@ -79,6 +80,8 @@ fn pair() {
     let msg2 = b"world!";
 
     let (mut s1, mut s2) = or_panic!(UnixStream::pair());
+    assert!(s1.local_addr().unwrap().is_unnamed());
+    assert!(s2.peer_addr().unwrap().is_unnamed());
     let thread = thread::spawn(move || {
         // s1 must be moved in or the test will hang!
         let mut buf = [0; 5];

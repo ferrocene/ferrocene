@@ -82,7 +82,7 @@ impl Step for CertifiedCoreSymbols {
 
         builder.info(&format!(
             "The certified core symbol report is out of date. \
-            Run `./x run update-certified-core-symbols` to update it."
+            Run `./x test certified-core-symbols --bless` to update it."
         ));
         crate::exit!(1);
     }

@@ -23,7 +23,8 @@ use rustc_lint_defs::builtin::{
 use rustc_parse::exp;
 use rustc_parse::parser::{Parser, Recovery};
 use rustc_session::Session;
-use rustc_session::parse::{ParseSess, feature_err};
+use rustc_session::errors::feature_err;
+use rustc_session::parse::ParseSess;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::Transparency;
 use rustc_span::{Ident, Span, Symbol, kw, sym};
@@ -169,6 +170,7 @@ pub struct MacroRulesMacroExpander {
     transparency: Transparency,
     kinds: MacroKinds,
     rules: Vec<MacroRule>,
+    macro_rules: bool,
 }
 
 impl MacroRulesMacroExpander {
@@ -186,6 +188,14 @@ impl MacroRulesMacroExpander {
 
     pub fn kinds(&self) -> MacroKinds {
         self.kinds
+    }
+
+    pub fn nrules(&self) -> usize {
+        self.rules.len()
+    }
+
+    pub fn is_macro_rules(&self) -> bool {
+        self.macro_rules
     }
 
     pub fn expand_derive(
@@ -713,13 +723,12 @@ pub fn compile_declarative_macro(
     span: Span,
     node_id: NodeId,
     edition: Edition,
-) -> (SyntaxExtension, usize) {
+) -> SyntaxExtension {
     let mk_syn_ext = |kind| {
         let is_local = is_defined_in_current_crate(node_id);
         SyntaxExtension::new(sess, kind, span, Vec::new(), edition, ident.name, attrs, is_local)
     };
-    let dummy_syn_ext =
-        |guar| (mk_syn_ext(SyntaxExtensionKind::Bang(Arc::new(DummyBang(guar)))), 0);
+    let dummy_syn_ext = |guar| mk_syn_ext(SyntaxExtensionKind::Bang(Arc::new(DummyBang(guar))));
 
     let macro_rules = macro_def.macro_rules;
     let exp_sep = if macro_rules { exp!(Semi) } else { exp!(Comma) };
@@ -856,9 +865,6 @@ pub fn compile_declarative_macro(
         return dummy_syn_ext(guar);
     }
 
-    // Return the number of rules for unused rule linting, if this is a local macro.
-    let nrules = if is_defined_in_current_crate(node_id) { rules.len() } else { 0 };
-
     let on_unmatch_args = find_attr!(
         attrs,
         OnUnmatchArgs { directive, .. } => directive.clone()
@@ -874,8 +880,9 @@ pub fn compile_declarative_macro(
         on_unmatch_args,
         transparency,
         rules,
+        macro_rules,
     };
-    (mk_syn_ext(SyntaxExtensionKind::MacroRules(Arc::new(exp))), nrules)
+    mk_syn_ext(SyntaxExtensionKind::MacroRules(Arc::new(exp)))
 }
 
 fn check_no_eof(sess: &Session, p: &Parser<'_>, msg: &'static str) -> Option<ErrorGuaranteed> {

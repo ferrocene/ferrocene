@@ -47,7 +47,6 @@ use super::{DescribePlaceOpt, RegionName, RegionNameSource, UseSpans};
 use crate::borrow_set::{BorrowData, TwoPhaseActivation};
 use crate::diagnostics::conflict_errors::StorageDeadOrDrop::LocalStorageDead;
 use crate::diagnostics::{CapturedMessageOpt, call_kind, find_all_local_uses};
-use crate::prefixes::IsPrefixOf;
 use crate::{InitializationRequiringAction, MirBorrowckCtxt, WriteKind, borrowck_errors};
 
 #[derive(Debug)]
@@ -3536,17 +3535,18 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                 && let ty::Adt(adt_def, _) = return_ty.kind()
                 && adt_def.did() == cow_did
             {
-                if let Ok(snippet) = tcx.sess.source_map().span_to_snippet(return_span) {
-                    if let Some(pos) = snippet.rfind(".to_owned") {
-                        let byte_pos = BytePos(pos as u32 + 1u32);
-                        let to_owned_span = return_span.with_hi(return_span.lo() + byte_pos);
-                        err.span_suggestion_short(
-                            to_owned_span.shrink_to_hi(),
-                            "try using `.into_owned()` if you meant to convert a `Cow<'_, T>` to an owned `T`",
-                            "in",
-                            Applicability::MaybeIncorrect,
-                        );
-                    }
+                let typeck = tcx.typeck(self.mir_def_id());
+                if let Some(expr) = self.find_expr(return_span)
+                    && let Some(def_id) = typeck.type_dependent_def_id(expr.hir_id)
+                    && tcx.is_diagnostic_item(sym::to_owned_method, def_id)
+                    && let Some(to_owned_ident) = expr.method_ident()
+                {
+                    err.span_suggestion_short(
+                        to_owned_ident.span.shrink_to_lo(),
+                        "try using `.into_owned()` if you meant to convert a `Cow<'_, T>` to an owned `T`",
+                        "in",
+                        Applicability::MaybeIncorrect,
+                    );
                 }
             }
         }
@@ -4325,7 +4325,7 @@ impl<'infcx, 'tcx> MirBorrowckCtxt<'_, 'infcx, 'tcx> {
                     // Otherwise, look at other types of assignment.
                     let assigned_from = match rvalue {
                         Rvalue::Ref(_, _, assigned_from) => assigned_from,
-                        Rvalue::Use(operand) => match operand {
+                        Rvalue::Use(operand, _) => match operand {
                             Operand::Copy(assigned_from) | Operand::Move(assigned_from) => {
                                 assigned_from
                             }

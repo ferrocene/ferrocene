@@ -1,8 +1,8 @@
 use std::borrow::{Borrow, Cow};
-use std::fmt;
 use std::hash::Hash;
+use std::{fmt, mem};
 
-use rustc_abi::{Align, FIRST_VARIANT, Size};
+use rustc_abi::{Align, FIRST_VARIANT, FieldIdx, Size};
 use rustc_ast::Mutability;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, IndexEntry};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -11,7 +11,7 @@ use rustc_middle::mir::AssertMessage;
 use rustc_middle::mir::interpret::ReportedErrorInfo;
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::ty::layout::{HasTypingEnv, TyAndLayout, ValidityRequirement};
-use rustc_middle::ty::{self, FieldInfo, Ty, TyCtxt};
+use rustc_middle::ty::{self, FieldInfo, ScalarInt, Ty, TyCtxt};
 use rustc_middle::{bug, mir, span_bug};
 use rustc_span::{Span, Symbol, sym};
 use rustc_target::callconv::FnAbi;
@@ -21,8 +21,8 @@ use super::error::*;
 use crate::errors::{LongRunning, LongRunningWarn};
 use crate::interpret::{
     self, AllocId, AllocInit, AllocRange, ConstAllocation, CtfeProvenance, FnArg, Frame,
-    GlobalAlloc, ImmTy, InterpCx, InterpResult, OpTy, PlaceTy, Pointer, RangeSet, Scalar,
-    compile_time_machine, ensure_monomorphic_enough, err_inval, interp_ok, throw_exhaust,
+    GlobalAlloc, ImmTy, InterpCx, InterpResult, OpTy, PlaceTy, Pointer, RangeSet, RetagMode,
+    Scalar, compile_time_machine, ensure_monomorphic_enough, err_inval, interp_ok, throw_exhaust,
     throw_inval, throw_ub, throw_ub_format, throw_unsup, throw_unsup_format,
     type_implements_dyn_trait,
 };
@@ -67,6 +67,9 @@ pub struct CompileTimeMachine<'tcx> {
 
     /// A cache of "data range" computations for unions (i.e., the offsets of non-padding bytes).
     union_data_ranges: FxHashMap<Ty<'tcx>, RangeSet>,
+
+    /// The current retag mode.
+    retag_mode: RetagMode,
 }
 
 #[derive(Copy, Clone)]
@@ -102,6 +105,7 @@ impl<'tcx> CompileTimeMachine<'tcx> {
             check_alignment,
             static_root_ids: None,
             union_data_ranges: FxHashMap::default(),
+            retag_mode: RetagMode::Default,
         }
     }
 }
@@ -601,6 +605,23 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 ecx.write_type_info(ty, dest)?;
             }
 
+            sym::size_of_type_id => {
+                let ty = ecx.read_type_id(&args[0])?;
+                let layout = ecx.layout_of(ty)?;
+                let variant_index = if layout.is_sized() {
+                    let (variant, variant_place) = ecx.project_downcast_named(dest, sym::Some)?;
+                    let size_field_place = ecx.project_field(&variant_place, FieldIdx::ZERO)?;
+                    ecx.write_scalar(
+                        ScalarInt::try_from_target_usize(layout.size.bytes(), ecx.tcx.tcx).unwrap(),
+                        &size_field_place,
+                    )?;
+                    variant
+                } else {
+                    ecx.project_downcast_named(dest, sym::None)?.0
+                };
+                ecx.write_discriminant(variant_index, dest)?;
+            }
+
             sym::field_offset => {
                 let frt_ty = instance.args.type_at(0);
                 ensure_monomorphic_enough(ecx.tcx.tcx, frt_ty)?;
@@ -824,9 +845,12 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
 
     fn retag_ptr_value(
         ecx: &mut InterpCx<'tcx, Self>,
-        _kind: mir::RetagKind,
         val: &ImmTy<'tcx, CtfeProvenance>,
-    ) -> InterpResult<'tcx, ImmTy<'tcx, CtfeProvenance>> {
+        _ty: Ty<'tcx>,
+    ) -> InterpResult<'tcx, Option<ImmTy<'tcx, CtfeProvenance>>> {
+        if matches!(ecx.machine.retag_mode, RetagMode::None | RetagMode::Raw) {
+            return interp_ok(None);
+        }
         // If it's a frozen shared reference that's not already immutable, potentially make it immutable.
         // (Do nothing on `None` provenance, that cannot store immutability anyway.)
         if let ty::Ref(_, ty, mutbl) = val.layout.ty.kind()
@@ -850,10 +874,21 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                 // even when there is interior mutability.)
                 place.map_provenance(CtfeProvenance::as_shared_ref)
             };
-            interp_ok(ImmTy::from_immediate(new_place.to_ref(ecx), val.layout))
+            interp_ok(Some(ImmTy::from_immediate(new_place.to_ref(ecx), val.layout)))
         } else {
-            interp_ok(val.clone())
+            interp_ok(None)
         }
+    }
+
+    fn with_retag_mode<T>(
+        ecx: &mut InterpCx<'tcx, Self>,
+        mode: RetagMode,
+        f: impl FnOnce(&mut InterpCx<'tcx, Self>) -> InterpResult<'tcx, T>,
+    ) -> InterpResult<'tcx, T> {
+        let old_mode = mem::replace(&mut ecx.machine.retag_mode, mode);
+        let ret = f(ecx);
+        ecx.machine.retag_mode = old_mode;
+        ret
     }
 
     fn before_memory_write(

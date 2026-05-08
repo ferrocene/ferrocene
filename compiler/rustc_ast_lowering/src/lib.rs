@@ -31,7 +31,7 @@
 //! in the HIR, especially for multiple identifiers.
 
 // tidy-alphabetical-start
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![recursion_limit = "256"]
 // tidy-alphabetical-end
 
@@ -45,7 +45,7 @@ use rustc_attr_parsing::{AttributeParser, OmitDoc, Recovery, ShouldEmit};
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::sorted_map::SortedMap;
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+use rustc_data_structures::stable_hasher::{StableHash, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::TaggedRef;
 use rustc_errors::{DiagArgFromDisplay, DiagCtxtHandle};
@@ -62,7 +62,7 @@ use rustc_macros::extension;
 use rustc_middle::hir::{self as mid_hir};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{DelegationInfo, ResolverAstLowering, TyCtxt};
-use rustc_session::parse::add_feature_diagnostics;
+use rustc_session::errors::add_feature_diagnostics;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, DesugaringKind, Span};
 use smallvec::SmallVec;
@@ -164,7 +164,6 @@ struct LoweringContext<'a, 'hir> {
 
 impl<'a, 'hir> LoweringContext<'a, 'hir> {
     fn new(tcx: TyCtxt<'hir>, resolver: &'a ResolverAstLowering<'hir>) -> Self {
-        let registered_tools = tcx.registered_tools(()).iter().map(|x| x.name).collect();
         Self {
             tcx,
             resolver,
@@ -220,7 +219,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             attribute_parser: AttributeParser::new(
                 tcx.sess,
                 tcx.features(),
-                registered_tools,
+                tcx.registered_tools(()),
                 ShouldEmit::ErrorsAndLints { recovery: Recovery::Allowed },
             ),
             delayed_lints: Vec::new(),
@@ -523,7 +522,7 @@ fn compute_hir_hash(
 
     tcx.with_stable_hashing_context(|mut hcx| {
         let mut stable_hasher = StableHasher::new();
-        hir_body_nodes.hash_stable(&mut hcx, &mut stable_hasher);
+        hir_body_nodes.stable_hash(&mut hcx, &mut stable_hasher);
         stable_hasher.finish()
     })
 }
@@ -563,7 +562,7 @@ pub fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
 
     // Don't hash unless necessary, because it's expensive.
     let opt_hir_hash =
-        if tcx.needs_crate_hash() { Some(compute_hir_hash(tcx, &owners)) } else { None };
+        if tcx.needs_hir_hash() { Some(compute_hir_hash(tcx, &owners)) } else { None };
 
     let delayed_resolver = Steal::new((resolver, krate));
     mid_hir::Crate::new(owners, delayed_ids, delayed_resolver, opt_hir_hash)

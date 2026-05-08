@@ -76,6 +76,14 @@ const MAX_COST: u8 = 100;
 
 impl<'tcx> crate::MirPass<'tcx> for JumpThreading {
     fn is_enabled(&self, sess: &rustc_session::Session) -> bool {
+        if sess.target.is_like_gpu {
+            // Jump threading can duplicate calls in control-flow.
+            // This leads to incorrect code when done for so called "convergent" operations on GPU
+            // targets, similar to how inline assembly cannot be duplicated on all targets.
+            // Conservatively prevent this by disabling the pass.
+            // See also issue #137086.
+            return false;
+        }
         sess.mir_opt_level() >= 2
     }
 
@@ -395,7 +403,6 @@ impl<'a, 'tcx> TOFinder<'a, 'tcx> {
             StatementKind::StorageLive(local) | StatementKind::StorageDead(local) => {
                 Some((Place::from(local), None))
             }
-            StatementKind::Retag(..)
             | StatementKind::Intrinsic(box NonDivergingIntrinsic::Assume(..))
             // copy_nonoverlapping takes pointers and mutated the pointed-to value.
             | StatementKind::Intrinsic(box NonDivergingIntrinsic::CopyNonOverlapping(..))
@@ -504,7 +511,7 @@ impl<'a, 'tcx> TOFinder<'a, 'tcx> {
     ) {
         let Some(lhs) = self.place(*lhs_place, None) else { return };
         match rvalue {
-            Rvalue::Use(operand) => self.process_operand(lhs, operand, state),
+            Rvalue::Use(operand, _) => self.process_operand(lhs, operand, state),
             // Transfer the conditions on the copy rhs.
             Rvalue::Discriminant(rhs) => {
                 let Some(rhs) = self.place(*rhs, Some(TrackElem::Discriminant)) else { return };

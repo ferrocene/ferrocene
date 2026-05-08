@@ -6,7 +6,7 @@ use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::SolverTraitLangItem;
 use rustc_type_ir::solve::inspect::ProbeKind;
 use rustc_type_ir::solve::{AliasBoundKind, SizedTraitKind};
-use rustc_type_ir::{self as ty, Interner, TypingMode, Unnormalized, elaborate};
+use rustc_type_ir::{self as ty, Interner, Unnormalized, elaborate};
 use tracing::instrument;
 
 use super::assembly::{Candidate, structural_traits};
@@ -142,13 +142,13 @@ where
         let impl_polarity = cx.impl_polarity(impl_def_id);
         let certainty = match impl_polarity {
             ty::ImplPolarity::Negative => return Err(NoSolution),
-            ty::ImplPolarity::Reservation => match ecx.typing_mode() {
-                TypingMode::Coherence => Certainty::AMBIGUOUS,
-                TypingMode::Analysis { .. }
-                | TypingMode::Borrowck { .. }
-                | TypingMode::PostBorrowckAnalysis { .. }
-                | TypingMode::PostAnalysis => return Err(NoSolution),
-            },
+            ty::ImplPolarity::Reservation => {
+                if ecx.typing_mode().is_coherence() {
+                    Certainty::AMBIGUOUS
+                } else {
+                    return Err(NoSolution);
+                }
+            }
             ty::ImplPolarity::Positive => Certainty::Yes,
         };
 

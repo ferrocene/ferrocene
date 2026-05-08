@@ -22,8 +22,12 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
         self.next_trait_solver
     }
 
-    fn typing_mode(&self) -> ty::TypingMode<'tcx> {
-        self.typing_mode()
+    fn disable_trait_solver_fast_paths(&self) -> bool {
+        self.disable_trait_solver_fast_paths()
+    }
+
+    fn typing_mode_raw(&self) -> ty::TypingMode<'tcx> {
+        self.typing_mode_raw()
     }
 
     fn universe(&self) -> ty::UniverseIndex {
@@ -256,19 +260,33 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
         self.probe(|_| probe())
     }
 
-    fn sub_regions(&self, sub: ty::Region<'tcx>, sup: ty::Region<'tcx>, span: Span) {
+    fn sub_regions(
+        &self,
+        sub: ty::Region<'tcx>,
+        sup: ty::Region<'tcx>,
+        vis: ty::VisibleForLeakCheck,
+        span: Span,
+    ) {
         self.inner.borrow_mut().unwrap_region_constraints().make_subregion(
             SubregionOrigin::RelateRegionParamBound(span, None),
             sub,
             sup,
+            vis,
         );
     }
 
-    fn equate_regions(&self, a: ty::Region<'tcx>, b: ty::Region<'tcx>, span: Span) {
+    fn equate_regions(
+        &self,
+        a: ty::Region<'tcx>,
+        b: ty::Region<'tcx>,
+        vis: ty::VisibleForLeakCheck,
+        span: Span,
+    ) {
         self.inner.borrow_mut().unwrap_region_constraints().make_eqregion(
             SubregionOrigin::RelateRegionParamBound(span, None),
             a,
             b,
+            vis,
         );
     }
 

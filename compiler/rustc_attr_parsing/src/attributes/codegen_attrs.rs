@@ -1,5 +1,5 @@
 use rustc_hir::attrs::{CoverageAttrKind, OptimizeAttr, RtsanSetting, SanitizerSet, UsedBy};
-use rustc_session::parse::feature_err;
+use rustc_session::errors::feature_err;
 use rustc_span::edition::Edition::Edition2024;
 
 use super::prelude::*;
@@ -54,7 +54,7 @@ impl NoArgsAttributeParser for ColdParser {
         Allow(Target::ForeignFn),
         Allow(Target::Closure),
     ]);
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::Cold;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::Cold;
 }
 
 pub(crate) struct CoverageParser;
@@ -94,7 +94,7 @@ impl SingleAttributeParser for CoverageParser {
             }
         };
 
-        Some(AttributeKind::Coverage(cx.attr_span, kind))
+        Some(AttributeKind::Coverage(kind))
     }
 }
 
@@ -156,7 +156,7 @@ impl SingleAttributeParser for RustcObjcClassParser {
             cx.emit_err(NullOnObjcClass { span: nv.value_span });
             return None;
         }
-        Some(AttributeKind::RustcObjcClass { classname, span: cx.attr_span })
+        Some(AttributeKind::RustcObjcClass { classname })
     }
 }
 
@@ -183,7 +183,7 @@ impl SingleAttributeParser for RustcObjcSelectorParser {
             cx.emit_err(NullOnObjcSelector { span: nv.value_span });
             return None;
         }
-        Some(AttributeKind::RustcObjcSelector { methname, span: cx.attr_span })
+        Some(AttributeKind::RustcObjcSelector { methname })
     }
 }
 
@@ -195,10 +195,9 @@ pub(crate) struct NakedParser {
 impl AttributeParser for NakedParser {
     const ATTRIBUTES: AcceptMapping<Self> =
         &[(&[sym::naked], template!(Word), |this, cx, args| {
-            if let Err(span) = args.no_args() {
-                cx.adcx().expected_no_args(span);
+            let Some(()) = cx.expect_no_args(args) else {
                 return;
-            }
+            };
 
             if let Some(earlier) = this.span {
                 let span = cx.attr_span;
@@ -265,10 +264,18 @@ impl AttributeParser for NakedParser {
 
         let span = self.span?;
 
+        let Some(tools) = cx.tools else {
+            unreachable!("tools required while parsing attributes");
+        };
+
         // only if we found a naked attribute do we do the somewhat expensive check
         'outer: for other_attr in cx.all_attrs {
             for allowed_attr in ALLOW_LIST {
-                if other_attr.segments().next().is_some_and(|i| cx.tools.contains(&i.name)) {
+                if other_attr
+                    .segments()
+                    .next()
+                    .is_some_and(|i| tools.iter().any(|tool| tool.name == i.name))
+                {
                     // effectively skips the error message  being emitted below
                     // if it's a tool attribute
                     continue 'outer;
@@ -437,9 +444,9 @@ impl AttributeParser for UsedParser {
         // If a specific form of `used` is specified, it takes precedence over generic `#[used]`.
         // If both `linker` and `compiler` are specified, use `linker`.
         Some(match (self.first_compiler, self.first_linker, self.first_default) {
-            (_, Some(span), _) => AttributeKind::Used { used_by: UsedBy::Linker, span },
-            (Some(span), _, _) => AttributeKind::Used { used_by: UsedBy::Compiler, span },
-            (_, _, Some(span)) => AttributeKind::Used { used_by: UsedBy::Default, span },
+            (_, Some(_), _) => AttributeKind::Used { used_by: UsedBy::Linker },
+            (Some(_), _, _) => AttributeKind::Used { used_by: UsedBy::Compiler },
+            (_, _, Some(_)) => AttributeKind::Used { used_by: UsedBy::Default },
             (None, None, None) => return None,
         })
     }

@@ -2,19 +2,22 @@ use std::mem;
 use std::ops::ControlFlow;
 
 #[cfg(feature = "nightly")]
-use rustc_macros::HashStable_NoContext;
+use rustc_macros::StableHash;
 use rustc_type_ir::data_structures::{HashMap, HashSet};
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::relate::Relate;
 use rustc_type_ir::relate::solver_relating::RelateExt;
 use rustc_type_ir::search_graph::{CandidateHeadUsages, PathKind};
-use rustc_type_ir::solve::{MaybeInfo, OpaqueTypesJank};
-use rustc_type_ir::{
-    self as ty, CanonicalVarValues, InferCtxtLike, Interner, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
-    TypingMode,
+use rustc_type_ir::solve::{
+    AccessedOpaques, FetchEligibleAssocItemResponse, MaybeInfo, OpaqueTypesJank, RerunCondition,
+    RerunReason, SmallCopyList,
 };
-use tracing::{debug, instrument, trace};
+use rustc_type_ir::{
+    self as ty, CanonicalVarValues, ClauseKind, InferCtxtLike, Interner, MayBeErased,
+    OpaqueTypeKey, PredicateKind, TypeFoldable, TypeFolder, TypeSuperFoldable, TypeSuperVisitable,
+    TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
+};
+use tracing::{Level, debug, instrument, trace, warn};
 
 use super::has_only_region_constraints;
 use crate::canonical::{
@@ -30,7 +33,8 @@ use crate::solve::ty::may_use_unstable_feature;
 use crate::solve::{
     CanonicalInput, CanonicalResponse, Certainty, ExternalConstraintsData, FIXPOINT_STEP_LIMIT,
     Goal, GoalEvaluation, GoalSource, GoalStalledOn, HasChanged, MaybeCause,
-    NestedNormalizationGoals, NoSolution, QueryInput, QueryResult, Response, inspect,
+    NestedNormalizationGoals, NoSolution, QueryInput, QueryResult, Response, VisibleForLeakCheck,
+    inspect,
 };
 
 mod probe;
@@ -73,6 +77,12 @@ impl CurrentGoalKind {
     }
 }
 
+#[derive(Debug)]
+enum RerunDecision {
+    Yes,
+    No,
+    EagerlyPropagateToParent,
+}
 pub struct EvalCtxt<'a, D, I = <D as SolverDelegate>::Interner>
 where
     D: SolverDelegate<Interner = I>,
@@ -133,11 +143,14 @@ where
     // evaluation code.
     tainted: Result<(), NoSolution>,
 
+    /// Tracks accesses of opaque types while in [`TypingMode::ErasedNotCoherence`].
+    pub(super) opaque_accesses: AccessedOpaques<I>,
+
     pub(super) inspect: inspect::EvaluationStepBuilder<D>,
 }
 
 #[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash))]
 pub enum GenerateProofTree {
     Yes,
     No,
@@ -258,7 +271,7 @@ where
     I: Interner,
 {
     pub(super) fn typing_mode(&self) -> TypingMode<I> {
-        self.delegate.typing_mode()
+        self.delegate.typing_mode_raw()
     }
 
     /// Computes the `PathKind` for the step from the current goal to the
@@ -334,12 +347,14 @@ where
             current_goal_kind: CurrentGoalKind::Misc,
             origin_span,
             tainted: Ok(()),
+            opaque_accesses: AccessedOpaques::default(),
         };
         let result = f(&mut ecx);
         assert!(
             ecx.nested_goals.is_empty(),
             "root `EvalCtxt` should not have any goals added to it"
         );
+        assert!(!ecx.opaque_accesses.might_rerun());
         assert!(search_graph.is_empty());
         result
     }
@@ -351,13 +366,13 @@ where
     ///
     /// This function takes care of setting up the inference context, setting the anchor,
     /// and registering opaques from the canonicalized input.
-    pub(super) fn enter_canonical<R>(
+    pub(super) fn enter_canonical<T>(
         cx: I,
         search_graph: &'a mut SearchGraph<D>,
         canonical_input: CanonicalInput<I>,
         proof_tree_builder: &mut inspect::ProofTreeBuilder<D>,
-        f: impl FnOnce(&mut EvalCtxt<'_, D>, Goal<I, I::Predicate>) -> R,
-    ) -> R {
+        f: impl FnOnce(&mut EvalCtxt<'_, D>, Goal<I, I::Predicate>) -> Result<T, NoSolution>,
+    ) -> (Result<T, NoSolution>, AccessedOpaques<I>) {
         let (ref delegate, input, var_values) = D::build_with_canonical(cx, &canonical_input);
         for (key, ty) in input.predefined_opaques_in_body.iter() {
             let prev = delegate.register_hidden_type_in_storage(key, ty, I::Span::dummy());
@@ -378,6 +393,10 @@ where
         }
 
         let initial_opaque_types_storage_num_entries = delegate.opaque_types_storage_num_entries();
+        if cfg!(debug_assertions) && delegate.typing_mode_raw().is_erased_not_coherence() {
+            assert!(delegate.clone_opaque_types_lookup_table().is_empty());
+        }
+
         let mut ecx = EvalCtxt {
             delegate,
             var_kinds: canonical_input.canonical.var_kinds,
@@ -390,11 +409,16 @@ where
             origin_span: I::Span::dummy(),
             tainted: Ok(()),
             inspect: proof_tree_builder.new_evaluation_step(var_values),
+            opaque_accesses: AccessedOpaques::default(),
         };
 
         let result = f(&mut ecx, input.goal);
         ecx.inspect.probe_final_state(ecx.delegate, ecx.max_input_universe);
         proof_tree_builder.finish_evaluation_step(ecx.inspect);
+
+        if canonical_input.typing_mode.0.is_erased_not_coherence() {
+            debug_assert!(delegate.clone_opaque_types_lookup_table().is_empty());
+        }
 
         // When creating a query response we clone the opaque type constraints
         // instead of taking them. This would cause an ICE here, since we have
@@ -403,7 +427,7 @@ where
         // FIXME: Could we make `build_with_canonical` into `enter_with_canonical` and call this at the end?
         delegate.reset_opaque_types();
 
-        result
+        (result, ecx.opaque_accesses)
     }
 
     pub(super) fn ignore_candidate_head_usages(&mut self, usages: CandidateHeadUsages) {
@@ -446,6 +470,7 @@ where
             ref sub_roots,
             stalled_certainty,
         }) = stalled_on
+            && !self.delegate.disable_trait_solver_fast_paths()
             && !stalled_vars.iter().any(|value| self.delegate.is_changed_arg(*value))
             && !sub_roots
                 .iter()
@@ -468,27 +493,133 @@ where
         // duplicate entries.
         let opaque_types = self.delegate.clone_opaque_types_lookup_table();
         let (goal, opaque_types) = eager_resolve_vars(self.delegate, (goal, opaque_types));
+        let typing_mode = self.typing_mode();
+        let step_kind = self.step_kind_for_source(source);
 
-        let (orig_values, canonical_goal) = canonicalize_goal(self.delegate, goal, &opaque_types);
-        let canonical_result = self.search_graph.evaluate_goal(
-            self.cx(),
-            canonical_goal,
-            self.step_kind_for_source(source),
-            &mut inspect::ProofTreeBuilder::new_noop(),
-        );
-        let response = match canonical_result {
-            Err(e) => return Err(e),
-            Ok(response) => response,
+        let tracing_span = tracing::span!(
+            Level::DEBUG,
+            "evaluate_goal_raw in typing mode",
+            "{:?} opaques={:?}",
+            typing_mode,
+            opaque_types
+        )
+        .entered();
+
+        let (result, orig_values, canonical_goal) = 'retry_canonicalize: {
+            let skip_erased_attempt = if typing_mode.is_coherence() {
+                true
+            } else {
+                let mut skip = false;
+                if opaque_types.iter().any(|(_, ty)| ty.is_ty_var())
+                    && let PredicateKind::Clause(ClauseKind::Trait(..)) =
+                        goal.predicate.kind().skip_binder()
+                {
+                    skip = true;
+                }
+
+                if let PredicateKind::Clause(ClauseKind::Trait(tr)) =
+                    goal.predicate.kind().skip_binder()
+                    && tr.self_ty().has_coroutines()
+                    && self.cx().trait_is_auto(tr.trait_ref.def_id)
+                {
+                    // FIXME(#155443): this doesn't make a difference now, but with eager normalization
+                    // it likely will.
+                    // skip_erased_attempt = true;
+                }
+
+                skip
+            };
+
+            if skip_erased_attempt {
+                if typing_mode.is_erased_not_coherence() {
+                    self.opaque_accesses.rerun_always(RerunReason::SkipErasedAttempt);
+                    // FIXME(#155443): We should differentiate between `NoSolution` and force rerun here.
+                    return Err(NoSolution);
+                } else {
+                    debug!("running in original typing mode");
+                }
+            } else {
+                debug!("trying without opaques: {goal:?}");
+
+                let (orig_values, canonical_goal) = canonicalize_goal(
+                    self.delegate,
+                    goal,
+                    &[],
+                    TypingMode::ErasedNotCoherence(MayBeErased),
+                );
+
+                let (canonical_result, accessed_opaques) = self.search_graph.evaluate_goal(
+                    self.cx(),
+                    canonical_goal,
+                    step_kind,
+                    &mut inspect::ProofTreeBuilder::new_noop(),
+                );
+
+                let should_rerun = self.should_rerun_after_erased_canonicalization(
+                    accessed_opaques,
+                    self.typing_mode(),
+                    &opaque_types,
+                );
+                match should_rerun {
+                    RerunDecision::Yes => debug!("rerunning in original typing mode"),
+                    RerunDecision::No => {
+                        break 'retry_canonicalize (canonical_result, orig_values, canonical_goal);
+                    }
+                    RerunDecision::EagerlyPropagateToParent => {
+                        self.opaque_accesses.update(accessed_opaques);
+                        break 'retry_canonicalize (canonical_result, orig_values, canonical_goal);
+                    }
+                }
+            }
+
+            let (orig_values, canonical_goal) =
+                canonicalize_goal(self.delegate, goal, &opaque_types, typing_mode);
+
+            let (canonical_result, accessed_opaques) = self.search_graph.evaluate_goal(
+                self.cx(),
+                canonical_goal,
+                step_kind,
+                &mut inspect::ProofTreeBuilder::new_noop(),
+            );
+            assert!(
+                !accessed_opaques.might_rerun(),
+                "we run without TypingMode::ErasedNotCoherence, so opaques are available, and we don't retry if the outer typing mode is ErasedNotCoherence: {accessed_opaques:?} after {goal:?}"
+            );
+
+            (canonical_result, orig_values, canonical_goal)
         };
+
+        debug!(?result);
+        let response = result?;
+
+        drop(tracing_span);
 
         let has_changed =
             if !has_only_region_constraints(response) { HasChanged::Yes } else { HasChanged::No };
+
+        // FIXME: We should revisit and consider removing this after
+        // *assumptions on binders* is available, like once we had done in the
+        // stabilization of `-Znext-solver=coherence`(#121848).
+        // We ignore constraints from the nested goals in leak check. This is to match
+        // with the old solver's behavior, which has separated evaluation and fulfillment,
+        // and the former doesn't consider outlives obligations from the later.
+        let vis = match goal.predicate.kind().skip_binder() {
+            ty::PredicateKind::Clause(_)
+            | ty::PredicateKind::DynCompatible(_)
+            | ty::PredicateKind::Subtype(_)
+            | ty::PredicateKind::Coerce(_)
+            | ty::PredicateKind::ConstEquate(_, _)
+            | ty::PredicateKind::Ambiguous
+            | ty::PredicateKind::NormalizesTo(_) => VisibleForLeakCheck::No,
+            ty::PredicateKind::AliasRelate(_, _, _) => VisibleForLeakCheck::Yes,
+        };
 
         let (normalization_nested_goals, certainty) = instantiate_and_apply_query_response(
             self.delegate,
             goal.param_env,
             &orig_values,
             response,
+            vis,
             self.origin_span,
         );
 
@@ -563,6 +694,96 @@ where
             normalization_nested_goals,
             GoalEvaluation { goal, certainty, has_changed, stalled_on },
         ))
+    }
+
+    fn should_rerun_after_erased_canonicalization(
+        &self,
+        AccessedOpaques { reason: _, rerun }: AccessedOpaques<I>,
+        original_typing_mode: TypingMode<I>,
+        parent_opaque_types: &[(OpaqueTypeKey<I>, I::Ty)],
+    ) -> RerunDecision {
+        let parent_opaque_defids = parent_opaque_types.iter().map(|(key, _)| key.def_id.into());
+        let opaque_in_storage = |opaques: I::LocalDefIds, defids: SmallCopyList<_>| {
+            if defids.as_ref().is_empty() {
+                RerunDecision::No
+            } else if opaques
+                .iter()
+                .chain(parent_opaque_defids)
+                .any(|opaque| defids.as_ref().contains(&opaque))
+            {
+                RerunDecision::Yes
+            } else {
+                RerunDecision::No
+            }
+        };
+        let any_opaque_has_infer_as_hidden = || {
+            if parent_opaque_types.iter().any(|(_, ty)| ty.is_ty_var()) {
+                RerunDecision::Yes
+            } else {
+                RerunDecision::No
+            }
+        };
+
+        let res = match (rerun, original_typing_mode) {
+            // =============================
+            (RerunCondition::Never, _) => RerunDecision::No,
+            // =============================
+            (_, TypingMode::ErasedNotCoherence(MayBeErased)) => {
+                RerunDecision::EagerlyPropagateToParent
+            }
+            // =============================
+            // In coherence, we never switch to erased mode, so we will never register anything
+            // in the rerun state, so we should've taken the first branch of this match
+            (_, TypingMode::Coherence) => unreachable!(),
+            // =============================
+            (RerunCondition::Always, _) => RerunDecision::Yes,
+            // =============================
+            (RerunCondition::OpaqueInStorage(..), TypingMode::PostAnalysis) => RerunDecision::Yes,
+            (
+                RerunCondition::OpaqueInStorage(defids),
+                TypingMode::PostBorrowckAnalysis { defined_opaque_types: opaques }
+                | TypingMode::Analysis { defining_opaque_types_and_generators: opaques }
+                | TypingMode::Borrowck { defining_opaque_types: opaques },
+            ) => opaque_in_storage(opaques, defids),
+            // =============================
+            (RerunCondition::AnyOpaqueHasInferAsHidden, TypingMode::Analysis { .. }) => {
+                any_opaque_has_infer_as_hidden()
+            }
+            (
+                RerunCondition::AnyOpaqueHasInferAsHidden,
+                TypingMode::PostBorrowckAnalysis { .. }
+                | TypingMode::PostAnalysis
+                | TypingMode::Borrowck { .. },
+            ) => RerunDecision::No,
+            // =============================
+            (
+                RerunCondition::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(_),
+                TypingMode::PostAnalysis,
+            ) => RerunDecision::No,
+            (
+                RerunCondition::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(defids),
+                TypingMode::Analysis { defining_opaque_types_and_generators: opaques },
+            ) => {
+                if let RerunDecision::Yes = any_opaque_has_infer_as_hidden() {
+                    RerunDecision::Yes
+                } else if let RerunDecision::Yes = opaque_in_storage(opaques, defids) {
+                    RerunDecision::Yes
+                } else {
+                    RerunDecision::No
+                }
+            }
+            (
+                RerunCondition::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(defids),
+                TypingMode::PostBorrowckAnalysis { defined_opaque_types: opaques }
+                | TypingMode::Borrowck { defining_opaque_types: opaques },
+            ) => opaque_in_storage(opaques, defids),
+        };
+
+        debug!(
+            "checking whether to rerun {rerun:?} in outer typing mode {original_typing_mode:?} and opaques {parent_opaque_types:?}: {res:?}"
+        );
+
+        res
     }
 
     pub(super) fn compute_goal(&mut self, goal: Goal<I, I::Predicate>) -> QueryResult<I> {
@@ -647,7 +868,10 @@ where
         // If this loop did not result in any progress, what's our final certainty.
         let mut unchanged_certainty = Some(Certainty::Yes);
         for (source, goal, stalled_on) in mem::take(&mut self.nested_goals) {
-            if let Some(certainty) = self.delegate.compute_goal_fast_path(goal, self.origin_span) {
+            if !self.delegate.disable_trait_solver_fast_paths()
+                && let Some(certainty) =
+                    self.delegate.compute_goal_fast_path(goal, self.origin_span)
+            {
                 match certainty {
                     Certainty::Yes => {}
                     Certainty::Maybe { .. } => {
@@ -1100,9 +1324,14 @@ where
         self.delegate.register_ty_outlives(ty, lt, self.origin_span);
     }
 
-    pub(super) fn register_region_outlives(&self, a: I::Region, b: I::Region) {
+    pub(super) fn register_region_outlives(
+        &self,
+        a: I::Region,
+        b: I::Region,
+        vis: VisibleForLeakCheck,
+    ) {
         // `'a: 'b` ==> `'b <= 'a`
-        self.delegate.sub_regions(b, a, self.origin_span);
+        self.delegate.sub_regions(b, a, vis, self.origin_span);
     }
 
     /// Computes the list of goals required for `arg` to be well-formed
@@ -1128,9 +1357,9 @@ where
     pub(super) fn fetch_eligible_assoc_item(
         &self,
         goal_trait_ref: ty::TraitRef<I>,
-        trait_assoc_def_id: I::DefId,
+        trait_assoc_def_id: I::TraitAssocTermId,
         impl_def_id: I::ImplId,
-    ) -> Result<Option<I::DefId>, I::ErrorGuaranteed> {
+    ) -> FetchEligibleAssocItemResponse<I> {
         self.delegate.fetch_eligible_assoc_item(goal_trait_ref, trait_assoc_def_id, impl_def_id)
     }
 
@@ -1145,7 +1374,7 @@ where
 
     pub(super) fn add_item_bounds_for_hidden_type(
         &mut self,
-        opaque_def_id: I::DefId,
+        opaque_def_id: I::OpaqueTyId,
         opaque_args: I::GenericArgs,
         param_env: I::ParamEnv,
         hidden_ty: I::Ty,
@@ -1165,11 +1394,54 @@ where
     // This doesn't mean the const isn't evaluatable, though, and should be treated
     // as an ambiguity rather than no-solution.
     pub(super) fn evaluate_const(
-        &self,
+        &mut self,
         param_env: I::ParamEnv,
         uv: ty::UnevaluatedConst<I>,
     ) -> Option<I::Const> {
+        if self.typing_mode().is_erased_not_coherence() {
+            self.opaque_accesses.rerun_always(RerunReason::EvaluateConst);
+            return None;
+        }
+
         self.delegate.evaluate_const(param_env, uv)
+    }
+
+    pub(super) fn evaluate_const_and_instantiate_normalizes_to_term(
+        &mut self,
+        goal: Goal<I, ty::NormalizesTo<I>>,
+        uv: ty::UnevaluatedConst<I>,
+    ) -> QueryResult<I> {
+        match self.evaluate_const(goal.param_env, uv) {
+            Some(evaluated) => {
+                self.instantiate_normalizes_to_term(goal, evaluated.into());
+                self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+            }
+            None if self.cx().features().generic_const_args() => {
+                // HACK(khyperia): calling `resolve_vars_if_possible` here shouldn't be necessary,
+                // `try_evaluate_const` calls `resolve_vars_if_possible` already. However, we want
+                // to check `has_non_region_infer` against the type with vars resolved (i.e. check
+                // if there are vars we failed to resolve), so we need to call it again here.
+                // Perhaps we could split EvaluateConstErr::HasGenericsOrInfers into HasGenerics and
+                // HasInfers or something, make evaluate_const return that, and make this branch be
+                // based on that, rather than checking `has_non_region_infer`.
+                if self.resolve_vars_if_possible(uv).has_non_region_infer() {
+                    self.evaluate_added_goals_and_make_canonical_response(Certainty::AMBIGUOUS)
+                } else {
+                    // We do not instantiate to the `uv` passed in, but rather
+                    // `goal.predicate.alias`. The `uv` passed in might correspond to the `impl`
+                    // form of a constant (with generic arguments corresponding to the impl block),
+                    // however, we want to structurally instantiate to the original, non-rebased,
+                    // trait `Self` form of the constant (with generic arguments being the trait
+                    // `Self` type).
+                    self.structurally_instantiate_normalizes_to_term(goal, goal.predicate.alias);
+                    self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+                }
+            }
+            None => {
+                // Legacy behavior: always treat as ambiguous
+                self.evaluate_added_goals_and_make_canonical_response(Certainty::AMBIGUOUS)
+            }
+        }
     }
 
     pub(super) fn is_transmutable(
@@ -1190,10 +1462,15 @@ where
     }
 
     pub(super) fn may_use_unstable_feature(
-        &self,
+        &mut self,
         param_env: I::ParamEnv,
         symbol: I::Symbol,
     ) -> bool {
+        if self.typing_mode().is_erased_not_coherence() {
+            self.opaque_accesses.rerun_always(RerunReason::MayUseUnstableFeature);
+            return false;
+        }
+
         may_use_unstable_feature(&**self.delegate, param_env, symbol)
     }
 
@@ -1303,7 +1580,7 @@ where
         let mut unique = HashSet::default();
         external_constraints
             .region_constraints
-            .retain(|outlives| !outlives.is_trivial() && unique.insert(*outlives));
+            .retain(|(outlives, _)| !outlives.is_trivial() && unique.insert(*outlives));
 
         let canonical = canonicalize_response(
             self.delegate,
@@ -1368,6 +1645,10 @@ where
         let opaque_types = self
             .delegate
             .clone_opaque_types_added_since(self.initial_opaque_types_storage_num_entries);
+
+        if self.typing_mode().is_erased_not_coherence() {
+            assert!(opaque_types.is_empty());
+        }
 
         ExternalConstraintsData { region_constraints, opaque_types, normalization_nested_goals }
     }
@@ -1489,13 +1770,15 @@ pub fn evaluate_root_goal_for_proof_tree_raw_provider<
     canonical_goal: CanonicalInput<I>,
 ) -> (QueryResult<I>, I::Probe) {
     let mut inspect = inspect::ProofTreeBuilder::new();
-    let canonical_result = SearchGraph::<D>::evaluate_root_goal_for_proof_tree(
+    let (canonical_result, accessed_opaques) = SearchGraph::<D>::evaluate_root_goal_for_proof_tree(
         cx,
         cx.recursion_limit(),
         canonical_goal,
         &mut inspect,
     );
     let final_revision = inspect.unwrap();
+
+    assert!(!accessed_opaques.might_rerun());
     (canonical_result, cx.mk_probe(final_revision))
 }
 
@@ -1510,8 +1793,10 @@ pub(super) fn evaluate_root_goal_for_proof_tree<D: SolverDelegate<Interner = I>,
 ) -> (Result<NestedNormalizationGoals<I>, NoSolution>, inspect::GoalEvaluation<I>) {
     let opaque_types = delegate.clone_opaque_types_lookup_table();
     let (goal, opaque_types) = eager_resolve_vars(delegate, (goal, opaque_types));
+    let typing_mode = delegate.typing_mode_raw().assert_not_erased();
 
-    let (orig_values, canonical_goal) = canonicalize_goal(delegate, goal, &opaque_types);
+    let (orig_values, canonical_goal) =
+        canonicalize_goal(delegate, goal, &opaque_types, typing_mode.into());
 
     let (canonical_result, final_revision) =
         delegate.cx().evaluate_root_goal_for_proof_tree_raw(canonical_goal);
@@ -1533,6 +1818,7 @@ pub(super) fn evaluate_root_goal_for_proof_tree<D: SolverDelegate<Interner = I>,
         goal.param_env,
         &proof_tree.orig_values,
         response,
+        VisibleForLeakCheck::Yes,
         origin_span,
     );
 

@@ -231,7 +231,7 @@ where
 
         Rvalue::CopyForDeref(place) => in_place::<Q, _>(cx, in_local, place.as_ref()),
 
-        Rvalue::Use(operand)
+        Rvalue::Use(operand, _)
         | Rvalue::Repeat(operand, _)
         | Rvalue::UnaryOp(_, operand)
         | Rvalue::Cast(_, operand, _) => in_operand::<Q, _>(cx, in_local, operand),
@@ -251,6 +251,8 @@ where
 
             in_place::<Q, _>(cx, in_local, place.as_ref())
         }
+
+        Rvalue::Reborrow(_, _, place) => in_place::<Q, _>(cx, in_local, place.as_ref()),
 
         Rvalue::WrapUnsafeBinder(op, _) => in_operand::<Q, _>(cx, in_local, op),
 

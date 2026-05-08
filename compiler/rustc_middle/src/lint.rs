@@ -5,17 +5,18 @@ use rustc_data_structures::sorted_map::SortedMap;
 use rustc_errors::{Diag, DiagLocation, Diagnostic, MultiSpan};
 use rustc_hir::{HirId, ItemLocalId};
 use rustc_lint_defs::EditionFcw;
-use rustc_macros::{Decodable, Encodable, HashStable};
+use rustc_macros::{Decodable, Encodable, StableHash};
 use rustc_session::Session;
-use rustc_session::lint::builtin::{self, FORBIDDEN_LINT_GROUPS};
-use rustc_session::lint::{FutureIncompatibilityReason, Level, Lint, LintExpectationId, LintId};
+use rustc_session::lint::{
+    FutureIncompatibilityReason, Level, Lint, LintExpectationId, LintId, builtin,
+};
 use rustc_span::{DUMMY_SP, ExpnKind, Span, Symbol, kw};
 use tracing::instrument;
 
 use crate::ty::TyCtxt;
 
 /// How a lint level was set.
-#[derive(Clone, Copy, PartialEq, Eq, Encodable, Decodable, HashStable, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Encodable, Decodable, StableHash, Debug)]
 pub enum LintLevelSource {
     /// Lint is at the default level as declared in rustc.
     Default,
@@ -53,7 +54,7 @@ impl LintLevelSource {
 }
 
 /// Convenience helper for moving things around together that frequently are paired
-#[derive(Copy, Clone, Debug, HashStable, Encodable, Decodable)]
+#[derive(Copy, Clone, Debug, StableHash, Encodable, Decodable)]
 pub struct LevelAndSource {
     pub level: Level,
     pub lint_id: Option<LintExpectationId>,
@@ -64,7 +65,7 @@ pub struct LevelAndSource {
 ///
 /// This map represents the set of allowed lints and allowance levels given
 /// by the attributes for *a single HirId*.
-#[derive(Default, Debug, HashStable)]
+#[derive(Default, Debug, StableHash)]
 pub struct ShallowLintLevelMap {
     pub expectations: Vec<(LintExpectationId, LintExpectation)>,
     pub specs: SortedMap<ItemLocalId, FxIndexMap<LintId, LevelAndSource>>,
@@ -89,17 +90,30 @@ pub fn reveal_actual_level(
         level.unwrap_or_else(|| (lint.lint.default_level(sess.edition()), None));
 
     // If we're about to issue a warning, check at the last minute for any
-    // directives against the warnings "lint". If, for example, there's an
+    // directives against the `warnings` lint group. If, for example, there's an
     // `allow(warnings)` in scope then we want to respect that instead.
-    //
-    // We exempt `FORBIDDEN_LINT_GROUPS` from this because it specifically
-    // triggers in cases (like #80988) where you have `forbid(warnings)`,
-    // and so if we turned that into an error, it'd defeat the purpose of the
-    // future compatibility warning.
-    if level == Level::Warn && lint != LintId::of(FORBIDDEN_LINT_GROUPS) {
+    if level == Level::Warn {
         let (warnings_level, warnings_src) = probe_for_lint_level(LintId::of(builtin::WARNINGS));
         if let Some((configured_warning_level, configured_lint_id)) = warnings_level {
-            if configured_warning_level != Level::Warn {
+            let respect_warnings_lint_group = match configured_warning_level {
+                // -Wwarnings is a no-op.
+                Level::Warn => false,
+                // Some warnings cannot be denied from the `warnings` lint group, only individually.
+                Level::Deny | Level::Forbid => !lint.lint.ignore_deny_warnings,
+                // All warnings respect -Awarnings.
+                Level::Allow => true,
+                // Not sure what the right behavior is here, but, sure, why not.
+                // See tests/ui/lint/rfc-2383-lint-reason/expect_warnings.rs.
+                Level::Expect => true,
+                Level::ForceWarn => {
+                    sess.dcx().span_delayed_bug(
+                        warnings_src.span(),
+                        "cannot --force-warn the `warnings` lint group",
+                    );
+                    false
+                }
+            };
+            if respect_warnings_lint_group {
                 level = configured_warning_level;
                 lint_id = configured_lint_id;
                 *src = warnings_src;
@@ -183,7 +197,7 @@ impl TyCtxt<'_> {
 /// This struct represents a lint expectation and holds all required information
 /// to emit the `unfulfilled_lint_expectations` lint if it is unfulfilled after
 /// the `LateLintPass` has completed.
-#[derive(Clone, Debug, Encodable, Decodable, HashStable)]
+#[derive(Clone, Debug, Encodable, Decodable, StableHash)]
 pub struct LintExpectation {
     /// The reason for this expectation that can optionally be added as part of
     /// the attribute. It will be displayed as part of the lint message.
@@ -290,6 +304,18 @@ fn explain_lint_level_source(
                 ));
             }
         }
+    }
+
+    if let Some(warnings_group) = sess
+        .opts
+        .lint_opts
+        .iter()
+        .find_map(|(opt, level)| (opt == "warnings").then_some(level))
+        .copied()
+        && warnings_group >= Level::Deny
+        && level < warnings_group
+    {
+        err.note_once(format!("the `{name}` lint ignores `-D warnings`"));
     }
 }
 

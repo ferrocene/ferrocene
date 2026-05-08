@@ -1431,9 +1431,13 @@ impl<T: ?Sized> Box<T> {
     pub fn into_raw(b: Self) -> *mut T {
         // Avoid `into_raw_with_allocator` as that interacts poorly with Miri's Stacked Borrows.
         let mut b = mem::ManuallyDrop::new(b);
-        // We go through the built-in deref for `Box`, which is crucial for Miri to recognize this
-        // operation for it's alias tracking.
-        &raw mut **b
+        // We need to give Miri (specifically, Stacked Borrows) a chance to recognize this as a
+        // safe-to-raw-pointer cast. To achieve this, we first create a mutable reference, and then
+        // cast that to a raw pointer -- this cast is recognized by the aliasing model and leads to
+        // a suitable retag.
+        // It would be wrong for `into_raw_with_allocator` to do the same as that would induce
+        // uniqueness assumptions (from the `&mut`) that we only want with the default allocator.
+        (&mut **b) as *mut T
     }
 
     /// Consumes the `Box`, returning a wrapped `NonNull` pointer.

@@ -2992,6 +2992,10 @@ impl<T, A: Allocator> Vec<T, A> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn clear(&mut self) {
+        // Though this is equivalent to `truncate(0)`, the manual version
+        // optimizes better, justifying the additional complexity
+        // (see #96002 and #154095 for context).
+
         let elems: *mut [T] = self.as_mut_slice();
 
         // SAFETY:

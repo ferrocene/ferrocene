@@ -32,10 +32,11 @@ impl<'tcx> At<'_, 'tcx> {
         &self,
         value: Unnormalized<'tcx, T>,
     ) -> InferOk<'tcx, T> {
-        let value = value.skip_normalization();
         if self.infcx.next_trait_solver() {
-            InferOk { value, obligations: PredicateObligations::new() }
+            let Normalized { value, obligations } = crate::solve::normalize(*self, value);
+            InferOk { value, obligations }
         } else {
+            let value = value.skip_normalization();
             let mut selcx = SelectionContext::new(self.infcx);
             let Normalized { value, obligations } =
                 normalize_with_depth(&mut selcx, self.param_env, self.cause.clone(), 0, value);
@@ -137,7 +138,7 @@ pub(super) fn needs_normalization<'tcx, T: TypeVisitable<TyCtxt<'tcx>>>(
 
     // Opaques are treated as rigid outside of `TypingMode::PostAnalysis`,
     // so we can ignore those.
-    match infcx.typing_mode() {
+    match infcx.typing_mode_raw().assert_not_erased() {
         // FIXME(#132279): We likely want to reveal opaques during post borrowck analysis
         TypingMode::Coherence
         | TypingMode::Analysis { .. }
@@ -409,7 +410,7 @@ impl<'a, 'b, 'tcx> TypeFolder<TyCtxt<'tcx>> for AssocTypeNormalizer<'a, 'b, 'tcx
         match data.kind {
             ty::Opaque { def_id } => {
                 // Only normalize `impl Trait` outside of type inference, usually in codegen.
-                match self.selcx.infcx.typing_mode() {
+                match self.selcx.typing_mode() {
                     // FIXME(#132279): We likely want to reveal opaques during post borrowck analysis
                     TypingMode::Coherence
                     | TypingMode::Analysis { .. }

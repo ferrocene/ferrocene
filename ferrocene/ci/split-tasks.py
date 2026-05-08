@@ -140,6 +140,9 @@ JOBS_DEFINITION: JobsDefinition = {
 
         # This is the library without std, for all targets that have no std.
         "library-nostd": ["library/core", "library/alloc", "library/test"],
+
+        # The flip link tests require the `--target thumbv7-none-eabi` flag
+        "flip-link": ["flip-link"],
     },
 
     "qnx": {

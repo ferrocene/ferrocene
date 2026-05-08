@@ -1134,10 +1134,10 @@ If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
 the :t:`visibility` of the :t:`name` is the most permissive one.
 
 :dp:`fls_sUhnfV62HJrb`
-When :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` is used to import the current :t:`crate`, a :t:`renaming` must be used to define the :t:`binding` name.
+When :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` is used to import the current :t:`crate`, the keyword shall be subject to a :t:`renaming`.
 
 :dp:`fls_QGdeRTe0H1Uc`
-When :t:`keyword` ``super`` is used to import a parent :t:`module`, a :t:`renaming` must be used to define the :t:`binding` name.
+When :t:`keyword` ``super`` is used to import a parent :t:`module`, the keyword shall be subject to a :t:`renaming`.
 
 :dp:`fls_aam34hsRmKU2`
 An :t:`external prelude` cannot be imported.

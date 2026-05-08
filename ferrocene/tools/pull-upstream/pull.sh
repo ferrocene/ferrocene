@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
@@ -422,10 +422,10 @@ ferrocene/ci/scripts/fix-stage0-branch.py || automation_warning "Could not fix s
 commit_if_modified src/stage0 "update src/stage0"
 
 echo "pull-upstream: trying to fix ferrocene/doc/symbol-report.csv"
-if ./x.py run update-certified-core-symbols --set rust.debug-assertions-std=true; then
+if ./x.py test certified-core-symbols --bless --set rust.debug-assertions-std=true; then
     commit_if_modified ferrocene/doc/symbol-report.csv "update symbol report"
 else
-    automation_warning "Couldn't regenerate the symbol report. Please run './x run update-certified-core-symbols' after fixing the conflicts."
+    automation_warning "Couldn't regenerate the symbol report. Please run './x test certified-core-symbols --bless' after fixing the conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

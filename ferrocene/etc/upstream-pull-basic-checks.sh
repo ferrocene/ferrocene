@@ -32,7 +32,7 @@ if [ -n "$BLESS" ]; then
     if ! ./x test bootstrap; then
         cargo insta review --manifest-path src/bootstrap/Cargo.toml
     fi
-    ./x run update-certified-core-symbols
+    ./x test certified-core-symbols --bless
 else
     ./x test bootstrap
     ./x test certified-core-symbols

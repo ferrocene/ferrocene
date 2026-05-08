@@ -6,7 +6,7 @@ Usage
 
 .. note::
 
-   flip-link is known to work with ARM Cortex-M programs that link to version 0.6.x of the
+   flip-link is known to work with ARM Cortex-M programs that link to version 0.6.x or 0.7.x of the
    ``cortex-m-rt`` `crate <https://crates.io/crates/cortex-m-rt>`_ and are linked using the
    linker shipped with the toolchain (LLD).
 
@@ -21,7 +21,7 @@ Using ``cargo``
 To use with ``cargo``, modify the ``.cargo/config.toml``:
 
 .. code-block:: toml
-   
+
    [target.'cfg(all(target_arch = "arm", target_os = "none"))']
    # (..)
    linker = "flip-link"

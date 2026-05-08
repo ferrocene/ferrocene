@@ -69,6 +69,7 @@ Ferrocene User Manual
    :maxdepth: 2
    :caption: flip-link
 
+   flip-link/overview
    flip-link/install
    flip-link/usage
 

@@ -48,8 +48,9 @@ cmd_prepare() {
     echo "===> creating initial IFS"
     tmpdir="$(mktemp -d)"
     pushd "$tmpdir"
+    # NOTE `--data-size=5000 --data-inodes=40000` are required to make the test `std::fs::tests::read_large_dir` pass
     QNX_TARGET="${qnxdir}/target/qnx" mkqnximage \
-        --noprompt \
+        --data-size=5000 --data-inodes=40000 --noprompt \
         --hostname="${vm_hostname}" --arch=aarch64le \
         --ip="${vm_ipv4_addr}" --ssh-ident=none
 

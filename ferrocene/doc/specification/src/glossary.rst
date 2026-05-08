@@ -4099,8 +4099,7 @@ See :s:`SimpleCStringLiteral`.
 simple import
 ^^^^^^^^^^^^^
 
-A :dt:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
-local :t:`name` by using an optional :t:`renaming`.
+A :dt:`simple import` is a :t:`use import` that brings a :t:`simple path` into scope, optionally with a :t:`renaming`.
 
 See :s:`SimpleImport`.
 

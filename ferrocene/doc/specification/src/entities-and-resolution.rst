@@ -327,7 +327,7 @@ If a :t:`simple path` appears in a :t:`use import` and starts with a
 :t:`path segment` expressed as either :t:`keyword` ``crate``, :t:`keyword`
 ``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``super``, then the
 :t:`path` shall be the :t:`simple path prefix` of a :t:`glob import` or a
-:t:`nesting import`, or the :t:`simple path` of a :t:`simple import`.
+:t:`nesting import`, or the :t:`path` of a :t:`simple import`.
 
 :dp:`fls_cw006jhlboa`
 If a :t:`simple path` appears in a :t:`use import` and starts with a
@@ -1073,7 +1073,7 @@ A :t:`glob import` brings :t:`[name]s` into :t:`scope` as follows:
 
 :dp:`fls_90hQvSh7Bfyg`
 A :dt:`simple import path` is the :t:`path` constructed by appending the last
-:t:`path segment` of a :t:`simple import`'s :t:`simple path` to the
+:t:`path segment` of the :t:`path` of the :t:`simple import` to the
 :t:`import path prefix`.
 
 :dp:`fls_wRmvtgQkFA6w`
@@ -1114,7 +1114,7 @@ A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
 prefix` is rejected, but may still be consumed by :t:`[macro]s`.
 
 :dp:`fls_RUiFQ17bmRLt`
-A :t:`simple import` with a :t:`simple path` with a single :t:`path segment` of
+A :t:`simple import` with a single :t:`path segment` of
 keyword ``self`` shall be subject to the following:
 
 * :dp:`fls_hv3xT2CjZuxc`

@@ -42,7 +42,6 @@ If you want to see what ``flip-link`` is up to, you can set these environment va
 
 .. code-block:: bash
 
-   export RUSTC_LOG=rustc_codegen_ssa::back::link=info
    export RUST_LOG=info
 
 

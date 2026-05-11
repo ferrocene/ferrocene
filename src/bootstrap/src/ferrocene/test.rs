@@ -213,8 +213,8 @@ impl Step for FlipLink {
     type Output = ();
     const IS_HOST: bool = true;
 
-    fn is_default_step(_builder: &Builder<'_>) -> bool {
-        true
+    fn is_default_step(builder: &Builder<'_>) -> bool {
+        builder.targets.iter().any(|target| target.contains("thumbv7em"))
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -229,9 +229,6 @@ impl Step for FlipLink {
         let host = builder.config.host_target;
         let compiler = builder.compiler(builder.top_stage, host);
         builder.ensure(Std::new(compiler, host));
-        // The flip link tests require a thumbv7em-none-eabi target to exist
-        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
-        builder.ensure(Std::new(compiler, thumb));
 
         builder.info("Testing ferrocene/tools/flip-link");
         let mut cmd = tool::prepare_tool_cargo(

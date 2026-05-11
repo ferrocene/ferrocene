@@ -2106,11 +2106,9 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 1 <host> -> std 1 <thumbv7em-none-eabi>
-        [build] rustdoc 1 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
+        [build] rustc 1 <host> -> std 1 <host>
         [test] compiletest-ui 1 <host>
         [test] compiletest-crashes 1 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
@@ -2124,6 +2122,7 @@ mod snapshot {
         [test] compiletest-incremental 1 <host>
         [test] compiletest-debuginfo 1 <host>
         [test] compiletest-ui-fulldeps 1 <host>
+        [build] rustdoc 1 <host>
         [test] compiletest-rustdoc-html 1 <host>
         [test] compiletest-coverage-run-rustdoc 1 <host>
         [test] compiletest-pretty 1 <host>
@@ -2287,12 +2286,9 @@ mod snapshot {
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [build] rustc 2 <host> -> std 2 <host>
-        [build] rustc 1 <host> -> std 1 <thumbv7em-none-eabi>
-        [build] rustc 2 <host> -> std 2 <thumbv7em-none-eabi>
-        [build] rustdoc 2 <host>
         [build] rustc 0 <host> -> Tidy 1 <host>
         [test] tidy <>
+        [build] rustc 2 <host> -> std 2 <host>
         [test] compiletest-ui 2 <host>
         [test] compiletest-crashes 2 <host>
         [build] rustc 0 <host> -> CoverageDump 1 <host>
@@ -2307,6 +2303,7 @@ mod snapshot {
         [test] compiletest-debuginfo 2 <host>
         [build] rustc 2 <host> -> rustc 3 <host>
         [test] compiletest-ui-fulldeps 2 <host>
+        [build] rustdoc 2 <host>
         [test] compiletest-rustdoc-html 2 <host>
         [test] compiletest-coverage-run-rustdoc 2 <host>
         [test] compiletest-pretty 2 <host>

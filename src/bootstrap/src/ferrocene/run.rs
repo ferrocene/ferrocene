@@ -11,7 +11,7 @@ use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::tool::{Blanket, SymbolReport};
+use crate::ferrocene::tool::{blanket::Blanket, SymbolReport};
 use crate::utils::channel::GitInfo;
 use crate::utils::exec::{self, BootstrapCommand};
 use crate::utils::{build_stamp, helpers};

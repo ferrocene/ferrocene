@@ -795,7 +795,7 @@ impl<'a> Builder<'a> {
                 llvm::CrtBeginEnd,
                 crate::ferrocene::tool::SelfTest,
                 crate::ferrocene::tool::SymbolReport,
-                crate::ferrocene::tool::Blanket,
+                crate::ferrocene::tool::blanket::Blanket,
                 crate::ferrocene::tool::flip_link::FlipLink,
                 tool::FerroceneDocumentSignatures,
                 tool::FerroceneGenerateTarball,

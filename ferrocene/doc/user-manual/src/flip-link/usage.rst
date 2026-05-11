@@ -51,12 +51,18 @@ This will produce something like:
 
    $ cargo build
    ...
+   INFO rustc_codegen_ssa::back::link reporting linker output: flavor=Gnu(No, Yes)
    INFO rustc_codegen_ssa::back::link linker stderr:
-   [INFO  flip_link] found MemoryEntry(line=3, origin=0x20000000, length=0x10000) in ./target/thumbv7em-none-eabi/debug/build/lm3s6965-3b7087c63b161e04/out/memory.x
+   [INFO  flip_link] found MemoryEntry(line=3, origin=0x20000000, length=0x10000) in /home/ana/git/knurling-rs/test-flip-link-app/target/thumbv7em-none-eabi/debug/build/lm3s6965-bc3a1fd440e03494/out/memory.x
    [INFO  flip_link] used RAM spans: origin=0x20000000, length=12, align=4
    [INFO  flip_link] new RAM region: ORIGIN=0x2000fff0, LENGTH=16
    INFO rustc_codegen_ssa::back::link linker stdout:
+   INFO rustc_codegen_ssa::back::link reporting linker output: flavor=Gnu(No, Yes)
+   INFO rustc_codegen_ssa::back::link linker stderr:
+   [INFO  flip_link] found MemoryEntry(line=3, origin=0x20000000, length=0x10000) in /home/ana/git/knurling-rs/test-flip-link-app/target/thumbv7em-none-eabi/debug/build/lm3s6965-bc3a1fd440e03494/out/memory.x
+   [INFO  flip_link] used RAM spans: origin=0x20000000, length=12, align=4
+   [INFO  flip_link] new RAM region: ORIGIN=0x2000fff0, LENGTH=16
    INFO rustc_codegen_ssa::back::link linker stdout:
-      Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+      Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.02s
 
 You can see even more detail about how expressions are parsed using ``RUST_LOG=debug``.

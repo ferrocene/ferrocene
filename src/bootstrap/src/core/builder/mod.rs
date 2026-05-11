@@ -873,6 +873,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::GenerateTarball,
                 crate::ferrocene::test::DiffUpstream,
                 crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
+                crate::ferrocene::test::blanket::Blanket,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::BootstrapPy,

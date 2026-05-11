@@ -8,14 +8,14 @@ use crate::ferrocene::tool::{ToolArtifactKind, ToolBuild};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct Blanket {}
-pub(super) const BLANKET_PATH: &str = "ferrocene/tools/blanket";
+pub(in crate::ferrocene) const PATH: &str = "ferrocene/tools/blanket";
 
 impl Step for Blanket {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(BLANKET_PATH)
+        run.path(PATH)
     }
 
     fn is_default_step(_: &Builder<'_>) -> bool {
@@ -33,7 +33,7 @@ impl Step for Blanket {
             target: builder.host_target,
             tool: "blanket",
             mode,
-            path: BLANKET_PATH,
+            path: PATH,
             source_type: SourceType::InTree,
             extra_features: vec![],
             allow_features: "",

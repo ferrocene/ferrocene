@@ -14,18 +14,12 @@ impl<'l, 'f, T, U, F: FnMut(T) -> U> Drain<'l, 'f, T, F> {
     /// This will also not actually store the array.
     ///
     /// SAFETY: must only be called `N` times. Thou shalt not drop the array either.
-    #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub(super) const unsafe fn new(array: &'l mut ManuallyDrop<[T; N]>, f: &'f mut F) -> Self {
-||||||| a021a7796f6
-    pub(super) const unsafe fn new(array: &'l mut ManuallyDrop<[T; N]>, f: &'f mut F) -> Self {
-=======
+    #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
     pub(super) const unsafe fn new<const N: usize>(
         array: &'l mut ManuallyDrop<[T; N]>,
         f: &'f mut F,
     ) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // dont drop the array, transfers "ownership" to Self
         let ptr: NonNull<T> = NonNull::from_mut(array).cast();
         // SAFETY:
@@ -41,18 +35,10 @@ impl<'l, 'f, T, U, F: FnMut(T) -> U> Drain<'l, 'f, T, F> {
 }
 
 /// See [`Drain::new`]; this is our fake iterator.
-#[unstable(feature = "array_try_map", issue = "79711")]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-pub(super) struct Drain<'l, 'f, T, const N: usize, F> {
-    // FIXME(const-hack): This is essentially a slice::IterMut<'static>, replace when possible.
-||||||| a021a7796f6
-pub(super) struct Drain<'l, 'f, T, const N: usize, F> {
-    // FIXME(const-hack): This is essentially a slice::IterMut<'static>, replace when possible.
-=======
+#[unstable(feature = "array_try_map", issue = "79711")]
 pub(super) struct Drain<'l, 'f, T, F> {
     // FIXME(const-hack): This is a slice::IterMut<'l>, replace when possible.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     /// The pointer to the next element to return, or the past-the-end location
     /// if the drainer is empty.
     ///
@@ -119,14 +105,8 @@ where
 }
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
-<<<<<<< ferrocene/main
-impl<T: [const] Destruct, const N: usize, F> const Drop for Drain<'_, '_, T, N, F> {
-    #[ferrocene::prevalidated]
-||||||| a021a7796f6
-impl<T: [const] Destruct, const N: usize, F> const Drop for Drain<'_, '_, T, N, F> {
-=======
 impl<T: [const] Destruct, F> const Drop for Drain<'_, '_, T, F> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let slice = if T::IS_ZST {
             from_raw_parts_mut::<[T]>(

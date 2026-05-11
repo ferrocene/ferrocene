@@ -804,16 +804,11 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 /// // Ensure that the last item was dropped.
 /// assert!(weak.upgrade().is_none());
 /// ```
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-||||||| a021a7796f6
-=======
 #[inline(always)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[stable(feature = "drop_in_place", since = "1.8.0")]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
 #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
-#[ferrocene::prevalidated]
 pub const unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T)
 where
     T: [const] Destruct,
@@ -830,6 +825,7 @@ where
 }
 
 /// Helper function for `drop_in_place`. The compiler replaces this by the actual drop glue.
+#[ferrocene::prevalidated]
 #[lang = "drop_glue"]
 pub(crate) const unsafe fn drop_glue<T: PointeeSized>(_: &mut T)
 where

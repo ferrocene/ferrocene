@@ -400,69 +400,18 @@ pub(crate) type ChangeOutputType<T: Try<Residual: Residual<V>>, V> =
 #[repr(transparent)]
 #[ferrocene::prevalidated]
 pub(crate) struct NeverShortCircuit<T>(pub T);
-<<<<<<< ferrocene/main
-// FIXME(const-hack): replace with `|a| NeverShortCircuit(f(a))` when const closures added.
-#[ferrocene::prevalidated]
-pub(crate) struct Wrapped<T, A, F: FnMut(A) -> T> {
-    f: F,
-    p: PhantomData<(T, A)>,
-}
-#[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
-impl<T, A, F: [const] FnMut(A) -> T + [const] Destruct> const FnOnce<(A,)> for Wrapped<T, A, F> {
-    type Output = NeverShortCircuit<T>;
-
-    #[ferrocene::prevalidated]
-    extern "rust-call" fn call_once(mut self, args: (A,)) -> Self::Output {
-        self.call_mut(args)
-    }
-}
-#[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
-impl<T, A, F: [const] FnMut(A) -> T> const FnMut<(A,)> for Wrapped<T, A, F> {
-    #[ferrocene::prevalidated]
-    extern "rust-call" fn call_mut(&mut self, (args,): (A,)) -> Self::Output {
-        NeverShortCircuit((self.f)(args))
-    }
-}
-||||||| a021a7796f6
-// FIXME(const-hack): replace with `|a| NeverShortCircuit(f(a))` when const closures added.
-pub(crate) struct Wrapped<T, A, F: FnMut(A) -> T> {
-    f: F,
-    p: PhantomData<(T, A)>,
-}
-#[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
-impl<T, A, F: [const] FnMut(A) -> T + [const] Destruct> const FnOnce<(A,)> for Wrapped<T, A, F> {
-    type Output = NeverShortCircuit<T>;
-
-    extern "rust-call" fn call_once(mut self, args: (A,)) -> Self::Output {
-        self.call_mut(args)
-    }
-}
-#[rustc_const_unstable(feature = "const_never_short_circuit", issue = "none")]
-impl<T, A, F: [const] FnMut(A) -> T> const FnMut<(A,)> for Wrapped<T, A, F> {
-    extern "rust-call" fn call_mut(&mut self, (args,): (A,)) -> Self::Output {
-        NeverShortCircuit((self.f)(args))
-    }
-}
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 impl<T> NeverShortCircuit<T> {
     /// Wraps a unary function to produce one that wraps the output into a `NeverShortCircuit`.
     ///
     /// This is useful for implementing infallible functions in terms of the `try_` ones,
     /// without accidentally capturing extra generic parameters in a closure.
-    #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub(crate) const fn wrap_mut_1<A, F>(f: F) -> Wrapped<T, A, F>
-||||||| a021a7796f6
-    pub(crate) const fn wrap_mut_1<A, F>(f: F) -> Wrapped<T, A, F>
-=======
+    #[inline]
     #[rustc_const_unstable(feature = "const_array", issue = "147606")]
     pub(crate) const fn wrap_mut_1<A, F>(
         mut f: F,
     ) -> impl [const] FnMut(A) -> Self + [const] Destruct
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     where
         F: [const] FnMut(A) -> T + [const] Destruct,
     {

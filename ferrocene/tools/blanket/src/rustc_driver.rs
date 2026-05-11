@@ -1,16 +1,17 @@
 use std::collections::BTreeMap;
 use std::fs::File;
+use std::path::PathBuf;
 
 use anyhow::{Context as _, Result, bail};
 use build_helper::symbol_report::{Function, SymbolReport};
 use llvm_profparser::CoverageReport;
 
-use crate::{Annotation, FunctionCoverage, ShowCommand, Span};
+use crate::{Annotation, FunctionCoverage, Span};
 
-pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<FunctionCoverage>> {
+pub fn coverage(ferrocene: &PathBuf, symbol_report: &PathBuf, report: &CoverageReport) -> Result<Vec<FunctionCoverage>> {
     let SymbolReport { symbols, annotations }: SymbolReport = serde_json::from_reader(
-        File::open(&cmd.symbol_report)
-            .context(format!("failed to open symbol file {}", cmd.symbol_report.display()))?,
+        File::open(symbol_report)
+            .context(format!("failed to open symbol file {}", symbol_report.display()))?,
     )?;
     let mut coverage = vec![];
 
@@ -32,7 +33,7 @@ pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<Functi
         coverage.push(super::get_coverage(
             report,
             span,
-            &cmd.ferrocene,
+            ferrocene,
             qualified_name,
             annotations,
         )?);

@@ -8,3 +8,8 @@ Next Ferrocene release
 
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.
+
+New features
+------------
+
+* The ``flip-link`` tool is now quality managed. See the User Manual for documentation.

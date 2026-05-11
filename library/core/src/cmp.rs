@@ -2245,6 +2245,7 @@ mod impls {
         A: [const] Ord,
     {
         #[inline]
+        #[ferrocene::prevalidated]
         fn cmp(&self, other: &Self) -> Ordering {
             Ord::cmp(*self, *other)
         }

@@ -70,7 +70,7 @@ impl PartialEq<Unvalidated> for Unvalidated {
 impl ToString for Validated {
     #[ferrocene::prevalidated]
     fn to_string(&self) -> String {
-        String::new()
+        String::new() //~ ERROR unvalidated
     }
 }
 

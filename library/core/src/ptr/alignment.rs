@@ -334,6 +334,7 @@ impl const Default for Alignment {
 #[cfg(target_pointer_width = "16")]
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -356,6 +357,7 @@ enum AlignmentEnum {
 #[cfg(target_pointer_width = "32")]
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(usize)]
+#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,

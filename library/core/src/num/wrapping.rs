@@ -93,6 +93,7 @@ macro_rules! sh_impl_signed {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn shl(self, other: $f) -> Wrapping<$t> {
                 if other < 0 {
                     Wrapping(self.0.wrapping_shr(-other as u32))
@@ -109,6 +110,7 @@ macro_rules! sh_impl_signed {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShlAssign<$f> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
                 *self = *self << other;
             }
@@ -123,6 +125,7 @@ macro_rules! sh_impl_signed {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn shr(self, other: $f) -> Wrapping<$t> {
                 if other < 0 {
                     Wrapping(self.0.wrapping_shl(-other as u32))
@@ -139,6 +142,7 @@ macro_rules! sh_impl_signed {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShrAssign<$f> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {
                 *self = *self >> other;
             }
@@ -157,6 +161,7 @@ macro_rules! sh_impl_unsigned {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn shl(self, other: $f) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_shl(other as u32))
             }
@@ -169,6 +174,7 @@ macro_rules! sh_impl_unsigned {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShlAssign<$f> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
                 *self = *self << other;
             }
@@ -183,6 +189,7 @@ macro_rules! sh_impl_unsigned {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn shr(self, other: $f) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_shr(other as u32))
             }
@@ -195,6 +202,7 @@ macro_rules! sh_impl_unsigned {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const ShrAssign<$f> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {
                 *self = *self >> other;
             }
@@ -235,6 +243,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn add(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_add(other.0))
             }
@@ -247,6 +256,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const AddAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self + other;
             }
@@ -259,6 +269,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const AddAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: $t) {
                 *self = *self + Wrapping(other);
             }
@@ -273,6 +284,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_sub(other.0))
             }
@@ -285,6 +297,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const SubAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self - other;
             }
@@ -297,6 +310,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const SubAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: $t) {
                 *self = *self - Wrapping(other);
             }
@@ -311,6 +325,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_mul(other.0))
             }
@@ -323,6 +338,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const MulAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self * other;
             }
@@ -335,6 +351,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const MulAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: $t) {
                 *self = *self * Wrapping(other);
             }
@@ -349,6 +366,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn div(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_div(other.0))
             }
@@ -361,6 +379,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self / other;
             }
@@ -373,6 +392,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const DivAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: $t) {
                 *self = *self / Wrapping(other);
             }
@@ -387,6 +407,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0.wrapping_rem(other.0))
             }
@@ -399,6 +420,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self % other;
             }
@@ -411,6 +433,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const RemAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: $t) {
                 *self = *self % Wrapping(other);
             }
@@ -425,6 +448,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn not(self) -> Wrapping<$t> {
                 Wrapping(!self.0)
             }
@@ -439,6 +463,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0 ^ other.0)
             }
@@ -451,6 +476,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitXorAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self ^ other;
             }
@@ -463,6 +489,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitXorAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: $t) {
                 *self = *self ^ Wrapping(other);
             }
@@ -477,6 +504,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0 | other.0)
             }
@@ -489,6 +517,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitOrAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self | other;
             }
@@ -501,6 +530,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitOrAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: $t) {
                 *self = *self | Wrapping(other);
             }
@@ -515,6 +545,7 @@ macro_rules! wrapping_impl {
             type Output = Wrapping<$t>;
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand(self, other: Wrapping<$t>) -> Wrapping<$t> {
                 Wrapping(self.0 & other.0)
             }
@@ -527,6 +558,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitAndAssign for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: Wrapping<$t>) {
                 *self = *self & other;
             }
@@ -539,6 +571,7 @@ macro_rules! wrapping_impl {
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
         impl const BitAndAssign<$t> for Wrapping<$t> {
             #[inline]
+            #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: $t) {
                 *self = *self & Wrapping(other);
             }
@@ -552,6 +585,7 @@ macro_rules! wrapping_impl {
         impl const Neg for Wrapping<$t> {
             type Output = Self;
             #[inline]
+            #[ferrocene::prevalidated]
             fn neg(self) -> Self {
                 Wrapping(0) - self
             }

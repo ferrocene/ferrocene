@@ -165,6 +165,7 @@ pub struct EscapeUnicode(EscapeIterInner<10, AlwaysEscaped>);
 
 impl EscapeUnicode {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn new(c: char) -> Self {
         Self(EscapeIterInner::unicode(c))
     }
@@ -231,16 +232,19 @@ pub struct EscapeDefault(EscapeIterInner<10, AlwaysEscaped>);
 
 impl EscapeDefault {
     #[inline]
+    #[ferrocene::prevalidated]
     const fn printable(c: ascii::Char) -> Self {
         Self(EscapeIterInner::ascii(c.to_u8()))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn backslash(c: ascii::Char) -> Self {
         Self(EscapeIterInner::backslash(c))
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn unicode(c: char) -> Self {
         Self(EscapeIterInner::unicode(c))
     }

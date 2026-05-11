@@ -1,0 +1,33 @@
+error: validated function calls an unvalidated method
+  --> $DIR/mir-inlining.rs:17:5
+   |
+LL |     f(x);
+   |     ^^^^
+   |
+  --> $SRC_DIR/core/src/ops/function.rs:LL:COL
+   |
+   = note: `<fn(u32) -> u32 {trailing_ones} as FnOnce<(u32,)>>::call_once` is unvalidated
+   |
+   = help: contact Ferrocene support to see if this method is possible to certify
+note: `main` is validated
+  --> $DIR/mir-inlining.rs:25:4
+   |
+LL | fn main() {
+   |    ^^^^
+   = note: main functions are assumed to be validated
+note: the lint level is defined here
+  --> $DIR/mir-inlining.rs:8:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: validated function calls an unvalidated function
+  --> $SRC_DIR/core/src/ops/function.rs:LL:COL
+   |
+  ::: $DIR/mir-inlining.rs:11:14
+   |
+LL | pub const fn trailing_ones(_: u32) -> u32 {
+   |              ------------- `trailing_ones` is unvalidated
+
+error: aborting due to 2 previous errors
+

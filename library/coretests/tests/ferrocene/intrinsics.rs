@@ -93,3 +93,43 @@ test_int_carryless_mul! {
     u128 => test_u128_carryless_mul,
     usize => test_usize_carryless_mul,
 }
+
+// Covers:
+// <T as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shl
+// <T as core::intrinsics::fallback::FunnelShift>::unchecked_funnel_shr
+macro_rules! test_intrinsic_unchecked_funnel {
+    ($($T:ty => $fn:ident,)*) => {
+        $(
+        #[test]
+        fn $fn() {
+            unsafe {
+                assert_eq!(
+                    core::intrinsics::fallback::FunnelShift::unchecked_funnel_shl(12 as $T, 12 as $T, 0),
+                    12,
+                );
+                assert_eq!(
+                    core::intrinsics::fallback::FunnelShift::unchecked_funnel_shr(12 as $T, 12 as $T, 0),
+                    12,
+                );
+                assert_eq!(
+                    core::intrinsics::fallback::FunnelShift::unchecked_funnel_shl(12 as $T, 12 as $T, 2),
+                    48,
+                );
+                assert_eq!(
+                    core::intrinsics::fallback::FunnelShift::unchecked_funnel_shr(12 as $T, 12 as $T, 2),
+                    3,
+                );
+            }
+        }
+        )*
+    };
+}
+
+test_intrinsic_unchecked_funnel! {
+    u8 => test_intrinsic_unchecked_funnel_u8,
+    u16 => test_intrinsic_unchecked_funnel_u16,
+    u32 => test_intrinsic_unchecked_funnel_u32,
+    u64 => test_intrinsic_unchecked_funnel_u64,
+    u128 => test_intrinsic_unchecked_funnel_u128,
+    usize => test_intrinsic_unchecked_funnel_usize,
+}

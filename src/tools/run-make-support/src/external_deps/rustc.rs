@@ -459,6 +459,13 @@ impl Rustc {
         self.cmd.arg(flag);
         self
     }
+
+    // Ferrocene addition: used in tests/ferrocene/run-make
+    /// Overrides the PATH variable
+    pub fn override_path(&mut self, value: &str) -> &mut Self {
+        self.cmd.env("PATH", value);
+        self
+    }
 }
 
 /// Query the sysroot path corresponding `rustc --print=sysroot`.

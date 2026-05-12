@@ -988,6 +988,12 @@ fn link_natively(
             && out.contains("-fuse-ld=lld")
             && cmd.get_args().iter().any(|e| e.to_string_lossy() == "-fuse-ld=lld")
         {
+            // Ferrocene-only: if the linker driver does not support the -fuse-ld flag, we
+            // treat that as a fatal error
+            if true {
+                sess.dcx().emit_fatal(errors::NoFuseLdSupport);
+            }
+
             info!("linker output: {:?}", out);
             info!("The linker driver does not support `-fuse-ld=lld`. Retrying without it.");
             for arg in cmd.take_args() {

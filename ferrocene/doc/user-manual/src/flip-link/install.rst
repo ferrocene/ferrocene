@@ -4,7 +4,7 @@
 Installing
 ==========
 
-Download the ``rustfmt`` archive for your host target and follow the
+Download the ``flip-link`` archive for your host target and follow the
 :doc:`installation instructions </rustc/install>`. Please refer to the
 :doc:`target documentation </targets/index>` of your host target to find which
 archive you need to download.

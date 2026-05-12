@@ -564,6 +564,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         ");
     }
 
@@ -590,6 +591,8 @@ mod snapshot {
         [build] llvm <target1>
         [build] rustc 1 <host> -> rustc 2 <target1>
         [build] rustdoc 2 <target1>
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         ");
     }
 
@@ -604,6 +607,7 @@ mod snapshot {
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
+        [build] rustc 1 <host> -> std 1 <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         "
         );
@@ -758,6 +762,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
+        [build] rustc 1 <host> -> std 1 <host>
         "
         );
     }
@@ -781,6 +786,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <host>
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustdoc 2 <host>
+        [build] rustc 2 <host> -> std 2 <host>
         "
         );
     }
@@ -810,6 +816,7 @@ mod snapshot {
         [build] rustc 1 <host> -> LldWrapper 2 <target1>
         [build] rustc 1 <host> -> LlvmBitcodeLinker 2 <target1>
         [build] rustdoc 2 <target1>
+        [build] rustc 2 <host> -> std 2 <target1>
         "
         );
     }
@@ -1168,6 +1175,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###
         );
     }
@@ -1302,6 +1310,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###);
     }
 
@@ -1374,6 +1383,8 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###
         );
     }
@@ -1437,6 +1448,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###
         );
     }
@@ -1519,6 +1531,8 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###
         );
     }
@@ -1541,6 +1555,9 @@ mod snapshot {
         [dist] mingw <target1>
         [build] rustc 1 <host> -> std 1 <target1>
         [dist] rustc 1 <host> -> std 1 <target1>
+        [build] rustc 1 <host> -> std 1 <host>
+        [build] rustc 1 <host> -> rustc 2 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###);
     }
 
@@ -1615,6 +1632,7 @@ mod snapshot {
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
+        [build] rustc 2 <host> -> std 2 <target1>
         "###);
     }
 
@@ -1637,6 +1655,8 @@ mod snapshot {
                 "build.extended=true",
                 "--set",
                 "build.docs=false",
+                "--exclude",
+                "flip-link", // Ferrocene addition: Flip link forces a rustc
             ])
             .get_steps();
 
@@ -1738,6 +1758,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
+        [build] rustc 2 <host> -> std 2 <host>
         "###);
     }
 
@@ -2079,7 +2100,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
-                .render_steps(), @r"
+                .render_steps(), @"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -2257,7 +2278,7 @@ mod snapshot {
         insta::assert_snapshot!(
             prepare_test_config(&ctx)
                 .stage(2)
-                .render_steps(), @r"
+                .render_steps(), @"
         [build] rustdoc 0 <host>
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>

@@ -4,6 +4,7 @@
 use std::path::PathBuf;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
 use crate::core::config::TargetSelection;
 use crate::{Kind, Mode, exe};
@@ -13,11 +14,11 @@ pub(crate) struct FlipLink {
     pub(crate) target: TargetSelection,
 }
 
-const PATH: &str = "ferrocene/tools/flip-link";
+pub(in crate::ferrocene) const PATH: &str = "ferrocene/tools/flip-link";
 
 impl Step for FlipLink {
     type Output = PathBuf;
-    const IS_HOST: bool = true;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path(PATH)
@@ -32,14 +33,16 @@ impl Step for FlipLink {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let compiler = builder.compiler(builder.top_stage, builder.config.host_target);
+        builder.ensure(Std::new(compiler, self.target));
+
         builder.info(format!("Building {PATH}").as_str());
         builder.require_submodule(PATH, None);
 
-        let compiler = builder.compiler(0, builder.config.host_target);
         let cmd = prepare_tool_cargo(
             builder,
             compiler,
-            Mode::ToolBootstrap,
+            Mode::ToolTarget,
             self.target,
             Kind::Build,
             PATH,
@@ -50,7 +53,7 @@ impl Step for FlipLink {
         cmd.into_cmd().run(builder);
 
         builder
-            .cargo_out(compiler, Mode::ToolBootstrap, self.target)
+            .cargo_out(compiler, Mode::ToolTarget, self.target)
             .join(exe("flip-link", self.target))
     }
 }

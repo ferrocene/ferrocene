@@ -53,7 +53,7 @@ impl<'tcx, B: Bridge> AllocRangeHelpers<'tcx> for CompilerCtxt<'tcx, B> {
 }
 
 impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
-    pub fn lift<T: ty::Lift<TyCtxt<'tcx>>>(&self, value: T) -> Option<T::Lifted> {
+    pub fn lift<T: ty::Lift<TyCtxt<'tcx>>>(&self, value: T) -> T::Lifted {
         self.tcx.lift(value)
     }
 
@@ -665,7 +665,7 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
 
     /// Resolve an instance for drop_in_place for the given type.
     pub fn resolve_drop_in_place(&self, internal_ty: Ty<'tcx>) -> Instance<'tcx> {
-        let instance = Instance::resolve_drop_in_place(self.tcx, internal_ty);
+        let instance = Instance::resolve_drop_glue(self.tcx, internal_ty);
         instance
     }
 

@@ -25,6 +25,7 @@ use rustc_resolve::rustdoc::{
     DocFragment, add_doc_fragment, attrs_to_doc_fragments, inner_docs, span_of_fragments,
 };
 use rustc_session::Session;
+use rustc_span::def_id::CRATE_DEF_ID;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::symbol::{Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, FileName, Ident, Loc, RemapPathScopeComponents};
@@ -405,6 +406,23 @@ fn is_field_vis_inherited(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
 }
 
 impl Item {
+    pub(crate) fn cfg_parent_ids_for_detached_item(&self, tcx: TyCtxt<'_>) -> Vec<LocalDefId> {
+        let Some(def_id) = self.inline_stmt_id.or(self.item_id.as_local_def_id()) else {
+            return Vec::new();
+        };
+        let mut ids = Vec::new();
+        let mut next = def_id;
+        while let Some(parent) = tcx.opt_local_parent(next) {
+            if parent == CRATE_DEF_ID {
+                break;
+            }
+            ids.push(parent);
+            next = parent;
+        }
+        ids.reverse();
+        ids
+    }
+
     /// Returns the effective stability of the item.
     ///
     /// This method should only be called after the `propagate-stability` pass has been run.

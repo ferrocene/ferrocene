@@ -3,12 +3,12 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::{
     ForeignItem, ForeignItemKind, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
 };
-use rustc_macros::{HashStable, TyDecodable, TyEncodable};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::{Span, Symbol, sym};
 use tracing::info;
 
-#[derive(Clone, TyEncodable, TyDecodable, HashStable, Debug)]
+#[derive(Clone, TyEncodable, TyDecodable, StableHash, Debug)]
 pub struct Validated {
     // prevalidated: bool,
     // FIXME: exported_constraint, validated, standards, qualification levels, entrypoint

@@ -6,13 +6,13 @@ use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::SolverTraitLangItem;
 use rustc_type_ir::solve::{
     AliasBoundKind, CandidatePreferenceMode, CanonicalResponse, MaybeInfo, OpaqueTypesJank,
-    SizedTraitKind,
+    RerunReason, SizedTraitKind,
 };
 use rustc_type_ir::{
-    self as ty, FieldInfo, Interner, Movability, PredicatePolarity, TraitPredicate, TraitRef,
-    TypeVisitableExt as _, TypingMode, Unnormalized, Upcast as _, elaborate,
+    self as ty, FieldInfo, Interner, MayBeErased, Movability, PredicatePolarity, TraitPredicate,
+    TraitRef, TypeVisitableExt as _, TypingMode, Unnormalized, Upcast as _, elaborate,
 };
-use tracing::{debug, instrument, trace};
+use tracing::{debug, instrument, trace, warn};
 
 use crate::delegate::SolverDelegate;
 use crate::solve::assembly::structural_traits::{self, AsyncCallableRelevantTypes};
@@ -74,15 +74,14 @@ where
         // of reservation impl to ambiguous during coherence.
         let impl_polarity = cx.impl_polarity(impl_def_id);
         let maximal_certainty = match (impl_polarity, goal.predicate.polarity) {
-            // In intercrate mode, this is ambiguous. But outside of intercrate,
-            // it's not a real impl.
-            (ty::ImplPolarity::Reservation, _) => match ecx.typing_mode() {
-                TypingMode::Coherence => Certainty::AMBIGUOUS,
-                TypingMode::Analysis { .. }
-                | TypingMode::Borrowck { .. }
-                | TypingMode::PostBorrowckAnalysis { .. }
-                | TypingMode::PostAnalysis => return Err(NoSolution),
-            },
+            // In coherence mode, this is ambiguous. But outside of coherence, it's not a real impl.
+            (ty::ImplPolarity::Reservation, _) => {
+                if ecx.typing_mode().is_coherence() {
+                    Certainty::AMBIGUOUS
+                } else {
+                    return Err(NoSolution);
+                }
+            }
 
             // Impl matches polarity
             (ty::ImplPolarity::Positive, ty::PredicatePolarity::Positive)
@@ -237,8 +236,13 @@ where
         if let ty::Alias(ty::AliasTy { kind: ty::Opaque { def_id }, .. }) =
             goal.predicate.self_ty().kind()
         {
+            if ecx.opaque_accesses.might_rerun() {
+                ecx.opaque_accesses.rerun_always(RerunReason::AutoTraitLeakage);
+                return Err(NoSolution);
+            }
+
             debug_assert!(ecx.opaque_type_is_rigid(def_id));
-            for item_bound in cx.item_self_bounds(def_id).skip_binder() {
+            for item_bound in cx.item_self_bounds(def_id.into()).skip_binder() {
                 if item_bound
                     .as_trait_clause()
                     .is_some_and(|b| b.def_id() == goal.predicate.def_id())
@@ -804,58 +808,56 @@ where
             return vec![];
         }
 
-        let result_to_single = |result| match result {
-            Ok(resp) => vec![resp],
+        let result = ecx.probe(|_| ProbeKind::UnsizeAssembly).enter(
+            |ecx| -> Result<Vec<Candidate<I>>, NoSolution> {
+                let a_ty = goal.predicate.self_ty();
+                // We need to normalize the b_ty since it's matched structurally
+                // in the other functions below.
+                let b_ty = ecx.structurally_normalize_ty(
+                    goal.param_env,
+                    goal.predicate.trait_ref.args.type_at(1),
+                )?;
+
+                let goal = goal.with(ecx.cx(), (a_ty, b_ty));
+                match (a_ty.kind(), b_ty.kind()) {
+                    (ty::Infer(ty::TyVar(..)), ..) => panic!("unexpected infer {a_ty:?} {b_ty:?}"),
+
+                    (_, ty::Infer(ty::TyVar(..))) => {
+                        Ok(vec![ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS)?])
+                    }
+
+                    // Trait upcasting, or `dyn Trait + Auto + 'a` -> `dyn Trait + 'b`.
+                    (ty::Dynamic(a_data, a_region), ty::Dynamic(b_data, b_region)) => Ok(ecx
+                        .consider_builtin_dyn_upcast_candidates(
+                            goal, a_data, a_region, b_data, b_region,
+                        )),
+
+                    // `T` -> `dyn Trait` unsizing.
+                    (_, ty::Dynamic(b_region, b_data)) => Ok(vec![
+                        ecx.consider_builtin_unsize_to_dyn_candidate(goal, b_region, b_data)?,
+                    ]),
+
+                    // `[T; N]` -> `[T]` unsizing
+                    (ty::Array(a_elem_ty, ..), ty::Slice(b_elem_ty)) => {
+                        Ok(vec![ecx.consider_builtin_array_unsize(goal, a_elem_ty, b_elem_ty)?])
+                    }
+
+                    // `Struct<T>` -> `Struct<U>` where `T: Unsize<U>`
+                    (ty::Adt(a_def, a_args), ty::Adt(b_def, b_args))
+                        if a_def.is_struct() && a_def == b_def =>
+                    {
+                        Ok(vec![ecx.consider_builtin_struct_unsize(goal, a_def, a_args, b_args)?])
+                    }
+
+                    _ => Err(NoSolution),
+                }
+            },
+        );
+
+        match result.map_err(Into::into) {
+            Ok(resp) => resp,
             Err(NoSolution) => vec![],
-        };
-
-        ecx.probe(|_| ProbeKind::UnsizeAssembly).enter(|ecx| {
-            let a_ty = goal.predicate.self_ty();
-            // We need to normalize the b_ty since it's matched structurally
-            // in the other functions below.
-            let Ok(b_ty) = ecx.structurally_normalize_ty(
-                goal.param_env,
-                goal.predicate.trait_ref.args.type_at(1),
-            ) else {
-                return vec![];
-            };
-
-            let goal = goal.with(ecx.cx(), (a_ty, b_ty));
-            match (a_ty.kind(), b_ty.kind()) {
-                (ty::Infer(ty::TyVar(..)), ..) => panic!("unexpected infer {a_ty:?} {b_ty:?}"),
-
-                (_, ty::Infer(ty::TyVar(..))) => {
-                    result_to_single(ecx.forced_ambiguity(MaybeInfo::AMBIGUOUS))
-                }
-
-                // Trait upcasting, or `dyn Trait + Auto + 'a` -> `dyn Trait + 'b`.
-                (ty::Dynamic(a_data, a_region), ty::Dynamic(b_data, b_region)) => ecx
-                    .consider_builtin_dyn_upcast_candidates(
-                        goal, a_data, a_region, b_data, b_region,
-                    ),
-
-                // `T` -> `dyn Trait` unsizing.
-                (_, ty::Dynamic(b_region, b_data)) => result_to_single(
-                    ecx.consider_builtin_unsize_to_dyn_candidate(goal, b_region, b_data),
-                ),
-
-                // `[T; N]` -> `[T]` unsizing
-                (ty::Array(a_elem_ty, ..), ty::Slice(b_elem_ty)) => {
-                    result_to_single(ecx.consider_builtin_array_unsize(goal, a_elem_ty, b_elem_ty))
-                }
-
-                // `Struct<T>` -> `Struct<U>` where `T: Unsize<U>`
-                (ty::Adt(a_def, a_args), ty::Adt(b_def, b_args))
-                    if a_def.is_struct() && a_def == b_def =>
-                {
-                    result_to_single(
-                        ecx.consider_builtin_struct_unsize(goal, a_def, a_args, b_args),
-                    )
-                }
-
-                _ => vec![],
-            }
-        })
+        }
     }
 
     fn consider_builtin_field_candidate(
@@ -1393,12 +1395,8 @@ where
     /// normalization. This means the only case where this special-case results in exploitable
     /// unsoundness should be lifetime dependent user-written impls.
     pub(super) fn unsound_prefer_builtin_dyn_impl(&mut self, candidates: &mut Vec<Candidate<I>>) {
-        match self.typing_mode() {
-            TypingMode::Coherence => return,
-            TypingMode::Analysis { .. }
-            | TypingMode::Borrowck { .. }
-            | TypingMode::PostBorrowckAnalysis { .. }
-            | TypingMode::PostAnalysis => {}
+        if self.typing_mode().is_coherence() {
+            return;
         }
 
         if candidates
@@ -1572,6 +1570,11 @@ where
                             stalled_on_coroutines: StalledOnCoroutines::Yes,
                         }));
                     }
+                }
+                TypingMode::ErasedNotCoherence(MayBeErased) => {
+                    // Trying to continue here isn't worth it.
+                    self.opaque_accesses.rerun_always(RerunReason::TryStallCoroutine);
+                    return Some(Err(NoSolution));
                 }
                 TypingMode::Coherence
                 | TypingMode::PostAnalysis

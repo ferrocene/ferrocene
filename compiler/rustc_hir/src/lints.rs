@@ -18,7 +18,7 @@ pub struct DelayedLint {
     pub id: HirId,
     pub span: MultiSpan,
     pub callback: Box<
-        dyn for<'a> Fn(DiagCtxtHandle<'a>, Level, &dyn std::any::Any) -> Diag<'a, ()>
+        dyn for<'a> FnOnce(DiagCtxtHandle<'a>, Level, &dyn std::any::Any) -> Diag<'a, ()>
             + DynSend
             + DynSync
             + 'static,

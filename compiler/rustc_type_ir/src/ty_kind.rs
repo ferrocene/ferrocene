@@ -6,9 +6,9 @@ use derive_where::derive_where;
 use rustc_abi::ExternAbi;
 use rustc_ast_ir::Mutability;
 #[cfg(feature = "nightly")]
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHasher};
 #[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash_NoContext};
 use rustc_type_ir::data_structures::{NoError, UnifyKey, UnifyValue};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
@@ -27,7 +27,7 @@ mod closure;
 #[derive(GenericTypeVisitable, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum AliasTyKind<I: Interner> {
     /// A projection `<Type as Trait>::AssocType`.
@@ -39,12 +39,12 @@ pub enum AliasTyKind<I: Interner> {
     /// Note that the `def_id` is not the `DefId` of the `TraitRef` containing this
     /// associated type, which is in `interner.associated_item(def_id).container`,
     /// aka. `interner.parent(def_id)`.
-    Projection { def_id: I::DefId },
+    Projection { def_id: I::TraitAssocTyId },
 
     /// An associated type in an inherent `impl`
     ///
     /// The `def_id` is the `DefId` of the `ImplItem` for the associated type.
-    Inherent { def_id: I::DefId },
+    Inherent { def_id: I::InherentAssocTyId },
 
     /// An opaque type (usually from `impl Trait` in type aliases or function return types)
     ///
@@ -55,13 +55,13 @@ pub enum AliasTyKind<I: Interner> {
     ///
     /// During codegen, `interner.type_of(def_id)` can be used to get the type of the
     /// underlying type if the type is an opaque.
-    Opaque { def_id: I::DefId },
+    Opaque { def_id: I::OpaqueTyId },
 
     /// A type alias that actually checks its trait bounds.
     ///
     /// Currently only used if the type alias references opaque types.
     /// Can always be normalized away.
-    Free { def_id: I::DefId },
+    Free { def_id: I::FreeTyAliasId },
 }
 
 impl<I: Interner> AliasTyKind<I> {
@@ -79,12 +79,12 @@ impl<I: Interner> AliasTyKind<I> {
     }
 
     pub fn def_id(self) -> I::DefId {
-        let (AliasTyKind::Projection { def_id }
-        | AliasTyKind::Inherent { def_id }
-        | AliasTyKind::Opaque { def_id }
-        | AliasTyKind::Free { def_id }) = self;
-
-        def_id
+        match self {
+            AliasTyKind::Projection { def_id } => def_id.into(),
+            AliasTyKind::Inherent { def_id } => def_id.into(),
+            AliasTyKind::Opaque { def_id } => def_id.into(),
+            AliasTyKind::Free { def_id } => def_id.into(),
+        }
     }
 }
 
@@ -97,7 +97,7 @@ impl<I: Interner> AliasTyKind<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum TyKind<I: Interner> {
     /// The primitive boolean type. Written as `bool`.
@@ -440,7 +440,7 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Decodable_NoContext, Encodable_NoContext, HashStable_NoContext)
+    derive(Decodable_NoContext, Encodable_NoContext, StableHash_NoContext)
 )]
 pub struct AliasTy<I: Interner> {
     /// The parameters of the associated or opaque type.
@@ -506,10 +506,10 @@ impl<I: Interner> AliasTy<I> {
         )
     }
 
-    pub fn trait_def_id(self, interner: I) -> I::DefId {
+    pub fn trait_def_id(self, interner: I) -> I::TraitId {
         let AliasTyKind::Projection { def_id } = self.kind else { panic!("expected a projection") };
 
-        interner.parent(def_id)
+        interner.projection_parent(def_id.into())
     }
 
     /// Extracts the underlying trait reference and own args from this projection.
@@ -520,7 +520,7 @@ impl<I: Interner> AliasTy<I> {
     pub fn trait_ref_and_own_args(self, interner: I) -> (ty::TraitRef<I>, I::GenericArgsSlice) {
         let AliasTyKind::Projection { def_id } = self.kind else { panic!("expected a projection") };
 
-        interner.trait_ref_and_own_args_for_alias(def_id, self.args)
+        interner.trait_ref_and_own_args_for_alias(def_id.into(), self.args)
     }
 
     /// Extracts the underlying trait reference from this projection.
@@ -707,15 +707,15 @@ impl UnifyKey for FloatVid {
 }
 
 #[cfg(feature = "nightly")]
-impl<Hcx> HashStable<Hcx> for InferTy {
-    fn hash_stable(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+impl StableHash for InferTy {
+    fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
         use InferTy::*;
-        std::mem::discriminant(self).hash_stable(hcx, hasher);
+        std::mem::discriminant(self).stable_hash(hcx, hasher);
         match self {
             TyVar(_) | IntVar(_) | FloatVar(_) => {
                 panic!("type variables should not be hashed: {self:?}")
             }
-            FreshTy(v) | FreshIntTy(v) | FreshFloatTy(v) => v.hash_stable(hcx, hasher),
+            FreshTy(v) | FreshIntTy(v) | FreshFloatTy(v) => v.stable_hash(hcx, hasher),
         }
     }
 }
@@ -751,7 +751,7 @@ impl fmt::Debug for InferTy {
 #[derive_where(Clone, Copy, PartialEq, Hash, Debug; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
 pub struct TypeAndMut<I: Interner> {
@@ -767,7 +767,7 @@ impl<I: Interner> Eq for TypeAndMut<I> {}
 #[derive(TypeVisitable_Generic, TypeFoldable_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct FnSigKind<I: Interner> {
     /// Holds the c_variadic and safety bitflags, and 6 bits for the `ExternAbi` variant and unwind
@@ -782,8 +782,8 @@ pub struct FnSigKind<I: Interner> {
 
 impl<I: Interner, J: Interner> crate::lift::Lift<J> for FnSigKind<I> {
     type Lifted = FnSigKind<J>;
-    fn lift_to_interner(self, _cx: J) -> Option<Self::Lifted> {
-        Some(FnSigKind { flags: self.flags, _marker: PhantomData })
+    fn lift_to_interner(self, _cx: J) -> Self::Lifted {
+        FnSigKind { flags: self.flags, _marker: PhantomData }
     }
 }
 
@@ -893,7 +893,7 @@ impl<I: Interner> FnSigKind<I> {
 #[derive_where(Clone, Copy, PartialEq, Hash; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 pub struct FnSig<I: Interner> {
@@ -1028,7 +1028,7 @@ impl<I: Interner> fmt::Debug for FnSig<I> {
 // FIXME: this is a distinct type because we need to define `Encode`/`Decode`
 // impls in this crate for `Binder<I, I::Ty>`.
 #[derive_where(Clone, Copy, PartialEq, Hash; I: Interner)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 pub struct UnsafeBinderInner<I: Interner>(ty::Binder<I, I::Ty>);
 
@@ -1093,7 +1093,7 @@ where
 #[derive_where(Clone, Copy, Debug, PartialEq, Hash; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 pub struct FnSigTys<I: Interner> {
@@ -1145,7 +1145,7 @@ impl<I: Interner> ty::Binder<I, FnSigTys<I>> {
 #[derive_where(Clone, Copy, Debug, PartialEq, Hash; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 pub struct FnHeader<I: Interner> {
@@ -1177,7 +1177,7 @@ impl<I: Interner> Eq for FnHeader<I> {}
 #[derive_where(Clone, Copy, Debug, PartialEq, Hash; I: Interner)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic, Lift_Generic)]
 pub struct CoroutineWitnessTypes<I: Interner> {

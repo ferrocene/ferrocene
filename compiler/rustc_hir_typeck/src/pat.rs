@@ -21,8 +21,8 @@ use rustc_infer::infer::RegionVariableOrigin;
 use rustc_middle::traits::PatternOriginExpr;
 use rustc_middle::ty::{self, Pinnedness, Ty, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
+use rustc_session::errors::feature_err;
 use rustc_session::lint::builtin::NON_EXHAUSTIVE_OMITTED_PATTERNS;
-use rustc_session::parse::feature_err;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::{BytePos, DUMMY_SP, Ident, Span, kw, sym};
@@ -497,7 +497,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let expected = if let AdjustMode::Peel { .. } = adjust_mode
             && pat.default_binding_modes
         {
-            self.try_structurally_resolve_type(pat.span, expected)
+            self.resolve_vars_with_obligations(expected)
         } else {
             expected
         };
@@ -816,7 +816,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let mut peeled_ty = lit_ty;
                     let mut pat_ref_layers = 0;
                     while let ty::Ref(_, inner_ty, mutbl) =
-                        *self.try_structurally_resolve_type(pat.span, peeled_ty).kind()
+                        *self.resolve_vars_with_obligations(peeled_ty).kind()
                     {
                         // We rely on references at the head of constants being immutable.
                         debug_assert!(mutbl.is_not());
@@ -962,7 +962,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             match *expected.kind() {
                 // Allow `b"...": &[u8]`
                 ty::Ref(_, inner_ty, _)
-                    if self.try_structurally_resolve_type(span, inner_ty).is_slice() =>
+                    if self.resolve_vars_with_obligations(inner_ty).is_slice() =>
                 {
                     trace!(?expr.hir_id.local_id, "polymorphic byte string lit");
                     pat_ty = Ty::new_imm_ref(
@@ -991,7 +991,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // string literal patterns to have type `str`. This is accounted for when lowering to MIR.
         if self.tcx.features().deref_patterns()
             && matches!(lit_kind, ast::LitKind::Str(..))
-            && self.try_structurally_resolve_type(span, expected).is_str()
+            && self.resolve_vars_with_obligations(expected).is_str()
         {
             pat_ty = self.tcx.types.str_;
         }
@@ -1032,7 +1032,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // be peeled to `str` while ty here is still `&str`, if we don't
                 // err early here, a rather confusing unification error will be
                 // emitted instead).
-                let ty = self.try_structurally_resolve_type(expr.span, ty);
+                let ty = self.resolve_vars_with_obligations(ty);
                 let fail =
                     !(ty.is_numeric() || ty.is_char() || ty.is_ty_var() || ty.references_error());
                 Some((fail, ty, expr.span))
@@ -1352,7 +1352,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     /// Precondition: pat is a `Ref(_)` pattern
-    // FIXME(pin_ergonomics): add suggestions for `&pin mut` or `&pin const` patterns
     fn borrow_pat_suggestion(&self, err: &mut Diag<'_>, pat: &Pat<'_>) {
         let tcx = self.tcx;
         if let PatKind::Ref(inner, pinned, mutbl) = pat.kind
@@ -1407,6 +1406,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             };
 
             match binding_parent {
+                hir::Node::Param(hir::Param { ty_span, pat, .. })
+                    if pat.span != *ty_span
+                        && pinned.is_pinned()
+                        && !tcx.features().pin_ergonomics() =>
+                {
+                    // FIXME(pin_ergonomics): Once `pin_ergonomics` is stabilized, remove this
+                    // gate and allow the pinned reference type-position suggestion unconditionally.
+                }
                 // Check that there is explicit type (ie this is not a closure param with inferred type)
                 // so we don't suggest moving something to the type that does not exist
                 hir::Node::Param(hir::Param { ty_span, pat, .. }) if pat.span != *ty_span => {
@@ -1414,7 +1421,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         format!("to take parameter `{binding}` by reference, move `&{pin_and_mut}` to the type"),
                         vec![
                             (pat.span.until(inner.span), "".to_owned()),
-                            (ty_span.shrink_to_lo(), mutbl.ref_prefix_str().to_owned()),
+                            (ty_span.shrink_to_lo(), format!("&{}", pinned.prefix_str(mutbl))),
                         ],
                         Applicability::MachineApplicable
                     );
@@ -2705,7 +2712,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             [source_ty],
         );
         let target_ty = self.normalize(span, Unnormalized::new_wip(target_ty));
-        self.try_structurally_resolve_type(span, target_ty)
+        self.resolve_vars_with_obligations(target_ty)
     }
 
     /// Check if the interior of a deref pattern (either explicit or implicit) has any `ref mut`
@@ -2753,7 +2760,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             pat_info.max_ref_mutbl = pat_info.max_ref_mutbl.cap_to_weakly_not(pat_prefix_span);
         }
 
-        expected = self.try_structurally_resolve_type(pat.span, expected);
+        expected = self.resolve_vars_with_obligations(expected);
         // Determine whether we're consuming an inherited reference and resetting the default
         // binding mode, based on edition and enabled experimental features.
         if let ByRef::Yes(inh_pin, inh_mut) = pat_info.binding_mode
@@ -3044,7 +3051,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expected: Ty<'tcx>,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
-        let expected = self.try_structurally_resolve_type(span, expected);
+        let expected = self.resolve_vars_with_obligations(expected);
 
         // If the pattern is irrefutable and `expected` is an infer ty, we try to equate it
         // to an array if the given pattern allows it. See issue #76342

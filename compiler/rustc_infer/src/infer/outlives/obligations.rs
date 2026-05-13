@@ -85,11 +85,12 @@ impl<'tcx> InferCtxt<'tcx> {
     pub fn register_outlives_constraint(
         &self,
         ty::OutlivesPredicate(arg, r2): ty::ArgOutlivesPredicate<'tcx>,
+        vis: ty::VisibleForLeakCheck,
         cause: &ObligationCause<'tcx>,
     ) {
         match arg.kind() {
             ty::GenericArgKind::Lifetime(r1) => {
-                self.register_region_outlives_constraint(ty::OutlivesPredicate(r1, r2), cause);
+                self.register_region_outlives_constraint(ty::OutlivesPredicate(r1, r2), vis, cause);
             }
             ty::GenericArgKind::Type(ty1) => {
                 self.register_type_outlives_constraint(ty1, r2, cause);
@@ -101,24 +102,26 @@ impl<'tcx> InferCtxt<'tcx> {
     pub fn register_region_eq_constraint(
         &self,
         ty::RegionEqPredicate(r_a, r_b): ty::RegionEqPredicate<'tcx>,
+        vis: ty::VisibleForLeakCheck,
         cause: &ObligationCause<'tcx>,
     ) {
         let origin = SubregionOrigin::from_obligation_cause(cause, || {
             SubregionOrigin::RelateRegionParamBound(cause.span, None)
         });
-        self.equate_regions(origin, r_a, r_b);
+        self.equate_regions(origin, r_a, r_b, vis);
     }
 
     pub fn register_region_outlives_constraint(
         &self,
         ty::OutlivesPredicate(r_a, r_b): ty::RegionOutlivesPredicate<'tcx>,
+        vis: ty::VisibleForLeakCheck,
         cause: &ObligationCause<'tcx>,
     ) {
         let origin = SubregionOrigin::from_obligation_cause(cause, || {
             SubregionOrigin::RelateRegionParamBound(cause.span, None)
         });
         // `'a: 'b` ==> `'b <= 'a`
-        self.sub_regions(origin, r_b, r_a);
+        self.sub_regions(origin, r_b, r_a, vis);
     }
 
     /// Registers that the given region obligation must be resolved
@@ -577,7 +580,8 @@ impl<'cx, 'tcx> TypeOutlivesDelegate<'tcx> for &'cx InferCtxt<'tcx> {
         b: ty::Region<'tcx>,
         _constraint_category: ConstraintCategory<'tcx>,
     ) {
-        self.sub_regions(origin, a, b)
+        // We don't do leak check in lexical region resolution
+        self.sub_regions(origin, a, b, ty::VisibleForLeakCheck::Unreachable)
     }
 
     fn push_verify(

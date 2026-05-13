@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_feature::template;
 use rustc_hir::attrs::AttributeKind;
 use rustc_session::lint::builtin::MISPLACED_DIAGNOSTIC_ATTRIBUTES;
@@ -28,11 +27,7 @@ impl OnMoveParser {
         self.span = Some(span);
 
         if !matches!(cx.target, Target::Enum | Target::Struct | Target::Union) {
-            cx.emit_lint(
-                MISPLACED_DIAGNOSTIC_ATTRIBUTES,
-                move |dcx, level| DiagnosticOnMoveOnlyForAdt.into_diag(dcx, level),
-                span,
-            );
+            cx.emit_lint(MISPLACED_DIAGNOSTIC_ATTRIBUTES, DiagnosticOnMoveOnlyForAdt, span);
             return;
         }
 
@@ -56,8 +51,8 @@ impl AttributeParser for OnMoveParser {
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
 
     fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
-        if let Some(span) = self.span {
-            Some(AttributeKind::OnMove { span, directive: self.directive.map(|d| Box::new(d.1)) })
+        if let Some(_span) = self.span {
+            Some(AttributeKind::OnMove { directive: self.directive.map(|d| Box::new(d.1)) })
         } else {
             None
         }

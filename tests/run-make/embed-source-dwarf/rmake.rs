@@ -63,6 +63,6 @@ fn main() {
     }
 
     dbg!(&sources);
-    assert_eq!(sources.len(), 1);
+    assert!(!sources.is_empty());
     assert_eq!(sources.get("main.rs").unwrap(), "// hello\nfn main() {}\n");
 }

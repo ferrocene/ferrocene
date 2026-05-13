@@ -2,8 +2,8 @@
 //! behaves differently depending on the current `TypingMode`.
 
 use rustc_type_ir::inherent::*;
-use rustc_type_ir::solve::GoalSource;
-use rustc_type_ir::{self as ty, Interner, TypingMode, fold_regions};
+use rustc_type_ir::solve::{GoalSource, NoSolution, RerunReason};
+use rustc_type_ir::{self as ty, Interner, MayBeErased, TypingMode, fold_regions};
 
 use crate::delegate::SolverDelegate;
 use crate::solve::{Certainty, EvalCtxt, Goal, QueryResult};
@@ -13,9 +13,11 @@ where
     D: SolverDelegate<Interner = I>,
     I: Interner,
 {
+    #[tracing::instrument(skip(self))]
     pub(super) fn normalize_opaque_type(
         &mut self,
         goal: Goal<I, ty::NormalizesTo<I>>,
+        def_id: I::OpaqueTyId,
     ) -> QueryResult<I> {
         let cx = self.cx();
         let opaque_ty = goal.predicate.alias;
@@ -26,7 +28,7 @@ where
                 // An impossible opaque type bound is the only way this goal will fail
                 // e.g. assigning `impl Copy := NotCopy`
                 self.add_item_bounds_for_hidden_type(
-                    opaque_ty.def_id(),
+                    def_id,
                     opaque_ty.args,
                     goal.param_env,
                     expected,
@@ -42,10 +44,9 @@ where
                 defining_opaque_types_and_generators: defining_opaque_types,
             }
             | TypingMode::Borrowck { defining_opaque_types } => {
-                let Some(def_id) = opaque_ty
-                    .def_id()
+                let Some(def_id) = def_id
                     .as_local()
-                    .filter(|&def_id| defining_opaque_types.contains(&def_id))
+                    .filter(|&def_id| defining_opaque_types.contains(&def_id.into()))
                 else {
                     // If we're not in the defining scope, treat the alias as rigid.
                     self.structurally_instantiate_normalizes_to_term(goal, goal.predicate.alias);
@@ -81,7 +82,7 @@ where
                     // During HIR typeck, opaque types start out as unconstrained
                     // inference variables. In borrowck we instead use the type
                     // computed in HIR typeck as the initial value.
-                    match self.typing_mode() {
+                    match self.typing_mode().assert_not_erased() {
                         TypingMode::Analysis { .. } => {}
                         TypingMode::Borrowck { .. } => {
                             let actual = cx
@@ -133,8 +134,36 @@ where
             TypingMode::PostAnalysis => {
                 // FIXME: Add an assertion that opaque type storage is empty.
                 let actual =
-                    cx.type_of(opaque_ty.def_id()).instantiate(cx, opaque_ty.args).skip_norm_wip();
+                    cx.type_of(def_id.into()).instantiate(cx, opaque_ty.args).skip_norm_wip();
                 self.eq(goal.param_env, expected, actual)?;
+                self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+            }
+            TypingMode::ErasedNotCoherence(MayBeErased) => {
+                let def_id = opaque_ty.def_id().as_local();
+
+                // If we have a local defid, in other typing modes we check whether
+                // this is the defining scope, and otherwise treat it as rigid.
+                // However, in `ErasedNotcoherence` we *always* treat it as rigid.
+                // This is the same as other modes if def_id is None, but wrong if we do have a DefId.
+                // So, if we have one, we register in the EvalCtxt that we may need that defid.
+                // We might then decide to rerun in the correct typing mode.
+                if let Some(def_id) = def_id {
+                    self.opaque_accesses.rerun_if_opaque_in_opaque_type_storage(
+                        RerunReason::NormalizeOpaqueType,
+                        def_id,
+                    );
+                } else {
+                    self.opaque_accesses
+                        .rerun_if_in_post_analysis(RerunReason::NormalizeOpaqueTypeRemoteCrate);
+                }
+                if self.opaque_accesses.should_bail() {
+                    // If we already accessed opaque types once, bail.
+                    // We can't make it more precise
+                    return Err(NoSolution);
+                }
+
+                // Always treat the opaque type as rigid.
+                self.structurally_instantiate_normalizes_to_term(goal, goal.predicate.alias);
                 self.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
             }
         }

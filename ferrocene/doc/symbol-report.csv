@@ -974,8 +974,8 @@
 <&mut W as core::fmt::Write>::write_char
 <&mut W as core::fmt::Write>::write_fmt
 <&mut W as core::fmt::Write>::write_str
-<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnMut<(usize,)>>::call_mut
-<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnOnce<(usize,)>>::call_once
+<&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnMut<(usize,)>>::call_mut
+<&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnOnce<(usize,)>>::call_once
 <&u128 as core::ops::arith::Add<&u128>>::add
 <&u128 as core::ops::arith::Add<u128>>::add
 <&u128 as core::ops::arith::Div<&u128>>::div
@@ -1473,7 +1473,7 @@
 <core::array::TryFromSliceError as core::clone::Clone>::clone
 <core::array::TryFromSliceError as core::fmt::Debug>::fmt
 <core::array::TryFromSliceError as core::fmt::Display>::fmt
-<core::array::drain::Drain<'_, '_, T, N, F> as core::ops::drop::Drop>::drop
+<core::array::drain::Drain<'_, '_, T, F> as core::ops::drop::Drop>::drop
 <core::array::iter::IntoIter<T, N> as core::clone::Clone>::clone
 <core::array::iter::IntoIter<T, N> as core::fmt::Debug>::fmt
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1614,7 +1614,6 @@
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str
 <core::fmt::builders::PadAdapterState as core::default::Default>::default
-<core::fmt::num_buffer::NumBuffer<T> as core::fmt::Debug>::fmt
 <core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
 <core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
 <core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
@@ -3507,8 +3506,6 @@
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::FromResidual>::from_residual
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::branch
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::from_output
-<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnMut<(A,)>>::call_mut
-<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnOnce<(A,)>>::call_once
 <core::option::IntoIter<A> as core::clone::Clone>::clone
 <core::option::IntoIter<A> as core::fmt::Debug>::fmt
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::next
@@ -5706,7 +5703,7 @@ core::array::<impl core::ops::index::IndexMut<I> for [T; N]>::index_mut
 core::array::Guard::<'_, T>::push_unchecked
 core::array::ascii::<impl [u8; N]>::as_ascii
 core::array::ascii::<impl [u8; N]>::as_ascii_unchecked
-core::array::drain::Drain::<'l, 'f, T, N, F>::new
+core::array::drain::Drain::<'l, 'f, T, F>::new
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::eq
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::ne
 core::array::equality::<impl core::cmp::PartialEq<&mut [U]> for [T; N]>::eq
@@ -6850,7 +6847,6 @@ core::iter::traits::iterator::Iterator::cmp_by::compare
 core::iter::traits::iterator::Iterator::collect
 core::iter::traits::iterator::Iterator::copied
 core::iter::traits::iterator::Iterator::count
-core::iter::traits::iterator::Iterator::count::plus_one
 core::iter::traits::iterator::Iterator::enumerate
 core::iter::traits::iterator::Iterator::eq
 core::iter::traits::iterator::Iterator::eq_by
@@ -8116,6 +8112,7 @@ core::ptr::copy
 core::ptr::copy::precondition_check
 core::ptr::copy_nonoverlapping
 core::ptr::copy_nonoverlapping::precondition_check
+core::ptr::drop_glue
 core::ptr::drop_in_place
 core::ptr::from_ref
 core::ptr::metadata::DynMetadata::<Dyn>::vtable_ptr

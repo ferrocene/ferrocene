@@ -23,7 +23,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         rvalue: &mir::Rvalue<'tcx>,
     ) {
         match *rvalue {
-            mir::Rvalue::Use(ref operand) => {
+            mir::Rvalue::Use(ref operand, _) => {
                 if let mir::Operand::Constant(const_op) = operand {
                     let val = self.eval_mir_constant(&const_op);
                     if val.all_bytes_uninit(self.cx.tcx()) {
@@ -518,6 +518,14 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 self.codegen_place_to_pointer(bx, place, mk_ref)
             }
 
+            // Note: Exclusive reborrowing is always equal to a memcpy, as the types do not change.
+            // Generic shared reborrowing is not (necessarily) a simple memcpy, but currently the
+            // coherence check places such restrictions on the CoerceShared trait as to guarantee
+            // that it is.
+            mir::Rvalue::Reborrow(_, _, place) => {
+                self.codegen_operand(bx, &mir::Operand::Copy(place))
+            }
+
             mir::Rvalue::RawPtr(kind, place) => {
                 let mk_ptr = move |tcx: TyCtxt<'tcx>, ty: Ty<'tcx>| {
                     Ty::new_ptr(tcx, ty, kind.to_mutbl_lossy())
@@ -658,7 +666,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 };
                 OperandRef { val: OperandValue::Immediate(static_), layout, move_annotation: None }
             }
-            mir::Rvalue::Use(ref operand) => self.codegen_operand(bx, operand),
+            mir::Rvalue::Use(ref operand, _) => self.codegen_operand(bx, operand),
             mir::Rvalue::Repeat(ref elem, len_const) => {
                 // All arrays have `BackendRepr::Memory`, so only the ZST cases
                 // end up here. Anything else forces the destination local to be

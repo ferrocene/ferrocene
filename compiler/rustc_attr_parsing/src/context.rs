@@ -208,8 +208,6 @@ attribute_parsers!(
         Single<RustcDumpSymbolNameParser>,
         Single<RustcForceInlineParser>,
         Single<RustcIfThisChangedParser>,
-        Single<RustcLayoutScalarValidRangeEndParser>,
-        Single<RustcLayoutScalarValidRangeStartParser>,
         Single<RustcLegacyConstGenericsParser>,
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMacroTransparencyParser>,
@@ -371,23 +369,21 @@ impl<'f, 'sess: 'f> SharedContext<'f, 'sess> {
     /// Emit a lint. This method is somewhat special, since lints emitted during attribute parsing
     /// must be delayed until after HIR is built. This method will take care of the details of
     /// that.
-    pub(crate) fn emit_lint<
-        F: for<'a> Fn(DiagCtxtHandle<'a>, Level) -> Diag<'a, ()> + DynSend + DynSync + 'static,
-    >(
+    pub(crate) fn emit_lint(
         &mut self,
         lint: &'static Lint,
-        callback: F,
+        diagnostic: impl for<'x> Diagnostic<'x, ()> + DynSend + DynSync + 'static,
         span: impl Into<MultiSpan>,
     ) {
         self.emit_lint_inner(
             lint,
-            EmitAttribute(Box::new(move |dcx, level, _| callback(dcx, level))),
+            EmitAttribute(Box::new(move |dcx, level, _| diagnostic.into_diag(dcx, level))),
             span,
         );
     }
 
     pub(crate) fn emit_lint_with_sess<
-        F: for<'a> Fn(DiagCtxtHandle<'a>, Level, &Session) -> Diag<'a, ()>
+        F: for<'a> FnOnce(DiagCtxtHandle<'a>, Level, &Session) -> Diag<'a, ()>
             + DynSend
             + DynSync
             + 'static,
@@ -418,13 +414,10 @@ impl<'f, 'sess: 'f> SharedContext<'f, 'sess> {
     pub(crate) fn warn_unused_duplicate(&mut self, used_span: Span, unused_span: Span) {
         self.emit_lint(
             rustc_session::lint::builtin::UNUSED_ATTRIBUTES,
-            move |dcx, level| {
-                rustc_errors::lints::UnusedDuplicate {
-                    this: unused_span,
-                    other: used_span,
-                    warning: false,
-                }
-                .into_diag(dcx, level)
+            rustc_errors::lints::UnusedDuplicate {
+                this: unused_span,
+                other: used_span,
+                warning: false,
             },
             unused_span,
         )
@@ -437,13 +430,10 @@ impl<'f, 'sess: 'f> SharedContext<'f, 'sess> {
     ) {
         self.emit_lint(
             rustc_session::lint::builtin::UNUSED_ATTRIBUTES,
-            move |dcx, level| {
-                rustc_errors::lints::UnusedDuplicate {
-                    this: unused_span,
-                    other: used_span,
-                    warning: true,
-                }
-                .into_diag(dcx, level)
+            rustc_errors::lints::UnusedDuplicate {
+                this: unused_span,
+                other: used_span,
+                warning: true,
             },
             unused_span,
         )
@@ -569,6 +559,16 @@ impl<'f, 'sess: 'f> AcceptContext<'f, 'sess> {
         Arg: ExpectNameValue,
     {
         arg.expect_name_value(self, span, name)
+    }
+
+    /// Assert that an [`ArgParser`] has no args, or emits an error and return `None`.
+    pub(crate) fn expect_no_args<'arg>(&mut self, arg: &'arg ArgParser) -> Option<()> {
+        if let Err(span) = arg.as_no_args() {
+            self.adcx().expected_no_args(span);
+            return None;
+        }
+
+        Some(())
     }
 }
 
@@ -967,14 +967,7 @@ impl<'a, 'f, 'sess: 'f> AttributeDiagnosticContext<'a, 'f, 'sess> {
         let valid_without_list = self.template.word;
         self.emit_lint(
             rustc_session::lint::builtin::UNUSED_ATTRIBUTES,
-            move |dcx, level| {
-                crate::errors::EmptyAttributeList {
-                    attr_span: span,
-                    attr_path: &attr_path,
-                    valid_without_list,
-                }
-                .into_diag(dcx, level)
-            },
+            crate::errors::EmptyAttributeList { attr_span: span, attr_path, valid_without_list },
             span,
         );
     }
@@ -991,10 +984,7 @@ impl<'a, 'f, 'sess: 'f> AttributeDiagnosticContext<'a, 'f, 'sess> {
         let span = self.attr_span;
         self.emit_lint(
             lint,
-            move |dcx, level| {
-                crate::errors::IllFormedAttributeInput::new(&suggestions, None, help.as_deref())
-                    .into_diag(dcx, level)
-            },
+            crate::errors::IllFormedAttributeInput::new(&suggestions, None, help.as_deref()),
             span,
         );
     }

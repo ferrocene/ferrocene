@@ -8,7 +8,7 @@ impl NoArgsAttributeParser for MacroEscapeParser {
     const PATH: &[Symbol] = &[sym::macro_escape];
     const ON_DUPLICATE: OnDuplicate = OnDuplicate::Warn;
     const ALLOWED_TARGETS: AllowedTargets = MACRO_USE_ALLOWED_TARGETS;
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::MacroEscape;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::MacroEscape;
 }
 
 /// `#[macro_use]` attributes can either:
@@ -86,10 +86,9 @@ impl AttributeParser for MacroUseParser {
                                     cx.adcx().expected_identifier(item.span());
                                     continue;
                                 };
-                                if let Err(err_span) = item.args().no_args() {
-                                    cx.adcx().expected_no_args(err_span);
+                                let Some(()) = cx.expect_no_args(item.args()) else {
                                     continue;
-                                }
+                                };
                                 let Some(item) = item.path().word() else {
                                     cx.adcx().expected_identifier(item.span());
                                     continue;
@@ -179,9 +178,7 @@ impl SingleAttributeParser for CollapseDebugInfoParser {
             cx.adcx().expected_not_literal(single.span());
             return None;
         };
-        if let Err(err) = mi.args().no_args() {
-            cx.adcx().expected_no_args(err);
-        }
+        let _ = cx.expect_no_args(mi.args());
         let path = mi.path().word_sym();
         let info = match path {
             Some(sym::yes) => CollapseMacroDebuginfo::Yes,

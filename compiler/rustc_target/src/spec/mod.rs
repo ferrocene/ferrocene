@@ -47,12 +47,13 @@ use std::str::FromStr;
 use std::{fmt, io};
 
 use rustc_abi::{
-    Align, CanonAbi, Endian, ExternAbi, Integer, Size, TargetDataLayout, TargetDataLayoutError,
+    Align, CVariadicStatus, CanonAbi, Endian, ExternAbi, Integer, Size, TargetDataLayout,
+    TargetDataLayoutError,
 };
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_error_messages::{DiagArgValue, IntoDiagArg, into_diag_arg_using_display};
 use rustc_fs_util::try_canonicalize;
-use rustc_macros::{BlobDecodable, Decodable, Encodable, HashStable_Generic};
+use rustc_macros::{BlobDecodable, Decodable, Encodable, StableHash};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use rustc_span::{Symbol, kw, sym};
 use serde_json::Value;
@@ -830,7 +831,7 @@ impl LinkerFeatures {
 }
 
 crate::target_spec_enum! {
-    #[derive(Encodable, BlobDecodable, HashStable_Generic)]
+    #[derive(Encodable, BlobDecodable, StableHash)]
     pub enum PanicStrategy {
         Unwind = "unwind",
         Abort = "abort",
@@ -840,7 +841,7 @@ crate::target_spec_enum! {
     parse_error_type = "panic strategy";
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Hash, Encodable, BlobDecodable, HashStable_Generic)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash, Encodable, BlobDecodable, StableHash)]
 pub enum OnBrokenPipe {
     Default,
     Kill,
@@ -1161,7 +1162,7 @@ impl ToJson for StackProbeType {
     }
 }
 
-#[derive(Default, Clone, Copy, PartialEq, Eq, Hash, Encodable, Decodable, HashStable_Generic)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, Hash, Encodable, Decodable, StableHash)]
 pub struct SanitizerSet(u16);
 bitflags::bitflags! {
     impl SanitizerSet: u16 {
@@ -1347,7 +1348,7 @@ impl FramePointer {
 
 crate::target_spec_enum! {
     /// Controls use of stack canaries.
-    #[derive(Encodable, BlobDecodable, HashStable_Generic)]
+    #[derive(Encodable, BlobDecodable, StableHash)]
     pub enum StackProtector {
         /// Disable stack canary generation.
         None = "none",
@@ -2218,10 +2219,13 @@ impl Target {
         Ok(dl)
     }
 
-    pub fn supports_c_variadic_definitions(&self) -> bool {
+    pub fn supports_c_variadic_definitions(&self) -> CVariadicStatus {
         use Arch::*;
 
         match self.arch {
+            // These targets just inherently do not support c-variadic definitions.
+            Bpf | SpirV => CVariadicStatus::NotSupported,
+
             // The c-variadic ABI for this target may change in the future, per this comment in
             // clang:
             //
@@ -2229,19 +2233,40 @@ impl Target {
             // > 2×XLEN-bit alignment and size at most 2×XLEN bits like `long long`,
             // > `unsigned long long` and `double` to have 4-byte alignment. This
             // > behavior may be changed when RV32E/ILP32E is ratified.
-            RiscV32 if self.llvm_abiname == LlvmAbi::Ilp32e => false,
-
-            // These targets just do not support c-variadic definitions.
-            Bpf | SpirV => false,
+            RiscV32 if self.llvm_abiname == LlvmAbi::Ilp32e => {
+                CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch }
+            }
 
             // We don't know how c-variadics work for this target. Using the default LLVM
-            // fallback implementation may work, but just to be safe we disallow this.
-            Other(_) => false,
+            // fallback implementation probably works, but we can't guarantee it.
+            Other(_) => CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch },
 
-            AArch64 | AmdGpu | Arm | Arm64EC | Avr | CSky | Hexagon | LoongArch32 | LoongArch64
-            | M68k | Mips | Mips32r6 | Mips64 | Mips64r6 | Msp430 | Nvptx64 | PowerPC
-            | PowerPC64 | RiscV32 | RiscV64 | S390x | Sparc | Sparc64 | Wasm32 | Wasm64 | X86
-            | X86_64 | Xtensa => true,
+            // These targets require more testing before we commit to c-variadic definitions
+            // being stable.
+            //
+            // To stabilize c-variadic functions for one of these targets, the following
+            // requirements must be met:
+            //
+            // - Check that `core::ffi::VaArgSafe` is (un)implemented for all the correct types.
+            // - Add an assembly test to `tests/assembly-llvm/c-variadic` that tests the assembly
+            // for all implementers of `VaArgSafe`. The generated assembly should either match
+            // `clang`, or we should understand and document why it deviates.
+            // - Ensure that `va_arg` is implemented in rustc. For stable targets we don't rely on
+            // the LLVM implementation, it has historically caused miscompilations.
+            // - The `tests/ui/c-variadic/roundtrip.rs` test must pass for the target. It may
+            // need slight modifications for embedded targets, that's fine.
+            // - Check that calling c-variadic functions defined in Rust can be called from C.
+            // For most targets `tests/run-make/c-link-to-rust-va-list-fn` can be used here.
+            // For no_std targets a manual setup may be needed.
+            Sparc | Avr | M68k | Msp430 => {
+                CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch }
+            }
+
+            AArch64 | AmdGpu | Arm | Arm64EC | CSky | Hexagon | LoongArch32 | LoongArch64
+            | Mips | Mips32r6 | Mips64 | Mips64r6 | Nvptx64 | PowerPC | PowerPC64 | RiscV32
+            | RiscV64 | S390x | Sparc64 | Wasm32 | Wasm64 | X86 | X86_64 | Xtensa => {
+                CVariadicStatus::Stable
+            }
         }
     }
 }

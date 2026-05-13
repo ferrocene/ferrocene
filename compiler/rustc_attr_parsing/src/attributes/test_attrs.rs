@@ -30,7 +30,7 @@ impl SingleAttributeParser for IgnoreParser {
                 ArgParser::List(list) => {
                     let help =
                         list.as_single().and_then(|item| item.meta_item()).and_then(|item| {
-                            item.args().no_args().ok()?;
+                            item.args().as_no_args().ok()?;
                             Some(item.path().to_string())
                         });
                     cx.adcx().warn_ill_formed_attribute_input_with_help(
@@ -58,7 +58,6 @@ impl SingleAttributeParser for ShouldPanicParser {
 
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         Some(AttributeKind::ShouldPanic {
-            span: cx.attr_span,
             reason: match args {
                 ArgParser::NoArgs => None,
                 ArgParser::NameValue(name_value) => {

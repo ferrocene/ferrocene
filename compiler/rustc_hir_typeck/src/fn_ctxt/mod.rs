@@ -17,7 +17,9 @@ use rustc_hir_analysis::hir_ty_lowering::{
 };
 use rustc_infer::infer::{self, RegionVariableOrigin};
 use rustc_infer::traits::{DynCompatibilityViolation, Obligation};
-use rustc_middle::ty::{self, Const, Flags, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
+use rustc_middle::ty::{
+    self, CantBeErased, Const, Flags, Ty, TyCtxt, TypeVisitableExt, TypingMode, Unnormalized,
+};
 use rustc_session::Session;
 use rustc_span::{self, DUMMY_SP, ErrorGuaranteed, Ident, Span};
 use rustc_trait_selection::error_reporting::TypeErrCtxt;
@@ -159,6 +161,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             trait_ascriptions: Default::default(),
             has_rustc_attrs: root_ctxt.tcx.features().rustc_attrs(),
         }
+    }
+
+    pub(crate) fn typing_mode(&self) -> TypingMode<'tcx, CantBeErased> {
+        // `FnCtxt` is never constructed in the trait solver, so we can safely use
+        // `assert_not_erased`.
+        self.infcx.typing_mode_raw().assert_not_erased()
     }
 
     pub(crate) fn dcx(&self) -> DiagCtxtHandle<'a> {
@@ -411,11 +419,7 @@ impl<'tcx> HirTyLowerer<'tcx> for FnCtxt<'_, 'tcx> {
                 kind: ty::Projection { .. } | ty::Inherent { .. } | ty::Free { .. },
                 ..
             }) if !ty.has_escaping_bound_vars() => {
-                if self.next_trait_solver() {
-                    self.try_structurally_resolve_type(span, ty).ty_adt_def()
-                } else {
-                    self.normalize(span, Unnormalized::new_wip(ty)).ty_adt_def()
-                }
+                self.normalize(span, Unnormalized::new_wip(ty)).ty_adt_def()
             }
             _ => None,
         }
@@ -485,15 +489,7 @@ pub(crate) struct LoweredTy<'tcx> {
 
 impl<'tcx> LoweredTy<'tcx> {
     fn from_raw(fcx: &FnCtxt<'_, 'tcx>, span: Span, raw: Ty<'tcx>) -> LoweredTy<'tcx> {
-        // FIXME(-Znext-solver=no): This is easier than requiring all uses of `LoweredTy`
-        // to call `try_structurally_resolve_type` instead. This seems like a lot of
-        // effort, especially as we're still supporting the old solver. We may revisit
-        // this in the future.
-        let normalized = if fcx.next_trait_solver() {
-            fcx.try_structurally_resolve_type(span, raw)
-        } else {
-            fcx.normalize(span, Unnormalized::new_wip(raw))
-        };
+        let normalized = fcx.normalize(span, Unnormalized::new_wip(raw));
         LoweredTy { raw, normalized }
     }
 }

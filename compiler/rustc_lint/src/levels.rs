@@ -671,7 +671,7 @@ impl<'s, P: LintLevelsProvider> LintLevelsBuilder<'s, P> {
                 continue;
             }
 
-            let (level, lint_id) = match Level::from_attr(attr) {
+            let (level, lint_id) = match Level::from_attr(attr.name(), || attr.id()) {
                 None => continue,
                 // This is the only lint level with a `LintExpectationId` that can be created from
                 // an attribute.
@@ -966,7 +966,7 @@ impl<'s, P: LintLevelsProvider> LintLevelsBuilder<'s, P> {
                 let mut lint = Diag::new(dcx, level, msg!("unknown lint: `{$name}`"))
                     .with_arg("name", lint_id.lint.name_lower())
                     .with_note(msg!("the `{$name}` lint is unstable"));
-                rustc_session::parse::add_feature_diagnostics_for_issue(
+                rustc_session::errors::add_feature_diagnostics_for_issue(
                     &mut lint,
                     sess,
                     feature,

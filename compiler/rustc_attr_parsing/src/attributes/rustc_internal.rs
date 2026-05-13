@@ -92,32 +92,6 @@ impl NoArgsAttributeParser for RustcNoImplicitAutorefsParser {
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcNoImplicitAutorefs;
 }
 
-pub(crate) struct RustcLayoutScalarValidRangeStartParser;
-
-impl SingleAttributeParser for RustcLayoutScalarValidRangeStartParser {
-    const PATH: &[Symbol] = &[sym::rustc_layout_scalar_valid_range_start];
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Struct)]);
-    const TEMPLATE: AttributeTemplate = template!(List: &["start"]);
-
-    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
-        parse_single_integer(cx, args)
-            .map(|n| AttributeKind::RustcLayoutScalarValidRangeStart(Box::new(n), cx.attr_span))
-    }
-}
-
-pub(crate) struct RustcLayoutScalarValidRangeEndParser;
-
-impl SingleAttributeParser for RustcLayoutScalarValidRangeEndParser {
-    const PATH: &[Symbol] = &[sym::rustc_layout_scalar_valid_range_end];
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Struct)]);
-    const TEMPLATE: AttributeTemplate = template!(List: &["end"]);
-
-    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
-        parse_single_integer(cx, args)
-            .map(|n| AttributeKind::RustcLayoutScalarValidRangeEnd(Box::new(n), cx.attr_span))
-    }
-}
-
 pub(crate) struct RustcLegacyConstGenericsParser;
 
 impl SingleAttributeParser for RustcLegacyConstGenericsParser {
@@ -555,11 +529,8 @@ impl SingleAttributeParser for RustcScalableVectorParser {
     const TEMPLATE: AttributeTemplate = template!(Word, List: &["count"]);
 
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
-        if args.no_args().is_ok() {
-            return Some(AttributeKind::RustcScalableVector {
-                element_count: None,
-                span: cx.attr_span,
-            });
+        if args.as_no_args().is_ok() {
+            return Some(AttributeKind::RustcScalableVector { element_count: None });
         }
 
         let n = parse_single_integer(cx, args)?;
@@ -567,7 +538,7 @@ impl SingleAttributeParser for RustcScalableVectorParser {
             cx.emit_err(RustcScalableVectorCountOutOfRange { span: cx.attr_span, n });
             return None;
         };
-        Some(AttributeKind::RustcScalableVector { element_count: Some(n), span: cx.attr_span })
+        Some(AttributeKind::RustcScalableVector { element_count: Some(n) })
     }
 }
 
@@ -588,7 +559,7 @@ impl SingleAttributeParser for LangParser {
             cx.emit_err(UnknownLangItem { span: cx.attr_span, name });
             return None;
         };
-        Some(AttributeKind::Lang(lang_item, cx.attr_span))
+        Some(AttributeKind::Lang(lang_item))
     }
 }
 
@@ -611,7 +582,7 @@ pub(crate) struct PanicHandlerParser;
 impl NoArgsAttributeParser for PanicHandlerParser {
     const PATH: &[Symbol] = &[sym::panic_handler];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS); // Targets are checked per lang item in `rustc_passes`
-    const CREATE: fn(Span) -> AttributeKind = |span| AttributeKind::Lang(LangItem::PanicImpl, span);
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::Lang(LangItem::PanicImpl);
 }
 
 pub(crate) struct RustcNounwindParser;
@@ -892,7 +863,7 @@ impl CombineAttributeParser for RustcThenThisWouldNeedParser {
     type Item = Ident;
 
     const CONVERT: ConvertFn<Self::Item> =
-        |items, span| AttributeKind::RustcThenThisWouldNeed(span, items);
+        |items, _span| AttributeKind::RustcThenThisWouldNeed(items);
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
         // tidy-alphabetical-start
         Allow(Target::AssocConst),
@@ -1073,7 +1044,7 @@ impl SingleAttributeParser for RustcReservationImplParser {
             return None;
         };
 
-        Some(AttributeKind::RustcReservationImpl(cx.attr_span, value_str))
+        Some(AttributeKind::RustcReservationImpl(value_str))
     }
 }
 

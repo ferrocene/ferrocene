@@ -1371,9 +1371,9 @@ impl Step for Tidy {
     /// for the `dev` or `nightly` channels.
     fn run(self, builder: &Builder<'_>) {
         let mut cmd = builder.tool_cmd(Tool::Tidy);
-        cmd.arg(format!("--root-path={}", &builder.src.display()));
-        cmd.arg(format!("--cargo-path={}", &builder.initial_cargo.display()));
-        cmd.arg(format!("--output-dir={}", &builder.out.display()));
+        cmd.arg(format!("--root-path={}", builder.src.display()));
+        cmd.arg(format!("--cargo-path={}", builder.initial_cargo.display()));
+        cmd.arg(format!("--output-dir={}", builder.out.display()));
         // Tidy is heavily IO constrained. Still respect `-j`, but use a higher limit if `jobs` hasn't been configured.
         let jobs = builder.config.jobs.unwrap_or_else(|| {
             8 * std::thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get) as u32
@@ -2622,7 +2622,7 @@ Please disable assertions with `rust.debug-assertions = false`.
 
             builder.info(&format!(
                 "Check compiletest suite={} mode={} compare_mode={} ({} -> {})",
-                suite, mode, compare_mode, &test_compiler.host, target
+                suite, mode, compare_mode, test_compiler.host, target
             ));
             let _time = helpers::timeit(builder);
             try_run_tests(builder, &mut cmd, false);
@@ -3324,7 +3324,7 @@ impl Step for CrateRustdoc {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("src/librustdoc").path("src/tools/rustdoc")
+        run.selectors(&["src/librustdoc", "src/tools/rustdoc"])
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {

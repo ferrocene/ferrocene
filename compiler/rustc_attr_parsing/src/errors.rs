@@ -118,7 +118,7 @@ struct IllFormedAttributeInputHelp {
         *[other] using `{$attr_path}` with an empty list has no effect
     }"
 )]
-pub(crate) struct EmptyAttributeList<'a> {
+pub(crate) struct EmptyAttributeList {
     #[suggestion(
         "{$valid_without_list ->
             [true] remove these parentheses
@@ -128,7 +128,7 @@ pub(crate) struct EmptyAttributeList<'a> {
         applicability = "machine-applicable"
     )]
     pub attr_span: Span,
-    pub attr_path: &'a str,
+    pub attr_path: String,
     pub valid_without_list: bool,
 }
 
@@ -159,8 +159,8 @@ pub(crate) struct InvalidTargetLint {
         *[other] the `#![{$name}]` attribute can only be used at the crate root
     }"
 )]
-pub(crate) struct InvalidAttrStyle<'a> {
-    pub name: &'a str,
+pub(crate) struct InvalidAttrStyle {
+    pub name: String,
     pub is_used_as_inner: bool,
     #[note("this attribute does not have an `!`, which means it is applied to this {$target}")]
     pub target_span: Option<Span>,
@@ -359,11 +359,11 @@ pub(crate) struct MalFormedDiagnosticAttributeLint {
 
 #[derive(Diagnostic)]
 #[diag("{$description}")]
-pub(crate) struct WrappedParserError<'a> {
-    pub description: &'a str,
+pub(crate) struct WrappedParserError {
+    pub description: String,
     #[label("{$label}")]
     pub span: Span,
-    pub label: &'a str,
+    pub label: String,
 }
 
 #[derive(Diagnostic)]

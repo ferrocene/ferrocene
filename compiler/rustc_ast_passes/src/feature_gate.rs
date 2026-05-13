@@ -6,7 +6,7 @@ use rustc_feature::{AttributeGate, BUILTIN_ATTRIBUTE_MAP, BuiltinAttribute, Feat
 use rustc_hir::Attribute;
 use rustc_hir::attrs::AttributeKind;
 use rustc_session::Session;
-use rustc_session::parse::{feature_err, feature_warn};
+use rustc_session::errors::{feature_err, feature_warn};
 use rustc_span::{Span, Spanned, Symbol, sym};
 use thin_vec::ThinVec;
 
@@ -228,7 +228,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 }
             }
 
-            ast::ItemKind::Trait(box ast::Trait { is_auto: ast::IsAuto::Yes, .. }) => {
+            ast::ItemKind::Trait(ast::Trait { is_auto: ast::IsAuto::Yes, .. }) => {
                 gate!(self, auto_traits, i.span, "auto traits are experimental and possibly buggy");
             }
 
@@ -241,10 +241,10 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 gate!(self, decl_macro, i.span, msg);
             }
 
-            ast::ItemKind::TyAlias(box ast::TyAlias { ty: Some(ty), .. }) => {
+            ast::ItemKind::TyAlias(ast::TyAlias { ty: Some(ty), .. }) => {
                 self.check_impl_trait(ty, false)
             }
-            ast::ItemKind::Const(box ast::ConstItem {
+            ast::ItemKind::Const(ast::ConstItem {
                 rhs_kind: ast::ConstItemRhsKind::TypeConst { .. },
                 ..
             }) => {
@@ -407,7 +407,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
     fn visit_assoc_item(&mut self, i: &'a ast::AssocItem, ctxt: AssocCtxt) {
         let is_fn = match &i.kind {
             ast::AssocItemKind::Fn(_) => true,
-            ast::AssocItemKind::Type(box ast::TyAlias { ty, .. }) => {
+            ast::AssocItemKind::Type(ast::TyAlias { ty, .. }) => {
                 if let (Some(_), AssocCtxt::Trait) = (ty, ctxt) {
                     gate!(
                         self,
@@ -421,7 +421,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 }
                 false
             }
-            ast::AssocItemKind::Const(box ast::ConstItem {
+            ast::AssocItemKind::Const(ast::ConstItem {
                 rhs_kind: ast::ConstItemRhsKind::TypeConst { rhs },
                 ..
             }) => {
@@ -464,6 +464,7 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
     check_incompatible_features(sess, features);
     check_dependent_features(sess, features);
     check_new_solver_banned_features(sess, features);
+    check_features_requiring_new_solver(sess, features);
 
     let mut visitor = PostExpansionVisitor { sess, features };
 
@@ -510,6 +511,7 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
     gate_all!(try_blocks_heterogeneous, "`try bikeshed` expression is experimental");
     gate_all!(unsafe_binders, "unsafe binder types are experimental");
     gate_all!(unsafe_fields, "`unsafe` fields are experimental");
+    gate_all!(view_types, "view types are experimental");
     gate_all!(where_clause_attrs, "attributes in `where` clause are unstable");
     gate_all!(yeet_expr, "`do yeet` expression is experimental");
     // tidy-alphabetical-end
@@ -735,6 +737,28 @@ fn check_new_solver_banned_features(sess: &Session, features: &Features) {
             spans: vec![gce_span],
             f1: Symbol::intern("-Znext-solver=globally"),
             f2: sym::generic_const_exprs,
+        });
+    }
+}
+
+fn check_features_requiring_new_solver(sess: &Session, features: &Features) {
+    if sess.opts.unstable_opts.next_solver.globally {
+        return;
+    }
+
+    // Require the new solver with GCA, because the old solver can't implement GCA correctly as it
+    // does not support normalization obligations for free and inherent consts.
+    if let Some(gca_span) = features
+        .enabled_lang_features()
+        .iter()
+        .find(|feat| feat.gate_name == sym::generic_const_args)
+        .map(|feat| feat.attr_sp)
+    {
+        #[allow(rustc::symbol_intern_string_literal)]
+        sess.dcx().emit_err(errors::MissingDependentFeatures {
+            parent_span: gca_span,
+            parent: sym::generic_const_args,
+            missing: String::from("-Znext-solver=globally"),
         });
     }
 }

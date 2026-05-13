@@ -60,7 +60,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     ) -> Diag<'a> {
         fn with_short_path<'tcx, T>(tcx: TyCtxt<'tcx>, value: T) -> String
         where
-            T: fmt::Display + Print<'tcx, FmtPrinter<'tcx, 'tcx>>,
+            T: fmt::Display + for<'b> Print<FmtPrinter<'b, 'tcx>>,
         {
             let s = value.to_string();
             if s.len() > 50 {

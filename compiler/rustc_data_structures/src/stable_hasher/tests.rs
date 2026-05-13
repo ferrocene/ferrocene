@@ -7,10 +7,25 @@ use super::*;
 // ways). The expected values depend on the hashing algorithm used, so they
 // need to be updated whenever StableHasher changes its hashing algorithm.
 
-fn hash<T: HashStable<()>>(t: &T) -> Hash128 {
+impl StableHashCtxt for () {
+    fn span_hash_stable(&mut self, _: RawSpan, _: &mut StableHasher) {
+        panic!();
+    }
+    fn def_path_hash(&self, _: RawDefId) -> RawDefPathHash {
+        panic!();
+    }
+    fn hashing_controls(&self) -> HashingControls {
+        panic!();
+    }
+    fn assert_default_hashing_controls(&self, _: &str) {
+        panic!();
+    }
+}
+
+fn hash<T: StableHash>(t: &T) -> Hash128 {
     let mut h = StableHasher::new();
-    let ctx = &mut ();
-    t.hash_stable(ctx, &mut h);
+    let hcx = &mut ();
+    t.stable_hash(hcx, &mut h);
     h.finish()
 }
 
@@ -44,10 +59,14 @@ fn test_attribute_permutation() {
                 b: $ty,
             }
 
-            impl<Hcx> HashStable<Hcx> for Foo {
-                fn hash_stable(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
-                    self.a.hash_stable(hcx, hasher);
-                    self.b.hash_stable(hcx, hasher);
+            impl StableHash for Foo {
+                fn stable_hash<Hcx: StableHashCtxt>(
+                    &self,
+                    hcx: &mut Hcx,
+                    hasher: &mut StableHasher,
+                ) {
+                    self.a.stable_hash(hcx, hasher);
+                    self.b.stable_hash(hcx, hasher);
                 }
             }
 

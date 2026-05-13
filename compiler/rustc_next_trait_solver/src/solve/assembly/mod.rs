@@ -9,11 +9,14 @@ use derive_where::derive_where;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::SolverTraitLangItem;
 use rustc_type_ir::search_graph::CandidateHeadUsages;
-use rustc_type_ir::solve::{AliasBoundKind, MaybeInfo, SizedTraitKind, StalledOnCoroutines};
+use rustc_type_ir::solve::{
+    AliasBoundKind, MaybeInfo, NoSolutionOrOpaquesAccessed, RerunReason, SizedTraitKind,
+    StalledOnCoroutines,
+};
 use rustc_type_ir::{
-    self as ty, AliasTy, Interner, TypeFlags, TypeFoldable, TypeFolder, TypeSuperFoldable,
-    TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode, Unnormalized,
-    Upcast, elaborate,
+    self as ty, AliasTy, Interner, MayBeErased, TypeFlags, TypeFoldable, TypeFolder,
+    TypeSuperFoldable, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
+    TypingMode, Unnormalized, Upcast, elaborate,
 };
 use tracing::{debug, instrument};
 
@@ -161,7 +164,7 @@ where
                 })
             });
 
-        match result {
+        match result.map_err(Into::into) {
             Ok(result) => Ok(Candidate { source: source.get(), result, head_usages }),
             Err(NoSolution) => Err(head_usages),
         }
@@ -415,6 +418,9 @@ where
     D: SolverDelegate<Interner = I>,
     I: Interner,
 {
+    // FIXME(#155443): This function should only ever return an error
+    // as we want to force a rerun when accessing opaques. We should change
+    // this file to revert all the newly added places which return `NoSolution`.
     pub(super) fn assemble_and_evaluate_candidates<G: GoalKind<D>>(
         &mut self,
         goal: Goal<I, G>,
@@ -471,7 +477,8 @@ where
                     TypingMode::Analysis { .. }
                     | TypingMode::Borrowck { .. }
                     | TypingMode::PostBorrowckAnalysis { .. }
-                    | TypingMode::PostAnalysis => !candidates.iter().any(|c| {
+                    | TypingMode::PostAnalysis
+                    | TypingMode::ErasedNotCoherence(MayBeErased) => !candidates.iter().any(|c| {
                         matches!(
                             c.source,
                             CandidateSource::ParamEnv(ParamEnvSource::NonGlobal)
@@ -682,14 +689,23 @@ where
         goal: Goal<I, G>,
         candidates: &mut Vec<Candidate<I>>,
     ) {
-        let () = self.probe(|_| ProbeKind::NormalizedSelfTyAssembly).enter(|ecx| {
+        let res = self.probe(|_| ProbeKind::NormalizedSelfTyAssembly).enter(|ecx| {
             ecx.assemble_alias_bound_candidates_recur(
                 goal.predicate.self_ty(),
                 goal,
                 candidates,
                 AliasBoundKind::SelfBounds,
             );
+            Ok(())
         });
+
+        // always returns Ok
+        match res {
+            Ok(_) | Err(NoSolutionOrOpaquesAccessed::OpaquesAccessed) => {}
+            Err(NoSolutionOrOpaquesAccessed::NoSolution(NoSolution)) => {
+                unreachable!()
+            }
+        }
     }
 
     /// For some deeply nested `<T>::A::B::C::D` rigid associated type,
@@ -959,12 +975,8 @@ where
         allow_inference_constraints: AllowInferenceConstraints,
         candidates: &mut Vec<Candidate<I>>,
     ) {
-        match self.typing_mode() {
-            TypingMode::Coherence => return,
-            TypingMode::Analysis { .. }
-            | TypingMode::Borrowck { .. }
-            | TypingMode::PostBorrowckAnalysis { .. }
-            | TypingMode::PostAnalysis => {}
+        if self.typing_mode().is_coherence() {
+            return;
         }
 
         let mut i = 0;
@@ -1014,6 +1026,7 @@ where
     ///
     /// See <https://github.com/rust-lang/trait-system-refactor-initiative/issues/182>
     /// for why this is necessary.
+    #[tracing::instrument(skip(self, assemble_from))]
     fn try_assemble_bounds_via_registered_opaques<G: GoalKind<D>>(
         &mut self,
         goal: Goal<I, G>,
@@ -1028,6 +1041,11 @@ where
             | TypingMode::Borrowck { .. }
             | TypingMode::PostBorrowckAnalysis { .. }
             | TypingMode::PostAnalysis => vec![],
+            TypingMode::ErasedNotCoherence(MayBeErased) => {
+                self.opaque_accesses
+                    .rerun_if_any_opaque_has_infer_as_hidden_type(RerunReason::SelfTyInfer);
+                Vec::new()
+            }
         };
 
         if opaque_types.is_empty() {
@@ -1059,7 +1077,7 @@ where
 
             // We look at all item-bounds of the opaque, replacing the
             // opaque with the current self type before considering
-            // them as a candidate. Imagine e've got `?x: Trait<?y>`
+            // them as a candidate. Imagine we've got `?x: Trait<?y>`
             // and `?x` has been sub-unified with the hidden type of
             // `impl Trait<u32>`, We take the item bound `opaque: Trait<u32>`
             // and replace all occurrences of `opaque` with `?x`. This results

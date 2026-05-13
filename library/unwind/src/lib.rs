@@ -35,6 +35,7 @@ cfg_select! {
         target_os = "psp",
         target_os = "solid_asp3",
         all(target_vendor = "fortanix", target_env = "sgx"),
+        all(target_os = "wasi", panic = "unwind"),
     ) => {
         mod libunwind;
         pub use libunwind::*;

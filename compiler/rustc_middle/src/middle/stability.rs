@@ -9,11 +9,11 @@ use rustc_feature::GateIssue;
 use rustc_hir::attrs::{DeprecatedSince, Deprecation};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{self as hir, ConstStability, DefaultBodyStability, HirId, Stability};
-use rustc_macros::{Decodable, Encodable, HashStable, Subdiagnostic};
+use rustc_macros::{Decodable, Encodable, StableHash, Subdiagnostic};
 use rustc_session::Session;
+use rustc_session::errors::feature_err_issue;
 use rustc_session::lint::builtin::{DEPRECATED, DEPRECATED_IN_FUTURE};
 use rustc_session::lint::{DeprecatedSinceKind, Level, Lint};
-use rustc_session::parse::feature_err_issue;
 use rustc_span::{Span, Symbol, sym};
 use tracing::debug;
 
@@ -36,7 +36,7 @@ pub enum UnstableKind {
 }
 
 /// An entry in the `depr_map`.
-#[derive(Copy, Clone, HashStable, Debug, Encodable, Decodable)]
+#[derive(Copy, Clone, StableHash, Debug, Encodable, Decodable)]
 pub struct DeprecationEntry {
     /// The metadata of the attribute associated with this entry.
     pub attr: Deprecation,

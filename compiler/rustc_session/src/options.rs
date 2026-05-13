@@ -653,6 +653,7 @@ type OptionDescrs<O> = &'static [OptionDesc<O>];
 
 /// Indicates whether a removed option should warn or error.
 enum RemovedOption {
+    #[allow(unused)] // we might want deprecated options that warn again in the future
     Warn,
     Err,
 }
@@ -759,7 +760,7 @@ mod desc {
     pub(crate) const parse_number: &str = "a number";
     pub(crate) const parse_opt_number: &str = parse_number;
     pub(crate) const parse_frame_pointer: &str = "one of `true`/`yes`/`on`, `false`/`no`/`off`, or (with -Zunstable-options) `non-leaf` or `always`";
-    pub(crate) const parse_threads: &str = parse_number;
+    pub(crate) const parse_threads: &str = "a number or `sync`";
     pub(crate) const parse_time_passes_format: &str = "`text` (default) or `json`";
     pub(crate) const parse_passes: &str = "a space-separated list of passes, or `all`";
     pub(crate) const parse_panic_strategy: &str = "either `unwind`, `abort`, or `immediate-abort`";
@@ -1067,22 +1068,23 @@ pub mod parse {
         }
     }
 
-    pub(crate) fn parse_threads(slot: &mut usize, v: Option<&str>) -> bool {
-        let ret = match v.and_then(|s| s.parse().ok()) {
-            Some(0) => {
-                *slot = std::thread::available_parallelism().map_or(1, NonZero::<usize>::get);
-                true
-            }
-            Some(i) => {
-                *slot = i;
-                true
-            }
-            None => false,
+    pub(crate) fn parse_threads(slot: &mut Option<usize>, v: Option<&str>) -> bool {
+        let Some(s) = v else { return false };
+        if s == "sync" {
+            // Enable synchronization despite only using one thread.
+            *slot = Some(1);
+            return true;
+        }
+        let n = match s.parse().ok() {
+            Some(0) => std::thread::available_parallelism().map_or(1, NonZero::<usize>::get),
+            Some(i) => i,
+            None => return false,
         };
         // We want to cap the number of threads here to avoid large numbers like 999999 and compiler panics.
         // This solution was suggested here https://github.com/rust-lang/rust/issues/117638#issuecomment-1800925067
-        *slot = slot.clone().min(MAX_THREADS_CAP);
-        ret
+        let n = n.min(MAX_THREADS_CAP);
+        *slot = (n > 1).then_some(n); // Enable synchronization if we're using more than one thread.
+        true
     }
 
     /// Use this for any numeric option that has a static default.
@@ -2037,10 +2039,9 @@ options! {
     // - src/doc/rustc/src/codegen-options/index.md
 
     // tidy-alphabetical-start
-    #[rustc_lint_opt_deny_field_access("documented to do nothing")]
-    ar: String = (String::new(), parse_string, [UNTRACKED],
-        "this option is deprecated and does nothing",
-        removed: Warn),
+    ar: () = ((), parse_ignore, [UNTRACKED],
+        "this option has been removed",
+        removed: Err),
     #[rustc_lint_opt_deny_field_access("use `Session::code_model` instead of this field")]
     code_model: Option<CodeModel> = (None, parse_code_model, [TRACKED],
         "choose the code model to use (`rustc --print code-models` for details)"),
@@ -2075,11 +2076,10 @@ options! {
     help: bool = (false, parse_no_value, [UNTRACKED], "Print codegen options"),
     incremental: Option<String> = (None, parse_opt_string, [UNTRACKED],
         "enable incremental compilation"),
-    #[rustc_lint_opt_deny_field_access("documented to do nothing")]
-    inline_threshold: Option<u32> = (None, parse_opt_number, [UNTRACKED],
-        "this option is deprecated and does nothing \
+    inline_threshold: () = ((), parse_ignore, [UNTRACKED],
+        "this option has been removed \
         (consider using `-Cllvm-args=--inline-threshold=...`)",
-        removed: Warn),
+        removed: Err),
     #[rustc_lint_opt_deny_field_access("use `Session::instrument_coverage` instead of this field")]
     instrument_coverage: InstrumentCoverage = (InstrumentCoverage::No, parse_instrument_coverage, [TRACKED],
         "instrument the generated code to support LLVM source-based code coverage reports \
@@ -2117,10 +2117,9 @@ options! {
         "give an empty list of passes to the pass manager"),
     no_redzone: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "disable the use of the redzone"),
-    #[rustc_lint_opt_deny_field_access("documented to do nothing")]
-    no_stack_check: bool = (false, parse_no_value, [UNTRACKED],
-        "this option is deprecated and does nothing",
-        removed: Warn),
+    no_stack_check: () = ((), parse_ignore, [UNTRACKED],
+        "this option has been removed",
+        removed: Err),
     no_vectorize_loops: bool = (false, parse_no_value, [TRACKED],
         "disable loop vectorization optimization passes"),
     no_vectorize_slp: bool = (false, parse_no_value, [TRACKED],
@@ -2154,7 +2153,6 @@ options! {
         "set rpath values in libs/exes (default: no)"),
     save_temps: bool = (false, parse_bool, [UNTRACKED],
         "save all temporary output files during compilation (default: no)"),
-    #[rustc_lint_opt_deny_field_access("documented to do nothing")]
     soft_float: () = ((), parse_ignore, [UNTRACKED],
         "this option has been removed \
         (use a corresponding *eabi target instead)",
@@ -2269,6 +2267,8 @@ options! {
         themselves (default: no)"),
     direct_access_external_data: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "Direct or use GOT indirect to reference external data symbols"),
+    disable_fast_paths: bool = (false, parse_bool, [TRACKED],
+        "disable various performance optimizations in trait solving"),
     dual_proc_macros: bool = (false, parse_bool, [TRACKED],
         "load proc macros for both target and host, but only link to the target (default: no)"),
     dump_dep_graph: bool = (false, parse_bool, [UNTRACKED],
@@ -2450,9 +2450,6 @@ options! {
         "align all functions to at least this many bytes. Must be a power of 2"),
     min_recursion_limit: Option<usize> = (None, parse_opt_number, [TRACKED],
         "set a minimum recursion limit (final limit = max(this, recursion_limit_from_crate))"),
-    mir_emit_retag: bool = (false, parse_bool, [TRACKED],
-        "emit Retagging MIR statements, interpreted e.g., by miri; implies -Zmir-opt-level=0 \
-        (default: no)"),
     mir_enable_passes: Vec<(String, bool)> = (Vec::new(), parse_list_with_polarity, [TRACKED],
         "use like `-Zmir-enable-passes=+DestinationPropagation,-InstSimplify`. Forces the \
         specified passes to be enabled, overriding all other checks. In particular, this will \
@@ -2673,12 +2670,12 @@ written to standard error output)"),
     #[rustc_lint_opt_deny_field_access("use `Session::lto` instead of this field")]
     thinlto: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "enable ThinLTO when possible"),
-    /// We default to 1 here since we want to behave like
+    /// We default to None here since we want to behave like
     /// a sequential compiler for now. This'll likely be adjusted
     /// in the future. Note that -Zthreads=0 is the way to get
     /// the num_cpus behavior.
     #[rustc_lint_opt_deny_field_access("use `Session::threads` instead of this field")]
-    threads: usize = (1, parse_threads, [UNTRACKED],
+    threads: Option<usize> = (None, parse_threads, [UNTRACKED],
         "use a thread pool with N threads"),
     time_llvm_passes: bool = (false, parse_bool, [UNTRACKED],
         "measure time of each LLVM pass (default: no)"),

@@ -34,6 +34,7 @@ declare_lint_pass! {
         CONST_EVALUATABLE_UNCHECKED,
         CONST_ITEM_MUTATION,
         DEAD_CODE,
+        DEAD_CODE_PUB_IN_BINARY,
         DEPENDENCY_ON_UNIT_NEVER_TYPE_FALLBACK,
         DEPRECATED,
         DEPRECATED_IN_FUTURE,
@@ -193,6 +194,11 @@ declare_lint! {
         reason: fcw!(FutureReleaseError #81670),
         report_in_deps: true,
     };
+    // We exempt `FORBIDDEN_LINT_GROUPS` from `-Dwarnings` because it specifically
+    // triggers in cases (like #80988) where you have `forbid(warnings)`,
+    // and so if we turned that into an error, it'd defeat the purpose of the
+    // future compatibility warning.
+    ignore_deny_warnings
 }
 
 declare_lint! {
@@ -782,6 +788,37 @@ declare_lint! {
     pub DEAD_CODE,
     Warn,
     "detect unused, unexported items"
+}
+
+declare_lint! {
+    /// The `dead_code_pub_in_binary` lint detects unused `pub` items in
+    /// executable crates.
+    ///
+    /// ### Example
+    ///
+    /// ```rust
+    /// #![deny(dead_code_pub_in_binary)]
+    ///
+    /// pub fn unused_pub_fn() {}
+    ///
+    /// fn main() {}
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// In executable crates, `pub` items are often implementation details
+    /// rather than part of an external API. This lint helps find those items
+    /// when they are never used.
+    ///
+    /// This lint only applies to executable crates. In library crates, public
+    /// items are considered part of the crate's API and are not reported by
+    /// this lint.
+    pub DEAD_CODE_PUB_IN_BINARY,
+    Allow,
+    "detect public items in executable crates that are never used",
+    crate_level_only
 }
 
 declare_lint! {
@@ -4073,8 +4110,12 @@ declare_lint! {
     /// and actionable warning of similar quality to our other diagnostics. See this tracking
     /// issue for more details: <https://github.com/rust-lang/rust/issues/136096>.
     pub LINKER_MESSAGES,
-    Allow,
-    "warnings emitted at runtime by the target-specific linker program"
+    Warn,
+    "warnings emitted at runtime by the target-specific linker program",
+    // Linker messages don't live up to the high standard people expect of rustc's errors.
+    // Prevent `-D warnings` from applying to it.
+    // It's still possible to pass `-D linker-messages` specifically.
+    ignore_deny_warnings
 }
 
 declare_lint! {

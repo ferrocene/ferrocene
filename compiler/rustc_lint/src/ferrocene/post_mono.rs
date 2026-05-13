@@ -253,9 +253,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         };
 
         // Keep the call span for diagnostics.
-        let site = if Some(self.instance.def_id())
-            == self.linter.tcx.lang_items().drop_in_place_fn()
-        {
+        let site = if Some(self.instance.def_id()) == self.linter.tcx.lang_items().drop_glue_fn() {
             // We want to show a better span; drop_in_place is never interesting since the body is
             // synthesized by a MIR shim anyway.
             // Note that we saw it, though, so diagnostics can say "dropped here".
@@ -414,26 +412,16 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
 
                 (pre_mono_call, instance)
             }
-            TerminatorKind::Drop { place, target: _, unwind: _, replace: _, drop, async_fut } => {
-                if drop.is_some() || async_fut.is_some() {
-                    span_bug!(span, "ferrocene::validated doesn't know how to check async drop");
+            TerminatorKind::Drop { place, .. } => {
+                let (ty, _) = self.monomorphize_args(place.ty(self.body, tcx));
+                let instance = Instance::resolve_drop_glue(tcx, ty.ty);
+                if matches!(instance.def, InstanceKind::DropGlue(_, None)) {
+                    debug!("ty `{ty:?}` does not need to be dropped");
+                    return None;
                 }
-
-                let (ty, env) = self.monomorphize_args(place.ty(self.body, tcx));
-                if !ty.ty.needs_drop(tcx, env) {
-                    return None; // otherwise instance_mir panics
-                }
-
-                let drop_in_place = tcx.lang_items().drop_in_place_fn().unwrap();
-                let generics = tcx.mk_args(&[ty.ty.into()]);
-                // We can't use DropGlue directly because `create_coroutine_drop_shim` treats
-                // coroutines specially and we'll crash if we try to avoid going through it.
-                // Instead we skip drop_in_place when iterating roots, it's never interesting and
-                // we want to show a different instantiation site in diagnostics.
-                let def = InstanceKind::Item(drop_in_place);
-                let instance = Instance { def, args: generics };
                 debug!("resolve drop glue => instance={instance:?}, ty={ty:?}");
-                (drop_in_place, instance)
+                let drop_glue = tcx.lang_items().drop_glue_fn().unwrap();
+                (drop_glue, instance)
             }
             _ => return None,
         };

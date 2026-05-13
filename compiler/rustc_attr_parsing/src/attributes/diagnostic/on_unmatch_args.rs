@@ -1,4 +1,3 @@
-use rustc_errors::Diagnostic;
 use rustc_hir::attrs::diagnostic::Directive;
 use rustc_session::lint::builtin::MISPLACED_DIAGNOSTIC_ATTRIBUTES;
 
@@ -27,7 +26,7 @@ impl AttributeParser for OnUnmatchArgsParser {
             if !matches!(cx.target, Target::MacroDef) {
                 cx.emit_lint(
                     MISPLACED_DIAGNOSTIC_ATTRIBUTES,
-                    move |dcx, level| DiagnosticOnUnmatchArgsOnlyForMacros.into_diag(dcx, level),
+                    DiagnosticOnUnmatchArgsOnlyForMacros,
                     span,
                 );
                 return;
@@ -46,11 +45,8 @@ impl AttributeParser for OnUnmatchArgsParser {
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
 
     fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
-        if let Some(span) = self.span {
-            Some(AttributeKind::OnUnmatchArgs {
-                span,
-                directive: self.directive.map(|d| Box::new(d.1)),
-            })
+        if let Some(_span) = self.span {
+            Some(AttributeKind::OnUnmatchArgs { directive: self.directive.map(|d| Box::new(d.1)) })
         } else {
             None
         }

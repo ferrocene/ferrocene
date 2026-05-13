@@ -21,6 +21,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
 use rustc_session::Session;
+use rustc_session::errors::ExprParenthesesNeeded;
 use rustc_span::{DUMMY_SP, Ident, Span, kw, sym};
 use rustc_trait_selection::error_reporting::infer::{FailureCode, ObligationCauseExt};
 use rustc_trait_selection::infer::InferCtxtExt;
@@ -217,29 +218,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             self.check_place_expr_if_unsized(fn_input_ty, arg_expr);
         }
-
-        let formal_input_tys_ns;
-        let formal_input_tys = if self.next_trait_solver() {
-            // In the new solver, the normalizations are done lazily.
-            // Because of this, if we encounter unnormalized alias types inside this
-            // fudge scope, we might lose the relationships between them and other vars
-            // when fudging inference variables created here.
-            // So, we utilize generalization to normalize aliases by adding a new
-            // inference var and equating it with the type we want to pull out of the
-            // fudge scope.
-            formal_input_tys_ns = formal_input_tys
-                .iter()
-                .map(|&ty| {
-                    let generalized_ty = self.next_ty_var(call_span);
-                    self.demand_eqtype(call_span, ty, generalized_ty);
-                    generalized_ty
-                })
-                .collect_vec();
-
-            formal_input_tys_ns.as_slice()
-        } else {
-            formal_input_tys
-        };
 
         // First, let's unify the formal method signature with the expectation eagerly.
         // We use this to guide coercion inference; it's output is "fudged" which means
@@ -977,14 +955,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         // wrapping in parentheses. We find the statement or expression
                         // following the `match` (`&& true`) and see if it is something that
                         // can reasonably be interpreted as a binop following an expression.
-                        err.multipart_suggestion(
-                            "parentheses are required to parse this as an expression",
-                            vec![
-                                (expr.span.shrink_to_lo(), "(".to_string()),
-                                (expr.span.shrink_to_hi(), ")".to_string()),
-                            ],
-                            Applicability::MachineApplicable,
-                        );
+                        err.subdiagnostic(ExprParenthesesNeeded::surrounding(expr.span));
                     } else if expr.can_have_side_effects() {
                         self.suggest_semicolon_at_end(expr.span, err);
                     }

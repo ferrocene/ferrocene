@@ -133,8 +133,8 @@ impl WriteBackendMethods for LlvmCodegenBackend {
         back::write::target_machine_factory(sess, optlvl, target_features)
     }
     fn optimize_and_codegen_fat_lto(
+        sess: &Session,
         cgcx: &CodegenContext,
-        prof: &SelfProfilerRef,
         shared_emitter: &SharedEmitter,
         tm_factory: TargetMachineFactoryFn<LlvmCodegenBackend>,
         exported_symbols_for_lto: &[String],
@@ -143,7 +143,7 @@ impl WriteBackendMethods for LlvmCodegenBackend {
     ) -> CompiledModule {
         let mut module = back::lto::run_fat(
             cgcx,
-            prof,
+            &sess.prof,
             shared_emitter,
             tm_factory,
             exported_symbols_for_lto,
@@ -153,9 +153,9 @@ impl WriteBackendMethods for LlvmCodegenBackend {
 
         let dcx = DiagCtxt::new(Box::new(shared_emitter.clone()));
         let dcx = dcx.handle();
-        back::lto::run_pass_manager(cgcx, prof, dcx, &mut module, false);
+        back::lto::run_pass_manager(cgcx, &sess.prof, dcx, &mut module, false);
 
-        back::write::codegen(cgcx, prof, shared_emitter, module, &cgcx.module_config)
+        back::write::codegen(cgcx, &sess.prof, shared_emitter, module, &cgcx.module_config)
     }
     fn run_thin_lto(
         cgcx: &CodegenContext,
@@ -333,8 +333,8 @@ impl CodegenBackend for LlvmCodegenBackend {
         crate::llvm_util::target_cpu(sess).to_string()
     }
 
-    fn codegen_crate<'tcx>(&self, tcx: TyCtxt<'tcx>, crate_info: &CrateInfo) -> Box<dyn Any> {
-        Box::new(rustc_codegen_ssa::base::codegen_crate(LlvmCodegenBackend(()), tcx, crate_info))
+    fn codegen_crate<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Box<dyn Any> {
+        Box::new(rustc_codegen_ssa::base::codegen_crate(LlvmCodegenBackend(()), tcx))
     }
 
     fn join_codegen(
@@ -342,11 +342,12 @@ impl CodegenBackend for LlvmCodegenBackend {
         ongoing_codegen: Box<dyn Any>,
         sess: &Session,
         outputs: &OutputFilenames,
+        crate_info: &CrateInfo,
     ) -> (CompiledModules, FxIndexMap<WorkProductId, WorkProduct>) {
         let (compiled_modules, work_products) = ongoing_codegen
             .downcast::<rustc_codegen_ssa::back::write::OngoingCodegen<LlvmCodegenBackend>>()
             .expect("Expected LlvmCodegenBackend's OngoingCodegen, found Box<Any>")
-            .join(sess);
+            .join(sess, crate_info);
 
         if sess.opts.unstable_opts.llvm_time_trace {
             sess.time("llvm_dump_timing_file", || {

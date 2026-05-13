@@ -1,0 +1,8 @@
+error: trait functions with a default implementation cannot be marked `requires_validation`
+  --> $DIR/bad-trait-annotation.rs:3:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use `prevalidated` instead: `#[ferrocene::prevalidated]`
+
+error: aborting due to 1 previous error
+

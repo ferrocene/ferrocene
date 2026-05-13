@@ -1,3 +1,30 @@
+error: unvalidated implementation of validated trait
+  --> $DIR/trait-ops.rs:39:17
+   |
+LL | /                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
+LL | |                            $(_: $ty),* )
+LL | |                     $(-> $ret)? {
+   | |_____________________________^
+...
+LL | / impl_traits! {
+LL | |     Unvalidated => [
+LL | |         | Add => type Output; fn add(self, Self) -> Self;
+LL | |         | AddAssign => fn add_assign(&mut self, Self);
+...  |
+LL | | }
+   | |_- in this macro invocation
+   |
+note: trait marked as validated here
+  --> $SRC_DIR/core/src/cmp.rs:LL:COL
+   = note: callers of `<Unvalidated as PartialEq>::ne` require every impl to be validated for safety
+note: the lint level is defined here
+  --> $DIR/trait-ops.rs:12:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
+   = note: this error originates in the macro `impl_traits` (in Nightly builds, run with -Z macro-backtrace for more info)
+
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:85:5
    |
@@ -12,12 +39,6 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | fn ops() {
    |    ^^^
-note: the lint level is defined here
-  --> $DIR/trait-ops.rs:12:9
-   |
-LL | #![deny(ferrocene::unvalidated)]
-   |         ^^^^^^^^^^^^^^^^^^^^^^
-   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
 help: consider marking the method as validated
    |
 LL ~                 #[ferrocene::prevalidated]
@@ -255,5 +276,5 @@ LL |     x?;
    |
    = note: `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
 
-error: aborting due to 19 previous errors
+error: aborting due to 20 previous errors
 

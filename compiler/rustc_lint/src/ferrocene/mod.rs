@@ -218,7 +218,15 @@ use rustc_middle::{
 };
 
 impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
+    fn check_crate(&mut self,_: &LateContext<'tcx>,) {
+        info!("running LintUnvalidated pass");
+    }
+
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
+        LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
+
+    fn check_trait_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx rustc_hir::TraitItem<'tcx>) {
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
 
@@ -254,6 +262,9 @@ impl<'tcx> LintState<'tcx> {
             match tcx.def_kind(item) {
                 // We don't care if types are unvalidated, only the functions that are called.
                 DefKind::Struct | DefKind::Enum | DefKind::Union => {}
+                // Associated item in a trait with no body.
+                // This is fine; we'll check the implementation later.
+                DefKind::AssocFn => {}
                 kind => {
                     let item_span = tcx.def_span(item);
                     let span = match annotation {

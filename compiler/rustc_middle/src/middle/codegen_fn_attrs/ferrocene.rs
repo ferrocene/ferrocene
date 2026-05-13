@@ -15,7 +15,8 @@ pub struct Validated {
     // FIXME: exported_constraint, validated, standards, qualification levels, entrypoint
 }
 
-const VALIDATED_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
+pub const REQUIRES_VALIDATION: &[Symbol; 2] = &[sym::ferrocene, sym::requires_validation];
+pub const PREVALIDATED: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
 
 pub enum ValidatedStatus {
     /// `annotation` is None IFF this is the `main` entrypoint.
@@ -62,11 +63,20 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         match tcx.hir_node_by_def_id(local) {
             Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
                 // FIXME: ForeignItems should be an exported_constraint
-                | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
-                | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
+                | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. }) => {
                     info!("skipping item {owner:?}");
                     return ValidatedStatus::Validated { annotation: None };
                 }
+            Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
+                let annotation = tcx.get_attrs_by_path(owner, REQUIRES_VALIDATION)
+                    .next()
+                    .map(|attr| attr.span());
+                return if annotation.is_some() {
+                    ValidatedStatus::Validated { annotation }
+                } else {
+                    ValidatedStatus::Unvalidated
+                }
+            }
             _ => {},
         }
 
@@ -123,7 +133,7 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         tcx.crate_name(LOCAL_CRATE).as_str() == "build_script_build" && was_invoked_from_cargo();
     let main_is_validated = is_main && !tcx.sess.opts.test && !is_build_script;
 
-    let annotation = tcx.get_attrs_by_path(owner, VALIDATED_ATTR).next();
+    let annotation = tcx.get_attrs_by_path(owner, PREVALIDATED).next();
     if annotation.is_some() {
         ValidatedStatus::Validated { annotation: annotation.map(|attr| attr.span()) }
     } else if upstream_has_bugs {

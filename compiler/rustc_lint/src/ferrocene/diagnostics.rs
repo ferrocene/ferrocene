@@ -4,14 +4,31 @@
 use rustc_errors::{Applicability, Diag, MultiSpan};
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{HirId, LangItem};
+use rustc_hir as hir;
 use rustc_middle::ty::TyCtxt;
-use rustc_span::{STDLIB_STABLE_CRATES, Span};
+use rustc_span::{ErrorGuaranteed, STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::{
     KNOWN_UNVALIDATED, LintState, POSSIBLY_UNVALIDATED, UnvalidatedImplCause, Use, UseKind,
 };
+
+pub(super) fn error_incorrect_attr(
+    tcx: TyCtxt<'_>,
+    annotation: &hir::Attribute,
+) -> ErrorGuaranteed {
+    let msg = "trait functions with a default implementation cannot be marked `requires_validation`";
+    let mut diag = tcx.dcx().struct_span_err(annotation.span(), msg);
+
+    diag.span_suggestion(
+        annotation.span(),
+        "use `prevalidated` instead",
+        "#[ferrocene::prevalidated]",
+        Applicability::MaybeIncorrect,
+    );
+    diag.emit()
+}
 
 pub(super) fn lint_unvalidated_impl(
     tcx: TyCtxt<'_>,
@@ -246,10 +263,12 @@ impl<'tcx> LintState<'tcx> {
 impl<'tcx> Use<'tcx> {
     fn present_tense(self) -> &'static str {
         match self.kind {
-            UseKind::Called(..) | UseKind::CalledPreMonoTraitFn(..) => "calls",
+            UseKind::Called(..) => "calls",
+            // THIR lint only. Will be caught later with more certainty by post-mono.
+            UseKind::CalledPreMonoTraitFn(..)
             // originally this said "type-erases" but that's unfamiliar jargon, and it's not clear
             // that it actually helps understanding.
-            UseKind::TraitObjectCast(..) | UseKind::FnPtrCast(..) => "possibly calls",
+            | UseKind::TraitObjectCast(..) | UseKind::FnPtrCast(..) => "possibly calls",
             UseKind::ContainsFnPtr(..) => "uses",
         }
     }

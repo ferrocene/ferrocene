@@ -1,5 +1,5 @@
 error: validated function possibly calls an unvalidated method
-  --> $DIR/dyn-cast-post-mono.rs:42:16
+  --> $DIR/dyn-cast-post-mono.rs:40:16
    |
 LL |     MyBox::new(&x)
    |                ^^
@@ -8,7 +8,7 @@ LL |     MyBox::new(&x)
    = note: once `Once<i32>` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `MyIterator::collect`
 note: `main` is validated
-  --> $DIR/dyn-cast-post-mono.rs:49:4
+  --> $DIR/dyn-cast-post-mono.rs:47:4
    |
 LL | fn main() {
    |    ^^^^
@@ -16,7 +16,7 @@ LL |     cast(iter_once(1));
    |     ------------------ generic function `cast` instantiated by `main`
    = note: main functions are assumed to be validated
 note: the lint level is defined here
-  --> $DIR/dyn-cast-post-mono.rs:5:9
+  --> $DIR/dyn-cast-post-mono.rs:3:9
    |
 LL | #![deny(ferrocene::known_unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

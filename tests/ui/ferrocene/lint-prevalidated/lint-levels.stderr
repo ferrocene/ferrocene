@@ -1,4 +1,4 @@
-warning: validated function calls an unvalidated method
+warning: validated function possibly calls an unvalidated method
   --> $DIR/lint-levels.rs:29:5
    |
 LL |     val.clone();

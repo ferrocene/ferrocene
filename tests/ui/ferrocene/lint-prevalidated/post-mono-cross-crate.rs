@@ -1,4 +1,4 @@
-#![deny(ferrocene::unvalidated)] //~ NOTE defined here
+#![deny(ferrocene::known_unvalidated)] //~ NOTE defined here
 #![crate_type = "lib"]
 
 //@ build-fail
@@ -7,7 +7,7 @@
 //@[dedup] compile-flags: -Z deduplicate-diagnostics=yes
 
 extern crate unvalidated_post_mono;
-use unvalidated_post_mono::uninstantiated_generic;
+use unvalidated_post_mono::{MyClone, uninstantiated_generic};
 
 //~? ERROR calls an unvalidated method
 //~? ERROR calls an unvalidated associated function
@@ -26,17 +26,21 @@ pub fn instantiation_reachable() { //~ NOTE is validated
 struct Unvalidated;
 struct Validated;
 
-impl Clone for Unvalidated {
+impl MyClone for Unvalidated {
     fn clone(&self) -> Self { Unvalidated }
-    //~^ NOTE is unvalidated
-    //[no-dedup]~^^ NOTE is unvalidated
-    fn clone_from(&mut self, other: &Self) { //~ NOTE unvalidated
+    //~^ HELP mark
+    //[no-dedup]~^^ HELP mark
+    //~? NOTE unvalidated
+    fn clone_from(&mut self, other: &Self) {
+        //~^ HELP mark
+        //~? NOTE unvalidated
         *self = other.clone();
         //[no-dedup]~^ ERROR calls an unvalidated
         //[no-dedup]~^^ NOTE instantiated by
+        //[no-dedup]~^^^ NOTE unvalidated
     }
 }
-impl Clone for Validated {
+impl MyClone for Validated {
     #[ferrocene::prevalidated]
     fn clone(&self) -> Self { Validated }
     #[ferrocene::prevalidated]
@@ -46,7 +50,8 @@ impl Clone for Validated {
 }
 
 impl Default for Unvalidated {
-    fn default() -> Self { Unvalidated } //~ NOTE unvalidated
+    fn default() -> Self { Unvalidated } //~? NOTE unvalidated
+    //~^ HELP mark
 }
 
 impl Default for Validated {

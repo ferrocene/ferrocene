@@ -5,7 +5,7 @@
 //@[post-mono-inlining] build-fail
 //@[post-mono-inlining] compile-flags: -Z inline-mir=yes
 
-#![deny(ferrocene::unvalidated)]
+#![deny(ferrocene::known_unvalidated)]
 
 #[inline(always)]
 pub const fn trailing_ones(_: u32) -> u32 {

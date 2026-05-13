@@ -15,9 +15,8 @@ LL | fn bar() {
 note: the lint level is defined here
   --> $DIR/specialization.rs:6:9
    |
-LL | #![deny(ferrocene::unvalidated)]
-   |         ^^^^^^^^^^^^^^^^^^^^^^
-   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
+LL | #![deny(ferrocene::known_unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: consider marking the method as validated
    |
 LL ~     #[ferrocene::prevalidated]

@@ -1,5 +1,10 @@
+pub trait MyClone {
+    fn clone(&self) -> Self;
+    fn clone_from(&mut self, other: &Self);
+}
+
 #[ferrocene::prevalidated]
-pub fn uninstantiated_generic<T: Clone + Default>(x: T) {
+pub fn uninstantiated_generic<T: MyClone + Default>(x: T) {
     x.clone();
     let fn_type = T::default; // ok -- not actually called, and can't be resolved by HIR pass
     let mut y = fn_type();

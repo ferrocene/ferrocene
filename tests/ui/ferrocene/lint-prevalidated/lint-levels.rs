@@ -26,7 +26,7 @@ fn uninstantiated_generic_indirect<T>(val: T) {} //~ NOTE instantiated
 #[ferrocene::prevalidated]
 fn uninstantiated_generic_direct<T: Clone>(val: T) {
     #[warn(ferrocene::unvalidated)] //~ NOTE lint level
-    val.clone(); //~ WARN calls
+    val.clone(); //~ WARN possibly calls
 }
 
 // this span points to core::ptr::drop_in_place

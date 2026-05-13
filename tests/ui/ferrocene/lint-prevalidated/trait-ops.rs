@@ -36,6 +36,7 @@ macro_rules! impl_traits {
         impl $(<$generic>)? $trait $(<$generic>)? for $type {
             $( type $assoc = Self; )?
             $(
+                #[allow(ferrocene::known_unvalidated, reason = "using traits in core instead of minicore")]
                 fn $name ( $(& $($none1)?)? $(mut $($none2)?)? self,
                            $(_: $ty),* )
                     $(-> $ret)? {

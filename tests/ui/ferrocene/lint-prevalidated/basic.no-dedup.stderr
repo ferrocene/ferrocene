@@ -1,3 +1,19 @@
+error: unvalidated implementation of validated trait
+  --> $DIR/basic.rs:65:5
+   |
+LL |     fn ne(&self, _: &Self) -> bool {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: trait marked as validated here
+  --> $SRC_DIR/core/src/cmp.rs:LL:COL
+   = note: callers of `<Unvalidated as PartialEq>::ne` require every impl to be validated for safety
+note: the lint level is defined here
+  --> $DIR/basic.rs:11:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
+
 error: validated method calls an unvalidated associated function
   --> $DIR/basic.rs:73:9
    |
@@ -16,12 +32,6 @@ LL |     #[ferrocene::prevalidated]
    |     -------------------------- marked as validated here
 LL |     fn to_string(&self) -> String {
    |        ^^^^^^^^^
-note: the lint level is defined here
-  --> $DIR/basic.rs:11:9
-   |
-LL | #![deny(ferrocene::unvalidated)]
-   |         ^^^^^^^^^^^^^^^^^^^^^^
-   = note: `#[deny(ferrocene::known_unvalidated)]` implied by `#[deny(ferrocene::unvalidated)]`
 
 error: validated closure calls an unvalidated function
   --> $DIR/basic.rs:90:42
@@ -329,5 +339,5 @@ LL + #[ferrocene::prevalidated]
 LL | fn normal_def() {
    |
 
-error: aborting due to 21 previous errors
+error: aborting due to 22 previous errors
 

@@ -3,7 +3,7 @@
 // You can still use traits as long as the impls use custom types.
 
 #![crate_type = "lib"]
-#![deny(ferrocene::unvalidated)]
+#![deny(ferrocene::known_unvalidated)]
 #![feature(min_specialization)]
 
 trait SpecializeMe {

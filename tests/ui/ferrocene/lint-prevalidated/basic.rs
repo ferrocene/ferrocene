@@ -62,7 +62,7 @@ impl PartialEq<Unvalidated> for Unvalidated {
         true
     }
 
-    fn ne(&self, _: &Self) -> bool {
+    fn ne(&self, _: &Self) -> bool { //~ ERROR validated trait
         false
     }
 }

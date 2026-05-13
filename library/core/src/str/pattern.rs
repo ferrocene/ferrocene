@@ -115,7 +115,6 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the front of the haystack
     #[inline]
-    #[ferrocene::requires_validation]
     #[ferrocene::prevalidated]
     fn is_prefix_of(self, haystack: &str) -> bool {
         matches!(self.into_searcher(haystack).next(), SearchStep::Match(0, _))
@@ -123,7 +122,6 @@ pub trait Pattern: Sized {
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
-    #[ferrocene::requires_validation]
     #[ferrocene::prevalidated]
     fn is_suffix_of<'a>(self, haystack: &'a str) -> bool
     where

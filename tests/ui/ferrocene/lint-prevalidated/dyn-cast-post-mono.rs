@@ -1,8 +1,6 @@
-//@ revisions: thir post-mono
-//@[thir] check-pass
-//@[post-mono] build-fail
+//@ build-fail
 
-#![deny(ferrocene::unvalidated)] //[post-mono]~ NOTE level
+#![deny(ferrocene::known_unvalidated)] //~ NOTE level
 
 use std::marker::PhantomData;
 
@@ -24,7 +22,7 @@ fn iter_once<T>(x: T) -> Once<T> {
 
 trait MyIterator {
     type Item;
-    fn collect<C>(self) -> C where Self: Sized { //[post-mono]~ NOTE unvalidated
+    fn collect<C>(self) -> C where Self: Sized { //~ NOTE unvalidated
         loop {}
     }
 }
@@ -39,13 +37,13 @@ impl<T> MyIterator for MyBox<dyn MyIterator<Item = T>> {
 
 #[ferrocene::prevalidated]
 fn cast<T, I: 'static + MyIterator<Item = T>>(x: I) -> MyBox<dyn MyIterator<Item = T>> {
-    MyBox::new(&x) //[post-mono]~ ERROR unvalidated
-    //[post-mono]~^ NOTE dynamic trait object
-    //[post-mono]~^^ NOTE `MyIterator::collect`
-    //[post-mono]~^^^ NOTE main functions
+    MyBox::new(&x) //~ ERROR unvalidated
+    //~^ NOTE dynamic trait object
+    //~^^ NOTE `MyIterator::collect`
+    //~^^^ NOTE main functions
 }
 
 
-fn main() { //[post-mono]~ NOTE validated
-    cast(iter_once(1)); //[post-mono]~ NOTE instantiated
+fn main() { //~ NOTE validated
+    cast(iter_once(1)); //~ NOTE instantiated
 }

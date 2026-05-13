@@ -101,7 +101,7 @@ fn split_at_mut_panics() {
 
 // covers `core::slice::<impl [T]>::align_to_mut`
 #[test]
-fn align_to_mut() {
+fn slice_align_to_mut() {
     let mut zst_arr = [(); 5];
     assert_eq!(
         unsafe { zst_arr.align_to_mut::<u8>() },
@@ -112,11 +112,21 @@ fn align_to_mut() {
     #[derive(Debug, PartialEq)]
     struct Foo([u8; 256]);
 
-    let mut arr = [0u8; 1];
+    // Try to avoid getting a value that's aligned with 256 by subslicing
+    let mut large_buffer = vec![0_u8; 256 * 2];
+    let arr = &mut large_buffer[1..2];
+    // Check we're hitting target line in the function
+    assert!(arr.as_ptr().align_offset(align_of::<Foo>()) > arr.len(), "{} > {}", arr.as_ptr().align_offset(align_of::<Foo>()), arr.len());
     assert_eq!(
         unsafe { arr.align_to_mut::<Foo>() },
-        ([0u8; 1].as_mut_slice(), [].as_mut_slice(), [].as_mut_slice())
+        ([0u8; 1].as_mut_slice(), [].as_mut_slice(), [].as_mut_slice()),
     );
+
+    // From doctests
+    unsafe {
+        let mut bytes: [u8; 7] = [1, 2, 3, 4, 5, 6, 7];
+        let (_prefix, _shorts, _suffix) = bytes.align_to_mut::<u16>();
+    }
 }
 
 // covers `core::slice::rotate::ptr_rotate`

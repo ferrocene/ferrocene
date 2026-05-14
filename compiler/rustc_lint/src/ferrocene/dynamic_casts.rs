@@ -262,7 +262,7 @@ impl<'tcx> LintState<'tcx> {
 
         let get_adt_field = |adt_def: ty::AdtDef<'_>, args, idx: FieldIdx| {
             let variant = adt_def.variant(VariantIdx::ZERO);
-            let field_ty = variant.fields[idx].ty(tcx, args);
+            let field_ty = variant.fields[idx].ty(tcx, args).skip_norm_wip();
             tcx.normalize_erasing_regions(typing_env, Unnormalized::new(field_ty))
         };
 
@@ -307,7 +307,8 @@ impl<'tcx> LintState<'tcx> {
                             for (idx, def) in
                                 dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated()
                             {
-                                if !def.ty(tcx, dst_args).is_sized(tcx, typing_env) {
+                                if !def.ty(tcx, dst_args).skip_norm_wip().is_sized(tcx, typing_env)
+                                {
                                     unsized_field = Some(idx);
                                     break;
                                 }

@@ -71,31 +71,29 @@ pub struct ShallowLintLevelMap {
     pub specs: SortedMap<ItemLocalId, FxIndexMap<LintId, LevelAndSource>>,
 }
 
-/// From an initial level and source, verify the effect of special annotations:
-/// `warnings` lint level and lint caps.
+/// Verify the effect of special annotations: `warnings` lint level and lint caps.
 ///
 /// The return of this function is suitable for diagnostics.
 pub fn reveal_actual_level(
-    level: Option<(Level, Option<LintExpectationId>)>,
-    src: &mut LintLevelSource,
     sess: &Session,
     lint: LintId,
-    probe_for_lint_level: impl FnOnce(
-        LintId,
-    )
-        -> (Option<(Level, Option<LintExpectationId>)>, LintLevelSource),
-) -> (Level, Option<LintExpectationId>) {
+    probe_for_lint_level: impl Fn(LintId) -> Option<LevelAndSource>,
+) -> LevelAndSource {
+    let level = probe_for_lint_level(lint);
+
     // If `level` is none then we actually assume the default level for this lint.
-    let (mut level, mut lint_id) =
-        level.unwrap_or_else(|| (lint.lint.default_level(sess.edition()), None));
+    let mut level = level.unwrap_or_else(|| LevelAndSource {
+        level: lint.lint.default_level(sess.edition()),
+        lint_id: None,
+        src: LintLevelSource::Default,
+    });
 
     // If we're about to issue a warning, check at the last minute for any
     // directives against the `warnings` lint group. If, for example, there's an
     // `allow(warnings)` in scope then we want to respect that instead.
-    if level == Level::Warn {
-        let (warnings_level, warnings_src) = probe_for_lint_level(LintId::of(builtin::WARNINGS));
-        if let Some((configured_warning_level, configured_lint_id)) = warnings_level {
-            let respect_warnings_lint_group = match configured_warning_level {
+    if level.level == Level::Warn {
+        if let Some(configured_level) = probe_for_lint_level(LintId::of(builtin::WARNINGS)) {
+            let respect_warnings_lint_group = match configured_level.level {
                 // -Wwarnings is a no-op.
                 Level::Warn => false,
                 // Some warnings cannot be denied from the `warnings` lint group, only individually.
@@ -107,33 +105,31 @@ pub fn reveal_actual_level(
                 Level::Expect => true,
                 Level::ForceWarn => {
                     sess.dcx().span_delayed_bug(
-                        warnings_src.span(),
+                        configured_level.src.span(),
                         "cannot --force-warn the `warnings` lint group",
                     );
                     false
                 }
             };
             if respect_warnings_lint_group {
-                level = configured_warning_level;
-                lint_id = configured_lint_id;
-                *src = warnings_src;
+                level = configured_level;
             }
         }
     }
 
     // Ensure that we never exceed the `--cap-lints` argument unless the source is a --force-warn
-    level = if let LintLevelSource::CommandLine(_, Level::ForceWarn) = src {
-        level
+    level.level = if let LintLevelSource::CommandLine(_, Level::ForceWarn) = level.src {
+        level.level
     } else {
-        cmp::min(level, sess.opts.lint_cap.unwrap_or(Level::Forbid))
+        cmp::min(level.level, sess.opts.lint_cap.unwrap_or(Level::Forbid))
     };
 
     if let Some(driver_level) = sess.driver_lint_caps.get(&lint) {
         // Ensure that we never exceed driver level.
-        level = cmp::min(*driver_level, level);
+        level.level = cmp::min(level.level, *driver_level);
     }
 
-    (level, lint_id)
+    level
 }
 
 impl ShallowLintLevelMap {
@@ -146,11 +142,11 @@ impl ShallowLintLevelMap {
         tcx: TyCtxt<'_>,
         id: LintId,
         start: HirId,
-    ) -> (Option<(Level, Option<LintExpectationId>)>, LintLevelSource) {
+    ) -> Option<LevelAndSource> {
         if let Some(map) = self.specs.get(&start.local_id)
-            && let Some(&LevelAndSource { level, lint_id, src }) = map.get(&id)
+            && let Some(level) = map.get(&id)
         {
-            return (Some((level, lint_id)), src);
+            return Some(*level);
         }
 
         let mut owner = start.owner;
@@ -162,13 +158,13 @@ impl ShallowLintLevelMap {
                 specs = &tcx.shallow_lint_levels_on(owner).specs;
             }
             if let Some(map) = specs.get(&parent.local_id)
-                && let Some(&LevelAndSource { level, lint_id, src }) = map.get(&id)
+                && let Some(level) = map.get(&id)
             {
-                return (Some((level, lint_id)), src);
+                return Some(*level);
             }
         }
 
-        (None, LintLevelSource::Default)
+        None
     }
 
     /// Fetch and return the user-visible lint level for the given lint at the given HirId.
@@ -179,11 +175,7 @@ impl ShallowLintLevelMap {
         lint: LintId,
         cur: HirId,
     ) -> LevelAndSource {
-        let (level, mut src) = self.probe_for_lint_level(tcx, lint, cur);
-        let (level, lint_id) = reveal_actual_level(level, &mut src, tcx.sess, lint, |lint| {
-            self.probe_for_lint_level(tcx, lint, cur)
-        });
-        LevelAndSource { level, lint_id, src }
+        reveal_actual_level(tcx.sess, lint, |lint| self.probe_for_lint_level(tcx, lint, cur))
     }
 }
 

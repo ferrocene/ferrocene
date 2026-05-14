@@ -823,29 +823,6 @@ impl f64 {
         !self.is_sign_negative()
     }
 
-<<<<<<< ferrocene/main
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
-    #[inline]
-    #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    pub fn is_positive(self) -> bool {
-        self.is_sign_positive()
-    }
-
-||||||| f2b291d902b
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[deprecated(since = "1.0.0", note = "renamed to is_sign_positive")]
-    #[inline]
-    #[doc(hidden)]
-    pub fn is_positive(self) -> bool {
-        self.is_sign_positive()
-    }
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     /// Returns `true` if `self` has a negative sign, including `-0.0`, NaNs with
     /// negative sign bit and negative infinity.
     ///
@@ -874,29 +851,6 @@ impl f64 {
         self.to_bits() & Self::SIGN_MASK != 0
     }
 
-<<<<<<< ferrocene/main
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
-    #[inline]
-    #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    pub fn is_negative(self) -> bool {
-        self.is_sign_negative()
-    }
-
-||||||| f2b291d902b
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[deprecated(since = "1.0.0", note = "renamed to is_sign_negative")]
-    #[inline]
-    #[doc(hidden)]
-    pub fn is_negative(self) -> bool {
-        self.is_sign_negative()
-    }
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     /// Returns the least number greater than `self`.
     ///
     /// Let `TINY` be the smallest representable positive `f64`. Then,

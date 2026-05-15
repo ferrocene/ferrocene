@@ -18,10 +18,7 @@
 use std::env;
 use std::path::Path;
 
-use run_make_support::{bare_rustc, target};
-
-// matches diagnostic in `/compiler/rustc_codegen_ssa/src/errors.rs`
-const NEEDLE: &str = "linker driver does not support the `-fuse-ld=` flag";
+use run_make_support::{Diff, bare_rustc, target};
 
 fn main() {
     let out_dir = Path::new("out");
@@ -69,7 +66,7 @@ fn main() {
         .out_dir(&out_dir)
         .run_fail();
 
-    assert!(output.stderr_utf8().contains(NEEDLE));
+    Diff::new().expected_file("rustc.stderr").actual_text("rustc", output.stderr_utf8()).run();
 }
 
 fn build_linker_driver_override_for_host(out_dir: &Path, linker_driver_arg: &str) {

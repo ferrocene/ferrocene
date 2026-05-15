@@ -307,6 +307,7 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     // Ferrocene additions
     "ferrocene-execute-in-temp",
     "ignore-ferrocene.facade",
+    "needs-linker-flavor-lld-cc",
     "only-ferrocene.facade",
 ];
 

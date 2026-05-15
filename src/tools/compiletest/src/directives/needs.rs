@@ -359,6 +359,12 @@ pub(crate) fn prepare_needs_conditions(config: &Config) -> PreparedNeedsConditio
             condition: build_helper::targets::target_supports_std(&config.target),
             ignore_reason: "ignored if target does not support std",
         },
+        // Ferrocene addition
+        Need {
+            name: "needs-linker-flavor-lld-cc",
+            condition: has_linker_flavor_lld_cc(config),
+            ignore_reason: "ignored on targets without linker-flavor=*-lld-cc",
+        },
     ];
     let simple_needs = simple_needs
         .into_iter()
@@ -457,5 +463,38 @@ fn has_mnemonic(config: &Config, mnemonic: &str) -> bool {
         "true" => true,
         "false" => false,
         _ => panic!("unexpected output from `--print=backend-has-mnemonic:{mnemonic}`: {output:?}"),
+    }
+}
+
+// Ferrocene addition
+fn has_linker_flavor_lld_cc(config: &Config) -> bool {
+    #[derive(serde::Deserialize)]
+    struct TargetSpecLinkerFlavor {
+        #[serde(rename = "linker-flavor")]
+        linker_flavor: String,
+    }
+
+    let target_flag = format!("--target={}", config.target);
+    let output = query_rustc_output(
+        config,
+        &[&target_flag, "-Zunstable-options", "--print=target-spec-json"],
+        Default::default(),
+    );
+
+    let flavor = serde_json::from_str::<TargetSpecLinkerFlavor>(&output)
+        .expect("`--print=target-spec-json` output has no linker-flavor field")
+        .linker_flavor;
+
+    match flavor.as_str() {
+        // `*(Cc::Yes, Ld::Yes)` flavors in /compiler/rustc_target/src/spec/mod.rs
+        "gnu-lld-cc" | "darwin-lld-cc" | "wasm-lld-cc" => true,
+
+        // the rest of flavors at time of implementation
+        "gnu" | "gnu-lld" | "gnu-cc" | "darwin" | "darwin-lld" | "darwin-cc" | "wasm-lld"
+        | "unix" | "unix-cc" | "msvc-lld" | "msvc" | "em-cc" | "bpf" | "llbc" | "ptx" | "gcc"
+        | "ld" | "ld.lld" | "ld64.lld" | "lld-link" | "wasm-ld" | "em" => false,
+
+        // flag up newly added flavors
+        _ => panic!("new linker-flavor: {flavor}; update this logic"),
     }
 }

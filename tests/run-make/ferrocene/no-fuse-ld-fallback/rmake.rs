@@ -1,3 +1,6 @@
+// only test targets that use `-fuse-ld` by default
+//@ needs-linker-flavor-lld-cc
+
 //! Check that if Ferrocene's rustc is used with a linker driver that does not support the
 //! `-fuse-ld` flag then it will produce an error instead of re-invoking the linker *without*
 //! the `-fuse-ld` flag, which is a fallback that upstream rustc implements
@@ -31,10 +34,10 @@ fn main() {
         .run();
 
     let stdout = output.stdout_utf8();
-    if !stdout.contains("-fuse-ld=") {
-        // this target does not use `-fuse-ld` flag so the fallback path cannot be tested
-        return;
-    }
+    assert!(
+        stdout.contains("-fuse-ld="),
+        "this target does not use `-fuse-ld`; add to ignore list"
+    );
 
     // `--print link-args` output has the form:
     // "ENVVAR1=value1" "ENVVAR2=value2" "the-linker" "link-arg1" "link-arg2" (..)

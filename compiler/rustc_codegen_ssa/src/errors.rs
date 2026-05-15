@@ -1310,8 +1310,3 @@ pub(crate) struct LtoProcMacro;
 #[diag("cannot prefer dynamic linking when performing LTO")]
 #[note("only 'staticlib', 'bin', and 'cdylib' outputs are supported with LTO")]
 pub(crate) struct DynamicLinkingWithLTO;
-
-// Ferrocene addition
-#[derive(Diagnostic)]
-#[diag("linker driver does not support the `-fuse-ld=` flag")]
-pub(crate) struct NoFuseLdSupport;

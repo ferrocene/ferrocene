@@ -991,7 +991,7 @@ fn link_natively(
             // Ferrocene-only: if the linker driver does not support the -fuse-ld flag, we
             // treat that as a fatal error
             if true {
-                sess.dcx().emit_fatal(errors::NoFuseLdSupport);
+                sess.dcx().fatal("linker driver does not support the `-fuse-ld=` flag");
             }
 
             info!("linker output: {:?}", out);

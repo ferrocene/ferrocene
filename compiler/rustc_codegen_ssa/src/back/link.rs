@@ -983,6 +983,11 @@ fn link_natively(
         // to spawn multiple instances on the happy path to do version checking, and ensures things
         // keep working on the tier 1 baseline of GLIBC 2.17+. That is generally understood as GCCs
         // circa RHEL/CentOS 7, 4.5 or so, whereas lld support was added in GCC 9.
+        #[expect(unreachable_code)]
+        // Ferrocene addition ^^^^^ `#[expect]` is used here because `fatal` is a divergent
+        // function and makes the code that follows raise an "unreachable code" warning which
+        // bootstrap treats as an error. an alternative would be to remove the code that follows but
+        // that increases the chance of a future merge conflict with upstream changes
         if matches!(flavor, LinkerFlavor::Gnu(Cc::Yes, Lld::Yes))
             && unknown_arg_regex.is_match(&out)
             && out.contains("-fuse-ld=lld")
@@ -990,9 +995,7 @@ fn link_natively(
         {
             // Ferrocene-only: if the linker driver does not support the -fuse-ld flag, we
             // treat that as a fatal error
-            if true {
-                sess.dcx().fatal("linker driver does not support the `-fuse-ld=` flag");
-            }
+            sess.dcx().fatal("linker driver does not support the `-fuse-ld=` flag");
 
             info!("linker output: {:?}", out);
             info!("The linker driver does not support `-fuse-ld=lld`. Retrying without it.");

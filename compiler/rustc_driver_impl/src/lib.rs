@@ -6,6 +6,7 @@
 
 // tidy-alphabetical-start
 #![feature(decl_macro)]
+#![feature(file_buffered)]
 #![feature(panic_backtrace_config)]
 #![feature(panic_update_hook)]
 #![feature(trim_prefix_suffix)]
@@ -333,7 +334,7 @@ pub fn run_compiler(at_args: &[String], callbacks: &mut (dyn Callbacks + Send)) 
             }
 
             if tcx.sess.opts.output_types.contains_key(&OutputType::Mir) {
-                if let Err(error) = rustc_mir_transform::dump_mir::emit_mir(tcx) {
+                if let Err(error) = pretty::emit_mir(tcx) {
                     tcx.dcx().emit_fatal(CantEmitMIR { error });
                 }
             }
@@ -802,7 +803,9 @@ fn print_crate_info(
                 println_info!("{}", calling_conventions.join("\n"));
             }
             BackendHasMnemonic => {
-                codegen_backend.print(req, &mut crate_info, sess);
+                let has_mnemonic: bool =
+                    codegen_backend.has_mnemonic(sess, req.arg.as_ref().unwrap());
+                println_info!("{has_mnemonic}");
             }
             BackendHasZstd => {
                 let has_zstd: bool = codegen_backend.has_zstd();

@@ -83,12 +83,7 @@ impl LintLevelSets {
         aux: Option<&FxIndexMap<LintId, LevelAndSource>>,
         sess: &Session,
     ) -> LevelAndSource {
-        let lint = LintId::of(lint);
-        let (level, mut src) = self.raw_lint_id_level(lint, idx, aux);
-        let (level, lint_id) = reveal_actual_level(level, &mut src, sess, lint, |id| {
-            self.raw_lint_id_level(id, idx, aux)
-        });
-        LevelAndSource { level, lint_id, src }
+        reveal_actual_level(sess, LintId::of(lint), |id| self.raw_lint_id_level(id, idx, aux))
     }
 
     fn raw_lint_id_level(
@@ -96,20 +91,20 @@ impl LintLevelSets {
         id: LintId,
         mut idx: LintStackIndex,
         aux: Option<&FxIndexMap<LintId, LevelAndSource>>,
-    ) -> (Option<(Level, Option<LintExpectationId>)>, LintLevelSource) {
+    ) -> Option<LevelAndSource> {
         if let Some(specs) = aux
-            && let Some(&LevelAndSource { level, lint_id, src }) = specs.get(&id)
+            && let Some(level) = specs.get(&id)
         {
-            return (Some((level, lint_id)), src);
+            return Some(*level);
         }
 
         loop {
             let LintSet { ref specs, parent } = self.list[idx];
-            if let Some(&LevelAndSource { level, lint_id, src }) = specs.get(&id) {
-                return (Some((level, lint_id)), src);
+            if let Some(level) = specs.get(&id) {
+                return Some(*level);
             }
             if idx == COMMAND_LINE {
-                return (None, LintLevelSource::Default);
+                return None;
             }
             idx = parent;
         }

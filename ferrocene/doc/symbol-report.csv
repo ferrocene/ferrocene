@@ -6386,8 +6386,6 @@ core::f64::<impl f64>::from_bits
 core::f64::<impl f64>::from_le_bytes
 core::f64::<impl f64>::is_infinite
 core::f64::<impl f64>::is_nan
-core::f64::<impl f64>::is_negative
-core::f64::<impl f64>::is_positive
 core::f64::<impl f64>::is_sign_negative
 core::f64::<impl f64>::is_sign_positive
 core::f64::<impl f64>::to_bits

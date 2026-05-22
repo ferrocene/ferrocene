@@ -1451,7 +1451,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 3.5_f16;
     /// let y = -3.5_f16;
@@ -1517,7 +1517,7 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(target_has_reliable_f16_math)] {
+    /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.5_f16;
     ///
@@ -1610,7 +1610,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.7_f16;
@@ -1639,7 +1638,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.01_f16;
@@ -1668,7 +1666,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.3_f16;
@@ -1702,7 +1699,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.3_f16;
@@ -1734,7 +1730,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let f = 3.7_f16;
@@ -1764,7 +1759,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 3.6_f16;
@@ -1803,7 +1797,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let m = 10.0_f16;
@@ -1848,7 +1841,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let a: f16 = 7.0;
@@ -1892,7 +1884,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let a: f16 = 7.0;
@@ -1935,12 +1926,11 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
-    /// # #[cfg(target_has_reliable_f16)] {
+    /// # #[cfg(target_has_reliable_f16_math)] {
     ///
     /// let x = 2.0_f16;
     /// let abs_difference = (x.powi(2) - (x * x)).abs();
-    /// assert!(abs_difference <= f16::EPSILON);
+    /// assert!(abs_difference <= 0.1);
     ///
     /// assert_eq!(f16::powi(f16::NAN, 0), 1.0);
     /// assert_eq!(f16::powi(0.0, 0), 1.0);
@@ -1968,7 +1958,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let positive = 4.0_f16;
@@ -2003,7 +1992,6 @@ impl f16 {
     ///
     /// ```
     /// #![feature(f16)]
-    /// # #[cfg(not(miri))]
     /// # #[cfg(target_has_reliable_f16)] {
     ///
     /// let x = 8.0f16;

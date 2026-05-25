@@ -444,8 +444,6 @@ declare_features! (
     (unstable, cfg_target_compact, "1.63.0", Some(96901)),
     /// Allows `cfg(target_has_atomic_load_store = "...")`.
     (unstable, cfg_target_has_atomic, "1.60.0", Some(94039)),
-    /// Allows `cfg(target_has_atomic_equal_alignment = "...")`.
-    (unstable, cfg_target_has_atomic_equal_alignment, "1.60.0", Some(93822)),
     /// Allows `cfg(target_object_format = "...")`.
     (unstable, cfg_target_object_format, "CURRENT_RUSTC_VERSION", Some(152586)),
     /// Allows `cfg(target_thread_local)`.
@@ -729,8 +727,6 @@ declare_features! (
     (unstable, super_let, "1.88.0", Some(139076)),
     /// Allows subtrait items to shadow supertrait items.
     (unstable, supertrait_item_shadowing, "1.86.0", Some(89151)),
-    /// Allows the use of target_feature when a function is marked inline(always).
-    (unstable, target_feature_inline_always, "1.91.0", Some(145574)),
     /// Allows using `#[thread_local]` on `static` items.
     (unstable, thread_local, "1.0.0", Some(29594)),
     /// Allows defining `trait X = A + B;` alias items.

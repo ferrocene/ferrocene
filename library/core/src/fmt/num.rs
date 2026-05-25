@@ -308,8 +308,8 @@ macro_rules! impl_Display {
         }
 
         impl $Unsigned {
-            /// Allows users to write an integer (in signed decimal format) into a variable `buf` of
-            /// type [`NumBuffer`] that is passed by the caller by mutable reference.
+            /// Allows users to write an integer (in unsigned decimal format) into a variable `buf`
+            /// of type [`NumBuffer`] that is passed by the caller by mutable reference.
             ///
             /// # Examples
             ///
@@ -758,7 +758,7 @@ impl u128 {
         offset
     }
 
-    /// Allows users to write an integer (in signed decimal format) into a variable `buf` of
+    /// Allows users to write an integer (in unsigned decimal format) into a variable `buf` of
     /// type [`NumBuffer`] that is passed by the caller by mutable reference.
     ///
     /// # Examples
@@ -892,7 +892,7 @@ fn div_rem_1e16(n: u128) -> (u128, u64) {
     const M_HIGH: u128 = 76624777043294442917917351357515459181;
     const SH_POST: u8 = 51;
 
-    let quot = n.widening_mul(M_HIGH).1 >> SH_POST;
+    let quot = n.carrying_mul(M_HIGH, 0).1 >> SH_POST;
     let rem = n - quot * D;
     (quot, rem as u64)
 }

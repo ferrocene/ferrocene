@@ -1,7 +1,7 @@
 // tidy-alphabetical-start
-#![feature(box_patterns)]
 #![feature(const_type_name)]
 #![feature(cow_is_borrowed)]
+#![feature(deref_patterns)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(iterator_try_collect)]
 #![feature(try_blocks)]
@@ -122,7 +122,6 @@ declare_passes! {
     mod add_subtyping_projections : Subtyper;
     mod check_inline : CheckForceInline;
     mod check_call_recursion : CheckCallRecursion, CheckDropRecursion;
-    mod check_inline_always_target_features: CheckInlineAlwaysTargetFeature;
     mod check_alignment : CheckAlignment;
     mod check_enums : CheckEnums;
     mod check_const_item_mutation : CheckConstItemMutation;
@@ -241,7 +240,7 @@ fn remap_mir_for_const_eval_select<'tcx>(
         let terminator = bb.terminator.as_mut().expect("invalid terminator");
         match terminator.kind {
             TerminatorKind::Call {
-                func: Operand::Constant(box ConstOperand { ref const_, .. }),
+                func: Operand::Constant(ConstOperand { ref const_, .. }),
                 ref mut args,
                 destination,
                 target,
@@ -403,9 +402,6 @@ fn mir_built(tcx: TyCtxt<'_>, def: LocalDefId) -> &Steal<Body<'_>> {
             // MIR-level lints.
             &Lint(check_inline::CheckForceInline),
             &Lint(check_call_recursion::CheckCallRecursion),
-            // Check callee's target features match callers target features when
-            // using `#[inline(always)]`
-            &Lint(check_inline_always_target_features::CheckInlineAlwaysTargetFeature),
             &Lint(check_packed_ref::CheckPackedRef),
             &Lint(check_const_item_mutation::CheckConstItemMutation),
             &Lint(function_item_references::FunctionItemReferences),

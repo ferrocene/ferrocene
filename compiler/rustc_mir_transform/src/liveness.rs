@@ -369,12 +369,12 @@ fn find_self_assignments<'tcx>(
 
     for (bb, bb_data) in body.basic_blocks.iter_enumerated() {
         for (statement_index, stmt) in bb_data.statements.iter().enumerate() {
-            let StatementKind::Assign(box (first_place, rvalue)) = &stmt.kind else { continue };
+            let StatementKind::Assign((first_place, rvalue)) = &stmt.kind else { continue };
             match rvalue {
                 // For checked binary ops, the MIR builder inserts an assertion in between.
                 Rvalue::BinaryOp(
                     BinOp::AddWithOverflow | BinOp::SubWithOverflow | BinOp::MulWithOverflow,
-                    box (Operand::Copy(lhs), _),
+                    (Operand::Copy(lhs), _),
                 ) => {
                     // Checked binary ops only appear at the end of the block, before the assertion.
                     if statement_index + 1 != bb_data.statements.len() {
@@ -382,10 +382,7 @@ fn find_self_assignments<'tcx>(
                     }
 
                     let TerminatorKind::Assert {
-                        cond,
-                        target,
-                        msg: box AssertKind::Overflow(..),
-                        ..
+                        cond, target, msg: AssertKind::Overflow(..), ..
                     } = &bb_data.terminator().kind
                     else {
                         continue;
@@ -393,7 +390,7 @@ fn find_self_assignments<'tcx>(
                     let Some(assign) = body.basic_blocks[*target].statements.first() else {
                         continue;
                     };
-                    let StatementKind::Assign(box (dest, Rvalue::Use(Operand::Move(temp), _))) =
+                    let StatementKind::Assign((dest, Rvalue::Use(Operand::Move(temp), _))) =
                         assign.kind
                     else {
                         continue;
@@ -437,7 +434,7 @@ fn find_self_assignments<'tcx>(
                     }
                 }
                 // Straight self-assignment.
-                Rvalue::BinaryOp(op, box (Operand::Copy(lhs), _)) => {
+                Rvalue::BinaryOp(op, (Operand::Copy(lhs), _)) => {
                     if lhs != first_place {
                         continue;
                     }
@@ -724,10 +721,18 @@ impl<'a, 'tcx> AssignmentResult<'a, 'tcx> {
                 let live = cursor.get();
                 ever_live.union(live);
                 match &statement.kind {
-                    StatementKind::Assign(box (place, _))
-                    | StatementKind::SetDiscriminant { box place, .. } => {
+                    StatementKind::Assign((place, _)) => {
                         check_place(
                             *place,
+                            AccessKind::Assign,
+                            statement.source_info,
+                            location,
+                            live,
+                        );
+                    }
+                    StatementKind::SetDiscriminant { place, .. } => {
+                        check_place(
+                            **place,
                             AccessKind::Assign,
                             statement.source_info,
                             location,
@@ -1299,17 +1304,17 @@ impl<'tcx> Visitor<'tcx> for TransferFunction<'_, 'tcx> {
         match statement.kind {
             // `ForLet(None)` and `ForGuardBinding` fake reads erroneously mark the just-assigned
             // locals as live. This defeats the purpose of the analysis for such bindings.
-            StatementKind::FakeRead(box (
+            StatementKind::FakeRead((
                 FakeReadCause::ForLet(None) | FakeReadCause::ForGuardBinding,
                 _,
             )) => return,
             // Handle self-assignment by restricting the read/write they do.
-            StatementKind::Assign(box (ref dest, ref rvalue))
+            StatementKind::Assign((ref dest, ref rvalue))
                 if self.self_assignment.contains(&location) =>
             {
                 if let Rvalue::BinaryOp(
                     BinOp::AddWithOverflow | BinOp::SubWithOverflow | BinOp::MulWithOverflow,
-                    box (_, rhs),
+                    (_, rhs),
                 ) = rvalue
                 {
                     // We are computing the binary operation:
@@ -1321,7 +1326,7 @@ impl<'tcx> Visitor<'tcx> for TransferFunction<'_, 'tcx> {
                         PlaceContext::MutatingUse(MutatingUseContext::Store),
                         location,
                     );
-                } else if let Rvalue::BinaryOp(_, box (_, rhs)) = rvalue {
+                } else if let Rvalue::BinaryOp(_, (_, rhs)) = rvalue {
                     // We are computing the binary operation:
                     // - the LHS is being updated, so we don't read it;
                     // - the RHS still needs to be read.
@@ -1371,7 +1376,7 @@ impl<'tcx> Visitor<'tcx> for TransferFunction<'_, 'tcx> {
             // captures as live in the surrounding function. This allows to report unused variables,
             // even if they have been (uselessly) captured.
             Rvalue::Aggregate(
-                box AggregateKind::Closure(def_id, _) | box AggregateKind::Coroutine(def_id, _),
+                AggregateKind::Closure(def_id, _) | AggregateKind::Coroutine(def_id, _),
                 operands,
             ) => {
                 if let Some(def_id) = def_id.as_local() {

@@ -13,16 +13,8 @@ const EXTERNAL_IGNORES_LIST: &[&str] = &[
     "ignore-gdb-version",
     "ignore-llvm-version",
     "ignore-parallel-frontend",
-<<<<<<< ferrocene/main
-    "ignore-pass",
-
     // Ferrocene addition
     "ignore-qemu",
-
-||||||| c85af1c5ed4
-    "ignore-pass",
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // tidy-alphabetical-end
 ];
 

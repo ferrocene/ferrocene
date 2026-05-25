@@ -1212,7 +1212,6 @@ impl Step for Src {
             &dst_src,
         );
 
-<<<<<<< ferrocene/main
         // Ferrocene addition: We have a different libc location, we need to copy that in:
         copy_src_dirs(
             builder,
@@ -1222,8 +1221,6 @@ impl Step for Src {
             &dst_src,
         );
 
-||||||| c85af1c5ed4
-=======
         // Vendor all Cargo dependencies
         let vendor = builder.ensure(Vendor {
             sync_args: vec![],
@@ -1237,7 +1234,6 @@ impl Step for Src {
         builder.create_dir(&library_cargo_config_dir);
         builder.create(&library_cargo_config_dir.join("config.toml"), &vendor.config_library);
 
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         tarball.generate()
     }
 

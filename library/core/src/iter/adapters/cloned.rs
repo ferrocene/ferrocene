@@ -152,37 +152,6 @@ where
 {
 }
 
-<<<<<<< ferrocene/main
-impl<'a, I, T: 'a> UncheckedIterator for Cloned<I>
-where
-    I: UncheckedIterator<Item = &'a T>,
-    T: Clone,
-{
-    #[ferrocene::prevalidated]
-    unsafe fn next_unchecked(&mut self) -> T {
-        // SAFETY: `Cloned` is 1:1 with the inner iterator, so if the caller promised
-        // that there's an element left, the inner iterator has one too.
-        let item = unsafe { self.it.next_unchecked() };
-        item.clone()
-    }
-}
-
-||||||| c85af1c5ed4
-impl<'a, I, T: 'a> UncheckedIterator for Cloned<I>
-where
-    I: UncheckedIterator<Item = &'a T>,
-    T: Clone,
-{
-    unsafe fn next_unchecked(&mut self) -> T {
-        // SAFETY: `Cloned` is 1:1 with the inner iterator, so if the caller promised
-        // that there's an element left, the inner iterator has one too.
-        let item = unsafe { self.it.next_unchecked() };
-        item.clone()
-    }
-}
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[stable(feature = "default_iters", since = "1.70.0")]
 impl<I: Default> Default for Cloned<I> {
     /// Creates a `Cloned` iterator from the default value of `I`

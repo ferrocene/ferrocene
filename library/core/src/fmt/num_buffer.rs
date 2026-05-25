@@ -34,10 +34,6 @@ impl_NumBufferTrait! {
 
 /// A buffer wrapper of which the internal size is based on the maximum
 /// number of digits the associated integer can have.
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-||||||| c85af1c5ed4
-=======
 ///
 /// # Examples
 ///
@@ -54,7 +50,7 @@ impl_NumBufferTrait! {
 /// let n2 = -1972i32;
 /// assert_eq!(n2.format_into(&mut buf), "-1972");
 /// ```
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#[ferrocene::prevalidated]
 #[unstable(feature = "int_format_into", issue = "138215")]
 pub struct NumBuffer<T: NumBufferTrait> {
     // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.

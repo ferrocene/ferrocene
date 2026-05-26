@@ -64,7 +64,7 @@ pub fn parse_xcoff(data: &[u8]) -> Option<Image> {
     let header = Xcoff::parse(data, &mut offset).ok()?;
     let _ = header.aux_header(data, &mut offset).ok()?;
     let sections = header.sections(data, &mut offset).ok()?;
-    if let Some(section) = sections.iter().find(|s| s.s_name().get(0..5) == b".text") {
+    if let Some(section) = sections.iter().find(|s| s.s_name().get(0..5) == Some(b".text")) {
         Some(Image {
             offset: section.s_scnptr() as usize,
             base: section.s_paddr() as u64,

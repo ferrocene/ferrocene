@@ -132,10 +132,6 @@ impl Step for CertifiedCoreSymbols {
         run.never()
     }
 
-    fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CertifiedCoreSymbols::new(run.builder, run.target));
-    }
-
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         if !builder.config.std_debug_assertions {
             panic!("generating the core symbol report requires `rust.debug-assertions-std=true`");

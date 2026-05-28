@@ -48,3 +48,6 @@ fn main() {}
 
 // ferrocene-annotations: fls_u2mzjgiwbkz0
 // Destructors
+//
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

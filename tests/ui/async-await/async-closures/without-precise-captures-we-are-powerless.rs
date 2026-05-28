@@ -59,3 +59,6 @@ fn through_method<'a>(x: &'a i32) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

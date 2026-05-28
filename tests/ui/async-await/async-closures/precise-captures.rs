@@ -155,3 +155,6 @@ async fn async_main() {
 fn main() {
     block_on::block_on(async_main());
 }
+
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

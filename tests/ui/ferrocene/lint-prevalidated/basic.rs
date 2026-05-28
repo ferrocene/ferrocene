@@ -24,11 +24,14 @@ const fn marked_validated() {}
 
 const fn const_fn() {}
 
-extern "C" { fn extern_fn(); }
+extern "C" {
+    fn extern_fn();
+}
 
 macro_rules! mbe {
-    () => { normal_def() }
-    //[no-dedup]~^ ERROR unvalidated
+    () => {
+        normal_def() //[no-dedup]~ ERROR unvalidated
+    };
 }
 
 struct Ctor;
@@ -131,7 +134,7 @@ fn validated() {
     Unvalidated.inherent_fn(); //~ ERROR unvalidated
     Unvalidated.clone();
     //[no-dedup]~^ ERROR unvalidated
-   Unvalidated::generic_inherent_fn::<usize>(1); //~ ERROR unvalidated
+    Unvalidated::generic_inherent_fn::<usize>(1); //~ ERROR unvalidated
 
     marked_validated(); // ok
 

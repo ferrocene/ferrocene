@@ -1,4 +1,3 @@
-#![crate_type = "bin"]
 #![deny(ferrocene::unvalidated)]
 
 fn normal_def() {}

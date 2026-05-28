@@ -20,7 +20,8 @@ fn has_drop_unreachable() {
 }
 
 #[ferrocene::prevalidated] //~ NOTE marked
-pub fn has_drop_reachable() { //~ NOTE validated
+pub fn has_drop_reachable() {
+    //~^ NOTE validated
     DropGlueOnly(ExplicitDropImpl); //~ NOTE dropped here
 }
 

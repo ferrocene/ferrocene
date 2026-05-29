@@ -24,13 +24,27 @@ pub struct IntoIter<T, const N: usize> {
 
 impl<T, const N: usize> IntoIter<T, N> {
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     fn unsize(&self) -> &InnerUnsized<T> {
+||||||| 62f36da19c6
+    fn unsize(&self) -> &InnerUnsized<T> {
+=======
+    #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+    const fn unsize(&self) -> &InnerUnsized<T> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.inner.deref()
     }
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     fn unsize_mut(&mut self) -> &mut InnerUnsized<T> {
+||||||| 62f36da19c6
+    fn unsize_mut(&mut self) -> &mut InnerUnsized<T> {
+=======
+    #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+    const fn unsize_mut(&mut self) -> &mut InnerUnsized<T> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.inner.deref_mut()
     }
 }
@@ -223,8 +237,15 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// Returns a mutable slice of all elements that have not been yielded yet.
     #[stable(feature = "array_value_iter", since = "1.51.0")]
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
+||||||| 62f36da19c6
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
+=======
+    #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+    pub const fn as_mut_slice(&mut self) -> &mut [T] {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.unsize_mut().as_mut_slice()
     }
 }

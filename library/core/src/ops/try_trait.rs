@@ -419,9 +419,23 @@ impl<T> NeverShortCircuit<T> {
     }
 
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     pub(crate) fn wrap_mut_2<A, B>(mut f: impl FnMut(A, B) -> T) -> impl FnMut(A, B) -> Self {
         move |a, b| NeverShortCircuit(f(a, b))
+||||||| 62f36da19c6
+    pub(crate) fn wrap_mut_2<A, B>(mut f: impl FnMut(A, B) -> T) -> impl FnMut(A, B) -> Self {
+        move |a, b| NeverShortCircuit(f(a, b))
+=======
+    #[rustc_const_unstable(feature = "const_array", issue = "147606")]
+    pub(crate) const fn wrap_mut_2<A, B, F>(
+        mut f: F,
+    ) -> impl [const] FnMut(A, B) -> Self + [const] Destruct
+    where
+        F: [const] FnMut(A, B) -> T + [const] Destruct,
+    {
+        const move |a, b| NeverShortCircuit(f(a, b))
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 }
 

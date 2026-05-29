@@ -9,5 +9,11 @@
 fn foo() {
     panic!();
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: um_rustc_C_panic
+||||||| 62f36da19c6
+=======
+
+// CHECK-NOT: !"uwtable"
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

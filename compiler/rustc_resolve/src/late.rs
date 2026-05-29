@@ -1479,6 +1479,7 @@ impl<'ast, 'ra, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'ra, 'tc
             ty,
             is_placeholder: _,
             default,
+            mut_restriction: _,
             safety: _,
         } = f;
         walk_list!(self, visit_attribute, attrs);
@@ -3937,7 +3938,9 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
             //As we lower target_expr_template body to a body of a function we need a label rib (#148889)
             this.with_label_rib(RibKind::FnOrCoroutine, |this| {
-                this.visit_block(body);
+                this.with_lifetime_rib(LifetimeRibKind::Elided(LifetimeRes::Infer), |this| {
+                    this.visit_block(body);
+                });
             });
         });
     }

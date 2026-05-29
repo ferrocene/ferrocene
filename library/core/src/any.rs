@@ -835,14 +835,8 @@ impl TypeId {
         }
     }
 
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn as_u128(self) -> u128 {
-||||||| 62f36da19c6
-    fn as_u128(self) -> u128 {
-=======
     pub(crate) fn as_u128(self) -> u128 {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         let mut bytes = [0; 16];
 
         // This is a provenance-stripping memcpy.

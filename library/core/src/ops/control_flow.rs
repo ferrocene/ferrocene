@@ -440,18 +440,12 @@ impl<T> ControlFlow<T, T> {
 impl<R: ops::Try> ControlFlow<R, R::Output> {
     /// Creates a `ControlFlow` from any type implementing `Try`.
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub(crate) fn from_try(r: R) -> Self {
-||||||| 62f36da19c6
-    pub(crate) fn from_try(r: R) -> Self {
-=======
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
     pub(crate) const fn from_try(r: R) -> Self
     where
         R: [const] ops::Try,
     {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         match R::branch(r) {
             ControlFlow::Continue(v) => ControlFlow::Continue(v),
             ControlFlow::Break(v) => ControlFlow::Break(R::from_residual(v)),
@@ -460,18 +454,12 @@ impl<R: ops::Try> ControlFlow<R, R::Output> {
 
     /// Converts a `ControlFlow` into any type implementing `Try`.
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub(crate) fn into_try(self) -> R {
-||||||| 62f36da19c6
-    pub(crate) fn into_try(self) -> R {
-=======
     #[rustc_const_unstable(feature = "const_control_flow", issue = "148739")]
     pub(crate) const fn into_try(self) -> R
     where
         R: [const] ops::Try,
     {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         match self {
             ControlFlow::Continue(v) => R::from_output(v),
             ControlFlow::Break(v) => v,

@@ -1410,6 +1410,7 @@
 <T as core::array::SpecArrayClone>::clone
 <T as core::array::equality::SpecArrayEq<Other, N>>::spec_eq
 <T as core::array::equality::SpecArrayEq<Other, N>>::spec_ne
+<T as core::array::iter::iter_inner::SpecPolymorphicIterClone<N>>::spec_clone::clone_into_new
 <T as core::borrow::Borrow<T>>::borrow
 <T as core::borrow::BorrowMut<T>>::borrow_mut
 <T as core::convert::From<T>>::from
@@ -1465,8 +1466,6 @@
 <core::any::TypeId as core::cmp::Eq>::assert_fields_are_eq
 <core::any::TypeId as core::cmp::Ord>::cmp
 <core::any::TypeId as core::cmp::PartialEq>::eq
-<core::any::TypeId as core::cmp::PartialEq>::eq::compiletime
-<core::any::TypeId as core::cmp::PartialEq>::eq::runtime
 <core::any::TypeId as core::cmp::PartialOrd>::partial_cmp
 <core::any::TypeId as core::fmt::Debug>::fmt
 <core::array::Guard<'_, T> as core::ops::drop::Drop>::drop
@@ -1492,7 +1491,6 @@
 <core::array::iter::IntoIter<T, N> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<DATA> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone
-<core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone::clone_into_new
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>]> as core::fmt::Debug>::fmt
 <core::ascii::EscapeDefault as core::clone::Clone>::clone
 <core::ascii::EscapeDefault as core::fmt::Debug>::fmt

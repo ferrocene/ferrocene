@@ -258,15 +258,10 @@ late_lint_methods!(
             CheckTransmutes: CheckTransmutes,
             LifetimeSyntax: LifetimeSyntax,
             InternalEqTraitMethodImpls: InternalEqTraitMethodImpls,
-<<<<<<< ferrocene/main
-
-            // Ferrocene addition
-            LintUnvalidated: LintUnvalidated,
-||||||| 62f36da19c6
-=======
             FuzzyProvenanceCasts: FuzzyProvenanceCasts,
             LossyProvenanceCasts: LossyProvenanceCasts,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+            // Ferrocene addition
+            LintUnvalidated: LintUnvalidated,
         ]
     ]
 );

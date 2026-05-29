@@ -1644,7 +1644,6 @@
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::try_fold
-<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::iter::adapters::copied::Copied<I> as core::clone::Clone>::clone
 <core::iter::adapters::copied::Copied<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1695,7 +1694,6 @@
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::try_fold
-<core::iter::adapters::map::Map<I, F> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::fold
 <core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -3617,7 +3615,6 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
-<core::slice::iter::Iter<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::IterMut<'_, T> as core::default::Default>::default
 <core::slice::iter::IterMut<'_, T> as core::fmt::Debug>::fmt
 <core::slice::iter::IterMut<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
@@ -3638,7 +3635,6 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
-<core::slice::iter::IterMut<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::Windows<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
@@ -5721,7 +5717,6 @@ core::array::equality::<impl core::cmp::PartialEq<[U]> for [T; N]>::ne
 core::array::from_fn
 core::array::from_mut
 core::array::from_ref
-core::array::from_trusted_iterator
 core::array::iter::<impl core::iter::traits::collect::IntoIterator for [T; N]>::into_iter
 core::array::iter::IntoIter::<T, N>::as_mut_slice
 core::array::iter::IntoIter::<T, N>::unsize
@@ -5742,8 +5737,6 @@ core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::Maybe
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::try_rfold
 core::array::try_from_fn
 core::array::try_from_fn_erased
-core::array::try_from_trusted_iterator
-core::array::try_from_trusted_iterator::next
 core::ascii::EscapeDefault::empty
 core::ascii::EscapeDefault::new
 core::ascii::ascii_char::AsciiChar::as_str
@@ -7358,7 +7351,6 @@ core::num::<impl u128>::unchecked_shr::precondition_check
 core::num::<impl u128>::unchecked_shr_exact::precondition_check
 core::num::<impl u128>::unchecked_sub
 core::num::<impl u128>::unchecked_sub::precondition_check
-core::num::<impl u128>::widening_mul
 core::num::<impl u128>::wrapping_add
 core::num::<impl u128>::wrapping_add_signed
 core::num::<impl u128>::wrapping_div
@@ -7431,7 +7423,6 @@ core::num::<impl u16>::unchecked_shr::precondition_check
 core::num::<impl u16>::unchecked_shr_exact::precondition_check
 core::num::<impl u16>::unchecked_sub
 core::num::<impl u16>::unchecked_sub::precondition_check
-core::num::<impl u16>::widening_mul
 core::num::<impl u16>::wrapping_add
 core::num::<impl u16>::wrapping_add_signed
 core::num::<impl u16>::wrapping_div
@@ -7503,7 +7494,6 @@ core::num::<impl u32>::unchecked_shr::precondition_check
 core::num::<impl u32>::unchecked_shr_exact::precondition_check
 core::num::<impl u32>::unchecked_sub
 core::num::<impl u32>::unchecked_sub::precondition_check
-core::num::<impl u32>::widening_mul
 core::num::<impl u32>::wrapping_add
 core::num::<impl u32>::wrapping_add_signed
 core::num::<impl u32>::wrapping_div
@@ -7575,7 +7565,6 @@ core::num::<impl u64>::unchecked_shr::precondition_check
 core::num::<impl u64>::unchecked_shr_exact::precondition_check
 core::num::<impl u64>::unchecked_sub
 core::num::<impl u64>::unchecked_sub::precondition_check
-core::num::<impl u64>::widening_mul
 core::num::<impl u64>::wrapping_add
 core::num::<impl u64>::wrapping_add_signed
 core::num::<impl u64>::wrapping_div
@@ -7657,7 +7646,6 @@ core::num::<impl u8>::unchecked_shr::precondition_check
 core::num::<impl u8>::unchecked_shr_exact::precondition_check
 core::num::<impl u8>::unchecked_sub
 core::num::<impl u8>::unchecked_sub::precondition_check
-core::num::<impl u8>::widening_mul
 core::num::<impl u8>::wrapping_add
 core::num::<impl u8>::wrapping_add_signed
 core::num::<impl u8>::wrapping_div
@@ -7731,7 +7719,6 @@ core::num::<impl usize>::unchecked_shr::precondition_check
 core::num::<impl usize>::unchecked_shr_exact::precondition_check
 core::num::<impl usize>::unchecked_sub
 core::num::<impl usize>::unchecked_sub::precondition_check
-core::num::<impl usize>::widening_mul
 core::num::<impl usize>::wrapping_add
 core::num::<impl usize>::wrapping_add_signed
 core::num::<impl usize>::wrapping_div

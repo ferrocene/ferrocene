@@ -24,7 +24,7 @@ impl Fp {
     /// Returns a correctly rounded product of itself and `other`.
     #[ferrocene::prevalidated]
     pub fn mul(self, other: Self) -> Self {
-        let (lo, hi) = self.f.widening_mul(other.f);
+        let (lo, hi) = self.f.carrying_mul(other.f, 0);
         let f = hi + (lo >> 63) /* round */;
         let e = self.e + other.e + 64;
         Self { f, e }

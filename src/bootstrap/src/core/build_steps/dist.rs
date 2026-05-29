@@ -1221,7 +1221,6 @@ impl Step for Src {
             &[],
             &dst_src,
         );
-
 ||||||| c85af1c5ed4
 =======
         // Vendor all Cargo dependencies
@@ -1236,8 +1235,8 @@ impl Step for Src {
         let library_cargo_config_dir = dst_src.join("library").join(".cargo");
         builder.create_dir(&library_cargo_config_dir);
         builder.create(&library_cargo_config_dir.join("config.toml"), &vendor.config_library);
-
 >>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+
         tarball.generate()
     }
 

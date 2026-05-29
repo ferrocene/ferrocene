@@ -2,7 +2,17 @@
 // submodule into the standard library. We try to set this crate up similarly
 // to the standard library itself to minimize the likelihood of issues when
 // updating the `backtrace` crate.
-#![feature(optimize_attribute)]
+#![cfg_attr(
+    // Only used by the gimli backend, see src/symbolize/mod.rs
+    all(
+        backtrace_in_libstd,
+        feature = "backtrace",
+        any(unix, all(windows, target_env = "gnu")),
+        not(target_vendor = "uwp"),
+        not(target_os = "emscripten"),
+    ),
+    feature(optimize_attribute)
+)]
 #![no_std]
 
 extern crate alloc;

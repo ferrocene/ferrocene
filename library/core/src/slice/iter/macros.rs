@@ -247,7 +247,7 @@ macro_rules! iterator {
                 // SAFETY: We are in bounds. `post_inc_start` does the right thing even for ZSTs.
                 unsafe {
                     self.post_inc_start(n);
-                    Some(self.next_unchecked())
+                    Some(self.post_inc_start(1).$into_ref())
                 }
             }
 
@@ -503,6 +503,7 @@ macro_rules! iterator {
         #[unstable(feature = "trusted_len", issue = "37572")]
         unsafe impl<T> TrustedLen for $name<'_, T> {}
 
+<<<<<<< ferrocene/release/1.97
         impl<'a, T> UncheckedIterator for $name<'a, T> {
             #[inline]
             #[ferrocene::prevalidated]
@@ -514,6 +515,19 @@ macro_rules! iterator {
             }
         }
 
+||||||| c85af1c5ed4
+        impl<'a, T> UncheckedIterator for $name<'a, T> {
+            #[inline]
+            unsafe fn next_unchecked(&mut self) -> $elem {
+                // SAFETY: The caller promised there's at least one more item.
+                unsafe {
+                    self.post_inc_start(1).$into_ref()
+                }
+            }
+        }
+
+=======
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         #[stable(feature = "default_iters", since = "1.70.0")]
         impl<T> Default for $name<'_, T> {
             /// Creates an empty slice iterator.

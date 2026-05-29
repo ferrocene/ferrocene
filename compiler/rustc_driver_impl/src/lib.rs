@@ -714,7 +714,7 @@ fn print_crate_info(
                 let lint_store = crate::unerased_lint_store(sess);
                 let features = rustc_expand::config::features(sess, attrs, crate_name);
                 let registered_tools = rustc_resolve::registered_tools_ast(sess.dcx(), attrs, sess);
-                let lint_levels = rustc_lint::LintLevelsBuilder::crate_root(
+                let builder = rustc_lint::LintLevelsBuilder::crate_root(
                     sess,
                     &features,
                     true,
@@ -729,7 +729,7 @@ fn print_crate_info(
                         // lint is unstable and feature gate isn't active, don't print
                         continue;
                     }
-                    let level = lint_levels.lint_level(lint).level;
+                    let level = builder.lint_level_spec(lint).level();
                     println_info!("{}={}", lint.name_lower(), level.as_str());
                 }
             }

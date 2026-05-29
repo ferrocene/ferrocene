@@ -1587,6 +1587,7 @@ impl<T> SizedTypeProperties for T {}
 #[diagnostic::on_unmatch_args(
     note = "this macro expects a container type and a (nested) field path, like `offset_of!(Type, field)`"
 )]
+#[doc(alias = "memoffset")]
 #[allow_internal_unstable(builtin_syntax, core_intrinsics)]
 pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
     // The `{}` is for better error messages
@@ -1636,6 +1637,7 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 #[rustc_const_unstable(feature = "mem_conjure_zst", issue = "95383")]
 #[ferrocene::prevalidated]
 pub const unsafe fn conjure_zst<T>() -> T {
+<<<<<<< ferrocene/release/1.97
     #[ferrocene::annotation(
         "This assertion only runs in compilation, meaning that it cannot be covered in runtime"
     )]
@@ -1648,6 +1650,21 @@ pub const unsafe fn conjure_zst<T>() -> T {
             name: &str = crate::any::type_name::<T>()
         );
     }
+||||||| c85af1c5ed4
+    const_assert!(
+        size_of::<T>() == 0,
+        "mem::conjure_zst invoked on a non-zero-sized type",
+        "mem::conjure_zst invoked on type {name}, which is not zero-sized",
+        name: &str = crate::any::type_name::<T>()
+    );
+=======
+    const_assert!(
+        T::IS_ZST,
+        "mem::conjure_zst invoked on a non-zero-sized type",
+        "mem::conjure_zst invoked on type {name}, which is not zero-sized",
+        name: &str = crate::any::type_name::<T>()
+    );
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 
     // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,
     // there's nothing in the representation that needs to be set.

@@ -5,7 +5,7 @@
 // You can still use traits as long as the impls use custom types.
 
 //@ build-fail
-//@ compile-flags -Z deduplicate-diagnostics=no
+//@ compile-flags: -Z deduplicate-diagnostics=no
 
 #![crate_type = "lib"]
 #![no_std]

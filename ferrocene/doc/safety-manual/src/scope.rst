@@ -22,6 +22,12 @@ This qualification is restricted to the following environment:
      - Uncertified Libraries
      - Qualified Libraries
 
+   * - :target:`aarch64-unknown-linux-gnu`
+     - :target:`aarch64-rhivos2-linux-gnu`
+     - ``core``
+     - ``alloc``
+     -
+
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
      - ``core``

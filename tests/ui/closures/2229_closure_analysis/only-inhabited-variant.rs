@@ -22,3 +22,6 @@ pub fn main() {
     g();
     assert_eq!(r, Err((1, 2)));
 }
+
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

@@ -62,3 +62,6 @@ fn test2() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

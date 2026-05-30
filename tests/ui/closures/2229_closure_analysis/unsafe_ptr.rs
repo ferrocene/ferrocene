@@ -68,3 +68,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety
+//
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

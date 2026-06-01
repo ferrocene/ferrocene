@@ -145,8 +145,14 @@ impl Step for CertifiedCoreSymbols {
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
         // c.f. check::std
-        let mut cargo =
-            Cargo::new(builder, build_compiler, Mode::Std, SourceType::InTree, target, Kind::Check);
+        let mut cargo = Cargo::new(
+            builder,
+            build_compiler,
+            Mode::Std,
+            SourceType::InTree,
+            target,
+            Kind::SymbolReport,
+        );
         let crates = vec!["core".to_owned()]; // currently, only core is certified
         std_cargo(builder, target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);

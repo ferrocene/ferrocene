@@ -518,6 +518,13 @@ impl Builder<'_> {
                 cargo.arg("miri").arg("test");
                 cargo
             }
+            // Ferrocene addition: If we're running symbol report, use `check`
+            // The `Kind` variant is to bust caching.
+            Kind::SymbolReport => {
+                let mut cargo = command(&self.initial_cargo);
+                cargo.arg("check");
+                cargo
+            }
             _ => {
                 let mut cargo = command(&self.initial_cargo);
                 cargo.arg(cmd_kind.as_str());
@@ -917,6 +924,11 @@ impl Builder<'_> {
         // `rustc_driver` being built. This can cause builds of different version numbers to produce
         // `librustc_driver*.so` artifacts that end up with identical filename hashes.
         metadata.push_str(&self.version);
+
+        // Ferrocene addition: If we're running symbol report, push a str to prevent caching issues
+        if cmd_kind == Kind::SymbolReport {
+            metadata.push_str("symbol-report");
+        }
 
         cargo.env("__CARGO_DEFAULT_LIB_METADATA", &metadata);
 

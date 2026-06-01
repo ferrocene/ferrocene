@@ -155,6 +155,12 @@ add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 
+# use crosstool-ng toolchain
+add --set target.x86_64-unknown-linux-gnu.ar=/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-ar
+add --set target.x86_64-unknown-linux-gnu.cc=/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-gcc
+add --set target.x86_64-unknown-linux-gnu.cxx=/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-g++
+add --set target.x86_64-unknown-linux-gnu.linker=/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-gcc
+
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).
 #

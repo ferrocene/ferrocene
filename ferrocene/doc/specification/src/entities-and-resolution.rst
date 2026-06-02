@@ -1137,7 +1137,7 @@ the :t:`visibility` of the :t:`name` is the most permissive one.
 When a :t:`path segment` expressed as :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` is used to import the current :t:`crate`, the :t:`path segment` shall be subject to a :t:`renaming`.
 
 :dp:`fls_QGdeRTe0H1Uc`
-When :t:`keyword` ``super`` is used to import a parent :t:`module`, the keyword shall be subject to a :t:`renaming`.
+When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the :t:`path segment` shall be subject to a :t:`renaming`.
 
 :dp:`fls_aam34hsRmKU2`
 A :t:`simple path` consisting of namespace qualifier ``::``, followed by a :t:`path segment` expressed as :t:`keyword` ``self``, shall not be used.

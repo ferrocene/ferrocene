@@ -5,7 +5,6 @@
 //@ build-fail
 
 #![crate_type = "lib"]
-#![no_std]
 #![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 struct ExplicitDropImpl;

@@ -1140,7 +1140,7 @@ When a :t:`path segment` expressed as :t:`keyword` ``crate`` or :t:`keyword` ``$
 When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the :t:`path segment` shall be subject to a :t:`renaming`.
 
 :dp:`fls_aam34hsRmKU2`
-A :t:`simple path` consisting of namespace qualifier ``::``, followed by a :t:`path segment` expressed as :t:`keyword` ``self``, shall not be used.
+A :t:`simple path` consisting of namespace qualifier ``::`` followed by a :t:`path segment` expressed as :t:`keyword` ``self`` shall not be used.
 
 :dp:`fls_LV94x3HlpBWk`
 A :t:`simple import` shall not refer to :t:`[enum variant]s` through a :t:`type alias`.

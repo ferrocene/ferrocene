@@ -2989,7 +2989,6 @@ pub const fn type_id<T: ?Sized>() -> crate::any::TypeId;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
-#[ferrocene::annotation("Cannot be covered as this code cannot be reached during runtime.")]
 #[ferrocene::prevalidated]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
     // SAFETY: we know `TypeId` is 16 bytes of initialized data.

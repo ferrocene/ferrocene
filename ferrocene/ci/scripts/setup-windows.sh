@@ -20,8 +20,11 @@ setup_python3() {
     fi
 }
 
-if [[ "${OSTYPE}" != "msys" ]]; then
-    echo "error: the script can only run on Windows (under MSYS)"
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
+if ! isWindows; then
+    echo "error: the script can only run on Windows (under CYGWIN)"
     exit 1
 fi
 
@@ -41,6 +44,6 @@ choco install -y cmake.portable ninja llvm
 choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
 
 # Followed: https://docs.chocolatey.org/en-us/guides/create/recompile-packages/#how-to-internalizerecompile-an-existing-package-manually
-# From: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-mingw-w64-x86_64-arm-none-eabi.msi 
+# From: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-mingw-w64-x86_64-arm-none-eabi.msi
 aws s3 cp s3://ferrocene-ci-mirrors/manual/arm-compiler/gcc-arm-embedded.10.3.1.20251211.nupkg gcc-arm-embedded.10.3.1.20251211.nupkg
 choco install gcc-arm-embedded --version="10.3.1.20251211" --source .

@@ -20,7 +20,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
+if isMacOS; then
     # Darwin's bash does not support RFC2822 on `touch`
     # `%ct` outputs the commit date formatted according UNIX timestamp
     git_log_format="%ct"

@@ -1,0 +1,320 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+
+.. default-domain:: qualification
+
+{% macro no_outcomes_error() %}
+.. error::
+
+   The ``ferrocene.test-outcomes`` setting in ``config.toml`` was not set.
+   The test outcomes won't be populated until you configure it.
+{% endmacro %}
+
+{% macro no_matching_outcomes_warning() %}
+.. warning::
+
+   No matching test outcomes were found for this suite.
+{% endmacro %}
+
+{% macro only_on_hosts(suite) %}
+.. note::
+
+   The {{ suite }} test suite is not tested on :target:`{{ target }}`, as it is
+   not a host platform.
+{% endmacro %}
+
+{% macro unconditional_pass(suite) %}
+The {{ suite }} suite is a pass/fail test suite integrated into the Ferrocene
+CI infrastructure.
+
+The {{ suite }} test suite is verified as part of
+:ref:`qualification-plan:ci-phase-full`. As indicated in
+:doc:`qualification-plan:development`, a PR is merged into the repository only
+when it passes full testing.
+
+As a result, the {{ suite }} test suite reports a **pass** for this
+qualification.
+{% endmacro %}
+
+{% macro render_variant(variant) -%}
+    {%- if variant.fields -%}
+        {%- for key, value in variant.fields.items() -%}
+            {% if not loop.first %} , {% endif -%}{{ key }}: {{ value }}
+        {%- endfor -%}
+    {%- else -%}
+        .. rst-class:: align-center
+
+        \-
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% else %}
+{% set invocations = platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) | list %}
+{% if invocations %}
+.. list-table::
+   :header-rows: 1
+
+   * - Crate name
+     - :ref:`Variant <qualification-plan:test-variants>`
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+
+   * - {% if invocation.kind.crates -%}
+           {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
+       {%- else -%}
+           N/A
+       {%- endif %}
+
+     - {{ render_variant(invocation.variant) }}
+
+       .. rst-class:: align-right
+     - {{ invocation.passed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.ignored_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
+:target:`{{ target }}` {% if upcoming %} :upcoming:`{{ upcoming }}` {% endif %}
+{{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
+
+This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
+|rust_version|) in the following environment:
+
+.. list-table::
+   :header-rows: 1
+
+   * -
+     - Target name
+     - Target tuple
+
+   * - Host platform:
+     - :target:`{{ host }}`
+     - ``{{ host }}``
+
+   * - Compilation target:
+     - :target:`{{ target }}`
+     - ``{{ target }}``
+
+   {% if bare_metal_test_target %}
+   * - :ref:`Bare metal testing <qualification-plan:bare-metal-testing>` target:
+     - :target:`{{ target }}`
+     - ``{{ bare_metal_test_target }}``
+   {% endif %}
+
+Test results
+============
+
+The following are the results of the Ferrocene test suites. For further
+details of each test suite, refer to
+:doc:`Evaluation Report : Qualification Method <evaluation-report:rustc/method>`.
+
+Compiletest Test Suite
+----------------------
+
+**Test suite:** :id:`RUSTC_TS1_COMP`
+
+The following compiletest suites were executed as part of this test suite:
+
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% else %}
+{% set invocations = platform_outcomes.filter_invocations("bootstrap::core::build_steps::test::Compiletest") | list %}
+{% if invocations %}
+.. list-table::
+   :header-rows: 1
+
+   * - Compiletest suite
+     - :ref:`Variant <qualification-plan:test-variants>`
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+   * - ``{{ invocation.kind.suite }}`` {% if invocation.kind.mode is not none %} (mode: ``{{ invocation.kind.mode }}``){% endif %}
+
+     - {{ render_variant(invocation.variant) }}
+
+       .. rst-class:: align-right
+     - {{ invocation.passed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.ignored_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
+{% endif %}
+
+{% if host != target %}
+.. note::
+
+   The following test suites are not executed on :target:`{{ target }}`, as it
+   is not a host platform:
+
+   .. list-table::
+      :header-rows: 1
+
+      * - Test suite
+        - Purpose
+      * - ``Pretty``
+        - Tests the compiler's pretty printing.
+      * - ``RunMakeFullDeps``, ``UiFullDeps``
+        - Tests the compiler binary's invocation.
+      * - ``Rustdoc``, ``RustdocJson``, ``RustdocUi``
+        - Tests the documentation generator.
+{% endif %}
+
+{% if remote_testing %}
+.. note::
+
+   The following test suites are not executed on :target:`{{ target }}` as they
+   require the tests to be executed on the CI machine, while we execute the
+   tests in a remote machine:
+
+   .. list-table::
+      :header-rows: 1
+
+      * - Test suite
+        - Purpose
+      * - ``Debuginfo``
+        - Tests the interactions of debuggers with the compiled program.
+{% endif %}
+
+Library Test Suite
+------------------
+
+**Test suite:** :id:`RUSTC_TS2_LIBR`
+
+.. FIXME: due to how the bootstrap code works, we're forced to match only the
+   root node, otherwise we'd also match other tests invoking Crate down their
+   dependency chain.
+
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
+
+{% if bare_metal_test_target %}
+.. note::
+
+   The ``std`` crate is not tested on :target:`{{ target }}` because it is not
+   available on bare metal targets.
+{% endif %}
+
+Compiler Test Suite
+-------------------
+
+**Test suite:** :id:`RUSTC_TS3_CRAT`
+
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
+{% else %}
+{{ only_on_hosts("compiler") }}
+{% endif %}
+
+Linkchecker Test Suite
+----------------------
+
+**Test suite:** :id:`RUSTC_TS4_LINK`
+
+{% if host == target %}
+{{ unconditional_pass("linkchecker") }}
+{% else %}
+{{ only_on_hosts("linkchecker") }}
+{% endif %}
+
+Build System Test Suite
+-----------------------
+
+**Test suite:** :id:`RUSTC_TS6_BSYS`
+
+
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Bootstrap") }}
+{% else %}
+{{ only_on_hosts("build system") }}
+{% endif %}
+
+Tidy Test Suite
+---------------
+
+**Test suite:** :id:`RUSTC_TS7_TIDY`
+
+{% if host == target %}
+{{ unconditional_pass("tidy") }}
+{% else %}
+{{ only_on_hosts("tidy") }}
+{% endif %}
+
+Self-Test Test Suite
+--------------------
+
+**Test suite:** :id:`RUSTC_TS8_SELF`
+
+{% if host == target %}
+{{ unconditional_pass("self-test") }}
+{% else %}
+{{ only_on_hosts("self-test") }}
+{% endif %}
+
+Ignored Tests
+=============
+
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% elif platform_outcomes.ignored_tests %}
+The following table presents the {{ platform_outcomes.ignored_tests|length }}
+tests that were ignored by our infrastructure for :target:`{{ target }}`, along
+with the reason as to why they were ignored.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Test name
+     - Ignore reason
+   {% for test in platform_outcomes.ignored_tests %}
+   * - ``{{ test.name }}``
+     - {% if test.reason %}{{ test.reason }}{% else %}*No reason provided.*{% endif %}
+   {% endfor %}
+{% else %}
+No tests were ignored by our infrastructure for :target:`{{ target }}`.
+{% endif %}
+
+{% if platform_outcomes.ignored_doc_tests %}
+.. note::
+
+   The {{ platform_outcomes.ignored_doc_tests|length }} ignored documentation
+   tests are **not** included here.
+
+   Rust's documentation and testing tooling considers all snippets of code in
+   the generated documentation to be a test by default, and snippets that are
+   not meant to be valid Rust code (or Rust code at all) would cause test
+   failures if not ignored explicitly.
+
+   Because of that, we don't consider ignored documentation tests to be valid
+   tests that were skipped by our testing infrastructure: we consider them not
+   to be tests at all.
+{% endif %}

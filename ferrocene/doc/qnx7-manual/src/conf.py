@@ -1,15 +1,21 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+import os
+import sys
+
+sys.path.append(os.path.abspath("../exts"))
+
 project = "Ferrocene User Manual"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
 extensions = [
     "ferrocene_autoglossary",
-    "ferrocene_domain_cli",
-    "ferrocene_qualification",
     "ferrocene_toctrees",
+    "ferrocene_qualification",
+    "ferrocene_test_outcomes",
+    "ferrocene_domain_cli",
     "myst_parser",
     "sphinx.ext.autosectionlabel",
 ]
@@ -17,7 +23,7 @@ extensions = [
 # autosectionlabel unique names settings
 autosectionlabel_prefix_document = True
 
-ferrocene_id = "UM"
+ferrocene_id = "QM"
 
 html_theme = "ferrocene"
 html_title = "QNX7 Manual"

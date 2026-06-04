@@ -21,6 +21,15 @@ QNX7 Manual
    targets/aarch64-unknown-nto-qnx710
    targets/x86_64-pc-nto-qnx710
 
+.. toctree::
+   :caption: rustc test results:
+   :numbered:
+   :maxdepth: 2
+
+   rustc/index
+   rustc/aarch64-unknown-nto-qnx710
+   rustc/x86_64-pc-nto-qnx710
+
 Indices and tables
 ------------------
 

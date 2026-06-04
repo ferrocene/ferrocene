@@ -36,7 +36,7 @@ pub fn svdup_n_f32(op: f32) -> svfloat32_t {
     unsafe { _svdup_n_f32(op) }
 }
 
-// CHECK-LABEL: define { <vscale x 4 x float>, <vscale x 4 x float> } @svcreate2_f32(
+// CHECK-LABEL: define{{( dso_local)?}} { <vscale x 4 x float>, <vscale x 4 x float> } @svcreate2_f32(
 // CHECK-SAME: <vscale x 4 x float> %x0, <vscale x 4 x float> %x1)
 #[no_mangle]
 #[target_feature(enable = "sve")]
@@ -46,7 +46,7 @@ pub fn svcreate2_f32(x0: svfloat32_t, x1: svfloat32_t) -> svfloat32x2_t {
     unsafe { std::intrinsics::simd::scalable::sve_tuple_create2(x0, x1) }
 }
 
-// CHECK-LABEL: define { <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float> } @svcreate3_f32(
+// CHECK-LABEL: define{{( dso_local)?}} { <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float> } @svcreate3_f32(
 // CHECK-SAME: <vscale x 4 x float> %x0, <vscale x 4 x float> %x1, <vscale x 4 x float> %x2)
 #[no_mangle]
 #[target_feature(enable = "sve")]
@@ -57,7 +57,7 @@ pub fn svcreate3_f32(x0: svfloat32_t, x1: svfloat32_t, x2: svfloat32_t) -> svflo
     unsafe { std::intrinsics::simd::scalable::sve_tuple_create3(x0, x1, x2) }
 }
 
-// CHECK-LABEL: define { <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float> } @svcreate4_f32(
+// CHECK-LABEL: define{{( dso_local)?}} { <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x float> } @svcreate4_f32(
 // CHECK-SAME: <vscale x 4 x float> %x0, <vscale x 4 x float> %x1, <vscale x 4 x float> %x2, <vscale x 4 x float> %x3)
 #[no_mangle]
 #[target_feature(enable = "sve")]
@@ -74,7 +74,7 @@ pub fn svcreate4_f32(
     unsafe { std::intrinsics::simd::scalable::sve_tuple_create4(x0, x1, x2, x3) }
 }
 
-// CHECK-LABEL: define <vscale x 4 x float> @svget2_f32(
+// CHECK-LABEL: define{{( dso_local)?}} <vscale x 4 x float> @svget2_f32(
 // CHECK-SAME: { <vscale x 4 x float>, <vscale x 4 x float> } %tup)
 #[no_mangle]
 #[target_feature(enable = "sve")]
@@ -83,7 +83,7 @@ pub fn svget2_f32(tup: svfloat32x2_t) -> svfloat32_t {
     unsafe { std::intrinsics::simd::scalable::sve_tuple_get::<_, _, 0>(tup) }
 }
 
-// CHECK-LABEL: define { <vscale x 4 x float>, <vscale x 4 x float> } @svset2_f32(
+// CHECK-LABEL: define{{( dso_local)?}} { <vscale x 4 x float>, <vscale x 4 x float> } @svset2_f32(
 // CHECK-SAME: { <vscale x 4 x float>, <vscale x 4 x float> } %tup, <vscale x 4 x float> %x)
 #[no_mangle]
 #[target_feature(enable = "sve")]

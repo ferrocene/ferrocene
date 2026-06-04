@@ -198,6 +198,9 @@ late_lint_methods!(
     [
         BuiltinCombinedModuleLateLintPass,
         [
+            // Ferrocene addition
+            LintUnvalidated: LintUnvalidated,
+
             ForLoopsOverFallibles: ForLoopsOverFallibles,
             DefaultCouldBeDerived: DefaultCouldBeDerived,
             DerefIntoDynSupertrait: DerefIntoDynSupertrait,
@@ -260,8 +263,6 @@ late_lint_methods!(
             InternalEqTraitMethodImpls: InternalEqTraitMethodImpls,
             FuzzyProvenanceCasts: FuzzyProvenanceCasts,
             LossyProvenanceCasts: LossyProvenanceCasts,
-            // Ferrocene addition
-            LintUnvalidated: LintUnvalidated,
         ]
     ]
 );

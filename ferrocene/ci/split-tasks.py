@@ -104,9 +104,7 @@ JOBS_DEFINITION: JobsDefinition = {
             # needs to be verified. To avoid wasting resources, run it in the
             # docs builder along with the rest of the steps that build docs.
             "ferrocene-check-document-signatures",
-            # Following two names refer to the same bootstrap step, but both
-            # have to be added for it to be properly excluded.
-            "certified-core-symbols",
+            # The core symbol report requires building the core library, which takes a while to build
             "ferrocene/doc/symbol-report.csv",
         ],
 

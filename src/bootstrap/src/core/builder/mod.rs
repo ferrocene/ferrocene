@@ -670,7 +670,8 @@ pub enum Kind {
     Setup,
     Vendor,
     Perf,
-    Sign, // for Ferrocene
+    Sign,         // for Ferrocene
+    SymbolReport, // for Ferrocene
 }
 
 impl Kind {
@@ -694,7 +695,8 @@ impl Kind {
             Kind::Setup => "setup",
             Kind::Vendor => "vendor",
             Kind::Perf => "perf",
-            Kind::Sign => "sign", // for Ferrocene
+            Kind::Sign => "sign",                  // for Ferrocene
+            Kind::SymbolReport => "symbol_report", // for Ferrocene
         }
     }
 
@@ -1121,6 +1123,8 @@ impl<'a> Builder<'a> {
             // special-cased in Build::build()
             Kind::Format | Kind::Perf => vec![],
             Kind::MiriTest | Kind::MiriSetup => unreachable!(),
+            // Ferrocene addition
+            Kind::SymbolReport => unreachable!(),
         }
     }
 

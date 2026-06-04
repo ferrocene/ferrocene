@@ -8,7 +8,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ "${OSTYPE}" != "msys" ]]; then
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
+if ! isWindows; then
     echo "build directory size:"
     du -sh build/*/* | sort -hr
 fi

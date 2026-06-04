@@ -1720,7 +1720,12 @@ impl<T, E> Result<T, E> {
     #[track_caller]
     #[stable(feature = "option_result_unwrap_unchecked", since = "1.58.0")]
     #[ferrocene::prevalidated]
-    pub unsafe fn unwrap_err_unchecked(self) -> E {
+    #[rustc_const_unstable(feature = "const_result_unwrap_unchecked", issue = "148714")]
+    pub const unsafe fn unwrap_err_unchecked(self) -> E
+    where
+        T: [const] Destruct,
+        E: [const] Destruct,
+    {
         match self {
             #[ferrocene::annotation(
                 "This line cannot be covered as reaching `unreachable_unchecked` is undefined behavior"

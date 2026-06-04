@@ -161,7 +161,7 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "min-llvm-version",
     "min-system-llvm-version",
     "minicore-compile-flags",
-    "needs-asm-mnemonic",
+    "needs-asm-ret",
     "needs-asm-support",
     "needs-backends",
     "needs-crate-type",

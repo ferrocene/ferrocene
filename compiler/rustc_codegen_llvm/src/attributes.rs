@@ -5,7 +5,7 @@ use rustc_hir::find_attr;
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs, TargetFeature,
 };
-use rustc_middle::ty::{self, TyCtxt};
+use rustc_middle::ty::{self, Instance, TyCtxt};
 use rustc_session::config::{BranchProtection, FunctionReturn, OptLevel, PAuthKey, PacRet};
 use rustc_span::sym;
 use rustc_symbol_mangling::mangle_internal_symbol;
@@ -42,22 +42,31 @@ pub(crate) fn remove_string_attr_from_llfn(llfn: &Value, name: &str) {
 
 /// Get LLVM attribute for the provided inline heuristic.
 #[inline]
-fn inline_attr<'ll>(
+pub(crate) fn inline_attr<'tcx, 'll>(
     cx: &SimpleCx<'ll>,
-    sess: &Session,
-    inline: InlineAttr,
+    tcx: TyCtxt<'tcx>,
+    instance: Instance<'tcx>,
+    codegen_fn_attrs: &CodegenFnAttrs,
 ) -> Option<&'ll Attribute> {
-    if !sess.opts.unstable_opts.inline_llvm {
+    if !tcx.sess.opts.unstable_opts.inline_llvm {
         // disable LLVM inlining
         return Some(AttributeKind::NoInline.create_attr(cx.llcx));
     }
+
+    // `optnone` requires `noinline`
+    let inline = match (codegen_fn_attrs.inline, &codegen_fn_attrs.optimize) {
+        (_, OptimizeAttr::DoNotOptimize) => InlineAttr::Never,
+        (InlineAttr::None, _) if instance.def.requires_inline(tcx) => InlineAttr::Hint,
+        (inline, _) => inline,
+    };
+
     match inline {
         InlineAttr::Hint => Some(AttributeKind::InlineHint.create_attr(cx.llcx)),
         InlineAttr::Always | InlineAttr::Force { .. } => {
             Some(AttributeKind::AlwaysInline.create_attr(cx.llcx))
         }
         InlineAttr::Never => {
-            if sess.target.arch != Arch::AmdGpu {
+            if tcx.sess.target.arch != Arch::AmdGpu {
                 Some(AttributeKind::NoInline.create_attr(cx.llcx))
             } else {
                 None
@@ -156,14 +165,13 @@ pub(crate) fn uwtable_attr(llcx: &llvm::Context, use_sync_unwind: Option<bool>) 
     // NOTE: We should determine if we even need async unwind tables, as they
     // take have more overhead and if we can use sync unwind tables we
     // probably should.
+    //
+    // Similar logic exists for the per-module uwtable annotation in `context.rs`.
     let async_unwind = !use_sync_unwind.unwrap_or(false);
     llvm::CreateUWTableAttr(llcx, async_unwind)
 }
 
-pub(crate) fn frame_pointer_type_attr<'ll>(
-    cx: &SimpleCx<'ll>,
-    sess: &Session,
-) -> Option<&'ll Attribute> {
+pub(crate) fn frame_pointer(sess: &Session) -> FramePointer {
     let mut fp = sess.target.frame_pointer;
     let opts = &sess.opts;
     // "mcount" function relies on stack pointer.
@@ -172,6 +180,14 @@ pub(crate) fn frame_pointer_type_attr<'ll>(
         fp.ratchet(FramePointer::Always);
     }
     fp.ratchet(opts.cg.force_frame_pointers);
+    fp
+}
+
+pub(crate) fn frame_pointer_type_attr<'ll>(
+    cx: &SimpleCx<'ll>,
+    sess: &Session,
+) -> Option<&'ll Attribute> {
+    let fp = frame_pointer(sess);
     let attr_value = match fp {
         FramePointer::Always => "all",
         FramePointer::NonLeaf => "non-leaf",
@@ -412,14 +428,7 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
     }
 
     if let Some(instance) = instance {
-        // `optnone` requires `noinline`
-        let inline = match (codegen_fn_attrs.inline, &codegen_fn_attrs.optimize) {
-            (_, OptimizeAttr::DoNotOptimize) => InlineAttr::Never,
-            (InlineAttr::None, _) if instance.def.requires_inline(tcx) => InlineAttr::Hint,
-            (inline, _) => inline,
-        };
-
-        to_add.extend(inline_attr(cx, sess, inline));
+        to_add.extend(inline_attr(cx, tcx, instance, codegen_fn_attrs));
     }
 
     if sess.must_emit_unwind_tables() {

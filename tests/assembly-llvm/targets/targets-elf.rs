@@ -835,6 +835,9 @@
 //@ revisions: thumbv7em_ferrocene_facade_eabi
 //@ [thumbv7em_ferrocene_facade_eabi] compile-flags: --target thumbv7em-ferrocene.facade-eabi
 //@ [thumbv7em_ferrocene_facade_eabi] needs-llvm-components: arm
+//@ revisions: armv7r_ferrocene_facade_eabihf
+//@ [armv7r_ferrocene_facade_eabihf] compile-flags: --target armv7r-ferrocene.facade-eabihf
+//@ [armv7r_ferrocene_facade_eabihf] needs-llvm-components: arm
 //@ revisions: thumbv7em_ferrocene_facade_eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] compile-flags: --target thumbv7em-ferrocene.facade-eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] needs-llvm-components: arm

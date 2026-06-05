@@ -44,7 +44,7 @@ reason = "<assert.h> is not available for inclusion on this platform"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710"]
+targets = ["armv7r-ferrocene.facade-eabihf", "aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710"]
 reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
 
 [["tests/run-make"]]
@@ -66,7 +66,7 @@ tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation behaves differently when spawning processes fails"
 
 [["tests/ui"]]
@@ -89,7 +89,7 @@ tests = [
     "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
     "tests/ui/test-attrs/test-panic-abort.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
 [["tests/debuginfo"]]
@@ -111,7 +111,7 @@ reason = "Running these tests require changes to bootstrap"
 tests = [
     "tests/ui/alloc-error/alloc-error-backtrace.rs"
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "These targets cannot unwind"
 
 [["tests/ui"]]
@@ -165,3 +165,10 @@ tests = [
 ]
 targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
 reason = "This tests the interoperabilty an unstable feature of the rust compiler (enabling PAC) with newer C compilers (‘-mbranch-protection=’)."
+
+[["tests/codegen-llvm"]]
+tests = [
+    "tests/codegen-llvm/force-frame-pointers.rs",
+]
+targets = ["armv7r-ferrocene.facade-eabihf"]
+reason = "TODO: ignore only the NonLeaf case using a directive"

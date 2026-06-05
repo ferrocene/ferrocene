@@ -277,7 +277,13 @@ fn check_that_qemu_cpu_was_set() {
             assert_eq!("cortex-a53", qemu_cpu);
         }
     } else if cfg!(target_arch = "arm") {
-        assert_eq!("cortex-m4", qemu_cpu);
+        if cfg!(target_feature = "mclass") {
+            assert_eq!("cortex-m4", qemu_cpu);
+        } else if cfg!(target_feature = "rclass") {
+            assert_eq!("cortex-r5f", qemu_cpu);
+        } else {
+            panic!("extend this logic")
+        }
     } else {
         panic!("extend this logic")
     }

@@ -108,6 +108,12 @@ qualified upon request.
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
+   * - :ref:`armv7r-none-eabihf`
+     - ``armv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
    * - :ref:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
      - Cross-compilation
@@ -209,12 +215,6 @@ Supported targets can often be qualified or quality managed upon request.
      - ``aarch64-unknown-linux-musl``
      - Cross-compilation
      - Full
-     - \-
-
-   * - :target:`armv7r-none-eabihf`
-     - ``armv7r-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
      - \-
 
    * - :target:`armv8r-none-eabihf`

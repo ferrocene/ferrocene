@@ -3188,7 +3188,7 @@ impl str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl const AsRef<[u8]> for str {
+const impl AsRef<[u8]> for str {
     #[inline]
     #[ferrocene::prevalidated]
     fn as_ref(&self) -> &[u8] {
@@ -3198,7 +3198,7 @@ impl const AsRef<[u8]> for str {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl const Default for &str {
+const impl Default for &str {
     /// Creates an empty str
     #[inline]
     #[ferrocene::prevalidated]
@@ -3209,7 +3209,7 @@ impl const Default for &str {
 
 #[stable(feature = "default_mut_str", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl const Default for &mut str {
+const impl Default for &mut str {
     /// Creates an empty mutable str
     #[inline]
     fn default() -> Self {

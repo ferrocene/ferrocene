@@ -209,7 +209,7 @@ pub const trait BorrowMut<Borrowed: ?Sized>: [const] Borrow<Borrowed> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T: ?Sized> const Borrow<T> for T {
+const impl<T: ?Sized> Borrow<T> for T {
     #[rustc_diagnostic_item = "noop_method_borrow"]
     #[ferrocene::prevalidated]
     fn borrow(&self) -> &T {
@@ -219,8 +219,14 @@ impl<T: ?Sized> const Borrow<T> for T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+<<<<<<< ferrocene/main
 impl<T: ?Sized> const BorrowMut<T> for T {
     #[ferrocene::prevalidated]
+||||||| b5d1746e7d2
+impl<T: ?Sized> const BorrowMut<T> for T {
+=======
+const impl<T: ?Sized> BorrowMut<T> for T {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn borrow_mut(&mut self) -> &mut T {
         self
     }
@@ -228,8 +234,14 @@ impl<T: ?Sized> const BorrowMut<T> for T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+<<<<<<< ferrocene/main
 impl<T: ?Sized> const Borrow<T> for &T {
     #[ferrocene::prevalidated]
+||||||| b5d1746e7d2
+impl<T: ?Sized> const Borrow<T> for &T {
+=======
+const impl<T: ?Sized> Borrow<T> for &T {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn borrow(&self) -> &T {
         self
     }
@@ -237,8 +249,14 @@ impl<T: ?Sized> const Borrow<T> for &T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+<<<<<<< ferrocene/main
 impl<T: ?Sized> const Borrow<T> for &mut T {
     #[ferrocene::prevalidated]
+||||||| b5d1746e7d2
+impl<T: ?Sized> const Borrow<T> for &mut T {
+=======
+const impl<T: ?Sized> Borrow<T> for &mut T {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn borrow(&self) -> &T {
         self
     }
@@ -246,8 +264,14 @@ impl<T: ?Sized> const Borrow<T> for &mut T {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+<<<<<<< ferrocene/main
 impl<T: ?Sized> const BorrowMut<T> for &mut T {
     #[ferrocene::prevalidated]
+||||||| b5d1746e7d2
+impl<T: ?Sized> const BorrowMut<T> for &mut T {
+=======
+const impl<T: ?Sized> BorrowMut<T> for &mut T {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn borrow_mut(&mut self) -> &mut T {
         self
     }

@@ -246,6 +246,7 @@
 #![allow(unused_lifetimes)]
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
+#![deny(lossy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(rustdoc::redundant_explicit_links)]
 #![warn(rustdoc::unescaped_backticks)]
@@ -289,6 +290,8 @@
 #![feature(f16)]
 #![feature(f128)]
 #![feature(ffi_const)]
+#![feature(gpu_offload)]
+#![feature(impl_restriction)]
 #![feature(intra_doc_pointers)]
 #![feature(lang_items)]
 #![feature(link_cfg)]
@@ -353,6 +356,7 @@
 #![feature(io_error_inprogress)]
 #![feature(io_error_more)]
 #![feature(io_error_uncategorized)]
+#![feature(io_slice_as_bytes)]
 #![feature(ip)]
 #![feature(iter_advance_by)]
 #![feature(iter_next_chunk)]
@@ -365,6 +369,7 @@
 #![feature(pointer_is_aligned_to)]
 #![feature(portable_simd)]
 #![feature(ptr_as_uninit)]
+#![feature(ptr_cast_slice)]
 #![feature(ptr_mask)]
 #![feature(random)]
 #![feature(raw_os_error_ty)]
@@ -664,6 +669,12 @@ pub mod autodiff {
     pub use core::autodiff::{autodiff_forward, autodiff_reverse};
 }
 
+#[unstable(feature = "gpu_offload", issue = "131513")]
+#[doc = include_str!("../../core/src/offload.md")]
+pub mod offload {
+    pub use core::offload::{offload, offload_kernel};
+}
+
 #[stable(feature = "futures_api", since = "1.36.0")]
 pub mod task {
     //! Types and Traits for working with asynchronous tasks.
@@ -716,8 +727,22 @@ pub mod alloc;
 // Private support modules
 mod panicking;
 
+<<<<<<< ferrocene/main
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
 #[allow(dead_code, unused_attributes, fuzzy_provenance_casts, unsafe_op_in_unsafe_fn)]
+||||||| b5d1746e7d2
+#[path = "../../backtrace/src/lib.rs"]
+#[allow(dead_code, unused_attributes, fuzzy_provenance_casts, unsafe_op_in_unsafe_fn)]
+=======
+#[path = "../../backtrace/src/lib.rs"]
+#[allow(
+    dead_code,
+    unused_attributes,
+    fuzzy_provenance_casts,
+    lossy_provenance_casts,
+    unsafe_op_in_unsafe_fn
+)]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 mod backtrace_rs;
 
 #[stable(feature = "cfg_select", since = "1.95.0")]
@@ -779,6 +804,8 @@ include!("keyword_docs.rs");
 #[unstable(feature = "restricted_std", issue = "none")]
 mod __restricted_std_workaround {}
 
+// FIXME(jhpratt) This is currently only used by portable SIMD. Once rust-lang/portable-simd#529 is
+// merged, this should be able to be removed.
 mod sealed {
     /// This trait being unreachable from outside the crate
     /// prevents outside implementations of our extension traits.

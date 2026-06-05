@@ -89,7 +89,7 @@ macro_rules! sh_impl_signed {
     ($t:ident, $f:ident) => {
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Shl<$f> for Wrapping<$t> {
+        const impl Shl<$f> for Wrapping<$t> {
             type Output = Wrapping<$t>;
 
             #[inline]
@@ -108,7 +108,7 @@ macro_rules! sh_impl_signed {
 
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const ShlAssign<$f> for Wrapping<$t> {
+        const impl ShlAssign<$f> for Wrapping<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
@@ -121,7 +121,7 @@ macro_rules! sh_impl_signed {
 
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Shr<$f> for Wrapping<$t> {
+        const impl Shr<$f> for Wrapping<$t> {
             type Output = Wrapping<$t>;
 
             #[inline]
@@ -140,7 +140,7 @@ macro_rules! sh_impl_signed {
 
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const ShrAssign<$f> for Wrapping<$t> {
+        const impl ShrAssign<$f> for Wrapping<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {
@@ -157,7 +157,7 @@ macro_rules! sh_impl_unsigned {
     ($t:ident, $f:ident) => {
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Shl<$f> for Wrapping<$t> {
+        const impl Shl<$f> for Wrapping<$t> {
             type Output = Wrapping<$t>;
 
             #[inline]
@@ -172,7 +172,7 @@ macro_rules! sh_impl_unsigned {
 
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const ShlAssign<$f> for Wrapping<$t> {
+        const impl ShlAssign<$f> for Wrapping<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn shl_assign(&mut self, other: $f) {
@@ -185,7 +185,7 @@ macro_rules! sh_impl_unsigned {
 
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Shr<$f> for Wrapping<$t> {
+        const impl Shr<$f> for Wrapping<$t> {
             type Output = Wrapping<$t>;
 
             #[inline]
@@ -200,7 +200,7 @@ macro_rules! sh_impl_unsigned {
 
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const ShrAssign<$f> for Wrapping<$t> {
+        const impl ShrAssign<$f> for Wrapping<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn shr_assign(&mut self, other: $f) {

@@ -78,6 +78,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     ("core/primitive.slice.html", &["#method.to_ascii_uppercase", "#method.to_ascii_lowercase",
                                     "core/slice::sort_by_key", "core\\slice::sort_by_key",
                                     "#method.sort_by_cached_key"]),
+<<<<<<< ferrocene/main
     // Ferrocene-specific:
     //
     // The technical report is missing most of the time, as it's only included in stable releases.
@@ -88,6 +89,23 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // the certified API docs.
     ("certification/api-docs/help.html", &["certification/api-docs/index.html"]),
     ("certification/api-docs/settings.html", &["certification/api-docs/index.html"]),
+||||||| b5d1746e7d2
+=======
+    ("core/io/struct.IoSlice.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "core/io/slice::sort_by_key",
+        "core\\io\\slice::sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
+    ("core/io/struct.IoSliceMut.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "core/io/slice::sort_by_key",
+        "core\\io\\slice::sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 ];
 
 #[rustfmt::skip]

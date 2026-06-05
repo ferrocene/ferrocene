@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ assembly-output: ptx-linker
 //@ compile-flags: --crate-type cdylib -C link-arg=--arch=sm_60
 //@ only-nvptx64

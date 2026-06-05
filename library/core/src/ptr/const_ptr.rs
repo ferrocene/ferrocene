@@ -188,7 +188,12 @@ impl<T: PointeeSized> *const T {
     /// [`with_exposed_provenance`]: with_exposed_provenance
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b5d1746e7d2
+=======
+    #[expect(lossy_provenance_casts, reason = "this *is* the replacement")]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -1425,11 +1430,11 @@ impl<T> *const T {
     ///
     /// ```rust
     /// #![feature(ptr_cast_slice)]
+    ///
     /// // create a slice pointer when starting out with a pointer to the first element
     /// let x = [5, 6, 7];
-    /// let raw_pointer = x.as_ptr();
-    /// let slice = raw_pointer.cast_slice(3);
-    /// assert_eq!(unsafe { &*slice }[2], 7);
+    /// let raw_slice = x.as_ptr().cast_slice(3);
+    /// assert_eq!(unsafe { &*raw_slice }[2], 7);
     /// ```
     ///
     /// You must ensure that the pointer is valid and not null before dereferencing

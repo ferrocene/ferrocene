@@ -9,6 +9,7 @@
 //@ [NonLeaf] ignore-x86_64-apple-darwin
 //@ [NonLeaf] ignore-windows-gnu
 //@ [NonLeaf] ignore-thumb
+//@ [NonLeaf] ignore-armv7r (ferrocene addition) not supported by this architecture
 // result is platform-dependent based on platform's frame pointer settings
 
 #![crate_type = "lib"]

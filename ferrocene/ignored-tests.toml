@@ -165,10 +165,3 @@ tests = [
 ]
 targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
 reason = "This tests the interoperabilty an unstable feature of the rust compiler (enabling PAC) with newer C compilers (‘-mbranch-protection=’)."
-
-[["tests/codegen-llvm"]]
-tests = [
-    "tests/codegen-llvm/force-frame-pointers.rs",
-]
-targets = ["armv7r-ferrocene.facade-eabihf"]
-reason = "TODO: ignore only the NonLeaf case using a directive"

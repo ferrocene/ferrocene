@@ -253,6 +253,12 @@ pub(crate) fn prepare_conditions(config: &Config) -> PreparedConditions {
         config.target.contains("ferrocene.facade"),
         "when the target is part of the Ferrocene facade target family",
     );
+    // ferrocene addition
+    builder.cond(
+        "armv7r",
+        config.target.starts_with("armv7r-") || config.target.starts_with("armebv7r-"),
+        "when the target is part of the Armv7-R target family",
+    );
     // FIXME(Zalathar): Ideally this should be configured by a command-line
     // flag, not an environment variable.
     builder.cond(

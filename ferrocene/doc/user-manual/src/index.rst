@@ -33,6 +33,7 @@ Ferrocene User Manual
    :caption: Compilation targets
 
    targets/index
+   targets/armv7r-none-eabihf
    targets/thumbv7em-none-eabi
    targets/thumbv7em-none-eabihf
    targets/aarch64-unknown-linux-gnu

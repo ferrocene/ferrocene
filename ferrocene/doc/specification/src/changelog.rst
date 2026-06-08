@@ -19,6 +19,29 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.96.0
+-------------------------------
+
+- `Allow passing expr metavariable to cfg <https://github.com/rust-lang/rust/pull/146961>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Always coerce never types in tuple expressions <https://github.com/rust-lang/rust/pull/147834>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Avoid incorrect inference guidance of function arguments in rare cases <https://github.com/rust-lang/rust/pull/150316>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
+- `Support s390x vector registers in inline assembly <https://github.com/rust-lang/rust/pull/154184>`_
+
+  - The target is outside the scope of the FLS.
+
+- `Allow using constants of type ManuallyDrop as patterns (fixing a regression introduced in 1.94.0) <https://github.com/rust-lang/rust/pull/154891>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
 Language changes in Rust 1.95.0
 -------------------------------
 

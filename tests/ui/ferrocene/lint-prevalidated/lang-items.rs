@@ -14,11 +14,12 @@
 #![deny(ferrocene::unvalidated)]
 
 extern crate minicore;
-use minicore::*;
 use Result::*;
+use minicore::*;
 
 #[ferrocene::prevalidated]
 fn ops() {
-    let f: fn() = || (); f(); // ok
+    let f: fn() = || ();
+    f(); // ok
     (|| ())(); // ok
 }

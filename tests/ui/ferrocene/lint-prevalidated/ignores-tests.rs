@@ -6,7 +6,7 @@ fn normal_def() {}
 
 #[cfg(test)]
 #[ferrocene::prevalidated]
-pub fn validated() {
+fn validated() {
     normal_def();
     //~^ ERROR unvalidated
 }

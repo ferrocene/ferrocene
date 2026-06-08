@@ -1,4 +1,3 @@
-//@ add-minicore
 //@ check-fail
 
 #![deny(ferrocene::unvalidated)]

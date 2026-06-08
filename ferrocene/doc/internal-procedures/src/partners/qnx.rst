@@ -206,7 +206,6 @@ Create a deployment containing Linux and Windows toolchains:
         -deployLicense $LICENSE_KEY \
         -installationDeployAs qnx/qnx710-472-deployment
 
-
 Create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
@@ -217,7 +216,7 @@ Create an archive of the deployment (with dereferenced symlinks) and upload it t
 .. note::
 
     If the existing license isn't expired yet, do a test run uploading to a test location, then
-    editing the CI workflows to refer to ``test-qnx710-472-deployment.tar.zst`` instead:
+    edit the CI workflows to refer to ``test-qnx710-472-deployment.tar.zst`` instead:
 
     .. code-block::
 

@@ -836,6 +836,37 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
+  aarch64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+
   # Docker jobs
 
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
@@ -1098,6 +1129,8 @@ workflows:
             - x86_64-qnx8-test-compiletest
             - aarch64-qnx-test-library
             - aarch64-qnx-test-compiletest
+            - aarch64-qnx8-test-library
+            - aarch64-qnx8-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-test-compiletest
             - aarch64r82-none-test-library
@@ -1402,6 +1435,25 @@ workflows:
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx8-generic-test-vm:
+          name: aarch64-qnx8-test-library
+          job: test:library
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx8-generic-test-vm:
+          name: aarch64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
           resource-class: xlarge # 8-core

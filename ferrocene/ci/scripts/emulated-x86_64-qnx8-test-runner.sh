@@ -22,8 +22,6 @@ start_vm() {
     # with paths remapped to $emulatordir
     qemu-system-x86_64 \
         -smp 2 \
-        -enable-kvm \
-        -cpu host \
         -m 1G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device virtio-net-pci,netdev=net0 \

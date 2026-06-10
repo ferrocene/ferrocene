@@ -630,7 +630,7 @@ impl AtomicBool {
     /// assert_eq!(some_bool, false);
     /// ```
     #[inline]
-    #[cfg(target_has_atomic_equal_alignment = "8")]
+    #[cfg(target_has_atomic_primitive_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut(v: &mut bool) -> &mut Self {
         // SAFETY: the mutable reference guarantees unique ownership, and
@@ -690,7 +690,7 @@ impl AtomicBool {
     /// assert_eq!(some_bools, [true; 10]);
     /// ```
     #[inline]
-    #[cfg(target_has_atomic_equal_alignment = "8")]
+    #[cfg(target_has_atomic_primitive_alignment = "8")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut_slice(v: &mut [bool]) -> &mut [Self] {
         // SAFETY: the mutable reference guarantees unique ownership, and
@@ -1615,7 +1615,7 @@ impl<T> AtomicPtr<T> {
     /// assert_eq!(unsafe { *some_ptr }, 456);
     /// ```
     #[inline]
-    #[cfg(target_has_atomic_equal_alignment = "ptr")]
+    #[cfg(target_has_atomic_primitive_alignment = "ptr")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut(v: &mut *mut T) -> &mut Self {
         let [] = [(); align_of::<AtomicPtr<()>>() - align_of::<*mut ()>()];
@@ -1694,7 +1694,7 @@ impl<T> AtomicPtr<T> {
     /// }
     /// ```
     #[inline]
-    #[cfg(target_has_atomic_equal_alignment = "ptr")]
+    #[cfg(target_has_atomic_primitive_alignment = "ptr")]
     #[unstable(feature = "atomic_from_mut", issue = "76314")]
     pub fn from_mut_slice(v: &mut [*mut T]) -> &mut [Self] {
         // SAFETY:
@@ -3671,7 +3671,7 @@ macro_rules! atomic_int {
 #[cfg(target_has_atomic_load_store = "8")]
 atomic_int! {
     cfg(target_has_atomic = "8"),
-    cfg(target_has_atomic_equal_alignment = "8"),
+    cfg(target_has_atomic_primitive_alignment = "8"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3689,7 +3689,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "8")]
 atomic_int! {
     cfg(target_has_atomic = "8"),
-    cfg(target_has_atomic_equal_alignment = "8"),
+    cfg(target_has_atomic_primitive_alignment = "8"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3707,7 +3707,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "16")]
 atomic_int! {
     cfg(target_has_atomic = "16"),
-    cfg(target_has_atomic_equal_alignment = "16"),
+    cfg(target_has_atomic_primitive_alignment = "16"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3725,7 +3725,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "16")]
 atomic_int! {
     cfg(target_has_atomic = "16"),
-    cfg(target_has_atomic_equal_alignment = "16"),
+    cfg(target_has_atomic_primitive_alignment = "16"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3743,7 +3743,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "32")]
 atomic_int! {
     cfg(target_has_atomic = "32"),
-    cfg(target_has_atomic_equal_alignment = "32"),
+    cfg(target_has_atomic_primitive_alignment = "32"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3761,7 +3761,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "32")]
 atomic_int! {
     cfg(target_has_atomic = "32"),
-    cfg(target_has_atomic_equal_alignment = "32"),
+    cfg(target_has_atomic_primitive_alignment = "32"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3779,7 +3779,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "64")]
 atomic_int! {
     cfg(target_has_atomic = "64"),
-    cfg(target_has_atomic_equal_alignment = "64"),
+    cfg(target_has_atomic_primitive_alignment = "64"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3797,7 +3797,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "64")]
 atomic_int! {
     cfg(target_has_atomic = "64"),
-    cfg(target_has_atomic_equal_alignment = "64"),
+    cfg(target_has_atomic_primitive_alignment = "64"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
     stable(feature = "integer_atomics_stable", since = "1.34.0"),
@@ -3815,7 +3815,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "128")]
 atomic_int! {
     cfg(target_has_atomic = "128"),
-    cfg(target_has_atomic_equal_alignment = "128"),
+    cfg(target_has_atomic_primitive_alignment = "128"),
     unstable(feature = "integer_atomics", issue = "99069"),
     unstable(feature = "integer_atomics", issue = "99069"),
     unstable(feature = "integer_atomics", issue = "99069"),
@@ -3833,7 +3833,7 @@ atomic_int! {
 #[cfg(target_has_atomic_load_store = "128")]
 atomic_int! {
     cfg(target_has_atomic = "128"),
-    cfg(target_has_atomic_equal_alignment = "128"),
+    cfg(target_has_atomic_primitive_alignment = "128"),
     unstable(feature = "integer_atomics", issue = "99069"),
     unstable(feature = "integer_atomics", issue = "99069"),
     unstable(feature = "integer_atomics", issue = "99069"),
@@ -3855,7 +3855,7 @@ macro_rules! atomic_int_ptr_sized {
         #[cfg(target_pointer_width = $target_pointer_width)]
         atomic_int! {
             cfg(target_has_atomic = "ptr"),
-            cfg(target_has_atomic_equal_alignment = "ptr"),
+            cfg(target_has_atomic_primitive_alignment = "ptr"),
             stable(feature = "rust1", since = "1.0.0"),
             stable(feature = "extended_compare_and_swap", since = "1.10.0"),
             stable(feature = "atomic_debug", since = "1.3.0"),
@@ -3873,7 +3873,7 @@ macro_rules! atomic_int_ptr_sized {
         #[cfg(target_pointer_width = $target_pointer_width)]
         atomic_int! {
             cfg(target_has_atomic = "ptr"),
-            cfg(target_has_atomic_equal_alignment = "ptr"),
+            cfg(target_has_atomic_primitive_alignment = "ptr"),
             stable(feature = "rust1", since = "1.0.0"),
             stable(feature = "extended_compare_and_swap", since = "1.10.0"),
             stable(feature = "atomic_debug", since = "1.3.0"),

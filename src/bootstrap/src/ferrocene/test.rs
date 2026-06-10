@@ -143,7 +143,7 @@ impl Step for GenerateTarball {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        builder.info("test generate-tarball");
+        builder.info("Testing ferrocene/tools/generate-tarball");
 
         let compiler = builder.compiler(0, self.target);
         let cargo = tool::prepare_tool_cargo(
@@ -198,7 +198,7 @@ impl Step for DiffUpstream {
             compiler: builder.compiler(builder.top_stage, host),
         });
 
-        builder.info("test diff-upstream");
+        builder.info("Testing ferrocene/tools/diff-upstream");
         let mut cmd = BootstrapCommand::new("ferrocene/tools/diff-upstream/diff.py");
         cmd.arg("--hide-diff");
         cmd.run(builder);

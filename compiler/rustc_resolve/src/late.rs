@@ -3612,6 +3612,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                                         this.check_trait_item(
                                             item.id,
                                             *ident,
+                                            *ident,
                                             &item.kind,
                                             ValueNS,
                                             item.span,
@@ -3656,7 +3657,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 );
                 self.resolve_define_opaques(define_opaque);
             }
-            AssocItemKind::Fn(Fn { ident, generics, define_opaque, .. }) => {
+            AssocItemKind::Fn(fn_kind @ Fn { ident, generics, define_opaque, .. }) => {
                 debug!("resolve_implementation AssocItemKind::Fn");
                 // We also need a new scope for the impl item type parameters.
                 self.with_generic_param_rib(
@@ -3666,10 +3667,16 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     LifetimeBinderKind::Function,
                     generics.span,
                     |this| {
+                        let effective_ident = if is_in_trait_impl && fn_kind.is_pin_drop_sugar() {
+                            Ident::new(sym::pin_drop, ident.span)
+                        } else {
+                            *ident
+                        };
                         // If this is a trait impl, ensure the method
                         // exists in trait
                         this.check_trait_item(
                             item.id,
+                            effective_ident,
                             *ident,
                             &item.kind,
                             ValueNS,
@@ -3701,6 +3708,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                             this.check_trait_item(
                                 item.id,
                                 *ident,
+                                *ident,
                                 &item.kind,
                                 TypeNS,
                                 item.span,
@@ -3726,6 +3734,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         this.check_trait_item(
                             item.id,
                             delegation.ident,
+                            delegation.ident,
                             &item.kind,
                             ValueNS,
                             item.span,
@@ -3750,6 +3759,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         &mut self,
         id: NodeId,
         mut ident: Ident,
+        mut reported_ident: Ident,
         kind: &AssocItemKind,
         ns: Namespace,
         span: Span,
@@ -3763,6 +3773,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             return;
         };
         ident.span.normalize_to_macros_2_0_and_adjust(module.expansion);
+        reported_ident.span.normalize_to_macros_2_0_and_adjust(module.expansion);
         let key = BindingKey::new(IdentKey::new(ident), ns);
         let mut decl = self.r.resolution(module, key).and_then(|r| r.best_decl());
         debug!(?decl);
@@ -3798,10 +3809,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
 
         let Some(decl) = decl else {
             // We could not find the method: report an error.
-            let candidate = self.find_similarly_named_assoc_item(ident.name, kind);
+            let candidate = self.find_similarly_named_assoc_item(reported_ident.name, kind);
             let path = &self.current_trait_ref.as_ref().unwrap().1.path;
             let path_names = path_names_to_string(path);
-            self.report_error(span, err(ident, path_names, candidate));
+            self.report_error(span, err(reported_ident, path_names, candidate));
             feed_visibility(self, module.def_id());
             return;
         };
@@ -3901,11 +3912,15 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             PathSource::Delegation,
         );
 
-        if let Some(qself) = &delegation.qself {
-            self.visit_ty(&qself.ty);
-        }
+        // Create lifetimes not with `LifetimeRibKind::Generics` but with `LifetimeRibKind::Elided`,
+        // as we are not processing generic params but generic args in a future call (#156342, #156758).
+        self.with_lifetime_rib(LifetimeRibKind::Elided(LifetimeRes::Infer), |this| {
+            if let Some(qself) = &delegation.qself {
+                this.visit_ty(&qself.ty);
+            }
 
-        self.visit_path(&delegation.path);
+            this.visit_path(&delegation.path);
+        });
 
         self.r.delegation_infos.insert(
             self.r.current_owner.def_id,
@@ -4418,7 +4433,13 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 }
                 Some(res)
             }
-            Res::Def(DefKind::Ctor(..) | DefKind::Const { .. } | DefKind::AssocConst { .. } | DefKind::Static { .. }, _) => {
+            Res::Def(
+                DefKind::Ctor(..)
+                | DefKind::Const { .. }
+                | DefKind::AssocConst { .. }
+                | DefKind::Static { .. },
+                _,
+            ) => {
                 // This is unambiguously a fresh binding, either syntactically
                 // (e.g., `IDENT @ PAT` or `ref IDENT`) or because `IDENT` resolves
                 // to something unusable as a pattern (e.g., constructor function),
@@ -4450,7 +4471,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         article: res.article(),
                         shadowed_binding: res,
                         shadowed_binding_span: self.r.def_span(def_id),
-                    }
+                    },
                 );
                 None
             }
@@ -4463,7 +4484,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 // so delay a bug instead of ICEing.
                 self.r.dcx().span_delayed_bug(
                     ident.span,
-                    "unexpected `SelfCtor` in pattern, expected identifier"
+                    "unexpected `SelfCtor` in pattern, expected identifier",
                 );
                 None
             }

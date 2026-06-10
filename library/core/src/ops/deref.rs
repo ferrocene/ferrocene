@@ -278,14 +278,8 @@ pub const trait DerefMut: [const] Deref + PointeeSized {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-<<<<<<< ferrocene/main
-impl<T: ?Sized> const DerefMut for &mut T {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl<T: ?Sized> const DerefMut for &mut T {
-=======
 const impl<T: ?Sized> DerefMut for &mut T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {
         self
     }

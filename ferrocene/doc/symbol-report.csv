@@ -8053,6 +8053,7 @@ core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
+core::ptr::const_ptr::<impl *const T>::cast_slice
 core::ptr::const_ptr::<impl *const T>::expose_provenance
 core::ptr::const_ptr::<impl *const T>::guaranteed_eq
 core::ptr::const_ptr::<impl *const T>::is_aligned_to
@@ -8112,6 +8113,7 @@ core::ptr::mut_ptr::<impl *mut T>::as_mut
 core::ptr::mut_ptr::<impl *mut T>::cast
 core::ptr::mut_ptr::<impl *mut T>::cast_array
 core::ptr::mut_ptr::<impl *mut T>::cast_const
+core::ptr::mut_ptr::<impl *mut T>::cast_slice
 core::ptr::mut_ptr::<impl *mut T>::drop_in_place
 core::ptr::mut_ptr::<impl *mut T>::is_null
 core::ptr::mut_ptr::<impl *mut T>::offset

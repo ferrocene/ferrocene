@@ -186,14 +186,10 @@ impl<T: PointeeSized> *const T {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     ///
     /// [`with_exposed_provenance`]: with_exposed_provenance
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-=======
     #[expect(lossy_provenance_casts, reason = "this *is* the replacement")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -1448,6 +1444,7 @@ impl<T> *const T {
     ///     danger.as_ref().expect("references must not be null");
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
     pub const fn cast_slice(self, len: usize) -> *const [T] {

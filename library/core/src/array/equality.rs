@@ -153,14 +153,8 @@ const trait SpecArrayEq<Other, const N: usize>: Sized {
 }
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-<<<<<<< ferrocene/main
-impl<T: [const] PartialEq<Other>, Other, const N: usize> const SpecArrayEq<Other, N> for T {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl<T: [const] PartialEq<Other>, Other, const N: usize> const SpecArrayEq<Other, N> for T {
-=======
 const impl<T: [const] PartialEq<Other>, Other, const N: usize> SpecArrayEq<Other, N> for T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     default fn spec_eq(a: &[Self; N], b: &[Other; N]) -> bool {
         a[..] == b[..]
     }

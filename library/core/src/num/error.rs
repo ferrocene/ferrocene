@@ -32,14 +32,8 @@ impl Error for TryFromIntError {}
 
 #[stable(feature = "try_from", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-<<<<<<< ferrocene/main
-impl const From<Infallible> for TryFromIntError {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl const From<Infallible> for TryFromIntError {
-=======
 const impl From<Infallible> for TryFromIntError {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn from(x: Infallible) -> TryFromIntError {
         match x {}
     }

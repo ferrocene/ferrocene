@@ -104,14 +104,8 @@ where
 }
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
-<<<<<<< ferrocene/main
-impl<T: [const] Destruct, F> const Drop for Drain<'_, '_, T, F> {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl<T: [const] Destruct, F> const Drop for Drain<'_, '_, T, F> {
-=======
 const impl<T: [const] Destruct, F> Drop for Drain<'_, '_, T, F> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let slice = if T::IS_ZST {
             from_raw_parts_mut::<[T]>(

@@ -1716,6 +1716,7 @@ impl<T> *mut T {
     ///     danger.as_mut().expect("references must not be null");
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
     pub const fn cast_slice(self, len: usize) -> *mut [T] {

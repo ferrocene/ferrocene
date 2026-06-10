@@ -943,14 +943,8 @@ pub enum Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
-<<<<<<< ferrocene/main
-impl const Clone for Infallible {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl const Clone for Infallible {
-=======
 const impl Clone for Infallible {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn clone(&self) -> Infallible {
         match *self {}
     }
@@ -977,14 +971,8 @@ impl Error for Infallible {}
 
 #[stable(feature = "convert_infallible", since = "1.34.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-<<<<<<< ferrocene/main
-impl const PartialEq for Infallible {
-    #[ferrocene::prevalidated]
-||||||| b5d1746e7d2
-impl const PartialEq for Infallible {
-=======
 const impl PartialEq for Infallible {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn eq(&self, _: &Infallible) -> bool {
         match *self {}
     }

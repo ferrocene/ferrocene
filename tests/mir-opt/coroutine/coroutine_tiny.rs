@@ -25,12 +25,8 @@ fn main() {
         }
     };
 }
-<<<<<<< ferrocene/main:tests/mir-opt/coroutine_tiny.rs
-
-// ferrocene-annotations: um_rustc_C_panic
-||||||| b5d1746e7d2:tests/mir-opt/coroutine_tiny.rs
-=======
 
 // CHECK-NOT: panic
 // CHECK-NOT: cleanup
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream:tests/mir-opt/coroutine/coroutine_tiny.rs
+
+// ferrocene-annotations: um_rustc_C_panic

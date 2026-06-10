@@ -6,7 +6,6 @@
 // https://github.com/rust-lang/rfcs/pull/3808#discussion_r2616622459,
 // and https://github.com/rust-lang/rust/issues/54726#issuecomment-431931811 for a possible
 // way to relax the limitation.
-// #![ferrocene::prevalidated]
 
 //@ build-fail
 //@ revisions: dedup no-dedup

@@ -20,8 +20,12 @@ start_vm() {
 
     # flags based on the QEMU invocation that `mkqnximage --run` does
     # with paths remapped to $emulatordir
+    # `mkqnximage --run` enables KVM which we can't use in CI. instead,
+    # use `-cpu max` as the startup library requires CPU features that
+    # are not enabled by default. without `-cpu max` QEMU will hang
     qemu-system-x86_64 \
         -smp 2 \
+        -cpu max \
         -m 1G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device virtio-net-pci,netdev=net0 \

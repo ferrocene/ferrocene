@@ -20,11 +20,12 @@ start_vm() {
 
     # flags based on the QEMU invocation that `mkqnximage --arch=aarch64le --run` does
     # with paths remapped to $emulatordir
+    # set memory to 6G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+
     qemu-system-aarch64 \
         -machine virt-4.2 \
         -cpu cortex-a57 \
         -smp 2 \
-        -m 1G \
+        -m 6G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=none,id=drv0 \
         -device virtio-blk-device,drive=drv0  \
         -netdev bridge,br=br0,id=net0 \

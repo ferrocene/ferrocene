@@ -45,9 +45,10 @@ REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 # They must be excluded on, for example, aarch64 Mac
 QNX_TARGETS = [
     "aarch64-unknown-nto-qnx710",
-    "aarch64-unknown-nto-qnx800",
     "x86_64-pc-nto-qnx710",
-    "x86_64-pc-nto-qnx800",
+    # these require a different SDP so they'll go into different jobs
+    # "aarch64-unknown-nto-qnx800",
+    # "x86_64-pc-nto-qnx800",
 ]
 
 GENERIC_BUILD_STD_TARGETS = [

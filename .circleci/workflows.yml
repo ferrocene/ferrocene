@@ -1854,17 +1854,17 @@ commands:
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
-      - run:
-          name: Enable IPv6 for Docker
-          command: |
-            sudo mkdir -p /etc/docker
-            cat \<<EOF | sudo tee /etc/docker/daemon.json
-            {
-              "ipv6": true,
-              "fixed-cidr-v6": "2001:db8:1::/64"
-            }
-            EOF
-            sudo service docker restart
+      # - run:
+      #     name: Enable IPv6 for Docker
+      #     command: |
+      #       sudo mkdir -p /etc/docker
+      #       cat \<<EOF | sudo tee /etc/docker/daemon.json
+      #       {
+      #         "ipv6": true,
+      #         "fixed-cidr-v6": "2001:db8:1::/64"
+      #       }
+      #       EOF
+      #       sudo service docker restart
 
       - run:
           name: Pull the Docker image used for CI

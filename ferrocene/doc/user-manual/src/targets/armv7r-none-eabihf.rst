@@ -8,8 +8,8 @@
 
 The ``armv7r-none-eabihf`` Ferrocene target provides support for
 bare-metal ARMv7-R processors with the ARM ISA, using the *hard-float ABI* with
-a double precision FPU. This includes the Arm Cortex-R4F, Cortex-R5,
-Cortex-R7 and Cortex-R8. 
+a double-precision capable FPU. This includes the Arm Cortex-R4, Cortex-R5,
+Cortex-R7 and Cortex-R8 with FPU architecture VFPv3-D16. 
 
 On this target, functions accepting ``f32`` or ``f64`` will have those
 arguments passed via FPU registers. For more information on the

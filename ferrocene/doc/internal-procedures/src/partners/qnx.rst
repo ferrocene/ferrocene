@@ -359,6 +359,8 @@ Create a deployment containing Linux and Windows toolchains:
             -installBaseline com.qnx.qnx800/$QNX_VERSION \
             -installPackage com.qnx.qnx800.host.win.x86_64=$QNX_WINDOWS_HOST_VERSION \
             -installPackage com.qnx.qnx800.host.linux.x86_64=$QNX_LINUX_HOST_VERSION \
+            -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
+            -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
             -destination qnx/qnx800-141 \
             -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \

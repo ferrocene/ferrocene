@@ -66,8 +66,8 @@ QNX 7.1.0
 ---------
 
 
-Windows
-^^^^^^^
+Windows (QNX 7.1.0)
+^^^^^^^^^^^^^^^^^^^
 
 Launch "QNX Software Center", log in, if prompted.
 
@@ -100,8 +100,8 @@ Your installation will be located in the installation folder you chose.
 For example, ``D:\qnx\qnx710``.
 
 
-Linux
-^^^^^
+Linux (QNX 7.1.0)
+^^^^^^^^^^^^^^^^^
 
 .. note::
 
@@ -153,8 +153,8 @@ If everything is working, the output of ``qcc`` should be:
     to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
 
-CI/CD deployment
-^^^^^^^^^^^^^^^^
+CI/CD deployment (QNX 7.1.0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
     These instructions are intended to be run on a x86_64 Linux host only.
@@ -230,8 +230,8 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
 QNX 8.0.0
 ---------
 
-Windows
-^^^^^^^
+Windows (QNX 8.0.0)
+^^^^^^^^^^^^^^^^^^^
 
 Launch "QNX Software Center", log in, if prompted.
 
@@ -264,8 +264,8 @@ Your installation will be located in the installation folder you chose.
 For example, ``D:\qnx\qnx800``.
 
 
-Linux
-^^^^^
+Linux (QNX 8.0.0)
+^^^^^^^^^^^^^^^^^
 
 .. note::
 
@@ -318,8 +318,8 @@ If everything is working, the output of ``qcc`` should be:
     to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
 
-CI/CD deployment
-^^^^^^^^^^^^^^^^
+CI/CD deployment (QNX 8.0.0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. note::

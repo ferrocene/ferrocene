@@ -3,16 +3,15 @@
 //!
 //! Issue: <https://github.com/rust-lang/rust/issues/31788>
 
-//@ ignore-ferrocene.facade facade targets do not have eh_personality
-//@ normalize-stderr: "loaded from .*libstd-.*.rmeta" -> "loaded from SYSROOT/libstd-*.rmeta"
+//@ normalize-stderr: "loaded from \$.*libcore-.*.rmeta" -> "loaded from SYSROOT/libcore-*.rmeta"
 //@ dont-require-annotations: NOTE
 
 #![feature(lang_items)]
 
-#[lang = "eh_personality"]
-fn personality() {
-    //~^ ERROR: found duplicate lang item `eh_personality`
-    //~| NOTE first defined in crate `std`
+#[lang = "panic"]
+fn panic() {
+    //~^ ERROR: found duplicate lang item `panic`
+    //~| NOTE first defined in crate `core`
     loop {}
 }
 

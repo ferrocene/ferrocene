@@ -603,7 +603,7 @@ jobs:
 
   aarch64-darwin-llvm:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -635,7 +635,7 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -656,7 +656,7 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -678,7 +678,7 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -699,7 +699,7 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -726,7 +726,7 @@ jobs:
 
   aarch64-darwin-generic-test-runner:
     macos:
-      xcode: "26.0.1"
+      xcode: "27.0.0"
     parameters:
       job:
         type: string

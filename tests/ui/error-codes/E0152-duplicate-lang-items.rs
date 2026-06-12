@@ -8,9 +8,9 @@
 
 #![feature(lang_items)]
 
-#[lang = "panic"]
-fn panic() {
-    //~^ ERROR: found duplicate lang item `panic`
+#[lang = "panic_fmt"]
+fn panic_fmt() -> ! {
+    //~^ ERROR: found duplicate lang item `panic_fmt`
     //~| NOTE first defined in crate `core`
     loop {}
 }

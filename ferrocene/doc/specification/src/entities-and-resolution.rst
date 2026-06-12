@@ -1096,7 +1096,7 @@ A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
   :t:`simple import` into :t:`scope`.
 
 :dp:`fls_FILuR3pfwjw3`
-An :t:`Entity` imported by a :t:`simple import` subject to a
+An :t:`entity` imported by a :t:`simple import` subject to a
 :t:`renaming` with :t:`identifier` is brought into :t:`scope` under the
 :t:`name` declared by the :t:`renaming`.
 

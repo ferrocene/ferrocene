@@ -23,11 +23,12 @@ start_vm() {
     # `mkqnximage --run` enables KVM which we can't use in CI. instead,
     # use `-cpu max` as the startup library requires CPU features that
     # are not enabled by default. without `-cpu max` QEMU will hang
-    # set memory to 6G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+
+    # set memory to 11G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+ and has two
+    # variants which can run in parallel
     qemu-system-x86_64 \
         -smp 2 \
         -cpu max \
-        -m 6G \
+        -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device virtio-net-pci,netdev=net0 \
         -pidfile "${emulatordir}"/qemu.pid \

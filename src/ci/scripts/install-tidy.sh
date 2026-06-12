@@ -15,7 +15,7 @@ if isMacOS; then
         x86_64)
             ;;
         arm64)
-            brew install tidy-html5
+            brew install -y tidy-html5
             ;;
         *)
             echo "unsupported architecture: ${platform}"

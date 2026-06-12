@@ -3,6 +3,7 @@
 //!
 //! Issue: <https://github.com/rust-lang/rust/issues/31788>
 
+//@ ignore-ferrocene.facade facade targets do not have eh_personality
 //@ normalize-stderr: "loaded from .*libstd-.*.rmeta" -> "loaded from SYSROOT/libstd-*.rmeta"
 //@ dont-require-annotations: NOTE
 

@@ -112,7 +112,7 @@ impl Nanoseconds {
 }
 
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl const Default for Nanoseconds {
+const impl Default for Nanoseconds {
     #[inline]
     #[ferrocene::prevalidated]
     fn default() -> Self {

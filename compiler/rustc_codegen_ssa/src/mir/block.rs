@@ -1585,9 +1585,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 MergingSucc::False
             }
 
-            mir::TerminatorKind::Drop { place, target, unwind, replace: _, drop, async_fut } => {
+            mir::TerminatorKind::Drop { place, target, unwind, replace: _, drop } => {
                 assert!(
-                    async_fut.is_none() && drop.is_none(),
+                    drop.is_none(),
                     "Async Drop must be expanded or reset to sync before codegen"
                 );
                 self.codegen_drop_terminator(
@@ -1737,7 +1737,8 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     op.store_with_annotation(bx, scratch);
                     (scratch.val.llval, scratch.val.align, true)
                 }
-                _ => (op.immediate_or_packed_pair(bx), arg.layout.align.abi, false),
+                PassMode::Direct(_) => (op.immediate(), arg.layout.align.abi, false),
+                PassMode::Ignore | PassMode::Pair(..) => unreachable!("handled above"),
             },
             Ref(op_place_val) => match arg.mode {
                 PassMode::Indirect { attrs, on_stack, .. } => {
@@ -2233,9 +2234,9 @@ fn load_cast<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 ) -> Bx::Value {
     let cast_ty = bx.cast_backend_type(cast);
     if let Some(offset_from_start) = cast.rest_offset {
-        assert!(cast.prefix[1..].iter().all(|p| p.is_none()));
+        assert_eq!(cast.prefix.len(), 1);
         assert_eq!(cast.rest.unit.size, cast.rest.total);
-        let first_ty = bx.reg_backend_type(&cast.prefix[0].unwrap());
+        let first_ty = bx.reg_backend_type(&cast.prefix[0]);
         let second_ty = bx.reg_backend_type(&cast.rest.unit);
         let first = bx.load(first_ty, ptr, align);
         let second_ptr = bx.inbounds_ptradd(ptr, bx.const_usize(offset_from_start.bytes()));
@@ -2256,9 +2257,8 @@ pub fn store_cast<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     align: Align,
 ) {
     if let Some(offset_from_start) = cast.rest_offset {
-        assert!(cast.prefix[1..].iter().all(|p| p.is_none()));
+        assert_eq!(cast.prefix.len(), 1);
         assert_eq!(cast.rest.unit.size, cast.rest.total);
-        assert!(cast.prefix[0].is_some());
         let first = bx.extract_value(value, 0);
         let second = bx.extract_value(value, 1);
         bx.store(first, ptr, align);

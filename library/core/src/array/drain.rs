@@ -54,7 +54,7 @@ pub(super) struct Drain<'l, 'f, T, F> {
 
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
-impl<T, U, F> const FnOnce<(usize,)> for &mut Drain<'_, '_, T, F>
+const impl<T, U, F> FnOnce<(usize,)> for &mut Drain<'_, '_, T, F>
 where
     F: [const] FnMut(T) -> U,
 {
@@ -68,7 +68,7 @@ where
 }
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
-impl<T, U, F> const FnMut<(usize,)> for &mut Drain<'_, '_, T, F>
+const impl<T, U, F> FnMut<(usize,)> for &mut Drain<'_, '_, T, F>
 where
     F: [const] FnMut(T) -> U,
 {
@@ -104,7 +104,7 @@ where
 }
 #[rustc_const_unstable(feature = "array_try_map", issue = "79711")]
 #[unstable(feature = "array_try_map", issue = "79711")]
-impl<T: [const] Destruct, F> const Drop for Drain<'_, '_, T, F> {
+const impl<T: [const] Destruct, F> Drop for Drain<'_, '_, T, F> {
     #[ferrocene::prevalidated]
     fn drop(&mut self) {
         let slice = if T::IS_ZST {

@@ -186,9 +186,10 @@ impl<T: PointeeSized> *const T {
     /// This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.
     ///
     /// [`with_exposed_provenance`]: with_exposed_provenance
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[stable(feature = "exposed_provenance", since = "1.84.0")]
-    #[ferrocene::prevalidated]
+    #[expect(lossy_provenance_casts, reason = "this *is* the replacement")]
     pub fn expose_provenance(self) -> usize {
         self.cast::<()>() as usize
     }
@@ -1425,11 +1426,11 @@ impl<T> *const T {
     ///
     /// ```rust
     /// #![feature(ptr_cast_slice)]
+    ///
     /// // create a slice pointer when starting out with a pointer to the first element
     /// let x = [5, 6, 7];
-    /// let raw_pointer = x.as_ptr();
-    /// let slice = raw_pointer.cast_slice(3);
-    /// assert_eq!(unsafe { &*slice }[2], 7);
+    /// let raw_slice = x.as_ptr().cast_slice(3);
+    /// assert_eq!(unsafe { &*raw_slice }[2], 7);
     /// ```
     ///
     /// You must ensure that the pointer is valid and not null before dereferencing
@@ -1443,6 +1444,7 @@ impl<T> *const T {
     ///     danger.as_ref().expect("references must not be null");
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
     pub const fn cast_slice(self, len: usize) -> *const [T] {

@@ -30,7 +30,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
         loop {
             if libc::loadquery(
                 libc::L_GETINFO,
-                buffer.as_mut_ptr().cast::<libc::c_char>(),
+                buffer.as_mut_ptr().cast::<libc::c_void>(),
                 (mem::size_of::<libc::ld_info>() * buffer.len()) as u32,
             ) != -1
             {

@@ -782,8 +782,8 @@ fn test_unstable_options_tracking_hash() {
     );
     tracked!(crate_attr, vec!["abc".to_string()]);
     tracked!(cross_crate_inline_threshold, InliningThreshold::Always);
-    tracked!(debug_info_for_profiling, true);
     tracked!(debug_info_type_line_numbers, true);
+    tracked!(debuginfo_for_profiling, true);
     tracked!(default_visibility, Some(rustc_target::spec::SymbolVisibility::Hidden));
     tracked!(dep_info_omit_d_target, true);
     tracked!(direct_access_external_data, Some(true));
@@ -791,7 +791,6 @@ fn test_unstable_options_tracking_hash() {
     tracked!(dwarf_version, Some(5));
     tracked!(embed_metadata, false);
     tracked!(embed_source, true);
-    tracked!(emscripten_wasm_eh, false);
     tracked!(export_executable_symbols, true);
     tracked!(fewer_names, Some(true));
     tracked!(fixed_x18, true);

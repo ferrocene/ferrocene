@@ -1278,7 +1278,7 @@ impl Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const Add for Duration {
+const impl Add for Duration {
     type Output = Duration;
 
     #[inline]
@@ -1290,7 +1290,7 @@ impl const Add for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const AddAssign for Duration {
+const impl AddAssign for Duration {
     #[inline]
     fn add_assign(&mut self, rhs: Duration) {
         *self = *self + rhs;
@@ -1299,7 +1299,7 @@ impl const AddAssign for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const Sub for Duration {
+const impl Sub for Duration {
     type Output = Duration;
 
     #[inline]
@@ -1311,7 +1311,7 @@ impl const Sub for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const SubAssign for Duration {
+const impl SubAssign for Duration {
     #[inline]
     fn sub_assign(&mut self, rhs: Duration) {
         *self = *self - rhs;
@@ -1320,7 +1320,7 @@ impl const SubAssign for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const Mul<u32> for Duration {
+const impl Mul<u32> for Duration {
     type Output = Duration;
 
     #[inline]
@@ -1331,7 +1331,7 @@ impl const Mul<u32> for Duration {
 
 #[stable(feature = "symmetric_u32_duration_mul", since = "1.31.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const Mul<Duration> for u32 {
+const impl Mul<Duration> for u32 {
     type Output = Duration;
 
     #[inline]
@@ -1342,7 +1342,7 @@ impl const Mul<Duration> for u32 {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const MulAssign<u32> for Duration {
+const impl MulAssign<u32> for Duration {
     #[inline]
     fn mul_assign(&mut self, rhs: u32) {
         *self = *self * rhs;
@@ -1351,7 +1351,7 @@ impl const MulAssign<u32> for Duration {
 
 #[stable(feature = "duration", since = "1.3.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const Div<u32> for Duration {
+const impl Div<u32> for Duration {
     type Output = Duration;
 
     #[inline]
@@ -1364,7 +1364,7 @@ impl const Div<u32> for Duration {
 
 #[stable(feature = "time_augmented_assignment", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-impl const DivAssign<u32> for Duration {
+const impl DivAssign<u32> for Duration {
     #[inline]
     #[track_caller]
     fn div_assign(&mut self, rhs: u32) {

@@ -256,10 +256,6 @@ pub struct Child {
     pub stderr: Option<ChildStderr>,
 }
 
-/// Allows extension traits within `std`.
-#[unstable(feature = "sealed", issue = "none")]
-impl crate::sealed::Sealed for Child {}
-
 impl AsInner<imp::Process> for Child {
     #[inline]
     fn as_inner(&self) -> &imp::Process {
@@ -596,10 +592,6 @@ impl fmt::Debug for ChildStderr {
 pub struct Command {
     inner: imp::Command,
 }
-
-/// Allows extension traits within `std`.
-#[unstable(feature = "sealed", issue = "none")]
-impl crate::sealed::Sealed for Command {}
 
 impl Command {
     /// Constructs a new `Command` for launching the program at
@@ -1896,10 +1888,6 @@ impl Default for ExitStatus {
     }
 }
 
-/// Allows extension traits within `std`.
-#[unstable(feature = "sealed", issue = "none")]
-impl crate::sealed::Sealed for ExitStatus {}
-
 impl ExitStatus {
     /// Was termination successful?  Returns a `Result`.
     ///
@@ -2001,10 +1989,6 @@ impl fmt::Display for ExitStatus {
         self.0.fmt(f)
     }
 }
-
-/// Allows extension traits within `std`.
-#[unstable(feature = "sealed", issue = "none")]
-impl crate::sealed::Sealed for ExitStatusError {}
 
 /// Describes the result of a process after it has failed
 ///
@@ -2176,10 +2160,6 @@ impl crate::error::Error for ExitStatusError {}
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[stable(feature = "process_exitcode", since = "1.61.0")]
 pub struct ExitCode(imp::ExitCode);
-
-/// Allows extension traits within `std`.
-#[unstable(feature = "sealed", issue = "none")]
-impl crate::sealed::Sealed for ExitCode {}
 
 #[stable(feature = "process_exitcode", since = "1.61.0")]
 impl ExitCode {

@@ -445,7 +445,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     {
         let tcx = self.linter.tcx;
 
-        let env = TypingEnv::post_analysis(tcx, self.linter.item);
+        let env = TypingEnv::codegen(tcx, self.linter.item);
         let args = self.instance.instantiate_mir_and_normalize_erasing_regions(
             tcx,
             env,

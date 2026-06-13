@@ -275,7 +275,7 @@ impl<T: ?Sized> ManuallyDrop<T> {
 
 #[stable(feature = "manually_drop", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T: ?Sized> const Deref for ManuallyDrop<T> {
+const impl<T: ?Sized> Deref for ManuallyDrop<T> {
     type Target = T;
     #[inline(always)]
     #[ferrocene::prevalidated]
@@ -286,7 +286,7 @@ impl<T: ?Sized> const Deref for ManuallyDrop<T> {
 
 #[stable(feature = "manually_drop", since = "1.20.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T: ?Sized> const DerefMut for ManuallyDrop<T> {
+const impl<T: ?Sized> DerefMut for ManuallyDrop<T> {
     #[inline(always)]
     #[ferrocene::prevalidated]
     fn deref_mut(&mut self) -> &mut T {

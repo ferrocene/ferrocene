@@ -272,7 +272,7 @@ impl fmt::Debug for Alignment {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl const TryFrom<NonZero<usize>> for Alignment {
+const impl TryFrom<NonZero<usize>> for Alignment {
     type Error = num::TryFromIntError;
 
     #[inline]
@@ -283,7 +283,7 @@ impl const TryFrom<NonZero<usize>> for Alignment {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl const TryFrom<usize> for Alignment {
+const impl TryFrom<usize> for Alignment {
     type Error = num::TryFromIntError;
 
     #[inline]
@@ -294,7 +294,7 @@ impl const TryFrom<usize> for Alignment {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl const From<Alignment> for NonZero<usize> {
+const impl From<Alignment> for NonZero<usize> {
     #[inline]
     fn from(align: Alignment) -> NonZero<usize> {
         align.as_nonzero_usize()
@@ -303,7 +303,7 @@ impl const From<Alignment> for NonZero<usize> {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl const From<Alignment> for usize {
+const impl From<Alignment> for usize {
     #[inline]
     fn from(align: Alignment) -> usize {
         align.as_usize()
@@ -312,7 +312,7 @@ impl const From<Alignment> for usize {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-impl const cmp::Ord for Alignment {
+const impl cmp::Ord for Alignment {
     #[inline]
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.as_nonzero_usize().cmp(&other.as_nonzero_usize())
@@ -321,7 +321,7 @@ impl const cmp::Ord for Alignment {
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-impl const cmp::PartialOrd for Alignment {
+const impl cmp::PartialOrd for Alignment {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
@@ -340,7 +340,7 @@ impl hash::Hash for Alignment {
 /// Returns [`Alignment::MIN`], which is valid for any type.
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl const Default for Alignment {
+const impl Default for Alignment {
     fn default() -> Alignment {
         Alignment::MIN
     }

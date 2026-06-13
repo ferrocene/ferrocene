@@ -724,7 +724,7 @@ pub(crate) struct DiagMetadata<'ast> {
     current_trait_assoc_items: Option<&'ast [Box<AssocItem>]>,
 
     /// The current self type if inside an impl (used for better errors).
-    pub(crate) current_self_type: Option<Ty>,
+    pub(crate) current_self_type: Option<&'ast Ty>,
 
     /// The current self item if inside an ADT (used for better errors).
     current_self_item: Option<NodeId>,
@@ -2671,7 +2671,6 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         let impl_self = self
             .diag_metadata
             .current_self_type
-            .as_ref()
             .and_then(|ty| {
                 if let TyKind::Path(None, _) = ty.kind {
                     self.r.partial_res_map.get(&ty.id)
@@ -3296,10 +3295,13 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         }
     }
 
-    fn with_current_self_type<T>(&mut self, self_type: &Ty, f: impl FnOnce(&mut Self) -> T) -> T {
+    fn with_current_self_type<T>(
+        &mut self,
+        self_type: &'ast Ty,
+        f: impl FnOnce(&mut Self) -> T,
+    ) -> T {
         // Handle nested impls (inside fn bodies)
-        let previous_value =
-            replace(&mut self.diag_metadata.current_self_type, Some(self_type.clone()));
+        let previous_value = replace(&mut self.diag_metadata.current_self_type, Some(self_type));
         let result = f(self);
         self.diag_metadata.current_self_type = previous_value;
         result
@@ -3899,24 +3901,24 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             this.visit_path(&delegation.path);
         });
 
-        let resolution_id = if is_in_trait_impl { item_id } else { delegation.id };
+        let resolution_node_id = if is_in_trait_impl { item_id } else { delegation.id };
         let def_id = self
             .r
             .partial_res_map
-            .get(&resolution_id)
+            .get(&resolution_node_id)
             .and_then(|r| r.expect_full_res().opt_def_id());
-        if let Some(resolution_id) = def_id {
-            self.r
-                .delegation_infos
-                .insert(self.r.current_owner.def_id, DelegationInfo { resolution_id });
-        } else {
+
+        let resolution_id = def_id.ok_or_else(|| {
             self.r.tcx.dcx().span_delayed_bug(
                 delegation.path.span,
                 format!(
-                    "LoweringContext: couldn't resolve node {resolution_id:?} in delegation item",
+                    "LateResolutionVisitor: couldn't resolve node {resolution_node_id:?} in delegation item",
                 ),
-            );
-        };
+            )
+        });
+
+        let info = DelegationInfo { resolution_id };
+        self.r.delegation_infos.insert(self.r.current_owner.def_id, info);
 
         let Some(body) = &delegation.body else { return };
         self.with_rib(ValueNS, RibKind::FnOrCoroutine, |this| {
@@ -5015,7 +5017,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 label,
                 suggestion,
                 module,
-                segment_name,
+                segment,
                 error_implied_by_parse_error: _,
                 message,
                 note: _,
@@ -5023,7 +5025,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 return Err(respan(
                     span,
                     ResolutionError::FailedToResolve {
-                        segment: segment_name,
+                        segment: segment.name,
                         label,
                         suggestion,
                         module,

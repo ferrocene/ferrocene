@@ -10,6 +10,7 @@
 #![feature(async_iterator)]
 #![feature(borrowed_buf_init)]
 #![feature(bstr)]
+#![feature(casefold)]
 #![feature(cfg_target_has_reliable_f16_f128)]
 #![feature(char_internals)]
 #![feature(clone_to_uninit)]
@@ -66,6 +67,7 @@
 #![feature(hashmap_internals)]
 #![feature(int_from_ascii)]
 #![feature(int_roundings)]
+#![feature(integer_casts)]
 #![feature(io_slice_as_bytes)]
 #![feature(ip)]
 #![feature(is_ascii_octdigit)]
@@ -81,7 +83,12 @@
 #![feature(iterator_try_collect)]
 #![feature(iterator_try_reduce)]
 #![feature(layout_for_ptr)]
+<<<<<<< ferrocene/main
 #![feature(maybe_dangling)]
+||||||| 76dfce2cb2d
+=======
+#![feature(macro_metavar_expr_concat)]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![feature(maybe_uninit_fill)]
 #![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(min_specialization)]
@@ -100,7 +107,6 @@
 #![feature(portable_simd)]
 #![feature(ptr_alignment_type)]
 #![feature(ptr_metadata)]
-#![feature(result_option_map_or_default)]
 #![feature(rustc_attrs)]
 #![feature(signed_bigint_helpers)]
 #![feature(slice_from_ptr_range)]

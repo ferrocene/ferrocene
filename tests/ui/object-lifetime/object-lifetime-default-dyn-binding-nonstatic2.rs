@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // Test that `dyn Bar<Item = XX>` uses `'static` as the default object
 // lifetime bound for the type `XX`.
 

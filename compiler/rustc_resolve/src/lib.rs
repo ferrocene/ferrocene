@@ -477,8 +477,8 @@ enum PathResult<'ra> {
         ///
         /// In this case, `module` will point to `a`.
         module: Option<ModuleOrUniformRoot<'ra>>,
-        /// The segment name of target
-        segment_name: Symbol,
+        /// The segment of target
+        segment: Ident,
         error_implied_by_parse_error: bool,
         message: String,
         note: Option<String>,
@@ -507,7 +507,7 @@ impl<'ra> PathResult<'ra> {
         };
         PathResult::Failed {
             span: ident.span,
-            segment_name: ident.name,
+            segment: ident,
             label,
             suggestion,
             is_error_from_last_segment,
@@ -1506,7 +1506,7 @@ pub struct Resolver<'ra, 'tcx> {
     /// Generic args to suggest for required params (e.g. `<'_>`, `<_, _>`), if any.
     item_required_generic_args_suggestions: FxHashMap<LocalDefId, String> = default::fx_hash_map(),
     delegation_fn_sigs: LocalDefIdMap<DelegationFnSig> = Default::default(),
-    delegation_infos: LocalDefIdMap<DelegationInfo> = Default::default(),
+    delegation_infos: FxIndexMap<LocalDefId, DelegationInfo>,
 
     main_def: Option<MainDefinition> = None,
     trait_impls: FxIndexMap<DefId, Vec<LocalDefId>>,
@@ -1871,6 +1871,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             doc_link_traits_in_scope: Default::default(),
             current_crate_outer_attr_insert_span,
             disambiguators: Default::default(),
+            delegation_infos: Default::default(),
             ..
         };
 
@@ -1991,6 +1992,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             doc_link_traits_in_scope: self.doc_link_traits_in_scope,
             all_macro_rules: self.all_macro_rules,
             stripped_cfg_items,
+            delegation_infos: self.delegation_infos,
         };
         let ast_lowering = ty::ResolverAstLowering {
             partial_res_map: self.partial_res_map,
@@ -1998,7 +2000,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             next_node_id: self.next_node_id,
             owners: self.owners,
             lint_buffer: Steal::new(self.lint_buffer),
-            delegation_infos: self.delegation_infos,
             disambiguators,
         };
         ResolverOutputs { global_ctxt, ast_lowering }
@@ -2868,15 +2869,9 @@ mod ref_mut {
         #[track_caller]
         pub(crate) fn get_mut(&mut self) -> &mut T {
             match self.mutable {
-                false => panic!("Can't mutably borrow speculative resolver"),
+                false => panic!("can't mutably borrow speculative resolver"),
                 true => self.p,
             }
-        }
-
-        /// Returns a mutable reference to the inner value without checking if
-        /// it's in a mutable state.
-        pub(crate) fn get_mut_unchecked(&mut self) -> &mut T {
-            self.p
         }
     }
 
@@ -2901,12 +2896,12 @@ mod ref_mut {
             self.0.get()
         }
 
-        pub(crate) fn update_unchecked(&self, f: impl FnOnce(T) -> T)
+        pub(crate) fn update<'ra, 'tcx>(&self, r: &Resolver<'ra, 'tcx>, f: impl FnOnce(T) -> T)
         where
             T: Copy,
         {
             let old = self.get();
-            self.set_unchecked(f(old));
+            self.set(f(old), r);
         }
     }
 
@@ -2915,7 +2910,10 @@ mod ref_mut {
             CmCell(Cell::new(value))
         }
 
-        pub(crate) fn set_unchecked(&self, val: T) {
+        pub(crate) fn set<'ra, 'tcx>(&self, val: T, r: &Resolver<'ra, 'tcx>) {
+            if r.assert_speculative {
+                panic!("not allowed to mutate a `CmCell` during speculative resolution")
+            }
             self.0.set(val);
         }
 
@@ -2941,13 +2939,23 @@ mod ref_mut {
         #[track_caller]
         pub(crate) fn borrow_mut<'ra, 'tcx>(&self, r: &Resolver<'ra, 'tcx>) -> RefMut<'_, T> {
             if r.assert_speculative {
-                panic!("Not allowed to mutably borrow a CmRefCell during speculative resolution");
+                panic!("not allowed to mutably borrow a `CmRefCell` during speculative resolution");
             }
-            self.borrow_mut_unchecked()
+            self.0.borrow_mut()
+        }
+
+        pub(crate) fn try_borrow_mut_unchecked(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
+            self.0.try_borrow_mut()
         }
 
         #[track_caller]
-        pub(crate) fn try_borrow_mut_unchecked(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
+        pub(crate) fn try_borrow_mut<'ra, 'tcx>(
+            &self,
+            r: &Resolver<'ra, 'tcx>,
+        ) -> Result<RefMut<'_, T>, BorrowMutError> {
+            if r.assert_speculative {
+                panic!("not allowed to mutably borrow a `CmRefCell` during speculative resolution");
+            }
             self.0.try_borrow_mut()
         }
 
@@ -2960,7 +2968,7 @@ mod ref_mut {
     impl<T: Default> CmRefCell<T> {
         pub(crate) fn take<'ra, 'tcx>(&self, r: &Resolver<'ra, 'tcx>) -> T {
             if r.assert_speculative {
-                panic!("Not allowed to mutate a CmRefCell during speculative resolution");
+                panic!("not allowed to mutate a CmRefCell during speculative resolution");
             }
             self.0.take()
         }

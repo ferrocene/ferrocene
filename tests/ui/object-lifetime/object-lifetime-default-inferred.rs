@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ run-pass
 // Test that even with prior inferred parameters, object lifetimes of objects after are still
 // valid.

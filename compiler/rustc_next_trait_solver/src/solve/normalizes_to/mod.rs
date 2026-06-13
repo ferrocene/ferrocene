@@ -121,11 +121,42 @@ where
     /// We know `term` to always be a fully unconstrained inference variable, so
     /// `eq` should never fail here. However, in case `term` contains aliases, we
     /// emit nested `AliasRelate` goals to structurally normalize the alias.
+    ///
+    /// Additionally, when `term` is a const, this registers a `ConstArgHasType`
+    /// goal to ensure that the const value's type matches the declared type of
+    /// the alias it was normalized from.
+    ///
+    /// You may reasonably wonder: shouldn't `wfcheck::check_type_const` already
+    /// catch any such type mismatch at the definition site, so that the
+    /// definition is tainted and we never even attempt to normalize a reference
+    /// to it? In principle that's exactly what should happen. However, we cannot
+    /// simply force the defining item's wfcheck to run before all uses are
+    /// normalized: wfcheck itself may depend on typeck, trait solving, and
+    /// normalization, so enforcing such a strict ordering would easily create
+    /// query cycles.
+    ///
+    /// However, when CTFE runs on a MIR body, normalizing a type const within
+    /// that body can change the type of the resulting value, causing the MIR
+    /// to become ill-formed. If `check_type_const` for that alias has not yet
+    /// reported its error, no prior error has been recorded and MIR validation
+    /// fires a `span_bug!`. Registering the obligation here ensures the type
+    /// mismatch is reported during normalization itself, tainting the MIR
+    /// before validation runs.
     pub fn instantiate_normalizes_to_term(
         &mut self,
         goal: Goal<I, NormalizesTo<I>>,
         term: I::Term,
     ) {
+        if let Some(ct) = term.as_const() {
+            let cx = self.cx();
+            let alias = goal.predicate.alias;
+            let expected_ty =
+                cx.type_of(alias.def_id()).instantiate(cx, alias.args).skip_norm_wip();
+            self.add_goal(
+                GoalSource::Misc,
+                goal.with(cx, ty::ClauseKind::ConstArgHasType(ct, expected_ty)),
+            );
+        }
         self.eq(goal.param_env, goal.predicate.term, term)
             .expect("expected goal term to be fully unconstrained");
     }
@@ -322,9 +353,9 @@ where
                                 .map_err(Into::into);
                         }
                         // Outside of coherence, we treat the associated item as rigid instead.
-                        ty::TypingMode::Analysis { .. }
-                        | ty::TypingMode::Borrowck { .. }
-                        | ty::TypingMode::PostBorrowckAnalysis { .. }
+                        ty::TypingMode::Typeck { .. }
+                        | ty::TypingMode::PostTypeckUntilBorrowck { .. }
+                        | ty::TypingMode::PostBorrowck { .. }
                         | ty::TypingMode::PostAnalysis
                         | ty::TypingMode::Codegen => {
                             ecx.structurally_instantiate_normalizes_to_term(
@@ -436,10 +467,21 @@ where
     /// Fail to normalize if the predicate contains an error, alternatively, we could normalize to `ty::Error`
     /// and succeed. Can experiment with this to figure out what results in better error messages.
     fn consider_error_guaranteed_candidate(
-        _ecx: &mut EvalCtxt<'_, D>,
-        _guar: I::ErrorGuaranteed,
+        ecx: &mut EvalCtxt<'_, D>,
+        goal: Goal<I, Self>,
+        guar: I::ErrorGuaranteed,
     ) -> Result<Candidate<I>, NoSolutionOrRerunNonErased> {
-        Err(NoSolution.into())
+        let cx = ecx.cx();
+        let error_term = match goal.predicate.alias.kind {
+            ty::AliasTermKind::ProjectionTy { .. } => Ty::new_error(cx, guar).into(),
+            ty::AliasTermKind::ProjectionConst { .. } => Const::new_error(cx, guar).into(),
+            kind => panic!("expected projection, found {kind:?}"),
+        };
+
+        ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
+            ecx.instantiate_normalizes_to_term(goal, error_term);
+            ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+        })
     }
 
     fn consider_auto_trait_candidate(

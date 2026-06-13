@@ -1009,30 +1009,6 @@ pub(crate) struct TransparentEnumVariant {
 }
 
 #[derive(Diagnostic)]
-#[diag("the variant of a transparent {$desc} needs at most one field with non-trivial size or alignment, but has {$field_count}", code = E0690)]
-pub(crate) struct TransparentNonZeroSizedEnum<'a> {
-    #[primary_span]
-    #[label("needs at most one field with non-trivial size or alignment, but has {$field_count}")]
-    pub span: Span,
-    #[label("this field has non-zero size or requires alignment")]
-    pub spans: Vec<Span>,
-    pub field_count: usize,
-    pub desc: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag("transparent {$desc} needs at most one field with non-trivial size or alignment, but has {$field_count}", code = E0690)]
-pub(crate) struct TransparentNonZeroSized<'a> {
-    #[primary_span]
-    #[label("needs at most one field with non-trivial size or alignment, but has {$field_count}")]
-    pub span: Span,
-    #[label("this field has non-zero size or requires alignment")]
-    pub spans: Vec<Span>,
-    pub field_count: usize,
-    pub desc: &'a str,
-}
-
-#[derive(Diagnostic)]
 #[diag("extern static is too large for the target architecture")]
 pub(crate) struct TooLargeStatic {
     #[primary_span]
@@ -2032,6 +2008,19 @@ pub(crate) struct PinV2WithoutPinDrop {
         code = "",
         applicability = "maybe-incorrect"
     )]
+    pub pin_v2_span: Option<Span>,
+    pub adt_name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("`#[pin_v2]` types may not have `#[repr(packed)]`")]
+#[note(
+    "fields of a `#[repr(packed)]` type can be under-aligned, so a structurally pinned field may be moved to a properly aligned location, which `Pin` does not allow"
+)]
+pub(crate) struct PinV2OnPacked {
+    #[primary_span]
+    pub span: Span,
+    #[note("`{$adt_name}` is marked `#[pin_v2]` here")]
     pub pin_v2_span: Option<Span>,
     pub adt_name: Symbol,
 }

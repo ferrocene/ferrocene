@@ -1885,6 +1885,7 @@ commands:
                 name: Prepare emulator
                 command: |
                   docker run \
+                    --device /dev/kvm \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
@@ -1906,6 +1907,7 @@ commands:
                 background: true
                 command: |
                   docker run \
+                    --device /dev/kvm \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /home/ci/project \
@@ -1923,6 +1925,7 @@ commands:
       - ferrocene-ci:
           wrapper: |
             docker run \
+              --device /dev/kvm \
               --rm \
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /home/ci/project \

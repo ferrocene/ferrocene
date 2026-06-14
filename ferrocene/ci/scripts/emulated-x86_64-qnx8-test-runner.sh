@@ -26,8 +26,9 @@ start_vm() {
     # set memory to 11G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+ and has two
     # variants which can run in parallel
     qemu-system-x86_64 \
+        -enable-kvm \
+        -cpu host \
         -smp 2 \
-        -cpu max \
         -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device virtio-net-pci,netdev=net0 \

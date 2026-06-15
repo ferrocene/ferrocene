@@ -22,3 +22,12 @@ fn h<'r>(x: <dyn Inner + 'r as Outer<'r>>::Ty) { /*check*/ i(x) }
 fn i<'r>(x: <dyn Inner as self::Outer<'r>>::Ty) {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

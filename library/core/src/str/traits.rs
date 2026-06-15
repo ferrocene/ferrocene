@@ -123,6 +123,7 @@ const unsafe impl SliceIndex<str> for ops::RangeFull {
 /// Check that a range is in bounds for slicing a string.
 /// If this returns true, it is safe to call `slice.get_unchecked(range)` or
 /// `slice.get_unchecked_mut(range)`.
+#[ferrocene::prevalidated]
 #[inline(always)]
 const fn check_range(slice: &str, range: crate::range::Range<usize>) -> bool {
     let crate::range::Range { start, end } = range;
@@ -265,6 +266,7 @@ const unsafe impl SliceIndex<str> for ops::Range<usize> {
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 const unsafe impl SliceIndex<str> for range::Range<usize> {
     type Output = str;
+    #[ferrocene::prevalidated]
     #[inline]
     fn get(self, slice: &str) -> Option<&Self::Output> {
         if check_range(slice, self) {
@@ -276,6 +278,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             None
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn get_mut(self, slice: &mut str) -> Option<&mut Self::Output> {
         if check_range(slice, self) {
@@ -286,6 +289,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             None
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
     unsafe fn get_unchecked(self, slice: *const str) -> *const Self::Output {
@@ -314,6 +318,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             slice.as_ptr().add(self.start).cast_slice(new_len) as *const str
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
     unsafe fn get_unchecked_mut(self, slice: *mut str) -> *mut Self::Output {
@@ -335,6 +340,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             slice.as_mut_ptr().add(self.start).cast_slice(new_len) as *mut str
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn index(self, slice: &str) -> &Self::Output {
         let (start, end) = (self.start, self.end);
@@ -343,6 +349,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             None => super::slice_error_fail(slice, start, end),
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn index_mut(self, slice: &mut str) -> &mut Self::Output {
         // cannot reuse `get` as above, because of NLL trouble

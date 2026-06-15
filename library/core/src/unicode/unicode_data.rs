@@ -365,12 +365,14 @@ pub mod cf {
         173, 1, 0, 6, 22, 1, 192, 1, 49, 1, 0, 2, 80, 1, 0, 1, 0, 5, 26, 5, 49, 5, 1, 10, 0, 1,
         249, 3, 0, 1, 15, 1, 0, 16, 0, 4, 0, 8, 0, 1, 30, 96, 0,
     ];
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         (c as u32) >= 0xad && lookup_slow(c)
     }
 
+    #[ferrocene::prevalidated]
     #[inline(never)]
     fn lookup_slow(c: char) -> bool {
         const {
@@ -476,12 +478,14 @@ pub mod cn_planes_0_3 {
         12, 4, 56, 8, 10, 6, 40, 8, 30, 2, 12, 4, 2, 14, 9, 39, 0, 8, 14, 2, 13, 3, 11, 3, 57, 1, 1,
         4, 16, 2, 12, 4, 10, 7, 147, 1, 103, 0, 0, 32, 0, 2, 0, 2, 0, 15, 0, 0, 0, 0, 0, 5, 0, 0, 0,
     ];
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         (c as u32) >= 0x378 && lookup_slow(c)
     }
 
+    #[ferrocene::prevalidated]
     #[inline(never)]
     fn lookup_slow(c: char) -> bool {
         const {
@@ -514,12 +518,14 @@ pub mod default_ignorable_code_point {
         173, 1, 0, 1, 0, 1, 0, 2, 0, 2, 85, 5, 0, 5, 26, 5, 49, 16, 0, 1, 0, 16, 239, 1, 160, 1,
         79, 9, 0, 4, 0, 8, 0, 0, 0,
     ];
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn lookup(c: char) -> bool {
         debug_assert!(!c.is_ascii());
         (c as u32) >= 0xad && lookup_slow(c)
     }
 
+    #[ferrocene::prevalidated]
     #[inline(never)]
     fn lookup_slow(c: char) -> bool {
         const {

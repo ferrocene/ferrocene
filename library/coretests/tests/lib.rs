@@ -83,12 +83,8 @@
 #![feature(iterator_try_collect)]
 #![feature(iterator_try_reduce)]
 #![feature(layout_for_ptr)]
-<<<<<<< ferrocene/main
-#![feature(maybe_dangling)]
-||||||| 76dfce2cb2d
-=======
 #![feature(macro_metavar_expr_concat)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#![feature(maybe_dangling)]
 #![feature(maybe_uninit_fill)]
 #![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(min_specialization)]

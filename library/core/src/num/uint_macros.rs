@@ -2004,6 +2004,7 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!(0x10", stringify!($SelfT), ".checked_shl(129), None);")]
         #[doc = concat!("assert_eq!(0x10", stringify!($SelfT), ".checked_shl(", stringify!($BITS_MINUS_ONE), "), Some(0));")]
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_checked_int_methods", since = "1.47.0")]
         #[must_use = "this returns the result of the operation, \
@@ -2109,6 +2110,7 @@ macro_rules! uint_impl {
         ///     running <<= 1;
         /// }
         /// ```
+    #[ferrocene::prevalidated]
         #[stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[rustc_const_stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \
@@ -2452,6 +2454,7 @@ macro_rules! uint_impl {
         /// ```should_panic
         #[doc = concat!("let _ = ", stringify!($SelfT), "::MAX.strict_pow(2);")]
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
         #[rustc_const_stable(feature = "strict_overflow_ops", since = "1.91.0")]
         #[must_use = "this returns the result of the operation, \
@@ -2959,6 +2962,7 @@ macro_rules! uint_impl {
         /// assert_eq!(3u8.wrapping_pow(6), 217);
         #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".wrapping_pow(0), 1);")]
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "no_panic_pow", since = "1.34.0")]
         #[rustc_const_stable(feature = "const_int_pow", since = "1.50.0")]
         #[must_use = "this returns the result of the operation, \
@@ -3562,6 +3566,7 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".overflowing_pow(0), (1, false));")]
         /// assert_eq!(3u8.overflowing_pow(6), (217, true));
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "no_panic_pow", since = "1.34.0")]
         #[rustc_const_stable(feature = "const_int_pow", since = "1.50.0")]
         #[must_use = "this returns the result of the operation, \
@@ -3633,62 +3638,16 @@ macro_rules! uint_impl {
         #[doc = concat!("assert_eq!(2", stringify!($SelfT), ".pow(5), 32);")]
         #[doc = concat!("assert_eq!(0_", stringify!($SelfT), ".pow(0), 1);")]
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_int_pow", since = "1.50.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
         #[rustc_inherit_overflow_checks]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-        pub const fn pow(self, mut exp: u32) -> Self {
-            if exp == 0 {
-                return 1;
-            }
-            let mut base = self;
-            let mut acc = 1;
-
-            if intrinsics::is_val_statically_known(exp) {
-                while exp > 1 {
-                    if (exp & 1) == 1 {
-                        acc = acc * base;
-                    }
-                    exp /= 2;
-                    base = base * base;
-                }
-
-                // since exp!=0, finally the exp must be 1.
-                // Deal with the final bit of the exponent separately, since
-                // squaring the base afterwards is not necessary and may cause a
-                // needless overflow.
-                acc * base
-||||||| 76dfce2cb2d
-        pub const fn pow(self, mut exp: u32) -> Self {
-            if exp == 0 {
-                return 1;
-            }
-            let mut base = self;
-            let mut acc = 1;
-
-            if intrinsics::is_val_statically_known(exp) {
-                while exp > 1 {
-                    if (exp & 1) == 1 {
-                        acc = acc * base;
-                    }
-                    exp /= 2;
-                    base = base * base;
-                }
-
-                // since exp!=0, finally the exp must be 1.
-                // Deal with the final bit of the exponent separately, since
-                // squaring the base afterwards is not necessary and may cause a
-                // needless overflow.
-                acc * base
-=======
         pub const fn pow(self, exp: u32) -> Self {
             if intrinsics::overflow_checks() {
                 self.strict_pow(exp)
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             } else {
                 self.wrapping_pow(exp)
             }

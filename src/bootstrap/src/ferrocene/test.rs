@@ -5,6 +5,7 @@ pub(crate) mod certified_core_symbols;
 pub(crate) mod flip_link;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
@@ -163,6 +164,7 @@ impl Step for GenerateTarball {
             "generate-tarball",
             self.target,
             builder,
+            builder.ensure(SetupFailedTestsFile),
         );
     }
 

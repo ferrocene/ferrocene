@@ -50,6 +50,7 @@ pub(in crate::num) const fn shl() -> ! {
     panic!("attempt to shift left with overflow")
 }
 
+#[ferrocene::prevalidated]
 #[cold]
 #[track_caller]
 pub(in crate::num) const fn pow() -> ! {

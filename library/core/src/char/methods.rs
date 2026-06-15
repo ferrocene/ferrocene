@@ -1120,6 +1120,7 @@ impl char {
     /// assert!('\u{9C}'.is_control()); // STRING TERMINATOR
     /// assert!(!'q'.is_control());
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_is_control", since = "1.97.0")]
@@ -1148,6 +1149,7 @@ impl char {
     /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
     ///
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline]
     const fn is_private_use(self) -> bool {
@@ -1180,6 +1182,7 @@ impl char {
     /// assert!('𓐲'.is_format_control()); // EGYPTIAN HIEROGLYPH INSERT AT TOP START
     /// assert!(!'q'.is_format_control());
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline]
     fn is_format_control(self) -> bool {
@@ -1220,6 +1223,7 @@ impl char {
     ///
     /// assert!(!'γ'.is_unassigned()); // once a character is assigned, it stays assigned forever
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline]
     fn is_unassigned(self) -> bool {
@@ -1262,6 +1266,7 @@ impl char {
     /// assert!(!'\n'.is_default_ignorable());
     /// assert!(!'\0'.is_default_ignorable());
     /// assert!(!'q'.is_default_ignorable());
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline]
     fn is_default_ignorable(self) -> bool {
@@ -1276,16 +1281,10 @@ impl char {
     /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G41165
     /// [specified]: https://www.unicode.org/reports/tr44/#Grapheme_Extend
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    pub(crate) fn is_grapheme_extended(self) -> bool {
-||||||| 76dfce2cb2d
-    pub(crate) fn is_grapheme_extended(self) -> bool {
-=======
     fn is_grapheme_extender(self) -> bool {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self > '\u{02FF}' && unicode::Grapheme_Extend(self)
     }
 

@@ -217,6 +217,7 @@ const impl<T> From<Range<T>> for legacy::Range<T> {
 #[stable(feature = "new_range_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl<T> From<legacy::Range<T>> for Range<T> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn from(value: legacy::Range<T>) -> Self {
         Self { start: value.start, end: value.end }

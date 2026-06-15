@@ -27,3 +27,12 @@ fn check1<'r>(x: Ty1<'r, 0, dyn Inner, ()>) {
 trait Inner {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

@@ -31,3 +31,12 @@ trait AbideBy<'a> {}
 impl<'a> AbideBy<'a> for dyn Inner + 'a {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

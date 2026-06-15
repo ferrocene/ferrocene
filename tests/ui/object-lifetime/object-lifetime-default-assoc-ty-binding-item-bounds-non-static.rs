@@ -31,3 +31,12 @@ fn main() {
     // If it weren't for the conservative path above, we'd expect an error here.
     is_static(r.item());
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

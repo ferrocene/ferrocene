@@ -809,18 +809,6 @@ impl Subcommand {
             _ => false,
         }
     }
-<<<<<<< ferrocene/main
-
-    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
-        match *self {
-            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
-                ferrocene_test_one_crate_per_cargo_call
-            }
-            _ => false,
-        }
-    }
-||||||| 76dfce2cb2d
-=======
 
     pub fn record(&self) -> bool {
         match self {
@@ -835,7 +823,15 @@ impl Subcommand {
             _ => false,
         }
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+
+    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
+        match *self {
+            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
+                ferrocene_test_one_crate_per_cargo_call
+            }
+            _ => false,
+        }
+    }
 }
 
 /// Returns the shell completion for a given shell, if the result differs from the current

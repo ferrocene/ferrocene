@@ -1134,8 +1134,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1155,23 +1154,6 @@ mod snapshot {
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1194,7 +1176,7 @@ mod snapshot {
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
-        "###
+        "
         );
     }
 
@@ -1266,38 +1248,12 @@ mod snapshot {
                 "--set",
                 "rust.lld=true",
             ])
-<<<<<<< ferrocene/main
-            .render_steps(), @r###"
-||||||| 76dfce2cb2d
-            .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-=======
-            .render_steps(), @r"
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+            .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> LldWrapper 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
         [build] rustc 0 <host> -> LlvmBitcodeLinker 1 <host>
-<<<<<<< ferrocene/main
-||||||| 76dfce2cb2d
-        [build] rustc 1 <host> -> std 1 <host>
-        [doc] book (book) <host>
-        [doc] book/first-edition (book) <host>
-        [doc] book/second-edition (book) <host>
-        [doc] book/2018-edition (book) <host>
-=======
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [doc] book (book) <host>
-        [doc] book/first-edition (book) <host>
-        [doc] book/second-edition (book) <host>
-        [doc] book/2018-edition (book) <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
@@ -1355,7 +1311,7 @@ mod snapshot {
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
-        "###);
+        ");
     }
 
     #[test]
@@ -1366,8 +1322,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1393,26 +1348,6 @@ mod snapshot {
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
         [doc] unstable-book (book) <target1>
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [doc] unstable-book (book) <target1>
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [doc] unstable-book (book) <target1>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1450,7 +1385,7 @@ mod snapshot {
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        "###
+        "
         );
     }
 
@@ -1462,8 +1397,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1490,24 +1424,6 @@ mod snapshot {
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [build] rustc 1 <host> -> std 1 <target1>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1515,15 +1431,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
-<<<<<<< ferrocene/main
-||||||| 76dfce2cb2d
-        [build] llvm <target1>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 1 <host> -> rustc 2 <target1>
-=======
-        [build] llvm <target1>
-        [build] rustc 1 <host> -> rustc 2 <target1>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustc 1 <host> -> error-index 2 <target1>
         [doc] rustc 1 <host> -> error-index 2 <target1>
         [doc] nomicon (book) <host>
@@ -1542,7 +1449,7 @@ mod snapshot {
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
-        "###
+        "
         );
     }
 
@@ -1554,8 +1461,7 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustdoc 1 <host>
@@ -1587,26 +1493,6 @@ mod snapshot {
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
         [doc] unstable-book (book) <target1>
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [doc] unstable-book (book) <target1>
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [build] rustc 1 <host> -> std 1 <target1>
-        [doc] unstable-book (book) <target1>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1647,7 +1533,7 @@ mod snapshot {
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        "###
+        "
         );
     }
 
@@ -1659,37 +1545,9 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <target1>
-=======
-                .render_steps(), @r"
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-<<<<<<< ferrocene/main
-||||||| 76dfce2cb2d
-        [build] rustc 1 <host> -> std 1 <target1>
-        [doc] book (book) <target1>
-        [doc] book/first-edition (book) <target1>
-        [doc] book/second-edition (book) <target1>
-        [doc] book/2018-edition (book) <target1>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <target1>
-        [doc] book (book) <target1>
-        [doc] book/first-edition (book) <target1>
-        [doc] book/second-edition (book) <target1>
-        [doc] book/2018-edition (book) <target1>
-        [build] rustc 1 <host> -> std 1 <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
@@ -1700,7 +1558,7 @@ mod snapshot {
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        "###);
+        ");
     }
 
     #[test]
@@ -1712,38 +1570,10 @@ mod snapshot {
                 .hosts(&[TEST_TRIPLE_1])
                 .targets(&[TEST_TRIPLE_1])
                 .args(&["--set", "rust.channel=nightly", "--set", "build.extended=true"])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <target1>
-=======
-                .render_steps(), @r"
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> WasmComponentLd 1 <host>
-<<<<<<< ferrocene/main
-||||||| 76dfce2cb2d
-        [build] rustc 1 <host> -> std 1 <target1>
-        [doc] book (book) <target1>
-        [doc] book/first-edition (book) <target1>
-        [doc] book/second-edition (book) <target1>
-        [doc] book/2018-edition (book) <target1>
-        [build] rustc 1 <host> -> std 1 <host>
-=======
-        [build] rustc 1 <host> -> std 1 <target1>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <target1>
-        [doc] book (book) <target1>
-        [doc] book/first-edition (book) <target1>
-        [doc] book/second-edition (book) <target1>
-        [doc] book/2018-edition (book) <target1>
-        [build] rustc 1 <host> -> std 1 <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[]
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
@@ -1803,7 +1633,7 @@ mod snapshot {
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <target1>
-        "###);
+        ");
     }
 
     /// Simulates e.g. the powerpc64 builder, which is fully cross-compiled from x64, but it does
@@ -1884,16 +1714,7 @@ mod snapshot {
             ctx
                 .config("dist")
                 .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
-<<<<<<< ferrocene/main
-                .render_steps(), @r###"
-||||||| 76dfce2cb2d
-                .render_steps(), @r"
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-=======
-                .render_steps(), @r"
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
@@ -1903,7 +1724,6 @@ mod snapshot {
         [dist] rustc 1 <host> -> json-docs 2 <host>
         [dist] mingw <host>
         [build] rustc 1 <host> -> std 1 <host>
-<<<<<<< ferrocene/main
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> rustc_codegen_cranelift 2 <host>
         [build] rustdoc 2 <host>
@@ -1917,12 +1737,6 @@ mod snapshot {
         [build] rustc 0 <host> -> UnstableBookGen 1 <host>
         [build] rustc 0 <host> -> Rustbook 1 <host>
         [doc] unstable-book (book) <host>
-||||||| 76dfce2cb2d
-=======
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [doc] book (book) <host>
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
@@ -1945,7 +1759,7 @@ mod snapshot {
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
-        "###);
+        ");
     }
 
     #[test]
@@ -2740,7 +2554,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("doc")
-                .render_steps(), @r"
+                .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
@@ -2751,18 +2565,6 @@ mod snapshot {
         [doc] book/first-edition (book) <host>
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
-<<<<<<< ferrocene/main
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-||||||| 76dfce2cb2d
-        [build] rustdoc 0 <host>
-        [doc] rustc 0 <host> -> standalone 1 <host>
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-=======
-        [build] rustdoc 0 <host>
-        [doc] rustc 0 <host> -> standalone 1 <host>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustdoc 1 <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [build] rustc 0 <host> -> error-index 1 <host>
@@ -3121,33 +2923,7 @@ mod snapshot {
                 }), @"
         [build] llvm <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
-<<<<<<< ferrocene/main
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
-||||||| 76dfce2cb2d
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
-        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
-        [doc] book (book) <x86_64-unknown-linux-gnu>
-        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
-        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-=======
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
-        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
-        [doc] book (book) <x86_64-unknown-linux-gnu>
-        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
-        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
         [build] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
@@ -3179,74 +2955,8 @@ mod snapshot {
                 .get_steps()
                 .render_with(RenderConfig {
                     normalize_host: false
-<<<<<<< ferrocene/main
                 }), @"
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
-||||||| 76dfce2cb2d
-                }), @r"
-        [build] llvm <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
-        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
-        [doc] book (book) <x86_64-unknown-linux-gnu>
-        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
-        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
-        [doc] nomicon (book) <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> reference (book) 2 <x86_64-unknown-linux-gnu>
-        [doc] rustdoc (book) <x86_64-unknown-linux-gnu>
-        [doc] rust-by-example (book) <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> LintDocs 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc (book) <x86_64-unknown-linux-gnu>
-        [doc] cargo (book) <x86_64-unknown-linux-gnu>
-        [doc] clippy (book) <x86_64-unknown-linux-gnu>
-        [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
-        [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
-        [doc] style-guide (book) <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
-        [dist] docs <x86_64-unknown-linux-gnu>
-=======
-                }), @r"
-        [build] llvm <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
-        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
-        [doc] book (book) <x86_64-unknown-linux-gnu>
-        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
-        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
-        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
-        [doc] nomicon (book) <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> reference (book) 2 <x86_64-unknown-linux-gnu>
-        [doc] rustdoc (book) <x86_64-unknown-linux-gnu>
-        [doc] rust-by-example (book) <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> LintDocs 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc (book) <x86_64-unknown-linux-gnu>
-        [doc] cargo (book) <x86_64-unknown-linux-gnu>
-        [doc] clippy (book) <x86_64-unknown-linux-gnu>
-        [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
-        [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
-        [doc] style-guide (book) <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
-        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
-        [dist] docs <x86_64-unknown-linux-gnu>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [dist] src <>
         ");
     }
@@ -3300,11 +3010,10 @@ mod snapshot {
                 .get_steps()
                 .render_with(RenderConfig {
                     normalize_host: false
-                }), @r###"
+                }), @"
         [build] llvm <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> WasmComponentLd 1 <x86_64-unknown-linux-gnu>
-<<<<<<< ferrocene/main
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> WasmComponentLd 2 <x86_64-unknown-linux-gnu>
@@ -3331,10 +3040,6 @@ mod snapshot {
         [build] rustc 2 <x86_64-unknown-linux-gnu> -> cargo-miri 3 <x86_64-unknown-linux-gnu>
         [dist] rustc 2 <x86_64-unknown-linux-gnu> -> miri 3 <x86_64-unknown-linux-gnu>
         [dist] src <>
-||||||| 76dfce2cb2d
-=======
-        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
         [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
@@ -3360,7 +3065,7 @@ mod snapshot {
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
         [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu> crates=[core]
-        "###);
+        ");
     }
 
     #[test]

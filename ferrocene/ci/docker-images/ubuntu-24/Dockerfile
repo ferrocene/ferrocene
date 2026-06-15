@@ -84,8 +84,10 @@ RUN <<-EOF
     addgroup --gid 993 kvm # we need to match the group of the host here and our image should be stable
     addgroup --gid 1000 ci
     addgroup --gid 1001 ci-usergroup
-    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password --groups kvm ci
-    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password --groups kvm ci-user
+    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci
+    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
+    adduser ci kvm
+    adduser ci-user kvm
     chown -R ci: /home/ci
 EOF
 USER ci

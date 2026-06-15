@@ -1909,6 +1909,7 @@ commands:
                     --volume /tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
+                    --group-add $(getent group kvm | cut -d: -f3) \
                     --network host \
                     --privileged \
                     --interactive \
@@ -1930,6 +1931,7 @@ commands:
                     --volume /tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
+                    --group-add $(getent group kvm | cut -d: -f3) \
                     --network host \
                     --privileged \
                     --interactive \
@@ -1948,6 +1950,7 @@ commands:
               --volume /tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \
+              --group-add $(getent group kvm | cut -d: -f3) \
               --network host \
               --interactive \
               --tty \

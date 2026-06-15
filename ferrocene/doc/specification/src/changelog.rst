@@ -103,6 +103,7 @@ Language changes in Rust 1.95.0
     - :p:`fls_sUhnfV62HJrb`
     - :p:`fls_QGdeRTe0H1Uc`
     - :p:`fls_aam34hsRmKU2`
+    - :p:`fls_uSajfdSsbxna`
 
   - Changed paragraphs:
 
@@ -110,6 +111,7 @@ Language changes in Rust 1.95.0
     - :p:`fls_iuzvtr3oax1o`
     - :p:`fls_90hQvSh7Bfyg`
     - :p:`fls_RUiFQ17bmRLt`
+    - :p:`fls_opn5n5t2mo3m`
 
 - `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
 

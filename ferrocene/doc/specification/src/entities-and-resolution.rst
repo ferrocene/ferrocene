@@ -295,9 +295,7 @@ A :t:`path segment` is an element of a :t:`path`.
 A :t:`path` is subject to :t:`path resolution`.
 
 :dp:`fls_opn5n5t2mo3m`
-If a :t:`path segment` is expressed as either :t:`keyword` ``crate``,
-:t:`keyword` ``$crate``, or :t:`keyword` ``Self``, then
-the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
+If a :t:`path segment` is expressed as either :t:`keyword` ``crate``, :t:`keyword` ``$crate``, or :t:`keyword` ``Self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
 
 :dp:`fls_uSajfdSsbxna`
 If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`, except that it may also be the last :t:`path segment` of a :t:`simple import` that appears in a :t:`nesting import`.

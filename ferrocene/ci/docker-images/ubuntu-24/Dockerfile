@@ -82,8 +82,8 @@ RUN <<-EOF
     deluser --remove-home ubuntu
     addgroup --gid 1000 ci
     addgroup --gid 1001 ci-usergroup
-    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci
-    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
+    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password --groups kvm ci
+    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password --groups kvm ci-user
     chown -R ci: /home/ci
 EOF
 USER ci

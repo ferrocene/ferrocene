@@ -52,6 +52,7 @@ RUN <<-EOF
     apt-install \
         qemu-system-arm \
         qemu-system-x86 \
+        qemu-kvm \
         bridge-utils \
         dnsmasq \
         net-tools \
@@ -80,6 +81,7 @@ RUN <<-EOF
     set -xe
     mkdir /home/ci
     deluser --remove-home ubuntu
+    addgroup --gid 993 kvm # we need to match the group of the host here and our image should be stable
     addgroup --gid 1000 ci
     addgroup --gid 1001 ci-usergroup
     adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password --groups kvm ci

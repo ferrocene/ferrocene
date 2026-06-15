@@ -1801,6 +1801,7 @@ supported_targets! {
     ("aarch64r82-unknown-none", aarch64r82_unknown_none),
     ("aarch64r82-unknown-none-softfloat", aarch64r82_unknown_none_softfloat),
     ("aarch64r82-unknown-ferrocene.facade", aarch64r82_unknown_ferrocene_facade),
+    ("armv7r-ferrocene.facade-eabihf", armv7r_ferrocene_facade_eabihf),
     ("thumbv7em-ferrocene.facade-eabi", thumbv7em_ferrocene_facade_eabi),
     ("thumbv7em-ferrocene.facade-eabihf", thumbv7em_ferrocene_facade_eabihf),
     ("aarch64-rhivos2-linux-gnu", aarch64_rhivos2_linux_gnu),

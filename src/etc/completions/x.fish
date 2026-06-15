@@ -438,7 +438,7 @@ complete -c x -n "__fish_x_using_subcommand test" -l run -d 'whether to execute 
 complete -c x -n "__fish_x_using_subcommand test" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand test" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x -n "__fish_x_using_subcommand test" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
-complete -c x -n "__fish_x_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-specific-cortex-m4\t''}"
+complete -c x -n "__fish_x_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-cortex-r5f\t'',2021-specific-cortex-m4\t''}"
 complete -c x -n "__fish_x_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand test" -l build -d 'host target of the stage0 compiler' -r -f
@@ -496,7 +496,7 @@ complete -c x -n "__fish_x_using_subcommand t" -l run -d 'whether to execute run
 complete -c x -n "__fish_x_using_subcommand t" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x -n "__fish_x_using_subcommand t" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x -n "__fish_x_using_subcommand t" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
-complete -c x -n "__fish_x_using_subcommand t" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-specific-cortex-m4\t''}"
+complete -c x -n "__fish_x_using_subcommand t" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-cortex-r5f\t'',2021-specific-cortex-m4\t''}"
 complete -c x -n "__fish_x_using_subcommand t" -l config -d 'TOML configuration file for build' -r -F
 complete -c x -n "__fish_x_using_subcommand t" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x -n "__fish_x_using_subcommand t" -l build -d 'host target of the stage0 compiler' -r -f

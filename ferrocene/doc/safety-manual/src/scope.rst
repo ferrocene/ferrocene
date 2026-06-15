@@ -35,6 +35,12 @@ This qualification is restricted to the following environment:
      - ``proc_macro``
 
    * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`armv7r-none-eabihf`
+     - ``core``
+     - ``alloc``
+     -
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
      - ``core``
      - ``alloc``

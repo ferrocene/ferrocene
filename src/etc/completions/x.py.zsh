@@ -515,7 +515,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
-'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-cortex-r5f 2021-specific-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \
@@ -583,7 +583,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
-'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-cortex-r5f 2021-specific-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \

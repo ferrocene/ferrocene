@@ -302,7 +302,7 @@ It is sometimes possible for Experimental targets to be qualified or quality man
      - Notes
 
    * - :target:`aarch64r82-unknown-none-softfloat`
-     - ``aarch64v8r-unknown-none-softfloat``
+     - ``aarch64r82-unknown-none-softfloat``
      - Cross-compilation
      - Bare-metal
      - \-

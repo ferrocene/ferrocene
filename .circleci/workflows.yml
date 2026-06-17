@@ -508,7 +508,7 @@ jobs:
             # Darwin does not come with awscli, setup it before aws steps
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
             - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
@@ -597,7 +597,7 @@ jobs:
             # Darwin does not come with awscli, setup it before aws steps
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
             - aws-oidc-auth
             - ferrocene-setup-darwin
             - setup-uv
@@ -1501,7 +1501,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - aws-oidc-auth
       - when:
           condition:
@@ -1549,7 +1549,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - aws-oidc-auth
       - when:
           condition:
@@ -1592,7 +1592,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - setup-uv
       - aws-oidc-auth
       - when:

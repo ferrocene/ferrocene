@@ -24,6 +24,7 @@ mod locals;
 pub mod naked_asm;
 pub mod operand;
 pub mod place;
+mod retag;
 mod rvalue;
 mod statement;
 
@@ -223,8 +224,6 @@ pub fn codegen_mir<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
         mir = tcx.arena.alloc(optimize_use_clone::<Bx>(cx, monomorphized_mir));
     }
 
-    let debug_context = cx.create_function_debug_context(instance, fn_abi, llfn, &mir);
-
     let start_llbb = Bx::append_block(cx, llfn, "start");
     let mut start_bx = Bx::build(cx, start_llbb);
 
@@ -260,7 +259,7 @@ pub fn codegen_mir<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
         funclets: IndexVec::from_fn_n(|_| None, mir.basic_blocks.len()),
         cold_blocks: find_cold_blocks(tcx, mir),
         locals: locals::Locals::empty(),
-        debug_context,
+        debug_context: None,
         per_local_var_debug_info: None,
         caller_location: None,
     };
@@ -269,6 +268,8 @@ pub fn codegen_mir<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     // evaluate; however, the `MirUsedCollector` already did that during the collection phase of
     // monomorphization, and if there is an error during collection then codegen never starts -- so
     // we don't have to do it again.
+
+    fx.fill_function_debug_context();
 
     let (per_local_var_debug_info, consts_debug_info) =
         fx.compute_per_local_var_debug_info(&mut start_bx).unzip();
@@ -425,7 +426,7 @@ fn arg_local_refs<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
         return vec![];
     }
 
-    let args = mir
+    let mut args = mir
         .args_iter()
         .enumerate()
         .map(|(arg_index, local)| {
@@ -562,6 +563,32 @@ fn arg_local_refs<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
             }
         })
         .collect::<Vec<_>>();
+    if bx.tcx().sess.opts.unstable_opts.codegen_emit_retag.is_some() {
+        args = args
+            .iter()
+            .map(|arg| match arg {
+                &LocalRef::Place(place_ref) => {
+                    fx.codegen_retag_place(bx, place_ref, true);
+                    LocalRef::Place(place_ref)
+                }
+                &LocalRef::UnsizedPlace(place_ref) => {
+                    let operand = bx.load_operand(place_ref);
+                    let retagged = fx.codegen_retag_operand(bx, operand, true);
+                    assert!(matches!(retagged.val, OperandValue::Pair(_, _)));
+                    retagged.val.store(bx, place_ref);
+                    LocalRef::UnsizedPlace(place_ref)
+                }
+                &LocalRef::Operand(operand_ref) => {
+                    let retagged = fx.codegen_retag_operand(bx, operand_ref, true);
+                    LocalRef::Operand(retagged)
+                }
+                LocalRef::PendingOperand => LocalRef::PendingOperand,
+            })
+            .collect::<Vec<_>>();
+        // If we branched during retagging, then we need to update the
+        // start block to the new location.
+        fx.cached_llbbs[mir::START_BLOCK] = CachedLlbb::Some(bx.llbb());
+    }
 
     if fx.instance.def.requires_caller_location(bx.tcx()) {
         let mir_args = if let Some(num_untupled) = num_untupled {

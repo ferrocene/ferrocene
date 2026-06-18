@@ -43,14 +43,15 @@ use rustc_ast::visit::Visitor;
 use rustc_ast::{self as ast, *};
 use rustc_attr_parsing::{AttributeParser, OmitDoc, Recovery, ShouldEmit};
 use rustc_data_structures::fingerprint::Fingerprint;
-use rustc_data_structures::fx::FxIndexSet;
+use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::stable_hash::{StableHash, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::TaggedRef;
+use rustc_errors::codes::*;
 use rustc_errors::{DiagArgFromDisplay, DiagCtxtHandle};
 use rustc_hir::def::{DefKind, LifetimeRes, Namespace, PartialRes, PerNS, Res};
-use rustc_hir::def_id::{CRATE_DEF_ID, LOCAL_CRATE, LocalDefId};
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::PerParentDisambiguatorState;
 use rustc_hir::lints::DelayedLint;
 use rustc_hir::{
@@ -60,8 +61,9 @@ use rustc_hir::{
 use rustc_index::{Idx, IndexSlice, IndexVec};
 use rustc_macros::extension;
 use rustc_middle::hir::{self as mid_hir};
+use rustc_middle::queries::Providers;
 use rustc_middle::span_bug;
-use rustc_middle::ty::{DelegationInfo, PerOwnerResolverData, ResolverAstLowering, TyCtxt};
+use rustc_middle::ty::{PerOwnerResolverData, ResolverAstLowering, TyCtxt};
 use rustc_session::errors::add_feature_diagnostics;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
 use rustc_span::{DUMMY_SP, DesugaringKind, Span};
@@ -69,7 +71,7 @@ use smallvec::SmallVec;
 use thin_vec::ThinVec;
 use tracing::{debug, instrument, trace};
 
-use crate::errors::{AssocTyParentheses, AssocTyParenthesesSub, MisplacedImplTrait};
+use crate::diagnostics::{AssocTyParentheses, AssocTyParenthesesSub, MisplacedImplTrait};
 use crate::item::Owners;
 
 macro_rules! arena_vec {
@@ -82,7 +84,7 @@ mod asm;
 mod block;
 mod contract;
 mod delegation;
-mod errors;
+mod diagnostics;
 mod expr;
 mod format;
 mod index;
@@ -90,6 +92,12 @@ mod item;
 mod pat;
 mod path;
 pub mod stability;
+
+pub fn provide(providers: &mut Providers) {
+    providers.hir_crate = lower_to_hir;
+    providers.lower_delayed_owner = lower_delayed_owner;
+    providers.delegations_resolutions = delegation::delegations_resolutions;
+}
 
 struct LoweringContext<'a, 'hir> {
     tcx: TyCtxt<'hir>,
@@ -299,10 +307,6 @@ impl<'tcx> ResolverAstLowering<'tcx> {
         self.extra_lifetime_params_map.get(&id).map_or(&[], |v| &v[..])
     }
 
-    fn delegation_info(&self, id: LocalDefId) -> Option<&DelegationInfo> {
-        self.delegation_infos.get(&id)
-    }
-
     fn owner_def_id(&self, id: NodeId) -> LocalDefId {
         self.owners[&id].def_id
     }
@@ -312,11 +316,19 @@ impl<'tcx> ResolverAstLowering<'tcx> {
 ///
 /// Relaxed bounds should only be allowed in places where we later
 /// (namely during HIR ty lowering) perform *sized elaboration*.
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 enum RelaxedBoundPolicy<'a> {
-    Allowed,
-    AllowedIfOnTyParam(NodeId, &'a [ast::GenericParam]),
+    /// The `DefId` refers to the trait that is being relaxed.
+    Allowed(&'a mut FxIndexMap<DefId, Span>),
     Forbidden(RelaxedBoundForbiddenReason),
+}
+impl RelaxedBoundPolicy<'_> {
+    fn reborrow(&mut self) -> RelaxedBoundPolicy<'_> {
+        match self {
+            RelaxedBoundPolicy::Allowed(m) => RelaxedBoundPolicy::Allowed(m),
+            RelaxedBoundPolicy::Forbidden(reason) => RelaxedBoundPolicy::Forbidden(*reason),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -325,7 +337,9 @@ enum RelaxedBoundForbiddenReason {
     SuperTrait,
     TraitAlias,
     AssocTyBounds,
-    LateBoundVarsInScope,
+    /// We do not allow where bounds doing relaxed bounds,
+    /// except if it's for generic parameters of the current item.
+    WhereBound,
 }
 
 /// Context of `impl Trait` in code, which determines whether it is allowed in an HIR subtree,
@@ -433,6 +447,16 @@ enum AstOwner<'a> {
     ForeignItem(&'a ast::ForeignItem),
 }
 
+impl AstOwner<'_> {
+    fn delegation(&self) -> Option<&ast::Delegation> {
+        match self {
+            AstOwner::Item(Item { kind: ItemKind::Delegation(d), .. })
+            | AstOwner::AssocItem(Item { kind: AssocItemKind::Delegation(d), .. }, _) => Some(d),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 enum TryBlockScope {
     /// There isn't a `try` block, so a `?` will use `return`.
@@ -512,7 +536,7 @@ fn compute_hir_hash(
     })
 }
 
-pub fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
+fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
     // Queries that borrow `resolver_for_lowering`.
     tcx.ensure_done().output_filenames(());
     tcx.ensure_done().early_lint_checks(());
@@ -536,13 +560,11 @@ pub fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
     let mut delayed_ids: FxIndexSet<LocalDefId> = Default::default();
 
     for def_id in ast_index.indices() {
-        match &ast_index[def_id] {
-            AstOwner::Item(Item { kind: ItemKind::Delegation { .. }, .. })
-            | AstOwner::AssocItem(Item { kind: AssocItemKind::Delegation { .. }, .. }, _) => {
-                delayed_ids.insert(def_id);
-            }
-            _ => lowerer.lower_node(def_id),
-        };
+        if ast_index[def_id].delegation().is_some() {
+            delayed_ids.insert(def_id);
+        } else {
+            lowerer.lower_node(def_id);
+        }
     }
 
     // Don't hash unless necessary, because it's expensive.
@@ -554,7 +576,7 @@ pub fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
 }
 
 /// Lowers an AST owner corresponding to `def_id`, now only delegations are lowered this way.
-pub fn lower_delayed_owner(tcx: TyCtxt<'_>, def_id: LocalDefId) {
+fn lower_delayed_owner(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     let krate = tcx.hir_crate(());
 
     let (resolver, krate) = &*krate.delayed_resolver.borrow();
@@ -1129,17 +1151,21 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     {
                         let err = match (&data.inputs[..], &data.output) {
                             ([_, ..], FnRetTy::Default(_)) => {
-                                errors::BadReturnTypeNotation::Inputs { span: data.inputs_span }
+                                diagnostics::BadReturnTypeNotation::Inputs {
+                                    span: data.inputs_span,
+                                }
                             }
                             ([], FnRetTy::Default(_)) => {
-                                errors::BadReturnTypeNotation::NeedsDots { span: data.inputs_span }
+                                diagnostics::BadReturnTypeNotation::NeedsDots {
+                                    span: data.inputs_span,
+                                }
                             }
                             // The case `T: Trait<method(..) -> Ret>` is handled in the parser.
                             (_, FnRetTy::Ty(ty)) => {
                                 let span = data.inputs_span.shrink_to_hi().to(ty.span);
-                                errors::BadReturnTypeNotation::Output {
+                                diagnostics::BadReturnTypeNotation::Output {
                                     span,
-                                    suggestion: errors::RTNSuggestion {
+                                    suggestion: diagnostics::RTNSuggestion {
                                         output: span,
                                         input: data.inputs_span,
                                     },
@@ -1210,7 +1236,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         _ => None,
                     };
 
-                    let guar = self.dcx().emit_err(errors::MisplacedAssocTyBinding {
+                    let guar = self.dcx().emit_err(diagnostics::MisplacedAssocTyBinding {
                         span: constraint.span,
                         suggestion,
                     });
@@ -1513,7 +1539,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ast::GenericBound::Use(_, span) => Some(span),
                             _ => None,
                         }) {
-                            self.tcx.dcx().emit_err(errors::NoPreciseCapturesOnApit { span });
+                            self.tcx.dcx().emit_err(diagnostics::NoPreciseCapturesOnApit { span });
                         }
 
                         let def_id = self.local_def_id(*def_node_id);
@@ -1531,9 +1557,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         }
                         path
                     }
-                    ImplTraitContext::InBinding => hir::TyKind::TraitAscription(
-                        self.lower_param_bounds(bounds, RelaxedBoundPolicy::Allowed, itctx),
-                    ),
+                    ImplTraitContext::InBinding => {
+                        hir::TyKind::TraitAscription(self.lower_param_bounds(
+                            bounds,
+                            RelaxedBoundPolicy::Allowed(&mut Default::default()),
+                            itctx,
+                        ))
+                    }
                     ImplTraitContext::FeatureGated(position, feature) => {
                         let guar = self
                             .tcx
@@ -1656,7 +1686,11 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let opaque_ty_span = self.mark_span_with_reason(DesugaringKind::OpaqueTy, span, None);
 
         self.lower_opaque_inner(opaque_ty_node_id, origin, opaque_ty_span, |this| {
-            this.lower_param_bounds(bounds, RelaxedBoundPolicy::Allowed, itctx)
+            this.lower_param_bounds(
+                bounds,
+                RelaxedBoundPolicy::Allowed(&mut Default::default()),
+                itctx,
+            )
         })
     }
 
@@ -1742,12 +1776,15 @@ impl<'hir> LoweringContext<'_, 'hir> {
         coro: Option<CoroutineKind>,
     ) -> &'hir hir::FnDecl<'hir> {
         let c_variadic = decl.c_variadic();
+        let mut splatted = decl.splatted();
 
         // Skip the `...` (`CVarArgs`) trailing arguments from the AST,
         // as they are not explicit in HIR/Ty function signatures.
         // (instead, the `c_variadic` flag is set to `true`)
         let mut inputs = &decl.inputs[..];
         if decl.c_variadic() {
+            // Splat + variadic errors in AST validation, so just ignore one of them here.
+            splatted = None;
             inputs = &inputs[..inputs.len() - 1];
         }
         let inputs = self.arena.alloc_from_iter(inputs.iter().map(|param| {
@@ -1837,7 +1874,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
             .set_lifetime_elision_allowed(
                 self.owner.id == fn_node_id && self.owner.lifetime_elision_allowed,
             )
-            .set_c_variadic(c_variadic);
+            .set_c_variadic(c_variadic)
+            .set_splatted(splatted, inputs.len())
+            .unwrap();
 
         self.arena.alloc(hir::FnDecl { inputs, output, fn_decl_kind })
     }
@@ -2107,7 +2146,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     .filter(|_| match source {
                         hir::GenericParamSource::Generics => true,
                         hir::GenericParamSource::Binder => {
-                            self.dcx().emit_err(errors::GenericParamDefaultInBinder {
+                            self.dcx().emit_err(diagnostics::GenericParamDefaultInBinder {
                                 span: param.span(),
                             });
 
@@ -2138,7 +2177,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     .filter(|anon_const| match source {
                         hir::GenericParamSource::Generics => true,
                         hir::GenericParamSource::Binder => {
-                            let err = errors::GenericParamDefaultInBinder { span: param.span() };
+                            let err =
+                                diagnostics::GenericParamDefaultInBinder { span: param.span() };
                             if expr::WillCreateDefIdsVisitor
                                 .visit_expr(&anon_const.value)
                                 .is_break()
@@ -2224,14 +2264,22 @@ impl<'hir> LoweringContext<'_, 'hir> {
         // question: E.g., `?Sized` & `?Move` most likely won't be allowed in all the same places).
 
         match rbp {
-            RelaxedBoundPolicy::Allowed => return,
-            RelaxedBoundPolicy::AllowedIfOnTyParam(id, params) => {
-                if let Some(res) = self.get_partial_res(id).and_then(|r| r.full_res())
-                    && let Res::Def(DefKind::TyParam, def_id) = res
-                    && params.iter().any(|p| def_id == self.local_def_id(p.id).to_def_id())
-                {
-                    return;
-                }
+            RelaxedBoundPolicy::Allowed(dedup_map) => {
+                // `trait_def_id` only returns `None` for errors during resolution.
+                let Some(trait_def_id) = trait_ref.trait_def_id() else { return };
+                let tcx = self.tcx;
+                let err = |s| {
+                    let name = tcx.item_name(trait_def_id);
+                    tcx.dcx()
+                        .struct_span_err(
+                            vec![span, s],
+                            format!("duplicate relaxed `{name}` bounds"),
+                        )
+                        .with_code(E0203)
+                        .emit();
+                };
+                dedup_map.entry(trait_def_id).and_modify(|&mut s| err(s)).or_insert(span);
+                return;
             }
             RelaxedBoundPolicy::Forbidden(reason) => {
                 let gate = |context, subject| {
@@ -2272,7 +2320,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         return;
                     }
                     RelaxedBoundForbiddenReason::AssocTyBounds
-                    | RelaxedBoundForbiddenReason::LateBoundVarsInScope => {}
+                    | RelaxedBoundForbiddenReason::WhereBound => {}
                 };
             }
         }
@@ -2303,10 +2351,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_param_bounds_mut(
         &mut self,
         bounds: &[GenericBound],
-        rbp: RelaxedBoundPolicy<'_>,
+        mut rbp: RelaxedBoundPolicy<'_>,
         itctx: ImplTraitContext,
     ) -> impl Iterator<Item = hir::GenericBound<'hir>> {
-        bounds.iter().map(move |bound| self.lower_param_bound(bound, rbp, itctx))
+        bounds.iter().map(move |bound| self.lower_param_bound(bound, rbp.reborrow(), itctx))
     }
 
     #[instrument(level = "debug", skip(self), ret)]
@@ -2340,7 +2388,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             bounds,
             /* colon_span */ None,
             span,
-            RelaxedBoundPolicy::Allowed,
+            RelaxedBoundPolicy::Allowed(&mut Default::default()),
             ImplTraitContext::Universal,
             hir::PredicateOrigin::ImplTrait,
         );

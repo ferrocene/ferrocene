@@ -3543,6 +3543,7 @@
 <core::ptr::non_null::NonNull<T> as core::convert::From<&mut T>>::from
 <core::ptr::non_null::NonNull<T> as core::fmt::Debug>::fmt
 <core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt
+<core::range::Range<T> as core::convert::From<core::ops::range::Range<T>>>::from
 <core::result::Result<T, E> as core::clone::Clone>::clone
 <core::result::Result<T, E> as core::clone::Clone>::clone_from
 <core::result::Result<T, E> as core::cmp::Eq>::assert_fields_are_eq
@@ -5740,6 +5741,7 @@ core::ascii::EscapeDefault::new
 core::ascii::ascii_char::AsciiChar::as_str
 core::ascii::ascii_char::AsciiChar::digit_unchecked::precondition_check
 core::ascii::ascii_char::AsciiChar::from_u8_unchecked
+core::ascii::ascii_char::AsciiChar::from_u8_unchecked::precondition_check
 core::ascii::ascii_char::AsciiChar::to_u8
 core::ascii::escape_default
 core::bool::<impl bool>::ok_or
@@ -5800,7 +5802,12 @@ core::char::methods::<impl char>::escape_unicode
 core::char::methods::<impl char>::from_u32_unchecked
 core::char::methods::<impl char>::is_ascii
 core::char::methods::<impl char>::is_ascii_whitespace
-core::char::methods::<impl char>::is_grapheme_extended
+core::char::methods::<impl char>::is_control
+core::char::methods::<impl char>::is_default_ignorable
+core::char::methods::<impl char>::is_format_control
+core::char::methods::<impl char>::is_grapheme_extender
+core::char::methods::<impl char>::is_private_use
+core::char::methods::<impl char>::is_unassigned
 core::char::methods::<impl char>::is_whitespace
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
@@ -6961,6 +6968,7 @@ core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
 core::num::<impl i128>::unchecked_add::precondition_check
+core::num::<impl i128>::unchecked_cast::precondition_check
 core::num::<impl i128>::unchecked_div_exact::precondition_check
 core::num::<impl i128>::unchecked_mul::precondition_check
 core::num::<impl i128>::unchecked_neg
@@ -7022,6 +7030,7 @@ core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
 core::num::<impl i16>::unchecked_add::precondition_check
+core::num::<impl i16>::unchecked_cast::precondition_check
 core::num::<impl i16>::unchecked_div_exact::precondition_check
 core::num::<impl i16>::unchecked_mul::precondition_check
 core::num::<impl i16>::unchecked_neg
@@ -7083,6 +7092,7 @@ core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
 core::num::<impl i32>::unchecked_add::precondition_check
+core::num::<impl i32>::unchecked_cast::precondition_check
 core::num::<impl i32>::unchecked_div_exact::precondition_check
 core::num::<impl i32>::unchecked_mul::precondition_check
 core::num::<impl i32>::unchecked_neg
@@ -7144,6 +7154,7 @@ core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
 core::num::<impl i64>::unchecked_add::precondition_check
+core::num::<impl i64>::unchecked_cast::precondition_check
 core::num::<impl i64>::unchecked_div_exact::precondition_check
 core::num::<impl i64>::unchecked_mul::precondition_check
 core::num::<impl i64>::unchecked_neg
@@ -7205,6 +7216,7 @@ core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
 core::num::<impl i8>::unchecked_add::precondition_check
+core::num::<impl i8>::unchecked_cast::precondition_check
 core::num::<impl i8>::unchecked_div_exact::precondition_check
 core::num::<impl i8>::unchecked_mul::precondition_check
 core::num::<impl i8>::unchecked_neg
@@ -7266,6 +7278,7 @@ core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes
 core::num::<impl isize>::unchecked_add::precondition_check
+core::num::<impl isize>::unchecked_cast::precondition_check
 core::num::<impl isize>::unchecked_div_exact::precondition_check
 core::num::<impl isize>::unchecked_mul::precondition_check
 core::num::<impl isize>::unchecked_neg
@@ -7297,6 +7310,7 @@ core::num::<impl u128>::checked_ilog10
 core::num::<impl u128>::checked_ilog2
 core::num::<impl u128>::checked_mul
 core::num::<impl u128>::checked_pow
+core::num::<impl u128>::checked_shl
 core::num::<impl u128>::checked_sub
 core::num::<impl u128>::count_ones
 core::num::<impl u128>::count_zeros
@@ -7318,6 +7332,7 @@ core::num::<impl u128>::leading_zeros
 core::num::<impl u128>::overflowing_add
 core::num::<impl u128>::overflowing_add_signed
 core::num::<impl u128>::overflowing_mul
+core::num::<impl u128>::overflowing_pow
 core::num::<impl u128>::overflowing_sub
 core::num::<impl u128>::pow
 core::num::<impl u128>::reverse_bits
@@ -7327,6 +7342,7 @@ core::num::<impl u128>::saturating_add
 core::num::<impl u128>::saturating_div
 core::num::<impl u128>::saturating_mul
 core::num::<impl u128>::saturating_sub
+core::num::<impl u128>::strict_pow
 core::num::<impl u128>::swap_bytes
 core::num::<impl u128>::to_be
 core::num::<impl u128>::to_be_bytes
@@ -7334,8 +7350,10 @@ core::num::<impl u128>::to_le
 core::num::<impl u128>::to_le_bytes
 core::num::<impl u128>::to_ne_bytes
 core::num::<impl u128>::trailing_zeros
+core::num::<impl u128>::unbounded_shl
 core::num::<impl u128>::unchecked_add
 core::num::<impl u128>::unchecked_add::precondition_check
+core::num::<impl u128>::unchecked_cast::precondition_check
 core::num::<impl u128>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u128>::unchecked_div_exact::precondition_check
 core::num::<impl u128>::unchecked_funnel_shl::precondition_check
@@ -7354,6 +7372,7 @@ core::num::<impl u128>::wrapping_add_signed
 core::num::<impl u128>::wrapping_div
 core::num::<impl u128>::wrapping_mul
 core::num::<impl u128>::wrapping_neg
+core::num::<impl u128>::wrapping_pow
 core::num::<impl u128>::wrapping_rem
 core::num::<impl u128>::wrapping_shl
 core::num::<impl u128>::wrapping_shr
@@ -7368,6 +7387,7 @@ core::num::<impl u16>::checked_ilog10
 core::num::<impl u16>::checked_ilog2
 core::num::<impl u16>::checked_mul
 core::num::<impl u16>::checked_pow
+core::num::<impl u16>::checked_shl
 core::num::<impl u16>::checked_sub
 core::num::<impl u16>::count_ones
 core::num::<impl u16>::count_zeros
@@ -7390,6 +7410,7 @@ core::num::<impl u16>::leading_zeros
 core::num::<impl u16>::overflowing_add
 core::num::<impl u16>::overflowing_add_signed
 core::num::<impl u16>::overflowing_mul
+core::num::<impl u16>::overflowing_pow
 core::num::<impl u16>::overflowing_sub
 core::num::<impl u16>::pow
 core::num::<impl u16>::reverse_bits
@@ -7399,6 +7420,7 @@ core::num::<impl u16>::saturating_add
 core::num::<impl u16>::saturating_div
 core::num::<impl u16>::saturating_mul
 core::num::<impl u16>::saturating_sub
+core::num::<impl u16>::strict_pow
 core::num::<impl u16>::swap_bytes
 core::num::<impl u16>::to_be
 core::num::<impl u16>::to_be_bytes
@@ -7406,8 +7428,10 @@ core::num::<impl u16>::to_le
 core::num::<impl u16>::to_le_bytes
 core::num::<impl u16>::to_ne_bytes
 core::num::<impl u16>::trailing_zeros
+core::num::<impl u16>::unbounded_shl
 core::num::<impl u16>::unchecked_add
 core::num::<impl u16>::unchecked_add::precondition_check
+core::num::<impl u16>::unchecked_cast::precondition_check
 core::num::<impl u16>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u16>::unchecked_div_exact::precondition_check
 core::num::<impl u16>::unchecked_funnel_shl::precondition_check
@@ -7426,6 +7450,7 @@ core::num::<impl u16>::wrapping_add_signed
 core::num::<impl u16>::wrapping_div
 core::num::<impl u16>::wrapping_mul
 core::num::<impl u16>::wrapping_neg
+core::num::<impl u16>::wrapping_pow
 core::num::<impl u16>::wrapping_rem
 core::num::<impl u16>::wrapping_shl
 core::num::<impl u16>::wrapping_shr
@@ -7440,6 +7465,7 @@ core::num::<impl u32>::checked_ilog10
 core::num::<impl u32>::checked_ilog2
 core::num::<impl u32>::checked_mul
 core::num::<impl u32>::checked_pow
+core::num::<impl u32>::checked_shl
 core::num::<impl u32>::checked_sub
 core::num::<impl u32>::count_ones
 core::num::<impl u32>::count_zeros
@@ -7461,6 +7487,7 @@ core::num::<impl u32>::leading_zeros
 core::num::<impl u32>::overflowing_add
 core::num::<impl u32>::overflowing_add_signed
 core::num::<impl u32>::overflowing_mul
+core::num::<impl u32>::overflowing_pow
 core::num::<impl u32>::overflowing_sub
 core::num::<impl u32>::pow
 core::num::<impl u32>::reverse_bits
@@ -7470,6 +7497,7 @@ core::num::<impl u32>::saturating_add
 core::num::<impl u32>::saturating_div
 core::num::<impl u32>::saturating_mul
 core::num::<impl u32>::saturating_sub
+core::num::<impl u32>::strict_pow
 core::num::<impl u32>::swap_bytes
 core::num::<impl u32>::to_be
 core::num::<impl u32>::to_be_bytes
@@ -7477,8 +7505,10 @@ core::num::<impl u32>::to_le
 core::num::<impl u32>::to_le_bytes
 core::num::<impl u32>::to_ne_bytes
 core::num::<impl u32>::trailing_zeros
+core::num::<impl u32>::unbounded_shl
 core::num::<impl u32>::unchecked_add
 core::num::<impl u32>::unchecked_add::precondition_check
+core::num::<impl u32>::unchecked_cast::precondition_check
 core::num::<impl u32>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u32>::unchecked_div_exact::precondition_check
 core::num::<impl u32>::unchecked_funnel_shl::precondition_check
@@ -7497,6 +7527,7 @@ core::num::<impl u32>::wrapping_add_signed
 core::num::<impl u32>::wrapping_div
 core::num::<impl u32>::wrapping_mul
 core::num::<impl u32>::wrapping_neg
+core::num::<impl u32>::wrapping_pow
 core::num::<impl u32>::wrapping_rem
 core::num::<impl u32>::wrapping_shl
 core::num::<impl u32>::wrapping_shr
@@ -7511,6 +7542,7 @@ core::num::<impl u64>::checked_ilog10
 core::num::<impl u64>::checked_ilog2
 core::num::<impl u64>::checked_mul
 core::num::<impl u64>::checked_pow
+core::num::<impl u64>::checked_shl
 core::num::<impl u64>::checked_sub
 core::num::<impl u64>::count_ones
 core::num::<impl u64>::count_zeros
@@ -7532,6 +7564,7 @@ core::num::<impl u64>::leading_zeros
 core::num::<impl u64>::overflowing_add
 core::num::<impl u64>::overflowing_add_signed
 core::num::<impl u64>::overflowing_mul
+core::num::<impl u64>::overflowing_pow
 core::num::<impl u64>::overflowing_sub
 core::num::<impl u64>::pow
 core::num::<impl u64>::reverse_bits
@@ -7541,6 +7574,7 @@ core::num::<impl u64>::saturating_add
 core::num::<impl u64>::saturating_div
 core::num::<impl u64>::saturating_mul
 core::num::<impl u64>::saturating_sub
+core::num::<impl u64>::strict_pow
 core::num::<impl u64>::swap_bytes
 core::num::<impl u64>::to_be
 core::num::<impl u64>::to_be_bytes
@@ -7548,8 +7582,10 @@ core::num::<impl u64>::to_le
 core::num::<impl u64>::to_le_bytes
 core::num::<impl u64>::to_ne_bytes
 core::num::<impl u64>::trailing_zeros
+core::num::<impl u64>::unbounded_shl
 core::num::<impl u64>::unchecked_add
 core::num::<impl u64>::unchecked_add::precondition_check
+core::num::<impl u64>::unchecked_cast::precondition_check
 core::num::<impl u64>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u64>::unchecked_div_exact::precondition_check
 core::num::<impl u64>::unchecked_funnel_shl::precondition_check
@@ -7568,6 +7604,7 @@ core::num::<impl u64>::wrapping_add_signed
 core::num::<impl u64>::wrapping_div
 core::num::<impl u64>::wrapping_mul
 core::num::<impl u64>::wrapping_neg
+core::num::<impl u64>::wrapping_pow
 core::num::<impl u64>::wrapping_rem
 core::num::<impl u64>::wrapping_shl
 core::num::<impl u64>::wrapping_shr
@@ -7583,6 +7620,7 @@ core::num::<impl u8>::checked_ilog10
 core::num::<impl u8>::checked_ilog2
 core::num::<impl u8>::checked_mul
 core::num::<impl u8>::checked_pow
+core::num::<impl u8>::checked_shl
 core::num::<impl u8>::checked_sub
 core::num::<impl u8>::count_ones
 core::num::<impl u8>::count_zeros
@@ -7612,6 +7650,7 @@ core::num::<impl u8>::leading_zeros
 core::num::<impl u8>::overflowing_add
 core::num::<impl u8>::overflowing_add_signed
 core::num::<impl u8>::overflowing_mul
+core::num::<impl u8>::overflowing_pow
 core::num::<impl u8>::overflowing_sub
 core::num::<impl u8>::pow
 core::num::<impl u8>::reverse_bits
@@ -7621,6 +7660,7 @@ core::num::<impl u8>::saturating_add
 core::num::<impl u8>::saturating_div
 core::num::<impl u8>::saturating_mul
 core::num::<impl u8>::saturating_sub
+core::num::<impl u8>::strict_pow
 core::num::<impl u8>::swap_bytes
 core::num::<impl u8>::to_ascii_lowercase
 core::num::<impl u8>::to_be
@@ -7629,8 +7669,10 @@ core::num::<impl u8>::to_le
 core::num::<impl u8>::to_le_bytes
 core::num::<impl u8>::to_ne_bytes
 core::num::<impl u8>::trailing_zeros
+core::num::<impl u8>::unbounded_shl
 core::num::<impl u8>::unchecked_add
 core::num::<impl u8>::unchecked_add::precondition_check
+core::num::<impl u8>::unchecked_cast::precondition_check
 core::num::<impl u8>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u8>::unchecked_div_exact::precondition_check
 core::num::<impl u8>::unchecked_funnel_shl::precondition_check
@@ -7649,6 +7691,7 @@ core::num::<impl u8>::wrapping_add_signed
 core::num::<impl u8>::wrapping_div
 core::num::<impl u8>::wrapping_mul
 core::num::<impl u8>::wrapping_neg
+core::num::<impl u8>::wrapping_pow
 core::num::<impl u8>::wrapping_rem
 core::num::<impl u8>::wrapping_shl
 core::num::<impl u8>::wrapping_shr
@@ -7663,6 +7706,7 @@ core::num::<impl usize>::checked_ilog10
 core::num::<impl usize>::checked_ilog2
 core::num::<impl usize>::checked_mul
 core::num::<impl usize>::checked_pow
+core::num::<impl usize>::checked_shl
 core::num::<impl usize>::checked_sub
 core::num::<impl usize>::count_ones
 core::num::<impl usize>::count_zeros
@@ -7684,6 +7728,7 @@ core::num::<impl usize>::leading_zeros
 core::num::<impl usize>::overflowing_add
 core::num::<impl usize>::overflowing_add_signed
 core::num::<impl usize>::overflowing_mul
+core::num::<impl usize>::overflowing_pow
 core::num::<impl usize>::overflowing_sub
 core::num::<impl usize>::pow
 core::num::<impl usize>::repeat_u16
@@ -7695,6 +7740,7 @@ core::num::<impl usize>::saturating_add
 core::num::<impl usize>::saturating_div
 core::num::<impl usize>::saturating_mul
 core::num::<impl usize>::saturating_sub
+core::num::<impl usize>::strict_pow
 core::num::<impl usize>::swap_bytes
 core::num::<impl usize>::to_be
 core::num::<impl usize>::to_be_bytes
@@ -7702,8 +7748,10 @@ core::num::<impl usize>::to_le
 core::num::<impl usize>::to_le_bytes
 core::num::<impl usize>::to_ne_bytes
 core::num::<impl usize>::trailing_zeros
+core::num::<impl usize>::unbounded_shl
 core::num::<impl usize>::unchecked_add
 core::num::<impl usize>::unchecked_add::precondition_check
+core::num::<impl usize>::unchecked_cast::precondition_check
 core::num::<impl usize>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl usize>::unchecked_div_exact::precondition_check
 core::num::<impl usize>::unchecked_funnel_shl::precondition_check
@@ -7722,6 +7770,7 @@ core::num::<impl usize>::wrapping_add_signed
 core::num::<impl usize>::wrapping_div
 core::num::<impl usize>::wrapping_mul
 core::num::<impl usize>::wrapping_neg
+core::num::<impl usize>::wrapping_pow
 core::num::<impl usize>::wrapping_rem
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
@@ -7796,6 +7845,7 @@ core::num::imp::int_log10::u64_impl
 core::num::imp::int_log10::u8
 core::num::imp::int_log10::u8_impl
 core::num::imp::int_log10::usize
+core::num::imp::overflow_panic::pow
 core::num::imp::traits::FloatExt::integer_decode
 core::num::imp::traits::pow2_to_pow10
 core::num::niche_types::CodePointInner::as_inner
@@ -8442,8 +8492,15 @@ core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::rang
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::get_unchecked_mut
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::index
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::index_mut
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_mut
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked::precondition_check
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked_mut
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked_mut::precondition_check
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::index
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::index_mut
+core::str::traits::check_range
 core::str::validations::contains_nonascii
 core::str::validations::next_code_point
 core::str::validations::next_code_point_reverse
@@ -8792,11 +8849,15 @@ core::ub_checks::maybe_is_aligned_and_not_null
 core::ub_checks::maybe_is_nonoverlapping
 core::ub_checks::maybe_is_nonoverlapping::compiletime
 core::ub_checks::maybe_is_nonoverlapping::runtime
-core::unicode::printable::check
-core::unicode::printable::is_printable
 core::unicode::unicode_data::ShortOffsetRunHeader::new
 core::unicode::unicode_data::ShortOffsetRunHeader::prefix_sum
 core::unicode::unicode_data::ShortOffsetRunHeader::start_index
+core::unicode::unicode_data::cf::lookup
+core::unicode::unicode_data::cf::lookup_slow
+core::unicode::unicode_data::cn_planes_0_3::lookup
+core::unicode::unicode_data::cn_planes_0_3::lookup_slow
+core::unicode::unicode_data::default_ignorable_code_point::lookup
+core::unicode::unicode_data::default_ignorable_code_point::lookup_slow
 core::unicode::unicode_data::grapheme_extend::lookup
 core::unicode::unicode_data::grapheme_extend::lookup_slow
 core::unicode::unicode_data::skip_search

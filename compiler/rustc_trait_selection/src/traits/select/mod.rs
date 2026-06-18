@@ -758,7 +758,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     if pred.0.has_free_regions()
                         || pred.0.has_bound_regions()
                         || pred.0.has_non_region_infer()
-                        || pred.0.has_non_region_infer()
+                        || pred.0.has_non_region_param()
                     {
                         Ok(EvaluatedToOkModuloRegions)
                     } else {
@@ -987,11 +987,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         }
                         ty::ConstKind::Error(_) => return Ok(EvaluatedToOk),
                         ty::ConstKind::Value(cv) => cv.ty,
-                        ty::ConstKind::Unevaluated(uv) => self
-                            .tcx()
-                            .type_of(uv.kind.def_id())
-                            .instantiate(self.tcx(), uv.args)
-                            .skip_norm_wip(),
+                        ty::ConstKind::Unevaluated(uv) => uv.type_of(self.tcx()).skip_norm_wip(),
                         // FIXME(generic_const_exprs): See comment in `fulfill.rs`
                         ty::ConstKind::Expr(_) => return Ok(EvaluatedToOk),
                         ty::ConstKind::Placeholder(_) => {
@@ -1485,9 +1481,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         let obligation = &stack.obligation;
         match self.typing_mode() {
             TypingMode::Coherence => {}
-            TypingMode::Analysis { .. }
-            | TypingMode::Borrowck { .. }
-            | TypingMode::PostBorrowckAnalysis { .. }
+            TypingMode::Typeck { .. }
+            | TypingMode::PostTypeckUntilBorrowck { .. }
+            | TypingMode::PostBorrowck { .. }
             | TypingMode::PostAnalysis
             | TypingMode::Codegen => return Ok(()),
         }
@@ -1533,16 +1529,14 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // However, if we disqualify *all* goals from being cached, perf suffers.
             // This is likely fixed by better caching in general in the new solver.
             // See: <https://github.com/rust-lang/rust/issues/132064>.
-            TypingMode::Analysis {
-                defining_opaque_types_and_generators: defining_opaque_types,
-            }
-            | TypingMode::Borrowck { defining_opaque_types } => {
+            TypingMode::Typeck { defining_opaque_types_and_generators: defining_opaque_types }
+            | TypingMode::PostTypeckUntilBorrowck { defining_opaque_types } => {
                 defining_opaque_types.is_empty()
                     || (!pred.has_opaque_types() && !pred.has_coroutines())
             }
             // The hidden types of `defined_opaque_types` is not local to the current
             // inference context, so we can freely move this to the global cache.
-            TypingMode::PostBorrowckAnalysis { .. } => true,
+            TypingMode::PostBorrowck { .. } => true,
             // The global cache is only used if there are no opaque types in
             // the defining scope or we're outside of analysis.
             //
@@ -2910,14 +2904,14 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
     pub(super) fn should_stall_coroutine(&self, def_id: DefId) -> bool {
         match self.typing_mode() {
-            TypingMode::Analysis { defining_opaque_types_and_generators: stalled_generators } => {
+            TypingMode::Typeck { defining_opaque_types_and_generators: stalled_generators } => {
                 def_id.as_local().is_some_and(|def_id| stalled_generators.contains(&def_id))
             }
             TypingMode::Coherence
             | TypingMode::PostAnalysis
             | TypingMode::Codegen
-            | TypingMode::Borrowck { defining_opaque_types: _ }
-            | TypingMode::PostBorrowckAnalysis { defined_opaque_types: _ } => false,
+            | TypingMode::PostTypeckUntilBorrowck { defining_opaque_types: _ }
+            | TypingMode::PostBorrowck { defined_opaque_types: _ } => false,
         }
     }
 }

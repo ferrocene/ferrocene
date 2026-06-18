@@ -120,6 +120,36 @@ const unsafe impl SliceIndex<str> for ops::RangeFull {
     }
 }
 
+/// Check that a range is in bounds for slicing a string.
+/// If this returns true, it is safe to call `slice.get_unchecked(range)` or
+/// `slice.get_unchecked_mut(range)`.
+#[ferrocene::prevalidated]
+#[inline(always)]
+const fn check_range(slice: &str, range: crate::range::Range<usize>) -> bool {
+    let crate::range::Range { start, end } = range;
+    let bytes = slice.as_bytes();
+
+    if start > end || end > slice.len() {
+        return false;
+    }
+
+    if start == slice.len() {
+        // If `start == slice.len()`, then `end == slice.len()` must also be true.
+        return true;
+    }
+
+    // SAFETY:
+    // `start > end || end > slice.len()` is false, so `start <= end <= slice.len()` is true.
+    // `start == slice.len()` is false, so `start < slice.len()` is also true.
+    //
+    // No need to check for `end == 0`, because if `end == 0` is true then `start == slice.len()`
+    // would also be true, which is already handled above.
+    unsafe {
+        (start == 0 || bytes.as_ptr().add(start).read().is_utf8_char_boundary())
+            && (end == slice.len() || bytes.as_ptr().add(end).read().is_utf8_char_boundary())
+    }
+}
+
 /// Implements substring slicing with syntax `&self[begin .. end]` or `&mut
 /// self[begin .. end]`.
 ///
@@ -162,31 +192,12 @@ const unsafe impl SliceIndex<str> for ops::Range<usize> {
     #[inline]
     #[ferrocene::prevalidated]
     fn get(self, slice: &str) -> Option<&Self::Output> {
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary,
-            // and we are passing in a safe reference, so the return value will also be one.
-            // We also checked char boundaries, so this is valid UTF-8.
-            Some(unsafe { &*self.get_unchecked(slice) })
-        } else {
-            None
-        }
+        range::Range::from(self).get(slice)
     }
     #[inline]
     #[ferrocene::prevalidated]
     fn get_mut(self, slice: &mut str) -> Option<&mut Self::Output> {
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary.
-            // We know the pointer is unique because we got it from `slice`.
-            Some(unsafe { &mut *self.get_unchecked_mut(slice) })
-        } else {
-            None
-        }
+        range::Range::from(self).get_mut(slice)
     }
     #[inline]
     #[track_caller]
@@ -242,27 +253,12 @@ const unsafe impl SliceIndex<str> for ops::Range<usize> {
     #[inline]
     #[ferrocene::prevalidated]
     fn index(self, slice: &str) -> &Self::Output {
-        let (start, end) = (self.start, self.end);
-        match self.get(slice) {
-            Some(s) => s,
-            None => super::slice_error_fail(slice, start, end),
-        }
+        range::Range::from(self).index(slice)
     }
     #[inline]
     #[ferrocene::prevalidated]
     fn index_mut(self, slice: &mut str) -> &mut Self::Output {
-        // is_char_boundary checks that the index is in [0, .len()]
-        // cannot reuse `get` as above, because of NLL trouble
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary,
-            // and we are passing in a safe reference, so the return value will also be one.
-            unsafe { &mut *self.get_unchecked_mut(slice) }
-        } else {
-            super::slice_error_fail(slice, self.start, self.end)
-        }
+        range::Range::from(self).index_mut(slice)
     }
 }
 
@@ -270,13 +266,11 @@ const unsafe impl SliceIndex<str> for ops::Range<usize> {
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 const unsafe impl SliceIndex<str> for range::Range<usize> {
     type Output = str;
+    #[ferrocene::prevalidated]
     #[inline]
     fn get(self, slice: &str) -> Option<&Self::Output> {
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary,
+        if check_range(slice, self) {
+            // SAFETY: just checked that `self` is in bounds,
             // and we are passing in a safe reference, so the return value will also be one.
             // We also checked char boundaries, so this is valid UTF-8.
             Some(unsafe { &*self.get_unchecked(slice) })
@@ -284,19 +278,18 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             None
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn get_mut(self, slice: &mut str) -> Option<&mut Self::Output> {
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary.
+        if check_range(slice, self) {
+            // SAFETY: just checked that `self` is in bounds.
             // We know the pointer is unique because we got it from `slice`.
             Some(unsafe { &mut *self.get_unchecked_mut(slice) })
         } else {
             None
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
     unsafe fn get_unchecked(self, slice: *const str) -> *const Self::Output {
@@ -325,6 +318,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             slice.as_ptr().add(self.start).cast_slice(new_len) as *const str
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
     unsafe fn get_unchecked_mut(self, slice: *mut str) -> *mut Self::Output {
@@ -346,6 +340,7 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             slice.as_mut_ptr().add(self.start).cast_slice(new_len) as *mut str
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn index(self, slice: &str) -> &Self::Output {
         let (start, end) = (self.start, self.end);
@@ -354,15 +349,12 @@ const unsafe impl SliceIndex<str> for range::Range<usize> {
             None => super::slice_error_fail(slice, start, end),
         }
     }
+    #[ferrocene::prevalidated]
     #[inline]
     fn index_mut(self, slice: &mut str) -> &mut Self::Output {
-        // is_char_boundary checks that the index is in [0, .len()]
         // cannot reuse `get` as above, because of NLL trouble
-        if self.start <= self.end
-            && slice.is_char_boundary(self.start)
-            && slice.is_char_boundary(self.end)
-        {
-            // SAFETY: just checked that `start` and `end` are on a char boundary,
+        if check_range(slice, self) {
+            // SAFETY: just checked that `self` is in bounds,
             // and we are passing in a safe reference, so the return value will also be one.
             unsafe { &mut *self.get_unchecked_mut(slice) }
         } else {

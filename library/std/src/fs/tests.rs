@@ -2182,15 +2182,11 @@ fn test_rename_directory_to_non_empty_directory() {
     fs::write(target_path.join("target_file.txt"), b"target hello world").unwrap();
 
     let err = fs::rename(source_path, target_path).unwrap_err();
-    // Ferrocene modification: Fix for xfs file systems
-    // Will be upstreamed by https://github.com/rust-lang/rust/issues/156762
-    assert!(
-        matches!(
-            err.kind(),
-            // On ext4, ntfs, apfs, tmpfs, and btrfs `DirectoryNotEmpty` is returned.
-            // On xfs `AlreadyExists` is returned.
-            ErrorKind::DirectoryNotEmpty | ErrorKind::AlreadyExists
-        ),
+    assert_matches!(
+        err.kind(),
+        // On ext4, ntfs, apfs, tmpfs, and btrfs `DirectoryNotEmpty` is returned.
+        // On xfs `AlreadyExists` is returned.
+        ErrorKind::DirectoryNotEmpty | ErrorKind::AlreadyExists,
         "Expected DirectoryNotEmpty or AlreadyExists error, got {err}"
     );
 }

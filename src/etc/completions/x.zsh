@@ -551,6 +551,8 @@ _arguments "${_arguments_options[@]}" : \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
 '--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
+'--record[Record all the failed tests in a file in the build directory]' \
+'--rerun[Rerun tests that previously failed, and stored with \`--record\`]' \
 '(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
 '(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
 '(-v --verbose)-q[use quiet output]' \
@@ -619,6 +621,8 @@ _arguments "${_arguments_options[@]}" : \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
 '--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
+'--record[Record all the failed tests in a file in the build directory]' \
+'--rerun[Rerun tests that previously failed, and stored with \`--record\`]' \
 '(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
 '(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
 '(-v --verbose)-q[use quiet output]' \

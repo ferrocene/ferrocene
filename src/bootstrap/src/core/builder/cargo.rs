@@ -136,6 +136,7 @@ impl Cargo {
 
         match cmd_kind {
             // No need to configure the target linker for these command types.
+            Kind::SymbolReport | // Ferrocene addition
             Kind::Clean | Kind::Check | Kind::Format | Kind::Setup => {}
             _ => {
                 cargo.configure_linker(builder);

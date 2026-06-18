@@ -179,6 +179,16 @@ pub(crate) struct BothFfiConstAndPure {
 }
 
 #[derive(Diagnostic)]
+#[diag("`#[optimize(none)]` cannot be used with `#[inline]` attributes")]
+pub(crate) struct BothOptimizeNoneAndInline {
+    #[primary_span]
+    #[label("`#[optimize(none)]` here")]
+    pub optimize_span: Span,
+    #[label("`#[inline]` here")]
+    pub inline_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("attribute should be applied to an `extern` block with non-Rust ABI")]
 #[warning(
     "this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!"
@@ -1249,4 +1259,11 @@ pub(crate) struct UnknownFormatParameterForOnUnimplementedAttr {
 #[help(r#"expect either a generic argument name or {"`{Self}`"} as format argument"#)]
 pub(crate) struct OnMoveMalformedFormatLiterals {
     pub name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("unused target expression is specified for glob or list delegation")]
+pub(crate) struct GlobOrListDelegationUnusedTargetExpr {
+    #[primary_span]
+    pub span: Span,
 }

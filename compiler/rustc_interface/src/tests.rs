@@ -10,9 +10,9 @@ use rustc_errors::ColorConfig;
 use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_hir::attrs::{CollapseMacroDebuginfo, NativeLibKind};
 use rustc_session::config::{
-    AnnotateMoves, AutoDiff, BranchProtection, CFGuard, Cfg, CoverageLevel, CoverageOptions,
-    DebugInfo, DumpMonoStatsFormat, ErrorOutputType, ExternEntry, ExternLocation, Externs,
-    FmtDebug, FunctionReturn, IncrementalStateAssertion, InliningThreshold, Input,
+    AnnotateMoves, AutoDiff, BranchProtection, CFGuard, Cfg, CodegenRetagOptions, CoverageLevel,
+    CoverageOptions, DebugInfo, DumpMonoStatsFormat, ErrorOutputType, ExternEntry, ExternLocation,
+    Externs, FmtDebug, FunctionReturn, IncrementalStateAssertion, InliningThreshold, Input,
     InstrumentCoverage, InstrumentXRay, LinkSelfContained, LinkerPluginLto, LocationDetail, LtoCli,
     MirIncludeSpans, NextSolverConfig, Offload, Options, OutFileName, OutputType, OutputTypes,
     PAuthKey, PacRet, Passes, PatchableFunctionEntry, Polonius, ProcMacroExecutionStrategy, Strip,
@@ -772,6 +772,7 @@ fn test_unstable_options_tracking_hash() {
         })
     );
     tracked!(codegen_backend, Some("abc".to_string()));
+    tracked!(codegen_emit_retag, Some(CodegenRetagOptions::default()));
     tracked!(
         coverage_options,
         CoverageOptions {
@@ -865,6 +866,7 @@ fn test_unstable_options_tracking_hash() {
     tracked!(split_lto_unit, Some(true));
     tracked!(src_hash_algorithm, Some(SourceFileHashAlgorithm::Sha1));
     tracked!(stack_protector, StackProtector::All);
+    tracked!(staticlib_hide_internal_symbols, true);
     tracked!(teach, true);
     tracked!(thinlto, Some(true));
     tracked!(tiny_const_eval_limit, true);

@@ -20,8 +20,8 @@ use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::{ConstStability, StabilityLevel, StableSince};
 use rustc_metadata::creader::CStore;
 use rustc_middle::ty::{self, TyCtxt, TypingMode};
-use rustc_span::Symbol;
 use rustc_span::symbol::kw;
+use rustc_span::{Ident, Symbol};
 use tracing::{debug, trace};
 
 use super::url_parts_builder::UrlPartsBuilder;
@@ -138,7 +138,7 @@ fn print_where_predicate(predicate: &clean::WherePredicate, cx: &Context<'_>) ->
                 }
                 Ok(())
             }
-            clean::WherePredicate::EqPredicate { lhs, rhs } => {
+            clean::WherePredicate::ProjectionPredicate { lhs, rhs } => {
                 let opts = WithOpts::from(f);
                 write!(
                     f,
@@ -1109,8 +1109,23 @@ fn print_qpath_data(qpath_data: &clean::QPathData, cx: &Context<'_>) -> impl Dis
                 Some(trait_) => href(trait_.def_id(), cx).ok(),
                 None => self_type.def_id(cx.cache()).and_then(|did| href(did, cx).ok()),
             };
+            let tcx = cx.tcx();
+            let assoc_type_is_hidden = !cx.cache().document_hidden
+                && trait_.as_ref().is_some_and(|trait_| {
+                    let trait_did = trait_.def_id();
+                    tcx.associated_items(trait_did)
+                        .find_by_ident_and_kind(
+                            tcx,
+                            Ident::with_dummy_span(assoc.name),
+                            ty::AssocTag::Type,
+                            trait_did,
+                        )
+                        .is_some_and(|assoc_item| tcx.is_doc_hidden(assoc_item.def_id))
+                });
 
-            if let Some(HrefInfo { url, rust_path, .. }) = parent_href {
+            if let Some(HrefInfo { url, rust_path, .. }) = parent_href
+                && !assoc_type_is_hidden
+            {
                 write!(
                     f,
                     "<a class=\"associatedtype\" href=\"{url}#{shortty}.{name}\" \
@@ -1494,15 +1509,21 @@ pub(crate) fn print_constness_with_space(
     overall_stab: Option<StableSince>,
     const_stab: Option<ConstStability>,
 ) -> &'static str {
-    match c {
-        hir::Constness::Const => match (overall_stab, const_stab) {
+    match *c {
+        hir::Constness::Const { always } => match (overall_stab, const_stab) {
             // const stable...
             (_, Some(ConstStability { level: StabilityLevel::Stable { .. }, .. }))
             // ...or when feature(staged_api) is not set...
             | (_, None)
             // ...or when const unstable, but overall unstable too
             | (None, Some(ConstStability { level: StabilityLevel::Unstable { .. }, .. })) => {
-                "const "
+                if always {
+                    // FIXME(comptime) show something when stable, currently relying on the attribute
+                    // being rendered as part of the regular attribute list.
+                    ""
+                } else {
+                    "const "
+                }
             }
             // const unstable (and overall stable)
             (Some(_), Some(ConstStability { level: StabilityLevel::Unstable { .. }, .. })) => "",

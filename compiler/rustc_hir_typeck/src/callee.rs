@@ -7,7 +7,6 @@ use rustc_hir::def::{self, CtorKind, Namespace, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, HirId, LangItem, find_attr};
 use rustc_hir_analysis::autoderef::Autoderef;
-use rustc_hir_analysis::delegation::opt_get_delegation_info;
 use rustc_infer::infer::BoundRegionConversionTime;
 use rustc_infer::traits::{Obligation, ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::adjustment::{
@@ -205,6 +204,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | CanonAbi::Rust
             | CanonAbi::RustCold
             | CanonAbi::RustPreserveNone
+            | CanonAbi::RustTail
             | CanonAbi::Swift
             | CanonAbi::Arm(_)
             | CanonAbi::X86(_) => {}
@@ -700,7 +700,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // by comparing their hir ids (otherwise we will encounter errors in nested delegations,
         // see tests\ui\delegation\impl-reuse-pass.rs:237).
         let parent_def = self.tcx.hir_get_parent_item(call_expr.hir_id).def_id;
-        let Some(info) = opt_get_delegation_info(self.tcx, parent_def) else { return None };
+        let Some(info) = self.tcx.hir_opt_delegation_info(parent_def) else {
+            return None;
+        };
 
         if call_expr.hir_id != info.call_expr_id {
             return None;
@@ -1023,6 +1025,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         callee_did: DefId,
         callee_args: GenericArgsRef<'tcx>,
     ) {
+        let const_context = self.tcx.hir_body_const_context(self.body_id);
+
+        if let hir::Constness::Const { always: true } = self.tcx.constness(callee_did) {
+            match const_context {
+                Some(hir::ConstContext::Const { .. } | hir::ConstContext::Static(_)) => {}
+                Some(hir::ConstContext::ConstFn) | None => {
+                    self.dcx().span_err(span, "comptime fns can only be called at compile time");
+                }
+            }
+        }
+
         // FIXME(const_trait_impl): We should be enforcing these effects unconditionally.
         // This can be done as soon as we convert the standard library back to
         // using const traits, since if we were to enforce these conditions now,
@@ -1036,7 +1049,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return;
         }
 
-        let host = match self.tcx.hir_body_const_context(self.body_id) {
+        let host = match const_context {
             Some(hir::ConstContext::Const { .. } | hir::ConstContext::Static(_)) => {
                 ty::BoundConstness::Const
             }

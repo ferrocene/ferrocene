@@ -54,11 +54,11 @@ Doc-tests are the code snippets in doc-comments. The doc-tests for the core libr
 Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
-In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-ferrocene-linux-gnu`` target is performed.
+In order to gather code coverage information, an additional test run of the coretests test suite on the ``x86_64-unknown-linux-gnu`` target is performed.
 
 It is ensured that both the instrumented and not instrumented coretests run succeeds. This ensures that coverage instrumentation does not introduce any correctness issues.
 
-Code coverage is measured only on one platform, ``x86_64-ferrocene-linux-gnu``.
+Code coverage is measured only on one platform, ``x86_64-unknown-linux-gnu``.
 This is sufficient because the certified subset only contains platform-independent code, and code coverage is only a measure of the quality of the test suite.
 Correctness is still tested by running the tests on all qualified targets.
 

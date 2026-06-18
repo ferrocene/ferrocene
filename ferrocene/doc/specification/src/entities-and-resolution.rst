@@ -1108,9 +1108,6 @@ A :t:`nesting import` is a :t:`use import` that provides a common
 A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
 prefix` is rejected, but may still be consumed by :t:`[macro]s`.
 
-:dp:`fls_RUiFQ17bmRLt`
-A :t:`simple import` with a single :t:`path segment` of :t:`keyword` ``self`` shall be subject to a :t:`renaming`.
-
 :dp:`fls_wB3fVglLOqbZ`
 It is a static error if two :t:`[glob import]s` import the same :t:`name` in the
 same :t:`namespace` but refer to different :t:`entities <entity>` if the
@@ -1119,6 +1116,9 @@ same :t:`namespace` but refer to different :t:`entities <entity>` if the
 :dp:`fls_zmYSBW995kSN`
 If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
 the :t:`visibility` of the :t:`name` is the most permissive one.
+
+:dp:`fls_RUiFQ17bmRLt`
+A :t:`simple import` with a single :t:`path segment` of :t:`keyword` ``self`` shall be subject to a :t:`renaming`.
 
 :dp:`fls_sUhnfV62HJrb`
 An :t:`import <use import>` with a single :t:`path segment` of either :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` shall be subject to a :t:`renaming`.

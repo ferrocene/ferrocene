@@ -443,7 +443,7 @@ impl<'tcx> LintState<'tcx> {
             ocx.register_obligation(o);
             span
         });
-        let errors = ocx.try_evaluate_obligations();
+        let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {
             debug!("impl obligations not met for trait upcast: {errors:?}");
             return None;

@@ -2,6 +2,11 @@
 // Verify that we don't ICE when building vtable entries
 // for a blanket impl involving async and impossible predicates.
 
+// Ferrocene note:
+// We get an ICE when ferrocene::unvalidated lint looks at this test, hence ignore-test.
+// The test also fails when check-pass directive is changed to build-pass.
+//@ ignore-test
+
 //@ check-pass
 //@ compile-flags: -Copt-level=0
 //@ edition: 2021

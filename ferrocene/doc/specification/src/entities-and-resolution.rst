@@ -330,12 +330,6 @@ If a :t:`simple path` appears in a :t:`use import` and starts with a
 :t:`path` shall be the :t:`simple path prefix` of a :t:`glob import` or a
 :t:`nesting import`, or the :t:`path` of a :t:`simple import`.
 
-:dp:`fls_cw006jhlboa`
-If a :t:`simple path` appears in a :t:`use import` and starts with a
-:t:`path segment` expressed as :t:`keyword` ``self``, then the :t:`path` shall
-be part of the :s:`UseImportContent` of a :t:`nesting import` as long as the
-:t:`path` is a :t:`single segment path`.
-
 :dp:`fls_kv5bpq8rf1j9`
 A :t:`simple path` is subject to :t:`simple path resolution`.
 
@@ -1115,15 +1109,7 @@ A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
 prefix` is rejected, but may still be consumed by :t:`[macro]s`.
 
 :dp:`fls_RUiFQ17bmRLt`
-A :t:`simple import` with a single :t:`path segment` of
-keyword ``self`` shall be subject to the following:
-
-* :dp:`fls_hv3xT2CjZuxc`
-  It shall either appear in a :t:`nesting import` with a non-empty
-  :t:`import path prefix`, or
-
-* :dp:`fls_Pxc0Ts8Y7pfW`
-  It shall be subject to a :t:`renaming`.
+A :t:`simple import` with a single :t:`path segment` of :t:`keyword` ``self`` shall be subject to a :t:`renaming`.
 
 :dp:`fls_wB3fVglLOqbZ`
 It is a static error if two :t:`[glob import]s` import the same :t:`name` in the

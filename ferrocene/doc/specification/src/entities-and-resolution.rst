@@ -305,10 +305,7 @@ A :t:`path` that starts with a :t:`path segment` that is expressed as
 :t:`keyword` ``$crate`` shall appear only within a :t:`macro transcriber`.
 
 :dp:`fls_7k88ypcgaoff`
-If a :t:`path segment` is expressed as :t:`keyword` ``super``, then the
-:t:`path segment` shall either be the first :t:`path segment` of a :t:`path`,
-or the previous :t:`path segment` of the :t:`path` shall also be expressed as
-:t:`keyword` ``super``.
+If a :t:`path segment` is expressed as :t:`keyword` ``super``, then each :t:`path segment` that precedes it in the :t:`path` shall be expressed as :t:`keyword` ``super``, except that the first :t:`path segment` of the :t:`path` may be expressed as :t:`keyword` ``self``.
 
 :dp:`fls_7kb6ltajgiou`
 A :t:`global path` is a :t:`path` that starts with :t:`namespace qualifier`

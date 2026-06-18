@@ -82,6 +82,7 @@ targets = [
   "aarch64v8r-unknown-none",
   "aarch64v8r-unknown-none-softfloat",
   "armebv7r-none-eabihf",
+  "armv7r-ferrocene.facade-eabihf",
   "armv7r-none-eabihf",
   "armv8r-none-eabihf",
   "powerpc64le-unknown-linux-gnu",

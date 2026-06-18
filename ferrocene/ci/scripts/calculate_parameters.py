@@ -55,6 +55,7 @@ GENERIC_BUILD_STD_TARGETS = [
     "aarch64r82-unknown-none-softfloat",
     "aarch64v8r-unknown-none",
     "aarch64v8r-unknown-none-softfloat",
+    "armv7r-ferrocene.facade-eabihf",
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
     "thumbv7em-ferrocene.facade-eabi",

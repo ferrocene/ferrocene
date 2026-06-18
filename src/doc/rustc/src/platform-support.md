@@ -476,6 +476,7 @@ target | std | host | notes
 `aarch64-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `aarch64r82-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
 `aarch64v8r-unknown-ferrocene.facade` | ✓ | ✓ | Internal target for tests
+`armv7r-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 

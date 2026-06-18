@@ -110,6 +110,7 @@ impl TargetSelection {
             "aarch64-unknown-ferrocene.facade"
             | "aarch64r82-unknown-ferrocene.facade"
             | "aarch64v8r-unknown-ferrocene.facade"
+            | "armv7r-ferrocene.facade-eabihf"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf" => true,
             _ => todo!("expand this `match`"),

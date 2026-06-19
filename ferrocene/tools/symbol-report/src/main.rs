@@ -136,8 +136,7 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
-        if !tcx.def_kind(def).is_fn_like()
-            || !item_is_validated(tcx, def.into()).needs_test() {
+        if !tcx.def_kind(def).is_fn_like() || !item_is_validated(tcx, def.into()).needs_test() {
             continue;
         }
 

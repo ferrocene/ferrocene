@@ -43,7 +43,9 @@ impl ValidatedStatus {
 
     pub fn needs_test(self) -> bool {
         match self {
-            ValidatedStatus::Validated { annotation, inherited } => annotation.is_some() || inherited,
+            ValidatedStatus::Validated { annotation, inherited } => {
+                annotation.is_some() || inherited
+            }
             _ => false,
         }
     }

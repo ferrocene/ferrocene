@@ -1,0 +1,20 @@
+use crate::spec::{Env, LinkSelfContainedDefault, Os, Target, TargetMetadata, crt_objects, cvs};
+
+pub(crate) fn target() -> Target {
+    let mut target = super::armv7r_none_eabihf::target();
+
+    target.metadata = TargetMetadata::default();
+    target.metadata.tier = Some(1);
+
+    // libstd port
+    target.families = cvs!["unix"];
+    target.os = Os::Linux;
+    target.env = Env::Musl;
+    target.has_thread_local = true;
+
+    // crt and libc are self-contained
+    target.pre_link_objects_self_contained = crt_objects::all("crt1.o");
+    target.link_self_contained = LinkSelfContainedDefault::True;
+
+    target
+}

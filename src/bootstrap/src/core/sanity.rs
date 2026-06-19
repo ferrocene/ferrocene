@@ -42,6 +42,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64r82-unknown-none",
     "aarch64r82-unknown-none-softfloat",
     "aarch64v8r-unknown-ferrocene.facade",
+    "armv7r-ferrocene.facade-eabihf",
     "aarch64-rhivos2-linux-gnu",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",

@@ -70,6 +70,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     },
     TargetSpec { tuple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { tuple: "armv7r-ferrocene.facade-eabihf", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec {
         tuple: "riscv64gc-unknown-linux-gnu",

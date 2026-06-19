@@ -508,7 +508,7 @@ jobs:
             # Darwin does not come with awscli, setup it before aws steps
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
             - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
@@ -597,7 +597,7 @@ jobs:
             # Darwin does not come with awscli, setup it before aws steps
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
             - aws-oidc-auth
             - ferrocene-setup-darwin
             - setup-uv
@@ -1071,6 +1071,8 @@ workflows:
             - aarch64r82-none-test-compiletest
             - aarch64v8r-none-test-library
             - aarch64v8r-none-test-compiletest
+            - armv7r-eabihf-test-compiletest
+            - armv7r-eabihf-test-library
             - thumbv7em-eabihf-test-library
             - thumbv7em-eabihf-test-compiletest
             - thumbv7em-eabi-test-library
@@ -1237,6 +1239,16 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - facade-generic-test:
+          name: armv7r-eabihf-test-library
+          target: armv7r-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-r5f
+          qemu-arch: qemu-arm
+          job: test:library-nostd
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-library
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
@@ -1273,6 +1285,16 @@ workflows:
           qemu-arch: qemu-arm
           job: test:library-nostd
           resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: armv7r-eabihf-test-compiletest
+          target: armv7r-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-r5f
+          qemu-arch: qemu-arm
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
 
@@ -1501,7 +1523,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - aws-oidc-auth
       - when:
           condition:
@@ -1549,7 +1571,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - aws-oidc-auth
       - when:
           condition:
@@ -1592,7 +1614,7 @@ commands:
           steps:
             - run:
                 name: Install AWSCLIv2
-                command: brew install awscli -y
+                command: brew install awscli
       - setup-uv
       - aws-oidc-auth
       - when:

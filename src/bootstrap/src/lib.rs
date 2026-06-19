@@ -2179,7 +2179,7 @@ impl Compiler {
 fn envify(s: &str) -> String {
     s.chars()
         .map(|c| match c {
-            '-' => '_',
+            '-' | '.' => '_',
             c => c,
         })
         .flat_map(|c| c.to_uppercase())

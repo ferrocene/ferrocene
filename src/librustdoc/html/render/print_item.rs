@@ -396,15 +396,7 @@ fn item_module(cx: &Context<'_>, item: &clean::Item, items: &[clean::Item]) -> i
                         let (stab_tags, deprecation) = match import.source.did {
                             Some(import_def_id) => {
                                 let stab_tags =
-<<<<<<< ferrocene/main
-                                    print_extra_info_tags(cx, myitem, item, Some(import_def_id))
-                                        .to_string();
-||||||| 09a37136124
-                                    print_extra_info_tags(tcx, myitem, item, Some(import_def_id))
-                                        .to_string();
-=======
-                                    print_extra_info_tags(tcx, myitem, item, Some(import_def_id));
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+                                    print_extra_info_tags(cx, myitem, item, Some(import_def_id));
                                 let deprecation = tcx
                                     .lookup_deprecation(import_def_id)
                                     .is_some_and(|deprecation| deprecation.is_in_effect());
@@ -526,17 +518,13 @@ fn print_extra_info_tags(
             write!(f, "{}", tag_html("unstable", "", "Experimental"))?;
         }
 
-<<<<<<< ferrocene/main
+        debug!(name = ?item.name, cfg = ?item.cfg, parent_cfg = ?parent.cfg, "Portability");
+
         // Ferrocene addition
         if super::show_validated(cx, item) {
             write!(f, "{}", tag_html("certification", "", "validated"))?;
         }
 
-||||||| 09a37136124
-=======
-        debug!(name = ?item.name, cfg = ?item.cfg, parent_cfg = ?parent.cfg, "Portability");
-
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         let cfg = match (&item.cfg, parent.cfg.as_ref()) {
             (Some(cfg), Some(parent_cfg)) => cfg.simplify_with(parent_cfg).map(Cow::Owned),
             (cfg, _) => cfg.as_deref().map(Cow::Borrowed),

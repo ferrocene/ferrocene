@@ -120,14 +120,11 @@ pub struct CodegenFnAttrs {
     pub objc_class: Option<Symbol>,
     /// The `#[rustc_objc_selector = "..."]` attribute.
     pub objc_selector: Option<Symbol>,
-<<<<<<< ferrocene/main
+    /// The `#[instrument_fn]` attribute.
+    pub instrument_fn: InstrumentFnAttr,
 
     // Ferrocene addition
     pub validated: Option<ferrocene::Validated>,
-||||||| 09a37136124
-=======
-    /// The `#[instrument_fn]` attribute.
-    pub instrument_fn: InstrumentFnAttr,
 }
 
 #[derive(Copy, Clone, TyEncodable, TyDecodable, StableHash, Debug)]
@@ -144,7 +141,6 @@ const impl Default for InstrumentFnAttr {
     fn default() -> Self {
         InstrumentFnAttr::Default
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash, PartialEq, Eq)]
@@ -272,14 +268,10 @@ impl CodegenFnAttrs {
             patchable_function_entry: None,
             objc_class: None,
             objc_selector: None,
-<<<<<<< ferrocene/main
+            instrument_fn: InstrumentFnAttr::default(),
 
             // Ferrocene addition
             validated: None,
-||||||| 09a37136124
-=======
-            instrument_fn: InstrumentFnAttr::default(),
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
     }
 

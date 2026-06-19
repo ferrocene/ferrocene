@@ -26,30 +26,6 @@ pub(crate) trait IsUnit {
 }
 
 impl<T: ?Sized> IsUnit for T {
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    default fn is_unit() -> bool {
-        false
-    }
-}
-
-impl IsUnit for () {
-    #[ferrocene::prevalidated]
-    fn is_unit() -> bool {
-        true
-    }
-||||||| 09a37136124
-    default fn is_unit() -> bool {
-        false
-    }
-}
-
-impl IsUnit for () {
-    fn is_unit() -> bool {
-        true
-    }
-=======
     // `type_id` erases lifetimes, but that's OK here because "is it ()" never depends on lifetimes
     const IS_UNIT: bool = type_id::<Self>() == type_id::<()>();
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }

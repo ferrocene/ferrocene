@@ -615,17 +615,13 @@ impl<T> [T] {
     /// }
     /// assert_eq!(x, &[0, 42, 2]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 09a37136124
-=======
     #[rustc_no_writable]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: [const] SliceIndex<Self>,
@@ -706,18 +702,14 @@ impl<T> [T] {
     /// }
     /// assert_eq!(x, &[1, 13, 4]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 09a37136124
-=======
     #[rustc_no_writable]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const unsafe fn get_unchecked_mut<I>(&mut self, index: I) -> &mut I::Output
     where
         I: [const] SliceIndex<Self>,

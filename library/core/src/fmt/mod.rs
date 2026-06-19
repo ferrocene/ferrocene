@@ -3154,6 +3154,7 @@ pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Resul
 }
 
 /// Formats a wide pointer (address and type-erased metadata) in `fmt::Pointer` style.
+#[ferrocene::prevalidated]
 fn wide_pointer_fmt_inner(ptr_addr: usize, metadata: &dyn Debug, f: &mut Formatter<'_>) -> Result {
     f.debug_struct("Pointer")
         .field_with("addr", move |f| pointer_fmt_inner(ptr_addr, f))

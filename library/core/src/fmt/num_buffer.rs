@@ -50,14 +50,8 @@ impl_NumBufferTrait! {
 /// let n2 = -1972i32;
 /// assert_eq!(n2.format_into(&mut buf), "-1972");
 /// ```
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-#[unstable(feature = "int_format_into", issue = "138215")]
-||||||| 09a37136124
-#[unstable(feature = "int_format_into", issue = "138215")]
-=======
 #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub struct NumBuffer<T: NumBufferTrait> {
     // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.
     pub(crate) buf: [MaybeUninit<u8>; 40],
@@ -75,32 +69,16 @@ impl<T: NumBufferTrait> core::fmt::Debug for NumBuffer<T> {
 #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
 impl<T: NumBufferTrait> NumBuffer<T> {
     /// Initializes internal buffer.
-<<<<<<< ferrocene/main
-    #[unstable(feature = "int_format_into", issue = "138215")]
     #[ferrocene::prevalidated]
-||||||| 09a37136124
-    #[unstable(feature = "int_format_into", issue = "138215")]
-=======
     #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn new() -> Self {
         // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.
         NumBuffer { buf: [MaybeUninit::<u8>::uninit(); 40], phantom: core::marker::PhantomData }
     }
 
-<<<<<<< ferrocene/main
-    /// Returns the length of the internal buffer.
-    #[unstable(feature = "int_format_into", issue = "138215")]
     #[ferrocene::prevalidated]
-    pub const fn capacity(&self) -> usize {
-||||||| 09a37136124
-    /// Returns the length of the internal buffer.
-    #[unstable(feature = "int_format_into", issue = "138215")]
-    pub const fn capacity(&self) -> usize {
-=======
     pub(crate) const fn capacity(&self) -> usize {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.buf.len()
     }
 }

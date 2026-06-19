@@ -311,6 +311,9 @@ If a :t:`path segment` is expressed as :t:`keyword` ``super``, then each :t:`pat
 A :t:`global path` is a :t:`path` that starts with :t:`namespace qualifier`
 ``::``.
 
+:dp:`fls_P6dFw89ZDKv2`
+The first :t:`path segment` of a :t:`global path` shall be expressed as an :t:`identifier` whose :t:`name` matches the :t:`name` of a :t:`candidate external prelude entity`.
+
 :dp:`fls_n77icl6idazp`
 A :t:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :t:`[identifier]s` or certain :t:`[keyword]s` as defined in the syntax rules
@@ -1124,7 +1127,7 @@ An :t:`import <use import>` with a single :t:`path segment` of either :t:`keywor
 When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.
 
 :dp:`fls_aam34hsRmKU2`
-A :t:`simple path` consisting of namespace qualifier ``::`` followed by a :t:`path segment` expressed as :t:`keyword` ``self`` shall not be used.
+A :t:`global path` where any of its :t:`[path segment]s` are expressed as any of the :t:`[keyword]s`, ``self``, ``super``, ``crate``, and ``$crate``, shall not be used.
 
 :dp:`fls_LV94x3HlpBWk`
 A :t:`simple import` shall not refer to :t:`[enum variant]s` through a :t:`type alias`.

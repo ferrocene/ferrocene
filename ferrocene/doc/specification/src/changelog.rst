@@ -104,6 +104,7 @@ Language changes in Rust 1.95.0
     - :p:`fls_QGdeRTe0H1Uc`
     - :p:`fls_aam34hsRmKU2`
     - :p:`fls_uSajfdSsbxna`
+    - :p:`fls_aam34hsRmKU2`
 
   - Changed paragraphs:
 

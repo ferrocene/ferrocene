@@ -34,7 +34,7 @@ pub enum ValidatedStatus {
 }
 
 impl ValidatedStatus {
-    pub fn validated(self) -> bool {
+    pub fn allowed_in_certified_build(self) -> bool {
         match self {
             ValidatedStatus::Validated { .. } => true,
             ValidatedStatus::WorkaroundDelegationBugs | ValidatedStatus::Unvalidated => false,

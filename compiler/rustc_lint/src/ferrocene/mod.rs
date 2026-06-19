@@ -270,11 +270,11 @@ impl<'tcx> LintState<'tcx> {
                     None => item_span,
                 };
                 // FIXME: this should probably be `WARN unused attibute` instead?
-                span_bug!(span, "annotated validated with no defined meaning: {kind:?} {item:?}");
+                span_bug!(span, "annotated validated item with no defined meaning: {kind:?} {item:?}");
             }
             Check::Ignore => {
                 debug!("ignoring validated item: {item:?}");
-                return None;
+                None
             }
             Check::Yes => {
                 debug!("check {item:?}");

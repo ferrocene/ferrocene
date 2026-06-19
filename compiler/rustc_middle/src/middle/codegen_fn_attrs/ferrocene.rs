@@ -158,8 +158,7 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
             _ => {}
         }
         // Check if the current item has an annotation
-        let annotation = tcx.get_attrs_by_path(current, VALIDATED_ATTR).next();
-        if let Some(attr) = annotation {
+        if let Some(attr) = tcx.get_attrs_by_path(current, VALIDATED_ATTR).next() {
             return Some(ValidatedStatus::Validated {
                 annotation: Some(attr.span()),
                 inherited: current != item,

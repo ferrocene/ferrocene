@@ -50,7 +50,7 @@ use rustc_trait_selection::traits::{self, FulfillmentError};
 use tracing::{debug, instrument};
 
 use crate::check::check_abi;
-use crate::errors::{BadReturnTypeNotation, NoFieldOnType};
+use crate::diagnostics::{BadReturnTypeNotation, NoFieldOnType};
 use crate::hir_ty_lowering::errors::{GenericsArgsErrExtend, prohibit_assoc_item_constraint};
 use crate::hir_ty_lowering::generics::{check_generic_arg_count, lower_generic_args};
 use crate::middle::resolve_bound_vars as rbv;
@@ -59,14 +59,17 @@ use crate::{NoVariantNamed, check_c_variadic_abi};
 /// The context in which an implied bound is being added to a item being lowered (i.e. a sizedness
 /// trait or a default trait)
 #[derive(Clone, Copy)]
-pub(crate) enum ImpliedBoundsContext<'tcx> {
+pub(crate) enum ImpliedBoundsContext {
     /// An implied bound is added to a trait definition (i.e. a new supertrait), used when adding
     /// a default `MetaSized` supertrait
     TraitDef(LocalDefId),
     /// An implied bound is added to a type parameter
-    TyParam(LocalDefId, &'tcx [hir::WherePredicate<'tcx>]),
-    /// An implied bound being added in any other context
-    AssociatedTypeOrImplTrait,
+    TyParam(LocalDefId),
+    /// Associated type bounds
+    AssociatedType(LocalDefId),
+    ImplTrait,
+    TraitObject,
+    TraitAscription,
 }
 
 /// A path segment that is semantically allowed to have generic arguments.
@@ -409,7 +412,7 @@ impl<'tcx> ForbidParamUsesFolder<'tcx> {
             }
             ForbidParamContext::ConstArgument => {
                 if self.tcx.features().generic_const_args() {
-                    "generic parameters in const blocks are only allowed as the direct value of a `type const`"
+                    "generic parameters in const blocks are not allowed; use a named `const` item instead"
                 } else {
                     "generic parameters may not be used in const operations"
                 }
@@ -535,9 +538,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     None
                 }
             }
-            ty::AnonConstKind::GCE
-            | ty::AnonConstKind::GCA
-            | ty::AnonConstKind::RepeatExprCount => None,
+            ty::AnonConstKind::GCE | ty::AnonConstKind::RepeatExprCount => None,
         }
     }
 
@@ -1080,7 +1081,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     }
                     (None, _) | (_, false) => (Some(tcx.def_span(trait_def_id)), None, ""),
                 };
-            self.dcx().emit_err(crate::errors::ConstBoundForNonConstTrait {
+            self.dcx().emit_err(crate::diagnostics::ConstBoundForNonConstTrait {
                 span,
                 modifier: constness.as_str(),
                 def_span,
@@ -1357,9 +1358,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             LowerTypeRelativePathMode::Type(permit_variants),
         )? {
             TypeRelativePath::AssocItem(alias_term) => {
-                let ty = alias_term.expect_ty().to_ty(tcx);
+                let alias_ty = alias_term.expect_ty();
+                let def_id = alias_ty.kind.def_id();
+                let ty = alias_ty.to_ty(tcx);
                 let ty = self.check_param_uses_if_mcg(ty, span, false);
-                Ok((ty, tcx.def_kind(alias_term.def_id()), alias_term.def_id()))
+                Ok((ty, tcx.def_kind(def_id), def_id))
             }
             TypeRelativePath::Variant { adt, variant_did } => {
                 let adt = self.check_param_uses_if_mcg(adt, span, false);
@@ -1392,8 +1395,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             LowerTypeRelativePathMode::Const,
         )? {
             TypeRelativePath::AssocItem(alias_term) => {
-                self.require_type_const_attribute(alias_term.def_id(), span)?;
-                let ct = Const::new_unevaluated(tcx, alias_term.expect_ct());
+                let alias_ct = alias_term.expect_ct();
+                if let Some(def_id) = alias_ct.kind.opt_def_id() {
+                    self.require_type_const_attribute(def_id, span)?;
+                }
+                let ct = Const::new_unevaluated(tcx, alias_ct);
                 let ct = self.check_param_uses_if_mcg(ct, span, false);
                 Ok(ct)
             }
@@ -1747,7 +1753,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let tcx = self.tcx();
 
         if !tcx.visibility(item_def_id).is_accessible_from(scope, tcx) {
-            self.dcx().emit_err(crate::errors::AssocItemIsPrivate {
+            self.dcx().emit_err(crate::diagnostics::AssocItemIsPrivate {
                 span,
                 kind: tcx.def_descr(item_def_id),
                 name: ident,
@@ -2588,6 +2594,43 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let variant_def = adt_def.variant_with_id(variant_did);
         let variant_idx = adt_def.variant_index_with_id(variant_did).as_u32();
 
+        for init in inits {
+            if !variant_def.fields.iter().any(|field_def| field_def.name == init.field.name) {
+                let mut err = if adt_def.is_enum() {
+                    struct_span_code_err!(
+                        tcx.dcx(),
+                        init.field.span,
+                        E0559,
+                        "variant `{}::{}` has no field named `{}`",
+                        ty,
+                        variant_def.name,
+                        init.field
+                    )
+                } else {
+                    struct_span_code_err!(
+                        tcx.dcx(),
+                        init.field.span,
+                        E0560,
+                        "struct `{}` has no field named `{}`",
+                        variant_def.name,
+                        init.field
+                    )
+                };
+                if adt_def.is_enum() {
+                    err.span_label(
+                        init.field.span,
+                        format!("`{}::{}` does not have this field", ty, variant_def.name),
+                    );
+                } else {
+                    err.span_label(
+                        init.field.span,
+                        format!("`{}` does not have this field", variant_def.name),
+                    );
+                }
+                return ty::Const::new_error(tcx, err.emit());
+            }
+        }
+
         let fields = variant_def
             .fields
             .iter()
@@ -3090,7 +3133,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     &mut bounds,
                     self_ty,
                     hir_bounds,
-                    ImpliedBoundsContext::AssociatedTypeOrImplTrait,
+                    &[],
+                    ImpliedBoundsContext::TraitAscription,
                     hir_ty.span,
                 );
                 self.register_trait_ascription_bounds(bounds, hir_ty.hir_id, hir_ty.span);
@@ -3506,9 +3550,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let fn_ty = tcx.mk_fn_sig(input_tys, output_ty, fn_sig_kind);
         let fn_ptr_ty = ty::Binder::bind_with_vars(fn_ty, bound_vars);
 
-        if let hir::Node::Ty(hir::Ty { kind: hir::TyKind::FnPtr(fn_ptr_ty), span, .. }) =
-            tcx.hir_node(hir_id)
-        {
+        if let Some(hir::Ty { kind: hir::TyKind::FnPtr(fn_ptr_ty), span, .. }) = hir_ty {
             check_abi(tcx, hir_id, *span, fn_ptr_ty.abi);
         }
 

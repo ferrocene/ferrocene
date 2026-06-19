@@ -12,7 +12,7 @@ use rustc_span::Span;
 use tracing::{debug, instrument};
 
 use super::{DefineOpaqueTypes, RegionVariableOrigin};
-use crate::errors::OpaqueHiddenTypeDiag;
+use crate::diagnostics::OpaqueHiddenTypeDiag;
 use crate::infer::{InferCtxt, InferOk};
 use crate::traits::{self, Obligation, PredicateObligations};
 
@@ -333,12 +333,10 @@ impl<'tcx> InferCtxt<'tcx> {
                         goals.push(Goal::new(
                             self.tcx,
                             param_env,
-                            ty::PredicateKind::Clause(ty::ClauseKind::Projection(
-                                ty::ProjectionPredicate {
-                                    projection_term: projection_ty.into(),
-                                    term: ty_var.into(),
-                                },
-                            )),
+                            ty::ProjectionPredicate {
+                                projection_term: projection_ty.into(),
+                                term: ty_var.into(),
+                            },
                         ));
                         ty_var
                     }

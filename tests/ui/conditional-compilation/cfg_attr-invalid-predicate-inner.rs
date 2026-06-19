@@ -5,3 +5,6 @@
 //~| ERROR malformed `cfg_attr` attribute input [E0539]
 
 fn main() {}
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr

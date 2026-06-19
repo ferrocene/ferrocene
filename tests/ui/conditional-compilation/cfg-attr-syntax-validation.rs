@@ -61,5 +61,5 @@ generate_s10!(concat!("nonexistent"));
 
 fn main() {}
 
-// ferrocene-annotations: fls_dd9xh3wdjudo
-// Attribute cfg_attr
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

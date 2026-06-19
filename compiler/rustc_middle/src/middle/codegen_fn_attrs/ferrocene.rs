@@ -40,6 +40,13 @@ impl ValidatedStatus {
             ValidatedStatus::WorkaroundDelegationBugs | ValidatedStatus::Unvalidated => false,
         }
     }
+
+    pub fn needs_test(self) -> bool {
+        match self {
+            ValidatedStatus::Validated { annotation, inherited } => annotation.is_some() || inherited,
+            _ => false,
+        }
+    }
 }
 
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.

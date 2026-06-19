@@ -41,7 +41,7 @@ impl<'tcx> LintState<'tcx> {
                     // qualification. It can't be called unless someone gets a `dyn Trait`, in which
                     // case we'll lint the unsizing cast.
                     None
-                } else if item_is_validated(tcx, instance.def_id()).validated() {
+                } else if item_is_validated(tcx, instance.def_id()).allowed_in_certified_build() {
                     None
                 } else {
                     Some(UseKind::FnPtrCast(instance))
@@ -371,7 +371,7 @@ impl<'tcx> LintState<'tcx> {
             // impl block.
             let impl_fn = *trait_to_impl_map.get(trait_item).unwrap_or(trait_item);
 
-            if item_is_validated(tcx, impl_fn).validated() {
+            if item_is_validated(tcx, impl_fn).allowed_in_certified_build() {
                 continue;
             }
 

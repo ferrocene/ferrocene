@@ -16,7 +16,8 @@ extern "C" {
 pub unsafe extern "C" fn c_variadic_no_use(fmt: *const i8, mut ap: ...) -> i32 {
     // CHECK: call void @llvm.va_start
     vprintf(fmt, ap)
-    // CHECK: call void @llvm.va_end
+    // We no longer call the LLVM va_end.
+    // CHECK-NOT: call void @llvm.va_end
 }
 
 // ferrocene-annotations: um_rustc_C_opt_level

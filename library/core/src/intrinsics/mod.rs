@@ -1636,6 +1636,7 @@ pub unsafe fn float_to_int_unchecked<Float: bounds::FloatPrimitive, Int: Copy>(v
 /// Float addition that allows optimizations based on algebraic rules.
 ///
 /// Stabilized as [`f16::algebraic_add`], [`f32::algebraic_add`], [`f64::algebraic_add`] and [`f128::algebraic_add`].
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn fadd_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
@@ -1643,6 +1644,7 @@ pub const fn fadd_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 /// Float subtraction that allows optimizations based on algebraic rules.
 ///
 /// Stabilized as [`f16::algebraic_sub`], [`f32::algebraic_sub`], [`f64::algebraic_sub`] and [`f128::algebraic_sub`].
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn fsub_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
@@ -1650,6 +1652,7 @@ pub const fn fsub_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 /// Float multiplication that allows optimizations based on algebraic rules.
 ///
 /// Stabilized as [`f16::algebraic_mul`], [`f32::algebraic_mul`], [`f64::algebraic_mul`] and [`f128::algebraic_mul`].
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn fmul_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
@@ -1657,6 +1660,7 @@ pub const fn fmul_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 /// Float division that allows optimizations based on algebraic rules.
 ///
 /// Stabilized as [`f16::algebraic_div`], [`f32::algebraic_div`], [`f64::algebraic_div`] and [`f128::algebraic_div`].
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn fdiv_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
@@ -1664,6 +1668,7 @@ pub const fn fdiv_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 /// Float remainder that allows optimizations based on algebraic rules.
 ///
 /// Stabilized as [`f16::algebraic_rem`], [`f32::algebraic_rem`], [`f64::algebraic_rem`] and [`f128::algebraic_rem`].
+#[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn frem_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
@@ -2079,7 +2084,8 @@ pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) ->
     unsafe { unchecked_funnel_shr(x, x, shift % (mem::size_of::<T>() as u32 * 8)) }
 }
 
-/// Returns (a + b) mod 2<sup>N</sup>, where N is the width of T in bits.
+/// Wrapping (modular) addition. Computes `a + b`,
+/// wrapping around at the boundary of the type.
 ///
 /// Note that, unlike most intrinsics, this is safe to call;
 /// it does not require an `unsafe` block.
@@ -2093,7 +2099,8 @@ pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) ->
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
-/// Returns (a - b) mod 2<sup>N</sup>, where N is the width of T in bits.
+/// Wrapping (modular) subtraction. Computes `a - b`,
+/// wrapping around at the boundary of the type.
 ///
 /// Note that, unlike most intrinsics, this is safe to call;
 /// it does not require an `unsafe` block.
@@ -2107,7 +2114,8 @@ pub const fn wrapping_add<T: Copy>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn wrapping_sub<T: Copy>(a: T, b: T) -> T;
-/// Returns (a * b) mod 2<sup>N</sup>, where N is the width of T in bits.
+/// Wrapping (modular) multiplication. Computes `a *
+/// b`, wrapping around at the boundary of the type.
 ///
 /// Note that, unlike most intrinsics, this is safe to call;
 /// it does not require an `unsafe` block.

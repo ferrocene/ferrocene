@@ -1,3 +1,5 @@
+use crate::intrinsics::type_id;
+
 /// Collapses all unit items from an iterator into one.
 ///
 /// This is more useful when combined with higher-level abstractions, like
@@ -20,19 +22,10 @@ impl FromIterator<()> for () {
 }
 
 pub(crate) trait IsUnit {
-    fn is_unit() -> bool;
+    const IS_UNIT: bool;
 }
 
 impl<T: ?Sized> IsUnit for T {
-    #[ferrocene::prevalidated]
-    default fn is_unit() -> bool {
-        false
-    }
-}
-
-impl IsUnit for () {
-    #[ferrocene::prevalidated]
-    fn is_unit() -> bool {
-        true
-    }
+    // `type_id` erases lifetimes, but that's OK here because "is it ()" never depends on lifetimes
+    const IS_UNIT: bool = type_id::<Self>() == type_id::<()>();
 }

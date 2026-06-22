@@ -10,3 +10,6 @@ fn main() {
     let _ = Disabled; //~ ERROR: cannot find value `Disabled`
     let _ = Enabled;  //  ok
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

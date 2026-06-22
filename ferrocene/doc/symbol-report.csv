@@ -1368,7 +1368,6 @@
 <&usize as core::ops::bit::Shr<usize>>::shr
 <() as core::default::Default>::default
 <() as core::fmt::Debug>::fmt
-<() as core::unit::IsUnit>::is_unit
 <(A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
@@ -1418,7 +1417,6 @@
 <T as core::convert::TryFrom<U>>::try_from
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
-<T as core::unit::IsUnit>::is_unit
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
 <[T] as core::fmt::Debug>::fmt
@@ -6666,6 +6664,7 @@ core::fmt::rt::Argument::<'_>::new_octal
 core::fmt::rt::Argument::<'_>::new_pointer
 core::fmt::rt::Argument::<'_>::new_upper_exp
 core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::wide_pointer_fmt_inner
 core::fmt::write
 core::hash::Hash::hash_slice
 core::hash::Hasher::write_i128

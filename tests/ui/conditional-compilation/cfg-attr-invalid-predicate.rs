@@ -1,7 +1,7 @@
-#[cfg(foo(bar))] //~ ERROR invalid predicate `foo`
+#[cfg(foo(bar))] //~ ERROR malformed `cfg` attribute input [E0539]
 fn check() {}
 
 fn main() {}
 
-// ferrocene-annotations: fls_dd9xh3wdjudo
-// Attribute cfg_attr
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

@@ -1384,7 +1384,7 @@ workflows:
           job: test:library
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1393,7 +1393,7 @@ workflows:
           name: x86_64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 8-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1403,7 +1403,7 @@ workflows:
           job: test:library
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1412,7 +1412,7 @@ workflows:
           name: x86_64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 8-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1522,7 +1522,7 @@ workflows:
           job: test:library
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1531,7 +1531,7 @@ workflows:
           name: aarch64-qnx-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 8-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1541,7 +1541,7 @@ workflows:
           job: test:library
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1550,7 +1550,7 @@ workflows:
           name: aarch64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
-          resource-class: ferrocene/vm-ubuntu-amd64-medium # 8-core
+          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64

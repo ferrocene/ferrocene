@@ -2066,6 +2066,9 @@ impl<'a> Formatter<'a> {
                 // the formatted output is also shorter than `u16::MAX`.
                 let len = match u16::try_from(len) {
                     Ok(len) => len,
+                    #[ferrocene::annotation(
+                        "The `Err(_)` branch is explicitly marked unreachable, causing it to be reached would be a bug"
+                    )]
                     Err(_) => unreachable!(),
                 };
                 let post_padding = self.padding(width - len, Alignment::Right)?;

@@ -1257,26 +1257,17 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-compiletest
-            - x86_64-qnx8-test-library
-            - x86_64-qnx8-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-compiletest
-            - aarch64-qnx8-test-library
-            - aarch64-qnx8-test-compiletest
-            - aarch64-none-test-library
-            - aarch64-none-test-compiletest
-            - aarch64r82-none-test-library
-            - aarch64r82-none-test-compiletest
-            - aarch64v8r-none-test-library
-            - aarch64v8r-none-test-compiletest
-            - armv7r-eabihf-test-compiletest
-            - armv7r-eabihf-test-library
-            - thumbv7em-eabihf-test-library
-            - thumbv7em-eabihf-test-compiletest
-            - thumbv7em-eabi-test-library
-            - thumbv7em-eabi-test-compiletest
+            - x86_64-qnx-test-library-compiletest
+            - x86_64-qnx8-test-library-compiletest
+            - aarch64-qnx-test-library-compiletest
+            - aarch64-qnx8-test-library-compiletest
+            - aarch64-none-test-library-compiletest
+            - aarch64-none-test-target-cpu-library-compiletest
+            - aarch64r82-none-test-library-compiletest
+            - aarch64v8r-none-test-library-compiletest
+            - armv7r-eabihf-test-library-compiletest
+            - thumbv7em-eabihf-test-library-compiletest
+            - thumbv7em-eabi-test-library-compiletest
             - aarch64-linux-test
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
@@ -1392,27 +1383,8 @@ workflows:
             - aarch64-linux-dist
 
       - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-compiletest
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
-          test-variant: "2021"
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - x86_64-qnx8-generic-test-vm:
-          name: x86_64-qnx8-test-library
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
+          name: x86_64-qnx-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1421,10 +1393,11 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - x86_64-qnx8-generic-test-vm:
-          name: x86_64-qnx8-test-compiletest
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          name: x86_64-qnx8-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
-          resource-class: xlarge # 8-core
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
@@ -1480,27 +1453,8 @@ workflows:
             - x86_64-linux-build
 
       - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-compiletest
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
-          test-variant: "2021"
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - aarch64-qnx8-generic-test-vm:
-          name: aarch64-qnx8-test-library
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
+          name: aarch64-qnx-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1509,10 +1463,11 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx8-generic-test-vm:
-          name: aarch64-qnx8-test-compiletest
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          name: aarch64-qnx8-test-library-compiletest
+          tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
-          resource-class: xlarge # 8-core
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64

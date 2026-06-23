@@ -1221,7 +1221,9 @@ workflows:
             - aarch64v8r-none-test-library-compiletest
             - armv7r-eabihf-test-library-compiletest
             - thumbv7em-eabihf-test-library-compiletest
+            - thumbv7em-eabihf-test-target-cpu-library-compiletest
             - thumbv7em-eabi-test-library-compiletest
+            - thumbv7em-eabi-test-target-cpu-library-compiletest
             - aarch64-linux-test
             - aarch64-linux-test-library
             - aarch64-linux-compiletest

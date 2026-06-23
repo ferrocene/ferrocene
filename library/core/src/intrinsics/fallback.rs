@@ -21,7 +21,7 @@ pub const trait CarryingMulAdd: Copy + 'static {
 macro_rules! impl_carrying_mul_add_by_widening {
     ($($t:ident $u:ident $w:ident,)+) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        impl const CarryingMulAdd for $t {
+        const impl CarryingMulAdd for $t {
             type Unsigned = $u;
             #[inline]
             #[ferrocene::prevalidated]
@@ -134,7 +134,7 @@ macro_rules! zero {
 macro_rules! impl_disjoint_bitor {
     ($($t:ident,)+) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        impl const DisjointBitOr for $t {
+        const impl DisjointBitOr for $t {
             #[cfg_attr(miri, track_caller)]
             #[inline]
             #[ferrocene::prevalidated]
@@ -169,7 +169,7 @@ pub const trait FunnelShift: Copy + 'static {
 macro_rules! impl_funnel_shifts {
     ($($type:ident),*) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        impl const FunnelShift for $type {
+        const impl FunnelShift for $type {
             #[cfg_attr(miri, track_caller)]
             #[inline]
             #[ferrocene::prevalidated]
@@ -239,7 +239,7 @@ pub const trait CarrylessMul: Copy + 'static {
 macro_rules! impl_carryless_mul{
     ($($type:ident),*) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        impl const CarrylessMul for $type {
+        const impl CarrylessMul for $type {
             #[inline]
             #[ferrocene::prevalidated]
             fn carryless_mul(self, rhs: Self) -> Self {

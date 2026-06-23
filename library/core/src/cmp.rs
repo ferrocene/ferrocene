@@ -1902,7 +1902,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-            impl const PartialEq for $t {
+            const impl PartialEq for $t {
                 #[inline]
                 #[ferrocene::prevalidated]
                 fn eq(&self, other: &Self) -> bool { *self == *other }
@@ -1936,7 +1936,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-            impl const Eq for $t {}
+            const impl Eq for $t {}
         )*)
     }
 
@@ -1993,7 +1993,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-            impl const PartialOrd for $t {
+            const impl PartialOrd for $t {
                 #[inline]
                 #[ferrocene::prevalidated]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -2038,7 +2038,7 @@ mod impls {
         ($($t:ty)*) => ($(
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-            impl const PartialOrd for $t {
+            const impl PartialOrd for $t {
                 #[inline]
                 #[ferrocene::prevalidated]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -2050,7 +2050,7 @@ mod impls {
 
             #[stable(feature = "rust1", since = "1.0.0")]
             #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
-            impl const Ord for $t {
+            const impl Ord for $t {
                 #[inline]
                 #[ferrocene::prevalidated]
                 fn cmp(&self, other: &Self) -> Ordering {

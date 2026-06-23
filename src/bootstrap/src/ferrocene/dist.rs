@@ -12,6 +12,7 @@ use std::rc::Rc;
 use serde_json::json;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::doc::Rustc;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
@@ -50,6 +51,9 @@ impl Step for Docs {
         builder.run_default_doc_steps();
         let doc_out = builder.doc_out(self.target);
 
+        builder.ensure(Rustc::for_stage(builder, builder.top_stage, self.target));
+        let compiler_doc_out = builder.compiler_doc_out(self.target);
+
         // Build the documentation for certified crates
         //
         // NOTE: must be called before .add_directory, since it places the
@@ -62,7 +66,8 @@ impl Step for Docs {
         }
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
-        subsetter.add_directory(&doc_out, &doc_out);
+        subsetter.add_directory(&doc_out, &Path::new(""), &doc_out);
+        subsetter.add_directory(&compiler_doc_out, &Path::new("rustc-docs"), &compiler_doc_out);
         subsetter.add_copyright_files(&builder);
 
         subsetter.into_tarballs().map(|tarball| tarball.generate()).collect()
@@ -160,10 +165,10 @@ impl Step for SourceTarball {
 
         // Copy raw source files
         for item in DIRS {
-            subsetter.add_directory(&builder.src, &builder.src.join(item));
+            subsetter.add_directory(&builder.src, &Path::new(""), &builder.src.join(item));
         }
         for item in FILES {
-            subsetter.add_file(&builder.src, &builder.src.join(item));
+            subsetter.add_file(&builder.src, &Path::new(""), &builder.src.join(item));
         }
         subsetter.add_copyright_files(&builder);
 
@@ -260,7 +265,10 @@ impl<'a> Subsetter<'a> {
         }
     }
 
-    fn add_directory(&mut self, root: &Path, path: &Path) {
+    // Add files from under `path`, remapping a specified directory in the filesystem to another
+    // in the tarball along the way.
+    // Note: `path` must be under `root_in_filesystem`.
+    fn add_directory(&mut self, root_in_filesystem: &Path, root_in_tarball: &Path, path: &Path) {
         let old_subset = self.directory_subset.clone();
 
         let subset_file = path.join("ferrocene-subset");
@@ -273,9 +281,9 @@ impl<'a> Subsetter<'a> {
         for entry in std::fs::read_dir(path).unwrap() {
             let path = entry.as_ref().unwrap().path();
             if path.is_file() {
-                self.add_file(root, &path);
+                self.add_file(root_in_filesystem, root_in_tarball, &path);
             } else if path.is_dir() {
-                self.add_directory(root, &path);
+                self.add_directory(root_in_filesystem, root_in_tarball, &path);
             }
         }
 
@@ -287,12 +295,12 @@ impl<'a> Subsetter<'a> {
         for path in builder.ensure(GenerateCopyright) {
             if !builder.config.dry_run() {
                 // First arg gets the file placed in the root of the tarball, instead of in build/
-                self.add_file(path.parent().unwrap(), &path);
+                self.add_file(path.parent().unwrap(), &Path::new(""), &path);
             }
         }
     }
 
-    fn add_file(&mut self, root: &Path, path: &Path) {
+    fn add_file(&mut self, root_in_filesystem: &Path, root_in_tarball: &Path, path: &Path) {
         let mut subset = self.directory_subset.clone();
 
         // Allow overriding the directory subset with per-file subsets.
@@ -321,10 +329,14 @@ impl<'a> Subsetter<'a> {
             }
         };
 
-        let relative = path.strip_prefix(root).unwrap();
+        let relative = path.strip_prefix(root_in_filesystem).unwrap();
         let file_type =
             if self.is_executable(&path) { FileType::Executable } else { FileType::Regular };
-        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), file_type);
+        tarball.add_file(
+            &path,
+            self.output_prefix.join(root_in_tarball).join(relative).parent().unwrap(),
+            file_type,
+        );
     }
 
     #[cfg(unix)]

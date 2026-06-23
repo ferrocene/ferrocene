@@ -1,12 +1,12 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _x86_64-pc-nto-qnx800:
+.. _x86_64-pc-qnx:
 
-:target:`x86_64-pc-nto-qnx800`
+:target:`x86_64-pc-qnx`
 ==============================
 
-The ``x86_64-pc-nto-qnx800`` Ferrocene target provides support for QNX on
+The ``x86_64-pc-qnx`` Ferrocene target provides support for QNX on
 x86-64 processors.
 
 .. note::
@@ -55,7 +55,7 @@ Archives to install
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-x86_64-pc-nto-qnx800``
+* ``rust-std-x86_64-pc-qnx``
 
 Required shell environment
 ------------------------------
@@ -82,4 +82,4 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-* ``--target=x86_64-pc-nto-qnx800``
+* ``--target=x86_64-pc-qnx``

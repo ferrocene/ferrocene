@@ -114,8 +114,8 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :ref:`aarch64-unknown-nto-qnx800`
-     - ``aarch64-unknown-nto-qnx800``
+   * - :ref:`aarch64-unknown-qnx`
+     - ``aarch64-unknown-qnx``
      - Cross-compilation
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
@@ -144,8 +144,8 @@ qualified upon request.
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :ref:`x86_64-pc-nto-qnx800`
-     - ``x86_64-pc-nto-qnx800``
+   * - :ref:`x86_64-pc-qnx`
+     - ``x86_64-pc-qnx``
      - Cross-compilation
      - Full
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.

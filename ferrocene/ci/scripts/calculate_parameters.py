@@ -49,8 +49,8 @@ QNX71_TARGETS = [
     # the QNX 8.0 targets require a different SDP (QNX toolchain) so they'll go
     # into different CI jobs (dist & self-test). we cannot list them together
     # with the QNX7.1 targets here
-    # "aarch64-unknown-nto-qnx800",
-    # "x86_64-pc-nto-qnx800",
+    # "aarch64-unknown-qnx",
+    # "x86_64-pc-qnx",
 ]
 
 GENERIC_BUILD_STD_TARGETS = [

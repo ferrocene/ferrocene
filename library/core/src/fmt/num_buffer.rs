@@ -77,21 +77,6 @@ impl<T: NumBufferTrait> NumBuffer<T> {
     #[rustc_const_stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
     pub const fn new() -> Self {
         // FIXME: Once const generics feature is working, use `T::BUF_SIZE` instead of 40.
-<<<<<<< ferrocene/main
-        NumBuffer { buf: [MaybeUninit::<u8>::uninit(); 40], phantom: core::marker::PhantomData }
-    }
-
-    #[ferrocene::prevalidated]
-    pub(crate) const fn capacity(&self) -> usize {
-        self.buf.len()
-||||||| 3768ec06c82
-        NumBuffer { buf: [MaybeUninit::<u8>::uninit(); 40], phantom: core::marker::PhantomData }
-    }
-
-    pub(crate) const fn capacity(&self) -> usize {
-        self.buf.len()
-=======
         NumBuffer { buf: T::DEFAULT, phantom: core::marker::PhantomData }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 }

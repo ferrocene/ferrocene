@@ -1274,7 +1274,7 @@ workflows:
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
-          resource-class: large # 4-core
+          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
 
@@ -1284,7 +1284,7 @@ workflows:
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
           job: qnx:compiletest-no-only-hosts
-          resource-class: large # 4-core
+          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
 
@@ -1294,7 +1294,7 @@ workflows:
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library-nostd
-          resource-class: large # 4-core
+          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
 
@@ -1304,7 +1304,7 @@ workflows:
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
           job: test:library-nostd
-          resource-class: large # 4-core
+          resource-class: ferrocene/vm-ubuntu-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
 
@@ -1397,7 +1397,7 @@ workflows:
           name: x86_64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
-          resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
+          resource-class: ferrocene/vm-ubuntu-amd64-medium # 8-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64

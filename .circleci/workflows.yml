@@ -1295,6 +1295,7 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
+            - aarch64-none-test-library-compiletest
 
       - facade-generic-test:
           name: aarch64r82-none-test-library-compiletest
@@ -1393,6 +1394,7 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
+            - thumbv7em-eabihf-test-library-compiletest
 
       - facade-generic-test:
           name: thumbv7em-eabi-test-target-cpu-library-compiletest
@@ -1403,6 +1405,7 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
+            - thumbv7em-eabi-test-library-compiletest
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest

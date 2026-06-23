@@ -1121,7 +1121,7 @@ the :t:`visibility` of the :t:`name` is the most permissive one.
 A :t:`simple import` with a single :t:`path segment` expressed as :t:`keyword` ``self`` shall be subject to a :t:`renaming`.
 
 :dp:`fls_sUhnfV62HJrb`
-An :t:`import <use import>` with a single :t:`path segment` of either :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` shall be subject to a :t:`renaming`.
+A :t:`use import` with a single :t:`path segment` expressed as either :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` shall be subject to a :t:`renaming`.
 
 :dp:`fls_QGdeRTe0H1Uc`
 When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.

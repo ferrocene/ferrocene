@@ -360,7 +360,7 @@ jobs:
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -375,7 +375,7 @@ jobs:
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
@@ -395,7 +395,7 @@ jobs:
   x86_64-qnx8-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -409,7 +409,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: x86_64-pc-nto-qnx800
       SCRIPT: |
-        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
@@ -878,7 +878,7 @@ jobs:
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -892,7 +892,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -912,7 +912,7 @@ jobs:
   aarch64-qnx8-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -926,7 +926,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
       SCRIPT: |
-        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -1338,7 +1338,7 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
@@ -1348,7 +1348,7 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
@@ -1357,7 +1357,7 @@ workflows:
 
       - x86_64-qnx8-generic-test-vm:
           name: x86_64-qnx8-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
@@ -1367,7 +1367,7 @@ workflows:
 
       - x86_64-qnx8-generic-test-vm:
           name: x86_64-qnx8-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
@@ -1426,7 +1426,7 @@ workflows:
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
@@ -1436,7 +1436,7 @@ workflows:
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:
@@ -1445,7 +1445,7 @@ workflows:
 
       - aarch64-qnx8-generic-test-vm:
           name: aarch64-qnx8-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
@@ -1455,7 +1455,7 @@ workflows:
 
       - aarch64-qnx8-generic-test-vm:
           name: aarch64-qnx8-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 8-core
           requires:

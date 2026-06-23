@@ -390,7 +390,7 @@ jobs:
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -405,7 +405,7 @@ jobs:
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
@@ -422,39 +422,39 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
-  # x86_64-qnx8-generic-test-vm:
-  #   executor: linux-vm
-  #   parameters:
-  #     job:
-  #       type: string
-  #     test-variant:
-  #       type: string
-  #     resource-class:
-  #       type: string
-  #     extra-args:
-  #       type: string
-  #       default: ""
-  #   resource_class: << parameters.resource-class >>
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: x86_64-pc-nto-qnx800
-  #     SCRIPT: |
-  #       set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-  #   steps:
-  #     - aws-cli/install:
-  #         version: << pipeline.parameters.awscli-version >>
-  #         override_installed: true
-  #     - aws-oidc-auth
-  #     - ferrocene-checkout
-  #     - setup-uv
-  #     - setup-qnx8-toolchain:
-  #         source-env-script: false
-  #     - ferrocene-job-test-vm:
-  #         checkout-source: false
-  #         docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #         run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-  #         restore-from-job: x86_64-linux-build
-  #         emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+  x86_64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      tasks:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -922,7 +922,7 @@ jobs:
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -936,7 +936,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -953,39 +953,39 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
-  # aarch64-qnx8-generic-test-vm:
-  #   executor: linux-vm
-  #   parameters:
-  #     job:
-  #       type: string
-  #     test-variant:
-  #       type: string
-  #     resource-class:
-  #       type: string
-  #     extra-args:
-  #       type: string
-  #       default: ""
-  #   resource_class: << parameters.resource-class >>
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
-  #     SCRIPT: |
-  #       set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-  #   steps:
-  #     - aws-oidc-auth
-  #     - ferrocene-checkout
-  #     - setup-uv
-  #     - aws-cli/install:
-  #         version: << pipeline.parameters.awscli-version >>
-  #         override_installed: true
-  #     - setup-qnx8-toolchain:
-  #         source-env-script: false
-  #     - ferrocene-job-test-vm:
-  #         checkout-source: false
-  #         docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #         run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-  #         restore-from-job: x86_64-linux-build
-  #         emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
+  aarch64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      tasks:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
 
   # Docker jobs
 
@@ -1388,7 +1388,7 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1398,7 +1398,7 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
@@ -1407,7 +1407,7 @@ workflows:
 
       # - x86_64-qnx8-generic-test-vm:
       #     name: x86_64-qnx8-test-library
-      #     job: test:library
+      #     tasks: $(ferrocene/ci/split-tasks.py test:library)
       #     test-variant: "2021"
       #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
       #     resource-class: large # 4-core
@@ -1417,7 +1417,7 @@ workflows:
 
       # - x86_64-qnx8-generic-test-vm:
       #     name: x86_64-qnx8-test-compiletest
-      #     job: qnx:compiletest-no-only-hosts
+      #     tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
       #     test-variant: "2021"
       #     resource-class: xlarge # 8-core
       #     requires:
@@ -1476,7 +1476,7 @@ workflows:
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library
-          job: test:library
+          tasks: $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1486,7 +1486,7 @@ workflows:
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test-variant: "2021"
           resource-class: xlarge # 8-core
           requires:
@@ -1495,7 +1495,7 @@ workflows:
 
       # - aarch64-qnx8-generic-test-vm:
       #     name: aarch64-qnx8-test-library
-      #     job: test:library
+      #     tasks: $(ferrocene/ci/split-tasks.py test:library)
       #     test-variant: "2021"
       #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
       #     resource-class: large # 4-core
@@ -1505,7 +1505,7 @@ workflows:
 
       # - aarch64-qnx8-generic-test-vm:
       #     name: aarch64-qnx8-test-compiletest
-      #     job: qnx:compiletest-no-only-hosts
+      #     tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
       #     test-variant: "2021"
       #     resource-class: xlarge # 8-core
       #     requires:

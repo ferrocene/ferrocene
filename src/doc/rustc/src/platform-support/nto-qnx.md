@@ -24,8 +24,8 @@ Currently, the following QNX versions and compilation targets are supported:
 
 | Target Tuple                        | QNX Version                   | Target Architecture | Full support | `no_std` support |
 | ----------------------------------- | ----------------------------- | ------------------- | :----------: | :--------------: |
-| `aarch64-unknown-nto-qnx800`        | QNX OS 8.0                    | AArch64             |      ?       |        ✓         |
-| `x86_64-pc-nto-qnx800`              | QNX OS 8.0                    | x86_64              |      ?       |        ✓         |
+| `aarch64-unknown-qnx`               | QNX OS 8.0                    | AArch64             |      ?       |        ✓         |
+| `x86_64-pc-qnx`                     | QNX OS 8.0                    | x86_64              |      ?       |        ✓         |
 | `aarch64-unknown-nto-qnx710`        | QNX Neutrino 7.1 with io-pkt  | AArch64             |      ✓       |        ✓         |
 | `x86_64-pc-nto-qnx710`              | QNX Neutrino 7.1 with io-pkt  | x86_64              |      ✓       |        ✓         |
 | `aarch64-unknown-nto-qnx710_iosock` | QNX Neutrino 7.1 with io-sock | AArch64             |      ?       |        ✓         |

@@ -937,7 +937,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: ferrocene/vm-ubuntu-20-amd64-medium
+    resource_class: large # 4-core
     parameters:
       image:
         description: The image that needs to be built

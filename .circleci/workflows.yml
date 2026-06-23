@@ -828,7 +828,7 @@ jobs:
         type: string
       target:
         type: string
-      job:
+      tasks:
         type: string
       resource-class:
         type: string
@@ -837,7 +837,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -1273,7 +1273,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1283,7 +1283,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1293,7 +1293,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1303,7 +1303,7 @@ workflows:
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1313,7 +1313,7 @@ workflows:
           target: aarch64r82-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1322,7 +1322,7 @@ workflows:
           target: aarch64r82-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: ferrocene/vm-ubuntu-20-amd64-medium # 4-core
           requires:
             - x86_64-linux-build
@@ -1332,7 +1332,7 @@ workflows:
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1341,7 +1341,7 @@ workflows:
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1407,7 +1407,7 @@ workflows:
           target: armv7r-ferrocene.facade-eabihf
           test-variant: 2021-cortex-r5f
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1417,7 +1417,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1427,7 +1427,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1437,7 +1437,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1447,7 +1447,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1457,7 +1457,7 @@ workflows:
           target: armv7r-ferrocene.facade-eabihf
           test-variant: 2021-cortex-r5f
           qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
@@ -1467,7 +1467,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
@@ -1477,7 +1477,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
@@ -1487,7 +1487,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
@@ -1497,7 +1497,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build

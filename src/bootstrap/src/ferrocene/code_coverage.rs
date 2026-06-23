@@ -104,7 +104,7 @@ pub(super) fn instrumented_binaries(
     match state.coverage_for {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
-            let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("deps");
+            let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("build");
 
             let collect_doctests = builder.test_target.runs_doctests()
                 && (paths.doctests_bins_dir.exists()
@@ -116,7 +116,13 @@ pub(super) fn instrumented_binaries(
                 .flatten()
                 .flat_map(|entry| builder.read_dir(&entry.path()));
 
-            for entry in builder.read_dir(&out_dir).chain(doctests_bins) {
+            let out_bins = builder
+                .read_dir(&out_dir)
+                .flat_map(|e| builder.read_dir(&e.path()))
+                .flat_map(|e| builder.read_dir(&e.path()))
+                .flat_map(|e| builder.read_dir(&e.path()));
+
+            for entry in out_bins.chain(doctests_bins) {
                 let path = entry.path();
 
                 #[cfg(target_os = "windows")]

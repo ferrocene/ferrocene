@@ -4,7 +4,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath("../exts"))
+sys.path.append(os.path.abspath("../../qualification-report/exts"))
 
 project = "Ferrocene User Manual"
 copyright = "The Ferrocene Developers"

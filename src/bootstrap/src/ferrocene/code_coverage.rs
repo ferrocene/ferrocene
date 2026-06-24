@@ -12,6 +12,7 @@ use crate::core::builder::{Cargo, Kind, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
+use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::{BootstrapCommand, Compiler, Mode};
 
@@ -104,7 +105,7 @@ pub(super) fn instrumented_binaries(
     match state.coverage_for {
         FerroceneCoverageFor::Library => {
             let mut instrumented_binaries = vec![];
-            let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target).join("build");
+            let out_dir = builder.cargo_out(state.compiler, Mode::Std, state.target);
 
             let collect_doctests = builder.test_target.runs_doctests()
                 && (paths.doctests_bins_dir.exists()
@@ -116,13 +117,7 @@ pub(super) fn instrumented_binaries(
                 .flatten()
                 .flat_map(|entry| builder.read_dir(&entry.path()));
 
-            let out_bins = builder
-                .read_dir(&out_dir)
-                .flat_map(|e| builder.read_dir(&e.path()))
-                .flat_map(|e| builder.read_dir(&e.path()))
-                .flat_map(|e| builder.read_dir(&e.path()));
-
-            for entry in out_bins.chain(doctests_bins) {
+            for entry in scan_build_tree(builder, &out_dir).chain(doctests_bins) {
                 let path = entry.path();
 
                 #[cfg(target_os = "windows")]

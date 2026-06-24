@@ -1044,7 +1044,7 @@ An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
    the current :t:`use import`.
 
 :dp:`fls_2bkcn83smy2y`
-A :dt:`simple import` is a :t:`use import` that brings a :t:`simple path` into scope, optionally with a :t:`renaming`.
+A :dt:`simple import` is a :t:`use import` that bring an :t:`entity` selected by its :t:`simple import path`, or by its :t:`import path prefix` when its :t:`simple path` ends in :t:`keyword` ``self`` and it appears in a :t:`nesting import`, into :t:`scope`.
 
 :dp:`fls_v3a6y2ze44v2`
 A :t:`glob import` is a :t:`use import` that brings all :t:`entities <entity>`

@@ -89,8 +89,15 @@ impl Step for DistOxidOs {
             for variant in variants {
                 let path = builder.ensure(variant);
                 let dest = format!("lib/rustlib/{}/lib/builtin/{}", self.target, variant.name());
-                for file in t!(std::fs::read_dir(path.join("deps"))) {
-                    let file = t!(file).path();
+
+                let built_files = builder
+                    .read_dir(&path.join("build"))
+                    .flat_map(|e| builder.read_dir(&e.path()))
+                    .flat_map(|e| builder.read_dir(&e.path()))
+                    .flat_map(|e| builder.read_dir(&e.path()));
+
+                for file in built_files {
+                    let file = file.path();
                     if file.extension().and_then(OsStr::to_str) == Some("rlib") {
                         tarball.add_file(&file, &dest, FileType::Regular);
                     }

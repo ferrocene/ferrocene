@@ -1091,9 +1091,7 @@ An :t:`entity` imported by a :t:`simple import` subject to a
 :t:`name` declared by the :t:`renaming`.
 
 :dp:`fls_iQOgxNihUEr7`
-A :t:`trait` imported by a :t:`simple import` subject to a
-:t:`renaming` with character underscore ``_`` is added into :t:`scope` without
-a :t:`name`.
+An :t:`entity` imported by a :t:`simple import` subject to a :t:`renaming` with character underscore ``_`` is added into :t:`scope` without a :t:`name`.
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common

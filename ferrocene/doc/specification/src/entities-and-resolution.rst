@@ -1074,16 +1074,11 @@ A :dt:`simple import path` is the :t:`path` constructed by appending the last
 :dp:`fls_wRmvtgQkFA6w`
 A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
 
-* :dp:`fls_kz2Gij5wHXnl`
-  If the :t:`simple path` is keyword ``self`` and:
+* :dp:`fls_yY58pFpkig9o`
+  If the :t:`simple import` appears in a :t:`nesting import`, and the last :t:`path segment` of its :t:`simple path` is expressed as :t:`keyword` ``self``, then bring the :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves to into :t:`scope`.
 
-  * :dp:`fls_yY58pFpkig9o`
-    The :t:`simple import` is in a :t:`nesting import`, then bring the
-    :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves
-    to into :t:`scope`.
-
-  * :dp:`fls_ar03D5rxjzy0`
-    Otherwise bring the containing :t:`module` into :t:`scope`.
+* :dp:`fls_ar03D5rxjzy0`
+  If the :t:`simple path` is :t:`keyword` ``self``, then bring the containing :t:`module` into :t:`scope`.
 
 * :dp:`fls_ce73bg0BqV1X`
   Otherwise bring all :t:`entities <entity>` that the :t:`simple import path`

@@ -591,6 +591,30 @@
 
       Multiple ``--cfg`` compiler arguments are allowed on the command line.
 
+      .. cli:option:: --check-cfg <SPEC>
+         :category: narrow
+
+         Provide list of expected cfgs for checking.
+
+         Example:
+
+         .. code-block::
+
+            $ rustc \
+              --check-cfg 'cfg(feature, values("alloc", "std"))' \
+              --check-cfg 'cfg(docsrs,test)' \
+              my_program.rs
+
+         A compiler argument of the form ``--check-cfg 'cfg(key)'`` corresponds to attribute
+         ``#[cfg(key)]``.
+
+         A compiler argument of the form ``--check-cfg 'cfg(key, values("value"))'`` corresponds to
+         attribute ``#[cfg(key = "value")]``.
+
+         Multiple ``--check-cfg`` compiler arguments are allowed on the command line.
+         Multiple keys are allowed in one `--check-cfg` argument.
+         Multiple values that correspond to the same key are allowed in one argument.
+
    .. cli:option:: --color <option>
       :category: informational
 

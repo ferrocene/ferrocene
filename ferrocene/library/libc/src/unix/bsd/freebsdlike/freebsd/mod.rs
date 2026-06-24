@@ -2608,6 +2608,11 @@ pub const PROC_NO_NEW_PRIVS_CTL: c_int = 19;
 pub const PROC_NO_NEW_PRIVS_STATUS: c_int = 20;
 pub const PROC_WXMAP_CTL: c_int = 21;
 pub const PROC_WXMAP_STATUS: c_int = 22;
+pub const PROC_LOGSIGEXIT_CTL: c_int = 23;
+pub const PROC_LOGSIGEXIT_STATUS: c_int = 24;
+pub const PROC_LOGSIGEXIT_CTL_NOFORCE: c_int = 1;
+pub const PROC_LOGSIGEXIT_CTL_FORCE_ENABLE: c_int = 2;
+pub const PROC_LOGSIGEXIT_CTL_FORCE_DISABLE: c_int = 3;
 pub const PROC_PROCCTL_MD_MIN: c_int = 0x10000000;
 
 pub const PPROT_SET: c_int = 1;
@@ -4269,6 +4274,8 @@ pub const KCMP_FILES: c_int = 102;
 pub const KCMP_SIGHAND: c_int = 103;
 pub const KCMP_VM: c_int = 104;
 
+pub const SOL_LOCAL: c_int = 0;
+
 pub const fn MAP_ALIGNED(a: c_int) -> c_int {
     a << 24
 }
@@ -4293,7 +4300,7 @@ f! {
         let next = cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize) + _ALIGN(size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
             (cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         }
@@ -4321,19 +4328,15 @@ f! {
     }
 
     pub fn uname(buf: *mut crate::utsname) -> c_int {
-        __xuname(256, buf as *mut c_void)
+        __xuname(256, buf.cast())
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpuset_t) -> () {
-        for slot in cpuset.__bits.iter_mut() {
-            *slot = 0;
-        }
+        cpuset.__bits.fill(0);
     }
 
     pub fn CPU_FILL(cpuset: &mut cpuset_t) -> () {
-        for slot in cpuset.__bits.iter_mut() {
-            *slot = !0;
-        }
+        cpuset.__bits.fill(!0);
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpuset_t) -> () {
@@ -4422,6 +4425,14 @@ safe_f! {
 
     pub const fn PR_SCTP_VALID_POLICY(x: c_int) -> bool {
         PR_SCTP_POLICY(x) <= SCTP_PR_SCTP_MAX
+    }
+
+    pub const fn PPROT_OP(o: c_int) -> c_int {
+        o & 0xf
+    }
+
+    pub const fn PPROT_FLAGS(o: c_int) -> c_int {
+        o & !0xf
     }
 }
 

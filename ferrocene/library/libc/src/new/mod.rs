@@ -104,7 +104,6 @@ cfg_if! {
         pub(crate) use openbsd::*;
     } else if #[cfg(target_os = "qurt")] {
         pub mod qurt;
-        pub use qurt::*;
     } else if #[cfg(target_os = "redox")] {
         mod redox;
         // pub(crate) use redox::*;
@@ -181,8 +180,14 @@ cfg_if! {
         pub use linux::can::j1939::*;
         pub use linux::can::netlink::*;
         pub use linux::can::raw::*;
+<<<<<<< HEAD
+=======
+        pub use linux::if_link::*;
+        pub use linux::if_packet::*;
+>>>>>>> a322a1d6a5fcabbf42877e735f7133a90a061c18
         pub use linux::keyctl::*;
         pub use linux::membarrier::*;
+        pub use linux::mount::*;
         pub use linux::netlink::*;
         pub use linux::pidfd::*;
         #[cfg(target_env = "gnu")]
@@ -193,6 +198,8 @@ cfg_if! {
         pub use pthread_::spawn::*;
         pub use pthread_::stack_np::*;
         pub use signal::*;
+    } else if #[cfg(target_os = "l4re")] {
+        pub use l4re::packet::*;
     } else if #[cfg(target_os = "netbsd")] {
         pub use net::if_::*;
         pub use sys::file::*;

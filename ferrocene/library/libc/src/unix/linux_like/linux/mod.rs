@@ -37,15 +37,6 @@ pub type sctp_assoc_t = __s32;
 
 pub type eventfd_t = u64;
 
-e! {
-    #[repr(u32)]
-    pub enum tpacket_versions {
-        TPACKET_V1,
-        TPACKET_V2,
-        TPACKET_V3,
-    }
-}
-
 c_enum! {
     pub enum pid_type {
         pub PIDTYPE_PID,
@@ -92,126 +83,6 @@ s! {
         pub ssi_call_addr: u64,
         pub ssi_arch: u32,
         _pad: Padding<[u8; 28]>,
-    }
-
-    pub struct fanout_args {
-        #[cfg(target_endian = "little")]
-        pub id: __u16,
-        pub type_flags: __u16,
-        #[cfg(target_endian = "big")]
-        pub id: __u16,
-        pub max_num_members: __u32,
-    }
-
-    #[deprecated(since = "0.2.70", note = "sockaddr_ll type must be used instead")]
-    pub struct sockaddr_pkt {
-        pub spkt_family: c_ushort,
-        pub spkt_device: [c_uchar; 14],
-        pub spkt_protocol: c_ushort,
-    }
-
-    pub struct tpacket_auxdata {
-        pub tp_status: __u32,
-        pub tp_len: __u32,
-        pub tp_snaplen: __u32,
-        pub tp_mac: __u16,
-        pub tp_net: __u16,
-        pub tp_vlan_tci: __u16,
-        pub tp_vlan_tpid: __u16,
-    }
-
-    pub struct tpacket_hdr {
-        pub tp_status: c_ulong,
-        pub tp_len: c_uint,
-        pub tp_snaplen: c_uint,
-        pub tp_mac: c_ushort,
-        pub tp_net: c_ushort,
-        pub tp_sec: c_uint,
-        pub tp_usec: c_uint,
-    }
-
-    pub struct tpacket_hdr_variant1 {
-        pub tp_rxhash: __u32,
-        pub tp_vlan_tci: __u32,
-        pub tp_vlan_tpid: __u16,
-        pub tp_padding: __u16,
-    }
-
-    pub struct tpacket2_hdr {
-        pub tp_status: __u32,
-        pub tp_len: __u32,
-        pub tp_snaplen: __u32,
-        pub tp_mac: __u16,
-        pub tp_net: __u16,
-        pub tp_sec: __u32,
-        pub tp_nsec: __u32,
-        pub tp_vlan_tci: __u16,
-        pub tp_vlan_tpid: __u16,
-        pub tp_padding: [__u8; 4],
-    }
-
-    pub struct tpacket_req {
-        pub tp_block_size: c_uint,
-        pub tp_block_nr: c_uint,
-        pub tp_frame_size: c_uint,
-        pub tp_frame_nr: c_uint,
-    }
-
-    pub struct tpacket_req3 {
-        pub tp_block_size: c_uint,
-        pub tp_block_nr: c_uint,
-        pub tp_frame_size: c_uint,
-        pub tp_frame_nr: c_uint,
-        pub tp_retire_blk_tov: c_uint,
-        pub tp_sizeof_priv: c_uint,
-        pub tp_feature_req_word: c_uint,
-    }
-
-    #[repr(align(8))]
-    pub struct tpacket_rollover_stats {
-        pub tp_all: crate::__u64,
-        pub tp_huge: crate::__u64,
-        pub tp_failed: crate::__u64,
-    }
-
-    pub struct tpacket_stats {
-        pub tp_packets: c_uint,
-        pub tp_drops: c_uint,
-    }
-
-    pub struct tpacket_stats_v3 {
-        pub tp_packets: c_uint,
-        pub tp_drops: c_uint,
-        pub tp_freeze_q_cnt: c_uint,
-    }
-
-    pub struct tpacket3_hdr {
-        pub tp_next_offset: __u32,
-        pub tp_sec: __u32,
-        pub tp_nsec: __u32,
-        pub tp_snaplen: __u32,
-        pub tp_len: __u32,
-        pub tp_status: __u32,
-        pub tp_mac: __u16,
-        pub tp_net: __u16,
-        pub hv1: crate::tpacket_hdr_variant1,
-        pub tp_padding: [__u8; 8],
-    }
-
-    pub struct tpacket_bd_ts {
-        pub ts_sec: c_uint,
-        pub ts_usec: c_uint,
-    }
-
-    #[repr(align(8))]
-    pub struct tpacket_hdr_v1 {
-        pub block_status: __u32,
-        pub num_pkts: __u32,
-        pub offset_to_first_pkt: __u32,
-        pub blk_len: __u32,
-        pub seq_num: crate::__u64,
-        pub ts_first_pkt: crate::tpacket_bd_ts,
-        pub ts_last_pkt: crate::tpacket_bd_ts,
     }
 
     // System V IPC
@@ -994,15 +865,6 @@ s! {
         pub csum_offset: __u16,
     }
 
-    // linux/mount.h
-
-    pub struct mount_attr {
-        pub attr_set: crate::__u64,
-        pub attr_clr: crate::__u64,
-        pub propagation: crate::__u64,
-        pub userns_fd: crate::__u64,
-    }
-
     // linux/nsfs.h
     pub struct mnt_ns_info {
         pub size: crate::__u32,
@@ -1304,21 +1166,6 @@ s_no_extra_traits! {
         pub iv: [c_uchar; 0],
     }
 
-    pub union tpacket_req_u {
-        pub req: crate::tpacket_req,
-        pub req3: crate::tpacket_req3,
-    }
-
-    pub union tpacket_bd_header_u {
-        pub bh1: crate::tpacket_hdr_v1,
-    }
-
-    pub struct tpacket_block_desc {
-        pub version: __u32,
-        pub offset_to_priv: __u32,
-        pub hdr: crate::tpacket_bd_header_u,
-    }
-
     // linux/net_tstamp.h
     pub struct sock_txtime {
         pub clockid: crate::clockid_t,
@@ -1421,8 +1268,9 @@ cfg_if! {
     }
 }
 
-pub const POSIX_SPAWN_USEVFORK: c_int = 64;
-pub const POSIX_SPAWN_SETSID: c_int = 128;
+pub const POSIX_SPAWN_USEVFORK: c_short = 64;
+#[cfg(not(target_env = "uclibc"))]
+pub const POSIX_SPAWN_SETSID: c_short = 128;
 
 pub const F_SEAL_FUTURE_WRITE: c_int = 0x0010;
 pub const F_SEAL_EXEC: c_int = 0x0020;
@@ -1475,78 +1323,6 @@ pub const RWF_APPEND: c_int = 0x00000010;
 pub const RWF_NOAPPEND: c_int = 0x00000020;
 pub const RWF_ATOMIC: c_int = 0x00000040;
 pub const RWF_DONTCACHE: c_int = 0x00000080;
-
-// linux/if_link.h
-pub const IFLA_UNSPEC: c_ushort = 0;
-pub const IFLA_ADDRESS: c_ushort = 1;
-pub const IFLA_BROADCAST: c_ushort = 2;
-pub const IFLA_IFNAME: c_ushort = 3;
-pub const IFLA_MTU: c_ushort = 4;
-pub const IFLA_LINK: c_ushort = 5;
-pub const IFLA_QDISC: c_ushort = 6;
-pub const IFLA_STATS: c_ushort = 7;
-pub const IFLA_COST: c_ushort = 8;
-pub const IFLA_PRIORITY: c_ushort = 9;
-pub const IFLA_MASTER: c_ushort = 10;
-pub const IFLA_WIRELESS: c_ushort = 11;
-pub const IFLA_PROTINFO: c_ushort = 12;
-pub const IFLA_TXQLEN: c_ushort = 13;
-pub const IFLA_MAP: c_ushort = 14;
-pub const IFLA_WEIGHT: c_ushort = 15;
-pub const IFLA_OPERSTATE: c_ushort = 16;
-pub const IFLA_LINKMODE: c_ushort = 17;
-pub const IFLA_LINKINFO: c_ushort = 18;
-pub const IFLA_NET_NS_PID: c_ushort = 19;
-pub const IFLA_IFALIAS: c_ushort = 20;
-pub const IFLA_NUM_VF: c_ushort = 21;
-pub const IFLA_VFINFO_LIST: c_ushort = 22;
-pub const IFLA_STATS64: c_ushort = 23;
-pub const IFLA_VF_PORTS: c_ushort = 24;
-pub const IFLA_PORT_SELF: c_ushort = 25;
-pub const IFLA_AF_SPEC: c_ushort = 26;
-pub const IFLA_GROUP: c_ushort = 27;
-pub const IFLA_NET_NS_FD: c_ushort = 28;
-pub const IFLA_EXT_MASK: c_ushort = 29;
-pub const IFLA_PROMISCUITY: c_ushort = 30;
-pub const IFLA_NUM_TX_QUEUES: c_ushort = 31;
-pub const IFLA_NUM_RX_QUEUES: c_ushort = 32;
-pub const IFLA_CARRIER: c_ushort = 33;
-pub const IFLA_PHYS_PORT_ID: c_ushort = 34;
-pub const IFLA_CARRIER_CHANGES: c_ushort = 35;
-pub const IFLA_PHYS_SWITCH_ID: c_ushort = 36;
-pub const IFLA_LINK_NETNSID: c_ushort = 37;
-pub const IFLA_PHYS_PORT_NAME: c_ushort = 38;
-pub const IFLA_PROTO_DOWN: c_ushort = 39;
-pub const IFLA_GSO_MAX_SEGS: c_ushort = 40;
-pub const IFLA_GSO_MAX_SIZE: c_ushort = 41;
-pub const IFLA_PAD: c_ushort = 42;
-pub const IFLA_XDP: c_ushort = 43;
-pub const IFLA_EVENT: c_ushort = 44;
-pub const IFLA_NEW_NETNSID: c_ushort = 45;
-pub const IFLA_IF_NETNSID: c_ushort = 46;
-pub const IFLA_TARGET_NETNSID: c_ushort = IFLA_IF_NETNSID;
-pub const IFLA_CARRIER_UP_COUNT: c_ushort = 47;
-pub const IFLA_CARRIER_DOWN_COUNT: c_ushort = 48;
-pub const IFLA_NEW_IFINDEX: c_ushort = 49;
-pub const IFLA_MIN_MTU: c_ushort = 50;
-pub const IFLA_MAX_MTU: c_ushort = 51;
-pub const IFLA_PROP_LIST: c_ushort = 52;
-pub const IFLA_ALT_IFNAME: c_ushort = 53;
-pub const IFLA_PERM_ADDRESS: c_ushort = 54;
-pub const IFLA_PROTO_DOWN_REASON: c_ushort = 55;
-pub const IFLA_PARENT_DEV_NAME: c_ushort = 56;
-pub const IFLA_PARENT_DEV_BUS_NAME: c_ushort = 57;
-pub const IFLA_GRO_MAX_SIZE: c_ushort = 58;
-pub const IFLA_TSO_MAX_SIZE: c_ushort = 59;
-pub const IFLA_TSO_MAX_SEGS: c_ushort = 60;
-pub const IFLA_ALLMULTI: c_ushort = 61;
-
-pub const IFLA_INFO_UNSPEC: c_ushort = 0;
-pub const IFLA_INFO_KIND: c_ushort = 1;
-pub const IFLA_INFO_DATA: c_ushort = 2;
-pub const IFLA_INFO_XSTATS: c_ushort = 3;
-pub const IFLA_INFO_SLAVE_KIND: c_ushort = 4;
-pub const IFLA_INFO_SLAVE_DATA: c_ushort = 5;
 
 // Since Linux 3.1
 pub const SEEK_DATA: c_int = 3;
@@ -2099,60 +1875,6 @@ pub const CTRL_ATTR_OP_FLAGS: c_int = 2;
 pub const CTRL_ATTR_MCAST_GRP_UNSPEC: c_int = 0;
 pub const CTRL_ATTR_MCAST_GRP_NAME: c_int = 1;
 pub const CTRL_ATTR_MCAST_GRP_ID: c_int = 2;
-
-pub const PACKET_FANOUT: c_int = 18;
-pub const PACKET_TX_HAS_OFF: c_int = 19;
-pub const PACKET_QDISC_BYPASS: c_int = 20;
-pub const PACKET_ROLLOVER_STATS: c_int = 21;
-pub const PACKET_FANOUT_DATA: c_int = 22;
-pub const PACKET_IGNORE_OUTGOING: c_int = 23;
-pub const PACKET_VNET_HDR_SZ: c_int = 24;
-
-pub const PACKET_FANOUT_HASH: c_uint = 0;
-pub const PACKET_FANOUT_LB: c_uint = 1;
-pub const PACKET_FANOUT_CPU: c_uint = 2;
-pub const PACKET_FANOUT_ROLLOVER: c_uint = 3;
-pub const PACKET_FANOUT_RND: c_uint = 4;
-pub const PACKET_FANOUT_QM: c_uint = 5;
-pub const PACKET_FANOUT_CBPF: c_uint = 6;
-pub const PACKET_FANOUT_EBPF: c_uint = 7;
-pub const PACKET_FANOUT_FLAG_ROLLOVER: c_uint = 0x1000;
-pub const PACKET_FANOUT_FLAG_UNIQUEID: c_uint = 0x2000;
-pub const PACKET_FANOUT_FLAG_IGNORE_OUTGOING: c_uint = 0x4000;
-pub const PACKET_FANOUT_FLAG_DEFRAG: c_uint = 0x8000;
-
-pub const TP_STATUS_KERNEL: __u32 = 0;
-pub const TP_STATUS_USER: __u32 = 1 << 0;
-pub const TP_STATUS_COPY: __u32 = 1 << 1;
-pub const TP_STATUS_LOSING: __u32 = 1 << 2;
-pub const TP_STATUS_CSUMNOTREADY: __u32 = 1 << 3;
-pub const TP_STATUS_VLAN_VALID: __u32 = 1 << 4;
-pub const TP_STATUS_BLK_TMO: __u32 = 1 << 5;
-pub const TP_STATUS_VLAN_TPID_VALID: __u32 = 1 << 6;
-pub const TP_STATUS_CSUM_VALID: __u32 = 1 << 7;
-
-pub const TP_STATUS_AVAILABLE: __u32 = 0;
-pub const TP_STATUS_SEND_REQUEST: __u32 = 1 << 0;
-pub const TP_STATUS_SENDING: __u32 = 1 << 1;
-pub const TP_STATUS_WRONG_FORMAT: __u32 = 1 << 2;
-
-pub const TP_STATUS_TS_SOFTWARE: __u32 = 1 << 29;
-pub const TP_STATUS_TS_SYS_HARDWARE: __u32 = 1 << 30;
-pub const TP_STATUS_TS_RAW_HARDWARE: __u32 = 1 << 31;
-
-pub const TP_FT_REQ_FILL_RXHASH: __u32 = 1;
-
-pub const TPACKET_ALIGNMENT: usize = 16;
-
-pub const TPACKET_HDRLEN: usize = ((size_of::<crate::tpacket_hdr>() + TPACKET_ALIGNMENT - 1)
-    & !(TPACKET_ALIGNMENT - 1))
-    + size_of::<crate::sockaddr_ll>();
-pub const TPACKET2_HDRLEN: usize = ((size_of::<crate::tpacket2_hdr>() + TPACKET_ALIGNMENT - 1)
-    & !(TPACKET_ALIGNMENT - 1))
-    + size_of::<crate::sockaddr_ll>();
-pub const TPACKET3_HDRLEN: usize = ((size_of::<crate::tpacket3_hdr>() + TPACKET_ALIGNMENT - 1)
-    & !(TPACKET_ALIGNMENT - 1))
-    + size_of::<crate::sockaddr_ll>();
 
 // linux/netfilter.h
 pub const NF_DROP: c_int = 0;
@@ -3141,10 +2863,6 @@ pub const IN_ALL_EVENTS: u32 = IN_ACCESS
 pub const IN_CLOEXEC: c_int = O_CLOEXEC;
 pub const IN_NONBLOCK: c_int = O_NONBLOCK;
 
-// uapi/linux/mount.h
-pub const OPEN_TREE_CLONE: c_uint = 0x01;
-pub const OPEN_TREE_CLOEXEC: c_uint = O_CLOEXEC as c_uint;
-
 // uapi/linux/netfilter/nf_tables.h
 pub const NFT_TABLE_MAXNAMELEN: c_int = 256;
 pub const NFT_CHAIN_MAXNAMELEN: c_int = 256;
@@ -3491,6 +3209,16 @@ pub const FUTEX_PRIVATE_FLAG: c_int = 128;
 pub const FUTEX_CLOCK_REALTIME: c_int = 256;
 pub const FUTEX_CMD_MASK: c_int = !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
 
+pub const FUTEX2_SIZE_U8: c_int = 0x00;
+pub const FUTEX2_SIZE_U16: c_int = 0x01;
+pub const FUTEX2_SIZE_U32: c_int = 0x02;
+pub const FUTEX2_SIZE_U64: c_int = 0x03;
+pub const FUTEX2_NUMA: c_int = 0x04;
+pub const FUTEX2_PRIVATE: c_int = FUTEX_PRIVATE_FLAG;
+pub const FUTEX2_SIZE_MASK: c_int = 0x03;
+pub const FUTEX_32: c_int = FUTEX2_SIZE_U32;
+pub const FUTEX_WAITV_MAX: c_int = 128;
+
 pub const FUTEX_WAITERS: u32 = 0x80000000;
 pub const FUTEX_OWNER_DIED: u32 = 0x40000000;
 pub const FUTEX_TID_MASK: u32 = 0x3fffffff;
@@ -3670,7 +3398,6 @@ pub const KERN_PROF: c_int = 6;
 pub const KERN_NODENAME: c_int = 7;
 pub const KERN_DOMAINNAME: c_int = 8;
 pub const KERN_PANIC: c_int = 15;
-pub const KERN_REALROOTDEV: c_int = 16;
 pub const KERN_SPARC_REBOOT: c_int = 21;
 pub const KERN_CTLALTDEL: c_int = 22;
 pub const KERN_PRINTK: c_int = 23;
@@ -3742,7 +3469,6 @@ pub const VM_SWAPPINESS: c_int = 19;
 pub const VM_LOWMEM_RESERVE_RATIO: c_int = 20;
 pub const VM_MIN_FREE_KBYTES: c_int = 21;
 pub const VM_MAX_MAP_COUNT: c_int = 22;
-pub const VM_LAPTOP_MODE: c_int = 23;
 pub const VM_BLOCK_DUMP: c_int = 24;
 pub const VM_HUGETLB_GROUP: c_int = 25;
 pub const VM_VFS_CACHE_PRESSURE: c_int = 26;
@@ -3902,21 +3628,6 @@ pub const XDP_TX_METADATA: crate::__u32 = 1 << 1;
 
 pub const SOL_XDP: c_int = 283;
 
-// linux/mount.h
-pub const MOUNT_ATTR_RDONLY: crate::__u64 = 0x00000001;
-pub const MOUNT_ATTR_NOSUID: crate::__u64 = 0x00000002;
-pub const MOUNT_ATTR_NODEV: crate::__u64 = 0x00000004;
-pub const MOUNT_ATTR_NOEXEC: crate::__u64 = 0x00000008;
-pub const MOUNT_ATTR__ATIME: crate::__u64 = 0x00000070;
-pub const MOUNT_ATTR_RELATIME: crate::__u64 = 0x00000000;
-pub const MOUNT_ATTR_NOATIME: crate::__u64 = 0x00000010;
-pub const MOUNT_ATTR_STRICTATIME: crate::__u64 = 0x00000020;
-pub const MOUNT_ATTR_NODIRATIME: crate::__u64 = 0x00000080;
-pub const MOUNT_ATTR_IDMAP: crate::__u64 = 0x00100000;
-pub const MOUNT_ATTR_NOSYMFOLLOW: crate::__u64 = 0x00200000;
-
-pub const MOUNT_ATTR_SIZE_VER0: c_int = 32;
-
 pub const SCHED_FLAG_KEEP_ALL: c_int = SCHED_FLAG_KEEP_POLICY | SCHED_FLAG_KEEP_PARAMS;
 
 pub const SCHED_FLAG_UTIL_CLAMP: c_int = SCHED_FLAG_UTIL_CLAMP_MIN | SCHED_FLAG_UTIL_CLAMP_MAX;
@@ -3951,10 +3662,6 @@ f! {
 
     pub fn SO_EE_OFFENDER(ee: *const crate::sock_extended_err) -> *mut crate::sockaddr {
         ee.offset(1) as *mut crate::sockaddr
-    }
-
-    pub fn TPACKET_ALIGN(x: usize) -> usize {
-        (x + TPACKET_ALIGNMENT - 1) & !(TPACKET_ALIGNMENT - 1)
     }
 
     pub fn BPF_CLASS(code: __u32) -> __u32 {

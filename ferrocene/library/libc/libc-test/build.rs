@@ -1,4 +1,3 @@
-#![deny(warnings)]
 #![allow(clippy::match_like_matches_macro)]
 
 use std::fs::File;
@@ -20,7 +19,7 @@ use std::{
 fn do_cc() {
     let target = env::var("TARGET").unwrap();
     if cfg!(unix) || target.contains("cygwin") {
-        let exclude = ["redox", "wasi", "wali"];
+        let exclude = ["redox", "wasi", "wali", "qurt"];
         if !exclude.iter().any(|x| target.contains(x)) {
             let mut cmsg = cc::Build::new();
 
@@ -76,6 +75,8 @@ fn do_ctest() {
         t if t.contains("windows") => test_windows(t),
         t if t.contains("vxworks") => test_vxworks(t),
         t if t.contains("nto-qnx") => test_neutrino(t),
+        // QuRT ctest requires a sched_yield stub (static inline in SDK).
+        t if t.contains("qurt") => return,
         t if t.contains("aix") => return test_aix(t),
         t => panic!("unknown target {t}"),
     }
@@ -2340,6 +2341,9 @@ fn test_android(target: &str) {
             "endgrent" => true,
 
             // Added in API level 26, but some tests use level 24.
+            "getpwent" | "setpwent" | "endpwent" => true,
+
+            // Added in API level 26, but some tests use level 24.
             "getdomainname" | "setdomainname" => true,
 
             // FIXME(android): bad function pointers:
@@ -2895,6 +2899,17 @@ fn test_freebsd(target: &str) {
 
             // Added in FreeBSD 15
             "DTYPE_INOTIFY" | "DTYPE_JAILDESC" if Some(15) > freebsd_ver => true,
+
+            // Added in FreeBSD 15
+            "PROC_LOGSIGEXIT_CTL"
+            | "PROC_LOGSIGEXIT_STATUS"
+            | "PROC_LOGSIGEXIT_CTL_NOFORCE"
+            | "PROC_LOGSIGEXIT_CTL_FORCE_ENABLE"
+            | "PROC_LOGSIGEXIT_CTL_FORCE_DISABLE"
+                if Some(15) > freebsd_ver =>
+            {
+                true
+            }
 
             _ => false,
         }
@@ -3781,10 +3796,10 @@ fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
         ) {
             (Ok(_), Ok(_)) => panic!("Do not set both RUST_LIBC_UNSTABLE_GNU_TIME_BITS and RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS"),
             (Err(_), Err(_)) => (defaultbits.clone(), defaultbits.clone()),
-            (Ok(tb), Err(_)) if tb == "64" => (tb.clone(), tb.clone()),
+            (Ok(tb), Err(_)) if tb == "64" => (tb.clone(), tb),
             (Ok(tb), Err(_)) if tb == "32" => (tb, defaultbits.clone()),
             (Ok(_), Err(_)) => panic!("Invalid value for RUST_LIBC_UNSTABLE_GNU_TIME_BITS, must be 32 or 64"),
-            (Err(_), Ok(fb)) if fb == "32" || fb == "64" => (defaultbits.clone(), fb),
+            (Err(_), Ok(fb)) if fb == "32" || fb == "64" => (defaultbits, fb),
             (Err(_), Ok(_)) => panic!("Invalid value for RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS, must be 32 or 64"),
         };
         let valid_bits = ["32", "64"];
@@ -3882,6 +3897,12 @@ fn test_linux(target: &str) {
             cfg.cfg("musl_redir_time64", None);
         }
     }
+    let uclibc_use_time64 = env::var("CARGO_CFG_LIBC_UNSTABLE_UCLIBC_TIME64")
+        .map(|val| val != "0")
+        .unwrap_or(false);
+    if uclibc && uclibc_use_time64 {
+        cfg.cfg("linux_time_bits64", None);
+    }
     cfg.define("_GNU_SOURCE", None)
         // This macro re-defines fscanf,scanf,sscanf to link to the symbols that are
         // deprecated since glibc >= 2.29. This allows Rust binaries to link against
@@ -3927,6 +3948,7 @@ fn test_linux(target: &str) {
         "netinet/ip.h",
         "netinet/tcp.h",
         "netinet/udp.h",
+        (gnu, "netiucv/iucv.h"),
         (l4re, "netpacket/packet.h"),
         "poll.h",
         "pthread.h",
@@ -4085,9 +4107,14 @@ fn test_linux(target: &str) {
             "linux/wait.h",
             "linux/wireless.h",
             "sys/fanotify.h",
-            // <sys/auxv.h> is not present on uclibc
-            (!uclibc, "sys/auxv.h"),
+            "sys/auxv.h",
             (gnu || musl, "linux/close_range.h"),
+            (uclibc, "linux/fanotify.h"),
+            (uclibc, "linux/auxvec.h"),
+            (uclibc, "linux/close_range.h"),
+            (uclibc, "linux/if_packet.h"),
+            (uclibc, "linux/elf-em.h"),
+            (uclibc, "sys/resource.h"),
         );
     }
 
@@ -4326,12 +4353,32 @@ fn test_linux(target: &str) {
             // On 64 bits the size did not change, skip only for 32 bits.
             "ptrace_syscall_info" if pointer_width == 32 => true,
 
+            "canxl_frame"
+            | "fanotify_event_info_header" // not in sys/fanotify.h in uclibc
+            | "fanotify_event_info_fid"  // not in sys/fanotify.h in uclibc
+            | "tls12_crypto_info_sm4_gcm"
+            | "tls12_crypto_info_sm4_ccm"
+            | "tls12_crypto_info_aria_gcm_128"
+            | "tls12_crypto_info_aria_gcm_256"
+                if uclibc =>
+            {
+                true
+            }
+
             _ => false,
         }
     });
 
     cfg.skip_const(move |constant| {
         let name = constant.ident();
+
+        // FIXME(linux): Requires newer kernel headers than CI has. These uapi/linux/mount.h
+        // constants (OPEN_TREE_NAMESPACE landed in v7.0, FSCONFIG_CMD_CREATE_EXCL in v6.6)
+        // aren't defined by the headers CI builds against on several targets (notably the
+        // tier2 cross sysroots), so skip on every libc until CI catches up.
+        if name == "OPEN_TREE_NAMESPACE" || name == "FSCONFIG_CMD_CREATE_EXCL" {
+            return true;
+        }
 
         // L4Re requires a min stack size of 64k; that isn't defined in uClibc, but
         // somewhere in the core libraries. uClibc wants 16k, but that's not enough.
@@ -4355,6 +4402,11 @@ fn test_linux(target: &str) {
                 || name.starts_with("EPOLL")
                 || name.starts_with("F_")
                 || name.starts_with("FALLOC_FL_")
+                || name.starts_with("FSCONFIG_")
+                || name.starts_with("FSMOUNT_")
+                || name.starts_with("FSOPEN_")
+                || name.starts_with("FSPICK_")
+                || name.starts_with("FUTEX2_")
                 || name.starts_with("IFLA_")
                 || name.starts_with("KEXEC_")
                 || name.starts_with("MS_")
@@ -4440,6 +4492,8 @@ fn test_linux(target: &str) {
                 | "PR_SCHED_CORE_SHARE_TO" => return true,
 
                 /* Added in versions more recent than what we test */
+                // Since 1.2.0
+                "SO_DETACH_REUSEPORT_BPF" => return true,
                 // Since 1.2.3
                 "SO_BUSY_POLL_BUDGET" | "SO_PREFER_BUSY_POLL" => return true,
 
@@ -4448,6 +4502,172 @@ fn test_linux(target: &str) {
 
                 // FIXME(musl): Values changed in newer musl versions on these arches
                 "O_LARGEFILE" if riscv64 || x86_64 => return true,
+
+                _ => (),
+            }
+        }
+
+        if uclibc {
+            match name {
+                // The canonical uClibc toolchain, bootlin bleeding-edge-2024.02-1,
+                // uses linux 5.15, so several constants are not available.
+
+                // requires linux 5.16
+                "PR_SCHED_CORE_SCOPE_PROCESS_GROUP"
+                | "PR_SCHED_CORE_SCOPE_THREAD_GROUP"
+                | "PR_SCHED_CORE_SCOPE_THREAD"
+                | "NF_NETDEV_EGRESS"
+                | "SO_RESERVE_MEM" => return true,
+
+                // TLS_CIPHER_SM4_[GC]CM requires linux 5.16
+                "TLS_CIPHER_SM4_CCM_IV_SIZE"
+                | "TLS_CIPHER_SM4_CCM_KEY_SIZE"
+                | "TLS_CIPHER_SM4_CCM_REC_SEQ_SIZE"
+                | "TLS_CIPHER_SM4_CCM_SALT_SIZE"
+                | "TLS_CIPHER_SM4_CCM_TAG_SIZE"
+                | "TLS_CIPHER_SM4_CCM"
+                | "TLS_CIPHER_SM4_GCM_IV_SIZE"
+                | "TLS_CIPHER_SM4_GCM_KEY_SIZE"
+                | "TLS_CIPHER_SM4_GCM_REC_SEQ_SIZE"
+                | "TLS_CIPHER_SM4_GCM_SALT_SIZE"
+                | "TLS_CIPHER_SM4_GCM_TAG_SIZE"
+                | "TLS_CIPHER_SM4_GCM" => return true,
+
+                // requires linux 5.17
+                "PR_SET_VMA_ANON_NAME"
+                | "PR_SET_VMA"
+                | "RTNLGRP_MCTP_IFADDR" => return true,
+
+                // requires linux 5.18
+                "RTNLGRP_STATS"
+                | "RTNLGRP_TUNNEL"
+                | "TLS_TX_ZEROCOPY_RO"
+                | "MADV_DONTNEED_LOCKED"
+                | "NFQA_PRIORITY"
+                | "SO_TXREHASH" => return true,
+
+                // requires linux 5.19
+                "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"
+                | "NLM_F_BULK"
+                | "SO_RCVMARK"
+                | "TLS_INFO_ZC_RO_TX" => return true,
+
+                // CAN_* consts requiring linux 6.0
+                "CAN_BUS_OFF_THRESHOLD"
+                | "CAN_CTRLMODE_TDC_AUTO"
+                | "CAN_CTRLMODE_TDC_MANUAL"
+                | "CAN_ERR_CNT"
+                | "CAN_ERROR_PASSIVE_THRESHOLD"
+                | "CAN_ERROR_WARNING_THRESHOLD" => return true,
+
+                // requires linux 6.0
+                "IFF_NO_CARRIER"
+                | "TLS_INFO_RX_NO_PAD"
+                | "TLS_RX_EXPECT_NO_PAD" => return true,
+
+                // CAN_* consts requiring linux 6.1
+                "CAN_RAW_XL_FRAMES"
+                | "CANXL_HDR_SIZE"
+                | "CANXL_MAX_DLC_MASK"
+                | "CANXL_MAX_DLC"
+                | "CANXL_MAX_DLEN"
+                | "CANXL_MAX_MTU"
+                | "CANXL_MIN_DLC"
+                | "CANXL_MIN_DLEN"
+                | "CANXL_MIN_MTU"
+                | "CANXL_MTU"
+                | "CANXL_PRIO_BITS"
+                | "CANXL_PRIO_MASK"
+                | "CANXL_SEC"
+                | "CANXL_XLF" => return true,
+
+                // TLS_CIPHER_ARIA_GCM_* requires linux 6.1
+                "TLS_CIPHER_ARIA_GCM_128_IV_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_128_KEY_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_128_REC_SEQ_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_128_SALT_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_128_TAG_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_128"
+                | "TLS_CIPHER_ARIA_GCM_256_IV_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_256_KEY_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_256_REC_SEQ_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_256_SALT_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_256_TAG_SIZE"
+                | "TLS_CIPHER_ARIA_GCM_256" => return true,
+
+                // requires linux 6.2
+                "ALG_SET_KEY_BY_KEY_SERIAL"
+                | "PACKET_FANOUT_FLAG_IGNORE_OUTGOING"
+                | "SOF_TIMESTAMPING_OPT_ID_TCP"
+                | "TUN_F_USO4"
+                | "TUN_F_USO6" => return true,
+
+                // FAN_* consts require kernel 6.3
+                "FAN_INFO"
+                | "FAN_RESPONSE_INFO_AUDIT_RULE"
+                | "FAN_RESPONSE_INFO_NONE" => return true,
+
+                // requires linux 6.3
+                "MFD_EXEC"
+                | "MFD_NOEXEC_SEAL"
+                | "PR_GET_MDWE"
+                | "PR_SET_MDWE" => return true,
+
+                // requires linux 6.4
+                "PACKET_VNET_HDR_SZ" => return true,
+                "PR_GET_MEMORY_MERGE" => return true,
+                "PR_SET_MEMORY_MERGE" => return true,
+
+                // requires linux 6.5
+                "SO_PASSPIDFD"
+                | "SO_PEERPIDFD" => return true,
+
+                // requires linux 6.6
+                "PR_MDWE_NO_INHERIT"
+                | "PR_MDWE_REFUSE_EXEC_GAIN" => return true,
+
+                // defined as a synonym for EM_ARC_COMPACT in gnu but not uclibc
+                "EM_ARC_A5" => return true,
+
+                /*
+                Here are a list of kernel UAPI constants which appear in linux/ headers,
+                but cannot be imported due to conflicts with the uclibc headers.
+                The conflicting linux/ header is noted.
+                 */
+                // linux/signal.h
+                "BUS_MCEERR_AO"
+                | "BUS_MCEERR_AR"
+                // linux/termios.h
+                | "EXTPROC"
+                // linux/inotify.h
+                | "IN_MASK_CREATE"
+                // linux/in.h
+                | "IPPROTO_BEETPH"
+                | "IPPROTO_ETHERNET"
+                | "IPPROTO_MPLS"
+                | "IPPROTO_MPTCP"
+                // linux/in6.h
+                | "IPV6_HDRINCL"
+                | "IPV6_MULTICAST_ALL"
+                | "IPV6_PMTUDISC_INTERFACE"
+                | "IPV6_PMTUDISC_OMIT"
+                | "IPV6_ROUTER_ALERT_ISOLATE"
+                // linux/elf.h
+                | "NT_PRFPREG"
+                // linux/sem.h
+                | "SEM_STAT_ANY"
+                // linux/shm.h
+                | "SHM_EXEC"
+                // linux/signal.h
+                | "SI_DETHREAD"
+                | "TRAP_BRANCH"
+                | "TRAP_HWBKPT"
+                | "TRAP_UNK"
+                // linux/timerfd.h
+                | "TFD_TIMER_CANCEL_ON_SET"
+                // linux/udp.h
+                | "UDP_GRO"
+                | "UDP_SEGMENT" => return true,
 
                 _ => (),
             }
@@ -4506,6 +4726,9 @@ fn test_linux(target: &str) {
             // FIXME(linux): Not yet implemented on sparc64
             "SYS_clone3" if sparc64 => true,
 
+            // FIXME(linux): Requires >= 6.9 kernel headers.
+            n if (arm || ppc32) && n.starts_with("FUTEX2_") => true,
+
             // FIXME(linux): Not defined on ARM, gnueabihf, mips, musl, PowerPC, riscv64, s390x, and sparc64.
             "SYS_memfd_secret"
                 if arm | gnueabihf | mips | musl | ppc | riscv64 | s390x | sparc64 =>
@@ -4515,25 +4738,6 @@ fn test_linux(target: &str) {
 
             // Skip as this signal codes and trap reasons need newer headers
             "TRAP_PERF" => true,
-
-            // kernel constants not available in uclibc 1.0.34
-            "EXTPROC"
-            | "IPPROTO_BEETPH"
-            | "IPPROTO_MPLS"
-            | "IPV6_HDRINCL"
-            | "IPV6_MULTICAST_ALL"
-            | "IPV6_PMTUDISC_INTERFACE"
-            | "IPV6_PMTUDISC_OMIT"
-            | "IPV6_ROUTER_ALERT_ISOLATE"
-            | "PACKET_MR_UNICAST"
-            | "RUSAGE_THREAD"
-            | "SHM_EXEC"
-            | "UDP_GRO"
-            | "UDP_SEGMENT"
-                if uclibc =>
-            {
-                true
-            }
 
             // headers conflicts with linux/pidfd.h
             "PIDFD_NONBLOCK" => true,
@@ -4574,6 +4778,10 @@ fn test_linux(target: &str) {
 
             // value changed
             "NF_NETDEV_NUMHOOKS" if sparc64 => true,
+
+            // Canonical uclibc latest from toolchains.bootlin.com is based on kernel 5.15,
+            // so opt out of tests for constants which are different in later kernels.
+            "NF_NETDEV_NUMHOOKS" | "RLIM_NLIMITS" | "NFT_MSG_MAX" if uclibc => true,
 
             // DIFF(main): fixed in 1.0 with e9abac9ac2
             "CLONE_CLEAR_SIGHAND" | "CLONE_INTO_CGROUP" => true,
@@ -4697,6 +4905,7 @@ fn test_linux(target: &str) {
 
     let c_enums = [
         "can_state",
+        "fsconfig_command",
         "membarrier_cmd",
         "pid_type",
         "proc_cn_event",
@@ -4790,12 +4999,15 @@ fn test_linux(target: &str) {
             "preadv2" | "pwritev2" if musl => true,
             // FIXME(musl): Supported in new musl but we don't have a new enough version in CI.
             "statx" if musl => true,
+            // FIXME(musl): Supported since musl 1.2.6 but not yet in CI.
+            "renameat2" if musl => true,
 
             // Needs glibc 2.33 or later.
             "mallinfo2" => true,
 
-            // Not defined in uclibc as of 1.0.34
+            // Not defined in uclibc as of 1.0.45
             "gettid" if uclibc => true,
+            "getauxval" if uclibc => true,
 
             // pthread_sigqueue uses sigval, which was initially declared
             // as a struct but should be defined as a union. However due
@@ -4933,7 +5145,7 @@ fn test_linux(target: &str) {
             // FIXME(linux): `max_phase_adj` requires >= 5.19 kernel headers
             // the rsv field shrunk when those fields got added, so is omitted too
             ("ptp_clock_caps", "adjust_phase" | "max_phase_adj" | "rsv")
-                if loongarch64 || sparc64 =>
+                if loongarch64 || sparc64 || uclibc =>
             {
                 true
             }
@@ -4950,7 +5162,7 @@ fn test_linux(target: &str) {
             ("bcm_msg_head", "frames") => true,
             // FAM
             ("af_alg_iv", "iv") => true,
-            ("file_handle", "f_handle") if musl => true,
+            ("file_handle", "f_handle") if musl || uclibc => true,
             // FIXME(ctest): ctest does not translate the rust code which computes the padding size
             ("pthread_cond_t", "__padding") if l4re => true,
             _ => false,
@@ -5818,6 +6030,246 @@ fn test_aix(target: &str) {
 
     let c_enums = ["uio_rw"];
     cfg.alias_is_c_enum(move |e| c_enums.contains(&e));
+
+    ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
+}
+
+// QuRT ctest is disabled: sched_yield is static inline in the SDK (no
+// linkable symbol).  A stub or --defsym is needed.  The semver test works.
+#[allow(dead_code)]
+fn test_qurt(target: &str) {
+    assert!(target.contains("qurt"));
+
+    let mut cfg = ctest_cfg();
+    cfg.flag("-Wno-deprecated-declarations");
+
+    // QuRT POSIX headers are in the SDK, include paths are set via
+    // CFLAGS_hexagon_unknown_qurt in the test runner script.
+    headers!(
+        cfg,
+        "pthread.h",
+        "pthread_types.h",
+        "semaphore.h",
+        "signal.h",
+        "time.h",
+        "fcntl.h",
+        "sys/types.h",
+        "sys/sched.h",
+        "sys/errno.h",
+        "mqueue.h",
+    );
+
+    // QuRT doesn't have all the standard unix types/structs
+    cfg.skip_struct(|s| {
+        match s.ident() {
+            // These are compatibility stubs in libc, not from QuRT headers
+            "stat" | "tm" | "timespec" | "timeval" | "itimerspec" | "dirent" | "DIR"
+            | "termios" | "rlimit" | "rusage" | "flock" | "div_t" | "ldiv_t" | "lldiv_t" => true,
+            // sigaction: sa_handler/sa_sigaction are a union in C but separate fields in Rust
+            "sigaction" => true,
+            // sem_t is typedef of anonymous struct in C (no struct tag)
+            "sem_t" => true,
+            _ => false,
+        }
+    });
+
+    cfg.skip_alias(|ty| {
+        match ty.ident() {
+            // Skip types not defined in QuRT POSIX headers
+            "intptr_t" | "uintptr_t" | "ptrdiff_t" | "size_t" | "ssize_t" | "time_t"
+            | "suseconds_t" | "useconds_t" | "timer_t" | "dev_t" | "ino_t" | "mode_t"
+            | "nlink_t" | "off_t" | "blkcnt_t" | "blksize_t" | "uid_t" | "gid_t" | "socklen_t"
+            | "sa_family_t" | "in_addr_t" | "in_port_t" | "fpos_t" | "clock_t" | "nfds_t"
+            | "va_list" | "c_schar" | "wchar_t" | "errno_t" | "rlim_t" | "speed_t" | "tcflag_t"
+            | "sighandler_t" => true,
+            // fd_set is defined in mqueue.h as a struct, but libc has it as c_ulong
+            "fd_set" => true,
+            // sem_t is a struct in QuRT but an alias in libc
+            "sem_t" => true,
+            // Skip internal/compatibility types
+            "FILE" => true,
+            // These are libc internal types
+            t if t.starts_with("__c_anonymous_") => true,
+            t if t.starts_with("__uint") => true,
+            _ => false,
+        }
+    });
+
+    cfg.skip_const(|c| {
+        let name = c.ident();
+        match name {
+            // Skip constants not from QuRT POSIX headers
+            "EOK" | "PAGESIZE" | "PAGE_SIZE" | "L_tmpnam" | "TMP_MAX" | "FOPEN_MAX" => true,
+            // Skip DT_* directory entry constants (not in QuRT POSIX headers)
+            _ if name.starts_with("DT_") => true,
+            // Skip CLOCK_* that aren't in the QuRT time.h directly
+            "CLOCK_MONOTONIC_RAW"
+            | "CLOCK_REALTIME_COARSE"
+            | "CLOCK_MONOTONIC_COARSE"
+            | "CLOCK_BOOTTIME" => true,
+            // Skip signal constants not defined in QuRT signal.h
+            _ if name.starts_with("SIG")
+                && !matches!(
+                    name,
+                    "SIGKILL"
+                        | "SIGRTMIN"
+                        | "SIGRTMAX"
+                        | "SIGEV_NONE"
+                        | "SIGEV_SIGNAL"
+                        | "SIGEV_THREAD"
+                        | "SIG_BLOCK"
+                        | "SIG_UNBLOCK"
+                        | "SIG_SETMASK"
+                ) =>
+            {
+                true
+            }
+            "SA_SIGINFO" => false,
+            // Skip SIG_DFL, SIG_IGN, SIG_ERR (function pointers, not simple ints)
+            "SIG_DFL" | "SIG_IGN" | "SIG_ERR" => true,
+            // Skip POSIX_MSG/POSIX_NOTIF
+            "POSIX_MSG" | "POSIX_NOTIF" => true,
+            // Skip errno constants (they come from toolchain errno.h, not QuRT-specific)
+            _ if name.starts_with("E")
+                && name.len() > 1
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()) =>
+            {
+                true
+            }
+            // Skip O_* constants that use POSIX_ prefix in QuRT
+            _ if name.starts_with("O_") => true,
+            // Skip F_* fcntl constants
+            _ if name.starts_with("F_") && !name.starts_with("FD_") => true,
+            "FD_CLOEXEC" => true,
+            // Skip limits constants not in QuRT headers
+            _ if name.starts_with("CHAR_")
+                || name.starts_with("SCHAR_")
+                || name.starts_with("UCHAR_") =>
+            {
+                true
+            }
+            _ if name.starts_with("INT_") || name.starts_with("UINT_") => true,
+            _ if name.starts_with("LONG_") || name.starts_with("ULONG_") => true,
+            _ if name.starts_with("SHRT_") || name.starts_with("USHRT_") => true,
+            "CHAR_BIT" | "IOV_MAX" => true,
+            _ if name.starts_with("ARG_MAX")
+                || name.starts_with("CHILD_MAX")
+                || name.starts_with("LINK_MAX")
+                || name.starts_with("MAX_")
+                || name.starts_with("NAME_MAX")
+                || name.starts_with("OPEN_MAX")
+                || name.starts_with("PATH_MAX")
+                || name.starts_with("PIPE_BUF")
+                || name.starts_with("STREAM_MAX")
+                || name.starts_with("TZNAME_MAX") =>
+            {
+                true
+            }
+            // Skip stdio constants
+            "BUFSIZ" | "FILENAME_MAX" | "EOF" => true,
+            // Skip stdlib constants
+            "EXIT_SUCCESS" | "EXIT_FAILURE" | "RAND_MAX" => true,
+            // Skip dlfcn constants
+            _ if name.starts_with("RTLD_") || name == "DL_LAZY" => true,
+            // Skip mman constants
+            _ if name.starts_with("PROT_")
+                || name.starts_with("MAP_")
+                || name.starts_with("MS_")
+                || name.starts_with("MCL_") =>
+            {
+                true
+            }
+            // Skip stat constants
+            _ if name.starts_with("S_I") || name == "S_IFMT" => true,
+            // Skip unistd constants
+            _ if name.starts_with("_PC_") || name.starts_with("_SC_") => true,
+            "F_OK" | "X_OK" | "W_OK" | "R_OK" => true,
+            "SEEK_SET" | "SEEK_CUR" | "SEEK_END" => true,
+            "STDIN_FILENO" | "STDOUT_FILENO" | "STDERR_FILENO" => true,
+            // Skip TIME_CONV_SCLK_FREQ (QuRT-specific, not a standard C constant)
+            "TIME_CONV_SCLK_FREQ" => true,
+            // Skip SEM_FAILED (null pointer constant)
+            "SEM_FAILED" => true,
+            // Skip MAP_FAILED
+            "MAP_FAILED" => true,
+            _ => false,
+        }
+    });
+
+    cfg.skip_fn(|func| {
+        let name = func.ident();
+        match name {
+            // Skip functions not from QuRT POSIX headers we're testing
+            "strlen" | "strcpy" | "strncpy" | "strcat" | "strncat" | "strcmp" | "strncmp"
+            | "strcoll" | "strxfrm" | "strchr" | "strrchr" | "strspn" | "strcspn" | "strpbrk"
+            | "strstr" | "strtok" | "strerror" | "memchr" | "memcmp" | "memcpy" | "memmove"
+            | "memset" => true,
+            // Skip ctype functions
+            "isalnum" | "isalpha" | "iscntrl" | "isdigit" | "isgraph" | "islower" | "isprint"
+            | "ispunct" | "isspace" | "isupper" | "isxdigit" | "tolower" | "toupper" => true,
+            // Skip stdio functions
+            "fopen" | "freopen" | "fclose" | "fflush" | "fread" | "fwrite" | "fgetc" | "fputc"
+            | "getchar" | "putchar" | "ungetc" | "fgets" | "fputs" | "gets" | "puts" | "printf"
+            | "fprintf" | "sprintf" | "snprintf" | "vprintf" | "vfprintf" | "vsprintf"
+            | "vsnprintf" | "scanf" | "fscanf" | "sscanf" | "fseek" | "ftell" | "rewind"
+            | "fgetpos" | "fsetpos" | "clearerr" | "feof" | "ferror" | "perror" | "remove"
+            | "rename" | "tmpfile" | "tmpnam" | "setvbuf" | "setbuf" => true,
+            // Skip stdlib functions
+            "malloc" | "calloc" | "realloc" | "free" | "abort" | "exit" | "atexit" | "getenv"
+            | "setenv" | "unsetenv" | "atoi" | "atol" | "atoll" | "strtol" | "strtoul"
+            | "strtoll" | "strtoull" | "strtod" | "strtof" | "rand" | "srand" | "qsort"
+            | "bsearch" | "abs" | "labs" | "llabs" | "div" | "ldiv" | "lldiv" => true,
+            // Skip unistd functions: QuRT has no standard unistd.h in its POSIX
+            // headers; these are declared via sys/types.h -> hooks/unistd.h or the
+            // toolchain's own sys/unistd.h, neither of which ctest traverses.
+            "access" | "close" | "lseek" | "read" | "write" | "ftruncate" | "unlink" | "getcwd"
+            | "rmdir" | "getpid" | "getppid" | "getpgid" | "getpgrp" | "getuid" | "geteuid"
+            | "getgid" | "getegid" | "seteuid" | "setuid" | "setpgid" | "setpgrp" | "setsid"
+            | "fsync" | "pathconf" | "sleep" | "sysconf" => true,
+            // Skip dlfcn functions
+            "dlopen" | "dlclose" | "dlsym" | "dlerror" => true,
+            // Skip mman functions
+            "mmap" | "munmap" | "mprotect" | "mlock" | "munlock" | "mlockall" | "munlockall"
+            | "msync" => true,
+            // Skip stat functions
+            "stat" | "fstat" => true,
+            // Skip time functions (some are in generic headers, not QuRT posix)
+            "time" | "clock" | "difftime" | "mktime" | "gmtime" | "gmtime_r" | "localtime"
+            | "localtime_r" | "asctime" | "asctime_r" | "ctime" | "ctime_r" | "strftime"
+            | "strptime" | "nanosleep" => true,
+            // Skip signal functions that use sigaction (it's a macro in QuRT)
+            "sigaction" => true,
+            // Skip signal functions from generic toolchain headers
+            "signal" | "raise" => true,
+            // Skip dir functions
+            "opendir" | "readdir" | "closedir" | "mkdir" => true,
+            // Skip aligned_alloc / posix_memalign
+            "aligned_alloc" | "posix_memalign" => true,
+            // Skip clock_getcpuclockid
+            "clock_getcpuclockid" => true,
+            // Skip sem_open/sem_close/sem_unlink
+            "sem_open" | "sem_close" | "sem_unlink" => true,
+            // Skip __errno_location (QuRT-specific)
+            "__errno_location" => true,
+            // Skip _sigaction (internal)
+            "_sigaction" => true,
+            // pthread_equal is a static inline in QuRT
+            "pthread_equal" => true,
+            // sigtimedwait is not in QuRT POSIX libraries
+            "sigtimedwait" => true,
+            _ => false,
+        }
+    });
+
+    // Skip field checks for opaque types
+    cfg.skip_struct_field(|s, f| {
+        // pthread_attr_t bitfield can't be checked directly
+        s.ident() == "pthread_attr_t" && f.ident() == "__bitfield"
+    });
+
+    cfg.skip_roundtrip(|_| true);
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }

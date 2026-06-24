@@ -2439,9 +2439,9 @@ const fn _ALIGN(p: usize, b: usize) -> usize {
 f! {
     pub fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
         if (*mhdr).msg_controllen as usize >= size_of::<cmsghdr>() {
-            (*mhdr).msg_control as *mut cmsghdr
+            (*mhdr).msg_control.cast()
         } else {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         }
     }
 
@@ -2449,7 +2449,7 @@ f! {
         let msg = _CMSG_ALIGN((*cmsg).cmsg_len as usize);
         let next = cmsg as usize + msg + _CMSG_ALIGN(size_of::<cmsghdr>());
         if next > (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
             (cmsg as usize + msg) as *mut cmsghdr
         }
@@ -2488,9 +2488,7 @@ f! {
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
-        for slot in (*set).fds_bits.iter_mut() {
-            *slot = 0;
-        }
+        (*set).fds_bits.fill(0);
     }
 
     pub fn _DEXTRA_FIRST(_d: *const dirent) -> *mut crate::dirent_extra {
@@ -3161,7 +3159,7 @@ pub unsafe fn atexit(cb: extern "C" fn()) -> c_int {
         static __dso_handle: *mut c_void;
         pub fn __cxa_atexit(cb: extern "C" fn(), __arg: *mut c_void, __dso: *mut c_void) -> c_int;
     }
-    __cxa_atexit(cb, 0 as *mut c_void, __dso_handle)
+    __cxa_atexit(cb, ptr::null_mut(), __dso_handle)
 }
 
 impl siginfo_t {
@@ -3171,7 +3169,7 @@ impl siginfo_t {
             _pad: Padding<[u8; 32]>,
             si_addr: *mut c_void,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_addr)).si_addr
+        (*(self as *const siginfo_t).cast::<siginfo_si_addr>()).si_addr
     }
 
     pub unsafe fn si_value(&self) -> crate::sigval {
@@ -3180,7 +3178,7 @@ impl siginfo_t {
             _pad: Padding<[u8; 32]>,
             si_value: crate::sigval,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_value)).si_value
+        (*(self as *const siginfo_t).cast::<siginfo_si_value>()).si_value
     }
 
     pub unsafe fn si_pid(&self) -> crate::pid_t {
@@ -3189,7 +3187,7 @@ impl siginfo_t {
             _pad: Padding<[u8; 16]>,
             si_pid: crate::pid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_pid)).si_pid
+        (*(self as *const siginfo_t).cast::<siginfo_si_pid>()).si_pid
     }
 
     pub unsafe fn si_uid(&self) -> crate::uid_t {
@@ -3198,7 +3196,7 @@ impl siginfo_t {
             _pad: Padding<[u8; 24]>,
             si_uid: crate::uid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_uid)).si_uid
+        (*(self as *const siginfo_t).cast::<siginfo_si_uid>()).si_uid
     }
 
     pub unsafe fn si_status(&self) -> c_int {
@@ -3207,7 +3205,7 @@ impl siginfo_t {
             _pad: Padding<[u8; 28]>,
             si_status: c_int,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_status)).si_status
+        (*(self as *const siginfo_t).cast::<siginfo_si_status>()).si_status
     }
 }
 

@@ -656,6 +656,14 @@ FS_IOC_GETFLAGS
 FS_IOC_GETVERSION
 FS_IOC_SETFLAGS
 FS_IOC_SETVERSION
+FUTEX2_NUMA
+FUTEX2_PRIVATE
+FUTEX2_SIZE_MASK
+FUTEX2_SIZE_U16
+FUTEX2_SIZE_U32
+FUTEX2_SIZE_U64
+FUTEX2_SIZE_U8
+FUTEX_32
 FUTEX_CLOCK_REALTIME
 FUTEX_CMD_MASK
 FUTEX_CMP_REQUEUE
@@ -668,6 +676,7 @@ FUTEX_REQUEUE
 FUTEX_TRYLOCK_PI
 FUTEX_UNLOCK_PI
 FUTEX_WAIT
+FUTEX_WAITV_MAX
 FUTEX_WAIT_BITSET
 FUTEX_WAIT_REQUEUE_PI
 FUTEX_WAKE
@@ -1936,6 +1945,15 @@ POSIX_FADV_NORMAL
 POSIX_FADV_RANDOM
 POSIX_FADV_SEQUENTIAL
 POSIX_FADV_WILLNEED
+POSIX_SPAWN_CLOEXEC_DEFAULT
+POSIX_SPAWN_RESETIDS
+POSIX_SPAWN_SETPGROUP
+POSIX_SPAWN_SETSCHEDPARAM
+POSIX_SPAWN_SETSCHEDULER
+POSIX_SPAWN_SETSID
+POSIX_SPAWN_SETSIGDEF
+POSIX_SPAWN_SETSIGMASK
+POSIX_SPAWN_USEVFORK
 PRIO_MAX
 PRIO_MIN
 PRIO_PGRP
@@ -3443,6 +3461,7 @@ dup
 dup2
 duplocale
 endgrent
+endpwent
 endservent
 epoll_create
 epoll_create1
@@ -3536,6 +3555,7 @@ ftell
 ftello
 ftruncate
 ftruncate64
+futex_waitv
 futimens
 fwrite
 fwrite_unlocked
@@ -3573,6 +3593,7 @@ getppid
 getpriority
 getprotobyname
 getprotobynumber
+getpwent
 getpwnam
 getpwnam_r
 getpwuid
@@ -3960,6 +3981,7 @@ setlogmask
 setns
 setpgid
 setpriority
+setpwent
 setregid
 setresgid
 setresuid
@@ -4090,6 +4112,11 @@ tgkill
 time
 time_t
 timegm
+timer_create
+timer_delete
+timer_getoverrun
+timer_gettime
+timer_settime
 timerfd_create
 timerfd_gettime
 timerfd_settime

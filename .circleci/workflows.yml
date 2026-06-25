@@ -848,9 +848,7 @@ jobs:
       - run:
           name: Pull the Docker image used for CI
           command: |
-            aws ecr get-login-password --region us-east-1 \
-              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
       - ferrocene-ci:
           wrapper: |
             docker run \
@@ -864,7 +862,7 @@ jobs:
               --privileged \
               --interactive \
               --tty \
-              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
+              harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
 
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
@@ -1730,10 +1728,8 @@ commands:
       - run:
           name: Pull the Docker image used for CI
           command: |
-            aws ecr get-login-password --region us-east-1 \
-              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1760,7 +1756,7 @@ commands:
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+                    harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >> \
                     ferrocene/ci/run.sh
                     # Actual command set in -e SCRIPT=... above!
 
@@ -1782,7 +1778,7 @@ commands:
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
+                    harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >> \
                     bash -c "<< parameters.emulator-script >>"
 
       - ferrocene-ci:
@@ -1800,7 +1796,7 @@ commands:
               --network host \
               --interactive \
               --tty \
-              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+              harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >> \
 
   ferrocene-git-shallow-clone:
     description: Perform a shallow `git clone`

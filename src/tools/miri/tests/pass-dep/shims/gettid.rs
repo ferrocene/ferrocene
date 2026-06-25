@@ -8,7 +8,7 @@ fn gettid() -> u64 {
     cfg_if::cfg_if! {
         if #[cfg(any(target_os = "android", target_os = "linux"))] {
             gettid_linux_like()
-        } else if #[cfg(target_os = "nto")] {
+        } else if #[cfg(any(target_os = "nto", target_os = "qnx"))] {
             unsafe { libc::gettid() as u64 }
         } else if #[cfg(target_os = "openbsd")] {
             unsafe { libc::getthrid() as u64 }

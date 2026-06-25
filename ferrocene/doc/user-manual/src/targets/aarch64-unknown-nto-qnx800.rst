@@ -1,12 +1,12 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-unknown-nto-qnx800:
+.. _aarch64-unknown-qnx:
 
-:target:`aarch64-unknown-nto-qnx800`
+:target:`aarch64-unknown-qnx`
 ====================================
 
-The ``aarch64-unknown-nto-qnx800`` Ferrocene target provides support for QNX on
+The ``aarch64-unknown-qnx`` Ferrocene target provides support for QNX on
 ARMv8-A processors operating in Aarch64 mode.
 
 .. note::
@@ -55,7 +55,7 @@ Archives to install
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-unknown-nto-qnx800``
+* ``rust-std-aarch64-unknown-qnx``
 
 Required shell environment
 ------------------------------
@@ -82,8 +82,8 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-* ``--target=aarch64-unknown-nto-qnx800``
+* ``--target=aarch64-unknown-qnx``
 
-.. _aarch64-ferrocene-nto-qnx800:
+.. _aarch64-ferrocene-qnx:
 
 .. NOTE: this is a std target so we redirect to a no-std equivalent for certified core.

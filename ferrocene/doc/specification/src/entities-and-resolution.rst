@@ -298,7 +298,7 @@ A :t:`path` is subject to :t:`path resolution`.
 If a :t:`path segment` is expressed as either :t:`keyword` ``crate``, :t:`keyword` ``$crate``, or :t:`keyword` ``Self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
 
 :dp:`fls_uSajfdSsbxna`
-If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`, except that it may also be the last :t:`path segment` of a :t:`simple import` that appears in a :t:`nesting import`.
+If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall be either the first :t:`path segment` of a :t:`path`, or the last :t:`path segment` of a :t:`simple import` that appears in a :t:`nesting import`.
 
 :dp:`fls_774uryecc2sx`
 A :t:`path` that starts with a :t:`path segment` that is expressed as

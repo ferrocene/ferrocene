@@ -72,15 +72,16 @@ RUN <<-EOF
     set -xe
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         ARCH="x86_64"
-        SHA="0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08"
+        SHA="d4bbcb5532c8bf43f9149f1b1e0d09f77f388df088656e349570637c06b76d2d"
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         ARCH="aarch64"
-        SHA="33b1c2a9daab91ae458516e934b1532e2174643aea2ccfa81ab8c5e9d4ed381b"
+        SHA="df18f41e85b1305747a51b2da3886dd17ecde7412614068ed19905d6b245c69b"
     else
         echo "Unsupported platform"
         exit 1
     fi
-    curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.12.4.zip
+    PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.35.11.zip"
+    curl -Lo /tmp/awscli.zip $PACKAGE_URL
     echo "${SHA} /tmp/awscli.zip" | sha256sum -c
     unzip -q -d /tmp/awscli /tmp/awscli.zip
     /tmp/awscli/aws/install

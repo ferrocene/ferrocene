@@ -48,9 +48,15 @@ case "$1" in
         fi
 
         # Call `zstd` separately to be able to use all cores available (`-T0`)
-        # and the lowest compression level possible, to speed the compression
-        # as much as possible.
-        tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        # compression level chosen after light experimentation.
+        # :NOTE: This compression level is good for our current setup, changes such
+        # as faster CPU and/or different networks speeds have impact on the optimum
+        echo "Creating tar archive"
+        tar c --checkpoint=1000 --exclude build/metrics.json $@ | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
+        echo "Uploading tar archive"
+        # if you intend to add retries here, configure them in the AWS cli settings
+        # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html
+        aws s3 --progress-frequency=10 --progress-multiline cp /tmp/persist_${CIRCLE_JOB}.tar.zst "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -59,7 +65,12 @@ case "$1" in
         fi
         job="$2"
 
-        aws s3 cp "$(s3_url "${job}")" - | unzstd --stdout | tar x
+        echo "Downloading tar archive"
+        # if you intend to add retries here, configure them in the AWS cli settings
+        # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html
+        aws s3 --progress-frequency=10 --progress-multiline cp "$(s3_url "${job}")" /tmp/persist_${CIRCLE_JOB}.tar.zst
+        echo "Unpacking tar archive"
+        unzstd --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x --checkpoint=1000
         ;;
     *)
         usage 1>&2

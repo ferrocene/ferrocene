@@ -22,7 +22,7 @@ ARMv8-A processors operating in AArch64 mode.
 Prerequisites
 -------------
 
-This target requires `QNX Software Development Platform 8.0 (QNX SDP 8.0)
+This target requires `QNX Software Development Platform 8.0.5 (QNX SDP 8.0.5)
 <https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform>`_
 to be installed.
 
@@ -30,20 +30,23 @@ Typically this is done through `QNX Software Center
 <https://www.qnx.com/download/group.html?programid=29178>`_.
 
 Ferrocene is qualified using a specific version QNX SDP version. In safety
-critical contexts you must ensure 8.0.0.00141T202311271501L (also known as
-8.0 BuildID 141) is used.
+critical contexts you must ensure that `com.qnx.qnx800.patchset805` (also
+known as GA 8.0.5) is installed.
 
 .. code-block::
 
     QNX_VERSION="8.0.0.00141T202311271501L"
+    PATCHSET_VERSION="8.0.5.00390T202606231321L"
 
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -installBaseline com.qnx.qnx800/$QNX_VERSION \
-        -destination qnx/qnx800-141 \
+        -installPackage com.qnx.qnx800.patchset805/$PATCHSET_VERSION \
+        -destination $HOME/qnx800 \
         -cleanInstall
 
 In an existing QNX SDP 8.0 install you can check for the presence of the
-``.packages/metadata/com.qnx.qnx800/8.0.0.00141T202311271501L/`` directory.
+``.packages/metadata/com.qnx.qnx800.target.microkernel.core/2.6.0.00145T202606051700L``
+directory.
 
 Ferrocene documents how our internal QNX toolchains are installed and
 configured in :doc:`internal procedures (QNX) <internal-procedures:partners/qnx>`.
@@ -58,7 +61,7 @@ target as a cross-compilation target:
 * ``rust-std-aarch64-unknown-qnx``
 
 Required shell environment
-------------------------------
+--------------------------
 
 To use the target, the following procedures must be undertaken in the shell
 running the build.

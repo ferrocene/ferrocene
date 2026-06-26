@@ -227,11 +227,11 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
     source qnx/qnx710-472/qnxsdp-env.sh
     qcc -v
 
-QNX 8.0.0
----------
+QNX SDP 8.0
+-----------
 
-Windows (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^^^
+Windows (QNX SDP 8.0)
+^^^^^^^^^^^^^^^^^^^^^
 
 Launch "QNX Software Center", log in, if prompted.
 
@@ -264,8 +264,8 @@ Your installation will be located in the installation folder you chose.
 For example, ``D:\qnx\qnx800``.
 
 
-Linux (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^
+Linux (QNX SDP 8.0)
+^^^^^^^^^^^^^^^^^^^
 
 .. note::
 
@@ -274,7 +274,7 @@ Linux (QNX 8.0.0)
     follow the Windows instructions above, starting from "Log in, if
     prompted" now.
 
-Install QNX 8.0.0 BuildID 141:
+Install QNX SDP 8.0.0 BuildID 141:
 
 .. code-block::
 
@@ -318,8 +318,8 @@ If everything is working, the output of ``qcc`` should be:
     to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
 
-CI/CD deployment (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CI/CD deployment (QNX SDP 8.0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. note::
@@ -361,6 +361,7 @@ Create a deployment containing Linux and Windows toolchains:
             -installPackage com.qnx.qnx800.host.linux.x86_64=$QNX_LINUX_HOST_VERSION \
             -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
             -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
+            -installPackage com.qnx.qnx800.patchset805/8.0.5.00390T202606231321L \
             -destination qnx/qnx800-141 \
             -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \

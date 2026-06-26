@@ -7,7 +7,7 @@
 ==============================
 
 The ``aarch64-unknown-none`` Ferrocene target provides support for
-bare-metal ARMv8-A processors operating in Aarch64 mode.
+bare-metal ARMv8-A processors operating in AArch64 mode.
 
 Prerequisites
 -------------

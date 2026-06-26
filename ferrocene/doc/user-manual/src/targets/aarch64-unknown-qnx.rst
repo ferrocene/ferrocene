@@ -1,17 +1,17 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-unknown-nto-qnx800:
+.. _aarch64-unknown-qnx:
 
-:target:`aarch64-unknown-nto-qnx800`
+:target:`aarch64-unknown-qnx`
 ====================================
 
-The ``aarch64-unknown-nto-qnx800`` Ferrocene target provides support for QNX on
-ARMv8-A processors operating in Aarch64 mode.
+The ``aarch64-unknown-qnx`` Ferrocene target provides support for QNX SDP 8.0+ on
+ARMv8-A processors operating in AArch64 mode.
 
 .. note::
 
-    QNX SDP 8.0.0 only supports :ref:`x86_64-unknown-linux-gnu` and
+    QNX SDP 8.0 only supports :ref:`x86_64-unknown-linux-gnu` and
     :ref:`x86_64-pc-windows-msvc` as host platforms.
 
     Currently, Ferrocene only qualifies cross compilation to this target from
@@ -22,7 +22,7 @@ ARMv8-A processors operating in Aarch64 mode.
 Prerequisites
 -------------
 
-This target requires `QNX Software Development Platform 8.0.0 (QNX SDP 8.0.0)
+This target requires `QNX Software Development Platform 8.0 (QNX SDP 8.0)
 <https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform>`_
 to be installed.
 
@@ -42,7 +42,7 @@ critical contexts you must ensure 8.0.0.00141T202311271501L (also known as
         -destination qnx/qnx800-141 \
         -cleanInstall
 
-In an existing QNX 8.0.0 install you can check for the presence of the
+In an existing QNX SDP 8.0 install you can check for the presence of the
 ``.packages/metadata/com.qnx.qnx800/8.0.0.00141T202311271501L/`` directory.
 
 Ferrocene documents how our internal QNX toolchains are installed and
@@ -55,7 +55,7 @@ Archives to install
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-unknown-nto-qnx800``
+* ``rust-std-aarch64-unknown-qnx``
 
 Required shell environment
 ------------------------------
@@ -64,11 +64,11 @@ To use the target, the following procedures must be undertaken in the shell
 running the build.
 
 You must ensure ``$HOME`` is set to a valid path, then source ``qnxsdp-env.sh``
-from your QNX SDP 8.0.0 installation:
+from your QNX SDP 8.0 installation:
 
 .. code-block::
 
-    source $QNX_SDP_800_INSTALL/qnxsdp-env.sh
+    source $HOME/qnx800/qnxsdp-env.sh
 
 
 On :ref:`x86_64-pc-windows-msvc`, there exists a ``qnxsdp-env.bat`` if
@@ -82,8 +82,8 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-* ``--target=aarch64-unknown-nto-qnx800``
+* ``--target=aarch64-unknown-qnx``
 
-.. _aarch64-ferrocene-nto-qnx800:
+.. _aarch64-ferrocene-qnx:
 
 .. NOTE: this is a std target so we redirect to a no-std equivalent for certified core.

@@ -18,5 +18,5 @@ if [ ! -z ${BASH_ENV+x} ]; then
 fi
 set -e
 
-uv python install 3.12
-uv python pin 3.12
+uv python install 3.14
+uv python pin 3.14

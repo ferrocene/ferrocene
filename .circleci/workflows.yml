@@ -377,6 +377,9 @@ jobs:
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
@@ -408,6 +411,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv

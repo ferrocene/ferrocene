@@ -1,5 +1,8 @@
 #!/bin/sh
-  
+
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
 rm -rf /tmp/awscli /tmp/awscli.zip
 set -xe
 if [ "$TARGETPLATFORM" = "linux/amd64" ]; then

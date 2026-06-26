@@ -14,5 +14,5 @@ if isWindows; then
     ciCommandSetEnv "RUST_CONFIGURE_ARGS" "${RUST_CONFIGURE_ARGS} --enable-ninja"
     ciCommandAddPath "$(cygpath -m "$(pwd)/ninja")"
 elif isMacOS; then
-    brew install ninja
+    brew install -y ninja
 fi

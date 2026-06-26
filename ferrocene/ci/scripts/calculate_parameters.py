@@ -244,6 +244,7 @@ def calculate_targets(host_plus_stage: str):
 def workflow_id(*dummy):
     return os.environ.get("CIRCLE_WORKFLOW_ID")
 
+## This needs to be kept in sync with the version in ferrocene/ci/docker-images/common/install-awscli.sh
 def awscli_version(*dummy):
     return "2.35.11"
 

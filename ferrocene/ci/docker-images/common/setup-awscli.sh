@@ -12,6 +12,8 @@ else
     echo "Unsupported platform"
     exit 1
 fi
+# The version defined here needs to be kept in sync with the version defined in
+# ferrocene/ci/scripts/calculate-parameters.py
 PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.35.11.zip"
 curl -Lo /tmp/awscli.zip $PACKAGE_URL
 echo "${SHA} /tmp/awscli.zip" | sha256sum -c

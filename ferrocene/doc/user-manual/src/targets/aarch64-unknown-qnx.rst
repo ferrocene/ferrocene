@@ -7,7 +7,7 @@
 ====================================
 
 The ``aarch64-unknown-qnx`` Ferrocene target provides support for QNX SDP 8.0+ on
-ARMv8-A processors operating in Aarch64 mode.
+ARMv8-A processors operating in AArch64 mode.
 
 .. note::
 

@@ -68,25 +68,10 @@ EOF
 
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 24.04 is a snap.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x86_64"
-        SHA="d4bbcb5532c8bf43f9149f1b1e0d09f77f388df088656e349570637c06b76d2d"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="aarch64"
-        SHA="df18f41e85b1305747a51b2da3886dd17ecde7412614068ed19905d6b245c69b"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.35.11.zip"
-    curl -Lo /tmp/awscli.zip $PACKAGE_URL
-    echo "${SHA} /tmp/awscli.zip" | sha256sum -c
-    unzip -q -d /tmp/awscli /tmp/awscli.zip
-    /tmp/awscli/aws/install
-    rm -rf /tmp/awscli /tmp/awscli.zip
-EOF
+#
+# Using the provided script also ensures that all versions are in sync
+COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+RUN /tmp/setup-awscli.sh
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8

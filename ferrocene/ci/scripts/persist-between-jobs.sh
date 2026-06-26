@@ -52,7 +52,7 @@ case "$1" in
         # :NOTE: This compression level is good for our current setup, changes such
         # as faster CPU and/or different networks speeds have impact on the optimum
         echo "Creating tar archive"
-        tar c --checkpoint=1000 --exclude build/metrics.json $@ | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
+        tar c --checkpoint=1000 --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Uploading tar archive"
         # if you intend to add retries here, configure them in the AWS cli settings
         # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html

@@ -18,13 +18,47 @@ panic() {
 qnx7_set_up_bridge_network() {
     echo
     echo "===> setting up QEMU bridge network"
-    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf
+    helper="$(locate_qemu_bridge_helper $1)"
+    conf="$(locate_bridge_conf "$helper")"
+    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh "$helper" "$conf"
 }
 
 qnx8_set_up_bridge_network() {
     echo
     echo "===> setting up QEMU bridge network"
-    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf nat
+    helper="$(locate_qemu_bridge_helper $1)"
+    conf="$(locate_bridge_conf "$helper")"
+    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh "$helper" "$conf" nat
+}
+
+locate_qemu_bridge_helper() {
+    bindir="$(dirname "$(which qemu-system-$1)")"
+    # default location when built from source
+    helper1="$bindir/../libexec/qemu-bridge-helper"
+    # location in Debian/Ubuntu package
+    helper2="$bindir/../lib/qemu/qemu-bridge-helper"
+    if [ -f "$helper1" ]; then
+        echo "$(readlink -f "$helper1")"
+    elif [ -f "$helper2" ]; then
+        echo "$(readlink -f "$helper2")"
+    else
+        panic "qemu-bridge-helper not found; update this search logic (arch=$1)"
+    fi
+}
+
+locate_bridge_conf() {
+    helperdir="$(dirname "$1")"
+    # default search location when built from source
+    conf1="$helperdir/../etc/qemu/bridge.conf"
+    # location in Debian/Ubuntu package
+    conf2="$helperdir/../../../etc/qemu/bridge.conf"
+    if [ -f "$conf1" ]; then
+        echo "$(readlink -f "$conf1")"
+    elif [ -f "$conf2" ]; then
+        echo "$(readlink -f "$conf2")"
+    else
+        panic "bridge.conf not found; update this search logic (helper=$1)"
+    fi
 }
 
 check_no_other_emulator_is_running() {

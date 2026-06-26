@@ -10,7 +10,7 @@ IFS=$'\n\t'
 nto_target=aarch64-unknown-nto-qnx710
 
 start_vm() {
-    qnx7_set_up_bridge_network
+    qnx7_set_up_bridge_network aarch64
 
     echo
     echo "===> creating virtual SD card"

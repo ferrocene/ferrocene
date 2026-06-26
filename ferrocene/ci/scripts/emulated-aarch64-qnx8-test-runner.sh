@@ -11,7 +11,7 @@ nto_target=aarch64-unknown-nto-qnx800
 vm_hostname=aarch64-qnx8-vm
 
 start_vm() {
-    qnx8_set_up_bridge_network
+    qnx8_set_up_bridge_network aarch64
 
     echo
     echo "===> starting QEMU"

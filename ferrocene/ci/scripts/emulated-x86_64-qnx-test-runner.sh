@@ -11,7 +11,7 @@ nto_target=x86_64-pc-nto-qnx710
 vm_hostname=x86_64-qnx-vm
 
 start_vm() {
-    qnx7_set_up_bridge_network
+    qnx7_set_up_bridge_network x86_64
 
     echo
     echo "===> starting QEMU"

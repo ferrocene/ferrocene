@@ -160,10 +160,12 @@ jobs:
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-ferrocene.facade,aarch64r82-unknown-ferrocene.facade,aarch64v8r-unknown-ferrocene.facade,armv7r-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabi
+      # This needs to be in sync with the Dockerfile for the facade-testserver
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-ferrocene.facade,aarch64r82-unknown-ferrocene.facade,aarch64v8r-unknown-ferrocene.facade,armv7r-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabi" --stage "2"
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
@@ -935,7 +937,7 @@ jobs:
     description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: large # 4-core
+    resource_class: large.gen2 # 4-core
     parameters:
       image:
         description: The image that needs to be built
@@ -1032,6 +1034,35 @@ jobs:
           environment:
             IMAGE_NAME: rhivos-2.0-test-server
             IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-facade-test-server-x86_64:
+    description: Job that builds and uploads a Docker image for a ubuntu container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    resource_class: large.gen2
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - run:
+          name: Restore files from the x86_64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
+          name: Build and upload the Docker image
+          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+          environment:
+            BASE_IMAGE: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+            IMAGE_NAME: facade-testserver
+            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.facade-testserver
 
   # The image gets built for every job because it needs to contain build results per job
   build-docker-rhel-test-server-aarch64:
@@ -1336,6 +1367,10 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
+
+      - build-docker-facade-test-server-x86_64:
+          requires:
+            - x86_64-linux-build
 
       - facade-generic-test:
           name: armv7r-eabihf-test-library-compiletest

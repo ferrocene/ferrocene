@@ -27,6 +27,7 @@ aws ecr get-login-password --region "${ECR_REGION}" \
 
 ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
 
+BASE_IMAGE="${BASE_IMAGE:''}"
 # Build and push the image
-docker build --progress=plain -t "${image}" -f "ferrocene/ci/docker-images/${IMAGE_NAME}/Dockerfile" .
+docker build --progress=plain -t "${image}" --build-arg BASE_IMAGE=$BASE_IMAGE -f "ferrocene/ci/docker-images/${IMAGE_NAME}/Dockerfile" .
 docker push "${image}"

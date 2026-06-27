@@ -51,8 +51,12 @@ case "$1" in
         # compression level chosen after light experimentation.
         # :NOTE: This compression level is good for our current setup, changes such
         # as faster CPU and/or different networks speeds have impact on the optimum
+        #
+        # Use verbose to produce output while packing so that we can see the job is
+        # progressing. It shouldn't slow us down much here since we're largely dominated
+        # by the effort of packing.
         echo "Creating tar archive"
-        tar c --checkpoint=1000 --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
+        tar c --verbose --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Uploading tar archive"
         # if you intend to add retries here, configure them in the AWS cli settings
         # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html
@@ -70,7 +74,10 @@ case "$1" in
         # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html
         aws s3 --progress-frequency=10 --progress-multiline cp "$(s3_url "${job}")" /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Unpacking tar archive"
-        unzstd --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x --checkpoint=1000
+        # Unpacking is faster than packing and logging each file causes a significant
+        # slowdown, so no verbose here.
+        unzstd --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x
+        echo "Done unpacking"
         ;;
     *)
         usage 1>&2

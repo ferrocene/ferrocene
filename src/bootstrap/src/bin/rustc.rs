@@ -21,6 +21,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command};
 use std::time::Instant;
 
+use arg_file_command::ArgFileCommand;
 use shared_helpers::{
     dylib_path, dylib_path_var, exe, maybe_dump, parse_rustc_stage, parse_rustc_verbose,
     parse_value_from_args,
@@ -28,6 +29,9 @@ use shared_helpers::{
 
 #[path = "../utils/shared_helpers.rs"]
 mod shared_helpers;
+
+#[path = "../../../build_helper/src/arg_file_command.rs"]
+mod arg_file_command;
 
 #[path = "../utils/proc_macro_deps.rs"]
 mod proc_macro_deps;
@@ -129,11 +133,11 @@ fn main() {
 
     let mut cmd = match env::var_os("RUSTC_WRAPPER_REAL") {
         Some(wrapper) if !wrapper.is_empty() => {
-            let mut cmd = Command::new(wrapper);
+            let mut cmd = ArgFileCommand::new(wrapper);
             cmd.arg(rustc_driver);
             cmd
         }
-        _ => Command::new(rustc_driver),
+        _ => ArgFileCommand::new(rustc_driver),
     };
     cmd.args(&args).env(dylib_path_var(), env::join_paths(&dylib_path).unwrap());
 
@@ -288,6 +292,7 @@ fn main() {
         eprintln!("{prefix} libdir: {libdir:?}");
     }
 
+    let (mut cmd, arg_file) = cmd.build().unwrap();
     maybe_dump(format!("stage{}-rustc", stage + 1), &cmd);
 
     let start = Instant::now();
@@ -297,6 +302,8 @@ fn main() {
         let status = child.wait().expect(&errmsg);
         (child, status)
     };
+
+    drop(arg_file);
 
     if (env::var_os("RUSTC_PRINT_STEP_TIMINGS").is_some()
         || env::var_os("RUSTC_PRINT_STEP_RUSAGE").is_some())

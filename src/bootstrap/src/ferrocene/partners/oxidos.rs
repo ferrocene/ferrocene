@@ -8,6 +8,7 @@ use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
+use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::tarball::Tarball;
 use crate::{Compiler, FileType, Mode, t};
@@ -89,8 +90,9 @@ impl Step for DistOxidOs {
             for variant in variants {
                 let path = builder.ensure(variant);
                 let dest = format!("lib/rustlib/{}/lib/builtin/{}", self.target, variant.name());
-                for file in t!(std::fs::read_dir(path.join("deps"))) {
-                    let file = t!(file).path();
+
+                for file in scan_build_tree(builder, &path) {
+                    let file = file.path();
                     if file.extension().and_then(OsStr::to_str) == Some("rlib") {
                         tarball.add_file(&file, &dest, FileType::Regular);
                     }

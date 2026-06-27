@@ -214,7 +214,7 @@ macro_rules! saturating_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Add for Saturating<$t> {
+        const impl Add for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -229,7 +229,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const AddAssign for Saturating<$t> {
+        const impl AddAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: Saturating<$t>) {
@@ -242,7 +242,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const AddAssign<$t> for Saturating<$t> {
+        const impl AddAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn add_assign(&mut self, other: $t) {
@@ -255,7 +255,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Sub for Saturating<$t> {
+        const impl Sub for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -270,7 +270,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const SubAssign for Saturating<$t> {
+        const impl SubAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: Saturating<$t>) {
@@ -283,7 +283,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const SubAssign<$t> for Saturating<$t> {
+        const impl SubAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn sub_assign(&mut self, other: $t) {
@@ -296,7 +296,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Mul for Saturating<$t> {
+        const impl Mul for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -311,7 +311,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const MulAssign for Saturating<$t> {
+        const impl MulAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: Saturating<$t>) {
@@ -324,7 +324,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const MulAssign<$t> for Saturating<$t> {
+        const impl MulAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn mul_assign(&mut self, other: $t) {
@@ -352,7 +352,7 @@ macro_rules! saturating_impl {
         /// ```
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Div for Saturating<$t> {
+        const impl Div for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -367,7 +367,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const DivAssign for Saturating<$t> {
+        const impl DivAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: Saturating<$t>) {
@@ -380,7 +380,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const DivAssign<$t> for Saturating<$t> {
+        const impl DivAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn div_assign(&mut self, other: $t) {
@@ -393,7 +393,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Rem for Saturating<$t> {
+        const impl Rem for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -408,7 +408,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const RemAssign for Saturating<$t> {
+        const impl RemAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: Saturating<$t>) {
@@ -421,7 +421,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const RemAssign<$t> for Saturating<$t> {
+        const impl RemAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn rem_assign(&mut self, other: $t) {
@@ -434,7 +434,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Not for Saturating<$t> {
+        const impl Not for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -449,7 +449,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitXor for Saturating<$t> {
+        const impl BitXor for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -464,7 +464,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitXorAssign for Saturating<$t> {
+        const impl BitXorAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: Saturating<$t>) {
@@ -477,7 +477,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitXorAssign<$t> for Saturating<$t> {
+        const impl BitXorAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: $t) {
@@ -490,7 +490,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitOr for Saturating<$t> {
+        const impl BitOr for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -505,7 +505,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitOrAssign for Saturating<$t> {
+        const impl BitOrAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: Saturating<$t>) {
@@ -518,7 +518,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitOrAssign<$t> for Saturating<$t> {
+        const impl BitOrAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: $t) {
@@ -531,7 +531,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitAnd for Saturating<$t> {
+        const impl BitAnd for Saturating<$t> {
             type Output = Saturating<$t>;
 
             #[inline]
@@ -546,7 +546,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitAndAssign for Saturating<$t> {
+        const impl BitAndAssign for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: Saturating<$t>) {
@@ -559,7 +559,7 @@ macro_rules! saturating_impl {
 
         #[stable(feature = "saturating_int_assign_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitAndAssign<$t> for Saturating<$t> {
+        const impl BitAndAssign<$t> for Saturating<$t> {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: $t) {
@@ -1026,7 +1026,7 @@ macro_rules! saturating_int_impl_signed {
 
         #[stable(feature = "saturating_int_impl", since = "1.74.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Neg for Saturating<$t> {
+        const impl Neg for Saturating<$t> {
             type Output = Self;
             #[inline]
             #[ferrocene::prevalidated]

@@ -56,7 +56,7 @@ macro_rules! not_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const Not for $t {
+        const impl Not for $t {
             type Output = $t;
 
             #[inline]
@@ -172,7 +172,7 @@ macro_rules! bitand_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitAnd for $t {
+        const impl BitAnd for $t {
             type Output = $t;
 
             #[inline]
@@ -277,7 +277,7 @@ macro_rules! bitor_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitOr for $t {
+        const impl BitOr for $t {
             type Output = $t;
 
             #[inline]
@@ -382,7 +382,7 @@ macro_rules! bitxor_impl {
     ($($t:ty)*) => ($(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitXor for $t {
+        const impl BitXor for $t {
             type Output = $t;
 
             #[inline]
@@ -749,7 +749,7 @@ macro_rules! bitand_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitAndAssign for $t {
+        const impl BitAndAssign for $t {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitand_assign(&mut self, other: $t) { *self &= other }
@@ -825,7 +825,7 @@ macro_rules! bitor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitOrAssign for $t {
+        const impl BitOrAssign for $t {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitor_assign(&mut self, other: $t) { *self |= other }
@@ -901,7 +901,7 @@ macro_rules! bitxor_assign_impl {
     ($($t:ty)+) => ($(
         #[stable(feature = "op_assign_traits", since = "1.8.0")]
         #[rustc_const_unstable(feature = "const_ops", issue = "143802")]
-        impl const BitXorAssign for $t {
+        const impl BitXorAssign for $t {
             #[inline]
             #[ferrocene::prevalidated]
             fn bitxor_assign(&mut self, other: $t) { *self ^= other }

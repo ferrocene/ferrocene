@@ -6648,7 +6648,6 @@ core::fmt::num::imp::<impl usize>::_fmt_inner
 core::fmt::num::imp::<impl usize>::format_into
 core::fmt::num::imp::exp_u64
 core::fmt::num::slice_buffer_to_str
-core::fmt::num_buffer::NumBuffer::<T>::capacity
 core::fmt::num_buffer::NumBuffer::<T>::new
 core::fmt::pointer_fmt_inner
 core::fmt::rt::Argument::<'_>::as_u16

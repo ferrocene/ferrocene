@@ -158,16 +158,17 @@ jobs:
           llvm_subset: false
 
   # x86_64-unknown-linux-gnu jobs
-
   x86_64-linux-build:
     executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-ferrocene.facade,aarch64r82-unknown-ferrocene.facade,aarch64v8r-unknown-ferrocene.facade,armv7r-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabi
+      # This needs to be in sync with the Dockerfile for the facade-testserver
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-ferrocene.facade,aarch64r82-unknown-ferrocene.facade,aarch64v8r-unknown-ferrocene.facade,armv7r-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabihf,thumbv7em-ferrocene.facade-eabi" --stage "2"
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
@@ -1047,8 +1048,8 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
-          requires:
-            - build-docker--ubuntu-20--x86_64
+         requires:
+           - build-docker--ubuntu-20--x86_64
 
       - x86_64-linux-llvm:
           requires:
@@ -1133,6 +1134,23 @@ workflows:
       - x86_64-linux-library-coverage:
           requires:
             - x86_64-linux-build
+
+
+      # Facade Test Infrastructure
+      # The image gets built for every job because it needs to contain build results per job
+      # The image is currently based on a plai ubuntu 24.04. base image
+      - ferrocene/build_docker:
+          name: build-docker-facade-testserver-x86_64
+          image: facade-test-server
+          base_image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.facade-testserver
+          rebuild: true
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+          restore_from_job: x86_64-linux-build
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-20--x86_64
 
       - facade-generic-test:
           name: aarch64-none-test-library-compiletest
@@ -1350,6 +1368,7 @@ workflows:
           restore_from_job: aarch64-linux-build
           requires:
             - aarch64-linux-build
+
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-test-library-compiletest
           tasks: $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)

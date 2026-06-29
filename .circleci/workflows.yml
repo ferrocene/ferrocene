@@ -837,7 +837,6 @@ jobs:
           command: echo
 
   # Test VMs
-
   facade-generic-test:
     executor: linux-vm
     parameters:
@@ -1254,6 +1253,20 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - ferrocene/facade_generic_test:
+          name: armv7r-eabihf-test-library-compiletest-docker
+          target: armv7r-ferrocene.facade-eabihf
+          test_variant: 2021-cortex-r5f
+          emulated: "true"
+          qemu_arch: qemu-arm
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.facade-testserver
+          requires:
+            - x86_64-linux-build
+            - build-docker-facade-testserver-x86_64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library-compiletest

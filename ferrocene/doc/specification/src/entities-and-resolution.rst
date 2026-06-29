@@ -1120,7 +1120,7 @@ A :t:`use import` with a single :t:`path segment` expressed as either :t:`keywor
 When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.
 
 :dp:`fls_aam34hsRmKU2`
-A :t:`global path` where any of its :t:`[path segment]s` are expressed as any of the :t:`[keyword]s`, ``self``, ``super``, ``crate``, and ``$crate``, shall not be used.
+A :t:`simple import` whose :t:`import path prefix` consists only of :t:`namespace qualifier` ``::`` and whose :t:`simple path` consists of a single :t:`path segment` expressed as :t:`keyword` ``self`` shall not be used.
 
 :dp:`fls_LV94x3HlpBWk`
 A :t:`simple import` shall not refer to :t:`[enum variant]s` through a :t:`type alias`.

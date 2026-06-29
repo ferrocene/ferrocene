@@ -17,6 +17,11 @@ dependencies = [
     "ferrocene-sphinx-shared-resources",
 ]
 
+# When updating with `uv lock --upgrade`, don't pull just-uploaded packages
+# This is a small mitigation against malicious package uploads
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.uv.sources]
 ferrocene-sphinx-shared-resources = { workspace = true }
 

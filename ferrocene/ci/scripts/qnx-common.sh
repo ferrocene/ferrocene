@@ -47,18 +47,24 @@ locate_qemu_bridge_helper() {
 }
 
 locate_bridge_conf() {
-    helperdir="$(dirname "$1")"
-    # default search location when built from source
-    conf1="$helperdir/../etc/qemu/bridge.conf"
-    # location in Debian/Ubuntu package
-    conf2="$helperdir/../../../etc/qemu/bridge.conf"
-    if [ -f "$conf1" ]; then
-        echo "$(readlink -f "$conf1")"
-    elif [ -f "$conf2" ]; then
-        echo "$(readlink -f "$conf2")"
-    else
-        panic "bridge.conf not found; update this search logic (helper=$1)"
-    fi
+    qemu_bridge_helper="$1"
+
+    # The location where `qemu-bridge-helper` expects `bride.conf` to be is
+    # different on a custom QEMU build vs on the Debian packaged QEMU. Also, the
+    # file is not contained in the Debian package not created by
+    # `make install` on a custom build; instead the QNX SDP's `net.sh` script
+    # will create it. As `bridge.conf` does not exist we cannot search for it
+    # using `find`. The most reliable way to get its expected location seems to
+    # be to extract the location directly from the helper binary itself
+    #
+    # Examples of bridge-qemu-helper and bridge.conf locations
+    # - Ubuntu/Debian package:
+    #   - `/usr/lib/qemu/qemu-bridge-helper`;
+    #   - `/etc/qemu/bridge.conf`
+    # - custom build:
+    #   - `$PREFIX/libexec/qemu-bridge-helper`;
+    #   - `$PREFIX/etc/qemu/bridge.conf`
+    strings "$qemu_bridge_helper" | grep '^/.*/bridge.conf$'
 }
 
 check_no_other_emulator_is_running() {

@@ -110,8 +110,14 @@ parameters:
     type: string
     default: ""
 
+  # CircleCI has no local variables and the recommendation is to use a parameter with a default value
+  # but since our paramters are all provided by calculate-parameters.py, we need to have the default there.
+  awscli-version:
+    type: string
+    default: ""
+
 orbs:
-  aws-cli: circleci/aws-cli@4.0
+  aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
 
 jobs:
@@ -371,6 +377,9 @@ jobs:
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
@@ -402,6 +411,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
@@ -566,9 +578,9 @@ jobs:
           steps:
             - ferrocene-checkout
             # Darwin does not come with awscli, setup it before aws steps
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
@@ -655,9 +667,9 @@ jobs:
             - ferrocene-git-shallow-clone:
                 depth: 1
             # Darwin does not come with awscli, setup it before aws steps
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-setup-darwin
             - setup-uv
@@ -836,6 +848,9 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - run:
           name: Restore files from the x86_64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
@@ -882,6 +897,9 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -913,6 +931,9 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - setup-qnx8-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -946,7 +967,9 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -981,7 +1004,9 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -1004,7 +1029,9 @@ jobs:
       - image: cimg/base:current
     resource_class: arm.medium # 2-core
     steps:
-      - aws-cli/install
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
@@ -1030,7 +1057,9 @@ jobs:
       - image: cimg/base:current
     resource_class: arm.medium # 2-core
     steps:
-      - aws-cli/install
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
@@ -1696,9 +1725,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - aws-oidc-auth
       - when:
           condition:
@@ -1747,9 +1776,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - aws-oidc-auth
       - when:
           condition:
@@ -1795,9 +1824,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - setup-uv
       - aws-oidc-auth
       - when:

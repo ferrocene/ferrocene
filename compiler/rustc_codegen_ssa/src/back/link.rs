@@ -35,8 +35,8 @@ use rustc_middle::middle::debugger_visualizer::DebuggerVisualizerFile;
 use rustc_middle::middle::dependency_format::Linkage;
 use rustc_middle::middle::exported_symbols::SymbolExportKind;
 use rustc_session::config::{
-    self, CFGuard, CrateType, DebugInfo, LinkerFeaturesCli, OutFileName, OutputFilenames,
-    OutputType, PrintKind, SplitDwarfKind, Strip,
+    self, CFGuard, CrateType, DebugInfo, InstrumentMcount, LinkerFeaturesCli, OutFileName,
+    OutputFilenames, OutputType, PrintKind, SplitDwarfKind, Strip,
 };
 use rustc_session::lint::builtin::LINKER_MESSAGES;
 use rustc_session::output::{check_file_is_writeable, invalid_output_for_target, out_filename};
@@ -47,7 +47,7 @@ use rustc_session::{Session, filesearch};
 use rustc_span::Symbol;
 use rustc_target::spec::crt_objects::CrtObjects;
 use rustc_target::spec::{
-    BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
+    Arch, BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
     LinkSelfContainedDefault, LinkerFeatures, LinkerFlavor, LinkerFlavorCli, Lld, Os, RelocModel,
     RelroLevel, SanitizerSet, SplitDebuginfo,
 };
@@ -59,6 +59,7 @@ use super::archive::{
 use super::command::Command;
 use super::linker::{self, Linker};
 use super::metadata::{MetadataPosition, create_wrapper_file};
+use super::rmeta_link::RmetaLinkCache;
 use super::rpath::{self, RPathConfig};
 use super::{apple, rmeta_link, versioned_llvm_target};
 use crate::base::needs_allocator_shim_for_linking;
@@ -86,6 +87,7 @@ pub fn link_binary(
     let _timer = sess.timer("link_binary");
     let output_metadata = sess.opts.output_types.contains_key(&OutputType::Metadata);
     let mut tempfiles_for_stdout_output: Vec<PathBuf> = Vec::new();
+    let mut rmeta_link_cache = RmetaLinkCache::default();
     for &crate_type in &crate_info.crate_types {
         // Ignore executable crates if we have -Z no-codegen, as they will error.
         if (sess.opts.unstable_opts.no_codegen || !sess.opts.output_types.should_codegen())
@@ -139,6 +141,7 @@ pub fn link_binary(
                     link_staticlib(
                         sess,
                         archive_builder_builder,
+                        &mut rmeta_link_cache,
                         &compiled_modules,
                         &crate_info,
                         &metadata,
@@ -150,6 +153,7 @@ pub fn link_binary(
                     link_natively(
                         sess,
                         archive_builder_builder,
+                        &mut rmeta_link_cache,
                         crate_type,
                         &out_filename,
                         &compiled_modules,
@@ -502,6 +506,7 @@ fn link_rlib<'a>(
 fn link_staticlib(
     sess: &Session,
     archive_builder_builder: &dyn ArchiveBuilderBuilder,
+    rmeta_link_cache: &mut RmetaLinkCache,
     compiled_modules: &CompiledModules,
     crate_info: &CrateInfo,
     metadata: &EncodedMetadata,
@@ -531,7 +536,7 @@ fn link_staticlib(
         let bundled_libs: FxIndexSet<_> = native_libs.filter_map(|lib| lib.filename).collect();
         ab.add_archive(
             path,
-            AddArchiveKind::Rlib(&|fname: &str, entry_kind| {
+            AddArchiveKind::Rlib(rmeta_link_cache, &|fname: &str, entry_kind| {
                 // Ignore metadata and rmeta-link files.
                 if fname == METADATA_FILENAME || fname == rmeta_link::FILENAME {
                     return true;
@@ -939,6 +944,7 @@ fn report_linker_output(
 fn link_natively(
     sess: &Session,
     archive_builder_builder: &dyn ArchiveBuilderBuilder,
+    rmeta_link_cache: &mut RmetaLinkCache,
     crate_type: CrateType,
     out_filename: &Path,
     compiled_modules: &CompiledModules,
@@ -965,6 +971,7 @@ fn link_natively(
         flavor,
         sess,
         archive_builder_builder,
+        rmeta_link_cache,
         crate_type,
         tmpdir,
         temp_filename,
@@ -2422,6 +2429,69 @@ fn add_rpath_args(
     }
 }
 
+fn strip_numeric_suffix<'a>(base: &'a str, suffix: impl AsRef<str>, fallback: &'a str) -> &'a str {
+    if suffix.as_ref().parse::<u32>().is_ok() { base } else { fallback }
+}
+
+fn undecorate_c_symbol<'a>(
+    name: &'a str,
+    sess: &Session,
+    kind: SymbolExportKind,
+) -> Option<&'a str> {
+    match sess.target.binary_format {
+        BinaryFormat::MachO => {
+            // Mach-O: strip the leading underscore that all external symbols have.
+            // The Darwin linker's export_symbols will add it back.
+            name.strip_prefix('_')
+        }
+        BinaryFormat::Coff => {
+            // MSVC C++ mangled names start with '?' and use a completely different
+            // decorating scheme that includes '@@' as structural delimiters.
+            // They must not be subjected to C calling-convention undecoration.
+            if name.starts_with('?') {
+                return Some(name);
+            }
+            Some(match sess.target.arch {
+                Arch::X86 => {
+                    // COFF 32-bit: strip calling-convention decorations.
+                    if let Some(rest) = name.strip_prefix('@') {
+                        // fastcall: @foo@N -> foo
+                        rest.rsplit_once('@')
+                            .map(|(base, suffix)| strip_numeric_suffix(base, suffix, name))
+                            .unwrap_or(name)
+                    } else if let Some(stripped) = name.strip_prefix('_') {
+                        if let Some((base, suffix)) = stripped.rsplit_once('@') {
+                            // stdcall: _foo@N -> foo
+                            strip_numeric_suffix(base, suffix, stripped)
+                        } else {
+                            // cdecl: _foo -> foo
+                            stripped
+                        }
+                    } else {
+                        // vectorcall: foo@@N -> foo
+                        name.rsplit_once("@@")
+                            .map(|(base, suffix)| strip_numeric_suffix(base, suffix, name))
+                            .unwrap_or(name)
+                    }
+                }
+                Arch::X86_64 => {
+                    // COFF 64-bit: vectorcall mangling (foo@@N -> foo) also applies on x86_64.
+                    name.rsplit_once("@@")
+                        .map(|(base, suffix)| strip_numeric_suffix(base, suffix, name))
+                        .unwrap_or(name)
+                }
+                Arch::Arm64EC if kind == SymbolExportKind::Text => {
+                    // Arm64EC: `#` prefix distinguishes ARM64EC text symbols from x64 thunks.
+                    name.strip_prefix('#').unwrap_or(name)
+                }
+                _ => name,
+            })
+        }
+        // ELF: no decoration
+        _ => Some(name),
+    }
+}
+
 fn add_c_staticlib_symbols(
     sess: &Session,
     lib: &NativeLib,
@@ -2463,7 +2533,14 @@ fn add_c_staticlib_symbols(
         }
 
         for symbol in object.symbols() {
-            if symbol.scope() != object::SymbolScope::Dynamic {
+            // The `object` crate returns `Dynamic` for ELF/Mach-O global symbols,
+            // but always returns `Linkage` for COFF external symbols.
+            // Accept both for COFF (Windows and UEFI).
+            let scope = symbol.scope();
+            if scope != object::SymbolScope::Dynamic
+                && !(sess.target.binary_format == BinaryFormat::Coff
+                    && scope == object::SymbolScope::Linkage)
+            {
                 continue;
             }
 
@@ -2478,9 +2555,10 @@ fn add_c_staticlib_symbols(
                 _ => continue,
             };
 
-            // FIXME:The symbol mangle rules are slightly different in Windows(32-bit) and Apple.
-            // Need to be resolved.
-            out.push((name.to_string(), export_kind));
+            let Some(undecorated) = undecorate_c_symbol(name, sess, export_kind) else {
+                continue;
+            };
+            out.push((undecorated.to_string(), export_kind));
         }
     }
 
@@ -2500,6 +2578,7 @@ fn linker_with_args(
     flavor: LinkerFlavor,
     sess: &Session,
     archive_builder_builder: &dyn ArchiveBuilderBuilder,
+    rmeta_link_cache: &mut RmetaLinkCache,
     crate_type: CrateType,
     tmpdir: &Path,
     out_filename: &Path,
@@ -2628,6 +2707,7 @@ fn linker_with_args(
         cmd,
         sess,
         archive_builder_builder,
+        rmeta_link_cache,
         crate_info,
         crate_type,
         tmpdir,
@@ -2891,7 +2971,7 @@ fn add_order_independent_options(
         cmd.pgo_gen();
     }
 
-    if sess.opts.unstable_opts.instrument_mcount {
+    if sess.opts.unstable_opts.instrument_mcount != InstrumentMcount::Disabled {
         cmd.enable_profiling();
     }
 
@@ -3064,6 +3144,7 @@ fn add_upstream_rust_crates(
     cmd: &mut dyn Linker,
     sess: &Session,
     archive_builder_builder: &dyn ArchiveBuilderBuilder,
+    rmeta_link_cache: &mut RmetaLinkCache,
     crate_info: &CrateInfo,
     crate_type: CrateType,
     tmpdir: &Path,
@@ -3116,6 +3197,7 @@ fn add_upstream_rust_crates(
                         cmd,
                         sess,
                         archive_builder_builder,
+                        rmeta_link_cache,
                         crate_info,
                         tmpdir,
                         cnum,
@@ -3247,6 +3329,7 @@ fn add_static_crate(
     cmd: &mut dyn Linker,
     sess: &Session,
     archive_builder_builder: &dyn ArchiveBuilderBuilder,
+    rmeta_link_cache: &mut RmetaLinkCache,
     crate_info: &CrateInfo,
     tmpdir: &Path,
     cnum: CrateNum,
@@ -3277,7 +3360,7 @@ fn add_static_crate(
         let mut archive = archive_builder_builder.new_archive_builder(sess);
         if let Err(error) = archive.add_archive(
             cratepath,
-            AddArchiveKind::Rlib(&|f, entry_kind| {
+            AddArchiveKind::Rlib(rmeta_link_cache, &|f, entry_kind| {
                 if f == METADATA_FILENAME || f == rmeta_link::FILENAME {
                     return true;
                 }

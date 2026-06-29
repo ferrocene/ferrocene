@@ -101,7 +101,6 @@ fn pre_expansion_lint<'a>(
                 lint_store,
                 registered_tools,
                 None,
-                rustc_lint::BuiltinCombinedPreExpansionLintPass::new(),
                 check_node,
             );
         },
@@ -479,7 +478,6 @@ fn early_lint_checks(tcx: TyCtxt<'_>, (): ()) {
         lint_store,
         tcx.registered_tools(()),
         Some(lint_buffer),
-        rustc_lint::BuiltinCombinedEarlyLintPass::new(),
         EarlyCheckNode::CrateRoot(&*krate, &*krate.attrs),
     )
 }
@@ -805,8 +803,8 @@ fn resolver_for_lowering_raw<'tcx>(
     );
     let krate = configure_and_expand(krate, &pre_configured_attrs, &mut resolver);
 
-    // Make sure we don't mutate the cstore from here on.
-    tcx.untracked().cstore.freeze();
+    // Don't mutate the cstore or stable crate id map from here on.
+    tcx.untracked().freeze_cstore();
 
     let ResolverOutputs {
         global_ctxt: untracked_resolutions,

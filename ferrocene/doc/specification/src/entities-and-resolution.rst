@@ -1111,7 +1111,7 @@ If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
 the :t:`visibility` of the :t:`name` is the most permissive one.
 
 :dp:`fls_RUiFQ17bmRLt`
-A :t:`simple import` with a single :t:`path segment` expressed as :t:`keyword` ``self`` shall be subject to a :t:`renaming`.
+When a :t:`path segment` expressed as :t:`keyword` ``self`` is used to import the current :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.
 
 :dp:`fls_sUhnfV62HJrb`
 A :t:`use import` with a single :t:`path segment` expressed as either :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` shall be subject to a :t:`renaming`.

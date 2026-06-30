@@ -575,46 +575,12 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
-<<<<<<< HEAD
       - ferrocene-git-shallow-clone:
           depth: 1
       # Darwin does not come with awscli, setup it before aws steps
-||||||| parent of f2b7a482f4f (Backport ferrocene/ferrocene#2399)
-      - when:
-          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
-          steps:
-            - ferrocene-git-shallow-clone:
-                depth: 1
-            # Darwin does not come with awscli, setup it before aws steps
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
-            - aws-oidc-auth
-            - ferrocene-setup-darwin
-            - setup-uv
-            - run:
-                name: Download dist artifacts and run the self-test tool
-                command: ferrocene/ci/scripts/run-self-test.sh
-=======
-      - when:
-          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
-          steps:
-            - ferrocene-git-shallow-clone:
-                depth: 1
-            # Darwin does not come with awscli, setup it before aws steps
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli -y
-            - aws-oidc-auth
-            - ferrocene-setup-darwin
-            - setup-uv
-            - run:
-                name: Download dist artifacts and run the self-test tool
-                command: ferrocene/ci/scripts/run-self-test.sh
->>>>>>> f2b7a482f4f (Backport ferrocene/ferrocene#2399)
       - run:
           name: Install AWSCLIv2
-          command: brew install awscli
+          command: brew install awscli -y
       - aws-oidc-auth
       - ferrocene-setup-darwin
       - setup-uv

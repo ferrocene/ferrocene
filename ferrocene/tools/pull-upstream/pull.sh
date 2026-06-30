@@ -422,7 +422,7 @@ ferrocene/ci/scripts/fix-stage0-branch.py || automation_warning "Could not fix s
 commit_if_modified src/stage0 "update src/stage0"
 
 echo "pull-upstream: trying to fix ferrocene/doc/symbol-report.csv"
-if ./x.py test ferrocene/doc/symbol-report.csv --bless --set rust.debug-assertions-std=true; then
+if ./x.py test ferrocene/doc/symbol-report.csv --stage 1 --bless --set rust.debug-assertions-std=true; then
     commit_if_modified ferrocene/doc/symbol-report.csv "update symbol report"
 else
     automation_warning "Couldn't regenerate the symbol report. Please run './x test ferrocene/doc/symbol-report.csv --bless' after fixing the conflicts."

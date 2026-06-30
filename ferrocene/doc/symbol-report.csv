@@ -8010,6 +8010,7 @@ core::option::Option::<T>::as_mut
 core::option::Option::<T>::as_ref
 core::option::Option::<T>::expect
 core::option::Option::<T>::filter
+core::option::Option::<T>::get_or_insert_with
 core::option::Option::<T>::insert
 core::option::Option::<T>::inspect
 core::option::Option::<T>::is_none

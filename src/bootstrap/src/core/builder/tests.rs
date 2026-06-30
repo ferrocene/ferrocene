@@ -1134,6 +1134,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1159,6 +1161,9 @@ mod snapshot {
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [doc] nomicon (book) <host>
@@ -1167,11 +1172,19 @@ mod snapshot {
         [doc] rust-by-example (book) <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
         [doc] cargo (book) <host>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
+        [doc] rustc 1 <host> -> Miri 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1241,6 +1254,9 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx.config("dist")
             .args(&[
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                "--set",
+                "build.compiler-docs=true",
                 "--set",
                 "build.extended=true",
                 "--set",
@@ -1294,6 +1310,9 @@ mod snapshot {
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [doc] nomicon (book) <host>
@@ -1302,11 +1321,19 @@ mod snapshot {
         [doc] rust-by-example (book) <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
         [doc] cargo (book) <host>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
+        [doc] rustc 1 <host> -> Miri 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1320,6 +1347,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .hosts(&[&host_target()])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
                 .render_steps(), @"
@@ -1358,6 +1387,9 @@ mod snapshot {
         [doc] book/2018-edition (book) <target1>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [doc] nomicon (book) <host>
@@ -1370,16 +1402,24 @@ mod snapshot {
         [doc] rust-by-example (book) <target1>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
         [doc] cargo (book) <host>
         [doc] cargo (book) <target1>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
         [doc] clippy (book) <target1>
+        [doc] rustc 1 <host> -> Miri 2 <host>
         [doc] embedded-book (book) <host>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <host>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1395,6 +1435,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target()])
                 .render_steps(), @"
@@ -1429,6 +1471,12 @@ mod snapshot {
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> rustc 2 <target1>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <target1>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [build] rustc 1 <host> -> error-index 2 <target1>
@@ -1440,11 +1488,27 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
         [doc] rustc (book) <target1>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
+        [doc] rustc 1 <host> -> Cargo 2 <target1>
         [doc] cargo (book) <host>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
+        [doc] rustc 1 <host> -> Clippy 2 <target1>
         [doc] clippy (book) <host>
+        [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Miri 2 <target1>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1459,6 +1523,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .hosts(&[&host_target(), TEST_TRIPLE_1])
                 .targets(&[&host_target(), TEST_TRIPLE_1])
                 .render_steps(), @"
@@ -1503,6 +1569,12 @@ mod snapshot {
         [doc] book/2018-edition (book) <target1>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> rustc 2 <target1>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <target1>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [build] rustc 1 <host> -> error-index 2 <target1>
@@ -1518,16 +1590,32 @@ mod snapshot {
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
         [doc] rustc (book) <target1>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
+        [doc] rustc 1 <host> -> Cargo 2 <target1>
         [doc] cargo (book) <host>
         [doc] cargo (book) <target1>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
+        [doc] rustc 1 <host> -> Clippy 2 <target1>
         [doc] clippy (book) <host>
         [doc] clippy (book) <target1>
+        [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Miri 2 <target1>
         [doc] embedded-book (book) <host>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <host>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1543,6 +1631,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .hosts(&[])
                 .targets(&[TEST_TRIPLE_1])
                 .render_steps(), @"
@@ -1569,7 +1659,10 @@ mod snapshot {
                 .config("dist")
                 .hosts(&[TEST_TRIPLE_1])
                 .targets(&[TEST_TRIPLE_1])
-                .args(&["--set", "rust.channel=nightly", "--set", "build.extended=true"])
+                .args(&[
+                    // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                    "--set", "build.compiler-docs=true",
+                    "--set", "rust.channel=nightly", "--set", "build.extended=true"])
                 .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1615,6 +1708,9 @@ mod snapshot {
         [doc] book/second-edition (book) <target1>
         [doc] book/2018-edition (book) <target1>
         [doc] rustc 1 <host> -> std 1 <target1> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <target1>
+        [doc] rustc 1 <host> -> Rustdoc 2 <target1>
+        [doc] rustc 1 <host> -> Rustfmt 2 <target1>
         [build] rustc 1 <host> -> error-index 2 <target1>
         [doc] rustc 1 <host> -> error-index 2 <target1>
         [doc] nomicon (book) <target1>
@@ -1623,11 +1719,19 @@ mod snapshot {
         [doc] rust-by-example (book) <target1>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <target1>
+        [doc] rustc 1 <host> -> Cargo 2 <target1>
         [doc] cargo (book) <target1>
+        [doc] rustc 1 <host> -> Clippy 2 <target1>
         [doc] clippy (book) <target1>
+        [doc] rustc 1 <host> -> Miri 2 <target1>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1649,6 +1753,9 @@ mod snapshot {
             .hosts(&[TEST_TRIPLE_1])
             .targets(&[TEST_TRIPLE_1])
             .args(&[
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                "--set",
+                "build.compiler-docs=true",
                 "--set",
                 "rust.channel=nightly",
                 "--set",
@@ -1713,7 +1820,10 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
-                .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
+                .args(&[
+                        // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                        "--set", "build.compiler-docs=true",
+                        "--set", "rust.codegen-backends=['llvm', 'cranelift']"])
                 .render_steps(), @"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
@@ -1742,6 +1852,9 @@ mod snapshot {
         [doc] book/second-edition (book) <host>
         [doc] book/2018-edition (book) <host>
         [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <host> -> rustc 2 <host>
+        [doc] rustc 1 <host> -> Rustdoc 2 <host>
+        [doc] rustc 1 <host> -> Rustfmt 2 <host>
         [build] rustc 1 <host> -> error-index 2 <host>
         [doc] rustc 1 <host> -> error-index 2 <host>
         [doc] nomicon (book) <host>
@@ -1750,11 +1863,19 @@ mod snapshot {
         [doc] rust-by-example (book) <host>
         [build] rustc 0 <host> -> LintDocs 1 <host>
         [doc] rustc (book) <host>
+        [doc] rustc 1 <host> -> Cargo 2 <host>
         [doc] cargo (book) <host>
+        [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
+        [doc] rustc 1 <host> -> Miri 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [doc] rustc 2 <host> -> std 2 <host> crates=[core]
@@ -1768,6 +1889,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .path("bootstrap")
                 .render_steps(), @r###"
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
@@ -1783,7 +1906,10 @@ mod snapshot {
                 .path("rust-std")
                 .stage(0)
                 .targets(&[TEST_TRIPLE_1])
-                .args(&["--set", "build.local-rebuild=true"])
+                .args(&[
+                    // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                    "--set", "build.compiler-docs=true",
+                    "--set", "build.local-rebuild=true"])
                 .render_steps(), @r###"
         [build] rustc 0 <host> -> std 0 <target1>
         [build] rustc 0 <host> -> FerroceneGenerateTarball 1 <host>
@@ -1798,6 +1924,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx
                 .config("dist")
+                // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                .args(&["--set", "build.compiler-docs=true"])
                 .path("rustc-docs")
                 .render_steps(), @r"
         [build] llvm <host>
@@ -2995,6 +3123,8 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx.config("install")
                 .args(&[
+                    // Ferrocene addition: We bundle the compiler docs, so we always need to build them
+                    "--set", "build.compiler-docs=true",
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.normalized_dir()),
                     "--set", &format!("install.bindir={}", ctx.normalized_dir()),
@@ -3049,6 +3179,9 @@ mod snapshot {
         [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
         [build] rustdoc 1 <x86_64-unknown-linux-gnu>
         [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Rustdoc 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Rustfmt 2 <x86_64-unknown-linux-gnu>
         [build] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
         [doc] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
         [doc] nomicon (book) <x86_64-unknown-linux-gnu>
@@ -3057,11 +3190,19 @@ mod snapshot {
         [doc] rust-by-example (book) <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> LintDocs 1 <x86_64-unknown-linux-gnu>
         [doc] rustc (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Cargo 2 <x86_64-unknown-linux-gnu>
         [doc] cargo (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Clippy 2 <x86_64-unknown-linux-gnu>
         [doc] clippy (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Miri 2 <x86_64-unknown-linux-gnu>
         [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
         [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
         [doc] style-guide (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Tidy 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Bootstrap 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> RunMakeSupport 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> BuildHelper 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Compiletest 2 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
         [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu> crates=[core]

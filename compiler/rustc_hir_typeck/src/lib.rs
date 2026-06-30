@@ -1,5 +1,5 @@
 // tidy-alphabetical-start
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![feature(iter_intersperse)]
 #![feature(iter_order_by)]
 #![feature(never_type)]
@@ -15,8 +15,8 @@ mod check;
 mod closure;
 mod coercion;
 mod demand;
+mod diagnostics;
 mod diverges;
-mod errors;
 mod expectation;
 mod expr;
 mod inline_asm;
@@ -50,7 +50,7 @@ use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
 use rustc_infer::traits::{ObligationCauseCode, ObligationInspector, WellFormedLoc};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::query::Providers;
-use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::ty::{self, Ty, TyCtxt, Unnormalized};
 use rustc_middle::{bug, span_bug};
 use rustc_session::config;
 use rustc_span::Span;
@@ -144,7 +144,7 @@ fn typeck_with_inspect<'tcx>(
             // a suggestion later on.
             fcx.lowerer().lower_fn_ty(id, header.safety(), header.abi, decl, None, None)
         } else {
-            tcx.fn_sig(def_id).instantiate_identity()
+            tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip()
         };
 
         check_abi(tcx, id, span, fn_sig.abi());
@@ -168,7 +168,7 @@ fn typeck_with_inspect<'tcx>(
                 .inputs_and_output
                 .iter()
                 .enumerate()
-                .map(|(idx, ty)| fcx.normalize(arg_span(idx), ty)),
+                .map(|(idx, ty)| fcx.normalize(arg_span(idx), Unnormalized::new_wip(ty))),
         );
 
         if tcx.codegen_fn_attrs(def_id).flags.contains(CodegenFnAttrFlags::NAKED) {
@@ -188,12 +188,12 @@ fn typeck_with_inspect<'tcx>(
             // a suggestion later on.
             fcx.lowerer().lower_ty(ty)
         } else {
-            tcx.type_of(def_id).instantiate_identity()
+            tcx.type_of(def_id).instantiate_identity().skip_norm_wip()
         };
 
         loops::check(tcx, def_id, body);
 
-        let expected_type = fcx.normalize(body.value.span, expected_type);
+        let expected_type = fcx.normalize(body.value.span, Unnormalized::new_wip(expected_type));
 
         let wf_code = ObligationCauseCode::WellFormed(Some(WellFormedLoc::Ty(def_id)));
         fcx.register_wf_obligation(expected_type.into(), body.value.span, wf_code);
@@ -244,7 +244,7 @@ fn typeck_with_inspect<'tcx>(
     assert!(fcx.deferred_call_resolutions.borrow().is_empty());
 
     for (ty, span, code) in fcx.deferred_sized_obligations.borrow_mut().drain(..) {
-        let ty = fcx.normalize(span, ty);
+        let ty = fcx.normalize(span, Unnormalized::new_wip(ty));
         fcx.require_type_is_sized(ty, span, code);
     }
 
@@ -286,9 +286,7 @@ fn extend_err_with_const_context(
 ) {
     match node {
         hir::Node::ImplItem(hir::ImplItem { kind: hir::ImplItemKind::Const(ty, _), .. })
-        | hir::Node::TraitItem(hir::TraitItem {
-            kind: hir::TraitItemKind::Const(ty, _, _), ..
-        }) => {
+        | hir::Node::TraitItem(hir::TraitItem { kind: hir::TraitItemKind::Const(ty, _), .. }) => {
             // Point at the `Type` in `const NAME: Type = value;`.
             err.span_label(ty.span, "expected because of the type of the associated constant");
         }
@@ -319,33 +317,11 @@ fn extend_err_with_const_context(
         // FIXME: support method calls too.
         hir::Node::AnonConst(anon)
             if let hir::Node::ConstArg(parent) = tcx.parent_hir_node(anon.hir_id)
-                && let hir::Node::Expr(expr) = tcx.parent_hir_node(parent.hir_id)
-                && let hir::ExprKind::Path(path) = expr.kind
+                && let Some(path) = tcx.parent_hir_node(parent.hir_id).path()
                 && let hir::QPath::Resolved(_, path) = path
                 && let Res::Def(_, def_id) = path.res =>
         {
-            // `foo<N>()` in expression context, point at `foo`'s const parameter.
-            if let Some(i) =
-                path.segments.iter().last().and_then(|segment| segment.args).and_then(|args| {
-                    args.args.iter().position(|arg| {
-                        matches!(arg, hir::GenericArg::Const(arg) if arg.hir_id == parent.hir_id)
-                    })
-                })
-            {
-                let generics = tcx.generics_of(def_id);
-                let param = &generics.param_at(i, tcx);
-                let sp = tcx.def_span(param.def_id);
-                err.span_note(sp, "expected because of the type of the const parameter");
-            }
-        }
-        hir::Node::AnonConst(anon)
-            if let hir::Node::ConstArg(parent) = tcx.parent_hir_node(anon.hir_id)
-                && let hir::Node::Ty(ty) = tcx.parent_hir_node(parent.hir_id)
-                && let hir::TyKind::Path(path) = ty.kind
-                && let hir::QPath::Resolved(_, path) = path
-                && let Res::Def(_, def_id) = path.res =>
-        {
-            // `Foo<N>` in type context, point at `Foo`'s const parameter.
+            // `foo<N>()`, point at the const parameter in the definition of `foo`.
             if let Some(i) =
                 path.segments.iter().last().and_then(|segment| segment.args).and_then(|args| {
                     args.args.iter().position(|arg| {
@@ -408,14 +384,15 @@ fn infer_type_if_missing<'tcx>(fcx: &FnCtxt<'_, 'tcx>, node: Node<'tcx>) -> Opti
             && let ty::AssocContainer::TraitImpl(Ok(trait_item_def_id)) = item.container
         {
             let impl_def_id = item.container_id(tcx);
-            let impl_trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate_identity();
+            let impl_trait_ref =
+                tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_norm_wip();
             let args = ty::GenericArgs::identity_for_item(tcx, def_id).rebase_onto(
                 tcx,
                 impl_def_id,
                 impl_trait_ref.args,
             );
             tcx.check_args_compatible(trait_item_def_id, args)
-                .then(|| tcx.type_of(trait_item_def_id).instantiate(tcx, args))
+                .then(|| tcx.type_of(trait_item_def_id).instantiate(tcx, args).skip_norm_wip())
         } else {
             Some(fcx.next_ty_var(span))
         }

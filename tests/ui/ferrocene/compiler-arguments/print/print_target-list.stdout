@@ -99,6 +99,7 @@ armv7a-nuttx-eabi
 armv7a-nuttx-eabihf
 armv7a-vex-v5
 armv7k-apple-watchos
+armv7r-ferrocene.facade-eabihf
 armv7r-none-eabi
 armv7r-none-eabihf
 armv7s-apple-ios
@@ -182,6 +183,7 @@ powerpc-wrs-vxworks-spe
 powerpc64-ibm-aix
 powerpc64-unknown-freebsd
 powerpc64-unknown-linux-gnu
+powerpc64-unknown-linux-gnuelfv2
 powerpc64-unknown-linux-musl
 powerpc64-unknown-openbsd
 powerpc64-wrs-vxworks

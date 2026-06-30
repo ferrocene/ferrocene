@@ -5,7 +5,7 @@ use std::{fmt, iter};
 use rustc_abi::{Float, Integer, IntegerType, Size};
 use rustc_apfloat::Float as _;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
-use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+use rustc_data_structures::stable_hash::{StableHash, StableHasher};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::ErrorGuaranteed;
 use rustc_hashes::Hash128;
@@ -14,7 +14,7 @@ use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::limit::Limit;
 use rustc_hir::{self as hir, find_attr};
 use rustc_index::bit_set::GrowableBitSet;
-use rustc_macros::{HashStable, TyDecodable, TyEncodable, extension};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable, extension};
 use rustc_span::sym;
 use rustc_type_ir::solve::SizedTraitKind;
 use smallvec::{SmallVec, smallvec};
@@ -28,7 +28,7 @@ use crate::traits::ObligationCause;
 use crate::ty::layout::{FloatExt, IntegerExt};
 use crate::ty::{
     self, Asyncness, FallibleTypeFolder, GenericArgKind, GenericArgsRef, Ty, TyCtxt, TypeFoldable,
-    TypeFolder, TypeSuperFoldable, TypeVisitableExt, Upcast,
+    TypeFolder, TypeSuperFoldable, TypeVisitableExt, Unnormalized, Upcast,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -138,7 +138,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         self.with_stable_hashing_context(|mut hcx| {
             let mut hasher = StableHasher::new();
-            hcx.while_hashing_spans(false, |hcx| ty.hash_stable(hcx, &mut hasher));
+            hcx.while_hashing_spans(false, |hcx| ty.stable_hash(hcx, &mut hasher));
             hasher.finish()
         })
     }
@@ -216,11 +216,11 @@ impl<'tcx> TyCtxt<'tcx> {
         ty: Ty<'tcx>,
         typing_env: ty::TypingEnv<'tcx>,
     ) -> Ty<'tcx> {
-        let tcx = self;
-        tcx.struct_tail_raw(
+        self.assert_fully_normalized(typing_env, ty);
+        self.struct_tail_raw(
             ty,
             &ObligationCause::dummy(),
-            |ty| tcx.normalize_erasing_regions(typing_env, ty),
+            |ty| self.normalize_erasing_regions(typing_env, ty),
             || {},
         )
     }
@@ -255,7 +255,7 @@ impl<'tcx> TyCtxt<'tcx> {
         self,
         mut ty: Ty<'tcx>,
         cause: &ObligationCause<'tcx>,
-        mut normalize: impl FnMut(Ty<'tcx>) -> Ty<'tcx>,
+        mut normalize: impl FnMut(Unnormalized<'tcx, Ty<'tcx>>) -> Ty<'tcx>,
         // This is currently used to allow us to walk a ValTree
         // in lockstep with the type in order to get the ValTree branch that
         // corresponds to an unsized field.
@@ -283,7 +283,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     match def.non_enum_variant().tail_opt() {
                         Some(field) => {
                             f();
-                            ty = field.ty(self, args);
+                            ty = normalize(field.ty(self, args));
                         }
                         None => break,
                     }
@@ -299,15 +299,6 @@ impl<'tcx> TyCtxt<'tcx> {
                 ty::Pat(inner, _) => {
                     f();
                     ty = inner;
-                }
-
-                ty::Alias(..) => {
-                    let normalized = normalize(ty);
-                    if ty == normalized {
-                        return ty;
-                    } else {
-                        ty = normalized;
-                    }
                 }
 
                 _ => {
@@ -333,9 +324,9 @@ impl<'tcx> TyCtxt<'tcx> {
         target: Ty<'tcx>,
         typing_env: ty::TypingEnv<'tcx>,
     ) -> (Ty<'tcx>, Ty<'tcx>) {
-        let tcx = self;
-        tcx.struct_lockstep_tails_raw(source, target, |ty| {
-            tcx.normalize_erasing_regions(typing_env, ty)
+        self.assert_fully_normalized(typing_env, (source, target));
+        self.struct_lockstep_tails_raw(source, target, |ty| {
+            self.normalize_erasing_regions(typing_env, ty)
         })
     }
 
@@ -351,7 +342,7 @@ impl<'tcx> TyCtxt<'tcx> {
         self,
         source: Ty<'tcx>,
         target: Ty<'tcx>,
-        normalize: impl Fn(Ty<'tcx>) -> Ty<'tcx>,
+        normalize: impl Fn(Unnormalized<'tcx, Ty<'tcx>>) -> Ty<'tcx>,
     ) -> (Ty<'tcx>, Ty<'tcx>) {
         let (mut a, mut b) = (source, target);
         loop {
@@ -360,8 +351,8 @@ impl<'tcx> TyCtxt<'tcx> {
                     if a_def == b_def && a_def.is_struct() =>
                 {
                     if let Some(f) = a_def.non_enum_variant().tail_opt() {
-                        a = f.ty(self, a_args);
-                        b = f.ty(self, b_args);
+                        a = normalize(f.ty(self, a_args));
+                        b = normalize(f.ty(self, b_args));
                     } else {
                         break;
                     }
@@ -372,20 +363,6 @@ impl<'tcx> TyCtxt<'tcx> {
                         b = *b_tys.last().unwrap();
                     } else {
                         break;
-                    }
-                }
-                (ty::Alias(..), _) | (_, ty::Alias(..)) => {
-                    // If either side is a projection, attempt to
-                    // progress via normalization. (Should be safe to
-                    // apply to both sides as normalization is
-                    // idempotent.)
-                    let a_norm = normalize(a);
-                    let b_norm = normalize(b);
-                    if a == a_norm && b == b_norm {
-                        break;
-                    } else {
-                        a = a_norm;
-                        b = b_norm;
                     }
                 }
 
@@ -517,10 +494,14 @@ impl<'tcx> TyCtxt<'tcx> {
         // <P1, P2, P0>, and then look up which of the impl args refer to
         // parameters marked as pure.
 
-        let impl_args = match *self.type_of(impl_def_id).instantiate_identity().kind() {
-            ty::Adt(def_, args) if def_ == def => args,
-            _ => span_bug!(self.def_span(impl_def_id), "expected ADT for self type of `Drop` impl"),
-        };
+        let impl_args =
+            match *self.type_of(impl_def_id).instantiate_identity().skip_norm_wip().kind() {
+                ty::Adt(def_, args) if def_ == def => args,
+                _ => span_bug!(
+                    self.def_span(impl_def_id),
+                    "expected ADT for self type of `Drop` impl"
+                ),
+            };
 
         let item_args = ty::GenericArgs::identity_for_item(self, def.did());
 
@@ -724,7 +705,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Returns the type a reference to the thread local takes in MIR.
     pub fn thread_local_ptr_ty(self, def_id: DefId) -> Ty<'tcx> {
-        let static_ty = self.type_of(def_id).instantiate_identity();
+        let static_ty = self.type_of(def_id).instantiate_identity().skip_norm_wip();
         if self.is_mutable_static(def_id) {
             Ty::new_mut_ptr(self, static_ty)
         } else if self.is_foreign_item(def_id) {
@@ -924,7 +905,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 return Ty::new_error(self, guar);
             }
 
-            ty = self.type_of(def_id).instantiate(self, args);
+            ty = self.type_of(def_id).instantiate(self, args).skip_normalization();
             depth += 1;
         }
 
@@ -935,24 +916,23 @@ impl<'tcx> TyCtxt<'tcx> {
     // its (un)captured regions.
     pub fn opt_alias_variances(
         self,
-        kind: impl Into<ty::AliasTermKind>,
-        def_id: DefId,
+        kind: impl Into<ty::AliasTermKind<'tcx>>,
     ) -> Option<&'tcx [ty::Variance]> {
         match kind.into() {
-            ty::AliasTermKind::ProjectionTy => {
+            ty::AliasTermKind::ProjectionTy { def_id } => {
                 if self.is_impl_trait_in_trait(def_id) {
                     Some(self.variances_of(def_id))
                 } else {
                     None
                 }
             }
-            ty::AliasTermKind::OpaqueTy => Some(self.variances_of(def_id)),
-            ty::AliasTermKind::InherentTy
-            | ty::AliasTermKind::InherentConst
-            | ty::AliasTermKind::FreeTy
-            | ty::AliasTermKind::FreeConst
-            | ty::AliasTermKind::UnevaluatedConst
-            | ty::AliasTermKind::ProjectionConst => None,
+            ty::AliasTermKind::OpaqueTy { def_id } => Some(self.variances_of(def_id)),
+            ty::AliasTermKind::InherentTy { .. }
+            | ty::AliasTermKind::InherentConst { .. }
+            | ty::AliasTermKind::FreeTy { .. }
+            | ty::AliasTermKind::FreeConst { .. }
+            | ty::AliasTermKind::AnonConst { .. }
+            | ty::AliasTermKind::ProjectionConst { .. } => None,
         }
     }
 }
@@ -987,7 +967,7 @@ impl<'tcx> OpaqueTypeExpander<'tcx> {
                 Some(expanded_ty) => *expanded_ty,
                 None => {
                     let generic_ty = self.tcx.type_of(def_id);
-                    let concrete_ty = generic_ty.instantiate(self.tcx, args);
+                    let concrete_ty = generic_ty.instantiate(self.tcx, args).skip_normalization();
                     let expanded_ty = self.fold_ty(concrete_ty);
                     self.expanded_cache.insert((def_id, args), expanded_ty);
                     expanded_ty
@@ -1067,7 +1047,11 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for FreeAliasTypeExpander<'tcx> {
 
         self.depth += 1;
         let ty = ensure_sufficient_stack(|| {
-            self.tcx.type_of(def_id).instantiate(self.tcx, args).fold_with(self)
+            self.tcx
+                .type_of(def_id)
+                .instantiate(self.tcx, args)
+                .skip_normalization()
+                .fold_with(self)
         });
         self.depth -= 1;
         ty
@@ -1331,7 +1315,7 @@ impl<'tcx> Ty<'tcx> {
                 // query keys used. If normalization fails, we just use `query_ty`.
                 debug_assert!(!typing_env.param_env.has_infer());
                 let query_ty = tcx
-                    .try_normalize_erasing_regions(typing_env, query_ty)
+                    .try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(query_ty))
                     .unwrap_or_else(|_| tcx.erase_and_anonymize_regions(query_ty));
 
                 tcx.needs_drop_raw(typing_env.as_query_input(query_ty))
@@ -1368,7 +1352,7 @@ impl<'tcx> Ty<'tcx> {
                 // If normalization fails, we just use `query_ty`.
                 debug_assert!(!typing_env.has_infer());
                 let query_ty = tcx
-                    .try_normalize_erasing_regions(typing_env, query_ty)
+                    .try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(query_ty))
                     .unwrap_or_else(|_| tcx.erase_and_anonymize_regions(query_ty));
 
                 tcx.needs_async_drop_raw(typing_env.as_query_input(query_ty))
@@ -1411,7 +1395,7 @@ impl<'tcx> Ty<'tcx> {
                 // This doesn't depend on regions, so try to minimize distinct
                 // query keys used.
                 // FIX: Use try_normalize to avoid crashing. If it fails, return true.
-                tcx.try_normalize_erasing_regions(typing_env, query_ty)
+                tcx.try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(query_ty))
                     .map(|erased| tcx.has_significant_drop_raw(typing_env.as_query_input(erased)))
                     .unwrap_or(true)
             }
@@ -1490,12 +1474,6 @@ impl<'tcx> Ty<'tcx> {
             ty = *inner_ty;
         }
         ty
-    }
-
-    // FIXME(compiler-errors): Think about removing this.
-    #[inline]
-    pub fn outer_exclusive_binder(self) -> ty::DebruijnIndex {
-        self.0.outer_exclusive_binder
     }
 }
 
@@ -1660,7 +1638,7 @@ where
     }
 }
 
-#[derive(Copy, Clone, Debug, HashStable, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, StableHash, TyEncodable, TyDecodable)]
 pub struct AlwaysRequiresDrop;
 
 /// Reveals all opaque types in the given value, replacing them

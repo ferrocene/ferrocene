@@ -1,12 +1,13 @@
 //! Helper functions for working with def, which don't need to be a separate
 //! query, but can't be computed directly from `*Data` (ie, which need a `db`).
 
+use std::iter::Enumerate;
+
 use base_db::target::{self, TargetData};
 use hir_def::{
-    EnumId, EnumVariantId, FunctionId, Lookup, TraitId, attrs::AttrFlags, lang_item::LangItems,
+    EnumId, EnumVariantId, FunctionId, Lookup, TraitId, lang_item::LangItems,
     signatures::FunctionSignature,
 };
-use intern::sym;
 use rustc_abi::TargetDataLayout;
 use span::Edition;
 
@@ -103,21 +104,10 @@ pub fn is_fn_unsafe_to_call(
 
     let loc = func.lookup(db);
     match loc.container {
-        hir_def::ItemContainerId::ExternBlockId(block) => {
-            let is_intrinsic_block = block.abi(db) == Some(sym::rust_dash_intrinsic);
-            if is_intrinsic_block {
-                // legacy intrinsics
-                // extern "rust-intrinsic" intrinsics are unsafe unless they have the rustc_safe_intrinsic attribute
-                if AttrFlags::query(db, func.into()).contains(AttrFlags::RUSTC_SAFE_INTRINSIC) {
-                    Unsafety::Safe
-                } else {
-                    Unsafety::Unsafe
-                }
-            } else {
-                // Function in an `extern` block are always unsafe to call, except when
-                // it is marked as `safe`.
-                if data.is_safe() { Unsafety::Safe } else { Unsafety::Unsafe }
-            }
+        hir_def::ItemContainerId::ExternBlockId(_) => {
+            // Function in an `extern` block are always unsafe to call, except when
+            // it is marked as `safe`.
+            if data.is_safe() { Unsafety::Safe } else { Unsafety::Unsafe }
         }
         _ => Unsafety::Safe,
     }
@@ -162,4 +152,55 @@ pub(crate) fn detect_variant_from_bytes<'a>(
         }
     };
     Some((var_id, var_layout))
+}
+
+pub(crate) struct EnumerateAndAdjust<I> {
+    enumerate: Enumerate<I>,
+    gap_pos: usize,
+    gap_len: usize,
+}
+
+impl<I> Iterator for EnumerateAndAdjust<I>
+where
+    I: Iterator,
+{
+    type Item = (usize, <I as Iterator>::Item);
+
+    fn next(&mut self) -> Option<(usize, <I as Iterator>::Item)> {
+        self.enumerate
+            .next()
+            .map(|(i, elem)| (if i < self.gap_pos { i } else { i + self.gap_len }, elem))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.enumerate.size_hint()
+    }
+}
+
+pub(crate) trait EnumerateAndAdjustIterator {
+    fn enumerate_and_adjust(
+        self,
+        expected_len: usize,
+        gap_pos: Option<u32>,
+    ) -> EnumerateAndAdjust<Self>
+    where
+        Self: Sized;
+}
+
+impl<T: ExactSizeIterator> EnumerateAndAdjustIterator for T {
+    fn enumerate_and_adjust(
+        self,
+        expected_len: usize,
+        gap_pos: Option<u32>,
+    ) -> EnumerateAndAdjust<Self>
+    where
+        Self: Sized,
+    {
+        let actual_len = self.len();
+        EnumerateAndAdjust {
+            enumerate: self.enumerate(),
+            gap_pos: gap_pos.map(|it| it as usize).unwrap_or(expected_len),
+            gap_len: expected_len - actual_len,
+        }
+    }
 }

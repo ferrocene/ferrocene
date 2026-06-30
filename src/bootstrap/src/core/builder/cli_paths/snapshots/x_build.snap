@@ -1,6 +1,5 @@
 ---
 source: src/bootstrap/src/core/builder/cli_paths/tests.rs
-assertion_line: 68
 expression: build
 ---
 [Build] compile::Std
@@ -20,8 +19,7 @@ expression: build
     - Set({build::library/unwind})
 [Build] tool::Rustdoc
     targets: [x86_64-unknown-linux-gnu]
-    - Set({build::src/librustdoc})
-    - Set({build::src/tools/rustdoc})
+    - Set({build::src/librustdoc, build::src/tools/rustdoc})
 [Build] bootstrap::ferrocene::tool::SelfTest
     targets: [x86_64-unknown-linux-gnu]
     - Set({build::ferrocene/tools/self-test})
@@ -32,5 +30,5 @@ expression: build
     targets: [x86_64-unknown-linux-gnu]
     - Set({build::ferrocene/tools/blanket})
 [Build] bootstrap::ferrocene::tool::flip_link::FlipLink
-    targets: [x86_64-unknown-linux-gnu]
+    targets: [aarch64-unknown-linux-gnu]
     - Set({build::ferrocene/tools/flip-link})

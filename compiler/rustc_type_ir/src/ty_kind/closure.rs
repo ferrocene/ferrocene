@@ -9,7 +9,7 @@ use crate::data_structures::DelayedMap;
 use crate::fold::{TypeFoldable, TypeFolder, TypeSuperFoldable, shift_region};
 use crate::inherent::*;
 use crate::visit::{TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use crate::{self as ty, Interner};
+use crate::{self as ty, FnSigKind, Interner};
 
 /// A closure can be modeled as a struct that looks like:
 /// ```ignore (illustrative)
@@ -307,9 +307,7 @@ impl<I: Interner> CoroutineClosureArgs<I> {
                 resume_ty,
                 yield_ty,
                 return_ty,
-                c_variadic: hdr.c_variadic,
-                safety: hdr.safety,
-                abi: hdr.abi,
+                fn_sig_kind: hdr.fn_sig_kind,
             }
         })
     }
@@ -366,16 +364,10 @@ pub struct CoroutineClosureSignature<I: Interner> {
     // Like the `fn_sig_as_fn_ptr_ty` of a regular closure, these types
     // never actually differ. But we save them rather than recreating them
     // from scratch just for good measure.
-    /// Always false
-    pub c_variadic: bool,
-    /// Always `Normal` (safe)
+    /// Always safe, RustCall, non-c-variadic
     #[type_visitable(ignore)]
     #[type_foldable(identity)]
-    pub safety: I::Safety,
-    /// Always `RustCall`
-    #[type_visitable(ignore)]
-    #[type_foldable(identity)]
-    pub abi: I::Abi,
+    pub fn_sig_kind: FnSigKind<I>,
 }
 
 impl<I: Interner> Eq for CoroutineClosureSignature<I> {}
@@ -462,6 +454,15 @@ impl<I: Interner> CoroutineClosureSignature<I> {
         coroutine_captures_by_ref_ty: I::Ty,
         env_region: I::Region,
     ) -> I::Ty {
+        // If either of the tupled capture types are constrained to error
+        // (e.g. during typeck when the infcx is tainted), then just return
+        // the error type directly.
+        if let ty::Error(_) = tupled_inputs_ty.kind() {
+            return tupled_inputs_ty;
+        } else if let ty::Error(_) = coroutine_captures_by_ref_ty.kind() {
+            return coroutine_captures_by_ref_ty;
+        }
+
         match kind {
             ty::ClosureKind::Fn | ty::ClosureKind::FnMut => {
                 let ty::FnPtr(sig_tys, _) = coroutine_captures_by_ref_ty.kind() else {

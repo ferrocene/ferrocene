@@ -1,11 +1,13 @@
 // This is marked as `test = true` and hence picked up by `./x miri`, but that would be too slow.
 #![cfg(not(miri))]
+#![allow(internal_features)]
 #![feature(iter_next_chunk)]
 #![feature(repr_simd)]
 #![feature(slice_partition_dedup)]
 #![feature(strict_provenance_lints)]
 #![feature(test)]
 #![deny(fuzzy_provenance_casts)]
+#![deny(lossy_provenance_casts)]
 
 extern crate test;
 

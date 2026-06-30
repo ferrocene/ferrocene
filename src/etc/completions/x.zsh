@@ -38,8 +38,10 @@ _x() {
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -91,8 +93,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--timings[Pass \`--timings\` to Cargo to get crate build timings]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -136,8 +140,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--timings[Pass \`--timings\` to Cargo to get crate build timings]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -182,8 +188,10 @@ _arguments "${_arguments_options[@]}" : \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--all-targets[Check all targets]' \
 '--timings[Pass \`--timings\` to Cargo to get crate build timings]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -228,8 +236,10 @@ _arguments "${_arguments_options[@]}" : \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--all-targets[Check all targets]' \
 '--timings[Pass \`--timings\` to Cargo to get crate build timings]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -279,8 +289,10 @@ _arguments "${_arguments_options[@]}" : \
 '--fix[]' \
 '--allow-dirty[]' \
 '--allow-staged[]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -323,8 +335,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -369,8 +383,10 @@ _arguments "${_arguments_options[@]}" : \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--check[check formatting instead of applying]' \
 '--all[apply to all appropriate files, not just those that have been modified]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -417,8 +433,10 @@ _arguments "${_arguments_options[@]}" : \
 '--serve[start a live-relodaing web server]' \
 '--debug-sphinx[allow easier debugging of Sphinx extensions]' \
 '--json[render the documentation in JSON format in addition to the usual HTML format]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -465,8 +483,10 @@ _arguments "${_arguments_options[@]}" : \
 '--serve[start a live-relodaing web server]' \
 '--debug-sphinx[allow easier debugging of Sphinx extensions]' \
 '--json[render the documentation in JSON format in addition to the usual HTML format]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -495,7 +515,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
-'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-cortex-r5f 2021-specific-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \
@@ -531,8 +551,12 @@ _arguments "${_arguments_options[@]}" : \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
 '--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'--record[Record all the failed tests in a file in the build directory]' \
+'--rerun[Rerun tests that previously failed, and stored with \`--record\`]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -561,7 +585,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose-run-make-subprocess-output=[whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)]' \
 '--test-codegen-backend=[Use a different codegen backend when running tests]:TEST_CODEGEN_BACKEND:_default' \
 '--coverage=[generate coverage for tests]:COVERAGE:(library)' \
-'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-specific-cortex-m4)' \
+'--test-variant=[Choose the test variant to use for this execution]:TEST_VARIANT:(2021 2021-cortex-a53 2021-specific-cortex-a53 2021-neoverse-v1 2021-cortex-m4 2021-cortex-r5f 2021-specific-cortex-m4)' \
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`bootstrap.toml\`]:DIR:_files -/' \
 '--build=[host target of the stage0 compiler]:BUILD:' \
@@ -597,8 +621,12 @@ _arguments "${_arguments_options[@]}" : \
 '--bypass-ignore-backends[Ignore \`//@ ignore-backends\` directives]' \
 '--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'--record[Record all the failed tests in a file in the build directory]' \
+'--rerun[Rerun tests that previously failed, and stored with \`--record\`]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -647,8 +675,10 @@ _arguments "${_arguments_options[@]}" : \
 '--doc[Only run doc tests]' \
 '--tests[Only run unit and integration tests]' \
 '--no-doc[Deprecated. Use \`--all-targets\` or \`--tests\` instead]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -692,8 +722,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -737,8 +769,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--all[Clean the entire build directory (not used by default)]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -781,8 +815,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -825,8 +861,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -871,8 +909,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--bless[update all files of failing tests]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -917,8 +957,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--bless[update all files of failing tests]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -961,8 +1003,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1008,8 +1052,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--versioned-dirs[Always include version in subdir name]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1052,8 +1098,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1108,8 +1156,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1155,8 +1205,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1202,8 +1254,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1249,8 +1303,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1294,8 +1350,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT:_default' \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \
@@ -1345,8 +1403,10 @@ _arguments "${_arguments_options[@]}" : \
 '*--set=[override options in bootstrap.toml]:section.option=value:' \
 '--ci=[Make bootstrap to behave as it'\''s running on the CI environment or not]:bool:(true false)' \
 '--force[Force re-signing the document even if its latest version is signed]' \
-'*-v[use verbose output (-vv for very verbose)]' \
-'*--verbose[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*-v[use verbose output (-vv for very verbose)]' \
+'(-q --quiet)*--verbose[use verbose output (-vv for very verbose)]' \
+'(-v --verbose)-q[use quiet output]' \
+'(-v --verbose)--quiet[use quiet output]' \
 '-i[use incremental compilation]' \
 '--incremental[use incremental compilation]' \
 '--include-default-paths[include default paths in addition to the provided ones]' \

@@ -7,6 +7,7 @@ pub(crate) mod doc;
 pub(crate) mod install;
 pub(crate) mod partners;
 pub(crate) mod run;
+pub(crate) mod scan_build_tree;
 pub(crate) mod secret_sauce;
 pub(crate) mod sign;
 pub(crate) mod test;

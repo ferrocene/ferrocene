@@ -1,11 +1,10 @@
 use std::ops::Not;
 
-use rustc_abi::ExternAbi;
 use rustc_hir as hir;
 use rustc_hir::{Node, find_attr};
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::span_bug;
-use rustc_middle::ty::{self, TyCtxt, TypingMode};
+use rustc_middle::ty::{self, TyCtxt, TypingMode, Unnormalized};
 use rustc_session::config::EntryFnType;
 use rustc_span::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_span::{ErrorGuaranteed, Span};
@@ -14,7 +13,7 @@ use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::{self, ObligationCause, ObligationCauseCode};
 
 use super::check_function_signature;
-use crate::errors;
+use crate::diagnostics;
 
 pub(crate) fn check_for_entry_fn(tcx: TyCtxt<'_>) -> Result<(), ErrorGuaranteed> {
     match tcx.entry_fn(()) {
@@ -24,12 +23,12 @@ pub(crate) fn check_for_entry_fn(tcx: TyCtxt<'_>) -> Result<(), ErrorGuaranteed>
 }
 
 fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuaranteed> {
-    let main_fnsig = tcx.fn_sig(main_def_id).instantiate_identity();
+    let main_fnsig = tcx.fn_sig(main_def_id).instantiate_identity().skip_norm_wip();
     let main_span = tcx.def_span(main_def_id);
 
     fn main_fn_diagnostics_def_id(tcx: TyCtxt<'_>, def_id: DefId, sp: Span) -> LocalDefId {
         if let Some(local_def_id) = def_id.as_local() {
-            let hir_type = tcx.type_of(local_def_id).instantiate_identity();
+            let hir_type = tcx.type_of(local_def_id).instantiate_identity().skip_norm_wip();
             if !matches!(hir_type.kind(), ty::FnDef(..)) {
                 span_bug!(sp, "main has a non-function type: found `{}`", hir_type);
             }
@@ -93,15 +92,16 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
     let main_asyncness = tcx.asyncness(main_def_id);
     if main_asyncness.is_async() {
         let asyncness_span = main_fn_asyncness_span(tcx, main_def_id);
-        return Err(tcx
-            .dcx()
-            .emit_err(errors::MainFunctionAsync { span: main_span, asyncness: asyncness_span }));
+        return Err(tcx.dcx().emit_err(diagnostics::MainFunctionAsync {
+            span: main_span,
+            asyncness: asyncness_span,
+        }));
     }
 
     if let Some(attr_span) = find_attr!(tcx, main_def_id, TrackCaller(span) => *span) {
         return Err(tcx
             .dcx()
-            .emit_err(errors::TrackCallerOnMain { span: attr_span, annotated: main_span }));
+            .emit_err(diagnostics::TrackCallerOnMain { span: attr_span, annotated: main_span }));
     }
 
     if !tcx.codegen_fn_attrs(main_def_id).target_features.is_empty()
@@ -109,7 +109,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
         && !tcx.sess.target.is_like_wasm
         && !tcx.sess.opts.actually_rustdoc
     {
-        return Err(tcx.dcx().emit_err(errors::TargetFeatureOnMain { main: main_span }));
+        return Err(tcx.dcx().emit_err(diagnostics::TargetFeatureOnMain { main: main_span }));
     }
 
     // Main should have no WC, so empty param env is OK here.
@@ -121,7 +121,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
         let Some(return_ty) = return_ty.no_bound_vars() else {
             return Err(tcx
                 .dcx()
-                .emit_err(errors::MainFunctionReturnTypeGeneric { span: return_ty_span }));
+                .emit_err(diagnostics::MainFunctionReturnTypeGeneric { span: return_ty_span }));
         };
         let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let cause = traits::ObligationCause::new(
@@ -130,7 +130,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
             ObligationCauseCode::MainFunctionType,
         );
         let ocx = traits::ObligationCtxt::new_with_diagnostics(&infcx);
-        let norm_return_ty = ocx.normalize(&cause, param_env, return_ty);
+        let norm_return_ty = ocx.normalize(&cause, param_env, Unnormalized::new_wip(return_ty));
         ocx.register_bound(cause, param_env, norm_return_ty, term_did);
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
         if !errors.is_empty() {
@@ -152,13 +152,7 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
         expected_return_type = tcx.types.unit;
     }
 
-    let expected_sig = ty::Binder::dummy(tcx.mk_fn_sig(
-        [],
-        expected_return_type,
-        false,
-        hir::Safety::Safe,
-        ExternAbi::Rust,
-    ));
+    let expected_sig = ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi([], expected_return_type));
 
     check_function_signature(
         tcx,
@@ -175,14 +169,14 @@ fn check_main_fn_ty(tcx: TyCtxt<'_>, main_def_id: DefId) -> Result<(), ErrorGuar
     let main_fn_predicates = tcx.predicates_of(main_def_id);
     if main_fn_generics.count() != 0 || !main_fnsig.bound_vars().is_empty() {
         let generics_param_span = main_fn_generics_params_span(tcx, main_def_id);
-        return Err(tcx.dcx().emit_err(errors::MainFunctionGenericParameters {
+        return Err(tcx.dcx().emit_err(diagnostics::MainFunctionGenericParameters {
             span: generics_param_span.unwrap_or(main_span),
             label_span: generics_param_span,
         }));
     } else if !main_fn_predicates.predicates.is_empty() {
         // generics may bring in implicit predicates, so we skip this check if generics is present.
         let generics_where_clauses_span = main_fn_where_clauses_span(tcx, main_def_id);
-        return Err(tcx.dcx().emit_err(errors::WhereClauseOnMain {
+        return Err(tcx.dcx().emit_err(diagnostics::WhereClauseOnMain {
             span: generics_where_clauses_span.unwrap_or(main_span),
             generics_span: generics_where_clauses_span,
         }));

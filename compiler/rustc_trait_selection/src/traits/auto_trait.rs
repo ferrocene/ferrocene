@@ -9,10 +9,11 @@ use rustc_data_structures::unord::UnordSet;
 use rustc_hir::def_id::CRATE_DEF_ID;
 use rustc_infer::infer::DefineOpaqueTypes;
 use rustc_middle::ty::{Region, RegionVid};
+use rustc_span::DUMMY_SP;
 use tracing::debug;
 
 use super::*;
-use crate::errors::UnableToConstructConstantValue;
+use crate::diagnostics::UnableToConstructConstantValue;
 use crate::infer::TypeFreshener;
 use crate::infer::region_constraints::{ConstraintKind, RegionConstraintData};
 use crate::regions::OutlivesEnvironmentBuildExt;
@@ -162,7 +163,8 @@ impl<'tcx> AutoTraitFinder<'tcx> {
         }
 
         let outlives_env = OutlivesEnvironment::new(&infcx, CRATE_DEF_ID, full_env, []);
-        let _ = infcx.process_registered_region_obligations(&outlives_env, |ty, _| Ok(ty));
+        let _ =
+            infcx.process_registered_region_obligations(&outlives_env, |ty, _| Ok(ty), DUMMY_SP);
 
         let region_data = infcx.inner.borrow_mut().unwrap_region_constraints().data().clone();
 
@@ -453,7 +455,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
         let mut vid_map = FxIndexMap::<RegionTarget<'cx>, RegionDeps<'cx>>::default();
         let mut finished_map = FxIndexMap::default();
 
-        for (c, _) in &regions.constraints {
+        for c in regions.constraints.iter().flat_map(|(c, _)| c.iter_outlives()) {
             match c.kind {
                 ConstraintKind::VarSubVar => {
                     let sub_vid = c.sub.as_var();
@@ -488,6 +490,10 @@ impl<'tcx> AutoTraitFinder<'tcx> {
 
                     let deps2 = vid_map.entry(RegionTarget::Region(c.sup)).or_default();
                     deps2.smaller.insert(RegionTarget::Region(c.sub));
+                }
+
+                ConstraintKind::VarEqVar | ConstraintKind::VarEqReg | ConstraintKind::RegEqReg => {
+                    unreachable!()
                 }
             }
         }
@@ -555,7 +561,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
 
     fn is_self_referential_projection(&self, p: ty::PolyProjectionPredicate<'tcx>) -> bool {
         if let Some(ty) = p.term().skip_binder().as_type() {
-            matches!(ty.kind(), ty::Alias(proj @ ty::AliasTy { kind: ty::Projection { .. }, .. }) if proj == &p.skip_binder().projection_term.expect_ty(self.tcx))
+            matches!(ty.kind(), ty::Alias(proj @ ty::AliasTy { kind: ty::Projection { .. }, .. }) if proj == &p.skip_binder().projection_term.expect_ty())
         } else {
             false
         }
@@ -734,7 +740,11 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                 ty::PredicateKind::Clause(ty::ClauseKind::RegionOutlives(binder)) => {
                     let binder = bound_predicate.rebind(binder);
                     selcx.infcx.enter_forall(binder, |pred| {
-                        selcx.infcx.register_region_outlives_constraint(pred, &dummy_cause);
+                        selcx.infcx.register_region_outlives_constraint(
+                            pred,
+                            ty::VisibleForLeakCheck::Yes,
+                            &dummy_cause,
+                        );
                     });
                 }
                 ty::PredicateKind::Clause(ty::ClauseKind::TypeOutlives(binder)) => {
@@ -751,11 +761,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                             );
                         }
                         (Some(ty::OutlivesPredicate(t_a, r_b)), _) => {
-                            selcx.infcx.register_type_outlives_constraint(
-                                t_a,
-                                r_b,
-                                &dummy_cause,
-                            );
+                            selcx.infcx.register_type_outlives_constraint(t_a, r_b, &dummy_cause);
                         }
                         _ => {}
                     };
@@ -763,17 +769,14 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                 ty::PredicateKind::ConstEquate(c1, c2) => {
                     let evaluate = |c: ty::Const<'tcx>| {
                         if let ty::ConstKind::Unevaluated(unevaluated) = c.kind() {
-                            let ct = super::try_evaluate_const(
-                                selcx.infcx,
-                                c,
-                                obligation.param_env,
-                            );
+                            let ct =
+                                super::try_evaluate_const(selcx.infcx, c, obligation.param_env);
 
                             if let Err(EvaluateConstErr::InvalidConstParamTy(_)) = ct {
-                                self.tcx.dcx().emit_err(UnableToConstructConstantValue {
-                                    span: self.tcx.def_span(unevaluated.def),
-                                    unevaluated,
-                                });
+                                let span = unevaluated.kind.def_span(self.tcx);
+                                self.tcx
+                                    .dcx()
+                                    .emit_err(UnableToConstructConstantValue { span, unevaluated });
                             }
 
                             ct
@@ -784,8 +787,11 @@ impl<'tcx> AutoTraitFinder<'tcx> {
 
                     match (evaluate(c1), evaluate(c2)) {
                         (Ok(c1), Ok(c2)) => {
-                            match selcx.infcx.at(&obligation.cause, obligation.param_env).eq(DefineOpaqueTypes::Yes,c1, c2)
-                            {
+                            match selcx.infcx.at(&obligation.cause, obligation.param_env).eq(
+                                DefineOpaqueTypes::Yes,
+                                c1,
+                                c2,
+                            ) {
                                 Ok(_) => (),
                                 Err(_) => return false,
                             }
@@ -804,12 +810,13 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                 | ty::PredicateKind::AliasRelate(..)
                 | ty::PredicateKind::DynCompatible(..)
                 | ty::PredicateKind::Subtype(..)
-                // FIXME(generic_const_exprs): you can absolutely add this as a where clauses
-                | ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(..))
                 | ty::PredicateKind::Coerce(..)
                 | ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature(_))
                 | ty::PredicateKind::Clause(ty::ClauseKind::HostEffect(..)) => {}
                 ty::PredicateKind::Ambiguous => return false,
+
+                // FIXME(generic_const_exprs): you can absolutely add this as a where clauses
+                ty::PredicateKind::Clause(ty::ClauseKind::ConstEvaluatable(..)) => return false,
             };
         }
         true

@@ -6,7 +6,6 @@ use rustc_ast::{LitKind, MetaItemKind, token};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::jobserver::{self, Proxy};
-use rustc_data_structures::stable_hasher::StableHasher;
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed};
 use rustc_lint::LintStore;
 use rustc_middle::ty;
@@ -339,11 +338,7 @@ pub struct Config {
     /// This is a callback to track otherwise untracked state used by the caller.
     ///
     /// You can write to `sess.env_depinfo` and `sess.file_depinfo` to track env vars and files.
-    /// To track any other state you can write to the given hasher. If the hash changes between
-    /// runs the incremental cache will be cleared.
-    ///
-    /// The hashing functionality has no known user. FIXME should this be removed?
-    pub track_state: Option<Box<dyn FnOnce(&Session, &mut StableHasher) + Send>>,
+    pub track_state: Option<Box<dyn FnOnce(&Session) + Send>>,
 
     /// This is a callback from the driver that is called when we're registering lints;
     /// it is called during lint loading when we have the LintStore in a non-shared state.
@@ -396,7 +391,9 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
     config.opts.unstable_opts.no_steal_thir = true;
 
     // Set parallel mode before thread pool creation, which will create `Lock`s.
-    rustc_data_structures::sync::set_dyn_thread_safe_mode(config.opts.unstable_opts.threads > 1);
+    rustc_data_structures::sync::set_dyn_thread_safe_mode(
+        config.opts.unstable_opts.threads.is_some(),
+    );
 
     // Check jobserver before run_in_thread_pool_with_globals, which call jobserver::acquire_thread
     let early_dcx = EarlyDiagCtxt::new(config.opts.error_format);
@@ -418,7 +415,7 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
     util::run_in_thread_pool_with_globals(
         &early_dcx,
         config.opts.edition,
-        config.opts.unstable_opts.threads,
+        config.opts.unstable_opts.threads.unwrap_or(1),
         &config.extra_symbols,
         SourceMapInputs { file_loader, path_mapping, hash_kind, checksum_hash_kind },
         |current_gcx, jobserver_proxy| {
@@ -458,25 +455,24 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
             };
             codegen_backend.init(&sess);
             sess.replaced_intrinsics = FxHashSet::from_iter(codegen_backend.replaced_intrinsics());
+            sess.fallback_intrinsics = FxHashSet::from_iter(codegen_backend.fallback_intrinsics());
             sess.thin_lto_supported = codegen_backend.thin_lto_supported();
 
             let cfg = parse_cfg(sess.dcx(), config.crate_cfg);
             let mut cfg = config::build_configuration(&sess, cfg);
             util::add_configuration(&mut cfg, &mut sess, &*codegen_backend);
-            sess.psess.config = cfg;
+            sess.config = cfg;
 
             let mut check_cfg = parse_check_cfg(sess.dcx(), config.crate_check_cfg);
             check_cfg.fill_well_known(&sess.target);
-            sess.psess.check_config = check_cfg;
+            sess.check_config = check_cfg;
 
             if let Some(psess_created) = config.psess_created {
                 psess_created(&mut sess.psess);
             }
 
             if let Some(track_state) = config.track_state {
-                let mut hasher = StableHasher::new();
-                track_state(&sess, &mut hasher);
-                sess.opts.untracked_state_hash = hasher.finish()
+                track_state(&sess);
             }
 
             // Even though the session holds the lint store, we can't build the

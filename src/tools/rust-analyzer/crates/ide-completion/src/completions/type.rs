@@ -11,7 +11,7 @@ use crate::{
 
 pub(crate) fn complete_type_path(
     acc: &mut Completions,
-    ctx: &CompletionContext<'_>,
+    ctx: &CompletionContext<'_, '_>,
     path_ctx @ PathCompletionCtx { qualified, .. }: &PathCompletionCtx<'_>,
     location: &TypeLocation,
 ) {
@@ -162,29 +162,27 @@ pub(crate) fn complete_type_path(
                 }
                 TypeLocation::GenericArg {
                     args: Some(arg_list), of_trait: Some(trait_), ..
-                } => {
-                    if arg_list.syntax().ancestors().find_map(ast::TypeBound::cast).is_some() {
-                        let arg_idx = arg_list
-                            .generic_args()
-                            .filter(|arg| {
-                                arg.syntax().text_range().end()
-                                    < ctx.original_token.text_range().start()
-                            })
-                            .count();
+                } if arg_list.syntax().ancestors().find_map(ast::TypeBound::cast).is_some() => {
+                    let arg_idx = arg_list
+                        .generic_args()
+                        .filter(|arg| {
+                            arg.syntax().text_range().end()
+                                < ctx.original_token.text_range().start()
+                        })
+                        .count();
 
-                        let n_required_params = trait_.type_or_const_param_count(ctx.sema.db, true);
-                        if arg_idx >= n_required_params {
-                            trait_.items_with_supertraits(ctx.sema.db).into_iter().for_each(|it| {
-                                if let hir::AssocItem::TypeAlias(alias) = it {
-                                    cov_mark::hit!(complete_assoc_type_in_generics_list);
-                                    acc.add_type_alias_with_eq(ctx, alias);
-                                }
-                            });
-
-                            let n_params = trait_.type_or_const_param_count(ctx.sema.db, false);
-                            if arg_idx >= n_params {
-                                return; // only show assoc types
+                    let n_required_params = trait_.type_or_const_param_count(ctx.sema.db, true);
+                    if arg_idx >= n_required_params {
+                        trait_.items_with_supertraits(ctx.sema.db).into_iter().for_each(|it| {
+                            if let hir::AssocItem::TypeAlias(alias) = it {
+                                cov_mark::hit!(complete_assoc_type_in_generics_list);
+                                acc.add_type_alias_with_eq(ctx, alias);
                             }
+                        });
+
+                        let n_params = trait_.type_or_const_param_count(ctx.sema.db, false);
+                        if arg_idx >= n_params {
+                            return; // only show assoc types
                         }
                     }
                 }
@@ -219,7 +217,7 @@ pub(crate) fn complete_type_path(
 
 pub(crate) fn complete_ascribed_type(
     acc: &mut Completions,
-    ctx: &CompletionContext<'_>,
+    ctx: &CompletionContext<'_, '_>,
     path_ctx: &PathCompletionCtx<'_>,
     ascription: &TypeAscriptionTarget,
 ) -> Option<()> {

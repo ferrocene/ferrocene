@@ -186,6 +186,7 @@ where
         }
     }
 
+    #[ferrocene::prevalidated]
     fn try_fold<B, F, T>(&mut self, init: B, mut f: F) -> T
     where
         F: FnMut(B, Self::Item) -> T,

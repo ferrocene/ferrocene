@@ -33,6 +33,7 @@ query-group.workspace = true
 salsa.workspace = true
 salsa-macros.workspace = true
 petgraph.workspace = true
+bitflags.workspace = true
 
 ra-ap-rustc_abi.workspace = true
 ra-ap-rustc_index.workspace = true
@@ -55,7 +56,7 @@ hir-expand.workspace = true
 base-db.workspace = true
 syntax.workspace = true
 span.workspace = true
-thin-vec = "0.2.14"
+thin-vec = "0.2.16"
 
 [dev-dependencies]
 expect-test = "1.5.1"

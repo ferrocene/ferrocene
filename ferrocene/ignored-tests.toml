@@ -21,7 +21,7 @@ tests = [
     "tests/run-coverage",
     "tests/run-coverage-rustdoc",
 ]
-targets = ["aarch64-unknown-linux-gnu"]
+targets = ["aarch64-unknown-linux-gnu", "aarch64-rhivos2-linux-gnu"]
 reason = "The tests generates profraw files to analyze, but remote-test is not capable of pushing those files back to the client yet"
 
 [["tests/run-make"]]
@@ -44,7 +44,7 @@ reason = "<assert.h> is not available for inclusion on this platform"
 tests = [
     "tests/run-make/c-link-to-rust-va-list-fn",
 ]
-targets = ["aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710"]
+targets = ["armv7r-ferrocene.facade-eabihf", "aarch64-unknown-nto-qnx710", "x86_64-pc-nto-qnx710", "aarch64-unknown-nto-qnx800", "x86_64-pc-nto-qnx800"]
 reason = "Fails with linker errors on `-lpthread`, `-ldl`, and `-lrt`"
 
 [["tests/run-make"]]
@@ -66,7 +66,7 @@ tests = [
     "tests/ui/process/no-stdio.rs",
     "tests/ui/process/nofile-limit.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation behaves differently when spawning processes fails"
 
 [["tests/ui"]]
@@ -89,7 +89,7 @@ tests = [
     "tests/ui/test-attrs/test-panic-abort-nocapture.rs",
     "tests/ui/test-attrs/test-panic-abort.rs",
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
 [["tests/debuginfo"]]
@@ -111,7 +111,7 @@ reason = "Running these tests require changes to bootstrap"
 tests = [
     "tests/ui/alloc-error/alloc-error-backtrace.rs"
 ]
-targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
+targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "These targets cannot unwind"
 
 [["tests/ui"]]
@@ -134,3 +134,34 @@ tests = [
 ]
 targets = ["aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade"]
 reason = "This errata does not affect Armv8-R AArch64 processors"
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/sanitizer-cdylib-link",
+    "tests/run-make/sanitizer-dylib-link",
+    "tests/run-make/sanitizer-staticlib-link"
+]
+targets = ["aarch64-rhivos2-linux-gnu"]
+reason = "Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs investigation."
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/sanitizer/hwaddress.rs",
+    "tests/ui/sanitizer/leak.rs",
+    "tests/ui/sanitizer/memory-eager.rs",
+    "tests/ui/sanitizer/memory-passing.rs",
+    "tests/ui/sanitizer/memory.rs",
+    "tests/ui/sanitizer/realtime-alloc.rs",
+    "tests/ui/sanitizer/realtime-blocking.rs",
+    "tests/ui/sanitizer/realtime-caller.rs",
+    "tests/ui/sanitizer/thread.rs"
+]
+targets = ["aarch64-rhivos2-linux-gnu"]
+reason = "Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs investigation."
+
+[["tests/run-make"]]
+tests = [
+    "tests/run-make/pointer-auth-link-with-c"
+]
+targets = ["aarch64-rhivos2-linux-gnu", "aarch64-unknown-linux-gnu"]
+reason = "This tests the interoperabilty an unstable feature of the rust compiler (enabling PAC) with newer C compilers (‘-mbranch-protection=’)."

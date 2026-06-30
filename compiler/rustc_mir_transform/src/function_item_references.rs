@@ -7,7 +7,7 @@ use rustc_middle::ty::{self, EarlyBinder, GenericArgsRef, Ty, TyCtxt};
 use rustc_session::lint::builtin::FUNCTION_ITEM_REFERENCES;
 use rustc_span::{Span, Spanned, sym};
 
-use crate::errors;
+use crate::diagnostics;
 
 pub(super) struct FunctionItemReferences;
 
@@ -83,8 +83,9 @@ impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
                         // If the inner type matches the type bound by `Pointer`
                         if inner_ty == bound_ty {
                             // Do an instantiation using the parameters from the callsite
-                            let instantiated_ty =
-                                EarlyBinder::bind(inner_ty).instantiate(self.tcx, args_ref);
+                            let instantiated_ty = EarlyBinder::bind(inner_ty)
+                                .instantiate(self.tcx, args_ref)
+                                .skip_norm_wip();
                             if let Some((fn_id, fn_args)) =
                                 FunctionItemRefChecker::is_fn_ref(instantiated_ty)
                             {
@@ -151,7 +152,7 @@ impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
             .unwrap_crate_local()
             .lint_root;
         // FIXME: use existing printing routines to print the function signature
-        let fn_sig = self.tcx.fn_sig(fn_id).instantiate(self.tcx, fn_args);
+        let fn_sig = self.tcx.fn_sig(fn_id).instantiate(self.tcx, fn_args).skip_norm_wip();
         let unsafety = fn_sig.safety().prefix_str();
         let abi = match fn_sig.abi() {
             ExternAbi::Rust => String::from(""),
@@ -178,7 +179,7 @@ impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
             FUNCTION_ITEM_REFERENCES,
             lint_root,
             span,
-            errors::FnItemRef { span, sugg, ident },
+            diagnostics::FnItemRef { span, sugg, ident },
         );
     }
 }

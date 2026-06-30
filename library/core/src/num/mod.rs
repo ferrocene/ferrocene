@@ -2,6 +2,7 @@
 
 #![stable(feature = "rust1", since = "1.0.0")]
 
+use crate::convert::{BoundedCastFromInt, CheckedCastFromInt};
 use crate::panic::const_panic;
 use crate::str::FromStr;
 use crate::ub_checks::assert_unsafe_precondition;
@@ -240,6 +241,39 @@ macro_rules! midpoint_impl {
     };
 }
 
+macro_rules! widening_mul_impl {
+    ($SelfT:ty, $WideT:ty) => {
+        /// Widening multiplication. Computes `self * rhs`, widening to a larger integer.
+        ///
+        /// The returned value is always exact and can never overflow.
+        ///
+        /// Note that this method is semantically equivalent to [`carrying_mul`] with a
+        /// carry of zero, with the latter instead returning a tuple denoting the low and
+        /// high parts of the result. Consider using it instead if you need
+        /// interoperability with other big int helper functions, or if this method isn't
+        /// available for a given type.
+        ///
+        /// [`carrying_mul`]: Self::carrying_mul
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// #![feature(widening_mul)]
+        ///
+        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.widening_mul(0_", stringify!($SelfT), "), 0);")]
+        #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MAX.widening_mul(", stringify!($SelfT), "::MAX), ", stringify!($SelfT), "::MAX as ", stringify!($WideT), " * ", stringify!($SelfT), "::MAX as ", stringify!($WideT), ");")]
+        /// ```
+        #[unstable(feature = "widening_mul", issue = "152016")]
+        #[rustc_const_unstable(feature = "widening_mul", issue = "152016")]
+        #[must_use = "this returns the result of the operation, \
+                      without modifying the original"]
+        #[inline]
+        pub const fn widening_mul(self, rhs: Self) -> $WideT {
+            self as $WideT * rhs as $WideT
+        }
+    }
+}
+
 macro_rules! widening_carryless_mul_impl {
     ($SelfT:ty, $WideT:ty) => {
         /// Performs a widening carry-less multiplication.
@@ -360,6 +394,7 @@ impl i8 {
         bound_condition = "",
     }
     midpoint_impl! { i8, i16, signed }
+    widening_mul_impl! { i8, i16 }
 }
 
 impl i16 {
@@ -384,6 +419,7 @@ impl i16 {
         bound_condition = "",
     }
     midpoint_impl! { i16, i32, signed }
+    widening_mul_impl! { i16, i32 }
 }
 
 impl i32 {
@@ -408,6 +444,7 @@ impl i32 {
         bound_condition = "",
     }
     midpoint_impl! { i32, i64, signed }
+    widening_mul_impl! { i32, i64 }
 }
 
 impl i64 {
@@ -432,6 +469,7 @@ impl i64 {
         bound_condition = "",
     }
     midpoint_impl! { i64, signed }
+    widening_mul_impl! { i64, i128 }
 }
 
 impl i128 {
@@ -460,6 +498,7 @@ impl i128 {
     midpoint_impl! { i128, signed }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "16")]
 impl isize {
     int_impl! {
@@ -485,6 +524,7 @@ impl isize {
     midpoint_impl! { isize, i32, signed }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "32")]
 impl isize {
     int_impl! {
@@ -510,6 +550,7 @@ impl isize {
     midpoint_impl! { isize, i64, signed }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "64")]
 impl isize {
     int_impl! {
@@ -565,6 +606,7 @@ impl u8 {
         bound_condition = "",
     }
     midpoint_impl! { u8, u16, unsigned }
+    widening_mul_impl! { u8, u16 }
     widening_carryless_mul_impl! { u8, u16 }
     carrying_carryless_mul_impl! { u8, u16 }
 
@@ -991,7 +1033,8 @@ impl u8 {
         matches!(*self, b'0'..=b'9') | matches!(*self, b'A'..=b'F') | matches!(*self, b'a'..=b'f')
     }
 
-    /// Checks if the value is an ASCII punctuation character:
+    /// Checks if the value is an ASCII punctuation or symbol character
+    /// (i.e. not alphanumeric, whitespace, or control):
     ///
     /// - U+0021 ..= U+002F `! " # $ % & ' ( ) * + , - . /`, or
     /// - U+003A ..= U+0040 `: ; < = > ? @`, or
@@ -1032,7 +1075,8 @@ impl u8 {
             | matches!(*self, b'{'..=b'~')
     }
 
-    /// Checks if the value is an ASCII graphic character:
+    /// Checks if the value is an ASCII graphic character
+    /// (i.e. not whitespace or control):
     /// U+0021 '!' ..= U+007E '~'.
     ///
     /// # Examples
@@ -1116,6 +1160,7 @@ impl u8 {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, b'\t' | b'\n' | b'\x0C' | b'\r' | b' ')
     }
@@ -1218,6 +1263,7 @@ impl u16 {
         bound_condition = "",
     }
     midpoint_impl! { u16, u32, unsigned }
+    widening_mul_impl! { u16, u32 }
     widening_carryless_mul_impl! { u16, u32 }
     carrying_carryless_mul_impl! { u16, u32 }
 
@@ -1274,6 +1320,7 @@ impl u32 {
         bound_condition = "",
     }
     midpoint_impl! { u32, u64, unsigned }
+    widening_mul_impl! { u32, u64 }
     widening_carryless_mul_impl! { u32, u64 }
     carrying_carryless_mul_impl! { u32, u64 }
 }
@@ -1305,6 +1352,7 @@ impl u64 {
         bound_condition = "",
     }
     midpoint_impl! { u64, u128, unsigned }
+    widening_mul_impl! { u64, u128 }
     widening_carryless_mul_impl! { u64, u128 }
     carrying_carryless_mul_impl! { u64, u128 }
 }
@@ -1341,6 +1389,7 @@ impl u128 {
     carrying_carryless_mul_impl! { u128, u256 }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "16")]
 impl usize {
     uint_impl! {
@@ -1372,6 +1421,7 @@ impl usize {
     carrying_carryless_mul_impl! { usize, u32 }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "32")]
 impl usize {
     uint_impl! {
@@ -1403,6 +1453,7 @@ impl usize {
     carrying_carryless_mul_impl! { usize, u64 }
 }
 
+#[doc(auto_cfg = false)]
 #[cfg(target_pointer_width = "64")]
 impl usize {
     uint_impl! {
@@ -1552,7 +1603,7 @@ macro_rules! from_str_int_impl {
     ($signedness:ident $($int_ty:ty)+) => {$(
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const FromStr for $int_ty {
+        const impl FromStr for $int_ty {
             type Err = ParseIntError;
 
             /// Parses an integer from a string slice with decimal digits.
@@ -1816,12 +1867,3 @@ macro_rules! from_str_int_impl {
 
 from_str_int_impl! { signed isize i8 i16 i32 i64 i128 }
 from_str_int_impl! { unsigned usize u8 u16 u32 u64 u128 }
-
-macro_rules! impl_sealed {
-    ($($t:ty)*) => {$(
-        /// Allows extension traits within `core`.
-        #[unstable(feature = "sealed", issue = "none")]
-        impl crate::sealed::Sealed for $t {}
-    )*}
-}
-impl_sealed! { isize i8 i16 i32 i64 i128 usize u8 u16 u32 u64 u128 }

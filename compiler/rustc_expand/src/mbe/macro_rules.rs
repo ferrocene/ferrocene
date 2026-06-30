@@ -14,6 +14,7 @@ use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, MultiSpan};
 use rustc_feature::Features;
 use rustc_hir as hir;
+use rustc_hir::attrs::diagnostic::Directive;
 use rustc_hir::def::MacroKinds;
 use rustc_hir::find_attr;
 use rustc_lint_defs::builtin::{
@@ -22,20 +23,21 @@ use rustc_lint_defs::builtin::{
 use rustc_parse::exp;
 use rustc_parse::parser::{Parser, Recovery};
 use rustc_session::Session;
-use rustc_session::parse::{ParseSess, feature_err};
+use rustc_session::errors::feature_err;
+use rustc_session::parse::ParseSess;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::Transparency;
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 use tracing::{debug, instrument, trace, trace_span};
 
+use super::SequenceRepetition;
 use super::diagnostics::{FailedMacro, failed_to_match_macro};
 use super::macro_parser::{NamedMatches, NamedParseResult};
-use super::{SequenceRepetition, diagnostics};
 use crate::base::{
     AttrProcMacro, BangProcMacro, DummyResult, ExpandResult, ExtCtxt, MacResult,
     MacroExpanderResult, SyntaxExtension, SyntaxExtensionKind, TTMacroExpander,
 };
-use crate::errors;
+use crate::diagnostics;
 use crate::expand::{AstFragment, AstFragmentKind, ensure_complete_parse, parse_ast_fragment};
 use crate::mbe::macro_check::check_meta_variables;
 use crate::mbe::macro_parser::{Error, ErrorReported, Failure, MatcherLoc, Success, TtParser};
@@ -79,7 +81,7 @@ impl<'a, 'b> ParserAnyMacro<'a, 'b> {
         let fragment = match parse_ast_fragment(parser, kind) {
             Ok(f) => f,
             Err(err) => {
-                let guar = diagnostics::emit_frag_parse_err(
+                let guar = super::diagnostics::emit_frag_parse_err(
                     err,
                     parser,
                     snapshot,
@@ -102,7 +104,7 @@ impl<'a, 'b> ParserAnyMacro<'a, 'b> {
                     SEMICOLON_IN_EXPRESSIONS_FROM_MACROS,
                     parser.token.span,
                     lint_node_id,
-                    errors::TrailingMacro { is_trailing: is_trailing_mac, name: macro_ident },
+                    diagnostics::TrailingMacro { is_trailing: is_trailing_mac, name: macro_ident },
                 );
             }
             parser.bump();
@@ -164,9 +166,11 @@ pub struct MacroRulesMacroExpander {
     node_id: NodeId,
     name: Ident,
     span: Span,
+    on_unmatched_args: Option<Directive>,
     transparency: Transparency,
     kinds: MacroKinds,
     rules: Vec<MacroRule>,
+    macro_rules: bool,
 }
 
 impl MacroRulesMacroExpander {
@@ -186,6 +190,14 @@ impl MacroRulesMacroExpander {
         self.kinds
     }
 
+    pub fn nrules(&self) -> usize {
+        self.rules.len()
+    }
+
+    pub fn is_macro_rules(&self) -> bool {
+        self.macro_rules
+    }
+
     pub fn expand_derive(
         &self,
         cx: &mut ExtCtxt<'_>,
@@ -194,7 +206,8 @@ impl MacroRulesMacroExpander {
     ) -> Result<TokenStream, ErrorGuaranteed> {
         // This is similar to `expand_macro`, but they have very different signatures, and will
         // diverge further once derives support arguments.
-        let Self { name, ref rules, node_id, .. } = *self;
+        let name = self.name;
+        let rules = &self.rules;
         let psess = &cx.sess.psess;
 
         if cx.trace_macros() {
@@ -220,8 +233,8 @@ impl MacroRulesMacroExpander {
                     trace_macros_note(&mut cx.expansions, sp, msg);
                 }
 
-                if is_defined_in_current_crate(node_id) {
-                    cx.resolver.record_macro_rule_usage(node_id, rule_index);
+                if is_defined_in_current_crate(self.node_id) {
+                    cx.resolver.record_macro_rule_usage(self.node_id, rule_index);
                 }
 
                 Ok(tts)
@@ -236,6 +249,7 @@ impl MacroRulesMacroExpander {
                     FailedMacro::Derive,
                     body,
                     rules,
+                    self.on_unmatched_args.as_ref(),
                 );
                 cx.macro_error_and_trace_macros_diag();
                 Err(guar)
@@ -260,6 +274,7 @@ impl TTMacroExpander for MacroRulesMacroExpander {
             self.transparency,
             input,
             &self.rules,
+            self.on_unmatched_args.as_ref(),
         ))
     }
 }
@@ -294,6 +309,7 @@ impl AttrProcMacro for MacroRulesMacroExpander {
             args,
             body,
             &self.rules,
+            self.on_unmatched_args.as_ref(),
         )
     }
 }
@@ -355,7 +371,7 @@ impl<'matcher> Tracker<'matcher> for NoopTracker {
 }
 
 /// Expands the rules based macro defined by `rules` for a given input `arg`.
-#[instrument(skip(cx, transparency, arg, rules))]
+#[instrument(skip(cx, transparency, arg, rules, on_unmatched_args))]
 fn expand_macro<'cx, 'a: 'cx>(
     cx: &'cx mut ExtCtxt<'_>,
     sp: Span,
@@ -365,6 +381,7 @@ fn expand_macro<'cx, 'a: 'cx>(
     transparency: Transparency,
     arg: TokenStream,
     rules: &'a [MacroRule],
+    on_unmatched_args: Option<&Directive>,
 ) -> Box<dyn MacResult + 'cx> {
     let psess = &cx.sess.psess;
 
@@ -423,6 +440,7 @@ fn expand_macro<'cx, 'a: 'cx>(
                 FailedMacro::Func,
                 &arg,
                 rules,
+                on_unmatched_args,
             );
             cx.macro_error_and_trace_macros_diag();
             DummyResult::any(span, guar)
@@ -431,7 +449,7 @@ fn expand_macro<'cx, 'a: 'cx>(
 }
 
 /// Expands the rules based macro defined by `rules` for a given attribute `args` and `body`.
-#[instrument(skip(cx, transparency, args, body, rules))]
+#[instrument(skip(cx, transparency, args, body, rules, on_unmatched_args))]
 fn expand_macro_attr(
     cx: &mut ExtCtxt<'_>,
     sp: Span,
@@ -443,6 +461,7 @@ fn expand_macro_attr(
     args: TokenStream,
     body: TokenStream,
     rules: &[MacroRule],
+    on_unmatched_args: Option<&Directive>,
 ) -> Result<TokenStream, ErrorGuaranteed> {
     let psess = &cx.sess.psess;
     // Macros defined in the current crate have a real node id,
@@ -507,6 +526,7 @@ fn expand_macro_attr(
                 FailedMacro::Attr(&args),
                 &body,
                 rules,
+                on_unmatched_args,
             );
             cx.trace_macros_diag();
             Err(guar)
@@ -703,13 +723,12 @@ pub fn compile_declarative_macro(
     span: Span,
     node_id: NodeId,
     edition: Edition,
-) -> (SyntaxExtension, usize) {
+) -> SyntaxExtension {
     let mk_syn_ext = |kind| {
         let is_local = is_defined_in_current_crate(node_id);
         SyntaxExtension::new(sess, kind, span, Vec::new(), edition, ident.name, attrs, is_local)
     };
-    let dummy_syn_ext =
-        |guar| (mk_syn_ext(SyntaxExtensionKind::Bang(Arc::new(DummyBang(guar)))), 0);
+    let dummy_syn_ext = |guar| mk_syn_ext(SyntaxExtensionKind::Bang(Arc::new(DummyBang(guar))));
 
     let macro_rules = macro_def.macro_rules;
     let exp_sep = if macro_rules { exp!(Semi) } else { exp!(Comma) };
@@ -846,11 +865,24 @@ pub fn compile_declarative_macro(
         return dummy_syn_ext(guar);
     }
 
-    // Return the number of rules for unused rule linting, if this is a local macro.
-    let nrules = if is_defined_in_current_crate(node_id) { rules.len() } else { 0 };
+    let on_unmatched_args = find_attr!(
+        attrs,
+        OnUnmatchedArgs { directive, .. } => directive.clone()
+    )
+    .flatten()
+    .map(|directive| *directive);
 
-    let exp = MacroRulesMacroExpander { name: ident, kinds, span, node_id, transparency, rules };
-    (mk_syn_ext(SyntaxExtensionKind::MacroRules(Arc::new(exp))), nrules)
+    let exp = MacroRulesMacroExpander {
+        name: ident,
+        kinds,
+        span,
+        node_id,
+        on_unmatched_args,
+        transparency,
+        rules,
+        macro_rules,
+    };
+    mk_syn_ext(SyntaxExtensionKind::MacroRules(Arc::new(exp)))
 }
 
 fn check_no_eof(sess: &Session, p: &Parser<'_>, msg: &'static str) -> Option<ErrorGuaranteed> {
@@ -871,9 +903,9 @@ fn check_args_parens(sess: &Session, rule_kw: Symbol, args: &tokenstream::TokenT
     if let tokenstream::TokenTree::Delimited(dspan, _, delim, _) = args
         && *delim != Delimiter::Parenthesis
     {
-        sess.dcx().emit_err(errors::MacroArgsBadDelim {
+        sess.dcx().emit_err(diagnostics::MacroArgsBadDelim {
             span: dspan.entire(),
-            sugg: errors::MacroArgsBadDelimSugg { open: dspan.open, close: dspan.close },
+            sugg: diagnostics::MacroArgsBadDelimSugg { open: dspan.open, close: dspan.close },
             rule_kw,
         });
     }
@@ -1507,7 +1539,7 @@ fn check_matcher_core<'tt>(
                             RUST_2021_INCOMPATIBLE_OR_PATTERNS,
                             span,
                             ast::CRATE_NODE_ID,
-                            errors::OrPatternsBackCompat { span, suggestion },
+                            diagnostics::OrPatternsBackCompat { span, suggestion },
                         );
                     }
                     match is_in_follow(next_token, kind) {

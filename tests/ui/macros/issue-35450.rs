@@ -1,7 +1,7 @@
 macro_rules! m { ($($t:tt)*) => { $($t)* } }
 
 fn main() {
-    m!($t); //~ ERROR expected expression
+    m!($t); //~ ERROR cannot find macro parameter `$t` in this scope
 }
 
 // ferrocene-annotations: fls_xa7lp0zg1ol2

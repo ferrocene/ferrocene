@@ -2,6 +2,12 @@
 //!
 //! Better known as "varargs".
 
+#![unstable(
+    feature = "c_variadic",
+    issue = "44930",
+    reason = "the `c_variadic` feature has not been properly tested on all supported platforms"
+)]
+
 #[cfg(not(target_arch = "xtensa"))]
 use crate::ffi::c_void;
 use crate::fmt;
@@ -204,7 +210,7 @@ crate::cfg_select! {
 /// unsafe fn vmy_func(count: u32, mut ap: VaList<'_>) -> i32 {
 ///     let mut sum = 0;
 ///     for _ in 0..count {
-///         sum += unsafe { ap.arg::<i32>() };
+///         sum += unsafe { ap.next_arg::<i32>() };
 ///     }
 ///     sum
 /// }
@@ -213,14 +219,15 @@ crate::cfg_select! {
 /// assert_eq!(unsafe { my_func(3, 42i32, -7i32, 20i32) }, 55);
 /// ```
 ///
-/// The [`VaList::arg`] method can be used to read an argument from the list. This method
-/// automatically advances the `VaList` to the next argument. The C equivalent is `va_arg`.
+/// The [`VaList::next_arg`] method reads the next argument from the variable argument list,
+/// and is equivalent to C `va_arg`.
 ///
 /// Cloning a `VaList` performs the equivalent of C `va_copy`, producing an independent cursor
 /// that arguments can be read from without affecting the original. Dropping a `VaList` performs
 /// the equivalent of C `va_end`.
 ///
-/// This can be used across an FFI boundary, and fully matches the platform's `va_list`.
+/// A `VaList` can be used across an FFI boundary, and fully matches the platform's `va_list` in
+/// terms of layout and ABI.
 #[repr(transparent)]
 #[lang = "va_list"]
 pub struct VaList<'a> {
@@ -243,7 +250,10 @@ impl VaList<'_> {
 }
 
 #[rustc_const_unstable(feature = "const_c_variadic", issue = "151787")]
-impl<'f> const Clone for VaList<'f> {
+const impl<'f> Clone for VaList<'f> {
+    /// Clone the [`VaList`], producing a second independent cursor into the variable argument list.
+    ///
+    /// Corresponds to `va_copy` in C.
     #[inline] // Avoid codegen when not used to help backends that don't support VaList.
     fn clone(&self) -> Self {
         // We only implement Clone and not Copy because some future target might not be able to
@@ -255,81 +265,145 @@ impl<'f> const Clone for VaList<'f> {
 }
 
 #[rustc_const_unstable(feature = "const_c_variadic", issue = "151787")]
-impl<'f> const Drop for VaList<'f> {
+const impl<'f> Drop for VaList<'f> {
+    /// Drop the [`VaList`].
+    ///
+    /// Corresponds to `va_end` in C.
     #[inline] // Avoid codegen when not used to help backends that don't support VaList.
     fn drop(&mut self) {
+        // Call the rust `va_end` intrinsic, which is a no-op and does not map to LLVM `va_end`.
+        // The rust intrinsic exists as a hook for Miri to check for UB.
+        //
         // SAFETY: this variable argument list is being dropped, so won't be read from again.
         unsafe { va_end(self) }
     }
 }
 
-mod sealed {
-    pub trait Sealed {}
-
-    impl Sealed for i32 {}
-    impl Sealed for i64 {}
-    impl Sealed for isize {}
-
-    impl Sealed for u32 {}
-    impl Sealed for u64 {}
-    impl Sealed for usize {}
-
-    impl Sealed for f64 {}
-
-    impl<T> Sealed for *mut T {}
-    impl<T> Sealed for *const T {}
-}
-
-/// Types that are valid to read using [`VaList::arg`].
+/// Types that are valid to read using [`VaList::next_arg`].
+///
+/// This trait is implemented for primitive types that have a variable argument application-binary
+/// interface (ABI) on the current platform. It is always implemented for:
+///
+/// - [`c_int`], [`c_long`] and [`c_longlong`]
+/// - [`c_uint`], [`c_ulong`] and [`c_ulonglong`]
+/// - [`c_double`]
+/// - `*const T` and `*mut T`
+///
+/// Implementations for e.g. `i32` or `usize` shouldn't be relied upon directly,
+/// because they may not be available on all platforms.
 ///
 /// # Safety
 ///
-/// The standard library implements this trait for primitive types that are
-/// expected to have a variable argument application-binary interface (ABI) on all
-/// platforms.
-///
-/// When C passes variable arguments, integers smaller than [`c_int`] and floats smaller
-/// than [`c_double`] are implicitly promoted to [`c_int`] and [`c_double`] respectively.
-/// Implementing this trait for types that are subject to this promotion rule is invalid.
+/// When C passes variable arguments, signed integers smaller than [`c_int`] are promoted
+/// to [`c_int`], unsigned integers smaller than [`c_uint`] are promoted to [`c_uint`],
+/// and [`c_float`] is promoted to [`c_double`]. Implementing this trait for types that are
+/// subject to this promotion rule is invalid.
 ///
 /// [`c_int`]: core::ffi::c_int
+/// [`c_long`]: core::ffi::c_long
+/// [`c_longlong`]: core::ffi::c_longlong
+///
+/// [`c_uint`]: core::ffi::c_uint
+/// [`c_ulong`]: core::ffi::c_ulong
+/// [`c_ulonglong`]: core::ffi::c_ulonglong
+///
+/// [`c_float`]: core::ffi::c_float
 /// [`c_double`]: core::ffi::c_double
 // We may unseal this trait in the future, but currently our `va_arg` implementations don't support
 // types with an alignment larger than 8, or with a non-scalar layout. Inline assembly can be used
 // to accept unsupported types in the meantime.
-pub unsafe trait VaArgSafe: sealed::Sealed {}
+#[lang = "va_arg_safe"]
+pub impl(self) unsafe trait VaArgSafe: Copy {}
 
-// i8 and i16 are implicitly promoted to c_int in C, and cannot implement `VaArgSafe`.
+crate::cfg_select! {
+    any(target_arch = "avr", target_arch = "msp430") => {
+        // c_int/c_uint are i16/u16 on these targets.
+        //
+        // - i8 is implicitly promoted to c_int in C, and cannot implement `VaArgSafe`.
+        // - u8 is implicitly promoted to c_uint in C, and cannot implement `VaArgSafe`.
+        unsafe impl VaArgSafe for i16 {}
+        unsafe impl VaArgSafe for u16 {}
+    }
+    _ => {
+        // c_int/c_uint are i32/u32 on this target.
+        //
+        // - i8 and i16 are implicitly promoted to c_int in C, and cannot implement `VaArgSafe`.
+        // - u8 and u16 are implicitly promoted to c_uint in C, and cannot implement `VaArgSafe`.
+    }
+}
+
+crate::cfg_select! {
+    target_arch = "avr" => {
+        // c_double is f32 on this target.
+        unsafe impl VaArgSafe for f32 {}
+    }
+    _ => {
+        // c_double is f64 on this target.
+        //
+        // - f32 is implicitly promoted to c_double in C, and cannot implement `VaArgSafe`.
+    }
+}
+
 unsafe impl VaArgSafe for i32 {}
 unsafe impl VaArgSafe for i64 {}
 unsafe impl VaArgSafe for isize {}
 
-// u8 and u16 are implicitly promoted to c_int in C, and cannot implement `VaArgSafe`.
 unsafe impl VaArgSafe for u32 {}
 unsafe impl VaArgSafe for u64 {}
 unsafe impl VaArgSafe for usize {}
 
-// f32 is implicitly promoted to c_double in C, and cannot implement `VaArgSafe`.
 unsafe impl VaArgSafe for f64 {}
 
 unsafe impl<T> VaArgSafe for *mut T {}
 unsafe impl<T> VaArgSafe for *const T {}
 
+// Check that relevant `core::ffi` types implement `VaArgSafe`.
+const _: () = {
+    const fn va_arg_safe_check<T: VaArgSafe>() {}
+
+    va_arg_safe_check::<crate::ffi::c_int>();
+    va_arg_safe_check::<crate::ffi::c_uint>();
+    va_arg_safe_check::<crate::ffi::c_long>();
+
+    va_arg_safe_check::<crate::ffi::c_ulong>();
+    va_arg_safe_check::<crate::ffi::c_longlong>();
+    va_arg_safe_check::<crate::ffi::c_ulonglong>();
+
+    va_arg_safe_check::<crate::ffi::c_double>();
+
+    va_arg_safe_check::<*const crate::ffi::c_void>();
+    va_arg_safe_check::<*mut crate::ffi::c_void>();
+
+    va_arg_safe_check::<*const crate::ffi::c_char>();
+    va_arg_safe_check::<*mut crate::ffi::c_char>();
+};
+
 impl<'f> VaList<'f> {
-    /// Read an argument from the variable argument list, and advance to the next argument.
+    /// Read the next argument from the variable argument list.
     ///
     /// Only types that implement [`VaArgSafe`] can be read from a variable argument list.
     ///
     /// # Safety
     ///
-    /// This function is only sound to call when there is another argument to read, and that
-    /// argument is a properly initialized value of the type `T`.
+    /// This function is safe to call only if all of the following conditions are satisfied:
     ///
-    /// Calling this function with an incompatible type, an invalid value, or when there
-    /// are no more variable arguments, is unsound.
+    /// - There is another c-variadic argument to read.
+    /// - The actual type of the argument `U` is compatible with `T` (as defined below).
+    /// - If `U` and `T` are both integer types, then the value passed by the caller must be
+    /// representable in both types.
+    ///
+    /// Types `T` and `U` are compatible when:
+    ///
+    /// - `T` and `U` are the same type.
+    /// - `T` and `U` are integer types of the same size.
+    /// - `T` and `U` are both pointers, and their target types are compatible.
+    /// - `T` is a pointer to [`c_void`] and `U` is a pointer to [`i8`] or [`u8`], or vice versa.
+    ///
+    /// [`c_void`]: core::ffi::c_void
     #[inline] // Avoid codegen when not used to help backends that don't support VaList.
     #[rustc_const_unstable(feature = "const_c_variadic", issue = "151787")]
-    pub const unsafe fn arg<T: VaArgSafe>(&mut self) -> T {
+    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    pub const unsafe fn next_arg<T: VaArgSafe>(&mut self) -> T {
         // SAFETY: the caller must uphold the safety contract for `va_arg`.
         unsafe { va_arg(self) }
     }

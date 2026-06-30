@@ -2,9 +2,11 @@ use itertools::Itertools;
 use rustc_abi::{FIRST_VARIANT, FieldIdx, Size, VariantIdx};
 use rustc_ast::UnsafeBinderCastKind;
 use rustc_data_structures::stack::ensure_sufficient_stack;
+use rustc_data_structures::thin_vec::ThinVec;
 use rustc_hir as hir;
+use rustc_hir::attrs::{AttributeKind, HasAttrs};
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
-use rustc_hir::{LangItem, find_attr};
+use rustc_hir::{HirId, LangItem, find_attr};
 use rustc_index::Idx;
 use rustc_middle::hir::place::{
     Place as HirPlace, PlaceBase as HirPlaceBase, ProjectionKind as HirProjectionKind,
@@ -16,14 +18,25 @@ use rustc_middle::ty::adjustment::{
     Adjust, Adjustment, AutoBorrow, AutoBorrowMutability, DerefAdjustKind, PointerCoercion,
 };
 use rustc_middle::ty::{
-    self, AdtKind, GenericArgs, InlineConstArgs, InlineConstArgsParts, ScalarInt, Ty, UpvarArgs,
+    self, AdtKind, GenericArgs, InlineConstArgs, InlineConstArgsParts, ScalarInt, Ty, TyCtxt,
+    UpvarArgs,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_span::Span;
+use rustc_span::{DesugaringKind, Span};
 use tracing::{debug, info, instrument, trace};
 
-use crate::errors::*;
+use crate::diagnostics::*;
 use crate::thir::cx::ThirBuildCx;
+
+fn parsed_attrs(id: HirId, tcx: TyCtxt<'_>) -> ThinVec<AttributeKind> {
+    HasAttrs::get_attrs(id, &tcx)
+        .into_iter()
+        .filter_map(|attr| match attr {
+            hir::Attribute::Parsed(attrkind) => Some(attrkind.clone()),
+            hir::Attribute::Unparsed(_) => None,
+        })
+        .collect()
+}
 
 impl<'tcx> ThirBuildCx<'tcx> {
     /// Create a THIR expression for the given HIR expression. This expands all
@@ -57,6 +70,29 @@ impl<'tcx> ThirBuildCx<'tcx> {
 
         trace!(?expr.ty);
 
+        let mut attrs = ThinVec::new();
+
+        if let hir::ExprKind::Loop(_, _, _, span) = hir_expr.kind {
+            match span.desugaring_kind() {
+                // `for` loop desugaring puts us pretty deep down the HIR tree
+                Some(DesugaringKind::ForLoop) => {
+                    let arm = self.tcx.parent_hir_node(hir_expr.hir_id).expect_arm();
+                    let expr = self.tcx.parent_hir_node(arm.hir_id).expect_expr();
+                    std::assert_matches!(expr.kind, hir::ExprKind::Match(..));
+                    // ignore async for loops
+                    if let hir::Node::Expr(expr) = self.tcx.parent_hir_node(expr.hir_id) {
+                        std::assert_matches!(expr.kind, hir::ExprKind::DropTemps(..));
+                        attrs = parsed_attrs(expr.hir_id, self.tcx)
+                    }
+                }
+                // For loops defined with `loop` and `while`, the expr already has the attrs
+                Some(DesugaringKind::WhileLoop) | None => {
+                    attrs = parsed_attrs(hir_expr.hir_id, self.tcx);
+                }
+                _ => (),
+            }
+        }
+
         // Now apply adjustments, if any.
         if self.apply_adjustments {
             for adjustment in self.typeck_results.expr_adjustments(hir_expr) {
@@ -68,16 +104,19 @@ impl<'tcx> ThirBuildCx<'tcx> {
 
         trace!(?expr.ty, "after adjustments");
 
+        let ty = expr.ty;
+        let value = self.thir.exprs.push(expr);
+
+        if !attrs.is_empty() {
+            self.thir.attributes.insert(value, attrs);
+        }
+
         // Finally, wrap this up in the expr's scope.
         expr = Expr {
             temp_scope_id: expr_scope.local_id,
-            ty: expr.ty,
+            ty,
             span: hir_expr.span,
-            kind: ExprKind::Scope {
-                region_scope: expr_scope,
-                value: self.thir.exprs.push(expr),
-                hir_id: hir_expr.hir_id,
-            },
+            kind: ExprKind::Scope { region_scope: expr_scope, value, hir_id: hir_expr.hir_id },
         };
 
         // OK, all done!
@@ -219,6 +258,13 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 }));
 
                 debug!(?kind);
+                kind
+            }
+            Adjust::GenericReborrow(mutability) => {
+                let expr = self.thir.exprs.push(expr);
+                let kind =
+                    ExprKind::Reborrow { source: expr, mutability, target: adjustment.target };
+
                 kind
             }
         };

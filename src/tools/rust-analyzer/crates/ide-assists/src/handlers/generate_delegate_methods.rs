@@ -4,7 +4,6 @@ use syntax::{
     ast::{
         self, AstNode, HasGenericParams, HasName, HasVisibility as _,
         edit::{AstNodeEdit, IndentLevel},
-        syntax_factory::SyntaxFactory,
     },
     syntax_editor::Position,
 };
@@ -49,7 +48,10 @@ use crate::{
 //     }
 // }
 // ```
-pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn generate_delegate_methods(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     if !ctx.config.code_action_grouping {
         return None;
     }
@@ -107,7 +109,8 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
             format!("Generate delegate for `{field_name}.{name}()`",),
             target,
             |edit| {
-                let make = SyntaxFactory::without_mappings();
+                let editor = edit.make_editor(strukt.syntax());
+                let make = editor.make();
                 let field = make
                     .field_from_idents(["self", &field_name])
                     .expect("always be a valid expression");
@@ -145,7 +148,7 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
                 // compute the `body`
                 let arg_list = method_source
                     .param_list()
-                    .map(|v| convert_param_list_to_arg_list(v, &make))
+                    .map(|v| convert_param_list_to_arg_list(v, make))
                     .unwrap_or_else(|| make.arg_list([]));
 
                 let tail_expr = make.expr_method_call(field, make.name_ref(&name), arg_list).into();
@@ -173,12 +176,11 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
                     .indent(IndentLevel(1));
                 let item = ast::AssocItem::Fn(f.clone());
 
-                let mut editor = edit.make_editor(strukt.syntax());
                 let fn_: Option<ast::AssocItem> = match impl_def {
                     Some(impl_def) => match impl_def.assoc_item_list() {
                         Some(assoc_item_list) => {
                             let item = item.indent(IndentLevel::from_node(impl_def.syntax()));
-                            assoc_item_list.add_items(&mut editor, vec![item.clone()]);
+                            assoc_item_list.add_items(&editor, vec![item.clone()]);
                             Some(item)
                         }
                         None => {
@@ -193,7 +195,7 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
                     None => {
                         let name = &strukt_name.to_string();
                         let ty_params = strukt.generic_param_list();
-                        let ty_args = ty_params.as_ref().map(|it| it.to_generic_args());
+                        let ty_args = ty_params.as_ref().map(|it| it.to_generic_args(make));
                         let where_clause = strukt.where_clause();
                         let assoc_item_list = make.assoc_item_list(vec![item]);
 
@@ -211,7 +213,6 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
                         let impl_def = impl_def.indent(indent);
 
                         // Insert the impl block.
-                        let strukt = edit.make_mut(strukt.clone());
                         editor.insert_all(
                             Position::after(strukt.syntax()),
                             vec![
@@ -229,7 +230,6 @@ pub(crate) fn generate_delegate_methods(acc: &mut Assists, ctx: &AssistContext<'
                     let tabstop = edit.make_tabstop_before(cap);
                     editor.add_annotation(fn_.syntax(), tabstop);
                 }
-                editor.add_mappings(make.finish_with_mappings());
                 edit.add_file_edits(ctx.vfs_file_id(), editor);
             },
         )?;

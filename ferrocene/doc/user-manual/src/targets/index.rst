@@ -90,6 +90,30 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
+   * - :ref:`aarch64-unknown-linux-gnu`
+     - ``aarch64-unknown-linux-gnu``
+     - Host platform
+     - Full
+     - Only qualified when cross-compiling to :ref:`aarch64-rhivos2-linux-gnu`.
+
+   * - :ref:`aarch64-rhivos2-linux-gnu`
+     - ``aarch64-rhivos2-linux-gnu``
+     - Cross-compilation
+     - Full
+     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
+
+   * - :ref:`armv7r-none-eabihf`
+     - ``armv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
+   * - :ref:`aarch64-unknown-nto-qnx800`
+     - ``aarch64-unknown-nto-qnx800``
+     - Cross-compilation
+     - Full
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
    * - :ref:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
      - Cross-compilation
@@ -109,6 +133,12 @@ qualified upon request.
      - \-
 
 
+
+   * - :ref:`x86_64-pc-nto-qnx800`
+     - ``x86_64-pc-nto-qnx800``
+     - Cross-compilation
+     - Full
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
 Quality managed targets
 -----------------------
@@ -171,18 +201,6 @@ Supported targets can often be qualified or quality managed upon request.
      - Standard library
      - Notes
 
-   * - :target:`aarch64-unknown-linux-gnu`
-     - ``aarch64-unknown-linux-gnu``
-     - Host platform
-     - Full
-     - \-
-
-   * - :target:`aarch64-rhivos2-linux-gnu`
-     - ``aarch64-rhivos2-linux-gnu``
-     - Host platform
-     - Full
-     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux.
-
    * - :target:`aarch64r82-unknown-none`
      - ``aarch64r82-unknown-none``
      - Cross-compilation
@@ -199,12 +217,6 @@ Supported targets can often be qualified or quality managed upon request.
      - ``aarch64-unknown-linux-musl``
      - Cross-compilation
      - Full
-     - \-
-
-   * - :target:`armv7r-none-eabihf`
-     - ``armv7r-none-eabihf``
-     - Cross-compilation
-     - Bare-metal
      - \-
 
    * - :target:`armv8r-none-eabihf`
@@ -292,7 +304,7 @@ It is sometimes possible for Experimental targets to be qualified or quality man
      - Notes
 
    * - :target:`aarch64r82-unknown-none-softfloat`
-     - ``aarch64v8r-unknown-none-softfloat``
+     - ``aarch64r82-unknown-none-softfloat``
      - Cross-compilation
      - Bare-metal
      - \-

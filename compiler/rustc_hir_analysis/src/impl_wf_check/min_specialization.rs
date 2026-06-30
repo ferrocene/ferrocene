@@ -79,8 +79,8 @@ use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::{self, ObligationCtxt, translate_args_with_cause, wf};
 use tracing::{debug, instrument};
 
-use crate::errors::GenericArgsOnOverriddenImpl;
-use crate::{constrained_generic_params as cgp, errors};
+use crate::diagnostics::GenericArgsOnOverriddenImpl;
+use crate::{constrained_generic_params as cgp, diagnostics};
 
 pub(super) fn check_min_specialization(
     tcx: TyCtxt<'_>,
@@ -146,7 +146,7 @@ fn check_has_items(
         && tcx.associated_item_def_ids(impl1_def_id).is_empty()
     {
         let base_impl_span = tcx.def_span(impl2_id);
-        return Err(tcx.dcx().emit_err(errors::EmptySpecialization { span, base_impl_span }));
+        return Err(tcx.dcx().emit_err(diagnostics::EmptySpecialization { span, base_impl_span }));
     }
     Ok(())
 }
@@ -215,7 +215,7 @@ fn unconstrained_parent_impl_args<'tcx>(
     let impl_generic_predicates = tcx.predicates_of(impl_def_id);
     let mut unconstrained_parameters = FxHashSet::default();
     let mut constrained_params = FxHashSet::default();
-    let impl_trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate_identity();
+    let impl_trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_norm_wip();
 
     // Unfortunately the functions in `constrained_generic_parameters` don't do
     // what we want here. We want only a list of constrained parameters while
@@ -300,7 +300,7 @@ fn check_static_lifetimes<'tcx>(
     span: Span,
 ) -> Result<(), ErrorGuaranteed> {
     if tcx.any_free_region_meets(parent_args, |r| r.is_static()) {
-        return Err(tcx.dcx().emit_err(errors::StaticSpecialize { span }));
+        return Err(tcx.dcx().emit_err(diagnostics::StaticSpecialize { span }));
     }
     Ok(())
 }
@@ -326,7 +326,10 @@ fn check_predicates<'tcx>(
 ) -> Result<(), ErrorGuaranteed> {
     let impl1_predicates: Vec<_> = traits::elaborate(
         tcx,
-        tcx.predicates_of(impl1_def_id).instantiate(tcx, impl1_args).into_iter(),
+        tcx.predicates_of(impl1_def_id)
+            .instantiate(tcx, impl1_args)
+            .into_iter()
+            .map(|(c, s)| (c.skip_norm_wip(), s)),
     )
     .collect();
 
@@ -340,7 +343,7 @@ fn check_predicates<'tcx>(
             tcx.predicates_of(impl2_node.def_id())
                 .instantiate(tcx, impl2_args)
                 .into_iter()
-                .map(|(c, _s)| c.as_predicate()),
+                .map(|(c, _s)| c.skip_norm_wip().as_predicate()),
         )
         .collect()
     };
@@ -373,7 +376,7 @@ fn check_predicates<'tcx>(
         .map(|(c, _span)| c.as_predicate());
 
     // Include the well-formed predicates of the type parameters of the impl.
-    for arg in tcx.impl_trait_ref(impl1_def_id).instantiate_identity().args {
+    for arg in tcx.impl_trait_ref(impl1_def_id).instantiate_identity().skip_norm_wip().args {
         let Some(term) = arg.as_term() else {
             continue;
         };

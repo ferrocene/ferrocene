@@ -15,9 +15,10 @@ use rustc_session::config::{
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
 use rustc_session::{EarlyDiagCtxt, getopts};
-use rustc_span::FileName;
 use rustc_span::edition::Edition;
+use rustc_span::{FileName, RemapPathScopeComponents};
 use rustc_target::spec::TargetTuple;
+use smallvec::SmallVec;
 
 use crate::core::new_dcx;
 use crate::externalfiles::ExternalHtml;
@@ -140,6 +141,8 @@ pub(crate) struct Options {
     pub(crate) no_run: bool,
     /// What sources are being mapped.
     pub(crate) remap_path_prefix: Vec<(PathBuf, PathBuf)>,
+    /// Which scope(s) to use with `--remap-path-prefix`
+    pub(crate) remap_path_scope: RemapPathScopeComponents,
 
     /// The path to a rustc-like binary to build tests with. If not set, we
     /// default to loading from `$sysroot/bin/rustc`.
@@ -222,6 +225,7 @@ impl fmt::Debug for Options {
             .field("no_run", &self.no_run)
             .field("test_builder_wrappers", &self.test_builder_wrappers)
             .field("remap-file-prefix", &self.remap_path_prefix)
+            .field("remap-file-scope", &self.remap_path_scope)
             .field("no_capture", &self.no_capture)
             .field("scrape_examples_options", &self.scrape_examples_options)
             .field("unstable_features", &self.unstable_features)
@@ -290,7 +294,7 @@ pub(crate) struct RenderOptions {
     /// Note: this field is duplicated in `Options` because it's useful to have
     /// it in both places.
     pub(crate) unstable_features: rustc_feature::UnstableFeatures,
-    pub(crate) emit: Vec<EmitType>,
+    pub(crate) emit: SmallVec<[EmitType; 2]>,
     /// If `true`, HTML source pages will generate links for items to their definition.
     pub(crate) generate_link_to_definition: bool,
     /// Set of function-call locations to include as examples
@@ -328,7 +332,20 @@ pub(crate) enum ModuleSorting {
 pub(crate) enum EmitType {
     HtmlStaticFiles,
     HtmlNonStaticFiles,
+    // not explicitly nameable by the user for now
+    JsonFiles,
     DepInfo(Option<OutFileName>),
+}
+
+impl fmt::Display for EmitType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::HtmlStaticFiles => "html-static-files",
+            Self::HtmlNonStaticFiles => "html-non-static-files",
+            Self::JsonFiles => "json-files",
+            Self::DepInfo(_) => "dep-info",
+        })
+    }
 }
 
 impl FromStr for EmitType {
@@ -353,17 +370,11 @@ impl FromStr for EmitType {
 }
 
 impl RenderOptions {
-    pub(crate) fn should_emit_crate(&self) -> bool {
-        self.emit.is_empty() || self.emit.contains(&EmitType::HtmlNonStaticFiles)
-    }
-
     pub(crate) fn dep_info(&self) -> Option<Option<&OutFileName>> {
-        for emit in &self.emit {
-            if let EmitType::DepInfo(file) = emit {
-                return Some(file.as_ref());
-            }
-        }
-        None
+        self.emit.iter().find_map(|emit| match emit {
+            EmitType::DepInfo(file) => Some(file.as_ref()),
+            _ => None,
+        })
     }
 }
 
@@ -427,6 +438,8 @@ impl Options {
                 early_dcx.early_fatal(err);
             }
         };
+        let remap_path_scope =
+            rustc_session::config::parse_remap_path_scope(early_dcx, matches, &unstable_opts);
 
         let dcx = new_dcx(error_format, None, diagnostic_width, &unstable_opts);
         let dcx = dcx.handle();
@@ -468,26 +481,6 @@ impl Options {
 
         let should_test = matches.opt_present("test");
 
-        let mut emit = FxIndexMap::<_, EmitType>::default();
-        for list in matches.opt_strs("emit") {
-            if should_test {
-                dcx.fatal("the `--test` flag and the `--emit` flag are not supported together");
-            }
-            for kind in list.split(',') {
-                match kind.parse() {
-                    Ok(kind) => {
-                        // De-duplicate emit types and the last wins.
-                        // Only one instance for each type is allowed
-                        // regardless the actual data it carries.
-                        // This matches rustc's `--emit` behavior.
-                        emit.insert(std::mem::discriminant(&kind), kind);
-                    }
-                    Err(()) => dcx.fatal(format!("unrecognized emission type: {kind}")),
-                }
-            }
-        }
-        let emit = emit.into_values().collect::<Vec<_>>();
-
         let show_coverage = matches.opt_present("show-coverage");
         let output_format_s = matches.opt_str("output-format");
         let output_format = match output_format_s {
@@ -526,15 +519,55 @@ impl Options {
             }
         }
 
-        if output_format == OutputFormat::Json {
-            if let Some(emit_flag) = emit.iter().find_map(|emit| match emit {
-                EmitType::HtmlStaticFiles => Some("html-static-files"),
-                EmitType::HtmlNonStaticFiles => Some("html-non-static-files"),
-                EmitType::DepInfo(_) => None,
-            }) {
-                dcx.fatal(format!(
-                    "the `--emit={emit_flag}` flag is not supported with `--output-format=json`",
-                ));
+        let mut emit = FxIndexMap::default();
+        for list in matches.opt_strs("emit") {
+            if should_test {
+                dcx.fatal("the `--test` flag and the `--emit` flag are not supported together");
+            }
+            if let OutputFormat::Doctest = output_format {
+                dcx.fatal("the `--emit` flag is not supported with `--output-format=doctest`");
+            }
+
+            for typ in list.split(',') {
+                let Ok(typ) = typ.parse::<EmitType>() else {
+                    dcx.fatal(format!("unrecognized emission type: {typ}"))
+                };
+
+                match typ {
+                    EmitType::DepInfo(_) => match output_format {
+                        OutputFormat::Json | OutputFormat::Html => {}
+                        OutputFormat::Doctest => unreachable!(),
+                    },
+                    EmitType::HtmlStaticFiles | EmitType::HtmlNonStaticFiles => match output_format
+                    {
+                        OutputFormat::Html => {}
+                        OutputFormat::Json => dcx.fatal(format!(
+                            "the `--emit={typ}` flag is not supported with `--output-format=json`",
+                        )),
+                        OutputFormat::Doctest => unreachable!(),
+                    },
+                    EmitType::JsonFiles => unreachable!(),
+                }
+
+                // De-duplicate emit types and the last wins.
+                // Only one instance for each type is allowed
+                // regardless the actual data it carries.
+                // This matches rustc's `--emit` behavior.
+                emit.insert(std::mem::discriminant(&typ), typ);
+            }
+        }
+        let mut emit: SmallVec<[_; 2]> = emit.into_values().collect();
+        // If `--emit` is absent we'll register default emission types depending on the requested
+        // output format. We can safely use `is_empty` for this since `--emit=` ("truly empty")
+        // will have already been rejected above.
+        if emit.is_empty() {
+            match output_format {
+                OutputFormat::Json => emit.push(EmitType::JsonFiles),
+                OutputFormat::Html => {
+                    emit.push(EmitType::HtmlStaticFiles);
+                    emit.push(EmitType::HtmlNonStaticFiles);
+                }
+                OutputFormat::Doctest => {}
             }
         }
 
@@ -895,6 +928,7 @@ impl Options {
             no_run,
             test_builder_wrappers,
             remap_path_prefix,
+            remap_path_scope,
             no_capture,
             crate_name,
             output_format,

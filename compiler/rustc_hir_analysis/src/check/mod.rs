@@ -89,11 +89,12 @@ use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::print::with_types_for_signature;
 use rustc_middle::ty::{
     self, GenericArgs, GenericArgsRef, OutlivesPredicate, Region, Ty, TyCtxt, TypingMode,
+    Unnormalized,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_session::parse::feature_err;
+use rustc_session::errors::feature_err;
 use rustc_span::def_id::CRATE_DEF_ID;
-use rustc_span::{BytePos, DUMMY_SP, Ident, Span, Symbol, kw, sym};
+use rustc_span::{BytePos, DUMMY_SP, Ident, Span, Symbol, kw};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::infer::ObligationCauseExt as _;
 use rustc_trait_selection::error_reporting::traits::suggestions::ReturnsVisitor;
@@ -102,7 +103,7 @@ use tracing::debug;
 
 use self::compare_impl_item::collect_return_position_impl_trait_in_trait_tys;
 use self::region::region_scope_tree;
-use crate::{check_c_variadic_abi, errors};
+use crate::{check_c_variadic_abi, diagnostics};
 
 /// Adds query implementations to the [Providers] vtable, see [`rustc_middle::query`]
 pub(super) fn provide(providers: &mut Providers) {
@@ -126,7 +127,7 @@ fn adt_destructor(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<ty::Destructor>
         if let Some(async_dtor) = adt_async_destructor(tcx, def_id) {
             // When type has AsyncDrop impl, but doesn't have Drop impl, generate error
             let span = tcx.def_span(async_dtor.impl_did);
-            tcx.dcx().emit_err(errors::AsyncDropWithoutSyncDrop { span });
+            tcx.dcx().emit_err(diagnostics::AsyncDropWithoutSyncDrop { span });
         }
     }
     dtor
@@ -238,19 +239,19 @@ fn missing_items_err(
         let snippet = with_types_for_signature!(suggestion_signature(
             tcx,
             trait_item,
-            tcx.impl_trait_ref(impl_def_id).instantiate_identity(),
+            tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_norm_wip(),
         ));
         let code = format!("{padding}{snippet}\n{padding}");
         if let Some(span) = tcx.hir_span_if_local(trait_item.def_id) {
             missing_trait_item_label
-                .push(errors::MissingTraitItemLabel { span, item: trait_item.name() });
-            missing_trait_item.push(errors::MissingTraitItemSuggestion {
+                .push(diagnostics::MissingTraitItemLabel { span, item: trait_item.name() });
+            missing_trait_item.push(diagnostics::MissingTraitItemSuggestion {
                 span: sugg_sp,
                 code,
                 snippet,
             });
         } else {
-            missing_trait_item_none.push(errors::MissingTraitItemSuggestionNone {
+            missing_trait_item_none.push(diagnostics::MissingTraitItemSuggestionNone {
                 span: sugg_sp,
                 code,
                 snippet,
@@ -258,7 +259,7 @@ fn missing_items_err(
         }
     }
 
-    tcx.dcx().emit_err(errors::MissingTraitItem {
+    tcx.dcx().emit_err(diagnostics::MissingTraitItem {
         span: tcx.span_of_impl(impl_def_id.to_def_id()).unwrap(),
         missing_items_msg,
         missing_trait_item_label,
@@ -276,7 +277,7 @@ fn missing_items_must_implement_one_of_err(
     let missing_items_msg =
         missing_items.iter().map(Ident::to_string).collect::<Vec<_>>().join("`, `");
 
-    tcx.dcx().emit_err(errors::MissingOneOfTraitItem {
+    tcx.dcx().emit_err(diagnostics::MissingOneOfTraitItem {
         span: impl_span,
         note: annotation_span,
         missing_items_msg,
@@ -301,7 +302,7 @@ fn default_body_is_unstable(
         None => none_note = true,
     };
 
-    let mut err = tcx.dcx().create_err(errors::MissingTraitItemUnstable {
+    let mut err = tcx.dcx().create_err(diagnostics::MissingTraitItemUnstable {
         span: impl_span,
         some_note,
         none_note,
@@ -311,7 +312,7 @@ fn default_body_is_unstable(
     });
 
     let inject_span = item_did.is_local().then(|| tcx.crate_level_attribute_injection_span());
-    rustc_session::parse::add_feature_diagnostics_for_issue(
+    rustc_session::errors::add_feature_diagnostics_for_issue(
         &mut err,
         &tcx.sess,
         feature,
@@ -369,10 +370,10 @@ fn bounds_from_generic_predicates<'tcx>(
                     let mut projections_str = vec![];
                     for projection in &projections {
                         let p = projection.skip_binder();
-                        if bound == tcx.parent(p.projection_term.def_id)
+                        if bound == p.projection_term.trait_def_id(tcx)
                             && p.projection_term.self_ty() == ty
                         {
-                            let name = tcx.item_name(p.projection_term.def_id);
+                            let name = tcx.item_name(p.projection_term.expect_projection_def_id());
                             projections_str.push(format!("{} = {}", name, p.term));
                         }
                     }
@@ -449,7 +450,7 @@ fn fn_sig_suggestion<'tcx>(
         .iter()
         .enumerate()
         .map(|(i, ty)| {
-            Some(match ty.kind() {
+            let arg_ty = match ty.kind() {
                 ty::Param(_) if assoc.is_method() && i == 0 => "self".to_string(),
                 ty::Ref(reg, ref_ty, mutability) if i == 0 => {
                     let reg = format!("{reg} ");
@@ -476,9 +477,10 @@ fn fn_sig_suggestion<'tcx>(
                         format!("_: {ty}")
                     }
                 }
-            })
+            };
+            Some(format!("{arg_ty}"))
         })
-        .chain(std::iter::once(if sig.c_variadic { Some("...".to_string()) } else { None }))
+        .chain(std::iter::once(if sig.c_variadic() { Some("...".to_string()) } else { None }))
         .flatten()
         .collect::<Vec<String>>()
         .join(", ");
@@ -489,6 +491,7 @@ fn fn_sig_suggestion<'tcx>(
             && let Some(output) = tcx
                 .explicit_item_self_bounds(alias_ty.kind.def_id())
                 .iter_instantiated_copied(tcx, alias_ty.args)
+                .map(Unnormalized::skip_norm_wip)
                 .find_map(|(bound, _)| {
                     bound.as_projection_clause()?.no_bound_vars()?.term.as_type()
                 }) {
@@ -506,7 +509,7 @@ fn fn_sig_suggestion<'tcx>(
 
     let output = if !output.is_unit() { format!(" -> {output}") } else { String::new() };
 
-    let safety = sig.safety.prefix_str();
+    let safety = sig.safety().prefix_str();
     let (generics, where_clauses) = bounds_from_generic_predicates(tcx, predicates, assoc);
 
     // FIXME: this is not entirely correct, as the lifetimes from borrowed params will
@@ -536,22 +539,26 @@ fn suggestion_signature<'tcx>(
             tcx,
             tcx.liberate_late_bound_regions(
                 assoc.def_id,
-                tcx.fn_sig(assoc.def_id).instantiate(tcx, args),
+                tcx.fn_sig(assoc.def_id).instantiate(tcx, args).skip_norm_wip(),
             ),
             assoc.ident(tcx),
-            tcx.predicates_of(assoc.def_id).instantiate_own(tcx, args),
+            tcx.predicates_of(assoc.def_id)
+                .instantiate_own(tcx, args)
+                .map(|(c, s)| (c.skip_norm_wip(), s)),
             assoc,
         ),
         ty::AssocKind::Type { .. } => {
             let (generics, where_clauses) = bounds_from_generic_predicates(
                 tcx,
-                tcx.predicates_of(assoc.def_id).instantiate_own(tcx, args),
+                tcx.predicates_of(assoc.def_id)
+                    .instantiate_own(tcx, args)
+                    .map(|(c, s)| (c.skip_norm_wip(), s)),
                 assoc,
             );
             format!("type {}{generics} = /* Type */{where_clauses};", assoc.name())
         }
         ty::AssocKind::Const { name, .. } => {
-            let ty = tcx.type_of(assoc.def_id).instantiate_identity();
+            let ty = tcx.type_of(assoc.def_id).instantiate_identity().skip_norm_wip();
             let val = tcx
                 .infer_ctxt()
                 .build(TypingMode::non_body_analysis())
@@ -575,39 +582,13 @@ fn bad_variant_count<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>, sp: Span, d
         spans = start.to_vec();
         many = Some(*end);
     }
-    tcx.dcx().emit_err(errors::TransparentEnumVariant {
+    tcx.dcx().emit_err(diagnostics::TransparentEnumVariant {
         span: sp,
         spans,
         many,
         number: adt.variants().len(),
         path: tcx.def_path_str(did),
     });
-}
-
-/// Emit an error when encountering two or more non-zero-sized fields in a transparent
-/// enum.
-fn bad_non_zero_sized_fields<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    adt: ty::AdtDef<'tcx>,
-    field_count: usize,
-    field_spans: impl Iterator<Item = Span>,
-    sp: Span,
-) {
-    if adt.is_enum() {
-        tcx.dcx().emit_err(errors::TransparentNonZeroSizedEnum {
-            span: sp,
-            spans: field_spans.collect(),
-            field_count,
-            desc: adt.descr(),
-        });
-    } else {
-        tcx.dcx().emit_err(errors::TransparentNonZeroSized {
-            span: sp,
-            spans: field_spans.collect(),
-            field_count,
-            desc: adt.descr(),
-        });
-    }
 }
 
 // FIXME: Consider moving this method to a more fitting place.

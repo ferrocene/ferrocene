@@ -8,7 +8,6 @@ use std::fmt::Debug;
 
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_errors::{Diag, EmissionGuarantee};
-use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::find_attr;
 use rustc_infer::infer::{DefineOpaqueTypes, InferCtxt, TyCtxtInferExt};
@@ -21,6 +20,7 @@ use rustc_middle::traits::specialization_graph::OverlapMode;
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
+    Unnormalized,
 };
 pub use rustc_next_trait_solver::coherence::*;
 use rustc_next_trait_solver::solve::SolverDelegateEvalExt;
@@ -209,13 +209,14 @@ fn fresh_impl_header<'tcx>(
     ImplHeader {
         impl_def_id,
         impl_args,
-        self_ty: tcx.type_of(impl_def_id).instantiate(tcx, impl_args),
-        trait_ref: is_of_trait.then(|| tcx.impl_trait_ref(impl_def_id).instantiate(tcx, impl_args)),
+        self_ty: tcx.type_of(impl_def_id).instantiate(tcx, impl_args).skip_norm_wip(),
+        trait_ref: is_of_trait
+            .then(|| tcx.impl_trait_ref(impl_def_id).instantiate(tcx, impl_args).skip_norm_wip()),
         predicates: tcx
             .predicates_of(impl_def_id)
             .instantiate(tcx, impl_args)
             .iter()
-            .map(|(c, _)| c.as_predicate())
+            .map(|(c, _)| c.skip_norm_wip().as_predicate())
             .collect(),
     }
 }
@@ -229,7 +230,7 @@ fn fresh_impl_header_normalized<'tcx>(
     let header = fresh_impl_header(infcx, impl_def_id, is_of_trait);
 
     let InferOk { value: mut header, obligations } =
-        infcx.at(&ObligationCause::dummy(), param_env).normalize(header);
+        infcx.at(&ObligationCause::dummy(), param_env).normalize(Unnormalized::new_wip(header));
 
     header.predicates.extend(obligations.into_iter().map(|o| o.predicate));
     header
@@ -276,10 +277,16 @@ fn overlap<'tcx>(
     // empty environment.
     let param_env = ty::ParamEnv::empty();
 
-    let impl1_header =
-        fresh_impl_header_normalized(selcx.infcx, param_env, impl1_def_id, is_of_trait);
-    let impl2_header =
-        fresh_impl_header_normalized(selcx.infcx, param_env, impl2_def_id, is_of_trait);
+    let impl1_header = if tcx.next_trait_solver_in_coherence() {
+        fresh_impl_header(selcx.infcx, impl1_def_id, is_of_trait)
+    } else {
+        fresh_impl_header_normalized(selcx.infcx, param_env, impl1_def_id, is_of_trait)
+    };
+    let impl2_header = if tcx.next_trait_solver_in_coherence() {
+        fresh_impl_header(selcx.infcx, impl2_def_id, is_of_trait)
+    } else {
+        fresh_impl_header_normalized(selcx.infcx, param_env, impl2_def_id, is_of_trait)
+    };
 
     // Equate the headers to find their intersection (the general type, with infer vars,
     // that may apply both impls).
@@ -535,12 +542,19 @@ fn impl_intersection_has_negative_obligation(
     // So there are no infer variables left now, except regions which aren't resolved by `resolve_vars_if_possible`.
     assert!(!impl1_header_args.has_non_region_infer());
 
-    let param_env =
-        ty::EarlyBinder::bind(tcx.param_env(impl1_def_id)).instantiate(tcx, impl1_header_args);
+    let param_env = ty::EarlyBinder::bind(tcx.param_env(impl1_def_id))
+        .instantiate(tcx, impl1_header_args)
+        .skip_norm_wip();
 
-    util::elaborate(tcx, tcx.predicates_of(impl2_def_id).instantiate(tcx, impl2_header.impl_args))
-        .elaborate_sized()
-        .any(|(clause, _)| try_prove_negated_where_clause(infcx, clause, param_env))
+    util::elaborate(
+        tcx,
+        tcx.predicates_of(impl2_def_id)
+            .instantiate(tcx, impl2_header.impl_args)
+            .into_iter()
+            .map(|(c, s)| (c.skip_norm_wip(), s)),
+    )
+    .elaborate_sized()
+    .any(|(clause, _)| try_prove_negated_where_clause(infcx, clause, param_env))
 }
 
 fn plug_infer_with_placeholders<'tcx>(
@@ -733,7 +747,7 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
         // was irrelevant.
         match goal.result() {
             Ok(Certainty::Yes) | Err(NoSolution) => return,
-            Ok(Certainty::Maybe { .. }) => {}
+            Ok(Certainty::Maybe(_)) => {}
         }
 
         // For bound predicates we simply call `infcx.enter_forall`
@@ -743,10 +757,7 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
         let trait_ref = match predicate_kind {
             ty::PredicateKind::Clause(ty::ClauseKind::Trait(tr)) => tr.trait_ref,
             ty::PredicateKind::Clause(ty::ClauseKind::Projection(proj))
-                if matches!(
-                    infcx.tcx.def_kind(proj.projection_term.def_id),
-                    DefKind::AssocTy | DefKind::AssocConst { .. }
-                ) =>
+                if proj.projection_term.kind.is_trait_projection() =>
             {
                 proj.projection_term.trait_ref(infcx.tcx)
             }
@@ -766,7 +777,7 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
                 && let ty::ImplPolarity::Reservation = infcx.tcx.impl_polarity(def_id)
             {
                 if let Some(message) =
-                    find_attr!(infcx.tcx, def_id, RustcReservationImpl(_, message) => *message)
+                    find_attr!(infcx.tcx, def_id, RustcReservationImpl(message) => *message)
                 {
                     self.causes.insert(IntercrateAmbiguityCause::ReservationImpl { message });
                 }
@@ -791,7 +802,11 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
             if matches!(ty.kind(), ty::Alias(..)) {
                 let ocx = ObligationCtxt::new(infcx);
                 ty = ocx
-                    .structurally_normalize_ty(&ObligationCause::dummy(), param_env, ty)
+                    .structurally_normalize_ty(
+                        &ObligationCause::dummy(),
+                        param_env,
+                        Unnormalized::new_wip(ty),
+                    )
                     .map_err(|_| ())?;
                 if !ocx.try_evaluate_obligations().is_empty() {
                     return Err(());

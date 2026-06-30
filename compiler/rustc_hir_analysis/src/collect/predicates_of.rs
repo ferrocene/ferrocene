@@ -92,8 +92,11 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
             // parent predicates would hold, and also so that the param-env
             // inherits these predicates as assumptions.
             let identity_args = ty::GenericArgs::identity_for_item(tcx, def_id);
-            predicates
-                .extend(tcx.explicit_predicates_of(fn_def_id).instantiate_own(tcx, identity_args));
+            predicates.extend(
+                tcx.explicit_predicates_of(fn_def_id)
+                    .instantiate_own(tcx, identity_args)
+                    .map(|(c, s)| (c.skip_norm_wip(), s)),
+            );
 
             // We also install bidirectional outlives predicates for the RPITIT
             // to keep the duplicates lifetimes from opaque lowering in sync.
@@ -118,12 +121,15 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
 
             let impl_assoc_identity_args = ty::GenericArgs::identity_for_item(tcx, def_id);
             let impl_def_id = tcx.parent(fn_def_id);
-            let impl_trait_ref_args = tcx.impl_trait_ref(impl_def_id).instantiate_identity().args;
+            let impl_trait_ref_args =
+                tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_norm_wip().args;
 
             let impl_assoc_args =
                 impl_assoc_identity_args.rebase_onto(tcx, impl_def_id, impl_trait_ref_args);
 
-            let impl_predicates = trait_assoc_predicates.instantiate_own(tcx, impl_assoc_args);
+            let impl_predicates = trait_assoc_predicates
+                .instantiate_own(tcx, impl_assoc_args)
+                .map(|(c, s)| (c.skip_norm_wip(), s));
 
             return ty::GenericPredicates {
                 parent: Some(impl_def_id),
@@ -161,11 +167,12 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
                 if let Some(of_trait) = impl_.of_trait
                     && of_trait.defaultness.is_default()
                 {
-                    is_default_impl_trait =
-                        Some(ty::Binder::dummy(tcx.impl_trait_ref(def_id).instantiate_identity()));
+                    is_default_impl_trait = Some(ty::Binder::dummy(
+                        tcx.impl_trait_ref(def_id).instantiate_identity().skip_norm_wip(),
+                    ));
                 }
             }
-            ItemKind::Trait(_, _, _, _, _, _, self_bounds, ..)
+            ItemKind::Trait { bounds: self_bounds, .. }
             | ItemKind::TraitAlias(_, _, _, self_bounds) => {
                 is_trait = Some((self_bounds, item.span));
             }
@@ -248,7 +255,7 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
             }
             hir::GenericParamKind::Const { .. } => {
                 let param_def_id = param.def_id.to_def_id();
-                let ct_ty = tcx.type_of(param_def_id).instantiate_identity();
+                let ct_ty = tcx.type_of(param_def_id).instantiate_identity().skip_norm_wip();
                 let ct = icx.lowerer().lower_const_param(param_def_id, param.hir_id);
                 predicates
                     .insert((ty::ClauseKind::ConstArgHasType(ct, ct_ty).upcast(tcx), param.span));
@@ -315,10 +322,6 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
                     (pred, span)
                 }))
             }
-
-            hir::WherePredicateKind::EqPredicate(..) => {
-                // FIXME(#20041)
-            }
         }
     }
 
@@ -345,9 +348,11 @@ fn gather_explicit_predicates_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Gen
     // in trait checking. See `setup_constraining_predicates`
     // for details.
     if let Node::Item(&Item { kind: ItemKind::Impl(impl_), .. }) = node {
-        let self_ty = tcx.type_of(def_id).instantiate_identity();
-        let trait_ref =
-            impl_.of_trait.is_some().then(|| tcx.impl_trait_ref(def_id).instantiate_identity());
+        let self_ty = tcx.type_of(def_id).instantiate_identity().skip_norm_wip();
+        let trait_ref = impl_
+            .of_trait
+            .is_some()
+            .then(|| tcx.impl_trait_ref(def_id).instantiate_identity().skip_norm_wip());
         cgp::setup_constraining_predicates(
             tcx,
             &mut predicates,
@@ -410,8 +415,11 @@ fn const_evaluatable_predicates_of<'tcx>(
         preds: FxIndexSet<(ty::Clause<'tcx>, Span)>,
     }
 
-    fn is_const_param_default(tcx: TyCtxt<'_>, def: LocalDefId) -> bool {
-        let hir_id = tcx.local_def_id_to_hir_id(def);
+    fn is_const_param_default(tcx: TyCtxt<'_>, kind: ty::UnevaluatedConstKind<'_>) -> bool {
+        let ty::UnevaluatedConstKind::Anon { def_id } = kind else { return false };
+        let Some(local) = def_id.as_local() else { return false };
+
+        let hir_id = tcx.local_def_id_to_hir_id(local);
         let (_, parent_node) = tcx
             .hir_parent_iter(hir_id)
             .skip_while(|(_, n)| matches!(n, Node::ConstArg(..)))
@@ -426,9 +434,7 @@ fn const_evaluatable_predicates_of<'tcx>(
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ConstCollector<'tcx> {
         fn visit_const(&mut self, c: ty::Const<'tcx>) {
             if let ty::ConstKind::Unevaluated(uv) = c.kind() {
-                if let Some(local) = uv.def.as_local()
-                    && is_const_param_default(self.tcx, local)
-                {
+                if is_const_param_default(self.tcx, uv.kind) {
                     // Do not look into const param defaults,
                     // these get checked when they are actually instantiated.
                     //
@@ -440,11 +446,11 @@ fn const_evaluatable_predicates_of<'tcx>(
                 }
 
                 // Skip type consts as mGCA doesn't support evaluatable clauses.
-                if self.tcx.is_type_const(uv.def) {
+                if uv.kind.is_type_const(self.tcx) {
                     return;
                 }
 
-                let span = self.tcx.def_span(uv.def);
+                let span = uv.kind.def_span(self.tcx);
                 self.preds.insert((ty::ClauseKind::ConstEvaluatable(c).upcast(self.tcx), span));
             }
         }
@@ -465,18 +471,18 @@ fn const_evaluatable_predicates_of<'tcx>(
         if impl_.of_trait.is_some() {
             debug!("visit impl trait_ref");
             let trait_ref = tcx.impl_trait_ref(def_id);
-            trait_ref.instantiate_identity().visit_with(&mut collector);
+            trait_ref.instantiate_identity().skip_norm_wip().visit_with(&mut collector);
         }
 
         debug!("visit self_ty");
         let self_ty = tcx.type_of(def_id);
-        self_ty.instantiate_identity().visit_with(&mut collector);
+        self_ty.instantiate_identity().skip_norm_wip().visit_with(&mut collector);
     }
 
     if let Some(_) = tcx.hir_fn_sig_by_hir_id(hir_id) {
         debug!("visit fn sig");
         let fn_sig = tcx.fn_sig(def_id);
-        let fn_sig = fn_sig.instantiate_identity();
+        let fn_sig = fn_sig.instantiate_identity().skip_norm_wip();
         debug!(?fn_sig);
         fn_sig.visit_with(&mut collector);
     }
@@ -660,7 +666,7 @@ pub(super) fn implied_predicates_with_filter<'tcx>(
     };
 
     let (generics, superbounds) = match item.kind {
-        hir::ItemKind::Trait(.., generics, supertraits, _) => (generics, supertraits),
+        hir::ItemKind::Trait { generics, bounds: supertraits, .. } => (generics, supertraits),
         hir::ItemKind::TraitAlias(_, _, generics, supertraits) => (generics, supertraits),
         _ => span_bug!(item.span, "super_predicates invoked on non-trait"),
     };
@@ -925,7 +931,7 @@ pub(super) fn type_param_predicates<'tcx>(
     };
 
     if let Node::Item(item) = hir_node
-        && let hir::ItemKind::Trait(..) = item.kind
+        && let hir::ItemKind::Trait { .. } = item.kind
         // Implied `Self: Trait` and supertrait bounds.
         && param_id == item_hir_id
     {
@@ -1064,7 +1070,7 @@ pub(super) fn const_conditions<'tcx>(
         Node::Item(item) => match item.kind {
             hir::ItemKind::Impl(impl_) => (impl_.generics, None, false),
             hir::ItemKind::Fn { generics, .. } => (generics, None, false),
-            hir::ItemKind::Trait(_, _, _, _, _, generics, supertraits, _) => {
+            hir::ItemKind::Trait { generics, bounds: supertraits, .. } => {
                 (generics, Some((Some(item.owner_id.def_id), supertraits)), false)
             }
             hir::ItemKind::TraitAlias(_, _, generics, supertraits) => {
@@ -1185,7 +1191,7 @@ pub(super) fn explicit_implied_const_bounds<'tcx>(
         }
         None => match tcx.hir_node_by_def_id(def_id) {
             Node::Item(hir::Item {
-                kind: hir::ItemKind::Trait(..) | hir::ItemKind::TraitAlias(..),
+                kind: hir::ItemKind::Trait { .. } | hir::ItemKind::TraitAlias(..),
                 ..
             }) => implied_predicates_with_filter(
                 tcx,

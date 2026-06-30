@@ -5,26 +5,32 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
 echo "CPU"
 echo "==="
-if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+if isMacOS; then
     sysctl -n machdep.cpu.brand_string
-elif [[ "${OSTYPE}" = "msys" ]]; then
+elif isWindows; then
     systeminfo
-else
+elif isLinux; then
     lscpu
+else
+    echo "Unknown OS"
 fi
 
 echo
 echo "System memory"
 echo "============="
-if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+if isMacOS; then
     vm_stat
-elif [[ "${OSTYPE}" != "msys" ]]; then
+elif isLinux; then
     free -h
 
     echo "Disk"
     echo "===="
     df -h
+else
+    echo "Unknown OS"
 fi
-

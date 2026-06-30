@@ -184,7 +184,6 @@ impl<'tcx> fmt::Debug for Region<'tcx> {
 // For things for which the type library provides traversal implementations
 // for all Interners, we only need to provide a Lift implementation.
 TrivialLiftImpls! {
-    (),
     bool,
     usize,
     u64,
@@ -197,6 +196,7 @@ TrivialLiftImpls! {
     rustc_abi::Size,
     rustc_hir::Safety,
     rustc_middle::mir::ConstValue,
+    rustc_span::Symbol,
     rustc_type_ir::BoundConstness,
     rustc_type_ir::PredicatePolarity,
     // tidy-alphabetical-end
@@ -220,11 +220,11 @@ TrivialTypeTraversalImpls! {
     crate::mir::MirPhase,
     crate::mir::Promoted,
     crate::mir::RawPtrKind,
-    crate::mir::RetagKind,
     crate::mir::SourceInfo,
     crate::mir::SourceScope,
     crate::mir::SourceScopeLocalData,
     crate::mir::SwitchTargets,
+    crate::mir::WithRetag,
     crate::traits::IsConstable,
     crate::traits::OverflowError,
     crate::ty::AdtKind,
@@ -245,6 +245,7 @@ TrivialTypeTraversalImpls! {
     rustc_hir::HirId,
     rustc_hir::MatchSource,
     rustc_hir::RangeEnd,
+    rustc_hir::attrs::AttributeKind,
     rustc_hir::def_id::LocalDefId,
     rustc_span::Ident,
     rustc_span::Span,
@@ -269,22 +270,27 @@ TrivialTypeTraversalAndLiftImpls! {
 ///////////////////////////////////////////////////////////////////////////
 // Lift implementations
 
+impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for ty::ParamEnv<'a> {
+    type Lifted = ty::ParamEnv<'tcx>;
+
+    fn lift_to_interner(self, tcx: TyCtxt<'tcx>) -> Self::Lifted {
+        ty::ParamEnv::new(tcx.lift(self.caller_bounds()))
+    }
+}
+
 impl<'tcx, T: Lift<TyCtxt<'tcx>>> Lift<TyCtxt<'tcx>> for Option<T> {
     type Lifted = Option<T::Lifted>;
-    fn lift_to_interner(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
-        Some(match self {
-            Some(x) => Some(tcx.lift(x)?),
-            None => None,
-        })
+    fn lift_to_interner(self, tcx: TyCtxt<'tcx>) -> Self::Lifted {
+        self.map(|x| tcx.lift(x))
     }
 }
 
 impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for Term<'a> {
     type Lifted = ty::Term<'tcx>;
-    fn lift_to_interner(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
+    fn lift_to_interner(self, tcx: TyCtxt<'tcx>) -> Self::Lifted {
         match self.kind() {
-            TermKind::Ty(ty) => tcx.lift(ty).map(Into::into),
-            TermKind::Const(c) => tcx.lift(c).map(Into::into),
+            TermKind::Ty(ty) => tcx.lift(ty).into(),
+            TermKind::Const(c) => tcx.lift(c).into(),
         }
     }
 }

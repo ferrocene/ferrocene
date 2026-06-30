@@ -89,3 +89,35 @@ fn ineffective() {
     x | 3 > 4; // not an error (yet), better written as x >= 4
     x | 4 <= 19;
 }
+
+mod issue16781 {
+    fn unsigned(x: u8) -> bool {
+        x & 0xf0 == 0x11 << 4
+    }
+
+    fn signed(x: i8) -> bool {
+        x & 0x70 == 0x11 << 4
+    }
+}
+
+mod issue16935 {
+    struct Wrapper(usize);
+
+    impl std::ops::BitAnd<usize> for Wrapper {
+        type Output = Self;
+
+        fn bitand(self, rhs: usize) -> Self::Output {
+            Self(self.0 & rhs)
+        }
+    }
+
+    impl PartialEq<usize> for Wrapper {
+        fn eq(&self, other: &usize) -> bool {
+            self.0.eq(other)
+        }
+    }
+
+    fn check(value: Wrapper) -> bool {
+        value & 0x1 != 0
+    }
+}

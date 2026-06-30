@@ -109,6 +109,7 @@ use rustc_hir::definitions::DefPathDataName;
 use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::middle::exported_symbols::{SymbolExportInfo, SymbolExportLevel};
+use rustc_middle::mir::StatementKind;
 use rustc_middle::mono::{
     CodegenUnit, CodegenUnitNameBuilder, InstantiationMode, MonoItem, MonoItemData,
     MonoItemPartitions, Visibility,
@@ -123,7 +124,7 @@ use rustc_target::spec::SymbolVisibility;
 use tracing::debug;
 
 use crate::collector::{self, MonoItemCollectionStrategy, UsageMap};
-use crate::errors::{CouldntDumpMonoStats, SymbolAlreadyDefined};
+use crate::diagnostics::{CouldntDumpMonoStats, SymbolAlreadyDefined};
 use crate::graph_checks::target_specific_checks;
 
 struct PartitioningCx<'a, 'tcx> {
@@ -662,9 +663,8 @@ fn characteristic_def_id_of_mono_item<'tcx>(
                     && tcx.sess.opts.incremental.is_some()
                     && tcx.is_lang_item(tcx.impl_trait_id(impl_def_id), LangItem::Drop)
                 {
-                    // Put `Drop::drop` into the same cgu as `drop_in_place`
-                    // since `drop_in_place` is the only thing that can
-                    // call it.
+                    // Put `Drop::drop` into the same cgu as `drop_glue`
+                    // since `drop_glue` is the only thing that can call it.
                     return None;
                 }
 
@@ -1334,7 +1334,21 @@ pub(crate) fn provide(providers: &mut Providers) {
             | InstanceKind::DropGlue(..)
             | InstanceKind::AsyncDropGlueCtorShim(..) => {
                 let mir = tcx.instance_mir(instance.def);
-                mir.basic_blocks.iter().map(|bb| bb.statements.len() + 1).sum()
+                mir.basic_blocks
+                    .iter()
+                    .map(|bb| {
+                        bb.statements
+                            .iter()
+                            .filter_map(|stmt| match stmt.kind {
+                                StatementKind::StorageLive(_) | StatementKind::StorageDead(_) => {
+                                    None
+                                }
+                                _ => Some(stmt),
+                            })
+                            .count()
+                            + 1
+                    })
+                    .sum()
             }
             // Other compiler-generated shims size estimate: 1
             _ => 1,

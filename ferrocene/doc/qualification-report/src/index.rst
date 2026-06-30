@@ -22,10 +22,14 @@ qualification, in accordance to the standards above.
    :maxdepth: 2
 
    rustc/index
+   rustc/aarch64-unknown-linux-gnu
+   rustc/aarch64-rhivos2-linux-gnu
    rustc/aarch64-unknown-none
+   rustc/aarch64-unknown-nto-qnx800
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
    rustc/x86_64-unknown-linux-gnu
+   rustc/x86_64-pc-nto-qnx800
 
 .. appendices::
    :caption: Appendices:

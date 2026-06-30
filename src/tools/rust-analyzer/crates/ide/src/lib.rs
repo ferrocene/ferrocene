@@ -41,6 +41,7 @@ mod matching_brace;
 mod moniker;
 mod move_item;
 mod parent_module;
+mod predicate_eval;
 mod references;
 mod rename;
 mod runnables;
@@ -64,11 +65,13 @@ use cfg::CfgOptions;
 use fetch_crates::CrateInfo;
 use hir::{ChangeWithProcMacros, EditionedFileId, crate_def_map, sym};
 use ide_db::base_db::relevant_crates;
+use ide_db::base_db::salsa::Durability;
+use ide_db::line_index;
 use ide_db::ra_fixture::RaFixtureAnalysis;
 use ide_db::{
-    FxHashMap, FxIndexSet, LineIndexDatabase,
+    FxHashMap, FxIndexSet,
     base_db::{
-        CrateOrigin, CrateWorkspaceData, Env, FileSet, SourceDatabase, VfsPath,
+        AbsPathBuf, CrateOrigin, CrateWorkspaceData, Env, FileSet, SourceDatabase, VfsPath,
         salsa::{Cancelled, Database},
     },
     prime_caches, symbol_index,
@@ -120,13 +123,14 @@ pub use crate::{
     },
     test_explorer::{TestItem, TestItemKind},
 };
-pub use hir::Semantics;
+pub use hir::{PredicateEvaluationResult, PredicateEvaluationStatus, Semantics};
 pub use ide_assists::{
     Assist, AssistConfig, AssistId, AssistKind, AssistResolveStrategy, SingleResolve,
 };
 pub use ide_completion::{
     CallableSnippets, CompletionConfig, CompletionFieldsToResolve, CompletionItem,
-    CompletionItemKind, CompletionItemRefMode, CompletionRelevance, Snippet, SnippetScope,
+    CompletionItemImport, CompletionItemKind, CompletionItemRefMode, CompletionRelevance, Snippet,
+    SnippetScope,
 };
 pub use ide_db::{
     FileId, FilePosition, FileRange, RootDatabase, Severity, SymbolKind,
@@ -202,10 +206,18 @@ impl AnalysisHost {
         self.db.per_query_memory_usage()
     }
     pub fn trigger_cancellation(&mut self) {
-        self.db.trigger_cancellation();
+        // We need to do a synthetic write right now due to how fixpoint cycles handle cancellation
+        // the revision bump there is a reset marker for clearing fixpoint poisoning.
+        // That is `trigger_cancellation` is currently bugged wrt to cancellation.
+        // self.db.trigger_cancellation();
+        self.db.synthetic_write(Durability::LOW);
     }
     pub fn trigger_garbage_collection(&mut self) {
-        self.db.trigger_lru_eviction();
+        // We need to do a synthetic write right now due to how fixpoint cycles handle cancellation
+        // the revision bump there is a reset marker for clearing fixpoint poisoning.
+        // That is `trigger_lru_eviction` is currently bugged wrt to cancellation.
+        // self.db.trigger_lru_eviction();
+        self.db.synthetic_write(Durability::LOW);
         // SAFETY: `trigger_lru_eviction` triggers cancellation, so all running queries were canceled.
         unsafe { hir::collect_ty_garbage() };
     }
@@ -242,7 +254,7 @@ impl Analysis {
     // Creates an analysis instance for a single file, without any external
     // dependencies, stdlib support or ability to apply changes. See
     // `AnalysisHost` for creating a fully-featured analysis.
-    pub fn from_single_file(text: String) -> (Analysis, FileId) {
+    pub fn from_single_file(text: String, proc_macro_cwd: Arc<AbsPathBuf>) -> (Analysis, FileId) {
         let mut host = AnalysisHost::default();
         let file_id = FileId::from_raw(0);
         let mut file_set = FileSet::default();
@@ -256,11 +268,6 @@ impl Analysis {
         // Default to enable test for single file.
         let mut cfg_options = CfgOptions::default();
 
-        // FIXME: This is less than ideal
-        let proc_macro_cwd = Arc::new(
-            TryFrom::try_from(&*std::env::current_dir().unwrap().as_path().to_string_lossy())
-                .unwrap(),
-        );
         let crate_attrs = Vec::new();
         cfg_options.insert_atom(sym::test);
         crate_graph.add_crate_root(
@@ -358,7 +365,7 @@ impl Analysis {
     /// Gets the file's `LineIndex`: data structure to convert between absolute
     /// offsets and line/column representation.
     pub fn file_line_index(&self, file_id: FileId) -> Cancellable<Arc<LineIndex>> {
-        self.with_db(|db| db.line_index(file_id))
+        self.with_db(|db| line_index(db, file_id).clone())
     }
 
     /// Selects the next syntactic nodes encompassing the range.
@@ -383,6 +390,14 @@ impl Analysis {
 
     pub fn view_hir(&self, position: FilePosition) -> Cancellable<String> {
         self.with_db(|db| view_hir::view_hir(db, position))
+    }
+
+    pub fn evaluate_predicate(
+        &self,
+        text: String,
+        position: FilePosition,
+    ) -> Cancellable<PredicateEvaluationResult> {
+        self.with_db(|db| predicate_eval::evaluate_predicate(db, text, position))
     }
 
     pub fn view_mir(&self, position: FilePosition) -> Cancellable<String> {
@@ -768,7 +783,7 @@ impl Analysis {
         &self,
         config: &CompletionConfig<'_>,
         position: FilePosition,
-        imports: impl IntoIterator<Item = String> + std::panic::UnwindSafe,
+        imports: impl IntoIterator<Item = CompletionItemImport> + std::panic::UnwindSafe,
     ) -> Cancellable<Vec<TextEdit>> {
         Ok(self
             .with_db(|db| ide_completion::resolve_completion_edits(db, config, position, imports))?

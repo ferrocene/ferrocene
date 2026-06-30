@@ -1,3 +1,27 @@
+error: validated method calls an unvalidated associated function
+  --> $DIR/basic.rs:73:9
+   |
+LL |         String::new()
+   |         ^^^^^^^^^^^
+   |
+  --> $SRC_DIR/alloc/src/string.rs:LL:COL
+   |
+   = note: `String::new` is unvalidated
+   |
+   = help: contact Ferrocene support to see if this associated function is possible to certify
+note: `<Validated as ToString>::to_string` is validated
+  --> $DIR/basic.rs:72:8
+   |
+LL |     #[ferrocene::prevalidated]
+   |     -------------------------- marked as validated here
+LL |     fn to_string(&self) -> String {
+   |        ^^^^^^^^^
+note: the lint level is defined here
+  --> $DIR/basic.rs:11:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
 error: validated closure calls an unvalidated function
   --> $DIR/basic.rs:90:42
    |
@@ -14,11 +38,6 @@ LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
 LL | const CERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |                                       ^^
-note: the lint level is defined here
-  --> $DIR/basic.rs:11:9
-   |
-LL | #![deny(ferrocene::unvalidated)]
-   |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated closure calls an unvalidated function
   --> $DIR/basic.rs:92:44
@@ -191,5 +210,5 @@ LL |     UNCERTIFIED_DYN_STATIC.partial_cmp(&Unvalidated);
    = note: `UNCERTIFIED_DYN_STATIC` contains a function pointer that might be called at runtime
    = note: the Ferrocene compiler does not know if the `dyn PartialOrd<Unvalidated> + Sync` was verified, so it must assume it is unverified
 
-error: aborting due to 14 previous errors
+error: aborting due to 15 previous errors
 

@@ -11,6 +11,7 @@ use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{
     self, CrateVariancesMap, GenericArgsRef, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable,
+    Unnormalized,
 };
 use tracing::{debug, instrument};
 
@@ -47,11 +48,6 @@ pub(super) fn variances_of(tcx: TyCtxt<'_>, item_def_id: LocalDefId) -> &[ty::Va
         | DefKind::Struct
         | DefKind::Union
         | DefKind::Ctor(..) => {
-            // These are inferred.
-            let crate_map = tcx.crate_variances(());
-            return crate_map.variances.get(&item_def_id.to_def_id()).copied().unwrap_or(&[]);
-        }
-        DefKind::TyAlias if tcx.type_alias_is_lazy(item_def_id) => {
             // These are inferred.
             let crate_map = tcx.crate_variances(());
             return crate_map.variances.get(&item_def_id.to_def_id()).copied().unwrap_or(&[]);
@@ -185,7 +181,11 @@ fn variance_of_opaque(
     let mut collector =
         OpaqueTypeLifetimeCollector { tcx, root_def_id: item_def_id.to_def_id(), variances };
     let id_args = ty::GenericArgs::identity_for_item(tcx, item_def_id);
-    for (pred, _) in tcx.explicit_item_bounds(item_def_id).iter_instantiated_copied(tcx, id_args) {
+    for (pred, _) in tcx
+        .explicit_item_bounds(item_def_id)
+        .iter_instantiated_copied(tcx, id_args)
+        .map(Unnormalized::skip_norm_wip)
+    {
         debug!(?pred);
 
         // We only ignore opaque type args if the opaque type is the outermost type.

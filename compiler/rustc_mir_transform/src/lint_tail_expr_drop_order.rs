@@ -137,7 +137,6 @@ impl<'a, 'mir, 'tcx> DropsReachable<'a, 'mir, 'tcx> {
                     unwind: _,
                     replace: _,
                     drop: _,
-                    async_fut: _,
                 } = &terminator.kind
                 && place_has_common_prefix(dropped_place, self.place)
             {
@@ -467,6 +466,7 @@ fn collect_user_names(body: &Body<'_>) -> FxIndexMap<Local, Symbol> {
     for var_debug_info in &body.var_debug_info {
         if let mir::VarDebugInfoContents::Place(place) = &var_debug_info.value
             && let Some(local) = place.local_or_deref_local()
+            && !body.local_decls[local].from_compiler_desugaring()
         {
             names.entry(local).or_insert(var_debug_info.name);
         }

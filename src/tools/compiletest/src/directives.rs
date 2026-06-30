@@ -6,7 +6,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use semver::Version;
 use tracing::*;
 
-use crate::common::{CodegenBackend, Config, Debugger, FailMode, PassMode, RunFailMode, TestMode};
+use crate::common::{CodegenBackend, Config, Debugger, PassFailMode, TestMode};
 use crate::debuggers::{extract_cdb_version, extract_gdb_version};
 use crate::directives::auxiliary::parse_and_update_aux;
 pub(crate) use crate::directives::auxiliary::{AuxCrate, AuxProps};
@@ -16,7 +16,7 @@ use crate::directives::directive_names::{
 pub(crate) use crate::directives::file::FileDirectives;
 use crate::directives::handlers::DIRECTIVE_HANDLERS_MAP;
 use crate::directives::line::DirectiveLine;
-use crate::directives::needs::CachedNeedsConditions;
+use crate::directives::needs::PreparedNeedsConditions;
 use crate::edition::{Edition, parse_edition};
 use crate::errors::ErrorKind;
 use crate::executor::{CollectedTestDesc, ShouldFail};
@@ -40,14 +40,14 @@ pub(crate) struct DirectivesCache {
     /// "Conditions" used by `ignore-*` and `only-*` directives, prepared in
     /// advance so that they don't have to be evaluated repeatedly.
     cfg_conditions: cfg::PreparedConditions,
-    needs: CachedNeedsConditions,
+    needs: PreparedNeedsConditions,
 }
 
 impl DirectivesCache {
     pub(crate) fn load(config: &Config) -> Self {
         Self {
             cfg_conditions: cfg::prepare_conditions(config),
-            needs: CachedNeedsConditions::load(config),
+            needs: needs::prepare_needs_conditions(config),
         }
     }
 }
@@ -135,7 +135,7 @@ pub(crate) struct TestProps {
     pub(crate) pretty_mode: String,
     // Only compare pretty output and don't try compiling
     pub(crate) pretty_compare_only: bool,
-    // Patterns which must not appear in the output of a cfail test.
+    /// Strings that must not appear in compile/run output.
     pub(crate) forbid_output: Vec<String>,
     // Revisions to test for incremental compilation.
     pub(crate) revisions: Vec<String>,
@@ -165,12 +165,13 @@ pub(crate) struct TestProps {
     // error annotations are needed, but this may be updated in the future to
     // include other relaxations.
     pub(crate) known_bug: bool,
-    // How far should the test proceed while still passing.
-    pass_mode: Option<PassMode>,
+    /// Whether this is a check, build, or build-and-run test, and whether the
+    /// final step should succeed or fail.
+    ///
+    /// None for non-UI tests, and for auxiliary crates used by UI tests.
+    pub(crate) pass_fail_mode: Option<PassFailMode>,
     // Ignore `--pass` overrides from the command line for this test.
-    ignore_pass: bool,
-    // How far this test should proceed to start failing.
-    pub(crate) fail_mode: Option<FailMode>,
+    pub(crate) no_pass_override: bool,
     // rustdoc will test the output of the `--test` option
     pub(crate) check_test_line_numbers_match: bool,
     // customized normalization rules
@@ -185,8 +186,6 @@ pub(crate) struct TestProps {
     // If true, `rustfix` will only apply `MachineApplicable` suggestions.
     pub(crate) rustfix_only_machine_applicable: bool,
     pub(crate) assembly_output: Option<String>,
-    // If true, the test is expected to ICE
-    pub(crate) should_ice: bool,
     // If true, the stderr is expected to be different across bit-widths.
     pub(crate) stderr_per_bitwidth: bool,
     // The MIR opt to unit test, if any
@@ -197,6 +196,9 @@ pub(crate) struct TestProps {
     /// Extra flags to pass to `llvm-cov` when producing coverage reports.
     /// Only used by the "coverage-run" test mode.
     pub(crate) llvm_cov_flags: Vec<String>,
+    /// Don't run LLVM's `filecheck` tool to check compiler output,
+    /// in tests that would normally run it.
+    pub(crate) skip_filecheck: bool,
     /// Extra flags to pass to LLVM's `filecheck` tool, in tests that use it.
     pub(crate) filecheck_flags: Vec<String>,
     /// Don't automatically insert any `--check-cfg` args
@@ -222,7 +224,6 @@ mod directives {
     pub(crate) const COMPILE_FLAGS: &str = "compile-flags";
     pub(crate) const RUN_FLAGS: &str = "run-flags";
     pub(crate) const DOC_FLAGS: &str = "doc-flags";
-    pub(crate) const SHOULD_ICE: &str = "should-ice";
     pub(crate) const BUILD_AUX_DOCS: &str = "build-aux-docs";
     pub(crate) const UNIQUE_DOC_OUT_DIR: &str = "unique-doc-out-dir";
     pub(crate) const FORCE_HOST: &str = "force-host";
@@ -245,7 +246,6 @@ mod directives {
     pub(crate) const UNSET_RUSTC_ENV: &str = "unset-rustc-env";
     pub(crate) const FORBID_OUTPUT: &str = "forbid-output";
     pub(crate) const CHECK_TEST_LINE_NUMBERS_MATCH: &str = "check-test-line-numbers-match";
-    pub(crate) const IGNORE_PASS: &str = "ignore-pass";
     pub(crate) const FAILURE_STATUS: &str = "failure-status";
     pub(crate) const DONT_CHECK_FAILURE_STATUS: &str = "dont-check-failure-status";
     pub(crate) const RUN_RUSTFIX: &str = "run-rustfix";
@@ -299,9 +299,8 @@ impl TestProps {
             incremental_dir: None,
             incremental: false,
             known_bug: false,
-            pass_mode: None,
-            fail_mode: None,
-            ignore_pass: false,
+            pass_fail_mode: None,
+            no_pass_override: false,
             check_test_line_numbers_match: false,
             normalize_stdout: vec![],
             normalize_stderr: vec![],
@@ -310,11 +309,11 @@ impl TestProps {
             run_rustfix: false,
             rustfix_only_machine_applicable: false,
             assembly_output: None,
-            should_ice: false,
             stderr_per_bitwidth: false,
             mir_unit_test: None,
             remap_src_base: false,
             llvm_cov_flags: vec![],
+            skip_filecheck: false,
             filecheck_flags: vec![],
             no_auto_check_cfg: false,
             add_minicore: false,
@@ -336,7 +335,7 @@ impl TestProps {
 
         // copy over select properties to the aux build:
         props.incremental_dir = self.incremental_dir.clone();
-        props.ignore_pass = true;
+        props.no_pass_override = true;
         props.load_from(testfile, revision, config);
 
         props
@@ -347,10 +346,9 @@ impl TestProps {
         props.load_from(testfile, revision, config);
         props.exec_env.push(("RUSTC".to_string(), config.rustc_path.to_string()));
 
-        match (props.pass_mode, props.fail_mode) {
-            (None, None) if config.mode == TestMode::Ui => props.fail_mode = Some(FailMode::Check),
-            (Some(_), Some(_)) => panic!("cannot use a *-fail and *-pass mode together"),
-            _ => {}
+        // UI tests default to `//@ check-fail` if unspecified.
+        if config.mode == TestMode::Ui && props.pass_fail_mode.is_none() {
+            props.pass_fail_mode = Some(PassFailMode::CheckFail);
         }
 
         props
@@ -379,10 +377,6 @@ impl TestProps {
                     }
                 },
             );
-        }
-
-        if self.should_ice {
-            self.failure_status = Some(101);
         }
 
         if config.mode == TestMode::Incremental {
@@ -414,97 +408,34 @@ impl TestProps {
         }
     }
 
-    fn update_fail_mode(&mut self, ln: &DirectiveLine<'_>, config: &Config) {
-        let check_ui = |mode: &str| {
-            // Mode::Crashes may need build-fail in order to trigger llvm errors or stack overflows
-            if config.mode != TestMode::Ui && config.mode != TestMode::Crashes {
-                panic!("`{}-fail` directive is only supported in UI tests", mode);
-            }
-        };
-        let fail_mode = if config.parse_name_directive(ln, "check-fail") {
-            check_ui("check");
-            Some(FailMode::Check)
-        } else if config.parse_name_directive(ln, "build-fail") {
-            check_ui("build");
-            Some(FailMode::Build)
-        } else if config.parse_name_directive(ln, "run-fail") {
-            check_ui("run");
-            Some(FailMode::Run(RunFailMode::Fail))
-        } else if config.parse_name_directive(ln, "run-crash") {
-            check_ui("run");
-            Some(FailMode::Run(RunFailMode::Crash))
-        } else if config.parse_name_directive(ln, "run-fail-or-crash") {
-            check_ui("run");
-            Some(FailMode::Run(RunFailMode::FailOrCrash))
-        } else {
-            None
-        };
-        match (self.fail_mode, fail_mode) {
-            (None, Some(_)) => self.fail_mode = fail_mode,
-            (Some(_), Some(_)) => panic!("multiple `*-fail` directives in a single test"),
-            (_, None) => {}
+    fn update_pass_fail_mode(&mut self, ln: &DirectiveLine<'_>, config: &Config) {
+        let name = ln.name;
+        if config.mode != TestMode::Ui {
+            panic!("`{name}` directive is only supported in UI tests");
         }
-    }
-
-    fn update_pass_mode(&mut self, ln: &DirectiveLine<'_>, config: &Config) {
-        let check_no_run = |s| match (config.mode, s) {
-            (TestMode::Ui, _) => (),
-            (TestMode::Crashes, _) => (),
-            (TestMode::Codegen, "build-pass") => (),
-            (TestMode::Incremental, _) => {
-                // FIXME(Zalathar): This only detects forbidden directives that are
-                // declared _after_ the incompatible `//@ revisions:` directive(s).
-                if self.revisions.iter().any(|r| !r.starts_with("cfail")) {
-                    panic!("`{s}` directive is only supported in `cfail` incremental tests")
-                }
-            }
-            (mode, _) => panic!("`{s}` directive is not supported in `{mode}` tests"),
-        };
-        let pass_mode = if config.parse_name_directive(ln, "check-pass") {
-            check_no_run("check-pass");
-            Some(PassMode::Check)
-        } else if config.parse_name_directive(ln, "build-pass") {
-            check_no_run("build-pass");
-            Some(PassMode::Build)
-        } else if config.parse_name_directive(ln, "run-pass") {
-            check_no_run("run-pass");
-            Some(PassMode::Run)
-        } else {
-            None
-        };
-        match (self.pass_mode, pass_mode) {
-            (None, Some(_)) => self.pass_mode = pass_mode,
-            (Some(_), Some(_)) => panic!("multiple `*-pass` directives in a single test"),
-            (_, None) => {}
+        if self.pass_fail_mode.is_some() {
+            panic!("multiple `*-fail` or `*-pass` directives in a single test");
         }
-    }
 
-    pub(crate) fn pass_mode(&self, config: &Config) -> Option<PassMode> {
-        if !self.ignore_pass && self.fail_mode.is_none() {
-            if let mode @ Some(_) = config.force_pass_mode {
-                return mode;
-            }
-        }
-        self.pass_mode
-    }
-
-    // does not consider CLI override for pass mode
-    pub(crate) fn local_pass_mode(&self) -> Option<PassMode> {
-        self.pass_mode
+        let mode = ln.name.parse::<PassFailMode>().unwrap();
+        self.pass_fail_mode = Some(mode);
     }
 
     fn update_add_minicore(&mut self, ln: &DirectiveLine<'_>, config: &Config) {
         let add_minicore = config.parse_name_directive(ln, directives::ADD_MINICORE);
         if add_minicore {
-            if !matches!(config.mode, TestMode::Ui | TestMode::Codegen | TestMode::Assembly) {
+            if !matches!(
+                config.mode,
+                TestMode::Ui | TestMode::Codegen | TestMode::Assembly | TestMode::MirOpt
+            ) {
                 panic!(
-                    "`add-minicore` is currently only supported for ui, codegen and assembly test modes"
+                    "`add-minicore` is currently only supported for ui, codegen, assembly and mir-opt test modes"
                 );
             }
 
             // FIXME(jieyouxu): this check is currently order-dependent, but we should probably
             // collect all directives in one go then perform a validation pass after that.
-            if self.local_pass_mode().is_some_and(|pm| pm == PassMode::Run) {
+            if self.pass_fail_mode == Some(PassFailMode::RunPass) {
                 // `minicore` can only be used with non-run modes, because it's `core` prelude stubs
                 // and can't run.
                 panic!("`add-minicore` cannot be used to run the test binary");
@@ -690,7 +621,11 @@ impl Config {
     }
 
     fn parse_pp_exact(&self, line: &DirectiveLine<'_>) -> Option<Utf8PathBuf> {
-        if let Some(s) = self.parse_name_value_directive(line, "pp-exact") {
+        // Unusually, `//@ pp-exact` can be used with or without a colon, so to avoid a panic
+        // in the parse method we need to make sure there is a colon before calling it.
+        if line.value_after_colon().is_some()
+            && let Some(s) = self.parse_name_value_directive(line, "pp-exact")
+        {
             Some(Utf8PathBuf::from(&s))
         } else if self.parse_name_directive(line, "pp-exact") {
             line.file_path.file_name().map(Utf8PathBuf::from)
@@ -720,10 +655,17 @@ impl Config {
     }
 
     fn parse_name_directive(&self, line: &DirectiveLine<'_>, directive: &str) -> bool {
-        // FIXME(Zalathar): Ideally, this should raise an error if a name-only
-        // directive is followed by a colon, since that's the wrong syntax.
-        // But we would need to fix tests that rely on the current behaviour.
-        line.name == directive
+        if line.name != directive {
+            return false;
+        }
+
+        if line.value_after_colon().is_some() {
+            let &DirectiveLine { file_path, line_number, .. } = line;
+            panic!(
+                "{file_path}:{line_number}: directive `{directive}` must not be followed by a colon"
+            );
+        }
+        true
     }
 
     fn parse_name_value_directive(
@@ -737,10 +679,9 @@ impl Config {
             return None;
         };
 
-        // FIXME(Zalathar): This silently discards directives with a matching
-        // name but no colon. Unfortunately, some directives (e.g. "pp-exact")
-        // currently rely on _not_ panicking here.
-        let value = line.value_after_colon()?;
+        let value = line.value_after_colon().unwrap_or_else(|| {
+            panic!("{file_path}:{line_number}: directive `{directive}` must be followed by a colon and value");
+        });
         debug!("{}: {}", directive, value);
         let value = expand_variables(value.to_owned(), self);
 

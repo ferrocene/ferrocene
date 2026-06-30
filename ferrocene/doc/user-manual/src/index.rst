@@ -33,11 +33,16 @@ Ferrocene User Manual
    :caption: Compilation targets
 
    targets/index
+   targets/armv7r-none-eabihf
    targets/thumbv7em-none-eabi
    targets/thumbv7em-none-eabihf
+   targets/aarch64-unknown-linux-gnu
+   targets/aarch64-rhivos2-linux-gnu
    targets/aarch64-unknown-none
+   targets/aarch64-unknown-nto-qnx800
    targets/aarch64-apple-darwin
    targets/x86_64-unknown-linux-gnu
+   targets/x86_64-pc-nto-qnx800
    targets/x86_64-pc-windows-msvc
 
 .. toctree::
@@ -59,6 +64,15 @@ Ferrocene User Manual
    rustfmt/install
    rustfmt/usage
    rustfmt/config
+
+.. toctree::
+   :numbered:
+   :maxdepth: 2
+   :caption: flip-link
+
+   flip-link/overview
+   flip-link/install
+   flip-link/usage
 
 .. appendices::
    :numbered:

@@ -1,6 +1,6 @@
 mod collapsible_match;
 mod infallible_destructuring_match;
-mod manual_filter;
+pub(crate) mod manual_filter;
 mod manual_map;
 mod manual_ok_err;
 mod manual_unwrap_or;
@@ -1138,6 +1138,7 @@ impl<'tcx> LateLintPass<'tcx> for Matches {
         } else if let Some(if_let) = higher::IfLet::hir(cx, expr) {
             collapsible_match::check_if_let(
                 cx,
+                if_let.let_span.ctxt(),
                 if_let.let_pat,
                 if_let.if_then,
                 if_let.if_else,

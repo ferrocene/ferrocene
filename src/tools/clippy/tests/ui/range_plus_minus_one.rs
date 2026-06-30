@@ -56,9 +56,7 @@ fn main() {
     let _ = (f() + 1)..(f() + 1);
 
     const ONE: usize = 1;
-    // integer consts are linted, too
     for _ in 1..ONE + ONE {}
-    //~^ range_plus_one
 
     let mut vec: Vec<()> = std::vec::Vec::new();
     vec.drain(..);
@@ -179,4 +177,17 @@ fn issue9908() {
 fn issue9908_2(n: usize) -> usize {
     (1..=n - 1).sum()
     //~^ range_minus_one
+}
+
+fn wrongly_unmangled_macros() {
+    macro_rules! test {
+        ($val:expr) => {
+            ($val * 2 + 0)
+        };
+    }
+
+    let x = 5usize;
+    for _ in test!(x)..test!(x) + 1 {
+        //~^ range_plus_one
+    }
 }

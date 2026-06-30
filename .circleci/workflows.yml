@@ -85,9 +85,39 @@ parameters:
   targets--x86_64-pc-windows-msvc--self-test:
     type: string
     default: ""
+  # use this parameter to disable building the windows host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in windows results
+  full-build-x86_64-pc-windows-msvc-host:
+    type: boolean
+    default: true
+  # use this parameter to disable building the darwin host. This is useful to cut down build times and
+  # cost in cases where you want to experiment with linux builds and are not interested in darwin results
+  full-build-aarch64-darwin-host:
+    type: boolean
+    default: true
+  # This is a stable workflow id that doesn't change on rerun
+  #
+  # The stable workflow id is used to identify intermediary containers used by this workflow.
+  #
+  # We can't key off the commit because we want to rebuild the test-runner image if the underlying
+  # base image is updated.
+  #
+  # We can't key off CirlceCIs workflow ID because it will change if someone uses any of the rerun
+  # options, for example "rerun with SSH", causing any step that uses an intermediary image to fail.
+  #
+  # Instead we take the setup workflow id because it's convenient, but any random id would work.
+  stable-workflow-id:
+    type: string
+    default: ""
+
+  # CircleCI has no local variables and the recommendation is to use a parameter with a default value
+  # but since our paramters are all provided by calculate-parameters.py, we need to have the default there.
+  awscli-version:
+    type: string
+    default: ""
 
 orbs:
-  aws-cli: circleci/aws-cli@4.0
+  aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
 
 jobs:
@@ -96,7 +126,7 @@ jobs:
   # is the place for it.
   misc-checks:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -114,7 +144,7 @@ jobs:
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -127,7 +157,7 @@ jobs:
 
   x86_64-linux-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
@@ -138,7 +168,7 @@ jobs:
 
   x86_64-linux-docs:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -157,7 +187,7 @@ jobs:
 
   x86_64-linux-dist:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -169,7 +199,7 @@ jobs:
 
   x86_64-linux-dist-tools:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -181,7 +211,7 @@ jobs:
 
   x86_64-linux-dist-targets:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
@@ -189,12 +219,25 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx: true
+          qnx7: true
+          restore-from-job: x86_64-linux-build
+
+  x86_64-linux-dist-targets-qnx8:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: ferrocene/k8s-amd64-large
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+      SCRIPT: |
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          qnx8: true
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
@@ -215,19 +258,22 @@ jobs:
         type: string
       resource-class:
         type: string
+      extra-args:
+        type: string
+        default: ""
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
-    resource_class: medium # 2-core
+    resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
@@ -243,34 +289,14 @@ jobs:
           path: build/x86_64-unknown-linux-gnu/ferrocene/traceability-matrix.html
           destination: reports
 
-  x86_64-linux-test-library-std:
-    executor: linux-vm
-    resource_class: large # 4-core
-    parameters:
-      test-variant:
-        type: string
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      # Standard library tests need IPv6, which is not available in container
-      # jobs. Because of that we need to run *just* standard library tests in a
-      # virtual machine.
-      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
-    steps:
-      - aws-oidc-auth
-      - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
-
   x86_64-linux-library-coverage:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py test --coverage=library library/core library/alloc --tests
+        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
@@ -282,7 +308,7 @@ jobs:
 
   x86_64-linux-llvm:
     executor: docker-x86_64-ubuntu-20
-    resource_class: xlarge # 8-core
+    resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -303,7 +329,7 @@ jobs:
 
   x86_64-linux-self-test:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
@@ -312,6 +338,21 @@ jobs:
           depth: 1
       - aws-oidc-auth
       - setup-qnx-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
+  x86_64-linux-self-test-qnx8:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: ferrocene/k8s-amd64-tiny
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+    steps:
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - aws-oidc-auth
+      - setup-qnx8-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -333,8 +374,12 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
@@ -347,11 +392,45 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
+  x86_64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
@@ -372,7 +451,7 @@ jobs:
 
   aarch64-linux-build:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
@@ -380,11 +459,12 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
+        ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -396,7 +476,7 @@ jobs:
 
   aarch64-linux-dist-tools:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.xlarge # 8-core
+    resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -406,9 +486,28 @@ jobs:
       - ferrocene-job-dist:
           restore-from-job: aarch64-linux-build
 
+  aarch64-linux-generic-test-container:
+    executor: docker-aarch64-ubuntu-20
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+    steps:
+      - ferrocene-job-test-container:
+          restore-from-job: aarch64-linux-build
+
   aarch64-linux-self-test:
     executor: docker-aarch64-ubuntu-20
-    resource_class: arm.medium # 2-core
+    resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
@@ -419,6 +518,42 @@ jobs:
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
+
+  aarch64-linux-library-coverage:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: ferrocene/k8s-arm64-large
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - ferrocene-ci
+
+  aarch64-linux-rhivos2-test-container:
+    executor: docker-aarch64-ubuntu-20-rhivos2-test-server
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-rhivos2-linux-gnu
+      TEST_DEVICE_ADDR: localhost:12345
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        env | grep TEST_DEVICE_ADDR
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+    steps:
+      - ferrocene-job-test-container:
+          restore-from-job: aarch64-linux-build
 
   # aarch64-apple-darwin jobs
 
@@ -436,13 +571,16 @@ jobs:
       LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+          condition:
+            and:
+              - << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+              - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
             - ferrocene-checkout
             # Darwin does not come with awscli, setup it before aws steps
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
@@ -463,8 +601,14 @@ jobs:
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
-      - ferrocene-job-build:
-          os: darwin
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-build:
+                os: darwin
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-dist:
     macos:
@@ -478,9 +622,15 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist rust-std
     steps:
-      - ferrocene-job-dist:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-dist-tools:
     macos:
@@ -493,9 +643,15 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-      - ferrocene-job-dist:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-self-test:
     macos:
@@ -505,18 +661,24 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      # Darwin does not come with awscli, setup it before aws steps
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            # Darwin does not come with awscli, setup it before aws steps
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
+            - aws-oidc-auth
+            - ferrocene-setup-darwin
+            - setup-uv
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
       - run:
-          name: Install AWSCLIv2
-          command: brew install awscli
-      - aws-oidc-auth
-      - ferrocene-setup-darwin
-      - setup-uv
-      - run:
-          name: Download dist artifacts and run the self-test tool
-          command: ferrocene/ci/scripts/run-self-test.sh
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   aarch64-darwin-generic-test-runner:
     macos:
@@ -533,9 +695,15 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
-      - ferrocene-job-test-container:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
+      - when:
+          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - ferrocene-job-test-container:
+                os: darwin
+                restore-from-job: aarch64-darwin-build
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # x86_64-pc-windows-msvc jobs
 
@@ -562,7 +730,10 @@ jobs:
           name: Make sure git autocrlf is false
           command: git config --global core.autocrlf false
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+          condition:
+            and:
+              - << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+              - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
@@ -591,8 +762,14 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std
     steps:
-      - ferrocene-job-dist:
-          os: windows
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-job-dist:
+                os: windows
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   x86_64-windows-self-test:
     executor:
@@ -604,15 +781,47 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - aws-oidc-auth
-      - ferrocene-setup-windows
-      - setup-uv
-      - setup-qnx-toolchain: {}
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - aws-oidc-auth
+            - ferrocene-setup-windows
+            - setup-uv
+            - setup-qnx-toolchain: {}
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
       - run:
-          name: Download dist artifacts and run the self-test tool
-          command: ferrocene/ci/scripts/run-self-test.sh
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  x86_64-windows-self-test-qnx8:
+    executor:
+      name: win/server-2022
+      size: medium # 4-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+    steps:
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - aws-oidc-auth
+            - ferrocene-setup-windows
+            - setup-uv
+            - setup-qnx8-toolchain: {}
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # Test VMs
 
@@ -639,6 +848,9 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - run:
           name: Restore files from the x86_64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
@@ -685,6 +897,9 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout
       - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -693,6 +908,40 @@ jobs:
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
+
+  aarch64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
 
   # Docker jobs
 
@@ -718,7 +967,9 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -753,7 +1004,9 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -769,10 +1022,66 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-rhivos2-test-server-aarch64:
+    description: Build and upload a Docker image for a rhivos2 container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - run:
+          name: Build and upload the Docker image
+          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+          environment:
+            IMAGE_NAME: rhivos-2.0-test-server
+            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+
+  # The image gets built for every job because it needs to contain build results per job
+  build-docker-rhel-test-server-aarch64:
+    description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+      - run:
+          name: Install required packages
+          command: sudo apt update && sudo apt install zstd
+      - run:
+          name: Restore files from the aarch64-linux-build job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
+      - run:
+          name: Build and upload the Docker image
+          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
+          environment:
+            IMAGE_NAME: rhel-10.1-test-server
+            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
+
   # Misc jobs
   wasm-dist-oxidos:
     executor: docker-x86_64-ubuntu-20
-    resource_class: large # 4-core
+    resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: wasm32-unknown-unknown
@@ -784,44 +1093,63 @@ jobs:
 
   finish-build:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
-      - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - run:
-          name: Restore files from the x86_64-linux-build
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - run:
-          name: Configure
-          command: ferrocene/ci/configure.sh
-      - run:
-          name: Checkout the submodules
-          command: ferrocene/ci/scripts/checkout-submodules.sh
-      - run:
-          name: Generate build metadata
-          command: ./x.py dist ferrocene-build-metadata
-      # From this point onwards, the commit can be released by the release process.
-      - run:
-          name: Upload metadata files to S3
-          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
-      # Unfortunately the validation script for packages.toml has to be executed after the build
-      # metadata has been uploaded, as it needs to retrieve some of it from S3.
-      #
-      # In theory this means a release could be published even when this step failed to execute. In
-      # practice it's not a problem, as the failures detected by this script also result in errors
-      # during the release process.
-      - run:
-          name: Verify that all of the expected artifacts were uploaded
-          command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
+      # if at least one of the conditions is set to false, we're not building the
+      # whole set and we want to fail the build
+      - when:
+          condition:
+            or:
+              - not: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+              - not: << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - run:
+                name: Fail build as incomplete
+                command: "false"
+      # only if both windows and darwin builds are enabled we want to continue the build and
+      # do the final checks
+      - when:
+          condition:
+            and:
+              - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+              - << pipeline.parameters.full-build-aarch64-darwin-host >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - run:
+                name: Restore files from the x86_64-linux-build
+                command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+            - run:
+                name: Configure
+                command: ferrocene/ci/configure.sh
+            - run:
+                name: Checkout the submodules
+                command: ferrocene/ci/scripts/checkout-submodules.sh
+            - run:
+                name: Generate build metadata
+                command: ./x.py dist ferrocene-build-metadata
+            # From this point onwards, the commit can be released by the release process.
+            - run:
+                name: Upload metadata files to S3
+                command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+            # Unfortunately the validation script for packages.toml has to be executed after the build
+            # metadata has been uploaded, as it needs to retrieve some of it from S3.
+            #
+            # In theory this means a release could be published even when this step failed to execute. In
+            # practice it's not a problem, as the failures detected by this script also result in errors
+            # during the release process.
+            - run:
+                name: Verify that all of the expected artifacts were uploaded
+                command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
 
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
     executor: docker-x86_64-ubuntu-20
-    resource_class: small # 1-core
+    resource_class: ferrocene/k8s-amd64-tiny
     steps:
       - run:
           name: This is a workaround for CircleCI always wanting at least a job per commit.
@@ -875,26 +1203,36 @@ workflows:
             # outcomes in the qualification documents.
             - misc-checks
             - x86_64-linux-test
+            - x86_64-linux-test-flip-link
             - x86_64-linux-test-library
-            - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
             - x86_64-qnx-test-library
-            - x86_64-qnx-test-library-std
             - x86_64-qnx-test-compiletest
+            - x86_64-qnx8-test-library
+            - x86_64-qnx8-test-compiletest
             - aarch64-qnx-test-library
-            - aarch64-qnx-test-library-std
             - aarch64-qnx-test-compiletest
+            - aarch64-qnx8-test-library
+            - aarch64-qnx8-test-compiletest
             - aarch64-none-test-library
             - aarch64-none-test-compiletest
             - aarch64r82-none-test-library
             - aarch64r82-none-test-compiletest
             - aarch64v8r-none-test-library
             - aarch64v8r-none-test-compiletest
+            - armv7r-eabihf-test-compiletest
+            - armv7r-eabihf-test-library
             - thumbv7em-eabihf-test-library
             - thumbv7em-eabihf-test-compiletest
             - thumbv7em-eabi-test-library
             - thumbv7em-eabi-test-compiletest
+            - aarch64-linux-test
+            - aarch64-linux-test-library
+            - aarch64-linux-compiletest
+            - aarch64-linux-library-coverage
+            - aarch64-linux-rhivos2-test-library
+            - aarch64-linux-rhivos2-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -906,31 +1244,38 @@ workflows:
       - x86_64-linux-dist-targets:
           requires:
             - x86_64-linux-build
+      - x86_64-linux-dist-targets-qnx8:
+          requires:
+            - x86_64-linux-build
       - x86_64-linux-dist-src:
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test
           job: test
-          resource-class: large # 4-core
+          resource-class: ferrocene/k8s-amd64-large
           test-variant: "2021"
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-generic-test-container:
+          name: x86_64-linux-test-flip-link
+          job: test:flip-link
+          resource-class: ferrocene/k8s-amd64-medium
+          test-variant: "2021"
+          extra-args: --target thumbv7em-none-eabi
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-test-library
           job: test:library
-          resource-class: large # 4-core
+          resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"
           requires:
             - x86_64-linux-build
       - x86_64-linux-generic-test-container:
           name: x86_64-linux-compiletest
           job: test:compiletest
-          resource-class: xlarge # 8-core
-          test-variant: "2021"
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-test-library-std:
+          resource-class: ferrocene/k8s-amd64-large
           test-variant: "2021"
           requires:
             - x86_64-linux-build
@@ -947,12 +1292,33 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64-none-test-target-cpu-compiletest
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-specific-cortex-a53
+          qemu-arch: qemu-aarch64
+          job: qnx:compiletest-no-only-hosts
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
       - facade-generic-test:
           name: aarch64-none-test-library
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64-none-test-target-cpu-library
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-specific-cortex-a53
+          qemu-arch: qemu-aarch64
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -971,7 +1337,7 @@ workflows:
           target: aarch64r82-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -990,7 +1356,7 @@ workflows:
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1006,20 +1372,18 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
+      - x86_64-linux-self-test-qnx8:
+          requires:
+            - x86_64-linux-dist
+            - x86_64-linux-dist-tools
+            - x86_64-linux-dist-targets-qnx8
+            - aarch64-linux-dist
+
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library
           job: test:library
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library-std
-          job: test:library-std
-          test-variant: "2021"
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1034,12 +1398,41 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
+      - x86_64-qnx8-generic-test-vm:
+          name: x86_64-qnx8-test-library
+          job: test:library
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - x86_64-qnx8-generic-test-vm:
+          name: x86_64-qnx8-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          test-variant: "2021"
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - facade-generic-test:
+          name: armv7r-eabihf-test-library
+          target: armv7r-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-r5f
+          qemu-arch: qemu-arm
+          job: test:library-nostd
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1049,7 +1442,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1059,7 +1452,7 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1069,8 +1462,18 @@ workflows:
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library
+          job: test:library-nostd
           resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: armv7r-eabihf-test-compiletest
+          target: armv7r-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-r5f
+          qemu-arch: qemu-arm
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
 
@@ -1125,16 +1528,26 @@ workflows:
             - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library-std
-          job: test:library-std
+          name: aarch64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
+
+      - aarch64-qnx8-generic-test-vm:
+          name: aarch64-qnx8-test-library
+          job: test:library
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-compiletest
+      - aarch64-qnx8-generic-test-vm:
+          name: aarch64-qnx8-test-compiletest
           job: qnx:compiletest-no-only-hosts
           test-variant: "2021"
           resource-class: xlarge # 8-core
@@ -1154,6 +1567,30 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
+      - aarch64-linux-generic-test-container:
+          name: aarch64-linux-test
+          job: test
+          resource-class: ferrocene/k8s-arm64-large
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-generic-test-container:
+          name: aarch64-linux-test-library
+          job: test:library
+          resource-class: ferrocene/k8s-arm64-medium
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-generic-test-container:
+          name: aarch64-linux-compiletest
+          job: test:compiletest
+          resource-class: ferrocene/k8s-arm64-large
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-library-coverage:
+          requires:
+            - aarch64-linux-build
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist
@@ -1161,6 +1598,32 @@ workflows:
             - x86_64-linux-dist-targets
             - x86_64-linux-dist
 
+      # RHEL Test Infrastructure
+      - build-docker-rhel-test-server-aarch64:
+          requires:
+            - aarch64-linux-build
+
+      # RHIVOS2 Test Infrastructure
+      - build-docker-rhivos2-test-server-aarch64:
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-rhivos2-test-container:
+          name: aarch64-linux-rhivos2-test-library
+          job: test:library
+          resource-class: ferrocene/k8s-rhel-10-arm64-medium
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - build-docker-rhivos2-test-server-aarch64
+      # notably, this job needs significantly more memory.
+      - aarch64-linux-rhivos2-test-container:
+          name: aarch64-linux-rhivos2-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: ferrocene/k8s-rhel-10-arm64-medium
+          test-variant: "2021"
+          requires:
+            - aarch64-linux-build
+            - build-docker-rhivos2-test-server-aarch64
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
@@ -1189,12 +1652,6 @@ workflows:
           resource-class: m4pro.medium # 6 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library-std
-          job: test:library-std
-          resource-class: m4pro.medium # 6 cores
-          requires:
-            - aarch64-darwin-build
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
@@ -1209,6 +1666,10 @@ workflows:
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets
+      - x86_64-windows-self-test-qnx8:
+          requires:
+            - x86_64-windows-dist
+            - x86_64-linux-dist-targets-qnx8
 
       - sbom-gen:
           requires:
@@ -1220,13 +1681,14 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
+            - x86_64-linux-self-test-qnx8
             - x86_64-windows-self-test
+            - x86_64-windows-self-test-qnx8
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
             - aarch64-darwin-test
             - aarch64-darwin-test-library
-            - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
             - sbom-gen
 
@@ -1263,9 +1725,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - aws-oidc-auth
       - when:
           condition:
@@ -1301,7 +1763,10 @@ commands:
       llvm-subset:
         type: boolean
         default: true
-      qnx:
+      qnx7:
+        type: boolean
+        default: false
+      qnx8:
         type: boolean
         default: false
     steps:
@@ -1311,9 +1776,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - aws-oidc-auth
       - when:
           condition:
@@ -1334,9 +1799,14 @@ commands:
                 command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
       - when:
           condition:
-            equal: [<<parameters.qnx>>, true]
+            equal: [<<parameters.qnx7>>, true]
           steps:
             - setup-qnx-toolchain: {}
+      - when:
+          condition:
+            equal: [<<parameters.qnx8>>, true]
+          steps:
+            - setup-qnx8-toolchain: {}
       - ferrocene-ci
 
   ferrocene-job-test-container:
@@ -1354,9 +1824,9 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - run:
-                name: Install AWSCLIv2
-                command: brew install awscli
+            - aws-cli/install:
+                version: << pipeline.parameters.awscli-version >>
+                override_installed: true
       - setup-uv
       - aws-oidc-auth
       - when:
@@ -1433,7 +1903,6 @@ commands:
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
-                    -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
@@ -1602,6 +2071,25 @@ commands:
                 name: Set PATH to include QNX710 tools
                 command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
 
+  setup-qnx8-toolchain:
+    description: Setup QNX8 Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
+    steps:
+      - run:
+          name: Fetch QNX800 toolchain
+          # On Windows, the virtualenv detection seems to struggle at times.
+          command: |
+            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX800 tools
+                command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
+
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC
     steps:
@@ -1639,22 +2127,68 @@ executors:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-aarch64-ubuntu-20:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+  # This executor spins up a secondary container with the remote testserver running in a RHIVOS2 image
+  # The image is built specifically for this run.
+  docker-aarch64-ubuntu-20-rhivos2-test-server:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+      - name: rhivos-test-server
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+        command:
+          - "/bin/test-server/aarch64-rhivos2-linux-gnu/remote-test-server"
+          - "-v"
+          - "--bind"
+          - "127.0.0.1:12345"
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+  # This executor spins up a secondary container with the remote testserver running in a RHEL 10.1 image
+  # The image is built specifically for this run.
+  docker-aarch64-ubuntu-20-rhel-10-1-test-server:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
+      - name: rhel-test-server
+        image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
+        command:
+          - "/bin/test-server/aarch64-unknown-linux-gnu/remote-test-server"
+          - "-v"
+          - "--bind"
+          - "127.0.0.1:12345"
+        aws_auth:
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-x86_64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-aarch64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-24 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          # Self-Hosted Runners can't do OIDC auth at the moment
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   linux-vm:
     machine:
       image: default

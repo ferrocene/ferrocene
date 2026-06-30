@@ -35,7 +35,10 @@ pub(super) fn apply_edits(editor: SyntaxEditor) -> SyntaxEdit {
     //   - changed nodes become part of the changed node set (useful for the formatter to only change those parts)
     // - Propagate annotations
 
-    let SyntaxEditor { root, mut changes, mappings, annotations } = editor;
+    let SyntaxEditor { root, changes, annotations, make } = editor;
+    let mut changes = changes.into_inner();
+    let annotations = annotations.into_inner();
+    let mappings = make.take();
 
     let mut node_depths = FxHashMap::<SyntaxNode, usize>::default();
     let mut get_node_depth = |node: SyntaxNode| {
@@ -108,8 +111,7 @@ pub(super) fn apply_edits(editor: SyntaxEditor) -> SyntaxEdit {
         // Check if this change is dependent on another change (i.e. it's contained within another range)
         if let Some(index) = changed_ancestors
             .iter()
-            .rev()
-            .position(|ancestor| ancestor.affected_range().contains_range(change.target_range()))
+            .rposition(|ancestor| ancestor.affected_range().contains_range(change.target_range()))
         {
             // Pop off any ancestors that aren't applicable
             changed_ancestors.drain((index + 1)..);
@@ -281,7 +283,7 @@ pub(super) fn apply_edits(editor: SyntaxEditor) -> SyntaxEdit {
         }
     }
 
-    for DependentChange { parent, child } in dependent_changes.into_iter() {
+    for DependentChange { parent, child } in dependent_changes.into_iter().rev() {
         let (input_ancestor, output_ancestor) = match &changes[parent as usize] {
             // No change will depend on an insert since changes can only depend on nodes in the root tree
             Change::Insert(_, _) | Change::InsertAll(_, _) => unreachable!(),

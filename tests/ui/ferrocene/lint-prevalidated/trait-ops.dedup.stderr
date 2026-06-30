@@ -165,16 +165,16 @@ LL |     x != x;
    |     ^^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:121:5
+  --> $DIR/trait-ops.rs:129:5
    |
-LL |     fn branch(self) -> ControlFlow<(), Self::Output> { ControlFlow::Continue(()) }
+LL |     fn branch(self) -> ControlFlow<Option<Infallible>> {
    |        ------ `<Unvalidated as core::ops::Try>::branch` is unvalidated
 ...
 LL |     x?;
    |     ^^
    |
 note: `ops2` is validated
-  --> $DIR/trait-ops.rs:119:4
+  --> $DIR/trait-ops.rs:127:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -182,10 +182,10 @@ LL | fn ops2() -> Unvalidated {
    |    ^^^^
 
 error: validated function calls an unvalidated associated function
-  --> $DIR/trait-ops.rs:121:5
+  --> $DIR/trait-ops.rs:129:5
    |
-LL |     fn from_residual(_: ()) -> Self { Unvalidated }
-   |        ------------- `<Unvalidated as core::ops::FromResidual<()>>::from_residual` is unvalidated
+LL |     fn from_residual(_: Option<Infallible>) -> Self {
+   |        ------------- `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
 ...
 LL |     x?;
    |     ^^

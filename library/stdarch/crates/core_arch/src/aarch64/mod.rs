@@ -25,6 +25,20 @@ mod neon;
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
 pub use self::neon::*;
 
+// The rest of `core_arch::aarch64` is available on `arm64ec` but SVE is not supported on `arm64ec`.
+#[cfg(any(all(target_arch = "aarch64", target_endian = "little"), doc))]
+mod sve;
+#[cfg(any(all(target_arch = "aarch64", target_endian = "little"), doc))]
+#[unstable(feature = "stdarch_aarch64_sve", issue = "145052")]
+pub use self::sve::*;
+
+// The rest of `core_arch::aarch64` is available on `arm64ec` but SVE is not supported on `arm64ec`.
+#[cfg(any(all(target_arch = "aarch64", target_endian = "little"), doc))]
+mod sve2;
+#[cfg(any(all(target_arch = "aarch64", target_endian = "little"), doc))]
+#[unstable(feature = "stdarch_aarch64_sve", issue = "145052")]
+pub use self::sve2::*;
+
 mod prefetch;
 #[unstable(feature = "stdarch_aarch64_prefetch", issue = "117217")]
 pub use self::prefetch::*;

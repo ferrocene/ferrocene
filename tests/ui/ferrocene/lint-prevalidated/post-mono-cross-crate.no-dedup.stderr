@@ -64,7 +64,7 @@ LL |     fn clone(&self) -> Self { Unvalidated }
 LL |         *self = other.clone();
    |                 ^^^^^^^^^^^^^
    |
-note: generic method `std::clone::Clone::clone_from` instantiated by `uninstantiated_generic::<Unvalidated>`, which is called from a validated entrypoint
+note: generic method `<Unvalidated as std::clone::Clone>::clone_from` instantiated by `uninstantiated_generic::<Unvalidated>`, which is called from a validated entrypoint
   --> $DIR/auxiliary/unvalidated-post-mono.rs:7:34
    |
 LL |     let fn_ptr: fn(&mut T, &T) = T::clone_from;

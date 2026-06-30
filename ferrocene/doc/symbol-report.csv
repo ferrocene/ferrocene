@@ -943,6 +943,7 @@
 <&isize as core::ops::bit::Shr<u8>>::shr
 <&isize as core::ops::bit::Shr<usize>>::shr
 <&mut I as core::iter::traits::double_ended::DoubleEndedIteratorRefSpec>::spec_rfold
+<&mut I as core::iter::traits::double_ended::DoubleEndedIteratorRefSpec>::spec_try_rfold
 <&mut I as core::iter::traits::exact_size::ExactSizeIterator>::is_empty
 <&mut I as core::iter::traits::exact_size::ExactSizeIterator>::len
 <&mut I as core::iter::traits::iterator::Iterator>::advance_by
@@ -951,6 +952,7 @@
 <&mut I as core::iter::traits::iterator::Iterator>::size_hint
 <&mut I as core::iter::traits::iterator::Iterator>::try_fold
 <&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_fold
+<&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold
 <&mut I as core::iter::traits::iterator::IteratorRefSpec>::spec_try_fold
 <&mut T as core::borrow::Borrow<T>>::borrow
 <&mut T as core::borrow::BorrowMut<T>>::borrow_mut
@@ -972,8 +974,8 @@
 <&mut W as core::fmt::Write>::write_char
 <&mut W as core::fmt::Write>::write_fmt
 <&mut W as core::fmt::Write>::write_str
-<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnMut<(usize,)>>::call_mut
-<&mut core::array::drain::Drain<'_, '_, T, N, F> as core::ops::function::FnOnce<(usize,)>>::call_once
+<&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnMut<(usize,)>>::call_mut
+<&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnOnce<(usize,)>>::call_once
 <&u128 as core::ops::arith::Add<&u128>>::add
 <&u128 as core::ops::arith::Add<u128>>::add
 <&u128 as core::ops::arith::Div<&u128>>::div
@@ -1366,7 +1368,6 @@
 <&usize as core::ops::bit::Shr<usize>>::shr
 <() as core::default::Default>::default
 <() as core::fmt::Debug>::fmt
-<() as core::unit::IsUnit>::is_unit
 <(A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
 <(C, B, A, Z, Y, X, W, V, U, T) as core::fmt::Debug>::fmt
@@ -1408,6 +1409,7 @@
 <T as core::array::SpecArrayClone>::clone
 <T as core::array::equality::SpecArrayEq<Other, N>>::spec_eq
 <T as core::array::equality::SpecArrayEq<Other, N>>::spec_ne
+<T as core::array::iter::iter_inner::SpecPolymorphicIterClone<N>>::spec_clone::clone_into_new
 <T as core::borrow::Borrow<T>>::borrow
 <T as core::borrow::BorrowMut<T>>::borrow_mut
 <T as core::convert::From<T>>::from
@@ -1415,7 +1417,6 @@
 <T as core::convert::TryFrom<U>>::try_from
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
-<T as core::unit::IsUnit>::is_unit
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
 <[T] as core::fmt::Debug>::fmt
@@ -1463,15 +1464,13 @@
 <core::any::TypeId as core::cmp::Eq>::assert_fields_are_eq
 <core::any::TypeId as core::cmp::Ord>::cmp
 <core::any::TypeId as core::cmp::PartialEq>::eq
-<core::any::TypeId as core::cmp::PartialEq>::eq::compiletime
-<core::any::TypeId as core::cmp::PartialEq>::eq::runtime
 <core::any::TypeId as core::cmp::PartialOrd>::partial_cmp
 <core::any::TypeId as core::fmt::Debug>::fmt
 <core::array::Guard<'_, T> as core::ops::drop::Drop>::drop
 <core::array::TryFromSliceError as core::clone::Clone>::clone
 <core::array::TryFromSliceError as core::fmt::Debug>::fmt
 <core::array::TryFromSliceError as core::fmt::Display>::fmt
-<core::array::drain::Drain<'_, '_, T, N, F> as core::ops::drop::Drop>::drop
+<core::array::drain::Drain<'_, '_, T, F> as core::ops::drop::Drop>::drop
 <core::array::iter::IntoIter<T, N> as core::clone::Clone>::clone
 <core::array::iter::IntoIter<T, N> as core::fmt::Debug>::fmt
 <core::array::iter::IntoIter<T, N> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1490,7 +1489,6 @@
 <core::array::iter::IntoIter<T, N> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<DATA> as core::ops::drop::Drop>::drop
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone
-<core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>; N]> as core::clone::Clone>::clone::clone_into_new
 <core::array::iter::iter_inner::PolymorphicIter<[core::mem::maybe_uninit::MaybeUninit<T>]> as core::fmt::Debug>::fmt
 <core::ascii::EscapeDefault as core::clone::Clone>::clone
 <core::ascii::EscapeDefault as core::fmt::Debug>::fmt
@@ -1612,7 +1610,6 @@
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str
 <core::fmt::builders::PadAdapterState as core::default::Default>::default
-<core::fmt::num_buffer::NumBuffer<T> as core::fmt::Debug>::fmt
 <core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
 <core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
 <core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
@@ -1620,7 +1617,9 @@
 <core::intrinsics::AtomicOrdering as core::cmp::PartialEq>::eq
 <core::intrinsics::AtomicOrdering as core::fmt::Debug>::fmt
 <core::iter::adapters::GenericShunt<'_, I, R> as core::iter::traits::iterator::Iterator>::fold
+<core::iter::adapters::GenericShunt<'_, I, R> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::array_chunks::ArrayChunks<I, N> as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
+<core::iter::adapters::array_chunks::ArrayChunks<I, N> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
 <core::iter::adapters::chain::Chain<A, B> as core::clone::Clone>::clone
 <core::iter::adapters::chain::Chain<A, B> as core::fmt::Debug>::fmt
 <core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::advance_by
@@ -1641,7 +1640,6 @@
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::cloned::Cloned<I> as core::iter::traits::iterator::Iterator>::try_fold
-<core::iter::adapters::cloned::Cloned<I> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::iter::adapters::copied::Copied<I> as core::clone::Clone>::clone
 <core::iter::adapters::copied::Copied<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::copied::Copied<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -1692,8 +1690,8 @@
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::next
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::map::Map<I, F> as core::iter::traits::iterator::Iterator>::try_fold
-<core::iter::adapters::map::Map<I, F> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::fold
+<core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::iter::adapters::rev::Rev<I> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
@@ -1710,6 +1708,8 @@
 <core::iter::adapters::rev::Rev<T> as core::clone::Clone>::clone
 <core::iter::adapters::rev::Rev<T> as core::fmt::Debug>::fmt
 <core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::fold
+<core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::try_fold
+<core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::try_fold::scan
 <core::iter::adapters::skip::Skip<I> as core::clone::Clone>::clone
 <core::iter::adapters::skip::Skip<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
@@ -2017,654 +2017,1326 @@
 <core::num::nonzero::NonZero<T> as core::fmt::UpperExp>::fmt
 <core::num::nonzero::NonZero<T> as core::fmt::UpperHex>::fmt
 <core::num::nonzero::NonZero<T> as core::hash::Hash>::hash
+<core::num::nonzero::NonZero<i128> as core::ops::arith::Neg>::neg
+<core::num::nonzero::NonZero<i16> as core::ops::arith::Neg>::neg
+<core::num::nonzero::NonZero<i32> as core::ops::arith::Neg>::neg
+<core::num::nonzero::NonZero<i64> as core::ops::arith::Neg>::neg
+<core::num::nonzero::NonZero<i8> as core::ops::arith::Neg>::neg
+<core::num::nonzero::NonZero<isize> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i128> as core::ops::arith::Add<&core::num::saturating::Saturating<i128>>>::add
+<core::num::saturating::Saturating<i128> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<i128> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<i128>>>::add_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::AddAssign<&i128>>::add_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::AddAssign<i128>>::add_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::Div<&core::num::saturating::Saturating<i128>>>::div
+<core::num::saturating::Saturating<i128> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<i128> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<i128>>>::div_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::DivAssign<&i128>>::div_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::DivAssign<i128>>::div_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::Mul<&core::num::saturating::Saturating<i128>>>::mul
+<core::num::saturating::Saturating<i128> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<i128> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<i128>>>::mul_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::MulAssign<&i128>>::mul_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::MulAssign<i128>>::mul_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i128> as core::ops::arith::Rem<&core::num::saturating::Saturating<i128>>>::rem
+<core::num::saturating::Saturating<i128> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<i128> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<i128>>>::rem_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::RemAssign<&i128>>::rem_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::RemAssign<i128>>::rem_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::Sub<&core::num::saturating::Saturating<i128>>>::sub
+<core::num::saturating::Saturating<i128> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<i128> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<i128>>>::sub_assign
 <core::num::saturating::Saturating<i128> as core::ops::arith::SubAssign<&i128>>::sub_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::SubAssign<i128>>::sub_assign
+<core::num::saturating::Saturating<i128> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<i128>>>::bitand
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<i128>>>::bitand_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitAndAssign<&i128>>::bitand_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitAndAssign<i128>>::bitand_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitOr<&core::num::saturating::Saturating<i128>>>::bitor
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<i128>>>::bitor_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitOrAssign<&i128>>::bitor_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitOrAssign<i128>>::bitor_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitXor<&core::num::saturating::Saturating<i128>>>::bitxor
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<i128>>>::bitxor_assign
 <core::num::saturating::Saturating<i128> as core::ops::bit::BitXorAssign<&i128>>::bitxor_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitXorAssign<i128>>::bitxor_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<i128> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<i16> as core::ops::arith::Add<&core::num::saturating::Saturating<i16>>>::add
+<core::num::saturating::Saturating<i16> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<i16> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<i16>>>::add_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::AddAssign<&i16>>::add_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::AddAssign<i16>>::add_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::Div<&core::num::saturating::Saturating<i16>>>::div
+<core::num::saturating::Saturating<i16> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<i16> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<i16>>>::div_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::DivAssign<&i16>>::div_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::DivAssign<i16>>::div_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::Mul<&core::num::saturating::Saturating<i16>>>::mul
+<core::num::saturating::Saturating<i16> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<i16> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<i16>>>::mul_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::MulAssign<&i16>>::mul_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::MulAssign<i16>>::mul_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i16> as core::ops::arith::Rem<&core::num::saturating::Saturating<i16>>>::rem
+<core::num::saturating::Saturating<i16> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<i16> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<i16>>>::rem_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::RemAssign<&i16>>::rem_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::RemAssign<i16>>::rem_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::Sub<&core::num::saturating::Saturating<i16>>>::sub
+<core::num::saturating::Saturating<i16> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<i16> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<i16>>>::sub_assign
 <core::num::saturating::Saturating<i16> as core::ops::arith::SubAssign<&i16>>::sub_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::SubAssign<i16>>::sub_assign
+<core::num::saturating::Saturating<i16> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<i16>>>::bitand
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<i16>>>::bitand_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitAndAssign<&i16>>::bitand_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitAndAssign<i16>>::bitand_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitOr<&core::num::saturating::Saturating<i16>>>::bitor
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<i16>>>::bitor_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitOrAssign<&i16>>::bitor_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitOrAssign<i16>>::bitor_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitXor<&core::num::saturating::Saturating<i16>>>::bitxor
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<i16>>>::bitxor_assign
 <core::num::saturating::Saturating<i16> as core::ops::bit::BitXorAssign<&i16>>::bitxor_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitXorAssign<i16>>::bitxor_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<i16> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<i32> as core::ops::arith::Add<&core::num::saturating::Saturating<i32>>>::add
+<core::num::saturating::Saturating<i32> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<i32> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<i32>>>::add_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::AddAssign<&i32>>::add_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::AddAssign<i32>>::add_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::Div<&core::num::saturating::Saturating<i32>>>::div
+<core::num::saturating::Saturating<i32> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<i32> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<i32>>>::div_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::DivAssign<&i32>>::div_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::DivAssign<i32>>::div_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::Mul<&core::num::saturating::Saturating<i32>>>::mul
+<core::num::saturating::Saturating<i32> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<i32> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<i32>>>::mul_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::MulAssign<&i32>>::mul_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::MulAssign<i32>>::mul_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i32> as core::ops::arith::Rem<&core::num::saturating::Saturating<i32>>>::rem
+<core::num::saturating::Saturating<i32> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<i32> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<i32>>>::rem_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::RemAssign<&i32>>::rem_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::RemAssign<i32>>::rem_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::Sub<&core::num::saturating::Saturating<i32>>>::sub
+<core::num::saturating::Saturating<i32> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<i32> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<i32>>>::sub_assign
 <core::num::saturating::Saturating<i32> as core::ops::arith::SubAssign<&i32>>::sub_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::SubAssign<i32>>::sub_assign
+<core::num::saturating::Saturating<i32> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<i32>>>::bitand
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<i32>>>::bitand_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitAndAssign<&i32>>::bitand_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitAndAssign<i32>>::bitand_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitOr<&core::num::saturating::Saturating<i32>>>::bitor
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<i32>>>::bitor_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitOrAssign<&i32>>::bitor_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitOrAssign<i32>>::bitor_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitXor<&core::num::saturating::Saturating<i32>>>::bitxor
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<i32>>>::bitxor_assign
 <core::num::saturating::Saturating<i32> as core::ops::bit::BitXorAssign<&i32>>::bitxor_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitXorAssign<i32>>::bitxor_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<i32> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<i64> as core::ops::arith::Add<&core::num::saturating::Saturating<i64>>>::add
+<core::num::saturating::Saturating<i64> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<i64> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<i64>>>::add_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::AddAssign<&i64>>::add_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::AddAssign<i64>>::add_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::Div<&core::num::saturating::Saturating<i64>>>::div
+<core::num::saturating::Saturating<i64> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<i64> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<i64>>>::div_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::DivAssign<&i64>>::div_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::DivAssign<i64>>::div_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::Mul<&core::num::saturating::Saturating<i64>>>::mul
+<core::num::saturating::Saturating<i64> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<i64> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<i64>>>::mul_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::MulAssign<&i64>>::mul_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::MulAssign<i64>>::mul_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i64> as core::ops::arith::Rem<&core::num::saturating::Saturating<i64>>>::rem
+<core::num::saturating::Saturating<i64> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<i64> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<i64>>>::rem_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::RemAssign<&i64>>::rem_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::RemAssign<i64>>::rem_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::Sub<&core::num::saturating::Saturating<i64>>>::sub
+<core::num::saturating::Saturating<i64> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<i64> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<i64>>>::sub_assign
 <core::num::saturating::Saturating<i64> as core::ops::arith::SubAssign<&i64>>::sub_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::SubAssign<i64>>::sub_assign
+<core::num::saturating::Saturating<i64> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<i64>>>::bitand
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<i64>>>::bitand_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitAndAssign<&i64>>::bitand_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitAndAssign<i64>>::bitand_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitOr<&core::num::saturating::Saturating<i64>>>::bitor
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<i64>>>::bitor_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitOrAssign<&i64>>::bitor_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitOrAssign<i64>>::bitor_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitXor<&core::num::saturating::Saturating<i64>>>::bitxor
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<i64>>>::bitxor_assign
 <core::num::saturating::Saturating<i64> as core::ops::bit::BitXorAssign<&i64>>::bitxor_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitXorAssign<i64>>::bitxor_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<i64> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<i8> as core::ops::arith::Add<&core::num::saturating::Saturating<i8>>>::add
+<core::num::saturating::Saturating<i8> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<i8> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<i8>>>::add_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::AddAssign<&i8>>::add_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::AddAssign<i8>>::add_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::Div<&core::num::saturating::Saturating<i8>>>::div
+<core::num::saturating::Saturating<i8> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<i8> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<i8>>>::div_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::DivAssign<&i8>>::div_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::DivAssign<i8>>::div_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::Mul<&core::num::saturating::Saturating<i8>>>::mul
+<core::num::saturating::Saturating<i8> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<i8> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<i8>>>::mul_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::MulAssign<&i8>>::mul_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::MulAssign<i8>>::mul_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<i8> as core::ops::arith::Rem<&core::num::saturating::Saturating<i8>>>::rem
+<core::num::saturating::Saturating<i8> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<i8> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<i8>>>::rem_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::RemAssign<&i8>>::rem_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::RemAssign<i8>>::rem_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::Sub<&core::num::saturating::Saturating<i8>>>::sub
+<core::num::saturating::Saturating<i8> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<i8> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<i8>>>::sub_assign
 <core::num::saturating::Saturating<i8> as core::ops::arith::SubAssign<&i8>>::sub_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::SubAssign<i8>>::sub_assign
+<core::num::saturating::Saturating<i8> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<i8>>>::bitand
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<i8>>>::bitand_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitAndAssign<&i8>>::bitand_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitAndAssign<i8>>::bitand_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitOr<&core::num::saturating::Saturating<i8>>>::bitor
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<i8>>>::bitor_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitOrAssign<&i8>>::bitor_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitOrAssign<i8>>::bitor_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitXor<&core::num::saturating::Saturating<i8>>>::bitxor
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<i8>>>::bitxor_assign
 <core::num::saturating::Saturating<i8> as core::ops::bit::BitXorAssign<&i8>>::bitxor_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitXorAssign<i8>>::bitxor_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<i8> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<isize> as core::ops::arith::Add<&core::num::saturating::Saturating<isize>>>::add
+<core::num::saturating::Saturating<isize> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<isize> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<isize>>>::add_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::AddAssign<&isize>>::add_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::AddAssign<isize>>::add_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::Div<&core::num::saturating::Saturating<isize>>>::div
+<core::num::saturating::Saturating<isize> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<isize> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<isize>>>::div_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::DivAssign<&isize>>::div_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::DivAssign<isize>>::div_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::Mul<&core::num::saturating::Saturating<isize>>>::mul
+<core::num::saturating::Saturating<isize> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<isize> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<isize>>>::mul_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::MulAssign<&isize>>::mul_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::MulAssign<isize>>::mul_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::MulAssign>::mul_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::Neg>::neg
 <core::num::saturating::Saturating<isize> as core::ops::arith::Rem<&core::num::saturating::Saturating<isize>>>::rem
+<core::num::saturating::Saturating<isize> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<isize> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<isize>>>::rem_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::RemAssign<&isize>>::rem_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::RemAssign<isize>>::rem_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::Sub<&core::num::saturating::Saturating<isize>>>::sub
+<core::num::saturating::Saturating<isize> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<isize> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<isize>>>::sub_assign
 <core::num::saturating::Saturating<isize> as core::ops::arith::SubAssign<&isize>>::sub_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::SubAssign<isize>>::sub_assign
+<core::num::saturating::Saturating<isize> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<isize>>>::bitand
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<isize>>>::bitand_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitAndAssign<&isize>>::bitand_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitAndAssign<isize>>::bitand_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitOr<&core::num::saturating::Saturating<isize>>>::bitor
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<isize>>>::bitor_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitOrAssign<&isize>>::bitor_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitOrAssign<isize>>::bitor_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitXor<&core::num::saturating::Saturating<isize>>>::bitxor
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<isize>>>::bitxor_assign
 <core::num::saturating::Saturating<isize> as core::ops::bit::BitXorAssign<&isize>>::bitxor_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitXorAssign<isize>>::bitxor_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<isize> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<u128> as core::ops::arith::Add<&core::num::saturating::Saturating<u128>>>::add
+<core::num::saturating::Saturating<u128> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<u128> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<u128>>>::add_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::AddAssign<&u128>>::add_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::AddAssign<u128>>::add_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::Div<&core::num::saturating::Saturating<u128>>>::div
+<core::num::saturating::Saturating<u128> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<u128> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<u128>>>::div_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::DivAssign<&u128>>::div_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::DivAssign<u128>>::div_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::Mul<&core::num::saturating::Saturating<u128>>>::mul
+<core::num::saturating::Saturating<u128> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<u128> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<u128>>>::mul_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::MulAssign<&u128>>::mul_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::MulAssign<u128>>::mul_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::Rem<&core::num::saturating::Saturating<u128>>>::rem
+<core::num::saturating::Saturating<u128> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<u128> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<u128>>>::rem_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::RemAssign<&u128>>::rem_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::RemAssign<u128>>::rem_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::Sub<&core::num::saturating::Saturating<u128>>>::sub
+<core::num::saturating::Saturating<u128> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<u128> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<u128>>>::sub_assign
 <core::num::saturating::Saturating<u128> as core::ops::arith::SubAssign<&u128>>::sub_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::SubAssign<u128>>::sub_assign
+<core::num::saturating::Saturating<u128> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<u128>>>::bitand
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<u128>>>::bitand_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitAndAssign<&u128>>::bitand_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitAndAssign<u128>>::bitand_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitOr<&core::num::saturating::Saturating<u128>>>::bitor
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<u128>>>::bitor_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitOrAssign<&u128>>::bitor_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitOrAssign<u128>>::bitor_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitXor<&core::num::saturating::Saturating<u128>>>::bitxor
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<u128>>>::bitxor_assign
 <core::num::saturating::Saturating<u128> as core::ops::bit::BitXorAssign<&u128>>::bitxor_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitXorAssign<u128>>::bitxor_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<u128> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<u16> as core::ops::arith::Add<&core::num::saturating::Saturating<u16>>>::add
+<core::num::saturating::Saturating<u16> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<u16> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<u16>>>::add_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::AddAssign<&u16>>::add_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::AddAssign<u16>>::add_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::Div<&core::num::saturating::Saturating<u16>>>::div
+<core::num::saturating::Saturating<u16> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<u16> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<u16>>>::div_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::DivAssign<&u16>>::div_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::DivAssign<u16>>::div_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::Mul<&core::num::saturating::Saturating<u16>>>::mul
+<core::num::saturating::Saturating<u16> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<u16> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<u16>>>::mul_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::MulAssign<&u16>>::mul_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::MulAssign<u16>>::mul_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::Rem<&core::num::saturating::Saturating<u16>>>::rem
+<core::num::saturating::Saturating<u16> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<u16> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<u16>>>::rem_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::RemAssign<&u16>>::rem_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::RemAssign<u16>>::rem_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::Sub<&core::num::saturating::Saturating<u16>>>::sub
+<core::num::saturating::Saturating<u16> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<u16> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<u16>>>::sub_assign
 <core::num::saturating::Saturating<u16> as core::ops::arith::SubAssign<&u16>>::sub_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::SubAssign<u16>>::sub_assign
+<core::num::saturating::Saturating<u16> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<u16>>>::bitand
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<u16>>>::bitand_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitAndAssign<&u16>>::bitand_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitAndAssign<u16>>::bitand_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitOr<&core::num::saturating::Saturating<u16>>>::bitor
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<u16>>>::bitor_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitOrAssign<&u16>>::bitor_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitOrAssign<u16>>::bitor_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitXor<&core::num::saturating::Saturating<u16>>>::bitxor
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<u16>>>::bitxor_assign
 <core::num::saturating::Saturating<u16> as core::ops::bit::BitXorAssign<&u16>>::bitxor_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitXorAssign<u16>>::bitxor_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<u16> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<u32> as core::ops::arith::Add<&core::num::saturating::Saturating<u32>>>::add
+<core::num::saturating::Saturating<u32> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<u32> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<u32>>>::add_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::AddAssign<&u32>>::add_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::AddAssign<u32>>::add_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::Div<&core::num::saturating::Saturating<u32>>>::div
+<core::num::saturating::Saturating<u32> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<u32> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<u32>>>::div_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::DivAssign<&u32>>::div_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::DivAssign<u32>>::div_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::Mul<&core::num::saturating::Saturating<u32>>>::mul
+<core::num::saturating::Saturating<u32> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<u32> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<u32>>>::mul_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::MulAssign<&u32>>::mul_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::MulAssign<u32>>::mul_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::Rem<&core::num::saturating::Saturating<u32>>>::rem
+<core::num::saturating::Saturating<u32> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<u32> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<u32>>>::rem_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::RemAssign<&u32>>::rem_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::RemAssign<u32>>::rem_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::Sub<&core::num::saturating::Saturating<u32>>>::sub
+<core::num::saturating::Saturating<u32> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<u32> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<u32>>>::sub_assign
 <core::num::saturating::Saturating<u32> as core::ops::arith::SubAssign<&u32>>::sub_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::SubAssign<u32>>::sub_assign
+<core::num::saturating::Saturating<u32> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<u32>>>::bitand
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<u32>>>::bitand_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitAndAssign<&u32>>::bitand_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitAndAssign<u32>>::bitand_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitOr<&core::num::saturating::Saturating<u32>>>::bitor
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<u32>>>::bitor_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitOrAssign<&u32>>::bitor_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitOrAssign<u32>>::bitor_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitXor<&core::num::saturating::Saturating<u32>>>::bitxor
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<u32>>>::bitxor_assign
 <core::num::saturating::Saturating<u32> as core::ops::bit::BitXorAssign<&u32>>::bitxor_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitXorAssign<u32>>::bitxor_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<u32> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<u64> as core::ops::arith::Add<&core::num::saturating::Saturating<u64>>>::add
+<core::num::saturating::Saturating<u64> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<u64> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<u64>>>::add_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::AddAssign<&u64>>::add_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::AddAssign<u64>>::add_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::Div<&core::num::saturating::Saturating<u64>>>::div
+<core::num::saturating::Saturating<u64> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<u64> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<u64>>>::div_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::DivAssign<&u64>>::div_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::DivAssign<u64>>::div_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::Mul<&core::num::saturating::Saturating<u64>>>::mul
+<core::num::saturating::Saturating<u64> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<u64> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<u64>>>::mul_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::MulAssign<&u64>>::mul_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::MulAssign<u64>>::mul_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::Rem<&core::num::saturating::Saturating<u64>>>::rem
+<core::num::saturating::Saturating<u64> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<u64> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<u64>>>::rem_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::RemAssign<&u64>>::rem_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::RemAssign<u64>>::rem_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::Sub<&core::num::saturating::Saturating<u64>>>::sub
+<core::num::saturating::Saturating<u64> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<u64> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<u64>>>::sub_assign
 <core::num::saturating::Saturating<u64> as core::ops::arith::SubAssign<&u64>>::sub_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::SubAssign<u64>>::sub_assign
+<core::num::saturating::Saturating<u64> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<u64>>>::bitand
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<u64>>>::bitand_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitAndAssign<&u64>>::bitand_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitAndAssign<u64>>::bitand_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitOr<&core::num::saturating::Saturating<u64>>>::bitor
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<u64>>>::bitor_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitOrAssign<&u64>>::bitor_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitOrAssign<u64>>::bitor_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitXor<&core::num::saturating::Saturating<u64>>>::bitxor
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<u64>>>::bitxor_assign
 <core::num::saturating::Saturating<u64> as core::ops::bit::BitXorAssign<&u64>>::bitxor_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitXorAssign<u64>>::bitxor_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<u64> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<u8> as core::ops::arith::Add<&core::num::saturating::Saturating<u8>>>::add
+<core::num::saturating::Saturating<u8> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<u8> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<u8>>>::add_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::AddAssign<&u8>>::add_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::AddAssign<u8>>::add_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::Div<&core::num::saturating::Saturating<u8>>>::div
+<core::num::saturating::Saturating<u8> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<u8> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<u8>>>::div_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::DivAssign<&u8>>::div_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::DivAssign<u8>>::div_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::Mul<&core::num::saturating::Saturating<u8>>>::mul
+<core::num::saturating::Saturating<u8> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<u8> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<u8>>>::mul_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::MulAssign<&u8>>::mul_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::MulAssign<u8>>::mul_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::Rem<&core::num::saturating::Saturating<u8>>>::rem
+<core::num::saturating::Saturating<u8> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<u8> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<u8>>>::rem_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::RemAssign<&u8>>::rem_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::RemAssign<u8>>::rem_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::Sub<&core::num::saturating::Saturating<u8>>>::sub
+<core::num::saturating::Saturating<u8> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<u8> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<u8>>>::sub_assign
 <core::num::saturating::Saturating<u8> as core::ops::arith::SubAssign<&u8>>::sub_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::SubAssign<u8>>::sub_assign
+<core::num::saturating::Saturating<u8> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<u8>>>::bitand
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<u8>>>::bitand_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitAndAssign<&u8>>::bitand_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitAndAssign<u8>>::bitand_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitOr<&core::num::saturating::Saturating<u8>>>::bitor
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<u8>>>::bitor_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitOrAssign<&u8>>::bitor_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitOrAssign<u8>>::bitor_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitXor<&core::num::saturating::Saturating<u8>>>::bitxor
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<u8>>>::bitxor_assign
 <core::num::saturating::Saturating<u8> as core::ops::bit::BitXorAssign<&u8>>::bitxor_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitXorAssign<u8>>::bitxor_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<u8> as core::ops::bit::Not>::not
 <core::num::saturating::Saturating<usize> as core::ops::arith::Add<&core::num::saturating::Saturating<usize>>>::add
+<core::num::saturating::Saturating<usize> as core::ops::arith::Add>::add
 <core::num::saturating::Saturating<usize> as core::ops::arith::AddAssign<&core::num::saturating::Saturating<usize>>>::add_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::AddAssign<&usize>>::add_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::AddAssign<usize>>::add_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::AddAssign>::add_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::Div<&core::num::saturating::Saturating<usize>>>::div
+<core::num::saturating::Saturating<usize> as core::ops::arith::Div>::div
 <core::num::saturating::Saturating<usize> as core::ops::arith::DivAssign<&core::num::saturating::Saturating<usize>>>::div_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::DivAssign<&usize>>::div_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::DivAssign<usize>>::div_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::DivAssign>::div_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::Mul<&core::num::saturating::Saturating<usize>>>::mul
+<core::num::saturating::Saturating<usize> as core::ops::arith::Mul>::mul
 <core::num::saturating::Saturating<usize> as core::ops::arith::MulAssign<&core::num::saturating::Saturating<usize>>>::mul_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::MulAssign<&usize>>::mul_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::MulAssign<usize>>::mul_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::MulAssign>::mul_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::Rem<&core::num::saturating::Saturating<usize>>>::rem
+<core::num::saturating::Saturating<usize> as core::ops::arith::Rem>::rem
 <core::num::saturating::Saturating<usize> as core::ops::arith::RemAssign<&core::num::saturating::Saturating<usize>>>::rem_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::RemAssign<&usize>>::rem_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::RemAssign<usize>>::rem_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::RemAssign>::rem_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::Sub<&core::num::saturating::Saturating<usize>>>::sub
+<core::num::saturating::Saturating<usize> as core::ops::arith::Sub>::sub
 <core::num::saturating::Saturating<usize> as core::ops::arith::SubAssign<&core::num::saturating::Saturating<usize>>>::sub_assign
 <core::num::saturating::Saturating<usize> as core::ops::arith::SubAssign<&usize>>::sub_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::SubAssign<usize>>::sub_assign
+<core::num::saturating::Saturating<usize> as core::ops::arith::SubAssign>::sub_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitAnd<&core::num::saturating::Saturating<usize>>>::bitand
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitAnd>::bitand
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitAndAssign<&core::num::saturating::Saturating<usize>>>::bitand_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitAndAssign<&usize>>::bitand_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitAndAssign<usize>>::bitand_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitOr<&core::num::saturating::Saturating<usize>>>::bitor
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitOr>::bitor
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitOrAssign<&core::num::saturating::Saturating<usize>>>::bitor_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitOrAssign<&usize>>::bitor_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitOrAssign<usize>>::bitor_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitXor<&core::num::saturating::Saturating<usize>>>::bitxor
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitXor>::bitxor
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitXorAssign<&core::num::saturating::Saturating<usize>>>::bitxor_assign
 <core::num::saturating::Saturating<usize> as core::ops::bit::BitXorAssign<&usize>>::bitxor_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitXorAssign<usize>>::bitxor_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::saturating::Saturating<usize> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i128> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<i128>>>::sum
 <core::num::wrapping::Wrapping<i128> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::Add<&core::num::wrapping::Wrapping<i128>>>::add
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<i128>>>::add_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::AddAssign<&i128>>::add_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::AddAssign<i128>>::add_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::Div<&core::num::wrapping::Wrapping<i128>>>::div
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<i128>>>::div_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::DivAssign<&i128>>::div_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::DivAssign<i128>>::div_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<i128>>>::mul
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<i128>>>::mul_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::MulAssign<&i128>>::mul_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::MulAssign<i128>>::mul_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<i128>>>::rem
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<i128>>>::rem_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::RemAssign<&i128>>::rem_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::RemAssign<i128>>::rem_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<i128>>>::sub
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<i128>>>::sub_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::arith::SubAssign<&i128>>::sub_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::SubAssign<i128>>::sub_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<i128>>>::bitand
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<i128>>>::bitand_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAndAssign<&i128>>::bitand_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAndAssign<i128>>::bitand_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<i128>>>::bitor
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<i128>>>::bitor_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOrAssign<&i128>>::bitor_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOrAssign<i128>>::bitor_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<i128>>>::bitxor
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<i128>>>::bitxor_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXorAssign<&i128>>::bitxor_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXorAssign<i128>>::bitxor_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<i128> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<i128> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<i16> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<i16>>>::sum
 <core::num::wrapping::Wrapping<i16> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::Add<&core::num::wrapping::Wrapping<i16>>>::add
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<i16>>>::add_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::AddAssign<&i16>>::add_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::AddAssign<i16>>::add_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::Div<&core::num::wrapping::Wrapping<i16>>>::div
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<i16>>>::div_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::DivAssign<&i16>>::div_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::DivAssign<i16>>::div_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<i16>>>::mul
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<i16>>>::mul_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::MulAssign<&i16>>::mul_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::MulAssign<i16>>::mul_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<i16>>>::rem
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<i16>>>::rem_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::RemAssign<&i16>>::rem_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::RemAssign<i16>>::rem_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<i16>>>::sub
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<i16>>>::sub_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::arith::SubAssign<&i16>>::sub_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::SubAssign<i16>>::sub_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<i16>>>::bitand
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<i16>>>::bitand_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAndAssign<&i16>>::bitand_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAndAssign<i16>>::bitand_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<i16>>>::bitor
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<i16>>>::bitor_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOrAssign<&i16>>::bitor_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOrAssign<i16>>::bitor_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<i16>>>::bitxor
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<i16>>>::bitxor_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXorAssign<&i16>>::bitxor_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXorAssign<i16>>::bitxor_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<i16> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<i16> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<i32> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<i32>>>::sum
 <core::num::wrapping::Wrapping<i32> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::Add<&core::num::wrapping::Wrapping<i32>>>::add
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<i32>>>::add_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::AddAssign<&i32>>::add_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::AddAssign<i32>>::add_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::Div<&core::num::wrapping::Wrapping<i32>>>::div
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<i32>>>::div_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::DivAssign<&i32>>::div_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::DivAssign<i32>>::div_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<i32>>>::mul
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<i32>>>::mul_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::MulAssign<&i32>>::mul_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::MulAssign<i32>>::mul_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<i32>>>::rem
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<i32>>>::rem_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::RemAssign<&i32>>::rem_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::RemAssign<i32>>::rem_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<i32>>>::sub
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<i32>>>::sub_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::arith::SubAssign<&i32>>::sub_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::SubAssign<i32>>::sub_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<i32>>>::bitand
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<i32>>>::bitand_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAndAssign<&i32>>::bitand_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAndAssign<i32>>::bitand_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<i32>>>::bitor
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<i32>>>::bitor_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOrAssign<&i32>>::bitor_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOrAssign<i32>>::bitor_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<i32>>>::bitxor
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<i32>>>::bitxor_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXorAssign<&i32>>::bitxor_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXorAssign<i32>>::bitxor_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<i32> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<i32> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<i64> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<i64>>>::sum
 <core::num::wrapping::Wrapping<i64> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::Add<&core::num::wrapping::Wrapping<i64>>>::add
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<i64>>>::add_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::AddAssign<&i64>>::add_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::AddAssign<i64>>::add_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::Div<&core::num::wrapping::Wrapping<i64>>>::div
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<i64>>>::div_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::DivAssign<&i64>>::div_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::DivAssign<i64>>::div_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<i64>>>::mul
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<i64>>>::mul_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::MulAssign<&i64>>::mul_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::MulAssign<i64>>::mul_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<i64>>>::rem
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<i64>>>::rem_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::RemAssign<&i64>>::rem_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::RemAssign<i64>>::rem_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<i64>>>::sub
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<i64>>>::sub_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::arith::SubAssign<&i64>>::sub_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::SubAssign<i64>>::sub_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<i64>>>::bitand
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<i64>>>::bitand_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAndAssign<&i64>>::bitand_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAndAssign<i64>>::bitand_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<i64>>>::bitor
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<i64>>>::bitor_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOrAssign<&i64>>::bitor_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOrAssign<i64>>::bitor_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<i64>>>::bitxor
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<i64>>>::bitxor_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXorAssign<&i64>>::bitxor_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXorAssign<i64>>::bitxor_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<i64> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<i64> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<i8> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<i8>>>::sum
 <core::num::wrapping::Wrapping<i8> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::Add<&core::num::wrapping::Wrapping<i8>>>::add
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<i8>>>::add_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::AddAssign<&i8>>::add_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::AddAssign<i8>>::add_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::Div<&core::num::wrapping::Wrapping<i8>>>::div
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<i8>>>::div_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::DivAssign<&i8>>::div_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::DivAssign<i8>>::div_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<i8>>>::mul
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<i8>>>::mul_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::MulAssign<&i8>>::mul_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::MulAssign<i8>>::mul_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<i8>>>::rem
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<i8>>>::rem_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::RemAssign<&i8>>::rem_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::RemAssign<i8>>::rem_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<i8>>>::sub
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<i8>>>::sub_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::arith::SubAssign<&i8>>::sub_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::SubAssign<i8>>::sub_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<i8>>>::bitand
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<i8>>>::bitand_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAndAssign<&i8>>::bitand_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAndAssign<i8>>::bitand_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<i8>>>::bitor
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<i8>>>::bitor_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOrAssign<&i8>>::bitor_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOrAssign<i8>>::bitor_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<i8>>>::bitxor
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<i8>>>::bitxor_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXorAssign<&i8>>::bitxor_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXorAssign<i8>>::bitxor_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<i8> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<i8> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<isize> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<isize>>>::sum
 <core::num::wrapping::Wrapping<isize> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::Add<&core::num::wrapping::Wrapping<isize>>>::add
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<isize>>>::add_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::AddAssign<&isize>>::add_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::AddAssign<isize>>::add_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::Div<&core::num::wrapping::Wrapping<isize>>>::div
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<isize>>>::div_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::DivAssign<&isize>>::div_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::DivAssign<isize>>::div_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<isize>>>::mul
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<isize>>>::mul_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::MulAssign<&isize>>::mul_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::MulAssign<isize>>::mul_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<isize>>>::rem
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<isize>>>::rem_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::RemAssign<&isize>>::rem_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::RemAssign<isize>>::rem_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<isize>>>::sub
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<isize>>>::sub_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::arith::SubAssign<&isize>>::sub_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::SubAssign<isize>>::sub_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<isize>>>::bitand
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<isize>>>::bitand_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAndAssign<&isize>>::bitand_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAndAssign<isize>>::bitand_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<isize>>>::bitor
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<isize>>>::bitor_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOrAssign<&isize>>::bitor_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOrAssign<isize>>::bitor_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<isize>>>::bitxor
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<isize>>>::bitxor_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXorAssign<&isize>>::bitxor_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXorAssign<isize>>::bitxor_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<isize> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<isize> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<u128> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<u128>>>::sum
 <core::num::wrapping::Wrapping<u128> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::Add<&core::num::wrapping::Wrapping<u128>>>::add
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<u128>>>::add_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::AddAssign<&u128>>::add_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::AddAssign<u128>>::add_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::Div<&core::num::wrapping::Wrapping<u128>>>::div
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<u128>>>::div_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::DivAssign<&u128>>::div_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::DivAssign<u128>>::div_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<u128>>>::mul
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<u128>>>::mul_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::MulAssign<&u128>>::mul_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::MulAssign<u128>>::mul_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<u128>>>::rem
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<u128>>>::rem_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::RemAssign<&u128>>::rem_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::RemAssign<u128>>::rem_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<u128>>>::sub
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<u128>>>::sub_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::arith::SubAssign<&u128>>::sub_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::SubAssign<u128>>::sub_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<u128>>>::bitand
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<u128>>>::bitand_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAndAssign<&u128>>::bitand_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAndAssign<u128>>::bitand_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<u128>>>::bitor
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<u128>>>::bitor_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOrAssign<&u128>>::bitor_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOrAssign<u128>>::bitor_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<u128>>>::bitxor
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<u128>>>::bitxor_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXorAssign<&u128>>::bitxor_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXorAssign<u128>>::bitxor_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<u128> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<u128> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<u16> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<u16>>>::sum
 <core::num::wrapping::Wrapping<u16> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::Add<&core::num::wrapping::Wrapping<u16>>>::add
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<u16>>>::add_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::AddAssign<&u16>>::add_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::AddAssign<u16>>::add_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::Div<&core::num::wrapping::Wrapping<u16>>>::div
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<u16>>>::div_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::DivAssign<&u16>>::div_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::DivAssign<u16>>::div_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<u16>>>::mul
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<u16>>>::mul_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::MulAssign<&u16>>::mul_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::MulAssign<u16>>::mul_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<u16>>>::rem
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<u16>>>::rem_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::RemAssign<&u16>>::rem_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::RemAssign<u16>>::rem_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<u16>>>::sub
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<u16>>>::sub_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::arith::SubAssign<&u16>>::sub_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::SubAssign<u16>>::sub_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<u16>>>::bitand
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<u16>>>::bitand_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAndAssign<&u16>>::bitand_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAndAssign<u16>>::bitand_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<u16>>>::bitor
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<u16>>>::bitor_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOrAssign<&u16>>::bitor_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOrAssign<u16>>::bitor_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<u16>>>::bitxor
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<u16>>>::bitxor_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXorAssign<&u16>>::bitxor_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXorAssign<u16>>::bitxor_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<u16> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<u16> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<u32> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<u32>>>::sum
 <core::num::wrapping::Wrapping<u32> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::Add<&core::num::wrapping::Wrapping<u32>>>::add
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<u32>>>::add_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::AddAssign<&u32>>::add_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::AddAssign<u32>>::add_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::Div<&core::num::wrapping::Wrapping<u32>>>::div
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<u32>>>::div_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::DivAssign<&u32>>::div_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::DivAssign<u32>>::div_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<u32>>>::mul
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<u32>>>::mul_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::MulAssign<&u32>>::mul_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::MulAssign<u32>>::mul_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<u32>>>::rem
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<u32>>>::rem_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::RemAssign<&u32>>::rem_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::RemAssign<u32>>::rem_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<u32>>>::sub
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<u32>>>::sub_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::arith::SubAssign<&u32>>::sub_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::SubAssign<u32>>::sub_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<u32>>>::bitand
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<u32>>>::bitand_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAndAssign<&u32>>::bitand_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAndAssign<u32>>::bitand_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<u32>>>::bitor
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<u32>>>::bitor_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOrAssign<&u32>>::bitor_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOrAssign<u32>>::bitor_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<u32>>>::bitxor
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<u32>>>::bitxor_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXorAssign<&u32>>::bitxor_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXorAssign<u32>>::bitxor_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<u32> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<u32> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<u64> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<u64>>>::sum
 <core::num::wrapping::Wrapping<u64> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::Add<&core::num::wrapping::Wrapping<u64>>>::add
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<u64>>>::add_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::AddAssign<&u64>>::add_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::AddAssign<u64>>::add_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::Div<&core::num::wrapping::Wrapping<u64>>>::div
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<u64>>>::div_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::DivAssign<&u64>>::div_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::DivAssign<u64>>::div_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<u64>>>::mul
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<u64>>>::mul_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::MulAssign<&u64>>::mul_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::MulAssign<u64>>::mul_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<u64>>>::rem
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<u64>>>::rem_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::RemAssign<&u64>>::rem_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::RemAssign<u64>>::rem_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<u64>>>::sub
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<u64>>>::sub_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::arith::SubAssign<&u64>>::sub_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::SubAssign<u64>>::sub_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<u64>>>::bitand
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<u64>>>::bitand_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAndAssign<&u64>>::bitand_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAndAssign<u64>>::bitand_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<u64>>>::bitor
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<u64>>>::bitor_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOrAssign<&u64>>::bitor_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOrAssign<u64>>::bitor_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<u64>>>::bitxor
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<u64>>>::bitxor_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXorAssign<&u64>>::bitxor_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXorAssign<u64>>::bitxor_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<u64> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<u64> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<u8> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<u8>>>::sum
 <core::num::wrapping::Wrapping<u8> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::Add<&core::num::wrapping::Wrapping<u8>>>::add
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<u8>>>::add_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::AddAssign<&u8>>::add_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::AddAssign<u8>>::add_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::Div<&core::num::wrapping::Wrapping<u8>>>::div
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<u8>>>::div_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::DivAssign<&u8>>::div_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::DivAssign<u8>>::div_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<u8>>>::mul
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<u8>>>::mul_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::MulAssign<&u8>>::mul_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::MulAssign<u8>>::mul_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<u8>>>::rem
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<u8>>>::rem_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::RemAssign<&u8>>::rem_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::RemAssign<u8>>::rem_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<u8>>>::sub
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<u8>>>::sub_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::arith::SubAssign<&u8>>::sub_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::SubAssign<u8>>::sub_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<u8>>>::bitand
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<u8>>>::bitand_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAndAssign<&u8>>::bitand_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAndAssign<u8>>::bitand_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<u8>>>::bitor
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<u8>>>::bitor_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOrAssign<&u8>>::bitor_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOrAssign<u8>>::bitor_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<u8>>>::bitxor
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<u8>>>::bitxor_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXorAssign<&u8>>::bitxor_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXorAssign<u8>>::bitxor_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<u8> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<u8> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::num::wrapping::Wrapping<usize> as core::iter::traits::accum::Sum<&'a core::num::wrapping::Wrapping<usize>>>::sum
 <core::num::wrapping::Wrapping<usize> as core::iter::traits::accum::Sum>::sum
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::Add<&core::num::wrapping::Wrapping<usize>>>::add
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Add>::add
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::AddAssign<&core::num::wrapping::Wrapping<usize>>>::add_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::AddAssign<&usize>>::add_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::AddAssign<usize>>::add_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::AddAssign>::add_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::Div<&core::num::wrapping::Wrapping<usize>>>::div
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Div>::div
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::DivAssign<&core::num::wrapping::Wrapping<usize>>>::div_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::DivAssign<&usize>>::div_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::DivAssign<usize>>::div_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::DivAssign>::div_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::Mul<&core::num::wrapping::Wrapping<usize>>>::mul
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Mul>::mul
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::MulAssign<&core::num::wrapping::Wrapping<usize>>>::mul_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::MulAssign<&usize>>::mul_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::MulAssign<usize>>::mul_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::MulAssign>::mul_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Neg>::neg
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::Rem<&core::num::wrapping::Wrapping<usize>>>::rem
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Rem>::rem
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::RemAssign<&core::num::wrapping::Wrapping<usize>>>::rem_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::RemAssign<&usize>>::rem_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::RemAssign<usize>>::rem_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::RemAssign>::rem_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::Sub<&core::num::wrapping::Wrapping<usize>>>::sub
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::Sub>::sub
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::SubAssign<&core::num::wrapping::Wrapping<usize>>>::sub_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::arith::SubAssign<&usize>>::sub_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::SubAssign<usize>>::sub_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::arith::SubAssign>::sub_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAnd<&core::num::wrapping::Wrapping<usize>>>::bitand
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAnd>::bitand
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAndAssign<&core::num::wrapping::Wrapping<usize>>>::bitand_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAndAssign<&usize>>::bitand_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAndAssign<usize>>::bitand_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitAndAssign>::bitand_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOr<&core::num::wrapping::Wrapping<usize>>>::bitor
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOr>::bitor
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOrAssign<&core::num::wrapping::Wrapping<usize>>>::bitor_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOrAssign<&usize>>::bitor_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOrAssign<usize>>::bitor_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitOrAssign>::bitor_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXor<&core::num::wrapping::Wrapping<usize>>>::bitxor
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXor>::bitxor
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXorAssign<&core::num::wrapping::Wrapping<usize>>>::bitxor_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXorAssign<&usize>>::bitxor_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXorAssign<usize>>::bitxor_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::BitXorAssign>::bitxor_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::Not>::not
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::Shl<&usize>>::shl
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::Shl<usize>>::shl
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::ShlAssign<&usize>>::shl_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::ShlAssign<usize>>::shl_assign
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::Shr<&usize>>::shr
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::Shr<usize>>::shr
 <core::num::wrapping::Wrapping<usize> as core::ops::bit::ShrAssign<&usize>>::shr_assign
+<core::num::wrapping::Wrapping<usize> as core::ops::bit::ShrAssign<usize>>::shr_assign
 <core::ops::control_flow::ControlFlow<B, C> as core::clone::Clone>::clone
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::PartialEq>::eq
@@ -2828,8 +3500,6 @@
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::FromResidual>::from_residual
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::branch
 <core::ops::try_trait::NeverShortCircuit<T> as core::ops::try_trait::Try>::from_output
-<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnMut<(A,)>>::call_mut
-<core::ops::try_trait::Wrapped<T, A, F> as core::ops::function::FnOnce<(A,)>>::call_once
 <core::option::IntoIter<A> as core::clone::Clone>::clone
 <core::option::IntoIter<A> as core::fmt::Debug>::fmt
 <core::option::IntoIter<A> as core::iter::traits::iterator::Iterator>::next
@@ -2871,6 +3541,7 @@
 <core::ptr::non_null::NonNull<T> as core::convert::From<&mut T>>::from
 <core::ptr::non_null::NonNull<T> as core::fmt::Debug>::fmt
 <core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt
+<core::range::Range<T> as core::convert::From<core::ops::range::Range<T>>>::from
 <core::result::Result<T, E> as core::clone::Clone>::clone
 <core::result::Result<T, E> as core::clone::Clone>::clone_from
 <core::result::Result<T, E> as core::cmp::Eq>::assert_fields_are_eq
@@ -2941,7 +3612,6 @@
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::Iter<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
-<core::slice::iter::Iter<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::IterMut<'_, T> as core::default::Default>::default
 <core::slice::iter::IterMut<'_, T> as core::fmt::Debug>::fmt
 <core::slice::iter::IterMut<'_, T> as core::iter::traits::exact_size::ExactSizeIterator>::len
@@ -2962,7 +3632,6 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
-<core::slice::iter::IterMut<'a, T> as core::iter::traits::unchecked_iterator::UncheckedIterator>::next_unchecked
 <core::slice::iter::Windows<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
@@ -5012,6 +5681,8 @@ core::array::<impl [T; N]>::as_slice
 core::array::<impl [T; N]>::map
 core::array::<impl [T; N]>::try_map
 core::array::<impl core::clone::Clone for [T; N]>::clone
+core::array::<impl core::cmp::Ord for [T; N]>::cmp
+core::array::<impl core::cmp::PartialOrd for [T; N]>::partial_cmp
 core::array::<impl core::convert::AsRef<[T]> for [T; N]>::as_ref
 core::array::<impl core::convert::TryFrom<&'a [T]> for &'a [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&'a mut [T]> for &'a mut [T; N]>::try_from
@@ -5025,7 +5696,7 @@ core::array::<impl core::ops::index::IndexMut<I> for [T; N]>::index_mut
 core::array::Guard::<'_, T>::push_unchecked
 core::array::ascii::<impl [u8; N]>::as_ascii
 core::array::ascii::<impl [u8; N]>::as_ascii_unchecked
-core::array::drain::Drain::<'l, 'f, T, N, F>::new
+core::array::drain::Drain::<'l, 'f, T, F>::new
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::eq
 core::array::equality::<impl core::cmp::PartialEq<&[U]> for [T; N]>::ne
 core::array::equality::<impl core::cmp::PartialEq<&mut [U]> for [T; N]>::eq
@@ -5043,8 +5714,8 @@ core::array::equality::<impl core::cmp::PartialEq<[U]> for [T; N]>::ne
 core::array::from_fn
 core::array::from_mut
 core::array::from_ref
-core::array::from_trusted_iterator
 core::array::iter::<impl core::iter::traits::collect::IntoIterator for [T; N]>::into_iter
+core::array::iter::IntoIter::<T, N>::as_mut_slice
 core::array::iter::IntoIter::<T, N>::unsize
 core::array::iter::IntoIter::<T, N>::unsize_mut
 core::array::iter::iter_inner::PolymorphicIter::<DATA>::len
@@ -5052,6 +5723,7 @@ core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::Maybe
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>; N]>::new_unchecked
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::advance_back_by
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::advance_by
+core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::as_mut_slice
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::as_slice
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::fold
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::next
@@ -5062,13 +5734,12 @@ core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::Maybe
 core::array::iter::iter_inner::PolymorphicIter::<[core::mem::maybe_uninit::MaybeUninit<T>]>::try_rfold
 core::array::try_from_fn
 core::array::try_from_fn_erased
-core::array::try_from_trusted_iterator
-core::array::try_from_trusted_iterator::next
 core::ascii::EscapeDefault::empty
 core::ascii::EscapeDefault::new
 core::ascii::ascii_char::AsciiChar::as_str
 core::ascii::ascii_char::AsciiChar::digit_unchecked::precondition_check
 core::ascii::ascii_char::AsciiChar::from_u8_unchecked
+core::ascii::ascii_char::AsciiChar::from_u8_unchecked::precondition_check
 core::ascii::ascii_char::AsciiChar::to_u8
 core::ascii::escape_default
 core::bool::<impl bool>::ok_or
@@ -5108,20 +5779,34 @@ core::cell::panic_already_mutably_borrowed::do_panic::runtime
 core::char::EscapeDebug::backslash
 core::char::EscapeDebug::printable
 core::char::EscapeDebug::unicode
+core::char::EscapeDefault::backslash
+core::char::EscapeDefault::printable
+core::char::EscapeDefault::unicode
+core::char::EscapeUnicode::new
 core::char::convert::<impl core::convert::From<u8> for char>::from
 core::char::convert::char_try_from_u32
 core::char::convert::from_u32_unchecked
 core::char::convert::from_u32_unchecked::precondition_check
 core::char::decode::DecodeUtf16Error::unpaired_surrogate
 core::char::decode::decode_utf16
+core::char::methods::<impl char>::as_ascii
 core::char::methods::<impl char>::as_ascii_unchecked::precondition_check
 core::char::methods::<impl char>::decode_utf16
 core::char::methods::<impl char>::encode_utf8
 core::char::methods::<impl char>::escape_debug
 core::char::methods::<impl char>::escape_debug_ext
+core::char::methods::<impl char>::escape_default
+core::char::methods::<impl char>::escape_unicode
 core::char::methods::<impl char>::from_u32_unchecked
 core::char::methods::<impl char>::is_ascii
-core::char::methods::<impl char>::is_grapheme_extended
+core::char::methods::<impl char>::is_ascii_whitespace
+core::char::methods::<impl char>::is_control
+core::char::methods::<impl char>::is_default_ignorable
+core::char::methods::<impl char>::is_format_control
+core::char::methods::<impl char>::is_grapheme_extender
+core::char::methods::<impl char>::is_private_use
+core::char::methods::<impl char>::is_unassigned
+core::char::methods::<impl char>::is_whitespace
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
 core::char::methods::encode_utf16_raw::do_panic
@@ -5181,6 +5866,7 @@ core::cmp::PartialOrd::le
 core::cmp::PartialOrd::lt
 core::cmp::default_chaining_impl
 core::cmp::impls::<impl core::cmp::Ord for !>::cmp
+core::cmp::impls::<impl core::cmp::Ord for &A>::cmp
 core::cmp::impls::<impl core::cmp::Ord for ()>::cmp
 core::cmp::impls::<impl core::cmp::Ord for bool>::clamp
 core::cmp::impls::<impl core::cmp::Ord for bool>::cmp
@@ -5696,8 +6382,6 @@ core::f64::<impl f64>::from_bits
 core::f64::<impl f64>::from_le_bytes
 core::f64::<impl f64>::is_infinite
 core::f64::<impl f64>::is_nan
-core::f64::<impl f64>::is_negative
-core::f64::<impl f64>::is_positive
 core::f64::<impl f64>::is_sign_negative
 core::f64::<impl f64>::is_sign_positive
 core::f64::<impl f64>::to_bits
@@ -5964,7 +6648,6 @@ core::fmt::num::imp::<impl usize>::_fmt_inner
 core::fmt::num::imp::<impl usize>::format_into
 core::fmt::num::imp::exp_u64
 core::fmt::num::slice_buffer_to_str
-core::fmt::num_buffer::NumBuffer::<T>::capacity
 core::fmt::num_buffer::NumBuffer::<T>::new
 core::fmt::pointer_fmt_inner
 core::fmt::rt::Argument::<'_>::as_u16
@@ -5980,6 +6663,7 @@ core::fmt::rt::Argument::<'_>::new_octal
 core::fmt::rt::Argument::<'_>::new_pointer
 core::fmt::rt::Argument::<'_>::new_upper_exp
 core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::wide_pointer_fmt_inner
 core::fmt::write
 core::hash::Hash::hash_slice
 core::hash::Hasher::write_i128
@@ -6076,6 +6760,7 @@ core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
 core::intrinsics::unchecked_funnel_shr
 core::intrinsics::unlikely
+core::iter::adapters::array_chunks::ArrayChunks::<I, N>::next_back_remainder
 core::iter::adapters::chain::Chain::<A, B>::new
 core::iter::adapters::chain::and_then_or_clear
 core::iter::adapters::cloned::Cloned::<I>::new
@@ -6156,7 +6841,6 @@ core::iter::traits::iterator::Iterator::cmp_by::compare
 core::iter::traits::iterator::Iterator::collect
 core::iter::traits::iterator::Iterator::copied
 core::iter::traits::iterator::Iterator::count
-core::iter::traits::iterator::Iterator::count::plus_one
 core::iter::traits::iterator::Iterator::enumerate
 core::iter::traits::iterator::Iterator::eq
 core::iter::traits::iterator::Iterator::eq_by
@@ -6174,6 +6858,7 @@ core::iter::traits::iterator::Iterator::last::some
 core::iter::traits::iterator::Iterator::map
 core::iter::traits::iterator::Iterator::max_by
 core::iter::traits::iterator::Iterator::max_by::fold
+core::iter::traits::iterator::Iterator::next_chunk
 core::iter::traits::iterator::Iterator::nth
 core::iter::traits::iterator::Iterator::position
 core::iter::traits::iterator::Iterator::position::check
@@ -6264,15 +6949,24 @@ core::num::<impl i128>::is_negative
 core::num::<impl i128>::leading_zeros
 core::num::<impl i128>::overflowing_add
 core::num::<impl i128>::overflowing_add_unsigned
+core::num::<impl i128>::overflowing_div
 core::num::<impl i128>::overflowing_mul
 core::num::<impl i128>::overflowing_neg
+core::num::<impl i128>::overflowing_rem
 core::num::<impl i128>::overflowing_sub
 core::num::<impl i128>::overflowing_sub_unsigned
 core::num::<impl i128>::rotate_left
+core::num::<impl i128>::saturating_add
+core::num::<impl i128>::saturating_div
+core::num::<impl i128>::saturating_mul
+core::num::<impl i128>::saturating_neg
+core::num::<impl i128>::saturating_sub
+core::num::<impl i128>::swap_bytes
 core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
 core::num::<impl i128>::unchecked_add::precondition_check
+core::num::<impl i128>::unchecked_cast::precondition_check
 core::num::<impl i128>::unchecked_div_exact::precondition_check
 core::num::<impl i128>::unchecked_mul::precondition_check
 core::num::<impl i128>::unchecked_neg
@@ -6287,8 +6981,10 @@ core::num::<impl i128>::unchecked_sub::precondition_check
 core::num::<impl i128>::unsigned_abs
 core::num::<impl i128>::wrapping_abs
 core::num::<impl i128>::wrapping_add
+core::num::<impl i128>::wrapping_div
 core::num::<impl i128>::wrapping_mul
 core::num::<impl i128>::wrapping_neg
+core::num::<impl i128>::wrapping_rem
 core::num::<impl i128>::wrapping_shl
 core::num::<impl i128>::wrapping_shr
 core::num::<impl i128>::wrapping_sub
@@ -6315,15 +7011,24 @@ core::num::<impl i16>::is_negative
 core::num::<impl i16>::leading_zeros
 core::num::<impl i16>::overflowing_add
 core::num::<impl i16>::overflowing_add_unsigned
+core::num::<impl i16>::overflowing_div
 core::num::<impl i16>::overflowing_mul
 core::num::<impl i16>::overflowing_neg
+core::num::<impl i16>::overflowing_rem
 core::num::<impl i16>::overflowing_sub
 core::num::<impl i16>::overflowing_sub_unsigned
 core::num::<impl i16>::rotate_left
+core::num::<impl i16>::saturating_add
+core::num::<impl i16>::saturating_div
+core::num::<impl i16>::saturating_mul
+core::num::<impl i16>::saturating_neg
+core::num::<impl i16>::saturating_sub
+core::num::<impl i16>::swap_bytes
 core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
 core::num::<impl i16>::unchecked_add::precondition_check
+core::num::<impl i16>::unchecked_cast::precondition_check
 core::num::<impl i16>::unchecked_div_exact::precondition_check
 core::num::<impl i16>::unchecked_mul::precondition_check
 core::num::<impl i16>::unchecked_neg
@@ -6338,8 +7043,10 @@ core::num::<impl i16>::unchecked_sub::precondition_check
 core::num::<impl i16>::unsigned_abs
 core::num::<impl i16>::wrapping_abs
 core::num::<impl i16>::wrapping_add
+core::num::<impl i16>::wrapping_div
 core::num::<impl i16>::wrapping_mul
 core::num::<impl i16>::wrapping_neg
+core::num::<impl i16>::wrapping_rem
 core::num::<impl i16>::wrapping_shl
 core::num::<impl i16>::wrapping_shr
 core::num::<impl i16>::wrapping_sub
@@ -6366,15 +7073,24 @@ core::num::<impl i32>::is_negative
 core::num::<impl i32>::leading_zeros
 core::num::<impl i32>::overflowing_add
 core::num::<impl i32>::overflowing_add_unsigned
+core::num::<impl i32>::overflowing_div
 core::num::<impl i32>::overflowing_mul
 core::num::<impl i32>::overflowing_neg
+core::num::<impl i32>::overflowing_rem
 core::num::<impl i32>::overflowing_sub
 core::num::<impl i32>::overflowing_sub_unsigned
 core::num::<impl i32>::rotate_left
+core::num::<impl i32>::saturating_add
+core::num::<impl i32>::saturating_div
+core::num::<impl i32>::saturating_mul
+core::num::<impl i32>::saturating_neg
+core::num::<impl i32>::saturating_sub
+core::num::<impl i32>::swap_bytes
 core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
 core::num::<impl i32>::unchecked_add::precondition_check
+core::num::<impl i32>::unchecked_cast::precondition_check
 core::num::<impl i32>::unchecked_div_exact::precondition_check
 core::num::<impl i32>::unchecked_mul::precondition_check
 core::num::<impl i32>::unchecked_neg
@@ -6389,8 +7105,10 @@ core::num::<impl i32>::unchecked_sub::precondition_check
 core::num::<impl i32>::unsigned_abs
 core::num::<impl i32>::wrapping_abs
 core::num::<impl i32>::wrapping_add
+core::num::<impl i32>::wrapping_div
 core::num::<impl i32>::wrapping_mul
 core::num::<impl i32>::wrapping_neg
+core::num::<impl i32>::wrapping_rem
 core::num::<impl i32>::wrapping_shl
 core::num::<impl i32>::wrapping_shr
 core::num::<impl i32>::wrapping_sub
@@ -6417,15 +7135,24 @@ core::num::<impl i64>::is_negative
 core::num::<impl i64>::leading_zeros
 core::num::<impl i64>::overflowing_add
 core::num::<impl i64>::overflowing_add_unsigned
+core::num::<impl i64>::overflowing_div
 core::num::<impl i64>::overflowing_mul
 core::num::<impl i64>::overflowing_neg
+core::num::<impl i64>::overflowing_rem
 core::num::<impl i64>::overflowing_sub
 core::num::<impl i64>::overflowing_sub_unsigned
 core::num::<impl i64>::rotate_left
+core::num::<impl i64>::saturating_add
+core::num::<impl i64>::saturating_div
+core::num::<impl i64>::saturating_mul
+core::num::<impl i64>::saturating_neg
+core::num::<impl i64>::saturating_sub
+core::num::<impl i64>::swap_bytes
 core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
 core::num::<impl i64>::unchecked_add::precondition_check
+core::num::<impl i64>::unchecked_cast::precondition_check
 core::num::<impl i64>::unchecked_div_exact::precondition_check
 core::num::<impl i64>::unchecked_mul::precondition_check
 core::num::<impl i64>::unchecked_neg
@@ -6440,8 +7167,10 @@ core::num::<impl i64>::unchecked_sub::precondition_check
 core::num::<impl i64>::unsigned_abs
 core::num::<impl i64>::wrapping_abs
 core::num::<impl i64>::wrapping_add
+core::num::<impl i64>::wrapping_div
 core::num::<impl i64>::wrapping_mul
 core::num::<impl i64>::wrapping_neg
+core::num::<impl i64>::wrapping_rem
 core::num::<impl i64>::wrapping_shl
 core::num::<impl i64>::wrapping_shr
 core::num::<impl i64>::wrapping_sub
@@ -6468,15 +7197,24 @@ core::num::<impl i8>::is_negative
 core::num::<impl i8>::leading_zeros
 core::num::<impl i8>::overflowing_add
 core::num::<impl i8>::overflowing_add_unsigned
+core::num::<impl i8>::overflowing_div
 core::num::<impl i8>::overflowing_mul
 core::num::<impl i8>::overflowing_neg
+core::num::<impl i8>::overflowing_rem
 core::num::<impl i8>::overflowing_sub
 core::num::<impl i8>::overflowing_sub_unsigned
 core::num::<impl i8>::rotate_left
+core::num::<impl i8>::saturating_add
+core::num::<impl i8>::saturating_div
+core::num::<impl i8>::saturating_mul
+core::num::<impl i8>::saturating_neg
+core::num::<impl i8>::saturating_sub
+core::num::<impl i8>::swap_bytes
 core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
 core::num::<impl i8>::unchecked_add::precondition_check
+core::num::<impl i8>::unchecked_cast::precondition_check
 core::num::<impl i8>::unchecked_div_exact::precondition_check
 core::num::<impl i8>::unchecked_mul::precondition_check
 core::num::<impl i8>::unchecked_neg
@@ -6491,8 +7229,10 @@ core::num::<impl i8>::unchecked_sub::precondition_check
 core::num::<impl i8>::unsigned_abs
 core::num::<impl i8>::wrapping_abs
 core::num::<impl i8>::wrapping_add
+core::num::<impl i8>::wrapping_div
 core::num::<impl i8>::wrapping_mul
 core::num::<impl i8>::wrapping_neg
+core::num::<impl i8>::wrapping_rem
 core::num::<impl i8>::wrapping_shl
 core::num::<impl i8>::wrapping_shr
 core::num::<impl i8>::wrapping_sub
@@ -6519,15 +7259,24 @@ core::num::<impl isize>::is_negative
 core::num::<impl isize>::leading_zeros
 core::num::<impl isize>::overflowing_add
 core::num::<impl isize>::overflowing_add_unsigned
+core::num::<impl isize>::overflowing_div
 core::num::<impl isize>::overflowing_mul
 core::num::<impl isize>::overflowing_neg
+core::num::<impl isize>::overflowing_rem
 core::num::<impl isize>::overflowing_sub
 core::num::<impl isize>::overflowing_sub_unsigned
 core::num::<impl isize>::rotate_left
+core::num::<impl isize>::saturating_add
+core::num::<impl isize>::saturating_div
+core::num::<impl isize>::saturating_mul
+core::num::<impl isize>::saturating_neg
+core::num::<impl isize>::saturating_sub
+core::num::<impl isize>::swap_bytes
 core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes
 core::num::<impl isize>::unchecked_add::precondition_check
+core::num::<impl isize>::unchecked_cast::precondition_check
 core::num::<impl isize>::unchecked_div_exact::precondition_check
 core::num::<impl isize>::unchecked_mul::precondition_check
 core::num::<impl isize>::unchecked_neg
@@ -6542,8 +7291,10 @@ core::num::<impl isize>::unchecked_sub::precondition_check
 core::num::<impl isize>::unsigned_abs
 core::num::<impl isize>::wrapping_abs
 core::num::<impl isize>::wrapping_add
+core::num::<impl isize>::wrapping_div
 core::num::<impl isize>::wrapping_mul
 core::num::<impl isize>::wrapping_neg
+core::num::<impl isize>::wrapping_rem
 core::num::<impl isize>::wrapping_shl
 core::num::<impl isize>::wrapping_shr
 core::num::<impl isize>::wrapping_sub
@@ -6557,6 +7308,7 @@ core::num::<impl u128>::checked_ilog10
 core::num::<impl u128>::checked_ilog2
 core::num::<impl u128>::checked_mul
 core::num::<impl u128>::checked_pow
+core::num::<impl u128>::checked_shl
 core::num::<impl u128>::checked_sub
 core::num::<impl u128>::count_ones
 core::num::<impl u128>::count_zeros
@@ -6578,14 +7330,17 @@ core::num::<impl u128>::leading_zeros
 core::num::<impl u128>::overflowing_add
 core::num::<impl u128>::overflowing_add_signed
 core::num::<impl u128>::overflowing_mul
+core::num::<impl u128>::overflowing_pow
 core::num::<impl u128>::overflowing_sub
 core::num::<impl u128>::pow
 core::num::<impl u128>::reverse_bits
 core::num::<impl u128>::rotate_left
 core::num::<impl u128>::rotate_right
 core::num::<impl u128>::saturating_add
+core::num::<impl u128>::saturating_div
 core::num::<impl u128>::saturating_mul
 core::num::<impl u128>::saturating_sub
+core::num::<impl u128>::strict_pow
 core::num::<impl u128>::swap_bytes
 core::num::<impl u128>::to_be
 core::num::<impl u128>::to_be_bytes
@@ -6593,8 +7348,10 @@ core::num::<impl u128>::to_le
 core::num::<impl u128>::to_le_bytes
 core::num::<impl u128>::to_ne_bytes
 core::num::<impl u128>::trailing_zeros
+core::num::<impl u128>::unbounded_shl
 core::num::<impl u128>::unchecked_add
 core::num::<impl u128>::unchecked_add::precondition_check
+core::num::<impl u128>::unchecked_cast::precondition_check
 core::num::<impl u128>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u128>::unchecked_div_exact::precondition_check
 core::num::<impl u128>::unchecked_funnel_shl::precondition_check
@@ -6608,11 +7365,13 @@ core::num::<impl u128>::unchecked_shr::precondition_check
 core::num::<impl u128>::unchecked_shr_exact::precondition_check
 core::num::<impl u128>::unchecked_sub
 core::num::<impl u128>::unchecked_sub::precondition_check
-core::num::<impl u128>::widening_mul
 core::num::<impl u128>::wrapping_add
 core::num::<impl u128>::wrapping_add_signed
+core::num::<impl u128>::wrapping_div
 core::num::<impl u128>::wrapping_mul
 core::num::<impl u128>::wrapping_neg
+core::num::<impl u128>::wrapping_pow
+core::num::<impl u128>::wrapping_rem
 core::num::<impl u128>::wrapping_shl
 core::num::<impl u128>::wrapping_shr
 core::num::<impl u128>::wrapping_sub
@@ -6626,6 +7385,7 @@ core::num::<impl u16>::checked_ilog10
 core::num::<impl u16>::checked_ilog2
 core::num::<impl u16>::checked_mul
 core::num::<impl u16>::checked_pow
+core::num::<impl u16>::checked_shl
 core::num::<impl u16>::checked_sub
 core::num::<impl u16>::count_ones
 core::num::<impl u16>::count_zeros
@@ -6648,14 +7408,17 @@ core::num::<impl u16>::leading_zeros
 core::num::<impl u16>::overflowing_add
 core::num::<impl u16>::overflowing_add_signed
 core::num::<impl u16>::overflowing_mul
+core::num::<impl u16>::overflowing_pow
 core::num::<impl u16>::overflowing_sub
 core::num::<impl u16>::pow
 core::num::<impl u16>::reverse_bits
 core::num::<impl u16>::rotate_left
 core::num::<impl u16>::rotate_right
 core::num::<impl u16>::saturating_add
+core::num::<impl u16>::saturating_div
 core::num::<impl u16>::saturating_mul
 core::num::<impl u16>::saturating_sub
+core::num::<impl u16>::strict_pow
 core::num::<impl u16>::swap_bytes
 core::num::<impl u16>::to_be
 core::num::<impl u16>::to_be_bytes
@@ -6663,8 +7426,10 @@ core::num::<impl u16>::to_le
 core::num::<impl u16>::to_le_bytes
 core::num::<impl u16>::to_ne_bytes
 core::num::<impl u16>::trailing_zeros
+core::num::<impl u16>::unbounded_shl
 core::num::<impl u16>::unchecked_add
 core::num::<impl u16>::unchecked_add::precondition_check
+core::num::<impl u16>::unchecked_cast::precondition_check
 core::num::<impl u16>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u16>::unchecked_div_exact::precondition_check
 core::num::<impl u16>::unchecked_funnel_shl::precondition_check
@@ -6678,11 +7443,13 @@ core::num::<impl u16>::unchecked_shr::precondition_check
 core::num::<impl u16>::unchecked_shr_exact::precondition_check
 core::num::<impl u16>::unchecked_sub
 core::num::<impl u16>::unchecked_sub::precondition_check
-core::num::<impl u16>::widening_mul
 core::num::<impl u16>::wrapping_add
 core::num::<impl u16>::wrapping_add_signed
+core::num::<impl u16>::wrapping_div
 core::num::<impl u16>::wrapping_mul
 core::num::<impl u16>::wrapping_neg
+core::num::<impl u16>::wrapping_pow
+core::num::<impl u16>::wrapping_rem
 core::num::<impl u16>::wrapping_shl
 core::num::<impl u16>::wrapping_shr
 core::num::<impl u16>::wrapping_sub
@@ -6696,6 +7463,7 @@ core::num::<impl u32>::checked_ilog10
 core::num::<impl u32>::checked_ilog2
 core::num::<impl u32>::checked_mul
 core::num::<impl u32>::checked_pow
+core::num::<impl u32>::checked_shl
 core::num::<impl u32>::checked_sub
 core::num::<impl u32>::count_ones
 core::num::<impl u32>::count_zeros
@@ -6717,14 +7485,17 @@ core::num::<impl u32>::leading_zeros
 core::num::<impl u32>::overflowing_add
 core::num::<impl u32>::overflowing_add_signed
 core::num::<impl u32>::overflowing_mul
+core::num::<impl u32>::overflowing_pow
 core::num::<impl u32>::overflowing_sub
 core::num::<impl u32>::pow
 core::num::<impl u32>::reverse_bits
 core::num::<impl u32>::rotate_left
 core::num::<impl u32>::rotate_right
 core::num::<impl u32>::saturating_add
+core::num::<impl u32>::saturating_div
 core::num::<impl u32>::saturating_mul
 core::num::<impl u32>::saturating_sub
+core::num::<impl u32>::strict_pow
 core::num::<impl u32>::swap_bytes
 core::num::<impl u32>::to_be
 core::num::<impl u32>::to_be_bytes
@@ -6732,8 +7503,10 @@ core::num::<impl u32>::to_le
 core::num::<impl u32>::to_le_bytes
 core::num::<impl u32>::to_ne_bytes
 core::num::<impl u32>::trailing_zeros
+core::num::<impl u32>::unbounded_shl
 core::num::<impl u32>::unchecked_add
 core::num::<impl u32>::unchecked_add::precondition_check
+core::num::<impl u32>::unchecked_cast::precondition_check
 core::num::<impl u32>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u32>::unchecked_div_exact::precondition_check
 core::num::<impl u32>::unchecked_funnel_shl::precondition_check
@@ -6747,11 +7520,13 @@ core::num::<impl u32>::unchecked_shr::precondition_check
 core::num::<impl u32>::unchecked_shr_exact::precondition_check
 core::num::<impl u32>::unchecked_sub
 core::num::<impl u32>::unchecked_sub::precondition_check
-core::num::<impl u32>::widening_mul
 core::num::<impl u32>::wrapping_add
 core::num::<impl u32>::wrapping_add_signed
+core::num::<impl u32>::wrapping_div
 core::num::<impl u32>::wrapping_mul
 core::num::<impl u32>::wrapping_neg
+core::num::<impl u32>::wrapping_pow
+core::num::<impl u32>::wrapping_rem
 core::num::<impl u32>::wrapping_shl
 core::num::<impl u32>::wrapping_shr
 core::num::<impl u32>::wrapping_sub
@@ -6765,6 +7540,7 @@ core::num::<impl u64>::checked_ilog10
 core::num::<impl u64>::checked_ilog2
 core::num::<impl u64>::checked_mul
 core::num::<impl u64>::checked_pow
+core::num::<impl u64>::checked_shl
 core::num::<impl u64>::checked_sub
 core::num::<impl u64>::count_ones
 core::num::<impl u64>::count_zeros
@@ -6786,14 +7562,17 @@ core::num::<impl u64>::leading_zeros
 core::num::<impl u64>::overflowing_add
 core::num::<impl u64>::overflowing_add_signed
 core::num::<impl u64>::overflowing_mul
+core::num::<impl u64>::overflowing_pow
 core::num::<impl u64>::overflowing_sub
 core::num::<impl u64>::pow
 core::num::<impl u64>::reverse_bits
 core::num::<impl u64>::rotate_left
 core::num::<impl u64>::rotate_right
 core::num::<impl u64>::saturating_add
+core::num::<impl u64>::saturating_div
 core::num::<impl u64>::saturating_mul
 core::num::<impl u64>::saturating_sub
+core::num::<impl u64>::strict_pow
 core::num::<impl u64>::swap_bytes
 core::num::<impl u64>::to_be
 core::num::<impl u64>::to_be_bytes
@@ -6801,8 +7580,10 @@ core::num::<impl u64>::to_le
 core::num::<impl u64>::to_le_bytes
 core::num::<impl u64>::to_ne_bytes
 core::num::<impl u64>::trailing_zeros
+core::num::<impl u64>::unbounded_shl
 core::num::<impl u64>::unchecked_add
 core::num::<impl u64>::unchecked_add::precondition_check
+core::num::<impl u64>::unchecked_cast::precondition_check
 core::num::<impl u64>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u64>::unchecked_div_exact::precondition_check
 core::num::<impl u64>::unchecked_funnel_shl::precondition_check
@@ -6816,11 +7597,13 @@ core::num::<impl u64>::unchecked_shr::precondition_check
 core::num::<impl u64>::unchecked_shr_exact::precondition_check
 core::num::<impl u64>::unchecked_sub
 core::num::<impl u64>::unchecked_sub::precondition_check
-core::num::<impl u64>::widening_mul
 core::num::<impl u64>::wrapping_add
 core::num::<impl u64>::wrapping_add_signed
+core::num::<impl u64>::wrapping_div
 core::num::<impl u64>::wrapping_mul
 core::num::<impl u64>::wrapping_neg
+core::num::<impl u64>::wrapping_pow
+core::num::<impl u64>::wrapping_rem
 core::num::<impl u64>::wrapping_shl
 core::num::<impl u64>::wrapping_shr
 core::num::<impl u64>::wrapping_sub
@@ -6835,6 +7618,7 @@ core::num::<impl u8>::checked_ilog10
 core::num::<impl u8>::checked_ilog2
 core::num::<impl u8>::checked_mul
 core::num::<impl u8>::checked_pow
+core::num::<impl u8>::checked_shl
 core::num::<impl u8>::checked_sub
 core::num::<impl u8>::count_ones
 core::num::<impl u8>::count_zeros
@@ -6855,6 +7639,7 @@ core::num::<impl u8>::is_ascii
 core::num::<impl u8>::is_ascii_alphabetic
 core::num::<impl u8>::is_ascii_control
 core::num::<impl u8>::is_ascii_uppercase
+core::num::<impl u8>::is_ascii_whitespace
 core::num::<impl u8>::is_multiple_of
 core::num::<impl u8>::is_power_of_two
 core::num::<impl u8>::is_utf8_char_boundary
@@ -6863,14 +7648,17 @@ core::num::<impl u8>::leading_zeros
 core::num::<impl u8>::overflowing_add
 core::num::<impl u8>::overflowing_add_signed
 core::num::<impl u8>::overflowing_mul
+core::num::<impl u8>::overflowing_pow
 core::num::<impl u8>::overflowing_sub
 core::num::<impl u8>::pow
 core::num::<impl u8>::reverse_bits
 core::num::<impl u8>::rotate_left
 core::num::<impl u8>::rotate_right
 core::num::<impl u8>::saturating_add
+core::num::<impl u8>::saturating_div
 core::num::<impl u8>::saturating_mul
 core::num::<impl u8>::saturating_sub
+core::num::<impl u8>::strict_pow
 core::num::<impl u8>::swap_bytes
 core::num::<impl u8>::to_ascii_lowercase
 core::num::<impl u8>::to_be
@@ -6879,8 +7667,10 @@ core::num::<impl u8>::to_le
 core::num::<impl u8>::to_le_bytes
 core::num::<impl u8>::to_ne_bytes
 core::num::<impl u8>::trailing_zeros
+core::num::<impl u8>::unbounded_shl
 core::num::<impl u8>::unchecked_add
 core::num::<impl u8>::unchecked_add::precondition_check
+core::num::<impl u8>::unchecked_cast::precondition_check
 core::num::<impl u8>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u8>::unchecked_div_exact::precondition_check
 core::num::<impl u8>::unchecked_funnel_shl::precondition_check
@@ -6894,11 +7684,13 @@ core::num::<impl u8>::unchecked_shr::precondition_check
 core::num::<impl u8>::unchecked_shr_exact::precondition_check
 core::num::<impl u8>::unchecked_sub
 core::num::<impl u8>::unchecked_sub::precondition_check
-core::num::<impl u8>::widening_mul
 core::num::<impl u8>::wrapping_add
 core::num::<impl u8>::wrapping_add_signed
+core::num::<impl u8>::wrapping_div
 core::num::<impl u8>::wrapping_mul
 core::num::<impl u8>::wrapping_neg
+core::num::<impl u8>::wrapping_pow
+core::num::<impl u8>::wrapping_rem
 core::num::<impl u8>::wrapping_shl
 core::num::<impl u8>::wrapping_shr
 core::num::<impl u8>::wrapping_sub
@@ -6912,6 +7704,7 @@ core::num::<impl usize>::checked_ilog10
 core::num::<impl usize>::checked_ilog2
 core::num::<impl usize>::checked_mul
 core::num::<impl usize>::checked_pow
+core::num::<impl usize>::checked_shl
 core::num::<impl usize>::checked_sub
 core::num::<impl usize>::count_ones
 core::num::<impl usize>::count_zeros
@@ -6933,6 +7726,7 @@ core::num::<impl usize>::leading_zeros
 core::num::<impl usize>::overflowing_add
 core::num::<impl usize>::overflowing_add_signed
 core::num::<impl usize>::overflowing_mul
+core::num::<impl usize>::overflowing_pow
 core::num::<impl usize>::overflowing_sub
 core::num::<impl usize>::pow
 core::num::<impl usize>::repeat_u16
@@ -6941,8 +7735,10 @@ core::num::<impl usize>::reverse_bits
 core::num::<impl usize>::rotate_left
 core::num::<impl usize>::rotate_right
 core::num::<impl usize>::saturating_add
+core::num::<impl usize>::saturating_div
 core::num::<impl usize>::saturating_mul
 core::num::<impl usize>::saturating_sub
+core::num::<impl usize>::strict_pow
 core::num::<impl usize>::swap_bytes
 core::num::<impl usize>::to_be
 core::num::<impl usize>::to_be_bytes
@@ -6950,8 +7746,10 @@ core::num::<impl usize>::to_le
 core::num::<impl usize>::to_le_bytes
 core::num::<impl usize>::to_ne_bytes
 core::num::<impl usize>::trailing_zeros
+core::num::<impl usize>::unbounded_shl
 core::num::<impl usize>::unchecked_add
 core::num::<impl usize>::unchecked_add::precondition_check
+core::num::<impl usize>::unchecked_cast::precondition_check
 core::num::<impl usize>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl usize>::unchecked_div_exact::precondition_check
 core::num::<impl usize>::unchecked_funnel_shl::precondition_check
@@ -6965,11 +7763,13 @@ core::num::<impl usize>::unchecked_shr::precondition_check
 core::num::<impl usize>::unchecked_shr_exact::precondition_check
 core::num::<impl usize>::unchecked_sub
 core::num::<impl usize>::unchecked_sub::precondition_check
-core::num::<impl usize>::widening_mul
 core::num::<impl usize>::wrapping_add
 core::num::<impl usize>::wrapping_add_signed
+core::num::<impl usize>::wrapping_div
 core::num::<impl usize>::wrapping_mul
 core::num::<impl usize>::wrapping_neg
+core::num::<impl usize>::wrapping_pow
+core::num::<impl usize>::wrapping_rem
 core::num::<impl usize>::wrapping_shl
 core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
@@ -7043,6 +7843,7 @@ core::num::imp::int_log10::u64_impl
 core::num::imp::int_log10::u8
 core::num::imp::int_log10::u8_impl
 core::num::imp::int_log10::usize
+core::num::imp::overflow_panic::pow
 core::num::imp::traits::FloatExt::integer_decode
 core::num::imp::traits::pow2_to_pow10
 core::num::niche_types::CodePointInner::as_inner
@@ -7300,6 +8101,7 @@ core::ptr::const_ptr::<impl *const T>::align_offset
 core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
+core::ptr::const_ptr::<impl *const T>::cast_slice
 core::ptr::const_ptr::<impl *const T>::expose_provenance
 core::ptr::const_ptr::<impl *const T>::guaranteed_eq
 core::ptr::const_ptr::<impl *const T>::is_aligned_to
@@ -7342,6 +8144,7 @@ core::ptr::copy
 core::ptr::copy::precondition_check
 core::ptr::copy_nonoverlapping
 core::ptr::copy_nonoverlapping::precondition_check
+core::ptr::drop_glue
 core::ptr::drop_in_place
 core::ptr::from_ref
 core::ptr::metadata::DynMetadata::<Dyn>::vtable_ptr
@@ -7358,6 +8161,7 @@ core::ptr::mut_ptr::<impl *mut T>::as_mut
 core::ptr::mut_ptr::<impl *mut T>::cast
 core::ptr::mut_ptr::<impl *mut T>::cast_array
 core::ptr::mut_ptr::<impl *mut T>::cast_const
+core::ptr::mut_ptr::<impl *mut T>::cast_slice
 core::ptr::mut_ptr::<impl *mut T>::drop_in_place
 core::ptr::mut_ptr::<impl *mut T>::is_null
 core::ptr::mut_ptr::<impl *mut T>::offset
@@ -7475,6 +8279,7 @@ core::slice::<impl [T]>::as_chunks_unchecked::precondition_check
 core::slice::<impl [T]>::as_chunks_unchecked_mut::precondition_check
 core::slice::<impl [T]>::as_mut_array
 core::slice::<impl [T]>::as_mut_ptr
+core::slice::<impl [T]>::as_mut_ptr_range
 core::slice::<impl [T]>::as_ptr
 core::slice::<impl [T]>::binary_search_by
 core::slice::<impl [T]>::binary_search_by_key
@@ -7498,8 +8303,11 @@ core::slice::<impl [T]>::is_empty
 core::slice::<impl [T]>::iter
 core::slice::<impl [T]>::iter_mut
 core::slice::<impl [T]>::last
+core::slice::<impl [T]>::last_chunk
 core::slice::<impl [T]>::last_mut
 core::slice::<impl [T]>::len
+core::slice::<impl [T]>::reverse
+core::slice::<impl [T]>::reverse::revswap
 core::slice::<impl [T]>::rotate_left
 core::slice::<impl [T]>::rotate_right
 core::slice::<impl [T]>::split_at
@@ -7521,9 +8329,12 @@ core::slice::<impl [T]>::swap
 core::slice::<impl [T]>::swap_unchecked::precondition_check
 core::slice::<impl [T]>::windows
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks::eq_ignore_ascii_inner
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
 core::slice::ascii::<impl [u8]>::escape_ascii
 core::slice::ascii::<impl [u8]>::is_ascii
+core::slice::ascii::is_ascii
 core::slice::ascii::is_ascii::compiletime
 core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii_simple
@@ -7619,6 +8430,7 @@ core::str::<impl str>::len
 core::str::<impl str>::parse
 core::str::<impl str>::split_inclusive
 core::str::<impl str>::starts_with
+core::str::<impl str>::strip_suffix
 core::str::converts::from_raw_parts
 core::str::converts::from_raw_parts_mut
 core::str::converts::from_utf8
@@ -7678,8 +8490,15 @@ core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::rang
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::get_unchecked_mut
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::index
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::ops::range::RangeTo<usize>>::index_mut
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_mut
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked::precondition_check
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked_mut
 core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::get_unchecked_mut::precondition_check
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::index
+core::str::traits::<impl core::slice::index::SliceIndex<str> for core::range::Range<usize>>::index_mut
+core::str::traits::check_range
 core::str::validations::contains_nonascii
 core::str::validations::next_code_point
 core::str::validations::next_code_point_reverse
@@ -7952,6 +8771,8 @@ core::sync::atomic::atomic_and
 core::sync::atomic::atomic_compare_exchange
 core::sync::atomic::atomic_compare_exchange_weak
 core::sync::atomic::atomic_load
+core::sync::atomic::atomic_max
+core::sync::atomic::atomic_min
 core::sync::atomic::atomic_nand
 core::sync::atomic::atomic_or
 core::sync::atomic::atomic_store
@@ -8026,12 +8847,17 @@ core::ub_checks::maybe_is_aligned_and_not_null
 core::ub_checks::maybe_is_nonoverlapping
 core::ub_checks::maybe_is_nonoverlapping::compiletime
 core::ub_checks::maybe_is_nonoverlapping::runtime
-core::unicode::printable::check
-core::unicode::printable::is_printable
 core::unicode::unicode_data::ShortOffsetRunHeader::new
 core::unicode::unicode_data::ShortOffsetRunHeader::prefix_sum
 core::unicode::unicode_data::ShortOffsetRunHeader::start_index
+core::unicode::unicode_data::cf::lookup
+core::unicode::unicode_data::cf::lookup_slow
+core::unicode::unicode_data::cn_planes_0_3::lookup
+core::unicode::unicode_data::cn_planes_0_3::lookup_slow
+core::unicode::unicode_data::default_ignorable_code_point::lookup
+core::unicode::unicode_data::default_ignorable_code_point::lookup_slow
 core::unicode::unicode_data::grapheme_extend::lookup
 core::unicode::unicode_data::grapheme_extend::lookup_slow
 core::unicode::unicode_data::skip_search
+core::unicode::unicode_data::white_space::lookup
 core::unit::<impl core::iter::traits::collect::FromIterator<()> for ()>::from_iter

@@ -9,10 +9,11 @@ use rustc_hir::def_id::DefId;
 use rustc_middle::mir::{self, ConstraintCategory, Location};
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
+    Unnormalized,
 };
 use rustc_span::Span;
+use rustc_trait_selection::diagnostics::impl_trait_overcapture_suggestion;
 use rustc_trait_selection::error_reporting::infer::region::unexpected_hidden_region_diagnostic;
-use rustc_trait_selection::errors::impl_trait_overcapture_suggestion;
 
 use crate::MirBorrowckCtxt;
 use crate::borrow_set::BorrowData;
@@ -282,6 +283,7 @@ impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for CheckExplicitRegionMentionAndCollectGen
                         .tcx
                         .explicit_item_bounds(def_id)
                         .iter_instantiated_copied(self.tcx, args)
+                        .map(Unnormalized::skip_norm_wip)
                     {
                         bound.visit_with(self)?;
                     }

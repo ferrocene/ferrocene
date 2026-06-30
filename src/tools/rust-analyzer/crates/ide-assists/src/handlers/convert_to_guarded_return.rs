@@ -59,7 +59,10 @@ use crate::{
 //     let Some(x) = foo() else { return };
 // }
 // ```
-pub(crate) fn convert_to_guarded_return(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn convert_to_guarded_return(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     match ctx.find_node_at_offset::<Either<ast::LetStmt, ast::IfExpr>>()? {
         Either::Left(let_stmt) => let_stmt_to_guarded_return(let_stmt, acc, ctx),
         Either::Right(if_expr) => if_expr_to_guarded_return(if_expr, acc, ctx),
@@ -69,15 +72,9 @@ pub(crate) fn convert_to_guarded_return(acc: &mut Assists, ctx: &AssistContext<'
 fn if_expr_to_guarded_return(
     if_expr: ast::IfExpr,
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
 ) -> Option<()> {
     let make = SyntaxFactory::without_mappings();
-    let else_block = match if_expr.else_branch() {
-        Some(ast::ElseBranch::Block(block_expr)) => Some(block_expr),
-        Some(_) => return None,
-        _ => None,
-    };
-
     let cond = if_expr.condition()?;
 
     let if_token_range = if_expr.if_token()?.text_range();
@@ -102,7 +99,7 @@ fn if_expr_to_guarded_return(
     }
 
     let container = container_of(&parent_block)?;
-    let else_block = ElseBlock::new(&ctx.sema, else_block, &container)?;
+    let else_block = ElseBlock::new(&ctx.sema, if_expr.else_branch(), &container)?;
 
     if parent_block.tail_expr() != Some(if_expr.clone().into())
         && !(else_block.is_never_block
@@ -130,9 +127,10 @@ fn if_expr_to_guarded_return(
         "Convert to guarded return",
         target,
         |edit| {
-            let make = SyntaxFactory::without_mappings();
+            let editor = edit.make_editor(if_expr.syntax());
+            let make = editor.make();
             let if_indent_level = IndentLevel::from_node(if_expr.syntax());
-            let early_expression = else_block.make_early_block(&ctx.sema, &make);
+            let early_expression = else_block.make_early_block(&ctx.sema, make);
             let replacement = let_chains.into_iter().map(|expr| {
                 if let ast::Expr::LetExpr(let_expr) = &expr
                     && let (Some(pat), Some(expr)) = (let_expr.pat(), let_expr.expr())
@@ -145,8 +143,8 @@ fn if_expr_to_guarded_return(
                 } else {
                     // If.
                     let new_expr = {
-                        let then_branch = clean_stmt_block(&early_expression, &make);
-                        let cond = invert_boolean_expression(&make, expr);
+                        let then_branch = clean_stmt_block(&early_expression, make);
+                        let cond = invert_boolean_expression(make, expr);
                         make.expr_if(cond, then_branch, None).indent(if_indent_level)
                     };
                     new_expr.syntax().clone()
@@ -170,7 +168,6 @@ fn if_expr_to_guarded_return(
                         .take_while(|i| *i != end_of_then),
                 )
                 .collect();
-            let mut editor = edit.make_editor(if_expr.syntax());
             editor.replace_with_many(if_expr.syntax(), then_statements);
             edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
@@ -180,7 +177,7 @@ fn if_expr_to_guarded_return(
 fn let_stmt_to_guarded_return(
     let_stmt: ast::LetStmt,
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
 ) -> Option<()> {
     let pat = let_stmt.pat()?;
     let expr = let_stmt.initializer()?;
@@ -209,22 +206,21 @@ fn let_stmt_to_guarded_return(
         "Convert to guarded return",
         target,
         |edit| {
+            let editor = edit.make_editor(let_stmt.syntax());
+            let make = editor.make();
             let let_indent_level = IndentLevel::from_node(let_stmt.syntax());
-            let make = SyntaxFactory::without_mappings();
 
             let replacement = {
                 let let_else_stmt = make.let_else_stmt(
                     happy_pattern,
                     let_stmt.ty(),
                     expr.reset_indent(),
-                    else_block.make_early_block(&ctx.sema, &make),
+                    else_block.make_early_block(&ctx.sema, make),
                 );
                 let let_else_stmt = let_else_stmt.indent(let_indent_level);
                 let_else_stmt.syntax().clone()
             };
-            let mut editor = edit.make_editor(let_stmt.syntax());
             editor.replace(let_stmt.syntax(), replacement);
-            editor.add_mappings(make.finish_with_mappings());
             edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -238,7 +234,7 @@ fn container_of(block: &ast::BlockExpr) -> Option<SyntaxNode> {
 }
 
 struct ElseBlock<'db> {
-    exist_else_block: Option<ast::BlockExpr>,
+    exist_else_branch: Option<ast::ElseBranch>,
     is_never_block: bool,
     kind: EarlyKind<'db>,
 }
@@ -246,13 +242,23 @@ struct ElseBlock<'db> {
 impl<'db> ElseBlock<'db> {
     fn new(
         sema: &Semantics<'db, RootDatabase>,
-        exist_else_block: Option<ast::BlockExpr>,
+        exist_else_branch: Option<ast::ElseBranch>,
         parent_container: &SyntaxNode,
     ) -> Option<Self> {
-        let is_never_block = exist_else_block.as_ref().is_some_and(|it| is_never_block(sema, it));
+        let is_never_block =
+            exist_else_branch.as_ref().is_some_and(|it| is_never_else_branch(sema, it));
         let kind = EarlyKind::from_node(parent_container, sema)?;
 
-        Some(Self { exist_else_block, is_never_block, kind })
+        Some(Self { exist_else_branch, is_never_block, kind })
+    }
+
+    fn make_else_block_from_exist_branch(&self, make: &SyntaxFactory) -> Option<ast::BlockExpr> {
+        match self.exist_else_branch.as_ref()? {
+            ast::ElseBranch::Block(block_expr) => Some(block_expr.reset_indent()),
+            ast::ElseBranch::IfExpr(if_expr) => {
+                Some(make.block_expr(None, Some(if_expr.reset_indent().indent(1.into()).into())))
+            }
+        }
     }
 
     fn make_early_block(
@@ -260,15 +266,16 @@ impl<'db> ElseBlock<'db> {
         sema: &Semantics<'_, RootDatabase>,
         make: &SyntaxFactory,
     ) -> ast::BlockExpr {
-        let Some(block_expr) = self.exist_else_block else {
+        let Some(block_expr) = self.make_else_block_from_exist_branch(make) else {
             return make.tail_only_block_expr(self.kind.make_early_expr(sema, make, None));
         };
 
         if self.is_never_block {
-            return block_expr.reset_indent();
+            return block_expr;
         }
 
-        let (mut edit, block_expr) = SyntaxEditor::with_ast_node(&block_expr.reset_indent());
+        let (editor, block_expr) = SyntaxEditor::with_ast_node(&block_expr);
+        let make = editor.make();
 
         let last_stmt = block_expr.statements().last().map(|it| it.syntax().clone());
         let tail_expr = block_expr.tail_expr().map(|it| it.syntax().clone());
@@ -277,28 +284,26 @@ impl<'db> ElseBlock<'db> {
         };
         let whitespace = last_element.prev_sibling_or_token().filter(|it| it.kind() == WHITESPACE);
 
-        let make = SyntaxFactory::without_mappings();
-
         if let Some(tail_expr) = block_expr.tail_expr()
             && !self.kind.is_unit()
         {
-            let early_expr = self.kind.make_early_expr(sema, &make, Some(tail_expr.clone()));
-            edit.replace(tail_expr.syntax(), early_expr.syntax());
+            let early_expr = self.kind.make_early_expr(sema, make, Some(tail_expr.clone()));
+            editor.replace(tail_expr.syntax(), early_expr.syntax());
         } else {
             let last_stmt = match block_expr.tail_expr() {
-                Some(expr) => make.expr_stmt(expr).syntax().clone(),
-                None => last_element.clone(),
+                Some(expr) if !expr.is_block_like() => make.expr_stmt(expr).syntax().clone(),
+                _ => last_element.clone(),
             };
             let whitespace =
                 make.whitespace(&whitespace.map_or(String::new(), |it| it.to_string()));
-            let early_expr = self.kind.make_early_expr(sema, &make, None).syntax().clone().into();
-            edit.replace_with_many(
+            let early_expr = self.kind.make_early_expr(sema, make, None).syntax().clone().into();
+            editor.replace_with_many(
                 last_element,
                 vec![last_stmt.into(), whitespace.into(), early_expr],
             );
         }
 
-        ast::BlockExpr::cast(edit.finish().new_root().clone()).unwrap()
+        ast::BlockExpr::cast(editor.finish().new_root().clone()).unwrap()
     }
 }
 
@@ -401,6 +406,27 @@ fn is_early_block(then_block: &ast::StmtList) -> bool {
     };
     then_block.tail_expr().is_some_and(is_early_expr)
         || then_block.statements().filter_map(into_expr).any(is_early_expr)
+}
+
+fn is_never_else_branch(sema: &Semantics<'_, RootDatabase>, it: &ast::ElseBranch) -> bool {
+    match it {
+        ast::ElseBranch::Block(block_expr) => is_never_block(sema, block_expr),
+        ast::ElseBranch::IfExpr(if_expr) => {
+            let mut if_exprs =
+                std::iter::successors(Some(if_expr.clone()), |it| match it.else_branch()? {
+                    ast::ElseBranch::Block(_) => None,
+                    ast::ElseBranch::IfExpr(if_expr) => Some(if_expr),
+                });
+            if_exprs.all(|it| {
+                let else_is_never = match it.else_branch() {
+                    None => false,
+                    Some(ast::ElseBranch::IfExpr(_)) => true,
+                    Some(ast::ElseBranch::Block(block)) => is_never_block(sema, &block),
+                };
+                else_is_never && it.then_branch().is_some_and(|it| is_never_block(sema, &it))
+            })
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1027,6 +1053,42 @@ fn main() {
     }
 
     #[test]
+    fn convert_inside_loop_with_else_if() {
+        check_assist(
+            convert_to_guarded_return,
+            r#"
+fn main() {
+    loop {
+        if$0 guard() {
+            foo();
+            bar();
+        } else if cond() {
+            break;
+        } else {
+            return
+        }
+    }
+}
+"#,
+            r#"
+fn main() {
+    loop {
+        if !guard() {
+            if cond() {
+                break;
+            } else {
+                return
+            }
+        }
+        foo();
+        bar();
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
     fn convert_let_inside_loop() {
         check_assist(
             convert_to_guarded_return,
@@ -1057,6 +1119,7 @@ fn main() {
         check_assist(
             convert_to_guarded_return,
             r#"
+//- minicore: iterator
 fn main() {
     for n in ns {
         if$0 let Some(n) = n {
@@ -1109,6 +1172,7 @@ fn main() {
         check_assist(
             convert_to_guarded_return,
             r#"
+//- minicore: iterator
 fn main() {
     for n in ns {
         if$0 let Some(n) = n {
@@ -1126,6 +1190,109 @@ fn main() {
         let Some(n) = n else {
             baz();
             continue
+        };
+        foo(n);
+        bar();
+    }
+}
+"#,
+        );
+    }
+
+    #[test]
+    fn convert_let_inside_for_with_else_if() {
+        check_assist(
+            convert_to_guarded_return,
+            r#"
+//- minicore: iterator
+fn main() {
+    for n in ns {
+        if$0 let Some(n) = n {
+            foo(n);
+            bar();
+        } else if cond() {
+            return
+        } else {
+            baz()
+        }
+    }
+}
+"#,
+            r#"
+fn main() {
+    for n in ns {
+        let Some(n) = n else {
+            if cond() {
+                return
+            } else {
+                baz()
+            }
+            continue
+        };
+        foo(n);
+        bar();
+    }
+}
+"#,
+        );
+
+        check_assist(
+            convert_to_guarded_return,
+            r#"
+//- minicore: iterator
+fn main() {
+    for n in ns {
+        if$0 let Some(n) = n {
+            foo(n);
+            bar();
+        } else if cond() {
+            return
+        }
+    }
+}
+"#,
+            r#"
+fn main() {
+    for n in ns {
+        let Some(n) = n else {
+            if cond() {
+                return
+            }
+            continue
+        };
+        foo(n);
+        bar();
+    }
+}
+"#,
+        );
+
+        check_assist(
+            convert_to_guarded_return,
+            r#"
+//- minicore: iterator
+fn main() {
+    for n in ns {
+        if$0 let Some(n) = n {
+            foo(n);
+            bar();
+        } else if cond() {
+            return
+        } else {
+            break
+        }
+    }
+}
+"#,
+            r#"
+fn main() {
+    for n in ns {
+        let Some(n) = n else {
+            if cond() {
+                return
+            } else {
+                break
+            }
         };
         foo(n);
         bar();
@@ -1417,7 +1584,7 @@ fn main() {
     }
 
     #[test]
-    fn ignore_else_if() {
+    fn ignore_on_else_if() {
         check_assist_not_applicable(
             convert_to_guarded_return,
             r#"

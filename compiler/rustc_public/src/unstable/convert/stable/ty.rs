@@ -46,8 +46,19 @@ impl<'tcx> Stable<'tcx> for ty::AliasTerm<'tcx> {
         tables: &mut Tables<'cx, BridgeTys>,
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
-        let ty::AliasTerm { args, def_id, .. } = self;
-        crate::ty::AliasTerm { def_id: tables.alias_def(*def_id), args: args.stable(tables, cx) }
+        let ty::AliasTerm { args, kind, .. } = self;
+        // rustc_public must change its API once we introduce a variant without a def_id.
+        let def_id = match *kind {
+            ty::AliasTermKind::ProjectionTy { def_id }
+            | ty::AliasTermKind::InherentTy { def_id }
+            | ty::AliasTermKind::OpaqueTy { def_id }
+            | ty::AliasTermKind::FreeTy { def_id }
+            | ty::AliasTermKind::AnonConst { def_id }
+            | ty::AliasTermKind::ProjectionConst { def_id }
+            | ty::AliasTermKind::FreeConst { def_id }
+            | ty::AliasTermKind::InherentConst { def_id } => def_id,
+        };
+        crate::ty::AliasTerm { def_id: tables.alias_def(def_id), args: args.stable(tables, cx) }
     }
 }
 
@@ -252,6 +263,23 @@ where
     }
 }
 
+// This internal type isn't publicly exposed, because it is an implementation detail.
+// But it's a public field of FnSig (which has a public mirror type), so allow conversions.
+impl<'tcx> Stable<'tcx> for ty::FnSigKind<'tcx> {
+    type T = (bool /*c_variadic*/, crate::mir::Safety, crate::ty::Abi);
+    fn stable<'cx>(
+        &self,
+        tables: &mut Tables<'cx, BridgeTys>,
+        cx: &CompilerCtxt<'cx, BridgeTys>,
+    ) -> Self::T {
+        (
+            self.c_variadic(),
+            if self.is_safe() { crate::mir::Safety::Safe } else { crate::mir::Safety::Unsafe },
+            self.abi().stable(tables, cx),
+        )
+    }
+}
+
 impl<'tcx> Stable<'tcx> for ty::FnSig<'tcx> {
     type T = crate::ty::FnSig;
     fn stable<'cx>(
@@ -260,6 +288,7 @@ impl<'tcx> Stable<'tcx> for ty::FnSig<'tcx> {
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
         use crate::ty::FnSig;
+        let (c_variadic, safety, abi) = self.fn_sig_kind.stable(tables, cx);
 
         FnSig {
             inputs_and_output: self
@@ -267,9 +296,9 @@ impl<'tcx> Stable<'tcx> for ty::FnSig<'tcx> {
                 .iter()
                 .map(|ty| ty.stable(tables, cx))
                 .collect(),
-            c_variadic: self.c_variadic,
-            safety: self.safety.stable(tables, cx),
-            abi: self.abi.stable(tables, cx),
+            c_variadic,
+            safety,
+            abi,
         }
     }
 }
@@ -387,7 +416,7 @@ impl<'tcx> Stable<'tcx> for Ty<'tcx> {
         tables: &mut Tables<'cx, BridgeTys>,
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
-        tables.intern_ty(cx.lift(*self).unwrap())
+        tables.intern_ty(cx.lift(*self))
     }
 }
 
@@ -454,8 +483,8 @@ impl<'tcx> Stable<'tcx> for ty::TyKind<'tcx> {
             ty::Tuple(fields) => TyKind::RigidTy(RigidTy::Tuple(
                 fields.iter().map(|ty| ty.stable(tables, cx)).collect(),
             )),
-            ty::Alias(_alias_ty) => {
-                todo!()
+            ty::Alias(alias_ty) => {
+                TyKind::Alias(alias_ty.kind.stable(tables, cx), alias_ty.stable(tables, cx))
             }
             ty::Param(param_ty) => TyKind::Param(param_ty.stable(tables, cx)),
             ty::Bound(ty::BoundVarIndexKind::Canonical, _) => {
@@ -485,13 +514,14 @@ impl<'tcx> Stable<'tcx> for ty::Pattern<'tcx> {
     ) -> Self::T {
         match **self {
             ty::PatternKind::Range { start, end } => crate::ty::Pattern::Range {
-                // FIXME(SMIR): update data structures to not have an Option here anymore
-                start: Some(start.stable(tables, cx)),
-                end: Some(end.stable(tables, cx)),
+                start: start.stable(tables, cx),
+                end: end.stable(tables, cx),
                 include_end: true,
             },
-            ty::PatternKind::NotNull => todo!(),
-            ty::PatternKind::Or(_) => todo!(),
+            ty::PatternKind::NotNull => crate::ty::Pattern::NotNull,
+            ty::PatternKind::Or(pats) => {
+                crate::ty::Pattern::Or(pats.iter().map(|pat| pat.stable(tables, cx)).collect())
+            }
         }
     }
 }
@@ -504,7 +534,7 @@ impl<'tcx> Stable<'tcx> for ty::Const<'tcx> {
         tables: &mut Tables<'cx, BridgeTys>,
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
-        let ct = cx.lift(*self).unwrap();
+        let ct = cx.lift(*self);
         let kind = match ct.kind() {
             ty::ConstKind::Value(cv) => {
                 let const_val = cx.valtree_to_const_val(cv);
@@ -518,10 +548,18 @@ impl<'tcx> Stable<'tcx> for ty::Const<'tcx> {
                 }
             }
             ty::ConstKind::Param(param) => crate::ty::TyConstKind::Param(param.stable(tables, cx)),
-            ty::ConstKind::Unevaluated(uv) => crate::ty::TyConstKind::Unevaluated(
-                tables.const_def(uv.def),
-                uv.args.stable(tables, cx),
-            ),
+            ty::ConstKind::Unevaluated(uv) => {
+                let Some(def_id) = uv.kind.opt_def_id() else {
+                    // FIXME: implement (both AliasTy and UnevaluatedConst will be needing this soon)
+                    panic!(
+                        "non-defid unevaluated constants are not supported by rustc_public at the moment"
+                    )
+                };
+                crate::ty::TyConstKind::Unevaluated(
+                    tables.const_def(def_id),
+                    uv.args.stable(tables, cx),
+                )
+            }
             ty::ConstKind::Error(_) => unreachable!(),
             ty::ConstKind::Infer(_) => unreachable!(),
             ty::ConstKind::Bound(_, _) => unimplemented!(),
@@ -945,7 +983,7 @@ impl<'tcx> Stable<'tcx> for ty::Instance<'tcx> {
         tables: &mut Tables<'cx, BridgeTys>,
         cx: &CompilerCtxt<'cx, BridgeTys>,
     ) -> Self::T {
-        let def = tables.instance_def(cx.lift(*self).unwrap());
+        let def = tables.instance_def(cx.lift(*self));
         let kind = match self.def {
             ty::InstanceKind::Item(..) => crate::mir::mono::InstanceKind::Item,
             ty::InstanceKind::Intrinsic(..) => crate::mir::mono::InstanceKind::Intrinsic,
@@ -1024,10 +1062,12 @@ impl<'tcx> Stable<'tcx> for rustc_abi::ExternAbi {
             ExternAbi::Unadjusted => Abi::Unadjusted,
             ExternAbi::RustCold => Abi::RustCold,
             ExternAbi::RustPreserveNone => Abi::RustPreserveNone,
+            ExternAbi::RustTail => Abi::RustTail,
             ExternAbi::RustInvalid => Abi::RustInvalid,
             ExternAbi::RiscvInterruptM => Abi::RiscvInterruptM,
             ExternAbi::RiscvInterruptS => Abi::RiscvInterruptS,
             ExternAbi::Custom => Abi::Custom,
+            ExternAbi::Swift => Abi::Swift,
         }
     }
 }

@@ -1,7 +1,7 @@
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def_id::LocalDefId;
 use rustc_infer::infer::SubregionOrigin;
-use rustc_infer::infer::canonical::QueryRegionConstraints;
+use rustc_infer::infer::canonical::{QueryRegionConstraint, QueryRegionConstraints};
 use rustc_infer::infer::outlives::env::RegionBoundPairs;
 use rustc_infer::infer::outlives::obligations::{TypeOutlives, TypeOutlivesDelegate};
 use rustc_infer::infer::region_constraints::{GenericKind, VerifyBound};
@@ -70,12 +70,14 @@ impl<'a, 'tcx> ConstraintConversion<'a, 'tcx> {
 
     #[instrument(skip(self), level = "debug")]
     pub(super) fn convert_all(&mut self, query_constraints: &QueryRegionConstraints<'tcx>) {
-        let QueryRegionConstraints { outlives, assumptions } = query_constraints;
+        let QueryRegionConstraints { constraints, assumptions } = query_constraints;
         let assumptions =
             elaborate::elaborate_outlives_assumptions(self.infcx.tcx, assumptions.iter().copied());
 
-        for &(predicate, constraint_category) in outlives {
-            self.convert(predicate, constraint_category, &assumptions);
+        for &QueryRegionConstraint { constraint, category, .. } in constraints {
+            constraint.iter_outlives().for_each(|predicate| {
+                self.convert(predicate, category, &assumptions);
+            });
         }
     }
 
@@ -292,8 +294,12 @@ impl<'a, 'tcx> ConstraintConversion<'a, 'tcx> {
         ) {
             Ok(TypeOpOutput { output: ty, constraints, .. }) => {
                 // FIXME(higher_ranked_auto): What should we do with the assumptions here?
-                if let Some(QueryRegionConstraints { outlives, assumptions: _ }) = constraints {
-                    next_outlives_predicates.extend(outlives.iter().copied());
+                if let Some(QueryRegionConstraints { constraints, assumptions: _ }) = constraints {
+                    next_outlives_predicates.extend(constraints.iter().flat_map(
+                        |QueryRegionConstraint { constraint, category, .. }| {
+                            constraint.iter_outlives().map(|outlives| (outlives, *category))
+                        },
+                    ));
                 }
                 ty
             }

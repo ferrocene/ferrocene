@@ -1,8 +1,11 @@
 //! Various code related to computing outlives relations.
 
+use std::iter;
+
 use rustc_data_structures::undo_log::UndoLogs;
 use rustc_middle::traits::query::{NoSolution, OutlivesBound};
 use rustc_middle::ty;
+use rustc_span::Span;
 use tracing::instrument;
 
 use self::env::OutlivesEnvironment;
@@ -47,8 +50,9 @@ impl<'tcx> InferCtxt<'tcx> {
             ty::PolyTypeOutlivesPredicate<'tcx>,
             SubregionOrigin<'tcx>,
         ) -> Result<ty::PolyTypeOutlivesPredicate<'tcx>, NoSolution>,
+        span: Span,
     ) -> Vec<RegionResolutionError<'tcx>> {
-        match self.process_registered_region_obligations(outlives_env, deeply_normalize_ty) {
+        match self.process_registered_region_obligations(outlives_env, deeply_normalize_ty, span) {
             Ok(()) => {}
             Err((clause, origin)) => {
                 return vec![RegionResolutionError::CannotNormalize(clause, origin)];
@@ -67,6 +71,15 @@ impl<'tcx> InferCtxt<'tcx> {
             inner.region_constraint_storage.take().expect("regions already resolved")
         };
 
+        storage.data.constraints = storage
+            .data
+            .constraints
+            .iter()
+            .flat_map(|(constraint, origin)| {
+                constraint.iter_outlives().zip(iter::repeat_with(|| origin.clone()))
+            })
+            .collect();
+
         // Filter out any region-region outlives assumptions that are implied by
         // coroutine well-formedness.
         if self.tcx.sess.opts.unstable_opts.higher_ranked_assumptions {
@@ -74,7 +87,14 @@ impl<'tcx> InferCtxt<'tcx> {
                 ConstraintKind::RegSubReg => !outlives_env
                     .higher_ranked_assumptions()
                     .contains(&ty::OutlivesPredicate(c.sup.into(), c.sub)),
-                _ => true,
+
+                ConstraintKind::VarSubVar
+                | ConstraintKind::RegSubVar
+                | ConstraintKind::VarSubReg => true,
+
+                ConstraintKind::VarEqVar | ConstraintKind::VarEqReg | ConstraintKind::RegEqReg => {
+                    unreachable!();
+                }
             });
         }
 

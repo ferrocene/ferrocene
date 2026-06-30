@@ -19,12 +19,12 @@ use tracing::{debug, instrument};
 
 use super::ObligationCauseAsDiagArg;
 use super::nice_region_error::find_anon_type;
-use crate::error_reporting::TypeErrCtxt;
-use crate::error_reporting::infer::ObligationCauseExt;
-use crate::errors::{
+use crate::diagnostics::{
     self, FulfillReqLifetime, LfBoundNotSatisfied, OutlivesBound, OutlivesContent,
     RefLongerThanData, RegionOriginNote, WhereClauseSuggestions, note_and_explain,
 };
+use crate::error_reporting::TypeErrCtxt;
+use crate::error_reporting::infer::ObligationCauseExt;
 use crate::infer::region_constraints::GenericKind;
 use crate::infer::{
     BoundRegionConversionTime, InferCtxt, RegionResolutionError, RegionVariableOrigin,
@@ -292,6 +292,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 RegionOriginNote::Plain { span, msg: msg!("...so that the where clause holds") }
                     .add_to_diag(err);
             }
+            SubregionOrigin::SolverRegionConstraint(span) => {
+                RegionOriginNote::Plain {
+                    span,
+                    msg: msg!("this diagnostic is currently WIP while -Zassumptions-on-binders is incomplete"),
+                }
+                .add_to_diag(err);
+            }
         }
     }
 
@@ -303,10 +310,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         sup: Region<'tcx>,
     ) -> Diag<'a> {
         let mut err = match origin {
-            SubregionOrigin::Subtype(box trace) => {
+            SubregionOrigin::Subtype(trace) => {
                 let terr = TypeError::RegionsDoesNotOutlive(sup, sub);
                 let mut err = self.report_and_explain_type_error(
-                    trace,
+                    *trace,
                     self.tcx.param_env(generic_param_scope),
                     terr,
                 );
@@ -441,7 +448,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     && let Some(def_id) = preds.principal_def_id()
                 {
                     for (clause, span) in
-                        self.tcx.predicates_of(def_id).instantiate_identity(self.tcx)
+                        self.tcx.predicates_of(def_id).instantiate_identity(self.tcx).into_iter()
                     {
                         if let ty::ClauseKind::TypeOutlives(ty::OutlivesPredicate(a, b)) =
                             clause.kind().skip_binder()
@@ -560,6 +567,14 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     notes: instantiated.into_iter().chain(must_outlive).collect(),
                 })
             }
+            SubregionOrigin::SolverRegionConstraint(span) => {
+                let mut d = self.dcx().struct_span_err(
+                    span,
+                    "unsatisfied lifetime constraint from -Zassumptions-on-binders :3",
+                );
+                d.note("meoow :c");
+                d
+            }
         };
         if sub.is_error() || sup.is_error() {
             err.downgrade_to_delayed_bug();
@@ -584,24 +599,22 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let trait_ref = self.tcx.impl_trait_ref(impl_def_id);
         let trait_args = trait_ref
             .instantiate_identity()
+            .skip_norm_wip()
             // Replace the explicit self type with `Self` for better suggestion rendering
             .with_replaced_self_ty(self.tcx, Ty::new_param(self.tcx, 0, kw::SelfUpper))
             .args;
         let trait_item_args = ty::GenericArgs::identity_for_item(self.tcx, impl_item_def_id)
             .rebase_onto(self.tcx, impl_def_id, trait_args);
 
-        let Ok(trait_predicates) =
-            self.tcx
-                .explicit_predicates_of(trait_item_def_id)
-                .instantiate_own(self.tcx, trait_item_args)
-                .map(|(pred, _)| {
-                    if pred.is_suggestable(self.tcx, false) {
-                        Ok(pred.to_string())
-                    } else {
-                        Err(())
-                    }
-                })
-                .collect::<Result<Vec<_>, ()>>()
+        let Ok(trait_predicates) = self
+            .tcx
+            .explicit_predicates_of(trait_item_def_id)
+            .instantiate_own(self.tcx, trait_item_args)
+            .map(|(pred, _)| {
+                let pred = pred.skip_norm_wip();
+                if pred.is_suggestable(self.tcx, false) { Ok(pred.to_string()) } else { Err(()) }
+            })
+            .collect::<Result<Vec<_>, ()>>()
         else {
             return;
         };
@@ -633,7 +646,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         // I can't think how to do better than this right now. -nikomatsakis
         debug!(?placeholder_origin, ?sub, ?sup, "report_placeholder_failure");
         match placeholder_origin {
-            SubregionOrigin::Subtype(box ref trace)
+            SubregionOrigin::Subtype(ref trace)
                 if matches!(
                     &trace.cause.code().peel_derives(),
                     ObligationCauseCode::WhereClause(..)
@@ -663,10 +676,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     )
                 }
             }
-            SubregionOrigin::Subtype(box trace) => {
+            SubregionOrigin::Subtype(trace) => {
                 let terr = TypeError::RegionsPlaceholderMismatch;
                 return self.report_and_explain_type_error(
-                    trace,
+                    *trace,
                     self.tcx.param_env(generic_param_scope),
                     terr,
                 );
@@ -1263,7 +1276,7 @@ pub fn unexpected_hidden_region_diagnostic<'a, 'tcx>(
     opaque_ty_key: ty::OpaqueTypeKey<'tcx>,
 ) -> Diag<'a> {
     let tcx = infcx.tcx;
-    let mut err = infcx.dcx().create_err(errors::OpaqueCapturesLifetime {
+    let mut err = infcx.dcx().create_err(diagnostics::OpaqueCapturesLifetime {
         span,
         opaque_ty: Ty::new_opaque(tcx, opaque_ty_key.def_id.to_def_id(), opaque_ty_key.args),
         opaque_ty_span: tcx.def_span(opaque_ty_key.def_id),
@@ -1376,7 +1389,12 @@ fn suggest_precise_capturing<'tcx>(
             (span.with_hi(span.hi() - BytePos(1)).shrink_to_hi(), "", "")
         };
 
-        diag.subdiagnostic(errors::AddPreciseCapturing::Existing { span, new_lifetime, pre, post });
+        diag.subdiagnostic(diagnostics::AddPreciseCapturing::Existing {
+            span,
+            new_lifetime,
+            pre,
+            post,
+        });
     } else {
         let mut captured_lifetimes = FxIndexSet::default();
         let mut captured_non_lifetimes = FxIndexSet::default();
@@ -1424,7 +1442,7 @@ fn suggest_precise_capturing<'tcx>(
                 .collect::<Vec<_>>()
                 .join(", ");
 
-            diag.subdiagnostic(errors::AddPreciseCapturing::New {
+            diag.subdiagnostic(diagnostics::AddPreciseCapturing::New {
                 span: tcx.def_span(opaque_def_id).shrink_to_hi(),
                 new_lifetime,
                 concatenated_bounds,
@@ -1491,7 +1509,7 @@ fn suggest_precise_capturing<'tcx>(
                 format!(" + use<{concatenated_bounds}>"),
             ));
 
-            diag.subdiagnostic(errors::AddPreciseCapturingAndParams {
+            diag.subdiagnostic(diagnostics::AddPreciseCapturingAndParams {
                 suggs,
                 new_lifetime,
                 apit_spans,

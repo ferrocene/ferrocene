@@ -1,7 +1,5 @@
 use syntax::{
-    ast::{
-        self, AstNode, HasGenericParams, HasName, edit::AstNodeEdit, syntax_factory::SyntaxFactory,
-    },
+    ast::{self, AstNode, HasGenericParams, HasName, edit::AstNodeEdit},
     syntax_editor::{Position, SyntaxEditor},
 };
 
@@ -9,16 +7,12 @@ use crate::{
     AssistContext, AssistId, Assists,
     utils::{
         self, DefaultMethods, IgnoreAssocItems, add_trait_assoc_items_to_impl,
-        generate_impl_with_factory, generate_trait_impl_intransitive,
+        generate_trait_impl_intransitive,
     },
 };
 
-fn insert_impl(
-    editor: &mut SyntaxEditor,
-    make: &SyntaxFactory,
-    impl_: &ast::Impl,
-    nominal: &impl AstNodeEdit,
-) -> ast::Impl {
+fn insert_impl(editor: &SyntaxEditor, impl_: &ast::Impl, nominal: &impl AstNodeEdit) -> ast::Impl {
+    let make = editor.make();
     let indent = nominal.indent_level();
 
     let impl_ = impl_.indent(indent);
@@ -51,7 +45,7 @@ fn insert_impl(
 //
 // impl<T: Clone> Ctx<T> {$0}
 // ```
-pub(crate) fn generate_impl(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn generate_impl(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let nominal = ctx.find_node_at_offset::<ast::Adt>()?;
     let name = nominal.name()?;
     let target = nominal.syntax().text_range();
@@ -65,13 +59,11 @@ pub(crate) fn generate_impl(acc: &mut Assists, ctx: &AssistContext<'_>) -> Optio
         format!("Generate impl for `{name}`"),
         target,
         |edit| {
-            let make = SyntaxFactory::with_mappings();
-            // Generate the impl
-            let impl_ = generate_impl_with_factory(&make, &nominal);
+            let editor = edit.make_editor(nominal.syntax());
+            let make = editor.make();
+            let impl_ = utils::generate_impl(make, &nominal);
 
-            let mut editor = edit.make_editor(nominal.syntax());
-
-            let impl_ = insert_impl(&mut editor, &make, &impl_, &nominal);
+            let impl_ = insert_impl(&editor, &impl_, &nominal);
             // Add a tabstop after the left curly brace
             if let Some(cap) = ctx.config.snippet_cap
                 && let Some(l_curly) = impl_.assoc_item_list().and_then(|it| it.l_curly_token())
@@ -79,8 +71,6 @@ pub(crate) fn generate_impl(acc: &mut Assists, ctx: &AssistContext<'_>) -> Optio
                 let tabstop = edit.make_tabstop_after(cap);
                 editor.add_annotation(l_curly, tabstop);
             }
-
-            editor.add_mappings(make.finish_with_mappings());
             edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -103,7 +93,7 @@ pub(crate) fn generate_impl(acc: &mut Assists, ctx: &AssistContext<'_>) -> Optio
 //
 // impl<T: Clone> ${1:_} for Ctx<T> {$0}
 // ```
-pub(crate) fn generate_trait_impl(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn generate_trait_impl(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let nominal = ctx.find_node_at_offset::<ast::Adt>()?;
     let name = nominal.name()?;
     let target = nominal.syntax().text_range();
@@ -117,13 +107,10 @@ pub(crate) fn generate_trait_impl(acc: &mut Assists, ctx: &AssistContext<'_>) ->
         format!("Generate trait impl for `{name}`"),
         target,
         |edit| {
-            let make = SyntaxFactory::with_mappings();
-            // Generate the impl
-            let impl_ = generate_trait_impl_intransitive(&make, &nominal, make.ty_placeholder());
-
-            let mut editor = edit.make_editor(nominal.syntax());
-
-            let impl_ = insert_impl(&mut editor, &make, &impl_, &nominal);
+            let editor = edit.make_editor(nominal.syntax());
+            let make = editor.make();
+            let impl_ = generate_trait_impl_intransitive(make, &nominal, make.ty_placeholder());
+            let impl_ = insert_impl(&editor, &impl_, &nominal);
             // Make the trait type a placeholder snippet
             if let Some(cap) = ctx.config.snippet_cap {
                 if let Some(trait_) = impl_.trait_() {
@@ -136,8 +123,6 @@ pub(crate) fn generate_trait_impl(acc: &mut Assists, ctx: &AssistContext<'_>) ->
                     editor.add_annotation(l_curly, tabstop);
                 }
             }
-
-            editor.add_mappings(make.finish_with_mappings());
             edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -164,7 +149,7 @@ pub(crate) fn generate_trait_impl(acc: &mut Assists, ctx: &AssistContext<'_>) ->
 //     }
 // }
 // ```
-pub(crate) fn generate_impl_trait(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn generate_impl_trait(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let name = ctx.find_node_at_offset::<ast::Name>()?;
     let trait_ = ast::Trait::cast(name.syntax().parent()?)?;
     let target_scope = ctx.sema.scope(trait_.syntax())?;
@@ -176,8 +161,8 @@ pub(crate) fn generate_impl_trait(acc: &mut Assists, ctx: &AssistContext<'_>) ->
         format!("Generate `{name}` impl for type"),
         target,
         |edit| {
-            let make = SyntaxFactory::with_mappings();
-            let mut editor = edit.make_editor(trait_.syntax());
+            let editor = edit.make_editor(trait_.syntax());
+            let make = editor.make();
 
             let holder_arg = ast::GenericArg::TypeArg(make.type_arg(make.ty_placeholder()));
             let missing_items = utils::filter_assoc_items(
@@ -213,7 +198,7 @@ pub(crate) fn generate_impl_trait(acc: &mut Assists, ctx: &AssistContext<'_>) ->
             } else {
                 let impl_ = make_impl_(None);
                 let assoc_items = add_trait_assoc_items_to_impl(
-                    &make,
+                    make,
                     &ctx.sema,
                     ctx.config,
                     &missing_items,
@@ -225,8 +210,7 @@ pub(crate) fn generate_impl_trait(acc: &mut Assists, ctx: &AssistContext<'_>) ->
                 make_impl_(Some(assoc_item_list))
             };
 
-            let impl_ = insert_impl(&mut editor, &make, &impl_, &trait_);
-            editor.add_mappings(make.finish_with_mappings());
+            let impl_ = insert_impl(&editor, &impl_, &trait_);
 
             if let Some(cap) = ctx.config.snippet_cap {
                 if let Some(generics) = impl_.trait_().and_then(|it| it.generic_arg_list()) {

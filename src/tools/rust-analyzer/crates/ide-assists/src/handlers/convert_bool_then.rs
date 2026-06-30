@@ -38,7 +38,10 @@ use crate::{
 //     cond.then(|| val)
 // }
 // ```
-pub(crate) fn convert_if_to_bool_then(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn convert_if_to_bool_then(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     // FIXME applies to match as well
     let expr = ctx.find_node_at_offset::<ast::IfExpr>()?;
     if !expr.if_token()?.text_range().contains_inclusive(ctx.offset()) {
@@ -77,7 +80,7 @@ pub(crate) fn convert_if_to_bool_then(acc: &mut Assists, ctx: &AssistContext<'_>
         "Convert `if` expression to `bool::then` call",
         target,
         |builder| {
-            let (mut editor, closure_body) = SyntaxEditor::with_ast_node(&closure_body);
+            let (editor, closure_body) = SyntaxEditor::with_ast_node(&closure_body);
             // Rewrite all `Some(e)` in tail position to `e`
             for_each_tail_expr(&closure_body, &mut |e| {
                 let e = match e {
@@ -95,13 +98,13 @@ pub(crate) fn convert_if_to_bool_then(acc: &mut Assists, ctx: &AssistContext<'_>
             let edit = editor.finish();
             let closure_body = ast::Expr::cast(edit.new_root().clone()).unwrap();
 
-            let mut editor = builder.make_editor(expr.syntax());
-            let make = SyntaxFactory::with_mappings();
+            let editor = builder.make_editor(expr.syntax());
+            let make = editor.make();
             let closure_body = match closure_body {
                 ast::Expr::BlockExpr(block) => unwrap_trivial_block(block),
                 e => e,
             };
-            let cond = if invert_cond { invert_boolean_expression(&make, cond) } else { cond };
+            let cond = if invert_cond { invert_boolean_expression(make, cond) } else { cond };
 
             let parenthesize = matches!(
                 cond,
@@ -128,8 +131,6 @@ pub(crate) fn convert_if_to_bool_then(acc: &mut Assists, ctx: &AssistContext<'_>
             let arg_list = make.arg_list(Some(make.expr_closure(None, closure_body).into()));
             let mcall = make.expr_method_call(cond, make.name_ref("then"), arg_list);
             editor.replace(expr.syntax(), mcall.syntax());
-
-            editor.add_mappings(make.finish_with_mappings());
             builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -155,7 +156,10 @@ pub(crate) fn convert_if_to_bool_then(acc: &mut Assists, ctx: &AssistContext<'_>
 //     }
 // }
 // ```
-pub(crate) fn convert_bool_then_to_if(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn convert_bool_then_to_if(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     let name_ref = ctx.find_node_at_offset::<ast::NameRef>()?;
     let mcall = name_ref.syntax().parent().and_then(ast::MethodCallExpr::cast)?;
     let receiver = mcall.receiver()?;
@@ -187,7 +191,7 @@ pub(crate) fn convert_bool_then_to_if(acc: &mut Assists, ctx: &AssistContext<'_>
                 e => mapless_make.block_expr(None, Some(e)),
             };
 
-            let (mut editor, closure_body) = SyntaxEditor::with_ast_node(&closure_body);
+            let (editor, closure_body) = SyntaxEditor::with_ast_node(&closure_body);
             // Wrap all tails in `Some(...)`
             let none_path = mapless_make.expr_path(mapless_make.ident_path("None"));
             let some_path = mapless_make.expr_path(mapless_make.ident_path("Some"));
@@ -210,8 +214,8 @@ pub(crate) fn convert_bool_then_to_if(acc: &mut Assists, ctx: &AssistContext<'_>
             let edit = editor.finish();
             let closure_body = ast::BlockExpr::cast(edit.new_root().clone()).unwrap();
 
-            let mut editor = builder.make_editor(mcall.syntax());
-            let make = SyntaxFactory::with_mappings();
+            let editor = builder.make_editor(mcall.syntax());
+            let make = editor.make();
 
             let cond = match &receiver {
                 ast::Expr::ParenExpr(expr) => expr.expr().unwrap_or(receiver),
@@ -225,8 +229,6 @@ pub(crate) fn convert_bool_then_to_if(acc: &mut Assists, ctx: &AssistContext<'_>
                 )
                 .indent(mcall.indent_level());
             editor.replace(mcall.syntax().clone(), if_expr.syntax().clone());
-
-            editor.add_mappings(make.finish_with_mappings());
             builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )

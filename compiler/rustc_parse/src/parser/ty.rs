@@ -19,7 +19,7 @@ use crate::errors::{
     NeedPlusAfterTraitObjectLifetime, NestedCVariadicType, ReturnTypesUseThinArrow,
 };
 use crate::parser::item::FrontMatterParsingMode;
-use crate::parser::{FnContext, FnParseMode};
+use crate::parser::{ExpTokenPair, FnContext, FnParseMode};
 use crate::{exp, maybe_recover_from_interpolated_ty_qpath};
 
 /// Signals whether parsing a type should allow `+`.
@@ -596,7 +596,7 @@ impl<'a> Parser<'a> {
     /// Parses a raw pointer with a C-style typo
     fn parse_ty_c_style_pointer(&mut self) -> PResult<'a, TyKind> {
         let kw_span = self.token.span;
-        let mutbl = self.parse_const_or_mut();
+        let mutbl = self.parse_mut_or_const();
 
         if let Some(mutbl) = mutbl
             && self.eat(exp!(Star))
@@ -630,7 +630,7 @@ impl<'a> Parser<'a> {
 
     /// Parses a raw pointer type: `*[const | mut] $type`.
     fn parse_ty_ptr(&mut self) -> PResult<'a, TyKind> {
-        let mutbl = self.parse_const_or_mut().unwrap_or_else(|| {
+        let mutbl = self.parse_mut_or_const().unwrap_or_else(|| {
             let span = self.prev_token.span;
             self.dcx().emit_err(ExpectedMutOrConstInRawPointerType {
                 span,
@@ -768,20 +768,41 @@ impl<'a> Parser<'a> {
             self.bump_with((dyn_tok, dyn_tok_sp));
         }
         let ty = self.parse_ty_no_plus()?;
+        if self.token == TokenKind::Dot && self.look_ahead(1, |t| t.kind == TokenKind::OpenBrace) {
+            // & [mut] <type> . { <fields> }
+            //                ^
+            //                we are here
+            let view_start_span = self.token.span;
+            self.bump();
+            let fields = self
+                .parse_delim_comma_seq(
+                    ExpTokenPair { tok: TokenKind::OpenBrace, token_type: TokenType::OpenBrace },
+                    ExpTokenPair { tok: TokenKind::CloseBrace, token_type: TokenType::CloseBrace },
+                    |p| p.parse_ident(),
+                )?
+                .0;
+            // FIXME(scrabsha): actually propagate field view in the AST.
+            let _ = fields;
+            let view_end_span = self.prev_token.span;
+            let span = view_start_span.to(view_end_span);
+            self.psess.gated_spans.gate(sym::view_types, span);
+        }
         Ok(match pinned {
             Pinnedness::Not => TyKind::Ref(opt_lifetime, MutTy { ty, mutbl }),
             Pinnedness::Pinned => TyKind::PinnedRef(opt_lifetime, MutTy { ty, mutbl }),
         })
     }
 
-    /// Parses `pin` and `mut` annotations on references, patterns, or borrow modifiers.
+    /// Parse nothing, mutability or `pin` followed by "explicit" mutability.
     ///
-    /// It must be either `pin const`, `pin mut`, `mut`, or nothing (immutable).
+    /// ```ebnf
+    /// PinAndMut = "pin" MutOrConst | "mut"
+    /// ```
     pub(crate) fn parse_pin_and_mut(&mut self) -> (Pinnedness, Mutability) {
         if self.token.is_ident_named(sym::pin) && self.look_ahead(1, Token::is_mutability) {
             self.psess.gated_spans.gate(sym::pin_ergonomics, self.token.span);
             assert!(self.eat_keyword(exp!(Pin)));
-            let mutbl = self.parse_const_or_mut().unwrap();
+            let mutbl = self.parse_mut_or_const().unwrap();
             (Pinnedness::Pinned, mutbl)
         } else {
             (Pinnedness::Not, self.parse_mutability())
@@ -1071,7 +1092,7 @@ impl<'a> Parser<'a> {
                 && (self.token.can_begin_type()
                     || (self.token.is_reserved_ident() && !self.token.is_keyword(kw::Where))))
         {
-            if self.token.is_keyword(kw::Dyn) {
+            if self.token.is_keyword(kw::Dyn) && self.token.span.edition().at_least_rust_2018() {
                 // Account for `&dyn Trait + dyn Other`.
                 self.bump();
                 self.dcx().emit_err(InvalidDynKeyword {

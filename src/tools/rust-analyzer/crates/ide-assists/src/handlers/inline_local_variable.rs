@@ -7,7 +7,7 @@ use ide_db::{
 };
 use syntax::{
     Direction, TextRange,
-    ast::{self, AstNode, AstToken, HasName, syntax_factory::SyntaxFactory},
+    ast::{self, AstNode, AstToken, HasName},
     syntax_editor::{Element, SyntaxEditor},
 };
 
@@ -32,7 +32,7 @@ use crate::{
 //     (1 + 2) * 4;
 // }
 // ```
-pub(crate) fn inline_local_variable(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn inline_local_variable(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let file_id = ctx.file_id();
     let range = ctx.selection_trimmed();
     let InlineData { let_stmt, delete_let, references, target } =
@@ -83,7 +83,8 @@ pub(crate) fn inline_local_variable(acc: &mut Assists, ctx: &AssistContext<'_>) 
         "Inline variable",
         target.text_range(),
         move |builder| {
-            let mut editor = builder.make_editor(&target);
+            let editor = builder.make_editor(&target);
+            let make = editor.make();
             if delete_let {
                 editor.delete(let_stmt.syntax());
 
@@ -91,14 +92,12 @@ pub(crate) fn inline_local_variable(acc: &mut Assists, ctx: &AssistContext<'_>) 
                     && let Some(op_token) = bin_expr.op_token()
                 {
                     editor.delete(&op_token);
-                    remove_whitespace(op_token, Direction::Prev, &mut editor);
-                    remove_whitespace(let_stmt.syntax(), Direction::Prev, &mut editor);
+                    remove_whitespace(op_token, Direction::Prev, &editor);
+                    remove_whitespace(let_stmt.syntax(), Direction::Prev, &editor);
                 } else {
-                    remove_whitespace(let_stmt.syntax(), Direction::Next, &mut editor);
+                    remove_whitespace(let_stmt.syntax(), Direction::Next, &editor);
                 }
             }
-
-            let make = SyntaxFactory::with_mappings();
 
             for (name, should_wrap) in wrap_in_parens {
                 let replacement = if should_wrap {
@@ -115,8 +114,6 @@ pub(crate) fn inline_local_variable(acc: &mut Assists, ctx: &AssistContext<'_>) 
                     editor.replace(name.syntax(), replacement.syntax());
                 }
             }
-
-            editor.add_mappings(make.finish_with_mappings());
             builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -204,7 +201,7 @@ fn inline_usage(
     Some(InlineData { let_stmt, delete_let, target: ast::NameOrNameRef::NameRef(name), references })
 }
 
-fn remove_whitespace(elem: impl Element, dir: Direction, editor: &mut SyntaxEditor) {
+fn remove_whitespace(elem: impl Element, dir: Direction, editor: &SyntaxEditor) {
     let token = match elem.syntax_element() {
         syntax::NodeOrToken::Node(node) => match dir {
             Direction::Next => node.last_token(),
@@ -727,6 +724,7 @@ fn foo() {
         check_assist(
             inline_local_variable,
             r"
+//- minicore: iterator
 fn foo() {
     let a$0 = vec![10, 20];
     for i in a {}
@@ -1054,6 +1052,7 @@ fn f() {
         check_assist(
             inline_local_variable,
             r#"
+//- minicore: fn
 fn main() {
     let $0f = || 2;
     let _ = f();

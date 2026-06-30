@@ -4,6 +4,7 @@ use std::ops::{Range, RangeFrom};
 use std::{debug_assert_matches, iter};
 
 use rustc_abi::{ExternAbi, FieldIdx};
+use rustc_data_structures::thin_vec::ThinVec;
 use rustc_hir::attrs::{InlineAttr, OptimizeAttr};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
@@ -13,7 +14,9 @@ use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
 use rustc_middle::mir::visit::*;
 use rustc_middle::mir::*;
-use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TyCtxt, TypeFlags, TypeVisitableExt};
+use rustc_middle::ty::{
+    self, Instance, InstanceKind, Ty, TyCtxt, TypeFlags, TypeVisitableExt, Unnormalized,
+};
 use rustc_session::config::{DebugInfo, OptLevel};
 use rustc_span::Spanned;
 use tracing::{debug, instrument, trace, trace_span};
@@ -251,7 +254,7 @@ impl<'tcx> Inliner<'tcx> for ForceInliner<'tcx> {
 
         let call_span = callsite.source_info.span;
         let callee = tcx.def_path_str(callsite.callee.def_id());
-        tcx.dcx().emit_err(crate::errors::ForceInlineFailure {
+        tcx.dcx().emit_err(crate::diagnostics::ForceInlineFailure {
             call_span,
             attr_span,
             caller_span: tcx.def_span(self.def_id),
@@ -260,7 +263,7 @@ impl<'tcx> Inliner<'tcx> for ForceInliner<'tcx> {
             callee: callee.clone(),
             reason,
             justification: justification
-                .map(|sym| crate::errors::ForceInlineJustification { sym, callee }),
+                .map(|sym| crate::diagnostics::ForceInlineJustification { sym, callee }),
         });
     }
 }
@@ -411,14 +414,8 @@ impl<'tcx> Inliner<'tcx> for NormalInliner<'tcx> {
 
             let term = blk.terminator();
             let caller_attrs = tcx.codegen_fn_attrs(self.caller_def_id());
-            if let TerminatorKind::Drop {
-                ref place,
-                target,
-                unwind,
-                replace: _,
-                drop: _,
-                async_fut: _,
-            } = term.kind
+            if let TerminatorKind::Drop { ref place, target, unwind, replace: _, drop: _ } =
+                term.kind
             {
                 work_list.push(target);
 
@@ -560,19 +557,33 @@ fn resolve_callsite<'tcx, I: Inliner<'tcx>>(
             }
 
             // To resolve an instance its args have to be fully normalized.
-            let args = tcx.try_normalize_erasing_regions(inliner.typing_env(), args).ok()?;
-            let callee =
+            let args = tcx
+                .try_normalize_erasing_regions(inliner.typing_env(), Unnormalized::new_wip(args))
+                .ok()?;
+            let mut callee =
                 Instance::try_resolve(tcx, inliner.typing_env(), def_id, args).ok().flatten()?;
 
-            if let InstanceKind::Virtual(..) | InstanceKind::Intrinsic(_) = callee.def {
+            if let InstanceKind::Virtual(..) = callee.def {
                 return None;
+            }
+            if let InstanceKind::Intrinsic(..) = callee.def {
+                let intrinsic = tcx.intrinsic(def_id).unwrap();
+                if intrinsic.must_be_overridden {
+                    return None; // intrinsic without fallback body
+                }
+                if !tcx.sess.fallback_intrinsics.contains(&intrinsic.name) {
+                    return None; // intrinsic that the backend may want to overwrite
+                }
+                // The callee is the fallback body.
+                debug!("callsite is fallback body: {def_id:?}");
+                callee = ty::Instance { def: ty::InstanceKind::Item(def_id), args: callee.args };
             }
 
             if inliner.history().contains(&callee.def_id()) {
                 return None;
             }
 
-            let fn_sig = tcx.fn_sig(def_id).instantiate(tcx, args);
+            let fn_sig = tcx.fn_sig(def_id).instantiate(tcx, args).skip_norm_wip();
 
             // Additionally, check that the body that we're inlining actually agrees
             // with the ABI of the trait that the item comes from.
@@ -868,6 +879,7 @@ fn inline_call<'tcx, I: Inliner<'tcx>>(
             Some(Terminator {
                 source_info: terminator.source_info,
                 kind: TerminatorKind::Goto { target: block },
+                attributes: ThinVec::new(),
             }),
             caller_body[block].is_cleanup,
         );
@@ -962,7 +974,7 @@ fn inline_call<'tcx, I: Inliner<'tcx>>(
                 callsite.source_info,
                 StatementKind::Assign(Box::new((
                     dest,
-                    Rvalue::Use(Operand::Move(destination_local.into())),
+                    Rvalue::Use(Operand::Move(destination_local.into()), WithRetag::Yes),
                 ))),
             ));
             n += 1;
@@ -1006,6 +1018,7 @@ fn inline_call<'tcx, I: Inliner<'tcx>>(
     caller_body[callsite.block].terminator = Some(Terminator {
         source_info: callsite.source_info,
         kind: TerminatorKind::Goto { target: integrator.map_block(START_BLOCK) },
+        attributes: ThinVec::new(),
     });
 
     // Copy required constants from the callee_body into the caller_body. Although we are only
@@ -1068,8 +1081,7 @@ fn make_call_args<'tcx, I: Inliner<'tcx>>(
     //
     // and the vector is `[closure_ref, tmp0, tmp1, tmp2]`.
     if callsite.fn_sig.abi() == ExternAbi::RustCall && callee_body.spread_arg.is_none() {
-        // FIXME(edition_2024): switch back to a normal method call.
-        let mut args = <_>::into_iter(args);
+        let mut args = args.into_iter();
         let self_ = create_temp_if_necessary(
             inliner,
             args.next().unwrap().node,
@@ -1134,7 +1146,7 @@ fn create_temp_if_necessary<'tcx, I: Inliner<'tcx>>(
     let local = new_call_temp(caller_body, callsite, arg_ty, return_block);
     caller_body[callsite.block].statements.push(Statement::new(
         callsite.source_info,
-        StatementKind::Assign(Box::new((Place::from(local), Rvalue::Use(arg)))),
+        StatementKind::Assign(Box::new((Place::from(local), Rvalue::Use(arg, WithRetag::Yes)))),
     ));
     local
 }
@@ -1269,16 +1281,6 @@ impl<'tcx> MutVisitor<'tcx> for Integrator<'_, 'tcx> {
         self.in_cleanup_block = data.is_cleanup;
         self.super_basic_block_data(block, data);
         self.in_cleanup_block = false;
-    }
-
-    fn visit_retag(&mut self, kind: &mut RetagKind, place: &mut Place<'tcx>, loc: Location) {
-        self.super_retag(kind, place, loc);
-
-        // We have to patch all inlined retags to be aware that they are no longer
-        // happening on function entry.
-        if *kind == RetagKind::FnEntry {
-            *kind = RetagKind::Default;
-        }
     }
 
     fn visit_statement(&mut self, statement: &mut Statement<'tcx>, location: Location) {

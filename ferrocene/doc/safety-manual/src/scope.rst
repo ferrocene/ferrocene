@@ -30,6 +30,18 @@ as well as environments listed in target specific documentation:
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`armv7r-none-eabihf`
+     - ``core``
+     - ``alloc``
+     -
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`aarch64-unknown-nto-qnx800`
+     - ``core``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
      - ``core``
      - ``alloc``
@@ -43,6 +55,12 @@ as well as environments listed in target specific documentation:
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
+     - ``core``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`x86_64-pc-nto-qnx800`
      - ``core``
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``

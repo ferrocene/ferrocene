@@ -39,6 +39,11 @@ pub struct GlobalCache<X: Cx> {
 }
 
 impl<X: Cx> GlobalCache<X> {
+    #[inline]
+    pub const fn new() -> Self {
+        GlobalCache { map: HashMap::with_hasher(rustc_hash::FxBuildHasher) }
+    }
+
     /// Insert a final result into the global cache.
     pub(super) fn insert(
         &mut self,
@@ -63,7 +68,7 @@ impl<X: Cx> GlobalCache<X> {
             let prev = entry.success.replace(Success { required_depth, nested_goals, result });
             if let Some(prev) = &prev {
                 cx.assert_evaluation_is_concurrent();
-                assert_eq!(cx.get_tracked(&prev.result), evaluation_result.result);
+                assert_eq!(cx.get_tracked(&prev.result), evaluation_result.result, "{input:?}");
             }
         }
     }

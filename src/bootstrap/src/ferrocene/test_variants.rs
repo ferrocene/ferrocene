@@ -50,6 +50,8 @@ pub enum TestVariantName {
     Ed2021NeoverseV1,
     #[clap(name = "2021-cortex-m4")]
     Ed2021CortexM4,
+    #[clap(name = "2021-cortex-r5f")]
+    Ed2021CortexR5F,
     #[clap(name = "2021-specific-cortex-m4")]
     Ed2021SpecificCortexM4,
 }
@@ -76,6 +78,9 @@ impl TestVariantName {
             }
             Self::Ed2021CortexM4 => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
+            }
+            Self::Ed2021CortexR5F => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-r5f"))
             }
             Self::Ed2021SpecificCortexM4 => TestVariantBase::new()
                 .edition(Edition("2015"))

@@ -43,9 +43,14 @@ REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
 # QNX targets only work on x86_64 Windows, x86_64 Linux, and x86_64 Mac
 # They must be excluded on, for example, aarch64 Mac
-QNX_TARGETS = [
+QNX71_TARGETS = [
     "aarch64-unknown-nto-qnx710",
     "x86_64-pc-nto-qnx710",
+    # the QNX 8.0 targets require a different SDP (QNX toolchain) so they'll go
+    # into different CI jobs (dist & self-test). we cannot list them together
+    # with the QNX7.1 targets here
+    # "aarch64-unknown-nto-qnx800",
+    # "x86_64-pc-nto-qnx800",
 ]
 
 GENERIC_BUILD_STD_TARGETS = [
@@ -55,6 +60,7 @@ GENERIC_BUILD_STD_TARGETS = [
     "aarch64r82-unknown-none-softfloat",
     "aarch64v8r-unknown-none",
     "aarch64v8r-unknown-none-softfloat",
+    "armv7r-ferrocene.facade-eabihf",
     "thumbv6m-none-eabi",
     "thumbv7em-none-eabi",
     "thumbv7em-ferrocene.facade-eabi",
@@ -83,7 +89,7 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
 X86_64_LINUX_BUILD_STD_TARGETS_ALL = (
-    X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+    X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX71_TARGETS
 )
 X86_64_LINUX_SELF_TEST_TARGETS = (
     X86_64_LINUX_BUILD_HOSTS
@@ -104,7 +110,7 @@ AARCH64_MAC_SELF_TEST_TARGETS = (
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = (
-    X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+    X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX71_TARGETS
 )
 
 s3 = boto3.client("s3", region_name=S3_REGION)
@@ -234,6 +240,16 @@ def calculate_targets(host_plus_stage: str):
     return ",".join(targets)
 
 
+# We need `*dummy` since below in `prepare_paremeters` calls this with args.
+def workflow_id(*dummy):
+    return os.environ.get("CIRCLE_WORKFLOW_ID")
+
+
+# This needs to be kept in sync with the version in ferrocene/ci/docker-images/common/install-awscli.sh
+def awscli_version(*dummy):
+    return "2.35.11"
+
+
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
         config: dict[str, dict[str, str]] = yaml.safe_load(f)
@@ -244,6 +260,8 @@ def prepare_parameters():
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
         "targets--": calculate_targets,
+        "stable-workflow-id": workflow_id,
+        "awscli-version": awscli_version,
     }
 
     parameters: dict[str, str] = {}
@@ -252,6 +270,9 @@ def prepare_parameters():
             if parameter.startswith(prefix):
                 # Anything after the prefix gets passed as a parameter
                 parameters[parameter] = func(parameter[len(prefix) :])
+                break
+            if parameter.startswith("full-build-"):
+                # ignore these parameters, they'll be passed straight on.
                 break
         # In Python, the `else` is executed when the for loop finished
         # normally, without any `break` being executed. In this case, it's

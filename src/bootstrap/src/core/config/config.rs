@@ -30,6 +30,7 @@ use tracing::{instrument, span};
 
 use crate::core::build_steps::llvm;
 use crate::core::build_steps::llvm::LLVM_INVALIDATION_PATHS;
+use crate::core::build_steps::test::failed_tests::collect_previously_failed_tests;
 pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags, Warnings};
 use crate::core::config::target_selection::TargetSelectionList;
@@ -78,6 +79,7 @@ pub const RUSTC_IF_UNCHANGED_ALLOWED_PATHS: &[&str] = &[
     ":!src/rustdoc-json-types",
     ":!tests",
     // ":!triagebot.toml", // ferrocene deletion: We don't have triagebot.toml
+    ":!ferrocene", // ferrocene addition: can't affect compiler builds
     ":!src/bootstrap/defaults",
 ];
 
@@ -125,6 +127,7 @@ pub struct Config {
     pub stage0_metadata: build_helper::stage0_parser::Stage0,
     pub android_ndk: Option<PathBuf>,
     pub optimized_compiler_builtins: CompilerBuiltins,
+    pub record_failed_tests_path: PathBuf,
 
     pub stdout_is_tty: bool,
     pub stderr_is_tty: bool,
@@ -140,6 +143,7 @@ pub struct Config {
     pub config: Option<PathBuf>,
     pub jobs: Option<u32>,
     pub cmd: Subcommand,
+    pub quiet: bool,
     pub incremental: bool,
     pub dump_bootstrap_shims: bool,
     /// Arguments appearing after `--` to be forwarded to tools,
@@ -153,6 +157,9 @@ pub struct Config {
     pub backtrace_on_ice: bool,
 
     // llvm codegen options
+    /// Key used to decide when to rebuild LLVM.
+    pub llvm_cache_key: String,
+
     pub llvm_assertions: bool,
     pub llvm_tests: bool,
     pub llvm_enzyme: bool,
@@ -434,6 +441,7 @@ impl Config {
         let Flags {
             cmd: flags_cmd,
             verbose: flags_verbose,
+            quiet: flags_quiet,
             incremental: flags_incremental,
             config: flags_config,
             build_dir: flags_build_dir,
@@ -570,6 +578,7 @@ impl Config {
             dist_stage: build_dist_stage,
             bench_stage: build_bench_stage,
             patch_binaries_for_nix: build_patch_binaries_for_nix,
+            record_failed_tests_path: build_record_failed_tests_path,
             // This field is only used by bootstrap.py
             metrics: _,
             android_ndk: build_android_ndk,
@@ -656,6 +665,8 @@ impl Config {
             rustflags: rust_rustflags,
         } = toml.rust.unwrap_or_default();
 
+        let llvm = toml.llvm.unwrap_or_default();
+        let llvm_cache_key = llvm.cache_key();
         let Llvm {
             optimize: llvm_optimize,
             thin_lto: llvm_thin_lto,
@@ -686,7 +697,7 @@ impl Config {
             enable_warnings: llvm_enable_warnings,
             download_ci_llvm: llvm_download_ci_llvm,
             build_config: llvm_build_config,
-        } = toml.llvm.unwrap_or_default();
+        } = llvm;
 
         let Dist {
             sign_folder: dist_sign_folder,
@@ -1374,6 +1385,12 @@ impl Config {
             exit!(1);
         }
 
+        if matches!(flags_cmd, Subcommand::Fix) {
+            eprintln!(
+                "WARNING: `x fix` is provided on a best-effort basis and does not support all `cargo fix` options correctly."
+            );
+        }
+
         // CI should always run stage 2 builds, unless it specifically states otherwise
         #[cfg(not(test))]
         if flags_stage.is_none() && ci_env.is_running_in_ci() {
@@ -1506,6 +1523,19 @@ impl Config {
         );
         let verbose_tests = rust_verbose_tests.unwrap_or(exec_ctx.is_verbose());
 
+        let record_failed_tests_path =
+            out.join(build_record_failed_tests_path.unwrap_or_else(|| "failed-tests".to_string()));
+
+        let paths = {
+            let mut paths = Vec::new();
+            if flags_cmd.rerun() {
+                paths = collect_previously_failed_tests(&record_failed_tests_path);
+            } else {
+                paths.extend(flags_paths);
+            }
+            paths
+        };
+
         Config {
             // tidy-alphabetical-start
             android_ndk: build_android_ndk,
@@ -1586,6 +1616,7 @@ impl Config {
             llvm_assertions,
             llvm_bitcode_linker_enabled: rust_llvm_bitcode_linker.unwrap_or(false),
             llvm_build_config: llvm_build_config.clone().unwrap_or(Default::default()),
+            llvm_cache_key,
             llvm_cflags,
             llvm_clang: llvm_clang.unwrap_or(false),
             llvm_clang_cl,
@@ -1636,12 +1667,14 @@ impl Config {
             out,
             patch_binaries_for_nix: build_patch_binaries_for_nix,
             path_modification_cache,
-            paths: flags_paths,
+            paths,
             prefix: install_prefix.map(PathBuf::from),
             print_step_rusage: build_print_step_rusage.unwrap_or(false),
             print_step_timings: build_print_step_timings.unwrap_or(false),
             profiler: build_profiler.unwrap_or(false),
             python: build_python.map(PathBuf::from),
+            quiet: flags_quiet,
+            record_failed_tests_path,
             reproducible_artifacts: flags_reproducible_artifact,
             reuse: build_reuse.map(PathBuf::from),
             rust_analyzer_info,
@@ -2416,6 +2449,42 @@ pub fn check_stage0_version(
     }
 }
 
+fn print_rustc_modifications(
+    dwn_ctx: &DownloadContext<'_>,
+    if_unchanged: bool,
+    mut modifications: Vec<PathBuf>,
+) -> Option<()> {
+    if !dwn_ctx.exec_ctx.is_verbose() {
+        modifications.retain(|path| !path.starts_with("compiler"));
+    }
+    if modifications.is_empty() {
+        // only compiler changes; still force a rebuild but don't say why.
+        eprintln!(
+            "skipping rustc download with `download-rustc = 'if-unchanged'` due to local changes"
+        );
+        return None;
+    }
+
+    eprintln!(
+        "NOTE: detected {} modifications that could affect a build of rustc",
+        modifications.len()
+    );
+    for file in modifications.iter().take(10) {
+        eprintln!("- {}", file.display());
+    }
+    if modifications.len() > 10 {
+        eprintln!("- ... and {} more", modifications.len() - 10);
+    }
+
+    if if_unchanged {
+        eprintln!("skipping rustc download due to `download-rustc = 'if-unchanged'`");
+        None
+    } else {
+        eprintln!("downloading unconditionally due to `download-rustc = true`");
+        Some(())
+    }
+}
+
 pub fn download_ci_rustc_commit<'a>(
     dwn_ctx: impl AsRef<DownloadContext<'a>>,
     rust_info: &channel::GitInfo,
@@ -2470,24 +2539,7 @@ pub fn download_ci_rustc_commit<'a>(
                     return None;
                 }
 
-                eprintln!(
-                    "NOTE: detected {} modifications that could affect a build of rustc",
-                    modifications.len()
-                );
-                for file in modifications.iter().take(10) {
-                    eprintln!("- {}", file.display());
-                }
-                if modifications.len() > 10 {
-                    eprintln!("- ... and {} more", modifications.len() - 10);
-                }
-
-                if if_unchanged {
-                    eprintln!("skipping rustc download due to `download-rustc = 'if-unchanged'`");
-                    return None;
-                } else {
-                    eprintln!("downloading unconditionally due to `download-rustc = true`");
-                }
-
+                print_rustc_modifications(dwn_ctx, if_unchanged, modifications)?;
                 upstream
             }
             PathFreshness::MissingUpstream => {
@@ -2643,17 +2695,7 @@ pub(crate) fn update_submodule<'a>(
         return;
     }
 
-    // Submodule updating actually happens during in the dry run mode. We need to make sure that
-    // all the git commands below are actually executed, because some follow-up code
-    // in bootstrap might depend on the submodules being checked out. Furthermore, not all
-    // the command executions below work with an empty output (produced during dry run).
-    // Therefore, all commands below are marked with `run_in_dry_run()`, so that they also run in
-    // dry run mode.
-    let submodule_git = || {
-        let mut cmd = helpers::git(Some(&absolute_path));
-        cmd.run_in_dry_run();
-        cmd
-    };
+    let submodule_git = || helpers::git(Some(&absolute_path));
 
     // Determine commit checked out in submodule.
     let checked_out_hash =
@@ -2661,7 +2703,7 @@ pub(crate) fn update_submodule<'a>(
     let checked_out_hash = checked_out_hash.trim_end();
     // Determine commit that the submodule *should* have.
     let recorded = helpers::git(Some(dwn_ctx.src))
-        .run_in_dry_run()
+        .run_in_dry_run() // otherwise parsing `actual_hash` fails
         .args(["ls-tree", "HEAD"])
         .arg(relative_path)
         .run_capture_stdout(dwn_ctx.exec_ctx)
@@ -2677,11 +2719,12 @@ pub(crate) fn update_submodule<'a>(
         return;
     }
 
-    println!("Updating submodule {relative_path}");
+    if !dwn_ctx.exec_ctx.dry_run() {
+        println!("Updating submodule {relative_path}");
+    };
 
     helpers::git(Some(dwn_ctx.src))
         .allow_failure()
-        .run_in_dry_run()
         .args(["submodule", "-q", "sync"])
         .arg(relative_path)
         .run(dwn_ctx.exec_ctx);
@@ -2692,12 +2735,10 @@ pub(crate) fn update_submodule<'a>(
         // even though that has no relation to the upstream for the submodule.
         let current_branch = helpers::git(Some(dwn_ctx.src))
             .allow_failure()
-            .run_in_dry_run()
             .args(["symbolic-ref", "--short", "HEAD"])
             .run_capture(dwn_ctx.exec_ctx);
 
         let mut git = helpers::git(Some(dwn_ctx.src)).allow_failure();
-        git.run_in_dry_run();
         if current_branch.is_success() {
             // If there is a tag named after the current branch, git will try to disambiguate by prepending `heads/` to the branch name.
             // This syntax isn't accepted by `branch.{branch}`. Strip it.

@@ -1,3 +1,4 @@
+//@ compile-flags: -Z deduplicate-diagnostics=yes
 //@ revisions: current next
 //@ ignore-compare-mode-next-solver (explicit revisions)
 //@[next] compile-flags: -Znext-solver
@@ -9,7 +10,6 @@
 #![feature(const_trait_impl)]
 #![feature(c_variadic)]
 #![feature(fn_delegation)]
-#![allow(incomplete_features)]
 
 mod opaque {
     trait Trait {}
@@ -52,6 +52,7 @@ mod effects {
     }
 
     reuse Trait::foo;
+    //~^ ERROR: delegation self type is not specified
 }
 
 fn main() {}

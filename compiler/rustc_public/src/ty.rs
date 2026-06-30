@@ -109,7 +109,9 @@ impl Ty {
 /// Represents a pattern in the type system
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub enum Pattern {
-    Range { start: Option<TyConst>, end: Option<TyConst>, include_end: bool },
+    Range { start: TyConst, end: TyConst, include_end: bool },
+    NotNull,
+    Or(Vec<Pattern>),
 }
 
 /// Represents a constant in the type system
@@ -710,6 +712,16 @@ impl FnDef {
         self.as_intrinsic().is_some()
     }
 
+    /// Get the constness of this function definition.
+    pub fn constness(&self) -> Constness {
+        with(|cx| cx.constness(*self))
+    }
+
+    /// Get the asyncness of this function definition.
+    pub fn asyncness(&self) -> Asyncness {
+        with(|cx| cx.asyncness(*self))
+    }
+
     /// Get the function signature for this function definition.
     pub fn fn_sig(&self) -> PolyFnSig {
         let kind = self.ty().kind();
@@ -883,28 +895,23 @@ impl VariantDef {
     pub fn fields(&self) -> Vec<FieldDef> {
         with(|cx| cx.variant_fields(*self))
     }
-}
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-pub struct FieldDef {
-    /// The field definition.
-    pub(crate) def: DefId,
-
-    /// The field name.
-    pub name: Symbol,
-}
-
-impl FieldDef {
-    /// Retrieve the type of this field instantiating and normalizing it with the given arguments.
-    ///
-    /// This will assume the type can be instantiated with these arguments.
-    pub fn ty_with_args(&self, args: &GenericArgs) -> Ty {
-        with(|cx| cx.def_ty_with_args(self.def, args))
+    /// Returns the variant index.
+    pub fn idx(&self) -> VariantIdx {
+        self.idx
     }
 
-    /// Retrieve the type of this field.
-    pub fn ty(&self) -> Ty {
-        with(|cx| cx.def_ty(self.def))
+    /// Returns the `AdtDef` which this variant comes from.
+    pub fn adt_def(&self) -> AdtDef {
+        self.adt_def
+    }
+}
+
+crate_def_with_ty! {
+    #[derive(Serialize)]
+    pub FieldDef {
+        /// The field name.
+        pub name: Symbol,
     }
 }
 
@@ -1103,6 +1110,30 @@ impl FnSig {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize)]
+pub enum Constness {
+    Const { always: bool },
+    NotConst,
+}
+
+impl Constness {
+    pub fn is_const(self) -> bool {
+        matches!(self, Constness::Const { always: false })
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize)]
+pub enum Asyncness {
+    Async,
+    NotAsync,
+}
+
+impl Asyncness {
+    pub fn is_async(self) -> bool {
+        matches!(self, Asyncness::Async)
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Debug, Serialize)]
 pub enum Abi {
     Rust,
@@ -1131,8 +1162,10 @@ pub enum Abi {
     RiscvInterruptM,
     RiscvInterruptS,
     RustPreserveNone,
+    RustTail,
     RustInvalid,
     Custom,
+    Swift,
 }
 
 /// A binder represents a possibly generic type and its bound vars.

@@ -9,15 +9,13 @@ use libc::c_uint;
 use metadata::create_subroutine_type;
 use rustc_abi::Size;
 use rustc_codegen_ssa::debuginfo::type_names;
+use rustc_codegen_ssa::mir::debuginfo::VariableKind;
 use rustc_codegen_ssa::mir::debuginfo::VariableKind::*;
-use rustc_codegen_ssa::mir::debuginfo::{DebugScope, FunctionDebugContext, VariableKind};
 use rustc_codegen_ssa::traits::*;
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir::def_id::{DefId, DefIdMap};
-use rustc_index::IndexVec;
-use rustc_middle::mir;
 use rustc_middle::ty::layout::{HasTypingEnv, LayoutOf};
-use rustc_middle::ty::{self, GenericArgsRef, Instance, Ty, TypeVisitableExt};
+use rustc_middle::ty::{self, GenericArgsRef, Instance, Ty, TypeVisitableExt, Unnormalized};
 use rustc_session::Session;
 use rustc_session::config::{self, DebugInfo};
 use rustc_span::{
@@ -28,7 +26,6 @@ use rustc_target::spec::DebuginfoKind;
 use smallvec::SmallVec;
 use tracing::debug;
 
-use self::create_scope_map::compute_mir_scopes;
 pub(crate) use self::di_builder::DIBuilderExt;
 pub(crate) use self::metadata::build_global_var_di_node;
 use self::metadata::{
@@ -45,7 +42,6 @@ use crate::llvm::debuginfo::{
 };
 use crate::llvm::{self, Value};
 
-mod create_scope_map;
 mod di_builder;
 mod dwarf_const;
 mod gdb;
@@ -398,33 +394,26 @@ impl<'ll> CodegenCx<'ll, '_> {
 }
 
 impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
-    fn create_function_debug_context(
-        &self,
-        instance: Instance<'tcx>,
-        fn_abi: &FnAbi<'tcx, Ty<'tcx>>,
-        llfn: &'ll Value,
-        mir: &mir::Body<'tcx>,
-    ) -> Option<FunctionDebugContext<'tcx, &'ll DIScope, &'ll DILocation>> {
-        if self.sess().opts.debuginfo == DebugInfo::None {
-            return None;
+    fn dbg_create_lexical_block(&self, pos: BytePos, parent_scope: &'ll DIScope) -> &'ll DIScope {
+        let loc = self.lookup_debug_loc(pos);
+        let file_metadata = file_metadata(self, &loc.file);
+        unsafe {
+            llvm::LLVMDIBuilderCreateLexicalBlock(
+                DIB(self),
+                parent_scope,
+                file_metadata,
+                loc.line,
+                loc.col,
+            )
         }
+    }
 
-        // Initialize fn debug context (including scopes).
-        let empty_scope = DebugScope {
-            dbg_scope: self.dbg_scope_fn(instance, fn_abi, Some(llfn)),
-            inlined_at: None,
-            file_start_pos: BytePos(0),
-            file_end_pos: BytePos(0),
-        };
-        let mut fn_debug_context = FunctionDebugContext {
-            scopes: IndexVec::from_elem(empty_scope, &mir.source_scopes),
-            inlined_function_scopes: Default::default(),
-        };
-
-        // Fill in all the scopes, with the information from the MIR body.
-        compute_mir_scopes(self, instance, mir, &mut fn_debug_context);
-
-        Some(fn_debug_context)
+    fn dbg_location_clone_with_discriminator(
+        &self,
+        loc: &'ll DILocation,
+        discriminator: u32,
+    ) -> Option<&'ll DILocation> {
+        unsafe { llvm::LLVMRustDILocationCloneWithBaseDiscriminator(loc, discriminator) }
     }
 
     fn dbg_scope_fn(
@@ -458,7 +447,7 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
 
         type_names::push_generic_args(
             tcx,
-            tcx.normalize_erasing_regions(self.typing_env(), args),
+            tcx.normalize_erasing_regions(self.typing_env(), Unnormalized::new_wip(args)),
             &mut name,
         );
 
@@ -595,7 +584,10 @@ impl<'ll, 'tcx> DebugInfoCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                 iter::zip(args, names)
                     .filter_map(|(kind, name)| {
                         kind.as_type().map(|ty| {
-                            let actual_type = cx.tcx.normalize_erasing_regions(cx.typing_env(), ty);
+                            let actual_type = cx.tcx.normalize_erasing_regions(
+                                cx.typing_env(),
+                                Unnormalized::new_wip(ty),
+                            );
                             let actual_type_metadata = type_di_node(cx, actual_type);
                             Some(cx.create_template_type_parameter(
                                 name.as_str(),

@@ -32,7 +32,7 @@ use crate::{
     AstId,
     db::ExpandDatabase,
     mod_path::ModPath,
-    span_map::SpanMapRef,
+    span_map::SpanMap,
     tt::{self, TopSubtree},
 };
 
@@ -92,7 +92,7 @@ impl AstKeyValueMetaExt for ast::KeyValueMeta {
 }
 
 /// The callback is passed the attribute and the outermost `ast::Attr`.
-/// Note that one node may map to multiple [`Meta`]s due to `cfg_attr`.
+/// Note that one node may map to multiple [`ast::Meta`]s due to `cfg_attr`.
 ///
 /// `unsafe(attr)` are passed the inner attribute for now.
 #[inline]
@@ -422,7 +422,7 @@ impl AttrId {
         ));
         let tt = syntax_bridge::syntax_node_to_token_tree(
             tt.syntax(),
-            SpanMapRef::RealSpanMap(&span_map),
+            SpanMap::RealSpanMap(&span_map),
             span_map.span_for_range(tt.syntax().text_range()),
             DocCommentDesugarMode::ProcMacro,
         );

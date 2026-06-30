@@ -1,5 +1,5 @@
 use crate::fmt;
-use crate::iter::{FusedIterator, TrustedLen, UncheckedIterator};
+use crate::iter::{FusedIterator, TrustedLen};
 use crate::num::NonZero;
 use crate::ops::Try;
 
@@ -99,6 +99,15 @@ impl<A: fmt::Debug> fmt::Debug for RepeatN<A> {
             None => (0, None),
         };
         f.debug_struct("RepeatN").field("count", &count).field("element", &element).finish()
+    }
+}
+
+/// Creates an empty iterator, like [`repeat_n(value, 0)`][`repeat_n`]
+/// but without needing any such value at hand.
+#[stable(feature = "iter_repeat_n_default", since = "1.97.0")]
+impl<A> Default for RepeatN<A> {
+    fn default() -> Self {
+        RepeatN { inner: None }
     }
 }
 
@@ -202,5 +211,3 @@ impl<A: Clone> FusedIterator for RepeatN<A> {}
 
 #[unstable(feature = "trusted_len", issue = "37572")]
 unsafe impl<A: Clone> TrustedLen for RepeatN<A> {}
-#[stable(feature = "iter_repeat_n", since = "1.82.0")]
-impl<A: Clone> UncheckedIterator for RepeatN<A> {}

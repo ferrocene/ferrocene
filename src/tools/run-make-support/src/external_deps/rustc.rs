@@ -190,14 +190,14 @@ impl Rustc {
         self
     }
 
-    /// Specify path to the output file. Equivalent to `-o`` in rustc.
+    /// Specify path to the output file. Equivalent to `-o` in rustc.
     pub fn output<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.cmd.arg("-o");
         self.cmd.arg(path.as_ref());
         self
     }
 
-    /// Specify path to the output directory. Equivalent to `--out-dir`` in rustc.
+    /// Specify path to the output directory. Equivalent to `--out-dir` in rustc.
     pub fn out_dir<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.cmd.arg("--out-dir");
         self.cmd.arg(path.as_ref());
@@ -447,6 +447,23 @@ impl Rustc {
     /// Make that the generated LLVM IR is in source order.
     pub fn codegen_source_order(&mut self) -> &mut Self {
         self.cmd.arg("-Zcodegen-source-order");
+        self
+    }
+
+    /// Specify `-Z function-sections={yes, no}`.
+    pub fn function_sections(&mut self, enable: bool) -> &mut Self {
+        let flag = match enable {
+            true => "-Zfunction-sections=yes",
+            false => "-Zfunction-sections=no",
+        };
+        self.cmd.arg(flag);
+        self
+    }
+
+    // Ferrocene addition: used in tests/ferrocene/run-make
+    /// Overrides the PATH variable
+    pub fn override_path(&mut self, value: &str) -> &mut Self {
+        self.cmd.env("PATH", value);
         self
     }
 }

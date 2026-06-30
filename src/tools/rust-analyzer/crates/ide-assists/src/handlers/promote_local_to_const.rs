@@ -3,7 +3,7 @@ use ide_db::{assists::AssistId, defs::Definition};
 use stdx::to_upper_snake_case;
 use syntax::{
     AstNode,
-    ast::{self, HasName, syntax_factory::SyntaxFactory},
+    ast::{self, HasName},
 };
 
 use crate::{
@@ -39,7 +39,7 @@ use crate::{
 //     }
 // }
 // ```
-pub(crate) fn promote_local_to_const(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn promote_local_to_const(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let pat = ctx.find_node_at_offset::<ast::IdentPat>()?;
     let name = pat.name()?;
     if !pat.is_simple_ident() {
@@ -68,8 +68,8 @@ pub(crate) fn promote_local_to_const(acc: &mut Assists, ctx: &AssistContext<'_>)
         "Promote local to constant",
         let_stmt.syntax().text_range(),
         |edit| {
-            let make = SyntaxFactory::with_mappings();
-            let mut editor = edit.make_editor(let_stmt.syntax());
+            let editor = edit.make_editor(let_stmt.syntax());
+            let make = editor.make();
             let name = to_upper_snake_case(&name.to_string());
             let usages = Definition::Local(local).usages(&ctx.sema).all();
             if let Some(usages) = usages.references.get(&ctx.file_id()) {
@@ -97,7 +97,6 @@ pub(crate) fn promote_local_to_const(acc: &mut Assists, ctx: &AssistContext<'_>)
 
             editor.replace(let_stmt.syntax(), item.syntax());
 
-            editor.add_mappings(make.finish_with_mappings());
             edit.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )

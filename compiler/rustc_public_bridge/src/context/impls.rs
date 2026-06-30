@@ -53,7 +53,7 @@ impl<'tcx, B: Bridge> AllocRangeHelpers<'tcx> for CompilerCtxt<'tcx, B> {
 }
 
 impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
-    pub fn lift<T: ty::Lift<TyCtxt<'tcx>>>(&self, value: T) -> Option<T::Lifted> {
+    pub fn lift<T: ty::Lift<TyCtxt<'tcx>>>(&self, value: T) -> T::Lifted {
         self.tcx.lift(value)
     }
 
@@ -110,6 +110,11 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
         matches!(self.tcx.def_kind(def_id), DefKind::Static { .. }).then(|| def_id)
     }
 
+    fn filter_adt_def(&self, def_id: DefId) -> Option<DefId> {
+        matches!(self.tcx.def_kind(def_id), DefKind::Struct | DefKind::Enum | DefKind::Union)
+            .then(|| def_id)
+    }
+
     pub fn target_endian(&self) -> Endian {
         self.tcx.data_layout.endian
     }
@@ -150,6 +155,11 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
     /// Retrieve all static items defined in this crate.
     pub fn crate_statics(&self, crate_num: CrateNum) -> Vec<DefId> {
         filter_def_ids(self.tcx, crate_num, |def_id| self.filter_static_def(def_id))
+    }
+
+    /// Retrieve all ADTs defined in this crate.
+    pub fn crate_adts(&self, crate_num: CrateNum) -> Vec<DefId> {
+        filter_def_ids(self.tcx, crate_num, |def_id| self.filter_adt_def(def_id))
     }
 
     pub fn foreign_module(&self, mod_def: DefId) -> &ForeignModule {
@@ -379,8 +389,18 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
         def_id: DefId,
         args_ref: GenericArgsRef<'tcx>,
     ) -> Binder<'tcx, FnSig<'tcx>> {
-        let sig = self.tcx.fn_sig(def_id).instantiate(self.tcx, args_ref);
+        let sig = self.tcx.fn_sig(def_id).instantiate(self.tcx, args_ref).skip_norm_wip();
         sig
+    }
+
+    /// Retrieve the constness for the given function definition.
+    pub fn constness(&self, def_id: DefId) -> rustc_hir::Constness {
+        self.tcx.constness(def_id)
+    }
+
+    /// Retrieve the asyncness for the given function definition.
+    pub fn asyncness(&self, def_id: DefId) -> ty::Asyncness {
+        self.tcx.asyncness(def_id)
     }
 
     /// Retrieve the intrinsic definition if the item corresponds one.
@@ -541,7 +561,7 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
 
     /// Returns the type of given crate item.
     pub fn def_ty(&self, item: DefId) -> Ty<'tcx> {
-        self.tcx.type_of(item).instantiate_identity()
+        self.tcx.type_of(item).instantiate_identity().skip_norm_wip()
     }
 
     /// Returns the type of given definition instantiated with the given arguments.
@@ -655,7 +675,7 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
 
     /// Resolve an instance for drop_in_place for the given type.
     pub fn resolve_drop_in_place(&self, internal_ty: Ty<'tcx>) -> Instance<'tcx> {
-        let instance = Instance::resolve_drop_in_place(self.tcx, internal_ty);
+        let instance = Instance::resolve_drop_glue(self.tcx, internal_ty);
         instance
     }
 

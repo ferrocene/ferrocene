@@ -34,7 +34,10 @@ use crate::{
 //     let v = _0;
 // }
 // ```
-pub(crate) fn destructure_tuple_binding(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn destructure_tuple_binding(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     destructure_tuple_binding_impl(acc, ctx, false)
 }
 
@@ -58,7 +61,7 @@ pub(crate) fn destructure_tuple_binding(acc: &mut Assists, ctx: &AssistContext<'
 // ```
 pub(crate) fn destructure_tuple_binding_impl(
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     with_sub_pattern: bool,
 ) -> Option<()> {
     let ident_pat = ctx.find_node_at_offset::<ast::IdentPat>()?;
@@ -84,30 +87,25 @@ pub(crate) fn destructure_tuple_binding_impl(
 }
 
 fn destructure_tuple_edit_impl(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     edit: &mut SourceChangeBuilder,
     data: &TupleData,
     in_sub_pattern: bool,
 ) {
-    let mut syntax_editor = edit.make_editor(data.ident_pat.syntax());
-    let syntax_factory = SyntaxFactory::with_mappings();
+    let editor = edit.make_editor(data.ident_pat.syntax());
+    let make = editor.make();
 
-    let assignment_edit =
-        edit_tuple_assignment(ctx, edit, &mut syntax_editor, &syntax_factory, data, in_sub_pattern);
-    let current_file_usages_edit = edit_tuple_usages(data, ctx, &syntax_factory, in_sub_pattern);
+    let assignment_edit = edit_tuple_assignment(ctx, edit, &editor, data, in_sub_pattern);
+    let current_file_usages_edit = edit_tuple_usages(data, ctx, make, in_sub_pattern);
 
-    assignment_edit.apply(&mut syntax_editor, &syntax_factory);
+    assignment_edit.apply(&editor);
     if let Some(usages_edit) = current_file_usages_edit {
-        usages_edit
-            .into_iter()
-            .for_each(|usage_edit| usage_edit.apply(ctx, edit, &mut syntax_editor))
+        usages_edit.into_iter().for_each(|usage_edit| usage_edit.apply(ctx, edit, &editor))
     }
-
-    syntax_editor.add_mappings(syntax_factory.finish_with_mappings());
-    edit.add_file_edits(ctx.vfs_file_id(), syntax_editor);
+    edit.add_file_edits(ctx.vfs_file_id(), editor);
 }
 
-fn collect_data(ident_pat: IdentPat, ctx: &AssistContext<'_>) -> Option<TupleData> {
+fn collect_data(ident_pat: IdentPat, ctx: &AssistContext<'_, '_>) -> Option<TupleData> {
     if ident_pat.at_token().is_some() {
         // Cannot destructure pattern with sub-pattern:
         // Only IdentPat can have sub-pattern,
@@ -173,13 +171,13 @@ struct TupleData {
     usages: Option<Vec<FileReference>>,
 }
 fn edit_tuple_assignment(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     edit: &mut SourceChangeBuilder,
-    editor: &mut SyntaxEditor,
-    make: &SyntaxFactory,
+    editor: &SyntaxEditor,
     data: &TupleData,
     in_sub_pattern: bool,
 ) -> AssignmentEdit {
+    let make = editor.make();
     let tuple_pat = {
         let original = &data.ident_pat;
         let is_ref = original.ref_token().is_some();
@@ -223,29 +221,24 @@ struct AssignmentEdit {
 }
 
 impl AssignmentEdit {
-    fn apply(self, syntax_editor: &mut SyntaxEditor, syntax_mapping: &SyntaxFactory) {
+    fn apply(self, editor: &SyntaxEditor) {
+        let make = editor.make();
         // with sub_pattern: keep original tuple and add subpattern: `tup @ (_0, _1)`
         if self.in_sub_pattern {
-            self.ident_pat.set_pat_with_editor(
-                Some(self.tuple_pat.into()),
-                syntax_editor,
-                syntax_mapping,
-            )
+            self.ident_pat.set_pat(Some(self.tuple_pat.into()), editor);
         } else if self.is_shorthand_field {
-            syntax_editor.insert(Position::after(self.ident_pat.syntax()), self.tuple_pat.syntax());
-            syntax_editor
-                .insert(Position::after(self.ident_pat.syntax()), syntax_mapping.whitespace(" "));
-            syntax_editor
-                .insert(Position::after(self.ident_pat.syntax()), syntax_mapping.token(T![:]));
+            editor.insert(Position::after(self.ident_pat.syntax()), self.tuple_pat.syntax());
+            editor.insert(Position::after(self.ident_pat.syntax()), make.whitespace(" "));
+            editor.insert(Position::after(self.ident_pat.syntax()), make.token(T![:]));
         } else {
-            syntax_editor.replace(self.ident_pat.syntax(), self.tuple_pat.syntax())
+            editor.replace(self.ident_pat.syntax(), self.tuple_pat.syntax())
         }
     }
 }
 
 fn edit_tuple_usages(
     data: &TupleData,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     make: &SyntaxFactory,
     in_sub_pattern: bool,
 ) -> Option<Vec<EditTupleUsage>> {
@@ -268,7 +261,7 @@ fn edit_tuple_usages(
     Some(edits)
 }
 fn edit_tuple_usage(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     make: &SyntaxFactory,
     usage: &FileReference,
     data: &TupleData,
@@ -285,7 +278,7 @@ fn edit_tuple_usage(
 }
 
 fn edit_tuple_field_usage(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     make: &SyntaxFactory,
     data: &TupleData,
     index: TupleIndex,
@@ -315,9 +308,9 @@ enum EditTupleUsage {
 impl EditTupleUsage {
     fn apply(
         self,
-        ctx: &AssistContext<'_>,
+        ctx: &AssistContext<'_, '_>,
         edit: &mut SourceChangeBuilder,
-        syntax_editor: &mut SyntaxEditor,
+        syntax_editor: &SyntaxEditor,
     ) {
         match self {
             EditTupleUsage::NoIndex(range) => {
@@ -381,7 +374,7 @@ mod tests {
     // Tests for direct tuple destructure:
     // `let $0t = (1,2);` -> `let (_0, _1) = (1,2);`
 
-    fn assist(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+    fn assist(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
         destructure_tuple_binding_impl(acc, ctx, false)
     }
 
@@ -907,6 +900,7 @@ fn main() {
         check_assist(
             assist,
             r#"
+//- minicore: fn
 fn main() {
     let f = |$0t| t.0 + t.1;
     let v = f((1,2));
@@ -1111,6 +1105,7 @@ fn main() {
         check_assist(
             assist,
             r#"
+//- minicore: fn
 fn main() {
     let $0t = (1,2);
     let v = t.1;
@@ -1188,10 +1183,10 @@ fn main {
         use super::*;
         use crate::tests::check_assist_by_label;
 
-        fn assist(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+        fn assist(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
             destructure_tuple_binding_impl(acc, ctx, true)
         }
-        fn in_place_assist(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+        fn in_place_assist(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
             destructure_tuple_binding_impl(acc, ctx, false)
         }
 
@@ -1259,7 +1254,7 @@ fn main() {
 
         #[test]
         fn trigger_both_destructure_tuple_assists() {
-            fn assist(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+            fn assist(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
                 destructure_tuple_binding_impl(acc, ctx, true)
             }
             let text = r#"
@@ -1795,7 +1790,7 @@ fn main() {
             // * `?`
             check_in_place_assist(
                 r#"
-//- minicore: option
+//- minicore: try, option
 fn f1(v: i32) {}
 fn f2(v: &i32) {}
 trait T {

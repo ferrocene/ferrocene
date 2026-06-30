@@ -4,11 +4,11 @@ use either::Either;
 use hir::{Adt, AsAssocItem, Crate, FindPathConfig, HasAttrs, ModuleDef, Semantics};
 use ide_db::RootDatabase;
 use ide_db::syntax_helpers::suggest_name;
-use ide_db::{famous_defs::FamousDefs, helpers::mod_path_to_ast};
+use ide_db::{famous_defs::FamousDefs, helpers::mod_path_to_ast_with_factory};
 use itertools::Itertools;
 use syntax::ast::edit::IndentLevel;
 use syntax::ast::syntax_factory::SyntaxFactory;
-use syntax::ast::{self, AstNode, MatchArmList, MatchExpr, Pat, make};
+use syntax::ast::{self, AstNode, MatchArmList, MatchExpr, Pat};
 use syntax::syntax_editor::{Position, SyntaxEditor};
 use syntax::{SyntaxKind, SyntaxNode, ToSmolStr};
 
@@ -38,7 +38,7 @@ use crate::{AssistContext, AssistId, Assists, utils};
 //     }
 // }
 // ```
-pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_, '_>) -> Option<()> {
     let match_expr = ctx.find_node_at_offset_with_descend::<ast::MatchExpr>()?;
     let match_arm_list = match_expr.match_arm_list()?;
     let arm_list_range = ctx.sema.original_range_opt(match_arm_list.syntax())?;
@@ -74,22 +74,31 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
         .filter(|pat| !matches!(pat, Pat::WildcardPat(_)))
         .collect();
 
-    let make = SyntaxFactory::with_mappings();
+    let make = SyntaxFactory::without_mappings();
 
     let scope = ctx.sema.scope(expr.syntax())?;
     let module = scope.module();
     let cfg = ctx.config.find_path_config(ctx.sema.is_nightly(scope.krate()));
     let self_ty = if ctx.config.prefer_self_ty {
-        scope.expression_store_owner().and_then(|def| {
-            match def {
-                hir::ExpressionStoreOwner::Body(def_with_body) => {
-                    def_with_body.as_assoc_item(ctx.db())
+        scope
+            .expression_store_owner()
+            .and_then(|def| {
+                match def {
+                    hir::ExpressionStoreOwner::Body(def_with_body) => {
+                        def_with_body.as_assoc_item(ctx.db())
+                    }
+                    hir::ExpressionStoreOwner::Signature(def) => def.as_assoc_item(ctx.db()),
+                    hir::ExpressionStoreOwner::VariantFields(_) => None,
+                }?
+                .implementing_ty(ctx.db())
+            })
+            .map(|self_ty| {
+                if let Some(owner) = scope.generic_def() {
+                    self_ty.try_rebase_into_owner(ctx.db(), owner).unwrap()
+                } else {
+                    self_ty
                 }
-                hir::ExpressionStoreOwner::Signature(def) => def.as_assoc_item(ctx.db()),
-                hir::ExpressionStoreOwner::VariantFields(_) => None,
-            }?
-            .implementing_ty(ctx.db())
-        })
+            })
     } else {
         None
     };
@@ -271,12 +280,12 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
                 }
             };
 
-            let mut editor = builder.make_editor(&old_place);
+            let editor = builder.make_editor(&old_place);
             let mut arms_edit = ArmsEdit { match_arm_list, place: old_place, last_arm: None };
 
-            arms_edit.remove_wildcard_arms(ctx, &mut editor);
-            arms_edit.add_comma_after_last_arm(ctx, &make, &mut editor);
-            arms_edit.append_arms(&missing_arms, &make, &mut editor);
+            arms_edit.remove_wildcard_arms(ctx, &editor);
+            arms_edit.add_comma_after_last_arm(ctx, &make, &editor);
+            arms_edit.append_arms(&missing_arms, &make, &editor);
 
             if let Some(cap) = ctx.config.snippet_cap {
                 if let Some(it) = missing_arms
@@ -297,14 +306,13 @@ pub(crate) fn add_missing_match_arms(acc: &mut Assists, ctx: &AssistContext<'_>)
                 }
             }
 
-            editor.add_mappings(make.take());
             builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
 }
 
 fn cursor_at_trivial_match_arm_list(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     match_expr: &MatchExpr,
     match_arm_list: &MatchArmList,
 ) -> Option<()> {
@@ -358,7 +366,7 @@ struct ArmsEdit {
 }
 
 impl ArmsEdit {
-    fn remove_wildcard_arms(&mut self, ctx: &AssistContext<'_>, editor: &mut SyntaxEditor) {
+    fn remove_wildcard_arms(&mut self, ctx: &AssistContext<'_, '_>, editor: &SyntaxEditor) {
         for arm in self.match_arm_list.arms() {
             if !matches!(arm.pat(), Some(Pat::WildcardPat(_))) {
                 self.last_arm = Some(arm);
@@ -387,7 +395,7 @@ impl ArmsEdit {
         }
     }
 
-    fn append_arms(&self, arms: &[ast::MatchArm], make: &SyntaxFactory, editor: &mut SyntaxEditor) {
+    fn append_arms(&self, arms: &[ast::MatchArm], make: &SyntaxFactory, editor: &SyntaxEditor) {
         let Some(mut before) = self.place.last_token() else {
             stdx::never!("match arm list not contain any token");
             return;
@@ -418,9 +426,9 @@ impl ArmsEdit {
 
     fn add_comma_after_last_arm(
         &self,
-        ctx: &AssistContext<'_>,
+        ctx: &AssistContext<'_, '_>,
         make: &SyntaxFactory,
-        editor: &mut SyntaxEditor,
+        editor: &SyntaxEditor,
     ) {
         if let Some(last_arm) = &self.last_arm
             && last_arm.comma_token().is_none()
@@ -433,7 +441,7 @@ impl ArmsEdit {
 
     fn cover_edit_range(
         &self,
-        ctx: &AssistContext<'_>,
+        ctx: &AssistContext<'_, '_>,
         node: &impl AstNode,
     ) -> Option<std::ops::RangeInclusive<syntax::SyntaxElement>> {
         let range = ctx.sema.original_range_opt(node.syntax())?;
@@ -582,7 +590,7 @@ fn resolve_array_of_enum_def(
 }
 
 fn build_pat(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     make: &SyntaxFactory,
     module: hir::Module,
     var: ExtendedVariant,
@@ -593,26 +601,30 @@ fn build_pat(
         ExtendedVariant::Variant { variant: var, use_self } => {
             let edition = module.krate(db).edition(db);
             let path = if use_self {
-                make::path_from_segments(
+                make.path_from_segments(
                     [
-                        make::path_segment(make::name_ref_self_ty()),
-                        make::path_segment(make::name_ref(
-                            &var.name(db).display(db, edition).to_smolstr(),
-                        )),
+                        make.path_segment(make.name_ref_self_ty()),
+                        make.path_segment(
+                            make.name_ref(&var.name(db).display(db, edition).to_smolstr()),
+                        ),
                     ],
                     false,
                 )
             } else {
-                mod_path_to_ast(&module.find_path(db, ModuleDef::from(var), cfg)?, edition)
+                mod_path_to_ast_with_factory(
+                    make,
+                    &module.find_path(db, ModuleDef::from(var), cfg)?,
+                    edition,
+                )
             };
             let fields = var.fields(db);
             let pat: ast::Pat = match var.kind(db) {
                 hir::StructKind::Tuple => {
                     let mut name_generator = suggest_name::NameGenerator::default();
                     let pats = fields.into_iter().map(|f| {
-                        let name = name_generator.for_type(&f.ty(db).to_type(db), db, edition);
+                        let name = name_generator.for_type(&f.ty(db), db, edition);
                         match name {
-                            Some(name) => make::ext::simple_ident_pat(make.name(&name)).into(),
+                            Some(name) => make.ident_pat(false, false, make.name(&name)).into(),
                             None => make.wildcard_pat().into(),
                         }
                     });

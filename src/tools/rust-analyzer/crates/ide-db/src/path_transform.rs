@@ -1,6 +1,6 @@
 //! See [`PathTransform`].
 
-use crate::helpers::mod_path_to_ast;
+use crate::helpers::mod_path_to_ast_with_factory;
 use either::Either;
 use hir::{
     AsAssocItem, FindPathConfig, HirDisplay, HirFileId, ModuleDef, SemanticsScope,
@@ -151,7 +151,7 @@ impl<'a> PathTransform<'a> {
                 prettify_macro_expansion(
                     db,
                     node,
-                    &db.expansion_span_map(file_id),
+                    db.expansion_span_map(file_id),
                     self.target_scope.module().krate(db).into(),
                 )
             }
@@ -218,8 +218,7 @@ impl<'a> PathTransform<'a> {
                     }
                 }
                 (Either::Left(k), None) => {
-                    if let Some(default) =
-                        k.default(db, target_module.krate(db).to_display_target(db))
+                    if let Some(default) = k.default_source_code(db, target_module)
                         && let Some(default) = default.expr()
                     {
                         const_substs.insert(k, default.syntax().clone());
@@ -278,7 +277,7 @@ impl Ctx<'_> {
         // `transform_path` may update a node's parent and that would break the
         // tree traversal. Thus all paths in the tree are collected into a vec
         // so that such operation is safe.
-        let (mut editor, item) = SyntaxEditor::new(self.transform_path(item));
+        let (editor, item) = SyntaxEditor::new(self.transform_path(item));
         preorder_rev(&item).filter_map(ast::Lifetime::cast).for_each(|lifetime| {
             if let Some(subst) = self.lifetime_substs.get(&lifetime.syntax().text().to_string()) {
                 editor.replace(lifetime.syntax(), subst.clone().syntax());
@@ -329,22 +328,22 @@ impl Ctx<'_> {
             result
         }
 
-        let (mut editor, root_path) = SyntaxEditor::new(path.clone());
+        let (editor, root_path) = SyntaxEditor::new(path.clone());
         let result = find_child_paths_and_ident_pats(&root_path);
         for sub_path in result {
             let new = self.transform_path(sub_path.syntax());
             editor.replace(sub_path.syntax(), new);
         }
-        let (mut editor, update_sub_item) = SyntaxEditor::new(editor.finish().new_root().clone());
+        let (editor, update_sub_item) = SyntaxEditor::new(editor.finish().new_root().clone());
         let item = find_child_paths_and_ident_pats(&update_sub_item);
         for sub_path in item {
-            self.transform_path_or_ident_pat(&mut editor, &sub_path);
+            self.transform_path_or_ident_pat(&editor, &sub_path);
         }
         editor.finish().new_root().clone()
     }
     fn transform_path_or_ident_pat(
         &self,
-        editor: &mut SyntaxEditor,
+        editor: &SyntaxEditor,
         item: &Either<ast::Path, ast::IdentPat>,
     ) -> Option<()> {
         match item {
@@ -353,7 +352,8 @@ impl Ctx<'_> {
         }
     }
 
-    fn transform_path_(&self, editor: &mut SyntaxEditor, path: &ast::Path) -> Option<()> {
+    fn transform_path_(&self, editor: &SyntaxEditor, path: &ast::Path) -> Option<()> {
+        let make = editor.make();
         if path.qualifier().is_some() {
             return None;
         }
@@ -397,7 +397,14 @@ impl Ctx<'_> {
                                 hir::ModuleDef::Trait(trait_ref),
                                 cfg,
                             )?;
-                            match make::ty_path(mod_path_to_ast(&found_path, self.target_edition)) {
+                            match make
+                                .ty_path(mod_path_to_ast_with_factory(
+                                    make,
+                                    &found_path,
+                                    self.target_edition,
+                                ))
+                                .into()
+                            {
                                 ast::Type::PathType(path_ty) => Some(path_ty),
                                 _ => None,
                             }
@@ -447,8 +454,8 @@ impl Ctx<'_> {
                     allow_unstable: true,
                 };
                 let found_path = self.target_module.find_path(self.source_scope.db, def, cfg)?;
-                let res = mod_path_to_ast(&found_path, self.target_edition);
-                let (mut res_editor, res) = SyntaxEditor::with_ast_node(&res);
+                let res = mod_path_to_ast_with_factory(make, &found_path, self.target_edition);
+                let (res_editor, res) = SyntaxEditor::with_ast_node(&res);
                 if let Some(args) = path.segment().and_then(|it| it.generic_arg_list())
                     && let Some(segment) = res.segment()
                 {
@@ -501,7 +508,8 @@ impl Ctx<'_> {
                     )?;
 
                     if let Some(qual) =
-                        mod_path_to_ast(&found_path, self.target_edition).qualifier()
+                        mod_path_to_ast_with_factory(make, &found_path, self.target_edition)
+                            .qualifier()
                     {
                         editor.replace(
                             path.syntax(),
@@ -522,14 +530,11 @@ impl Ctx<'_> {
         Some(())
     }
 
-    fn transform_ident_pat(
-        &self,
-        editor: &mut SyntaxEditor,
-        ident_pat: &ast::IdentPat,
-    ) -> Option<()> {
+    fn transform_ident_pat(&self, editor: &SyntaxEditor, ident_pat: &ast::IdentPat) -> Option<()> {
         let name = ident_pat.name()?;
+        let make = editor.make();
 
-        let temp_path = make::path_from_text(&name.text());
+        let temp_path = make.path_from_text(&name.text());
 
         let resolution = self.source_scope.speculative_resolve(&temp_path)?;
 
@@ -584,7 +589,7 @@ impl Ctx<'_> {
                 let found_path = self.target_module.find_path(self.source_scope.db, def, cfg)?;
                 editor.replace(
                     ident_pat.syntax(),
-                    mod_path_to_ast(&found_path, self.target_edition).syntax(),
+                    mod_path_to_ast_with_factory(make, &found_path, self.target_edition).syntax(),
                 );
                 Some(())
             }

@@ -137,8 +137,10 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                 "deprecated" => attr_flags.insert(AttrFlags::IS_DEPRECATED),
                 "ignore" => attr_flags.insert(AttrFlags::IS_IGNORE),
                 "lang" => attr_flags.insert(AttrFlags::LANG_ITEM),
+                "must_use" => attr_flags.insert(AttrFlags::IS_MUST_USE),
                 "path" => attr_flags.insert(AttrFlags::HAS_PATH),
                 "unstable" => attr_flags.insert(AttrFlags::IS_UNSTABLE),
+                "rustc_reservation_impl" => attr_flags.insert(AttrFlags::RUSTC_RESERVATION_IMPL),
                 "export_name" => {
                     if let Some(value) = attr.value_string()
                         && *value == *"main"
@@ -159,7 +161,7 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                 None => match &*first_segment {
                     "deprecated" => attr_flags.insert(AttrFlags::IS_DEPRECATED),
                     "doc" => extract_doc_tt_attr(attr_flags, tt),
-                    "repr" => attr_flags.insert(AttrFlags::HAS_REPR),
+                    "repr" | "rustc_scalable_vector" => attr_flags.insert(AttrFlags::HAS_REPR),
                     "target_feature" => attr_flags.insert(AttrFlags::HAS_TARGET_FEATURE),
                     "proc_macro_derive" | "rustc_builtin_macro" => {
                         attr_flags.insert(AttrFlags::IS_DERIVE_OR_BUILTIN_MACRO)
@@ -200,7 +202,7 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                 let segment4 = segment4.and_then(|it| it.segment()?.name_ref());
                 segment1.text() == "test"
                     && segment3.is_none_or(|it| it.text() == "prelude")
-                    && segment4.is_none_or(|it| it.text() == "core")
+                    && segment4.is_none_or(|it| matches!(&*it.text(), "core" | "std"))
             });
             if is_test {
                 attr_flags.insert(AttrFlags::IS_TEST);
@@ -217,6 +219,7 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                     "rustc_allow_incoherent_impl" => {
                         attr_flags.insert(AttrFlags::RUSTC_ALLOW_INCOHERENT_IMPL)
                     }
+                    "rustc_scalable_vector" => attr_flags.insert(AttrFlags::HAS_REPR),
                     "fundamental" => attr_flags.insert(AttrFlags::FUNDAMENTAL),
                     "no_std" => attr_flags.insert(AttrFlags::IS_NO_STD),
                     "may_dangle" => attr_flags.insert(AttrFlags::MAY_DANGLE),
@@ -226,6 +229,7 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                     "unstable" => attr_flags.insert(AttrFlags::IS_UNSTABLE),
                     "deprecated" => attr_flags.insert(AttrFlags::IS_DEPRECATED),
                     "macro_export" => attr_flags.insert(AttrFlags::IS_MACRO_EXPORT),
+                    "must_use" => attr_flags.insert(AttrFlags::IS_MUST_USE),
                     "no_mangle" => attr_flags.insert(AttrFlags::NO_MANGLE),
                     "pointee" => attr_flags.insert(AttrFlags::IS_POINTEE),
                     "non_exhaustive" => attr_flags.insert(AttrFlags::NON_EXHAUSTIVE),
@@ -257,6 +261,15 @@ fn match_attr_flags(attr_flags: &mut AttrFlags, attr: ast::Meta) -> ControlFlow<
                 Some(second_segment) => match &*first_segment {
                     "rust_analyzer" => match &*second_segment {
                         "skip" => attr_flags.insert(AttrFlags::RUST_ANALYZER_SKIP),
+                        "prefer_underscore_import" => {
+                            attr_flags.insert(AttrFlags::PREFER_UNDERSCORE_IMPORT)
+                        }
+                        _ => {}
+                    },
+                    "diagnostic" => match &*second_segment {
+                        "do_not_recommend" => {
+                            attr_flags.insert(AttrFlags::DIAGNOSTIC_DO_NOT_RECOMMEND)
+                        }
                         _ => {}
                     },
                     _ => {}
@@ -329,6 +342,12 @@ bitflags::bitflags! {
         const MACRO_STYLE_BRACES = 1 << 46;
         const MACRO_STYLE_BRACKETS = 1 << 47;
         const MACRO_STYLE_PARENTHESES = 1 << 48;
+
+        const PREFER_UNDERSCORE_IMPORT = 1 << 49;
+
+        const IS_MUST_USE = 1 << 50;
+
+        const DIAGNOSTIC_DO_NOT_RECOMMEND = 1 << 51;
     }
 }
 
@@ -718,26 +737,56 @@ impl AttrFlags {
             return None;
         }
 
-        return repr(db, owner);
+        Self::repr_assume_has(db, owner)
+    }
 
-        #[salsa::tracked]
-        fn repr(db: &dyn DefDatabase, owner: AdtId) -> Option<ReprOptions> {
-            let mut result = None;
-            collect_attrs::<Infallible>(db, owner.into(), |attr| {
-                if let ast::Meta::TokenTreeMeta(attr) = attr
-                    && attr.path().is1("repr")
-                    && let Some(tt) = attr.token_tree()
+    /// Only call this when you've verified the type indeed has a `#[repr]` attribute!
+    ///
+    /// Prefer [`AttrFlags::repr()`] in non-perf-sensitive places as it also has a check that
+    /// that the ADT has repr.
+    #[salsa::tracked]
+    pub fn repr_assume_has(db: &dyn DefDatabase, owner: AdtId) -> Option<ReprOptions> {
+        let mut result = None;
+        collect_attrs::<Infallible>(db, owner.into(), |attr| {
+            let mut current = None;
+            if let ast::Meta::TokenTreeMeta(attr) = &attr
+                && let Some(path) = attr.path()
+                && let Some(tt) = attr.token_tree()
+            {
+                if path.is1("repr")
                     && let Some(repr) = parse_repr_tt(&tt)
                 {
-                    match &mut result {
-                        Some(existing) => merge_repr(existing, repr),
-                        None => result = Some(repr),
-                    }
+                    current = Some(repr);
+                } else if path.is1("rustc_scalable_vector")
+                    && let mut tt = TokenTreeChildren::new(&tt)
+                    && let Some(NodeOrToken::Token(scalable)) = tt.next()
+                    && let Some(scalable) = ast::IntNumber::cast(scalable)
+                    && let Ok(scalable) = scalable.value()
+                    && let Ok(scalable) = scalable.try_into()
+                {
+                    current = Some(ReprOptions {
+                        scalable: Some(rustc_abi::ScalableElt::ElementCount(scalable)),
+                        ..ReprOptions::default()
+                    });
                 }
-                ControlFlow::Continue(())
-            });
-            result
-        }
+            } else if let ast::Meta::PathMeta(attr) = &attr
+                && attr.path().is1("rustc_scalable_vector")
+            {
+                current = Some(ReprOptions {
+                    scalable: Some(rustc_abi::ScalableElt::Container),
+                    ..ReprOptions::default()
+                });
+            }
+
+            if let Some(current) = current {
+                match &mut result {
+                    Some(existing) => merge_repr(existing, current),
+                    None => result = Some(current),
+                }
+            }
+            ControlFlow::Continue(())
+        });
+        result
     }
 
     /// Call this only if there are legacy const generics, to save memory.
@@ -1076,10 +1125,67 @@ impl AttrFlags {
             })
         }
     }
+
+    pub fn unstable_feature(self, db: &dyn DefDatabase, owner: AttrDefId) -> Option<Symbol> {
+        if !self.contains(AttrFlags::IS_UNSTABLE) {
+            return None;
+        }
+
+        return unstable_feature(db, owner);
+
+        #[salsa::tracked]
+        fn unstable_feature(db: &dyn DefDatabase, owner: AttrDefId) -> Option<Symbol> {
+            collect_attrs(db, owner, |attr| {
+                if let ast::Meta::TokenTreeMeta(attr) = attr
+                    && let path = attr.path()
+                    && path.is1("unstable")
+                    && let Some(tt) = attr.token_tree()
+                {
+                    let mut tt = TokenTreeChildren::new(&tt);
+                    // Technically the `feature = "..."` always comes first, but it's not a requirement.
+                    while let Some(token) = tt.next() {
+                        if let NodeOrToken::Token(token) = token
+                            && token.text() == "feature"
+                            && let Some(NodeOrToken::Token(eq)) = tt.next()
+                            && eq.kind() == T![=]
+                            && let Some(NodeOrToken::Token(feature)) = tt.next()
+                            && let Some(feature) = ast::String::cast(feature)
+                            && let Ok(feature) = feature.value()
+                        {
+                            return ControlFlow::Break(Symbol::intern(&feature));
+                        }
+                    }
+                }
+                ControlFlow::Continue(())
+            })
+        }
+    }
+
+    /// Returns `None` if there is no `#[must_use]`, `Some(None)` if there is a `#[must_use]` without a message,
+    /// and `Some(Some(message))` if there is a `#[must_use]` with a message.
+    pub fn must_use_message(db: &dyn DefDatabase, owner: AttrDefId) -> Option<Option<&str>> {
+        if !AttrFlags::query(db, owner).contains(AttrFlags::IS_MUST_USE) {
+            return None;
+        }
+        return Some(must_use_message(db, owner));
+
+        #[salsa::tracked(returns(as_deref))]
+        fn must_use_message(db: &dyn DefDatabase, owner: AttrDefId) -> Option<Box<str>> {
+            collect_attrs(db, owner, |attr| {
+                if let ast::Meta::KeyValueMeta(attr) = attr
+                    && attr.path().is1("must_use")
+                    && let Some(message) = attr.value_string()
+                {
+                    return ControlFlow::Break(Box::from(&*message));
+                }
+                ControlFlow::Continue(())
+            })
+        }
+    }
 }
 
 fn merge_repr(this: &mut ReprOptions, other: ReprOptions) {
-    let ReprOptions { int, align, pack, flags, field_shuffle_seed: _ } = this;
+    let ReprOptions { int, align, pack, flags, scalable, field_shuffle_seed: _ } = this;
     flags.insert(other.flags);
     *align = (*align).max(other.align);
     *pack = match (*pack, other.pack) {
@@ -1088,6 +1194,9 @@ fn merge_repr(this: &mut ReprOptions, other: ReprOptions) {
     };
     if other.int.is_some() {
         *int = other.int;
+    }
+    if other.scalable.is_some() {
+        *scalable = other.scalable;
     }
 }
 

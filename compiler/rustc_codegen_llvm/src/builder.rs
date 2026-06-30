@@ -14,8 +14,9 @@ use rustc_codegen_ssa::mir::operand::{OperandRef, OperandValue};
 use rustc_codegen_ssa::mir::place::PlaceRef;
 use rustc_codegen_ssa::traits::*;
 use rustc_data_structures::small_c_str::SmallCStr;
+use rustc_hir::attrs::{AttributeKind, UnrollAttr};
 use rustc_hir::def_id::DefId;
-use rustc_middle::middle::codegen_fn_attrs::{CodegenFnAttrs, TargetFeature, TargetFeatureKind};
+use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
 use rustc_middle::ty::layout::{
     FnAbiError, FnAbiOfHelpers, FnAbiRequest, HasTypingEnv, LayoutError, LayoutOfHelpers,
     TyAndLayout,
@@ -333,6 +334,51 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
     fn br(&mut self, dest: &'ll BasicBlock) {
         unsafe {
             llvm::LLVMBuildBr(self.llbuilder, dest);
+        }
+    }
+
+    fn br_with_attrs(&mut self, dest: &'ll BasicBlock, attributes: &[AttributeKind]) {
+        unsafe {
+            let val = llvm::LLVMBuildBr(self.llbuilder, dest);
+
+            let mut nodes = Vec::new();
+
+            for attribute in attributes {
+                let AttributeKind::Unroll(unroll) = attribute else {
+                    continue;
+                };
+                // UnrollAttr::Count needs a second operand, the provided count, but the other
+                // unroll hints do not.
+                let md_node = if let UnrollAttr::Count(count) = unroll {
+                    let unroll_meta = self.create_metadata("llvm.loop.unroll.count".as_bytes());
+                    let count = llvm::LLVMValueAsMetadata(self.get_const_i32(u64::from(*count)));
+                    self.md_node_in_context(&[unroll_meta, count])
+                } else {
+                    let metadata_str = match unroll {
+                        UnrollAttr::Hint => "llvm.loop.unroll.enable",
+                        UnrollAttr::Full => "llvm.loop.unroll.full",
+                        UnrollAttr::Never => "llvm.loop.unroll.disable",
+                        UnrollAttr::Count(_) => unreachable!(),
+                    };
+                    let unroll_meta = self.create_metadata(metadata_str.as_bytes());
+                    self.md_node_in_context(&[unroll_meta])
+                };
+                nodes.push(md_node);
+            }
+
+            if let [first, ..] = nodes[..] {
+                nodes.insert(0, first);
+
+                // Create the loop metadata node
+                let loop_meta_mdnode = self.set_metadata_node(val, llvm::MD_loop, &nodes);
+
+                // Look up the metadata node as a value
+                let loop_meta_val = llvm::LLVMGetMetadata(val, llvm::MD_loop).unwrap();
+
+                // Replace the first entry with a reference to itself
+                // This is required by LLVM. See the LangRef page for llvm.loop metadata.
+                llvm::LLVMReplaceMDNodeOperandWith(loop_meta_val, 0, loop_meta_mdnode);
+            }
         }
     }
 
@@ -854,6 +900,22 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                     self.set_metadata_node(store, llvm::MD_nontemporal, &[one]);
                 }
             }
+            if flags.contains(MemFlags::CAPTURES_READ_ONLY)
+                && crate::llvm_util::get_version() >= (22, 0, 0)
+            {
+                assert!(
+                    self.type_kind(self.val_ty(val)) == TypeKind::Pointer,
+                    "CAPTURED_READ_ONLY is only supported on pointer stores"
+                );
+                let args = [
+                    self.cx.create_metadata(b"address"),
+                    self.cx.create_metadata(b"read_provenance"),
+                ];
+                // FIXME: Switch this to use MD_captures once LLVM 22 is the minimum.
+                let id = self.get_md_kind_id("captures");
+                let md = llvm::LLVMMDNodeInContext2(self.cx.llcx, args.as_ptr(), args.len());
+                self.set_metadata(store, id, md);
+            }
             store
         }
     }
@@ -1289,6 +1351,10 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         ret
     }
 
+    fn get_funclet_cleanuppad(&self, funclet: &Funclet<'ll>) -> &'ll Value {
+        funclet.cleanuppad()
+    }
+
     // Atomic Operations
     fn atomic_cmpxchg(
         &mut self,
@@ -1418,20 +1484,9 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         if let Some(callee_instance) = callee_instance {
             // Attributes on the function definition being called
             let callee_attrs = self.cx.tcx.codegen_fn_attrs(callee_instance.def_id());
-            if let Some(caller_attrs) = caller_attrs
-                // If there is an inline attribute and a target feature that matches
-                // we will add the attribute to the callsite otherwise we'll omit
-                // this and not add the attribute to prevent soundness issues.
-                && let Some(inlining_rule) = attributes::inline_attr(&self.cx, self.cx.tcx, callee_instance)
-                && self.cx.tcx.is_target_feature_call_safe(
-                    &callee_attrs.target_features,
-                    &caller_attrs.target_features.iter().cloned().chain(
-                        self.cx.tcx.sess.target_features.iter().map(|feat| TargetFeature {
-                            name: *feat,
-                            kind: TargetFeatureKind::Implied,
-                        })
-                    ).collect::<Vec<_>>(),
-                )
+
+            if let Some(inlining_rule) =
+                attributes::inline_attr(&self.cx, self.cx.tcx, callee_instance, callee_attrs)
             {
                 attributes::apply_to_callsite(
                     call,
@@ -1667,12 +1722,6 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
     }
     pub(crate) fn vector_reduce_xor(&mut self, src: &'ll Value) -> &'ll Value {
         self.call_intrinsic("llvm.vector.reduce.xor", &[self.val_ty(src)], &[src])
-    }
-    pub(crate) fn vector_reduce_fmin(&mut self, src: &'ll Value) -> &'ll Value {
-        self.call_intrinsic("llvm.vector.reduce.fmin", &[self.val_ty(src)], &[src])
-    }
-    pub(crate) fn vector_reduce_fmax(&mut self, src: &'ll Value) -> &'ll Value {
-        self.call_intrinsic("llvm.vector.reduce.fmax", &[self.val_ty(src)], &[src])
     }
     pub(crate) fn vector_reduce_min(&mut self, src: &'ll Value, is_signed: bool) -> &'ll Value {
         self.call_intrinsic(

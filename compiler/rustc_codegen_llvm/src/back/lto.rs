@@ -8,11 +8,12 @@ use std::{io, iter, slice};
 use object::read::archive::ArchiveFile;
 use object::{Object, ObjectSection};
 use rustc_codegen_ssa::back::lto::{SerializedModule, ThinModule, ThinShared};
+use rustc_codegen_ssa::back::rmeta_link;
 use rustc_codegen_ssa::back::write::{
     CodegenContext, FatLtoInput, SharedEmitter, TargetMachineFactoryFn, ThinLtoInput,
 };
 use rustc_codegen_ssa::traits::*;
-use rustc_codegen_ssa::{CompiledModule, ModuleCodegen, ModuleKind, looks_like_rust_object_file};
+use rustc_codegen_ssa::{CompiledModule, ModuleCodegen, ModuleKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::memmap::Mmap;
 use rustc_data_structures::profiling::SelfProfilerRef;
@@ -96,6 +97,7 @@ fn prepare_lto(
                 .expect("couldn't map rlib")
         };
         let archive = ArchiveFile::parse(&*archive_data).expect("wanted an rlib");
+        let metadata_link = rmeta_link::read(&archive, &archive_data, &path).unwrap();
         let obj_files = archive
             .members()
             .filter_map(|child| {
@@ -103,7 +105,7 @@ fn prepare_lto(
                     .ok()
                     .and_then(|c| std::str::from_utf8(c.name()).ok().map(|name| (name.trim(), c)))
             })
-            .filter(|&(name, _)| looks_like_rust_object_file(name));
+            .filter(|&(name, _)| metadata_link.rust_object_files.iter().any(|f| f == name));
         for (name, child) in obj_files {
             info!("adding bitcode from {}", name);
             match get_bitcode_slice_from_object_data(
@@ -223,9 +225,12 @@ fn fat_lto(
     for module in modules {
         match module {
             FatLtoInput::InMemory(m) => in_memory.push(m),
-            FatLtoInput::Serialized { name, buffer } => {
+            FatLtoInput::Serialized { name, bitcode_path } => {
                 info!("pushing serialized module {:?}", name);
-                serialized_modules.push((buffer, CString::new(name).unwrap()));
+                serialized_modules.push((
+                    SerializedModule::from_file(&bitcode_path),
+                    CString::new(name).unwrap(),
+                ));
             }
         }
     }
@@ -396,7 +401,9 @@ fn thin_lto(
         for (i, module) in modules.into_iter().enumerate() {
             let (name, buffer) = match module {
                 ThinLtoInput::Red { name, buffer } => (name, buffer),
-                ThinLtoInput::Green { wp, buffer } => (wp.cgu_name, buffer),
+                ThinLtoInput::Green { wp, bitcode_path } => {
+                    (wp.cgu_name, SerializedModule::from_file(&bitcode_path))
+                }
             };
             info!("local module: {} - {}", i, name);
             let cname = CString::new(name.as_bytes()).unwrap();

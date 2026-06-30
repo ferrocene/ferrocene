@@ -1772,7 +1772,7 @@ fn function() {
 "#,
         expect![[r#"
             st FooStruct (use outer::FooStruct) BarStruct
-            md foo (use outer::foo)
+            md foo:: (use outer::foo)
             fn foo_fun() (use outer::foo_fun)        fn()
         "#]],
     );
@@ -1809,9 +1809,8 @@ fn intrinsics() {
         r#"
     //- /core.rs crate:core
     pub mod intrinsics {
-        extern "rust-intrinsic" {
-            pub fn transmute<Src, Dst>(src: Src) -> Dst;
-        }
+        #[rustc_intrinsic]
+        pub unsafe fn transmute<Src, Dst>(src: Src) -> Dst;
     }
     pub mod mem {
         pub use crate::intrinsics::transmute;
@@ -1829,9 +1828,8 @@ fn intrinsics() {
         r#"
 //- /core.rs crate:core
 pub mod intrinsics {
-    extern "rust-intrinsic" {
-        pub fn transmute<Src, Dst>(src: Src) -> Dst;
-    }
+    #[rustc_intrinsic]
+    pub unsafe fn transmute<Src, Dst>(src: Src) -> Dst;
 }
 pub mod mem {
     pub use crate::intrinsics::transmute;
@@ -2055,5 +2053,40 @@ fn main() {
     test.test_function()$0
 }
 "#,
+    );
+}
+
+#[test]
+fn prefer_underscore_import() {
+    check_edit(
+        "bar",
+        r#"
+mod foo {
+    #[rust_analyzer::prefer_underscore_import]
+    pub trait Ext {
+        fn bar(&self) {}
+    }
+    impl<T> Ext for T {}
+}
+
+fn baz() {
+    1.bar$0
+}
+    "#,
+        r#"
+use foo::Ext as _;
+
+mod foo {
+    #[rust_analyzer::prefer_underscore_import]
+    pub trait Ext {
+        fn bar(&self) {}
+    }
+    impl<T> Ext for T {}
+}
+
+fn baz() {
+    1.bar();$0
+}
+    "#,
     );
 }

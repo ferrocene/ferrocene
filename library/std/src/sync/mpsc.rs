@@ -142,6 +142,8 @@
 // not exposed publicly, but if you are curious about the implementation,
 // that's where everything is.
 
+use core::clone::Share;
+
 use crate::sync::mpmc;
 use crate::time::{Duration, Instant};
 use crate::{error, fmt};
@@ -173,7 +175,7 @@ use crate::{error, fmt};
 /// println!("{}", recv.recv().unwrap()); // Received after 2 seconds
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
-#[cfg_attr(not(test), rustc_diagnostic_item = "Receiver")]
+#[cfg_attr(not(test), rustc_diagnostic_item = "MpscReceiver")]
 pub struct Receiver<T> {
     inner: mpmc::Receiver<T>,
 }
@@ -330,6 +332,7 @@ pub struct IntoIter<T> {
 /// assert_eq!(3, msg + msg2);
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
+#[cfg_attr(not(test), rustc_diagnostic_item = "MpscSender")]
 pub struct Sender<T> {
     inner: mpmc::Sender<T>,
 }
@@ -644,6 +647,9 @@ impl<T> Clone for Sender<T> {
     }
 }
 
+#[unstable(feature = "share_trait", issue = "156756")]
+impl<T> Share for Sender<T> {}
+
 #[stable(feature = "mpsc_debug", since = "1.8.0")]
 impl<T> fmt::Debug for Sender<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -772,6 +778,9 @@ impl<T> Clone for SyncSender<T> {
         SyncSender { inner: self.inner.clone() }
     }
 }
+
+#[unstable(feature = "share_trait", issue = "156756")]
+impl<T> Share for SyncSender<T> {}
 
 #[stable(feature = "mpsc_debug", since = "1.8.0")]
 impl<T> fmt::Debug for SyncSender<T> {

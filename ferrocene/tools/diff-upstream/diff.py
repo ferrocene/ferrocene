@@ -11,15 +11,14 @@
 # ///
 
 import argparse
-import re
 import os
+import re
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
+from automations_common import cmd_capture
 from ignorelib import IgnoreFilterManager
 from more_itertools import peekable
-
-from automations_common import cmd_capture
 
 had_error = False
 
@@ -36,7 +35,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--hide-diff",
     action="store_true",
-    help="Only test " "ferrocene-annotations; don't run the diff. Implies --test.",
+    help="Only test ferrocene-annotations; don't run the diff. Implies --test.",
 )
 parser.add_argument("--test", action="store_true", help="Test ferrocene-annotations")
 args = parser.parse_args()
@@ -100,7 +99,7 @@ for line in test_changes:
             continue
         # Next line is the section name it corresponds to.
         section = test_changes.peek()
-        if not section.startswith("+// "):
+        if not ((section[0] == "+") and section[1:].lstrip().startswith("//")):
             missing_annotations[span] = id
         else:
             annotations[id] = span, section.split(" ", 1)[1]

@@ -26,7 +26,7 @@ use crate::sys::cmath;
 
 #[cfg(not(test))]
 impl f64 {
-    /// Returns the largest integer less than or equal to `self`.
+    /// Returns the largest integer that is less than or equal to `self`.
     ///
     /// This function always returns the precise result.
     ///
@@ -50,7 +50,7 @@ impl f64 {
         core::f64::math::floor(self)
     }
 
-    /// Returns the smallest integer greater than or equal to `self`.
+    /// Returns the smallest integer that is greater than or equal to `self`.
     ///
     /// This function always returns the precise result.
     ///
@@ -59,9 +59,11 @@ impl f64 {
     /// ```
     /// let f = 3.01_f64;
     /// let g = 4.0_f64;
+    /// let h = -3.01_f64;
     ///
     /// assert_eq!(f.ceil(), 4.0);
     /// assert_eq!(g.ceil(), 4.0);
+    /// assert_eq!(h.ceil(), -3.0);
     /// ```
     #[doc(alias = "ceiling")]
     #[rustc_allow_incoherent_impl]
@@ -907,6 +909,7 @@ impl f64 {
     #[rustc_allow_incoherent_impl]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn sin_cos(self) -> (f64, f64) {
         (self.sin(), self.cos())
     }

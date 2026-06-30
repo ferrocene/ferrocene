@@ -65,5 +65,3 @@ If your C compiler loads the GCC LTO plugins by default, you will also need to
 switch off GCC LTO with:
 
 - ``-Clink-arg=-fno-lto``
-
-.. _x86_64-ferrocene-linux-gnu:

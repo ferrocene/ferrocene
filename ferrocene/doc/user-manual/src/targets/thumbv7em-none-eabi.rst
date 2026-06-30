@@ -8,9 +8,12 @@
 
 .. note::
 
-   The baseline target is qualified, without any specific
-   ``-Ctarget-cpu`` or ``-Ctarget-feature`` flags mentioned in `the rustc book
-   <../../rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_.
+   The baseline target is qualified, along with specific
+   ``-C target-cpu`` flags as noted in :ref:`thumbv7em-none-eabi-permitted-flags`.
+
+   Other ``-C target-cpu`` or ``-C target-feature`` flags mentioned in `the rustc book
+   <../../rustc/platform-support/thumbv7em-none-eabi.html#target-cpu-and-target-feature-options>`_
+   are not qualified at this time.
 
    Please contact support if your use case demands fully optimized builds for
    a specific CPU configuration.
@@ -49,6 +52,16 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 * ``--target=thumbv7em-none-eabi``
+
+.. _thumbv7em-none-eabi-permitted-flags:
+
+Permitted compiler flags
+------------------------
+
+Specific ``-C target-cpu`` flags are tested and are permitted in
+safety critical use. They may be passed to ``rustc`` during build.
+
+- ``-C target-cpu=cortex-m4``, supporting Cortex-M4 processors only.
 
 Testing Facade (Experimental)
 -----------------------------

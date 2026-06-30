@@ -231,7 +231,7 @@ use rustc_middle::ty::adjustment::{CustomCoerceUnsized, PointerCoercion};
 use rustc_middle::ty::layout::ValidityRequirement;
 use rustc_middle::ty::{
     self, GenericArgs, GenericParamDefKind, Instance, InstanceKind, Ty, TyCtxt, TypeFoldable,
-    TypeVisitable, TypeVisitableExt, TypeVisitor, VtblEntry,
+    TypeVisitable, TypeVisitableExt, TypeVisitor, Unnormalized, VtblEntry,
 };
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
@@ -239,7 +239,7 @@ use rustc_session::config::{DebugInfo, EntryFnType};
 use rustc_span::{DUMMY_SP, Span, Spanned, dummy_spanned, respan};
 use tracing::{debug, instrument, trace};
 
-use crate::errors::{
+use crate::diagnostics::{
     self, EncounteredErrorWhileInstantiating, EncounteredErrorWhileInstantiatingGlobalAsm,
     NoOptimizedMir, RecursionLimit,
 };
@@ -420,7 +420,7 @@ fn collect_items_rec<'tcx>(
     // current step of mono items collection.
     //
     // FIXME: don't rely on global state, instead bubble up errors. Note: this is very hard to do.
-    let error_count = tcx.dcx().err_count();
+    let error_count = tcx.dcx().err_count_on_current_thread();
 
     // In `mentioned_items` we collect items that were mentioned in this MIR but possibly do not
     // need to be monomorphized. This is done to ensure that optimizing away function calls does not
@@ -545,7 +545,7 @@ fn collect_items_rec<'tcx>(
 
     // Check for PMEs and emit a diagnostic if one happened. To try to show relevant edges of the
     // mono item graph.
-    if tcx.dcx().err_count() > error_count
+    if tcx.dcx().err_count_on_current_thread() > error_count
         && starting_item.node.is_generic_fn()
         && starting_item.node.is_user_defined()
     {
@@ -663,8 +663,8 @@ fn check_recursion_limit<'tcx>(
     let recursion_depth = recursion_depths.get(&def_id).cloned().unwrap_or(0);
     debug!(" => recursion depth={}", recursion_depth);
 
-    let adjusted_recursion_depth = if tcx.is_lang_item(def_id, LangItem::DropInPlace) {
-        // HACK: drop_in_place creates tight monomorphization loops. Give
+    let adjusted_recursion_depth = if tcx.is_lang_item(def_id, LangItem::DropGlue) {
+        // HACK: `drop_glue` creates tight monomorphization loops. Give
         // it more margin.
         recursion_depth / 4
     } else {
@@ -942,7 +942,7 @@ fn visit_drop_use<'tcx>(
     source: Span,
     output: &mut MonoItems<'tcx>,
 ) {
-    let instance = Instance::resolve_drop_in_place(tcx, ty);
+    let instance = Instance::resolve_drop_glue(tcx, ty);
     visit_instance_use(tcx, instance, is_direct_call, source, output);
 }
 
@@ -1532,7 +1532,7 @@ impl<'v> RootCollector<'_, 'v> {
                         });
 
                     // This type is impossible to instantiate, so we should not try to
-                    // generate a `drop_in_place` instance for it.
+                    // generate a `drop_glue` instance for it.
                     if self.tcx.instantiate_and_check_impossible_predicates((
                         id.owner_id.to_def_id(),
                         id_args,
@@ -1540,8 +1540,11 @@ impl<'v> RootCollector<'_, 'v> {
                         return;
                     }
 
-                    let ty =
-                        self.tcx.type_of(id.owner_id.to_def_id()).instantiate(self.tcx, id_args);
+                    let ty = self
+                        .tcx
+                        .type_of(id.owner_id.to_def_id())
+                        .instantiate(self.tcx, id_args)
+                        .skip_norm_wip();
                     assert!(!ty.has_non_region_param());
                     visit_drop_use(self.tcx, ty, true, DUMMY_SP, self.output);
                 }
@@ -1606,7 +1609,7 @@ impl<'v> RootCollector<'_, 'v> {
             DefKind::Closure => {
                 // for 'pub async fn foo(..)' also trying to monomorphize foo::{closure}
                 let is_pub_fn_coroutine =
-                    match *self.tcx.type_of(def_id).instantiate_identity().kind() {
+                    match *self.tcx.type_of(def_id).instantiate_identity().skip_norm_wip().kind() {
                         ty::Coroutine(cor_id, _args) => {
                             let tcx = self.tcx;
                             let parent_id = tcx.parent(cor_id);
@@ -1623,7 +1626,13 @@ impl<'v> RootCollector<'_, 'v> {
                         .generics_of(self.tcx.typeck_root_def_id_local(def_id))
                         .requires_monomorphization(self.tcx)
                 {
-                    let instance = match *self.tcx.type_of(def_id).instantiate_identity().kind() {
+                    let instance = match *self
+                        .tcx
+                        .type_of(def_id)
+                        .instantiate_identity()
+                        .skip_norm_wip()
+                        .kind()
+                    {
                         ty::Closure(def_id, args)
                         | ty::Coroutine(def_id, args)
                         | ty::CoroutineClosure(def_id, args) => {
@@ -1633,7 +1642,7 @@ impl<'v> RootCollector<'_, 'v> {
                     };
                     let Ok(instance) = self.tcx.try_normalize_erasing_regions(
                         ty::TypingEnv::fully_monomorphized(),
-                        instance,
+                        Unnormalized::new_wip(instance),
                     ) else {
                         // Don't ICE on an impossible-to-normalize closure.
                         return;
@@ -1711,7 +1720,7 @@ impl<'v> RootCollector<'_, 'v> {
         }
 
         let Some(start_def_id) = self.tcx.lang_items().start_fn() else {
-            self.tcx.dcx().emit_fatal(errors::StartNotFound);
+            self.tcx.dcx().emit_fatal(diagnostics::StartNotFound);
         };
         let main_ret_ty = self.tcx.fn_sig(main_def_id).no_bound_vars().unwrap().output();
 
@@ -1722,7 +1731,7 @@ impl<'v> RootCollector<'_, 'v> {
         // listing.
         let main_ret_ty = self.tcx.normalize_erasing_regions(
             ty::TypingEnv::fully_monomorphized(),
-            main_ret_ty.no_bound_vars().unwrap(),
+            Unnormalized::new_wip(main_ret_ty.no_bound_vars().unwrap()),
         );
 
         let start_instance = Instance::expect_resolve(
@@ -1768,7 +1777,7 @@ fn create_mono_items_for_default_impls<'tcx>(
         }
     };
     let impl_args = GenericArgs::for_item(tcx, item.owner_id.to_def_id(), only_region_params);
-    let trait_ref = impl_.trait_ref.instantiate(tcx, impl_args);
+    let trait_ref = impl_.trait_ref.instantiate(tcx, impl_args).skip_norm_wip();
 
     // Unlike 'lazy' monomorphization that begins by collecting items transitively
     // called by `main` or other global items, when eagerly monomorphizing impl
@@ -1784,7 +1793,7 @@ fn create_mono_items_for_default_impls<'tcx>(
     }
 
     let typing_env = ty::TypingEnv::fully_monomorphized();
-    let trait_ref = tcx.normalize_erasing_regions(typing_env, trait_ref);
+    let trait_ref = tcx.normalize_erasing_regions(typing_env, Unnormalized::new_wip(trait_ref));
     let overridden_methods = tcx.impl_item_implementor_ids(item.owner_id);
     for method in tcx.provided_trait_methods(trait_ref.def_id) {
         if overridden_methods.contains_key(&method.def_id) {

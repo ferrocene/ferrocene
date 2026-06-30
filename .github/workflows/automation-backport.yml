@@ -34,6 +34,9 @@ jobs:
       - name: Setup uv
         run: ferrocene/ci/scripts/setup-uv.sh
 
+      - name: Setup mergiraf
+        run: ferrocene/ci/scripts/setup-mergiraf.sh
+
       - name: Configure git authorship information
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"

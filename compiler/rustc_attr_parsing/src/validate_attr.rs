@@ -8,17 +8,16 @@ use rustc_ast::tokenstream::DelimSpan;
 use rustc_ast::{
     self as ast, AttrArgs, Attribute, DelimArgs, MetaItem, MetaItemInner, MetaItemKind, Safety,
 };
-use rustc_errors::{Applicability, PResult};
-use rustc_feature::{AttributeTemplate, BUILTIN_ATTRIBUTE_MAP, BuiltinAttribute, template};
+use rustc_errors::{Applicability, Diagnostic, PResult};
+use rustc_feature::BUILTIN_ATTRIBUTE_MAP;
 use rustc_hir::AttrPath;
-use rustc_hir::lints::AttributeLintKind;
 use rustc_parse::parse_in;
 use rustc_session::errors::report_lit_error;
 use rustc_session::lint::builtin::ILL_FORMED_ATTRIBUTE_INPUT;
 use rustc_session::parse::ParseSess;
 use rustc_span::{Span, Symbol, sym};
 
-use crate::{AttributeParser, Late, session_diagnostics as errors};
+use crate::{AttributeParser, AttributeTemplate, session_diagnostics as errors, template};
 
 pub fn check_attr(psess: &ParseSess, attr: &Attribute) {
     if attr.is_doc_comment() || attr.has_name(sym::cfg_trace) || attr.has_name(sym::cfg_attr_trace)
@@ -30,8 +29,8 @@ pub fn check_attr(psess: &ParseSess, attr: &Attribute) {
 
     // Check input tokens for built-in and key-value attributes.
     match builtin_attr_info {
-        Some(BuiltinAttribute { name, .. }) => {
-            if AttributeParser::<Late>::is_parsed_attribute(slice::from_ref(&name)) {
+        Some(name) => {
+            if AttributeParser::is_parsed_attribute(slice::from_ref(&name)) {
                 return;
             }
             match parse_meta(psess, attr) {
@@ -210,14 +209,14 @@ pub fn emit_malformed_attribute(
         suggestions.clear();
     }
     if should_warn(name) {
-        psess.buffer_lint(
+        let suggestions = suggestions.clone();
+        psess.dyn_buffer_lint(
             ILL_FORMED_ATTRIBUTE_INPUT,
             span,
             ast::CRATE_NODE_ID,
-            AttributeLintKind::IllFormedAttributeInput {
-                suggestions: suggestions.clone(),
-                docs: template.docs,
-                help: None,
+            move |dcx, level| {
+                crate::diagnostics::IllFormedAttributeInput::new(&suggestions, template.docs, None)
+                    .into_diag(dcx, level)
             },
         );
     } else {

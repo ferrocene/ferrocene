@@ -298,7 +298,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             error.code,
             FulfillmentErrorCode::Select(crate::traits::SelectionError::Unimplemented)
                 | FulfillmentErrorCode::Project(_)
-        ) && self.apply_do_not_recommend(&mut error.obligation)
+        ) && self.apply_do_not_recommend(&mut error.obligation, &error.root_obligation)
         {
             error.code = FulfillmentErrorCode::Select(SelectionError::Unimplemented);
         }
@@ -455,7 +455,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 pub(crate) fn to_pretty_impl_header(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
     use std::fmt::Write;
 
-    let trait_ref = tcx.impl_opt_trait_ref(impl_def_id)?.instantiate_identity();
+    let trait_ref = tcx.impl_opt_trait_ref(impl_def_id)?.instantiate_identity().skip_norm_wip();
     let mut w = "impl".to_owned();
 
     #[derive(Debug, Default)]
@@ -485,7 +485,7 @@ pub(crate) fn to_pretty_impl_header(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Opti
         " {}{} for {}",
         tcx.impl_polarity(impl_def_id).as_str(),
         trait_ref.print_only_trait_path(),
-        tcx.type_of(impl_def_id).instantiate_identity()
+        tcx.type_of(impl_def_id).instantiate_identity().skip_norm_wip()
     )
     .unwrap();
 
@@ -577,8 +577,9 @@ pub fn report_dyn_incompatibility<'tcx>(
     let trait_str = tcx.def_path_str(trait_def_id);
     let trait_span = tcx.hir_get_if_local(trait_def_id).and_then(|node| match node {
         hir::Node::Item(item) => match item.kind {
-            hir::ItemKind::Trait(_, _, _, _, ident, ..)
-            | hir::ItemKind::TraitAlias(_, ident, _, _) => Some(ident.span),
+            hir::ItemKind::Trait { ident, .. } | hir::ItemKind::TraitAlias(_, ident, _, _) => {
+                Some(ident.span)
+            }
             _ => unreachable!(),
         },
         _ => None,

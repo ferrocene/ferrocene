@@ -1,17 +1,9 @@
-use crate::num::TryFromIntError;
-
-mod private {
-    /// This trait being unreachable from outside the crate
-    /// prevents other implementations of the `FloatToInt` trait,
-    /// which allows potentially adding more trait methods after the trait is `#[stable]`.
-    #[unstable(feature = "convert_float_to_int", issue = "67057")]
-    pub trait Sealed {}
-}
+use crate::num::{IntErrorKind, TryFromIntError};
 
 /// Supporting trait for inherent methods of `f32` and `f64` such as `to_int_unchecked`.
 /// Typically doesn’t need to be used directly.
 #[unstable(feature = "convert_float_to_int", issue = "67057")]
-pub trait FloatToInt<Int>: private::Sealed + Sized {
+pub impl(self) trait FloatToInt<Int>: Sized {
     #[unstable(feature = "convert_float_to_int", issue = "67057")]
     #[doc(hidden)]
     unsafe fn to_int_unchecked(self) -> Int;
@@ -19,8 +11,6 @@ pub trait FloatToInt<Int>: private::Sealed + Sized {
 
 macro_rules! impl_float_to_int {
     ($Float:ty => $($Int:ty),+) => {
-        #[unstable(feature = "convert_float_to_int", issue = "67057")]
-        impl private::Sealed for $Float {}
         $(
             #[unstable(feature = "convert_float_to_int", issue = "67057")]
             impl FloatToInt<$Int> for $Float {
@@ -44,7 +34,7 @@ macro_rules! impl_from_bool {
     ($($int:ty)*) => {$(
         #[stable(feature = "from_bool", since = "1.28.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const From<bool> for $int {
+        const impl From<bool> for $int {
             /// Converts from [`bool`] to
             #[doc = concat!("[`", stringify!($int), "`]")]
             /// , by turning `false` into `0` and `true` into `1`.
@@ -74,7 +64,7 @@ macro_rules! impl_from {
     ($small:ty => $large:ty, $(#[$attrs:meta]),+) => {
         $(#[$attrs])+
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const From<$small> for $large {
+        const impl From<$small> for $large {
             #[doc = concat!("Converts from [`", stringify!($small), "`] to [`", stringify!($large), "`] losslessly.")]
             #[inline(always)]
             #[ferrocene::prevalidated]
@@ -197,7 +187,7 @@ macro_rules! impl_float_from_bool {
     ) => {
         #[stable(feature = "float_from_bool", since = "1.68.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-            impl const From<bool> for $float {
+            const impl From<bool> for $float {
             #[doc = concat!("Converts a [`bool`] to [`", stringify!($float),"`] losslessly.")]
             /// The resulting value is positive `0.0` for `false` and `1.0` for `true` values.
             ///
@@ -250,7 +240,7 @@ macro_rules! impl_try_from_unbounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$source> for $target {
+        const impl TryFrom<$source> for $target {
             type Error = TryFromIntError;
 
             /// Tries to create the target number type from a source
@@ -270,7 +260,7 @@ macro_rules! impl_try_from_lower_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$source> for $target {
+        const impl TryFrom<$source> for $target {
             type Error = TryFromIntError;
 
             /// Tries to create the target number type from a source
@@ -282,7 +272,7 @@ macro_rules! impl_try_from_lower_bounded {
                 if u >= 0 {
                     Ok(u as Self)
                 } else {
-                    Err(TryFromIntError(()))
+                    Err(TryFromIntError(IntErrorKind::NegOverflow))
                 }
             }
         }
@@ -294,7 +284,7 @@ macro_rules! impl_try_from_upper_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$source> for $target {
+        const impl TryFrom<$source> for $target {
             type Error = TryFromIntError;
 
             /// Tries to create the target number type from a source
@@ -304,7 +294,7 @@ macro_rules! impl_try_from_upper_bounded {
             #[ferrocene::prevalidated]
             fn try_from(u: $source) -> Result<Self, Self::Error> {
                 if u > (Self::MAX as $source) {
-                    Err(TryFromIntError(()))
+                    Err(TryFromIntError(IntErrorKind::PosOverflow))
                 } else {
                     Ok(u as Self)
                 }
@@ -318,7 +308,7 @@ macro_rules! impl_try_from_both_bounded {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "try_from", since = "1.34.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$source> for $target {
+        const impl TryFrom<$source> for $target {
             type Error = TryFromIntError;
 
             /// Tries to create the target number type from a source
@@ -329,8 +319,10 @@ macro_rules! impl_try_from_both_bounded {
             fn try_from(u: $source) -> Result<Self, Self::Error> {
                 let min = Self::MIN as $source;
                 let max = Self::MAX as $source;
-                if u < min || u > max {
-                    Err(TryFromIntError(()))
+                if u < min {
+                    Err(TryFromIntError(IntErrorKind::NegOverflow))
+                } else if u > max {
+                    Err(TryFromIntError(IntErrorKind::PosOverflow))
                 } else {
                     Ok(u as Self)
                 }
@@ -341,10 +333,10 @@ macro_rules! impl_try_from_both_bounded {
 
 /// Implement `TryFrom<integer>` for `bool`
 macro_rules! impl_try_from_integer_for_bool {
-    ($($int:ty)+) => {$(
+    ($signedness:ident $($int:ty)+) => {$(
         #[stable(feature = "bool_try_from_int", since = "1.95.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$int> for bool {
+        const impl TryFrom<$int> for bool {
             type Error = TryFromIntError;
 
             /// Tries to create a bool from an integer type.
@@ -362,10 +354,23 @@ macro_rules! impl_try_from_integer_for_bool {
             #[inline]
             #[ferrocene::prevalidated]
             fn try_from(i: $int) -> Result<Self, Self::Error> {
-                match i {
-                    0 => Ok(false),
-                    1 => Ok(true),
-                    _ => Err(TryFromIntError(())),
+                sign_dependent_expr!{
+                    $signedness ?
+                    if signed {
+                        match i {
+                            0 => Ok(false),
+                            1 => Ok(true),
+                            ..0 => Err(TryFromIntError(IntErrorKind::NegOverflow)),
+                            2.. => Err(TryFromIntError(IntErrorKind::PosOverflow)),
+                        }
+                    }
+                    if unsigned {
+                        match i {
+                            0 => Ok(false),
+                            1 => Ok(true),
+                            2.. => Err(TryFromIntError(IntErrorKind::PosOverflow)),
+                        }
+                    }
                 }
             }
         }
@@ -379,8 +384,8 @@ macro_rules! rev {
 }
 
 // integer -> bool
-impl_try_from_integer_for_bool!(u128 u64 u32 u16 u8);
-impl_try_from_integer_for_bool!(i128 i64 i32 i16 i8);
+impl_try_from_integer_for_bool!(unsigned u128 u64 u32 u16 u8);
+impl_try_from_integer_for_bool!(signed i128 i64 i32 i16 i8);
 
 // unsigned integer -> unsigned integer
 impl_try_from_upper_bounded!(u16 => u8);
@@ -418,7 +423,7 @@ impl_try_from_lower_bounded!(isize => usize);
 
 #[cfg(target_pointer_width = "16")]
 mod ptr_try_from_impls {
-    use super::TryFromIntError;
+    use super::{IntErrorKind, TryFromIntError};
 
     impl_try_from_upper_bounded!(usize => u8);
     impl_try_from_unbounded!(usize => u16, u32, u64, u128);
@@ -440,7 +445,7 @@ mod ptr_try_from_impls {
 
 #[cfg(target_pointer_width = "32")]
 mod ptr_try_from_impls {
-    use super::TryFromIntError;
+    use super::{IntErrorKind, TryFromIntError};
 
     impl_try_from_upper_bounded!(usize => u8, u16);
     impl_try_from_unbounded!(usize => u32, u64, u128);
@@ -465,7 +470,7 @@ mod ptr_try_from_impls {
 
 #[cfg(target_pointer_width = "64")]
 mod ptr_try_from_impls {
-    use super::TryFromIntError;
+    use super::{IntErrorKind, TryFromIntError};
 
     impl_try_from_upper_bounded!(usize => u8, u16, u32);
     impl_try_from_unbounded!(usize => u64, u128);
@@ -495,7 +500,7 @@ macro_rules! impl_nonzero_int_from_nonzero_int {
     ($Small:ty => $Large:ty) => {
         #[stable(feature = "nz_int_conv", since = "1.41.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const From<NonZero<$Small>> for NonZero<$Large> {
+        const impl From<NonZero<$Small>> for NonZero<$Large> {
             // Rustdocs on the impl block show a "[+] show undocumented items" toggle.
             // Rustdocs on functions do not.
             #[doc = concat!("Converts <code>[NonZero]\\<[", stringify!($Small), "]></code> ")]
@@ -554,7 +559,7 @@ macro_rules! impl_nonzero_int_try_from_int {
     ($Int:ty) => {
         #[stable(feature = "nzint_try_from_int_conv", since = "1.46.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<$Int> for NonZero<$Int> {
+        const impl TryFrom<$Int> for NonZero<$Int> {
             type Error = TryFromIntError;
 
             // Rustdocs on the impl block show a "[+] show undocumented items" toggle.
@@ -563,7 +568,7 @@ macro_rules! impl_nonzero_int_try_from_int {
             #[doc = concat!("to <code>[NonZero]\\<[", stringify!($Int), "]></code>.")]
             #[inline]
             fn try_from(value: $Int) -> Result<Self, Self::Error> {
-                Self::new(value).ok_or(TryFromIntError(()))
+                Self::new(value).ok_or(TryFromIntError(IntErrorKind::Zero))
             }
         }
     };
@@ -587,7 +592,7 @@ macro_rules! impl_nonzero_int_try_from_nonzero_int {
     ($source:ty => $($target:ty),+) => {$(
         #[stable(feature = "nzint_try_from_nzint_conv", since = "1.49.0")]
         #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-        impl const TryFrom<NonZero<$source>> for NonZero<$target> {
+        const impl TryFrom<NonZero<$source>> for NonZero<$target> {
             type Error = TryFromIntError;
 
             // Rustdocs on the impl block show a "[+] show undocumented items" toggle.
@@ -632,3 +637,98 @@ impl_nonzero_int_try_from_nonzero_int!(i32 => u8, u16, u32, u64, u128, usize);
 impl_nonzero_int_try_from_nonzero_int!(i64 => u8, u16, u32, u64, u128, usize);
 impl_nonzero_int_try_from_nonzero_int!(i128 => u8, u16, u32, u64, u128, usize);
 impl_nonzero_int_try_from_nonzero_int!(isize => u8, u16, u32, u64, u128, usize);
+
+/// Conversion between integers, wrapping around or saturating at the target type's boundaries.
+#[unstable(feature = "integer_casts", issue = "157388")]
+#[rustc_const_unstable(feature = "integer_casts", issue = "157388")]
+pub impl(self) const trait BoundedCastFromInt<T>: Sized {
+    /// Converts `value` to this type, wrapping around at the boundary of the type.
+    #[unstable(feature = "integer_casts", issue = "157388")]
+    fn wrapping_cast_from(value: T) -> Self;
+
+    /// Converts `value` to this type, saturating at the numeric bounds instead of overflowing.
+    #[unstable(feature = "integer_casts", issue = "157388")]
+    fn saturating_cast_from(value: T) -> Self;
+}
+
+/// Fallible conversion between integers.
+#[unstable(feature = "integer_casts", issue = "157388")]
+#[rustc_const_unstable(feature = "integer_casts", issue = "157388")]
+pub impl(self) const trait CheckedCastFromInt<T>: Sized {
+    /// Converts `value` to this type, returning `None` if overflow would have occurred.
+    #[unstable(feature = "integer_casts", issue = "157388")]
+    fn checked_cast_from(value: T) -> Option<Self>;
+
+    /// Converts `value` to this type, assuming overflow cannot occur.
+    ///
+    /// # Safety
+    ///
+    /// This results in undefined behavior when `value` will overflow when
+    /// converted to this type.
+    #[unstable(feature = "integer_casts", issue = "157388")]
+    unsafe fn unchecked_cast_from(value: T) -> Self;
+
+    /// Converts `value` to this type, panicking on overflow.
+    ///
+    /// # Panics
+    ///
+    /// This function will always panic on overflow, regardless of whether overflow checks are enabled.
+    #[unstable(feature = "integer_casts", issue = "157388")]
+    fn strict_cast_from(value: T) -> Self;
+}
+
+macro_rules! impl_int_cast {
+    ($Src:ty as [$($Dst:ty),*]) => {$(
+        #[unstable(feature = "integer_casts", issue = "157388")]
+        #[rustc_const_unstable(feature = "integer_casts", issue = "157388")]
+        const impl CheckedCastFromInt<$Src> for $Dst {
+            #[inline]
+            fn checked_cast_from(value: $Src) -> Option<Self> {
+                value.try_into().ok()
+            }
+
+            #[inline(always)]
+            unsafe fn unchecked_cast_from(value: $Src) -> Self {
+                // SAFETY: the safety contract must be upheld by the caller.
+                unsafe { value.try_into().unwrap_unchecked() }
+            }
+
+            #[inline]
+            #[track_caller]
+            fn strict_cast_from(value: $Src) -> Self {
+                match value.try_into() {
+                    Ok(x) => x,
+                    Err(_) => core::num::imp::overflow_panic::cast_integer()
+                }
+            }
+        }
+
+        #[unstable(feature = "integer_casts", issue = "157388")]
+        #[rustc_const_unstable(feature = "integer_casts", issue = "157388")]
+        const impl BoundedCastFromInt<$Src> for $Dst {
+            #[inline(always)]
+            fn wrapping_cast_from(value: $Src) -> Self {
+                value as Self
+            }
+
+            #[inline]
+            #[allow(unused_comparisons)]
+            #[allow(irrefutable_let_patterns)]
+            fn saturating_cast_from(value: $Src) -> Self {
+                if let Ok(x) = value.try_into() {
+                    return x;
+                }
+
+                if value < 0 { <$Dst>::MIN } else { <$Dst>::MAX }
+            }
+        }
+    )*};
+}
+
+macro_rules! impl_all_int_casts {
+    ([$($Src:ty),*]) => {$(
+        impl_int_cast!($Src as [u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize]);
+    )*};
+}
+
+impl_all_int_casts!([u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize]);

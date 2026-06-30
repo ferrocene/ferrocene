@@ -13,7 +13,7 @@ pub(crate) struct FlipLink {
 
 impl Step for FlipLink {
     type Output = GeneratedTarball;
-    const IS_HOST: bool = true;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.alias("flip-link")

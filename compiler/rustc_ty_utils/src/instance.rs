@@ -7,13 +7,14 @@ use rustc_middle::query::Providers;
 use rustc_middle::traits::{BuiltinImplSource, CodegenObligationError};
 use rustc_middle::ty::{
     self, ClosureKind, GenericArgsRef, Instance, PseudoCanonicalInput, TyCtxt, TypeVisitableExt,
+    Unnormalized,
 };
 use rustc_span::sym;
 use rustc_trait_selection::traits;
 use tracing::debug;
 use traits::translate_args;
 
-use crate::errors::UnexpectedFnPtrAssociatedItem;
+use crate::diagnostics::UnexpectedFnPtrAssociatedItem;
 
 fn resolve_instance_raw<'tcx>(
     tcx: TyCtxt<'tcx>,
@@ -28,13 +29,13 @@ fn resolve_instance_raw<'tcx>(
             def_id,
             typing_env,
             trait_def_id,
-            tcx.normalize_erasing_regions(typing_env, args),
+            tcx.normalize_erasing_regions(typing_env, Unnormalized::new_wip(args)),
         )
     } else {
         let def = if tcx.intrinsic(def_id).is_some() {
             debug!(" => intrinsic");
             ty::InstanceKind::Intrinsic(def_id)
-        } else if tcx.is_lang_item(def_id, LangItem::DropInPlace) {
+        } else if tcx.is_lang_item(def_id, LangItem::DropGlue) {
             let ty = args.type_at(0);
 
             if ty.needs_drop(tcx, typing_env) {
@@ -154,12 +155,14 @@ fn resolve_associated_item<'tcx>(
                 // and the obligation is monomorphic, otherwise passes such as
                 // transmute checking and polymorphic MIR optimizations could
                 // get a result which isn't correct for all monomorphizations.
-                match typing_env.typing_mode() {
+                match typing_env.typing_mode().assert_not_erased() {
                     ty::TypingMode::Coherence
-                    | ty::TypingMode::Analysis { .. }
-                    | ty::TypingMode::Borrowck { .. }
-                    | ty::TypingMode::PostBorrowckAnalysis { .. } => false,
-                    ty::TypingMode::PostAnalysis => !trait_ref.still_further_specializable(),
+                    | ty::TypingMode::Typeck { .. }
+                    | ty::TypingMode::PostTypeckUntilBorrowck { .. }
+                    | ty::TypingMode::PostBorrowck { .. } => false,
+                    ty::TypingMode::PostAnalysis | ty::TypingMode::Codegen => {
+                        !trait_ref.still_further_specializable()
+                    }
                 }
             };
             if !eligible {
@@ -194,7 +197,7 @@ fn resolve_associated_item<'tcx>(
                 let sized_def_id = tcx.lang_items().sized_trait();
                 // If we find a `Self: Sized` bound on the item, then we know
                 // that `dyn Trait` can certainly never apply here.
-                if !predicates.into_iter().filter_map(ty::Clause::as_trait_clause).any(|clause| {
+                if !predicates.into_iter().filter_map(|p| p.as_trait_clause()).any(|clause| {
                     Some(clause.def_id()) == sized_def_id
                         && clause.skip_binder().self_ty() == self_ty
                 }) {

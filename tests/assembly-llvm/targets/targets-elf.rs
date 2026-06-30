@@ -403,6 +403,9 @@
 //@ revisions: powerpc64_unknown_linux_gnu
 //@ [powerpc64_unknown_linux_gnu] compile-flags: --target powerpc64-unknown-linux-gnu
 //@ [powerpc64_unknown_linux_gnu] needs-llvm-components: powerpc
+//@ revisions: powerpc64_unknown_linux_gnuelfv2
+//@ [powerpc64_unknown_linux_gnuelfv2] compile-flags: --target powerpc64-unknown-linux-gnuelfv2
+//@ [powerpc64_unknown_linux_gnuelfv2] needs-llvm-components: powerpc
 //@ revisions: powerpc64_unknown_linux_musl
 //@ [powerpc64_unknown_linux_musl] compile-flags: --target powerpc64-unknown-linux-musl
 //@ [powerpc64_unknown_linux_musl] needs-llvm-components: powerpc
@@ -835,6 +838,9 @@
 //@ revisions: thumbv7em_ferrocene_facade_eabi
 //@ [thumbv7em_ferrocene_facade_eabi] compile-flags: --target thumbv7em-ferrocene.facade-eabi
 //@ [thumbv7em_ferrocene_facade_eabi] needs-llvm-components: arm
+//@ revisions: armv7r_ferrocene_facade_eabihf
+//@ [armv7r_ferrocene_facade_eabihf] compile-flags: --target armv7r-ferrocene.facade-eabihf
+//@ [armv7r_ferrocene_facade_eabihf] needs-llvm-components: arm
 //@ revisions: thumbv7em_ferrocene_facade_eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] compile-flags: --target thumbv7em-ferrocene.facade-eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] needs-llvm-components: arm

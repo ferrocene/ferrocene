@@ -120,6 +120,14 @@ add --set target.x86_64-pc-nto-qnx710.cc=qcc
 add --set target.x86_64-pc-nto-qnx710.cxx=q++
 add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 add --set target.x86_64-pc-nto-qnx710.profiler=false # Build failures were noted if this is enabled.
+add --set target.x86_64-pc-nto-qnx800.cc=qcc
+add --set target.x86_64-pc-nto-qnx800.cxx=q++
+add --set target.x86_64-pc-nto-qnx800.ar=ntox86_64-ar
+add --set target.x86_64-pc-nto-qnx800.profiler=false # Build failures were noted if this is enabled.
+add --set target.aarch64-unknown-nto-qnx800.cc=qcc
+add --set target.aarch64-unknown-nto-qnx800.cxx=q++
+add --set target.aarch64-unknown-nto-qnx800.ar=ntox86_64-ar
+add --set target.aarch64-unknown-nto-qnx800.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
 add --set 'target."aarch64r82-unknown-none".cc=aarch64-linux-gnu-gcc'
@@ -130,6 +138,7 @@ add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64r82-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64v8r-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
 add --set 'target."aarch64-rhivos2-linux-gnu".cc=aarch64-linux-gnu-gcc'
+add --set 'target."armv7r-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 add --set 'target."powerpc64le-unknown-linux-gnu".cc=powerpc64le-linux-gnu-gcc'
 add --set 'target."powerpc64le-unknown-linux-gnu".cxx=powerpc64le-linux-gnu-g++'
 add --set 'target."s390x-unknown-linux-gnu".cc=s390x-linux-gnu-gcc'
@@ -152,6 +161,7 @@ add --set target.x86_64-unknown-linux-musl.sanitizers=false
 add --set 'target."aarch64-unknown-ferrocene.facade".profiler=true'
 add --set 'target."aarch64r82-unknown-ferrocene.facade".profiler=true'
 add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
+add --set 'target."armv7r-ferrocene.facade-eabihf".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
 

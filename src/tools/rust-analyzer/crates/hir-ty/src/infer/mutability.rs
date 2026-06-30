@@ -32,13 +32,14 @@ impl<'db> InferenceContext<'_, 'db> {
                             };
                             if let Some(infer_ok) = Self::try_mutable_overloaded_place_op(
                                 &self.table,
+                                tgt_expr,
                                 source_ty,
                                 None,
                                 PlaceOp::Deref,
                             ) {
                                 self.table.register_predicates(infer_ok.obligations);
                             }
-                            *d = OverloadedDeref(Some(mutability));
+                            *d = OverloadedDeref(mutability);
                         }
                     }
                     Adjust::Borrow(b) => match b {
@@ -86,7 +87,6 @@ impl<'db> InferenceContext<'_, 'db> {
             }
             Expr::Let { pat, expr } => self.infer_mut_expr(*expr, self.pat_bound_mutability(*pat)),
             Expr::Block { id: _, statements, tail, label: _ }
-            | Expr::Async { id: _, statements, tail }
             | Expr::Unsafe { id: _, statements, tail } => {
                 for st in statements.iter() {
                     match st {
@@ -160,7 +160,7 @@ impl<'db> InferenceContext<'_, 'db> {
             | Expr::Range { rhs: Some(expr), lhs: None, range_type: _ }
             | Expr::Await { expr }
             | Expr::Box { expr }
-            | Expr::Loop { body: expr, label: _ }
+            | Expr::Loop { body: expr, label: _, source: _ }
             | Expr::Cast { expr, type_ref: _ } => {
                 self.infer_mut_expr(*expr, Mutability::Not);
             }
@@ -197,7 +197,8 @@ impl<'db> InferenceContext<'_, 'db> {
             | Expr::Literal(_)
             | Expr::Path(_)
             | Expr::Continue { .. }
-            | Expr::Underscore => (),
+            | Expr::Underscore
+            | Expr::IncludeBytes => (),
         }
     }
 

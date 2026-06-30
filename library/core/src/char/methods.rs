@@ -5,7 +5,6 @@ use crate::panic::const_panic;
 use crate::slice;
 use crate::str::from_utf8_unchecked_mut;
 use crate::ub_checks::assert_unsafe_precondition;
-use crate::unicode::printable::is_printable;
 use crate::unicode::{self, conversions};
 
 impl char {
@@ -93,13 +92,18 @@ impl char {
     /// The version of [Unicode](https://www.unicode.org/) that the Unicode parts of
     /// `char` and `str` methods are based on.
     ///
-    /// New versions of Unicode are released regularly and subsequently all methods
-    /// in the standard library depending on Unicode are updated. Therefore the
-    /// behavior of some `char` and `str` methods and the value of this constant
-    /// changes over time. This is *not* considered to be a breaking change.
+    /// New versions of Unicode are released regularly, and subsequently all methods
+    /// in the standard library depending on Unicode are updated. Therefore, the
+    /// behavior of some `char` and `str` methods, and the value of this constant,
+    /// change over time (within the boundaries of Unicode's [stability policies]).
+    /// This is *not* considered to be a breaking change.
+    ///
+    /// [stability policies]: https://www.unicode.org/policies/stability_policy.html
     ///
     /// The version numbering scheme is explained in
-    /// [Unicode 11.0 or later, Section 3.1 Versions of the Unicode Standard](https://www.unicode.org/versions/Unicode11.0.0/ch03.pdf#page=4).
+    /// [Section 3.1 (Version Numbering)] of the Unicode Standard.
+    ///
+    /// [Section 3.1 (Version Numbering)]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G49512
     #[stable(feature = "assoc_char_consts", since = "1.52.0")]
     pub const UNICODE_VERSION: (u8, u8, u8) = crate::unicode::UNICODE_VERSION;
 
@@ -464,6 +468,7 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_unicode(self) -> EscapeUnicode {
         EscapeUnicode::new(self)
     }
@@ -477,18 +482,30 @@ impl char {
     #[ferrocene::prevalidated]
     pub(crate) fn escape_debug_ext(self, args: EscapeDebugExtArgs) -> EscapeDebug {
         match self {
-            '\0' => EscapeDebug::backslash(ascii::Char::Digit0),
-            '\t' => EscapeDebug::backslash(ascii::Char::SmallT),
-            '\r' => EscapeDebug::backslash(ascii::Char::SmallR),
-            '\n' => EscapeDebug::backslash(ascii::Char::SmallN),
-            '\\' => EscapeDebug::backslash(ascii::Char::ReverseSolidus),
+            // Special escapes
             '\"' if args.escape_double_quote => EscapeDebug::backslash(ascii::Char::QuotationMark),
             '\'' if args.escape_single_quote => EscapeDebug::backslash(ascii::Char::Apostrophe),
-            _ if args.escape_grapheme_extended && self.is_grapheme_extended() => {
+            '\\' => EscapeDebug::backslash(ascii::Char::ReverseSolidus),
+            '\n' => EscapeDebug::backslash(ascii::Char::SmallN),
+            '\t' => EscapeDebug::backslash(ascii::Char::SmallT),
+            '\r' => EscapeDebug::backslash(ascii::Char::SmallR),
+            '\0' => EscapeDebug::backslash(ascii::Char::Digit0),
+
+            // ASCII fast path
+            '\x20'..='\x7E' => EscapeDebug::printable(self),
+
+            _ if self.is_control()
+                || self.is_private_use()
+                || self.is_whitespace()
+                || args.escape_grapheme_extender && self.is_grapheme_extender()
+                || self.is_default_ignorable()
+                || self.is_format_control()
+                || self.is_unassigned() =>
+            {
                 EscapeDebug::unicode(self)
             }
-            _ if is_printable(self) => EscapeDebug::printable(self),
-            _ => EscapeDebug::unicode(self),
+
+            _ => EscapeDebug::printable(self),
         }
     }
 
@@ -587,6 +604,7 @@ impl char {
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn escape_default(self) -> EscapeDefault {
         match self {
             '\t' => EscapeDefault::backslash(ascii::Char::SmallT),
@@ -760,11 +778,11 @@ impl char {
 
     /// Returns `true` if this `char` has the `Alphabetic` property.
     ///
-    /// `Alphabetic` is described in Chapter 4 (Character Properties) of the [Unicode Standard] and
-    /// specified in the [Unicode Character Database][ucd] [`DerivedCoreProperties.txt`].
+    /// `Alphabetic` is [described] in Chapter 4 (Character Properties) of the Unicode Standard, and
+    /// [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G32524
+    /// [specified]: https://www.unicode.org/reports/tr44/#Alphabetic
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     ///
     /// # Examples
@@ -793,11 +811,11 @@ impl char {
     /// Returns `true` if this `char` has the `Cased` property.
     /// A character is cased if and only if it is uppercase, lowercase, or titlecase.
     ///
-    /// `Cased` is described in Chapter 4 (Character Properties) of the [Unicode Standard] and
-    /// specified in the [Unicode Character Database][ucd] [`DerivedCoreProperties.txt`].
+    /// `Cased` is [described] in Chapter 3 (Character Properties) of the Unicode Standard and
+    /// [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G44595
+    /// [specified]: https://www.unicode.org/reports/tr44/#Cased
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     ///
     /// # Examples
@@ -817,7 +835,7 @@ impl char {
         match self {
             'a'..='z' | 'A'..='Z' => true,
             '\0'..='\u{A9}' => false,
-            _ => unicode::Cased(self),
+            _ => unicode::Lowercase(self) || unicode::Uppercase(self) || unicode::Lt(self),
         }
     }
 
@@ -847,20 +865,20 @@ impl char {
             'a'..='z' => Some(CharCase::Lower),
             'A'..='Z' => Some(CharCase::Upper),
             '\0'..='\u{A9}' => None,
-            _ if !unicode::Cased(self) => None,
             _ if unicode::Lowercase(self) => Some(CharCase::Lower),
             _ if unicode::Uppercase(self) => Some(CharCase::Upper),
-            _ => Some(CharCase::Title),
+            _ if unicode::Lt(self) => Some(CharCase::Title),
+            _ => None,
         }
     }
 
     /// Returns `true` if this `char` has the `Lowercase` property.
     ///
-    /// `Lowercase` is described in Chapter 4 (Character Properties) of the [Unicode Standard] and
-    /// specified in the [Unicode Character Database][ucd] [`DerivedCoreProperties.txt`].
+    /// `Lowercase` is [described] in Chapter 4 (Character Properties) of the Unicode Standard, and
+    /// [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G136255
+    /// [specified]: https://www.unicode.org/reports/tr44/#Lowercase
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     ///
     /// # Examples
@@ -896,15 +914,15 @@ impl char {
         }
     }
 
-    /// Returns `true` if this `char` has the general category for titlecase letters.
+    /// Returns `true` if this `char` is in the general category for titlecase letters.
     /// Conceptually, these characters consist of an uppercase portion followed by a lowercase portion.
     ///
-    /// Titlecase letters (code points with the general category of `Lt`) are described in Chapter 4
-    /// (Character Properties) of the [Unicode Standard] and specified in the [Unicode Character
-    /// Database][ucd] [`UnicodeData.txt`].
+    /// Titlecase letters (code points with the general category of `Lt`) are [described] in Chapter 4
+    /// (Character Properties) of the Unicode Standard, and [specified] in the Unicode Character
+    /// Database [`UnicodeData.txt`].
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G124722
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
     ///
     /// # Examples
@@ -926,17 +944,17 @@ impl char {
     pub fn is_titlecase(self) -> bool {
         match self {
             '\0'..='\u{01C4}' => false,
-            _ => self.is_cased() && !self.is_lowercase() && !self.is_uppercase(),
+            _ => unicode::Lt(self),
         }
     }
 
     /// Returns `true` if this `char` has the `Uppercase` property.
     ///
-    /// `Uppercase` is described in Chapter 4 (Character Properties) of the [Unicode Standard] and
-    /// specified in the [Unicode Character Database][ucd] [`DerivedCoreProperties.txt`].
+    /// `Uppercase` is [described] in Chapter 4 (Character Properties) of the Unicode Standard, and
+    /// [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G136255
+    /// [specified]: https://www.unicode.org/reports/tr44/#Uppercase
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     ///
     /// # Examples
@@ -972,155 +990,23 @@ impl char {
         }
     }
 
-    /// Returns `true` if this `char` has the `White_Space` property.
-    ///
-    /// `White_Space` is specified in the [Unicode Character Database][ucd] [`PropList.txt`].
-    ///
-    /// [ucd]: https://www.unicode.org/reports/tr44/
-    /// [`PropList.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/PropList.txt
-    ///
-    /// # Examples
-    ///
-    /// Basic usage:
-    ///
-    /// ```
-    /// assert!(' '.is_whitespace());
-    ///
-    /// // line break
-    /// assert!('\n'.is_whitespace());
-    ///
-    /// // a non-breaking space
-    /// assert!('\u{A0}'.is_whitespace());
-    ///
-    /// assert!(!'越'.is_whitespace());
-    /// ```
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_const_stable(feature = "const_char_classify", since = "1.87.0")]
-    #[inline]
-    pub const fn is_whitespace(self) -> bool {
-        match self {
-            ' ' | '\x09'..='\x0d' => true,
-            '\0'..='\u{84}' => false,
-            _ => unicode::White_Space(self),
-        }
-    }
-
-    /// Returns `true` if this `char` satisfies either [`is_alphabetic()`] or [`is_numeric()`].
-    ///
-    /// [`is_alphabetic()`]: #method.is_alphabetic
-    /// [`is_numeric()`]: #method.is_numeric
-    ///
-    /// # Examples
-    ///
-    /// Basic usage:
-    ///
-    /// ```
-    /// assert!('٣'.is_alphanumeric());
-    /// assert!('7'.is_alphanumeric());
-    /// assert!('৬'.is_alphanumeric());
-    /// assert!('¾'.is_alphanumeric());
-    /// assert!('①'.is_alphanumeric());
-    /// assert!('K'.is_alphanumeric());
-    /// assert!('و'.is_alphanumeric());
-    /// assert!('藏'.is_alphanumeric());
-    /// ```
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
-    pub fn is_alphanumeric(self) -> bool {
-        match self {
-            'a'..='z' | 'A'..='Z' | '0'..='9' => true,
-            '\0'..='\u{A9}' => false,
-            _ => unicode::Alphabetic(self) || unicode::N(self),
-        }
-    }
-
-    /// Returns `true` if this `char` has the general category for control codes.
-    ///
-    /// Control codes (code points with the general category of `Cc`) are described in Chapter 4
-    /// (Character Properties) of the [Unicode Standard] and specified in the [Unicode Character
-    /// Database][ucd] [`UnicodeData.txt`].
-    ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
-    /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
-    ///
-    /// # Examples
-    ///
-    /// Basic usage:
-    ///
-    /// ```
-    /// // U+009C, STRING TERMINATOR
-    /// assert!(''.is_control());
-    /// assert!(!'q'.is_control());
-    /// ```
-    #[must_use]
-    #[stable(feature = "rust1", since = "1.0.0")]
-    #[inline]
-    pub fn is_control(self) -> bool {
-        // According to
-        // https://www.unicode.org/policies/stability_policy.html#Property_Value,
-        // the set of codepoints in `Cc` will never change.
-        // So we can just hard-code the patterns to match against instead of using a table.
-        matches!(self, '\0'..='\x1f' | '\x7f'..='\u{9f}')
-    }
-
-    /// Returns `true` if this `char` has the `Grapheme_Extend` property.
-    ///
-    /// `Grapheme_Extend` is described in [Unicode Standard Annex #29 (Unicode Text
-    /// Segmentation)][uax29] and specified in the [Unicode Character Database][ucd]
-    /// [`DerivedCoreProperties.txt`].
-    ///
-    /// [uax29]: https://www.unicode.org/reports/tr29/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
-    /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
-    #[must_use]
-    #[inline]
-    #[ferrocene::prevalidated]
-    pub(crate) fn is_grapheme_extended(self) -> bool {
-        self > '\u{02FF}' && unicode::Grapheme_Extend(self)
-    }
-
-    /// Returns `true` if this `char` has the `Case_Ignorable` property. This narrow-use property
-    /// is used to implement context-dependent casing for the Greek letter sigma (uppercase Σ),
-    /// which has two lowercase forms.
-    ///
-    /// `Case_Ignorable` is [described][D136] in Chapter 3 (Conformance) of the Unicode Core Specification,
-    /// and specified in the [Unicode Character Database][ucd] [`DerivedCoreProperties.txt`];
-    /// see those resources for more information.
-    ///
-    /// [D136]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G63116
-    /// [ucd]: https://www.unicode.org/reports/tr44/
-    /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
-    #[must_use]
-    #[inline]
-    #[unstable(feature = "case_ignorable", issue = "154848")]
-    pub fn is_case_ignorable(self) -> bool {
-        if self.is_ascii() {
-            matches!(self, '\'' | '.' | ':' | '^' | '`')
-        } else {
-            unicode::Case_Ignorable(self)
-        }
-    }
-
     /// Returns `true` if this `char` has one of the general categories for numbers.
     ///
     /// The general categories for numbers (`Nd` for decimal digits, `Nl` for letter-like numeric
-    /// characters, and `No` for other numeric characters) are specified in the [Unicode Character
-    /// Database][ucd] [`UnicodeData.txt`].
+    /// characters, and `No` for other numeric characters) are [specified] in the Unicode Character
+    /// Database [`UnicodeData.txt`].
     ///
     /// This method doesn't cover everything that could be considered a number, e.g. ideographic numbers like '三'.
-    /// If you want everything including characters with overlapping purposes then you might want to use
-    /// a unicode or language-processing library that exposes the appropriate character properties instead
-    /// of looking at the unicode categories.
+    /// If you want everything including characters with overlapping purposes, then you might want to use
+    /// a Unicode or language-processing library that exposes the appropriate character properties
+    /// (e.g. [`Numeric_Type`]) instead of looking at the Unicode categories.
     ///
     /// If you want to parse ASCII decimal digits (0-9) or ASCII base-N, use
     /// `is_ascii_digit` or `is_digit` instead.
     ///
-    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
-    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    /// [`Numeric_Type`]: https://www.unicode.org/reports/tr44/#Numeric_Type
     ///
     /// # Examples
     ///
@@ -1148,6 +1034,283 @@ impl char {
         }
     }
 
+    /// Returns `true` if this `char` satisfies either [`is_alphabetic()`] or [`is_numeric()`].
+    ///
+    /// [`is_alphabetic()`]: Self::is_alphabetic
+    /// [`is_numeric()`]: Self::is_numeric
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// assert!('٣'.is_alphanumeric());
+    /// assert!('7'.is_alphanumeric());
+    /// assert!('৬'.is_alphanumeric());
+    /// assert!('¾'.is_alphanumeric());
+    /// assert!('①'.is_alphanumeric());
+    /// assert!('K'.is_alphanumeric());
+    /// assert!('و'.is_alphanumeric());
+    /// assert!('藏'.is_alphanumeric());
+    /// ```
+    #[must_use]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[inline]
+    pub fn is_alphanumeric(self) -> bool {
+        match self {
+            'a'..='z' | 'A'..='Z' | '0'..='9' => true,
+            '\0'..='\u{A9}' => false,
+            _ => unicode::Alphabetic(self) || unicode::N(self),
+        }
+    }
+
+    /// Returns `true` if this `char` has the `White_Space` property.
+    ///
+    /// `White_Space` is [specified] in the Unicode Character Database [`PropList.txt`].
+    ///
+    /// [specified]: https://www.unicode.org/reports/tr44/#White_Space
+    /// [`PropList.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/PropList.txt
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// assert!(' '.is_whitespace());
+    ///
+    /// // line break
+    /// assert!('\n'.is_whitespace());
+    ///
+    /// // a non-breaking space
+    /// assert!('\u{A0}'.is_whitespace());
+    ///
+    /// assert!(!'越'.is_whitespace());
+    /// ```
+    #[must_use]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_char_classify", since = "1.87.0")]
+    #[inline]
+    #[ferrocene::prevalidated]
+    pub const fn is_whitespace(self) -> bool {
+        match self {
+            ' ' | '\x09'..='\x0d' => true,
+            '\0'..='\u{84}' => false,
+            _ => unicode::White_Space(self),
+        }
+    }
+
+    /// Returns `true` if this `char` has the general category for control codes.
+    ///
+    /// Control codes (code points with the general category of `Cc`) are [described] in Chapter 23
+    /// (Special Areas and Format Characters) of the Unicode Standard, and [specified] in the Unicode Character
+    /// Database [`UnicodeData.txt`]. The full set of Unicode control codes is
+    /// `'\0'..='\x1f' | '\x7f'..='\u{9f}'`, and will never change.
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-23/#G20365
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
+    /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// assert!('\t'.is_control());
+    /// assert!('\n'.is_control());
+    /// assert!('\u{9C}'.is_control()); // STRING TERMINATOR
+    /// assert!(!'q'.is_control());
+    /// ```
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_stable(feature = "const_is_control", since = "1.97.0")]
+    #[inline]
+    pub const fn is_control(self) -> bool {
+        // According to
+        // https://www.unicode.org/policies/stability_policy.html#Property_Value,
+        // the set of codepoints in `Cc` will never change.
+        // So we can just hard-code the patterns to match against instead of using a table.
+        matches!(self, '\0'..='\x1f' | '\x7f'..='\u{9f}')
+    }
+
+    /// Returns `true` if this `char` has the general category for [private-use characters].
+    /// These characters do not have an interpretation specified by Unicode; individual programs
+    /// and users are free to assign them whatever meaning they like.
+    ///
+    /// [private-use characters]: https://www.unicode.org/faq/private_use#private_use
+    ///
+    /// Private-use characters (code points with the general category of `Co`) are [described] in Chapter 23
+    /// (Special Areas and Format Characters) of the Unicode Standard, and [specified] in the
+    /// Unicode Character Database [`UnicodeData.txt`]. The full set of private-use characters is
+    /// `'\u{E000}'..='\u{F8FF}' | '\u{F0000}'..='\u{FFFFD}' | '\u{100000}'..='\u{10FFFD}'`,
+    /// and will never change.
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-23/#G19184
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
+    /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    ///
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[inline]
+    const fn is_private_use(self) -> bool {
+        // According to
+        // https://www.unicode.org/policies/stability_policy.html#Property_Value,
+        // the set of codepoints in `Co` will never change.
+        // So we can just hard-code the patterns to match against instead of using a table.
+        matches!(self, '\u{E000}'..='\u{F8FF}' | '\u{F0000}'..='\u{FFFFD}' | '\u{100000}'..='\u{10FFFD}')
+    }
+
+    /// Returns `true` if this `char` has the general category for format control characters.
+    ///
+    /// Format controls (code points with the general category of `Cf`) are [described] in Chapter 4
+    /// (Character Properties) of the Unicode Standard, and [specified] in the Unicode Character
+    /// Database [`UnicodeData.txt`].
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G134153
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
+    /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```ignore(private)
+    /// assert!('\u{AD}'.is_format_control()); // SOFT HYPHEN
+    /// assert!('\u{200B}'.is_format_control()); // ZERO WIDTH SPACE
+    /// assert!('\u{E0041}'.is_format_control()); // TAG LATIN CAPITAL LETTER A
+    /// assert!('۝'.is_format_control()); // ARABIC END OF AYAH
+    /// assert!('𓐲'.is_format_control()); // EGYPTIAN HIEROGLYPH INSERT AT TOP START
+    /// assert!(!'q'.is_format_control());
+    /// ```
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[inline]
+    fn is_format_control(self) -> bool {
+        self > '\u{AC}' && unicode::Cf(self)
+    }
+
+    /// Returns `true` if this `char` has not yet been assigned a meaning by Unicode, as of
+    /// [`UNICODE_VERSION`].
+    ///
+    /// [`UNICODE_VERSION`]: Self::UNICODE_VERSION
+    ///
+    /// These characters may have a meaning assigned in the future,
+    /// except for the 66 [noncharacters] which will never be assigned a meaning.
+    ///
+    /// [noncharacters]: https://www.unicode.org/faq/private_use#noncharacters
+    ///
+    /// Many of Unicode's [stability policies] apply only to assigned characters.
+    ///
+    /// [stability policies]: https://www.unicode.org/policies/stability_policy.html
+    ///
+    /// Unassigned characters (code points with the general category of `Cn`) are [described] in Chapter 4
+    /// (Character Properties) of the Unicode Standard, and [specified] in the Unicode Character Database
+    /// by their exclusion from [`UnicodeData.txt`].
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-4/#G134153
+    /// [specified]: https://www.unicode.org/reports/tr44/#GC_Values_Table
+    /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```ignore(private)
+    /// assert!('\u{FFFE}'.is_unassigned()); // noncharacter, will never be assigned
+    ///
+    /// //assert!('\u{7AAAA}'.is_unassigned()); // not currently assigned, but may be in the future,
+    ///                                         // so we shouldn't rely on the current status
+    ///
+    /// assert!(!'γ'.is_unassigned()); // once a character is assigned, it stays assigned forever
+    /// ```
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[inline]
+    fn is_unassigned(self) -> bool {
+        match self {
+            '\0'..='\u{377}' => false,
+            '\u{378}'..='\u{3FFFD}' => unicode::Cn_planes_0_3(self),
+            // Assigned character ranges in planes 4 and above.
+            // `src/tools/unicode-table-generator/src/main.rs` asserts that this is correct
+            '\u{E0001}'
+            | '\u{E0020}'..='\u{E007F}'
+            | '\u{E0100}'..='\u{E01EF}'
+            | '\u{F0000}'..='\u{FFFFD}'
+            | '\u{100000}'..='\u{10FFFD}' => false,
+            _ => true,
+        }
+    }
+
+    /// Returns `true` if this `char` has the `Default_Ignorable_Code_Point` property.
+    /// These characters [should be displayed as invisible in fallback rendering](https://www.unicode.org/faq/unsup_char#3).
+    ///
+    /// `Default_Ignorable_Code_Point` is [described] in Chapter 5 (Implementation Guidelines) of the Unicode Standard,
+    /// and [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-5/#G40120
+    /// [specified]: https://www.unicode.org/reports/tr44/#Default_Ignorable_Code_Point
+    /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```ignore(private)
+    /// assert!('\u{AD}'.is_default_ignorable()); // SOFT HYPHEN
+    /// assert!('\u{115F}'.is_default_ignorable()); // HANGUL CHOSEONG FILLER
+    /// assert!('\u{200B}'.is_default_ignorable()); // ZERO WIDTH SPACE
+    /// assert!('\u{E0041}'.is_default_ignorable()); // TAG LATIN CAPITAL LETTER A
+    /// assert!(!'۝'.is_default_ignorable()); // ARABIC END OF AYAH
+    /// assert!(!'𓐲'.is_default_ignorable()); // EGYPTIAN HIEROGLYPH INSERT AT TOP START
+    /// assert!(!' '.is_default_ignorable());
+    /// assert!(!'\n'.is_default_ignorable());
+    /// assert!(!'\0'.is_default_ignorable());
+    /// assert!(!'q'.is_default_ignorable());
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[inline]
+    fn is_default_ignorable(self) -> bool {
+        self > '\u{AC}' && unicode::Default_Ignorable_Code_Point(self)
+    }
+
+    /// Returns `true` if this `char` has the `Grapheme_Extend` property.
+    ///
+    /// `Grapheme_Extend` is [described] in Chapter 3 (Conformance) of the Unicode Standard,
+    /// and [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G41165
+    /// [specified]: https://www.unicode.org/reports/tr44/#Grapheme_Extend
+    /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
+    #[ferrocene::prevalidated]
+    #[must_use]
+    #[inline]
+    fn is_grapheme_extender(self) -> bool {
+        self > '\u{02FF}' && unicode::Grapheme_Extend(self)
+    }
+
+    /// Returns `true` if this `char` has the `Case_Ignorable` property. This narrow-use property
+    /// is used to implement context-dependent casing for the Greek letter sigma (uppercase 'Σ'),
+    /// which has two lowercase forms.
+    ///
+    /// `Case_Ignorable` is [described] in Chapter 3 (Conformance) of the Unicode Core Specification,
+    /// and [specified] in the Unicode Character Database [`DerivedCoreProperties.txt`].
+    /// See those resources, as well as [`to_lowercase()`]'s documentation, for more information.
+    ///
+    /// [described]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G63116
+    /// [specified]: https://www.unicode.org/reports/tr44/#Case_Ignorable
+    /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
+    /// [`to_lowercase()`]: Self::to_lowercase()
+    #[must_use]
+    #[inline]
+    #[unstable(feature = "case_ignorable", issue = "154848")]
+    pub fn is_case_ignorable(self) -> bool {
+        if self.is_ascii() {
+            matches!(self, '\'' | '.' | ':' | '^' | '`')
+        } else {
+            unicode::Case_Ignorable(self)
+        }
+    }
+
     /// Returns an iterator that yields the lowercase mapping of this `char` as one or more
     /// `char`s.
     ///
@@ -1159,13 +1322,12 @@ impl char {
     /// [ucd]: https://www.unicode.org/reports/tr44/
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
     ///
-    /// If this `char` requires special considerations (e.g. multiple `char`s) the iterator yields
-    /// the `char`(s) given by [`SpecialCasing.txt`].
-    ///
-    /// [`SpecialCasing.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt
+    /// If this `char` expands to multiple `char`s, the iterator yields the `char`s given by
+    /// [`SpecialCasing.txt`]. The maximum number of `char`s in a case mapping is 3.
     ///
     /// This operation performs an unconditional mapping without tailoring. That is, the conversion
-    /// is independent of context and language.
+    /// is independent of context and language. See [below](#notes-on-context-and-locale)
+    /// for more information.
     ///
     /// In the [Unicode Standard], Chapter 4 (Character Properties) discusses case mapping in
     /// general and Chapter 3 (Conformance) discusses the default algorithm for case conversion.
@@ -1207,6 +1369,61 @@ impl char {
     /// // convert into themselves.
     /// assert_eq!('山'.to_lowercase().to_string(), "山");
     /// ```
+    /// # Notes on context and locale
+    ///
+    /// As stated earlier, this method does not take into account language or context.
+    /// Below is a non-exhaustive list of situations where this can be relevant.
+    /// If you need to handle locale-depedendent casing in your code, consider using
+    /// an external crate, like [`icu_casemap`](https://crates.io/crates/icu_casemap)
+    /// which is developed by Unicode.
+    ///
+    /// ## Greek sigma
+    ///
+    /// In Greek, the letter simga (uppercase 'Σ') has two lowercase forms:
+    /// 'σ' which is used in most situations, and 'ς' which appears only
+    /// at the end of a word. [`char::to_lowercase()`] always uses the first form:
+    ///
+    /// ```
+    /// assert_eq!('Σ'.to_lowercase().to_string(), "σ");
+    /// ```
+    ///
+    /// `str::to_lowercase()` (only available with the `alloc` crate)
+    /// *does* properly handle this contextual mapping,
+    /// so prefer using that method if you can. Alternatively, you can use
+    /// [`is_cased()`] and [`is_case_ignorable()`] to implement it yourself.
+    /// See `Final_Sigma` in [Table 3.17] of the Unicode Standard,
+    /// along with [`SpecialCasing.txt`], for more details.
+    ///
+    /// [`is_cased()`]: Self::is_cased()
+    /// [`is_case_ignorable()`]: Self::is_case_ignorable()
+    /// [Table 3.17]: https://www.unicode.org/versions/latest/core-spec/chapter-3/#G54277
+    ///
+    /// ## Turkish and Azeri I/ı/İ/i
+    ///
+    /// In Turkish and Azeri, the equivalent of 'i' in Latin has five forms instead of two:
+    ///
+    /// * 'Dotless': I / ı, sometimes written ï
+    /// * 'Dotted': İ / i
+    ///
+    /// Note that the uppercase undotted 'I' is the same codepoint as the Latin. Therefore:
+    ///
+    /// ```
+    /// let lower_i = 'I'.to_lowercase().to_string();
+    /// ```
+    ///
+    /// `'I'`'s correct lowercase relies on the language of the text: if we're
+    /// in `en-US`, it should be `"i"`, but if we're in `tr-TR` or `az-AZ`, it should
+    /// be `"ı"`. `to_lowercase()` does not take this into account, and so:
+    ///
+    /// ```
+    /// let lower_i = 'I'.to_lowercase().to_string();
+    ///
+    /// assert_eq!(lower_i, "i");
+    /// ```
+    ///
+    /// holds across languages.
+    ///
+    /// [`SpecialCasing.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt
     #[must_use = "this returns the lowercased character as a new iterator, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -1219,8 +1436,10 @@ impl char {
     /// `char`s.
     ///
     /// This is usually, but not always, equivalent to the uppercase mapping
-    /// returned by [`Self::to_uppercase`]. Prefer this method when seeking to capitalize
-    /// Only The First Letter of a word, but use [`Self::to_uppercase`] for ALL CAPS.
+    /// returned by [`to_uppercase()`]. Prefer this method when seeking to capitalize
+    /// Only The First Letter of a word, but use [`to_uppercase()`] for ALL CAPS.
+    /// See [below](#difference-from-uppercase) for a thorough explanation
+    /// of the difference between the two methods.
     ///
     /// If this `char` does not have a titlecase mapping, the iterator yields the same `char`.
     ///
@@ -1230,13 +1449,14 @@ impl char {
     /// [ucd]: https://www.unicode.org/reports/tr44/
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
     ///
-    /// If this `char` requires special considerations (e.g. multiple `char`s) the iterator yields
-    /// the `char`(s) given by [`SpecialCasing.txt`].
+    /// If this `char` expands to multiple `char`s, the iterator yields the `char`s given by
+    /// [`SpecialCasing.txt`]. The maximum number of `char`s in a case mapping is 3.
     ///
     /// [`SpecialCasing.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt
     ///
     /// This operation performs an unconditional mapping without tailoring. That is, the conversion
-    /// is independent of context and language.
+    /// is independent of context and language. See [below](#note-on-locale)
+    /// for more information.
     ///
     /// In the [Unicode Standard], Chapter 4 (Character Properties) discusses case mapping in
     /// general and Chapter 3 (Conformance) discusses the default algorithm for case conversion.
@@ -1273,8 +1493,9 @@ impl char {
     /// ```
     /// #![feature(titlecase)]
     /// assert_eq!('c'.to_titlecase().to_string(), "C");
+    /// assert_eq!('ა'.to_titlecase().to_string(), "ა");
     /// assert_eq!('ǆ'.to_titlecase().to_string(), "ǅ");
-    /// assert_eq!('ῼ'.to_titlecase().to_string(), "ῼ");
+    /// assert_eq!('ᾨ'.to_titlecase().to_string(), "ᾨ");
     ///
     /// // Sometimes the result is more than one character:
     /// assert_eq!('ß'.to_titlecase().to_string(), "Ss");
@@ -1284,21 +1505,91 @@ impl char {
     /// assert_eq!('山'.to_titlecase().to_string(), "山");
     /// ```
     ///
+    /// # Difference from uppercase
+    ///
+    /// Currently, there are three classes of characters where [`to_uppercase()`]
+    /// and `to_titlecase()` give different results:
+    ///
+    /// ## Georgian script
+    ///
+    /// Each letter in the modern Georgian alphabet can be written in one of two forms:
+    /// the typical lowercase-like "mkhedruli" form, and a variant uppercase-like "mtavruli"
+    /// form. However, unlike uppercase in most cased scripts, mtavruli is not typically used
+    /// to start sentences, denote proper nouns, or for any other purpose
+    /// in running text. It is instead confined to titles and headings, which are written entirely
+    /// in mtavruli. For this reason, [`to_uppercase()`] applied to a Georgian letter
+    /// will return the mtavruli form, but `to_titlecase()` will return the mkhedruli form.
+    ///
+    /// ```
+    /// #![feature(titlecase)]
+    /// let ani = 'ა'; // First letter of the Georgian alphabet, in mkhedruli form
+    ///
+    /// // Titlecasing mkhedruli maps it to itself...
+    /// assert_eq!(ani.to_titlecase().to_string(), ani.to_string());
+    ///
+    /// // but uppercasing it maps it to mtavruli
+    /// assert_eq!(ani.to_uppercase().to_string(), "Ა");
+    /// ```
+    ///
+    /// ## Compatibility digraphs for Latin-alphabet Serbo-Croatian
+    ///
+    /// The standard Latin alphabet for the Serbo-Croatian language
+    /// (Bosnian, Croatian, Montenegrin, and Serbian) contains
+    /// three digraphs: Dž, Lj, and Nj. These are usually represented as
+    /// two characters. However, for compatibility with older character sets,
+    /// Unicode includes single-character versions of these digraphs.
+    /// Each has a uppercase, titlecase, and lowercase version:
+    ///
+    /// - `'Ǆ'`, `'ǅ'`, `'ǆ'`
+    /// - `'Ǉ'`, `'ǈ'`, `'ǉ'`
+    /// - `'Ǌ'`, `'ǋ'`, `'ǌ'`
+    ///
+    /// Unicode additionally encodes a casing triad for the Dz digraph
+    /// without the caron: `'Ǳ'`, `'ǲ'`, `'ǳ'`.
+    ///
+    /// ## Iota-subscritped Greek vowels
+    ///
+    /// In ancient Greek, the long vowels alpha (α), eta (η), and omega (ω)
+    /// were sometimes followed by an iota (ι), forming a diphthong. Over time,
+    /// the diphthong pronunciation was slowly lost, with the iota becoming mute.
+    /// Eventually, the ι disappeared from the spelling as well.
+    /// However, there remains a need to represent ancient texts faithfully.
+    ///
+    /// Modern editions of ancient Greek texts commonly use a reduced-sized
+    /// ι symbol to denote mute iotas, while distinguishing them from ιs
+    /// which continued to affect pronunciation. The exact standard differs
+    /// between different publications. Some render the mute ι below its associated
+    /// vowel (subscript), while others place it to the right of said vowel (adscript).
+    /// The interaction of mute ι symbols with casing also varies.
+    ///
+    /// The Unicode Standard, for its default casing rules, chose to make lowercase
+    /// Greek vowels with iota subscipt (e.g. `'ᾠ'`) titlecase to the uppercase vowel
+    /// with iota subscript (`'ᾨ'`) but uppercase to the uppercase vowel followed by
+    /// full-size uppercase iota (`"ὨΙ"`). This is just one convention among many
+    /// in common use, but it is the one Unicode settled on,
+    /// so it is what this method does also.
+    ///
     /// # Note on locale
+    ///
+    /// As stated above, this method is locale-insensitive.
+    /// If you need locale support, consider using an external crate,
+    /// like [`icu_casemap`](https://crates.io/crates/icu_casemap)
+    /// which is developed by Unicode. A description of one common
+    /// locale-dependent casing issue follows (there are others):
     ///
     /// In Turkish and Azeri, the equivalent of 'i' in Latin has five forms instead of two:
     ///
     /// * 'Dotless': I / ı, sometimes written ï
     /// * 'Dotted': İ / i
     ///
-    /// Note that the lowercase dotted 'i' is the same as the Latin. Therefore:
+    /// Note that the lowercase dotted 'i' is the same codepoint as the Latin. Therefore:
     ///
     /// ```
     /// #![feature(titlecase)]
     /// let upper_i = 'i'.to_titlecase().to_string();
     /// ```
     ///
-    /// The value of `upper_i` here relies on the language of the text: if we're
+    /// `'i'`'s correct titlecase relies on the language of the text: if we're
     /// in `en-US`, it should be `"I"`, but if we're in `tr-TR` or `az-AZ`, it should
     /// be `"İ"`. `to_titlecase()` does not take this into account, and so:
     ///
@@ -1310,6 +1601,8 @@ impl char {
     /// ```
     ///
     /// holds across languages.
+    ///
+    /// [`to_uppercase()`]: Self::to_uppercase()
     #[must_use = "this returns the titlecased character as a new iterator, \
                   without modifying the original"]
     #[unstable(feature = "titlecase", issue = "153892")]
@@ -1321,8 +1614,9 @@ impl char {
     /// Returns an iterator that yields the uppercase mapping of this `char` as one or more
     /// `char`s.
     ///
-    /// Prefer this method when converting a word into ALL CAPS, but consider [`Self::to_titlecase`]
-    /// instead if you seek to capitalize Only The First Letter.
+    /// Prefer this method when converting a word into ALL CAPS, but consider [`to_titlecase()`]
+    /// instead if you seek to capitalize Only The First Letter. See that method's documentation
+    /// for more information on the difference between the two.
     ///
     /// If this `char` does not have an uppercase mapping, the iterator yields the same `char`.
     ///
@@ -1332,13 +1626,14 @@ impl char {
     /// [ucd]: https://www.unicode.org/reports/tr44/
     /// [`UnicodeData.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
     ///
-    /// If this `char` requires special considerations (e.g. multiple `char`s) the iterator yields
-    /// the `char`(s) given by [`SpecialCasing.txt`].
+    /// If this `char` expands to multiple `char`s, the iterator yields the `char`s given by
+    /// [`SpecialCasing.txt`]. The maximum number of `char`s in a case mapping is 3.
     ///
     /// [`SpecialCasing.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt
     ///
     /// This operation performs an unconditional mapping without tailoring. That is, the conversion
-    /// is independent of context and language.
+    /// is independent of context and language. See [below](#note-on-locale)
+    /// for more information.
     ///
     /// In the [Unicode Standard], Chapter 4 (Character Properties) discusses case mapping in
     /// general and Chapter 3 (Conformance) discusses the default algorithm for case conversion.
@@ -1346,6 +1641,7 @@ impl char {
     /// [Unicode Standard]: https://www.unicode.org/versions/latest/
     ///
     /// # Examples
+    ///
     /// `'ﬅ'` (U+FB05) is a single Unicode code point (a ligature) that maps to "ST" in uppercase.
     ///
     /// As an iterator:
@@ -1373,11 +1669,12 @@ impl char {
     ///
     /// ```
     /// assert_eq!('c'.to_uppercase().to_string(), "C");
+    /// assert_eq!('ა'.to_uppercase().to_string(), "Ა");
     /// assert_eq!('ǆ'.to_uppercase().to_string(), "Ǆ");
     ///
     /// // Sometimes the result is more than one character:
     /// assert_eq!('ﬅ'.to_uppercase().to_string(), "ST");
-    /// assert_eq!('ῼ'.to_uppercase().to_string(), "ΩΙ");
+    /// assert_eq!('ᾨ'.to_uppercase().to_string(), "ὨΙ");
     ///
     /// // Characters that do not have both uppercase and lowercase
     /// // convert into themselves.
@@ -1386,18 +1683,24 @@ impl char {
     ///
     /// # Note on locale
     ///
+    /// As stated above, this method is locale-insensitive.
+    /// If you need locale support, consider using an external crate,
+    /// like [`icu_casemap`](https://crates.io/crates/icu_casemap)
+    /// which is developed by Unicode. A description of one common
+    /// locale-dependent casing issue follows (there are others):
+    ///
     /// In Turkish and Azeri, the equivalent of 'i' in Latin has five forms instead of two:
     ///
     /// * 'Dotless': I / ı, sometimes written ï
     /// * 'Dotted': İ / i
     ///
-    /// Note that the lowercase dotted 'i' is the same as the Latin. Therefore:
+    /// Note that the lowercase dotted 'i' is the same codepoint as the Latin. Therefore:
     ///
     /// ```
     /// let upper_i = 'i'.to_uppercase().to_string();
     /// ```
     ///
-    /// The value of `upper_i` here relies on the language of the text: if we're
+    /// `'i'`'s correct uppercase relies on the language of the text: if we're
     /// in `en-US`, it should be `"I"`, but if we're in `tr-TR` or `az-AZ`, it should
     /// be `"İ"`. `to_uppercase()` does not take this into account, and so:
     ///
@@ -1408,12 +1711,118 @@ impl char {
     /// ```
     ///
     /// holds across languages.
+    ///
+    /// [`to_titlecase()`]: Self::to_titlecase()
     #[must_use = "this returns the uppercased character as a new iterator, \
                   without modifying the original"]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn to_uppercase(self) -> ToUppercase {
         ToUppercase(CaseMappingIter::new(conversions::to_upper(self)))
+    }
+
+    /// Returns an iterator that yields the case folding of this `char` as one or more
+    /// `char`s.
+    ///
+    /// Case folding is meant to be used when performing case-insensitive string comparisons.
+    /// Case-folded strings should not usually be exposed directly to users. For most,
+    /// but not all, characters, the casefold mapping is identical to the lowercase one.
+    ///
+    /// This iterator yields the `char`(s) in the common or full case folding for this `char`,
+    /// as given by the [Unicode Character Database][ucd] [`CaseFolding.txt`].
+    /// The maximum number of `char`s in a case folding is 3.
+    ///
+    /// [ucd]: https://www.unicode.org/reports/tr44/
+    /// [`CaseFolding.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/CaseFolding.txt
+    ///
+    ///
+    /// No [normalization] (e.g. NFC) is performed, so visually and semantically identical characters
+    /// might still casefold differently. For example, `'ά'` (U+03AC GREEK SMALL LETTER ALPHA WITH TONOS)
+    /// is considered distinct from `'ά'` (U+1F71 GREEK SMALL LETTER ALPHA WITH OXIA),
+    /// even though Unicode considers them canonically equivalent.
+    ///
+    /// In addition, this method is independent of language/locale,
+    /// so the special behavior of I/ı/İ/i in Turkish and Azeri is not handled.
+    ///
+    /// In the [Unicode Standard], Chapter 4 (Character Properties) discusses case folding in
+    /// general and Chapter 3 (Conformance) discusses the default algorithm for case folding.
+    ///
+    /// [Unicode Standard]: https://www.unicode.org/versions/latest/
+    ///
+    /// # Examples
+    ///
+    /// The German sharp S `'ß'` (U+DF) is a single Unicode code point
+    /// that casefolds to `"ss"`. Its uppercase variant '`ẞ`' (U+1E9E)
+    /// has the same case-folding.
+    ///
+    /// As an iterator:
+    ///
+    /// ```
+    /// #![feature(casefold)]
+    /// assert!('ß'.to_casefold_unnormalized().eq(['s', 's']));
+    /// assert!('ẞ'.to_casefold_unnormalized().eq(['s', 's']));
+    /// ```
+    ///
+    /// Using [`to_string`](../std/string/trait.ToString.html#tymethod.to_string):
+    ///
+    /// ```
+    /// #![feature(casefold)]
+    /// assert_eq!('ß'.to_casefold_unnormalized().to_string(), "ss");
+    /// assert_eq!('ẞ'.to_casefold_unnormalized().to_string(), "ss");
+    /// ```
+    ///
+    /// No [normalization] is performed:
+    ///
+    /// ```rust
+    /// #![feature(casefold)]
+    /// // These two characters are visually and semantically identical;
+    /// // Unicode considers them to be canonically equivalent.
+    /// let alpha_tonos = 'ά';
+    /// let alpha_oxia = 'ά';
+    ///
+    /// // However, they are different codepoints:
+    /// assert_eq!(alpha_tonos, '\u{03AC}');
+    /// assert_eq!(alpha_oxia, '\u{1F71}');
+    ///
+    /// // Their case-foldings are likewise unequal:
+    /// assert!(alpha_tonos.to_casefold_unnormalized().eq(['\u{03AC}']));
+    /// assert!(alpha_oxia.to_casefold_unnormalized().eq(['\u{1F71}']));
+    /// ```
+    ///
+    /// # Note on locale
+    ///
+    /// In Turkish and Azeri, the equivalent of 'i' in Latin has five forms instead of two:
+    ///
+    /// * 'Dotless': I / ı, sometimes written ï
+    /// * 'Dotted': İ / i
+    ///
+    /// Note that the uppercase undotted 'I' is the same codepoint as the Latin. Therefore:
+    ///
+    /// ```
+    /// #![feature(casefold)]
+    /// let casefold_i = 'I'.to_casefold_unnormalized().to_string();
+    /// ```
+    ///
+    /// `'I'`'s correct case folding relies on the language of the text: if we're
+    /// in `en-US`, it should be `"i"`, but if we're in `tr-TR` or `az-AZ`, it should
+    /// be `"ı"`. `to_casefold_unnormalized()` does not take this into account, and so:
+    ///
+    /// ```
+    /// #![feature(casefold)]
+    /// let casefold_i = 'I'.to_casefold_unnormalized().to_string();
+    ///
+    /// assert_eq!(casefold_i, "i");
+    /// ```
+    ///
+    /// holds across languages.
+    ///
+    /// [normalization]: https://www.unicode.org/faq/normalization.html
+    #[must_use = "this returns the case-folded character as a new iterator, \
+                  without modifying the original"]
+    #[unstable(feature = "casefold", issue = "154742")]
+    #[inline]
+    pub fn to_casefold_unnormalized(self) -> ToCasefold {
+        ToCasefold(CaseMappingIter::new(conversions::to_casefold(self)))
     }
 
     /// Checks if the value is within the ASCII range.
@@ -1446,6 +1855,7 @@ impl char {
     #[must_use]
     #[unstable(feature = "ascii_char", issue = "110998")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn as_ascii(&self) -> Option<ascii::Char> {
         if self.is_ascii() {
             // SAFETY: Just checked that this is ASCII.
@@ -1862,7 +2272,8 @@ impl char {
         matches!(*self, '0'..='9') | matches!(*self, 'A'..='F') | matches!(*self, 'a'..='f')
     }
 
-    /// Checks if the value is an ASCII punctuation character:
+    /// Checks if the value is an ASCII punctuation or symbol character
+    /// (i.e. not alphanumeric, whitespace, or control):
     ///
     /// - U+0021 ..= U+002F `! " # $ % & ' ( ) * + , - . /`, or
     /// - U+003A ..= U+0040 `: ; < = > ? @`, or
@@ -1903,7 +2314,8 @@ impl char {
             | matches!(*self, '{'..='~')
     }
 
-    /// Checks if the value is an ASCII graphic character:
+    /// Checks if the value is an ASCII graphic character
+    /// (i.e. not whitespace or control):
     /// U+0021 '!' ..= U+007E '~'.
     ///
     /// # Examples
@@ -1987,6 +2399,7 @@ impl char {
     #[stable(feature = "ascii_ctype_on_intrinsics", since = "1.24.0")]
     #[rustc_const_stable(feature = "const_ascii_ctype_on_intrinsics", since = "1.47.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn is_ascii_whitespace(&self) -> bool {
         matches!(*self, '\t' | '\n' | '\x0C' | '\r' | ' ')
     }
@@ -2030,8 +2443,8 @@ impl char {
 
 #[ferrocene::prevalidated]
 pub(crate) struct EscapeDebugExtArgs {
-    /// Escape Extended Grapheme codepoints?
-    pub(crate) escape_grapheme_extended: bool,
+    /// Escape Grapheme Extender codepoints?
+    pub(crate) escape_grapheme_extender: bool,
 
     /// Escape single quotes?
     pub(crate) escape_single_quote: bool,
@@ -2042,7 +2455,7 @@ pub(crate) struct EscapeDebugExtArgs {
 
 impl EscapeDebugExtArgs {
     pub(crate) const ESCAPE_ALL: Self = Self {
-        escape_grapheme_extended: true,
+        escape_grapheme_extender: true,
         escape_single_quote: true,
         escape_double_quote: true,
     };

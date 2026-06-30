@@ -525,6 +525,7 @@ impl<T> [T] {
     /// let w: &[i32] = &[];
     /// assert_eq!(Some(&[]), w.last_chunk::<0>());
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "slice_first_last_chunk", since = "1.77.0")]
     #[rustc_const_stable(feature = "const_slice_last_chunk", since = "1.80.0")]
@@ -614,12 +615,13 @@ impl<T> [T] {
     /// }
     /// assert_eq!(x, &[0, 42, 2]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-    #[ferrocene::prevalidated]
+    #[rustc_no_writable]
     pub const fn get_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: [const] SliceIndex<Self>,
@@ -700,13 +702,14 @@ impl<T> [T] {
     /// }
     /// assert_eq!(x, &[1, 13, 4]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_no_implicit_autorefs]
     #[inline]
     #[must_use]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-    #[ferrocene::prevalidated]
+    #[rustc_no_writable]
     pub const unsafe fn get_unchecked_mut<I>(&mut self, index: I) -> &mut I::Output
     where
         I: [const] SliceIndex<Self>,
@@ -775,13 +778,14 @@ impl<T> [T] {
     /// }
     /// assert_eq!(x, &[3, 4, 6]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[rustc_never_returns_null_ptr]
     #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
-    #[ferrocene::prevalidated]
+    #[rustc_no_writable]
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         self as *mut [T] as *mut T
     }
@@ -861,6 +865,7 @@ impl<T> [T] {
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr_range(&mut self) -> Range<*mut T> {
         let start = self.as_mut_ptr();
         // SAFETY: See as_ptr_range() above for why `add` here is safe.
@@ -1006,6 +1011,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_reverse", since = "1.90.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn reverse(&mut self) {
         let half_len = self.len() / 2;
         let Range { start, end } = self.as_mut_ptr_range();
@@ -1029,6 +1035,7 @@ impl<T> [T] {
         revswap(front_half, back_half, half_len);
 
         #[inline]
+        #[ferrocene::prevalidated]
         const fn revswap<T>(a: &mut [T], b: &mut [T], n: usize) {
             debug_assert!(a.len() == n);
             debug_assert!(b.len() == n);
@@ -2789,8 +2796,6 @@ impl<T> [T] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(strip_circumfix)]
-    ///
     /// let v = &[10, 50, 40, 30];
     /// assert_eq!(v.strip_circumfix(&[10], &[30]), Some(&[50, 40][..]));
     /// assert_eq!(v.strip_circumfix(&[10], &[40, 30]), Some(&[50][..]));
@@ -2801,7 +2806,7 @@ impl<T> [T] {
     /// assert_eq!(v.strip_circumfix(&[10, 50], &[]), Some(&[40, 30][..]));
     /// ```
     #[must_use = "returns the subslice without modifying the original"]
-    #[unstable(feature = "strip_circumfix", issue = "147946")]
+    #[stable(feature = "strip_circumfix", since = "CURRENT_RUSTC_VERSION")]
     pub fn strip_circumfix<S, P>(&self, prefix: &P, suffix: &S) -> Option<&[T]>
     where
         T: PartialEq,
@@ -4404,6 +4409,7 @@ impl<T> [T] {
     ///
     /// assert_eq!(&bytes, b"Hello, Wello!");
     /// ```
+    #[inline]
     #[stable(feature = "copy_within", since = "1.37.0")]
     #[track_caller]
     pub fn copy_within<R: RangeBounds<usize>>(&mut self, src: R, dest: usize)
@@ -5359,7 +5365,6 @@ impl<T> [T] {
     /// # Examples
     /// Basic usage:
     /// ```
-    /// #![feature(substr_range)]
     /// use core::range::Range;
     ///
     /// let nums = &[0, 5, 10, 0, 0, 5];
@@ -5374,7 +5379,7 @@ impl<T> [T] {
     /// assert_eq!(iter.next(), Some(Range { start: 5, end: 6 }));
     /// ```
     #[must_use]
-    #[unstable(feature = "substr_range", issue = "126769")]
+    #[stable(feature = "substr_range", since = "CURRENT_RUSTC_VERSION")]
     pub fn subslice_range(&self, subslice: &[T]) -> Option<core::range::Range<usize>> {
         if T::IS_ZST {
             panic!("elements are zero-sized");
@@ -5658,7 +5663,7 @@ const trait CloneFromSpec<T> {
 }
 
 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
-impl<T> const CloneFromSpec<T> for [T]
+const impl<T> CloneFromSpec<T> for [T]
 where
     T: [const] Clone + [const] Destruct,
 {
@@ -5681,7 +5686,7 @@ where
 }
 
 #[rustc_const_unstable(feature = "const_clone", issue = "142757")]
-impl<T> const CloneFromSpec<T> for [T]
+const impl<T> CloneFromSpec<T> for [T]
 where
     T: [const] TrivialClone + [const] Destruct,
 {
@@ -5696,7 +5701,7 @@ where
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl<T> const Default for &[T] {
+const impl<T> Default for &[T] {
     /// Creates an empty slice.
     fn default() -> Self {
         &[]
@@ -5705,7 +5710,7 @@ impl<T> const Default for &[T] {
 
 #[stable(feature = "mut_slice_default", since = "1.5.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl<T> const Default for &mut [T] {
+const impl<T> Default for &mut [T] {
     /// Creates a mutable empty slice.
     fn default() -> Self {
         &mut []
@@ -5804,24 +5809,6 @@ impl fmt::Display for GetDisjointMutError {
     }
 }
 
-mod private_get_disjoint_mut_index {
-    use super::{Range, RangeInclusive, range};
-
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    pub trait Sealed {}
-
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    impl Sealed for usize {}
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    impl Sealed for Range<usize> {}
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    impl Sealed for RangeInclusive<usize> {}
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    impl Sealed for range::Range<usize> {}
-    #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-    impl Sealed for range::RangeInclusive<usize> {}
-}
-
 /// A helper trait for `<[T]>::get_disjoint_mut()`.
 ///
 /// # Safety
@@ -5829,9 +5816,7 @@ mod private_get_disjoint_mut_index {
 /// If `is_in_bounds()` returns `true` and `is_overlapping()` returns `false`,
 /// it must be safe to index the slice with the indices.
 #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
-pub unsafe trait GetDisjointMutIndex:
-    Clone + private_get_disjoint_mut_index::Sealed
-{
+pub impl(self) unsafe trait GetDisjointMutIndex: Clone {
     /// Returns `true` if `self` is in bounds for `len` slice elements.
     #[unstable(feature = "get_disjoint_mut_helpers", issue = "none")]
     fn is_in_bounds(&self, len: usize) -> bool;

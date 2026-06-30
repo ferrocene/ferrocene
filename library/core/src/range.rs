@@ -20,32 +20,28 @@ use crate::hash::Hash;
 
 mod iter;
 
-#[unstable(feature = "new_range_api_legacy", issue = "125687")]
+#[stable(feature = "new_range_api_legacy", since = "CURRENT_RUSTC_VERSION")]
 pub mod legacy;
 
+use core::ops::Bound::{self, Excluded, Included, Unbounded};
+
 #[doc(inline)]
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 pub use iter::RangeFromIter;
 #[doc(inline)]
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 pub use iter::RangeInclusiveIter;
 #[doc(inline)]
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 pub use iter::RangeIter;
 
-// FIXME(#125687): re-exports temporarily removed
-// Because re-exports of stable items (Bound, RangeBounds, RangeFull, RangeTo)
-// can't be made unstable.
-//
-// #[doc(inline)]
-// #[unstable(feature = "new_range_api", issue = "125687")]
-// pub use crate::iter::Step;
-// #[doc(inline)]
-// #[unstable(feature = "new_range_api", issue = "125687")]
-// pub use crate::ops::{Bound, IntoBounds, OneSidedRange, RangeBounds, RangeFull, RangeTo};
 use crate::iter::Step;
-use crate::ops::Bound::{self, Excluded, Included, Unbounded};
+// FIXME(one_sided_range): These types should move into this module.
+// FIXME(range_into_bounds): Ditto. Also consider re-exporting `RangeBounds` and related.
 use crate::ops::{IntoBounds, OneSidedRange, OneSidedRangeBound, RangeBounds};
+#[doc(inline)]
+#[stable(feature = "new_range_api_exports", since = "CURRENT_RUSTC_VERSION")]
+pub use crate::ops::{RangeFull, RangeTo};
 
 /// A (half-open) range bounded inclusively below and exclusively above.
 ///
@@ -68,17 +64,17 @@ use crate::ops::{IntoBounds, OneSidedRange, OneSidedRangeBound, RangeBounds};
 #[lang = "RangeCopy"]
 #[derive(Copy, Hash)]
 #[derive_const(Clone, Default, PartialEq, Eq)]
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 pub struct Range<Idx> {
     /// The lower bound of the range (inclusive).
-    #[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_api", since = "1.96.0")]
     pub start: Idx,
     /// The upper bound of the range (exclusive).
-    #[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_api", since = "1.96.0")]
     pub end: Idx,
 }
 
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 impl<Idx: fmt::Debug> fmt::Debug for Range<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -103,7 +99,7 @@ impl<Idx: Step> Range<Idx> {
     /// assert_eq!(i.next(), Some(16));
     /// assert_eq!(i.next(), Some(25));
     /// ```
-    #[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_api", since = "1.96.0")]
     #[inline]
     pub fn iter(&self) -> RangeIter<Idx> {
         self.clone().into_iter()
@@ -132,7 +128,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!(!Range::from(f32::NAN..1.0).contains(&0.5));
     /// ```
     #[inline]
-    #[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_api", since = "1.96.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
     pub const fn contains<U>(&self, item: &U) -> bool
     where
@@ -164,7 +160,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!( Range::from(f32::NAN..5.0).is_empty());
     /// ```
     #[inline]
-    #[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_api", since = "1.96.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
     pub const fn is_empty(&self) -> bool
     where
@@ -174,9 +170,9 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     }
 }
 
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for Range<T> {
+const impl<T> RangeBounds<T> for Range<T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
@@ -191,9 +187,9 @@ impl<T> const RangeBounds<T> for Range<T> {
 /// If you need to use this implementation where `T` is unsized,
 /// consider using the `RangeBounds` impl for a 2-tuple of [`Bound<&T>`][Bound],
 /// i.e. replace `start..end` with `(Bound::Included(start), Bound::Excluded(end))`.
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for Range<&T> {
+const impl<T> RangeBounds<T> for Range<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
@@ -204,23 +200,24 @@ impl<T> const RangeBounds<T> for Range<&T> {
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const IntoBounds<T> for Range<T> {
+const impl<T> IntoBounds<T> for Range<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Excluded(self.end))
     }
 }
 
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T> const From<Range<T>> for legacy::Range<T> {
+const impl<T> From<Range<T>> for legacy::Range<T> {
     #[inline]
     fn from(value: Range<T>) -> Self {
         Self { start: value.start, end: value.end }
     }
 }
-#[stable(feature = "new_range_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T> const From<legacy::Range<T>> for Range<T> {
+const impl<T> From<legacy::Range<T>> for Range<T> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn from(value: legacy::Range<T>) -> Self {
         Self { start: value.start, end: value.end }
@@ -356,7 +353,7 @@ impl<Idx: Step> RangeInclusive<Idx> {
 
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeInclusive<T> {
+const impl<T> RangeBounds<T> for RangeInclusive<T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
@@ -373,7 +370,7 @@ impl<T> const RangeBounds<T> for RangeInclusive<T> {
 /// i.e. replace `start..=end` with `(Bound::Included(start), Bound::Included(end))`.
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeInclusive<&T> {
+const impl<T> RangeBounds<T> for RangeInclusive<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
@@ -385,7 +382,7 @@ impl<T> const RangeBounds<T> for RangeInclusive<&T> {
 // #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const IntoBounds<T> for RangeInclusive<T> {
+const impl<T> IntoBounds<T> for RangeInclusive<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Included(self.last))
     }
@@ -393,7 +390,7 @@ impl<T> const IntoBounds<T> for RangeInclusive<T> {
 
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T> const From<RangeInclusive<T>> for legacy::RangeInclusive<T> {
+const impl<T> From<RangeInclusive<T>> for legacy::RangeInclusive<T> {
     #[inline]
     fn from(value: RangeInclusive<T>) -> Self {
         Self::new(value.start, value.last)
@@ -401,12 +398,47 @@ impl<T> const From<RangeInclusive<T>> for legacy::RangeInclusive<T> {
 }
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-impl<T> const From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
+const impl<T> From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
+    /// Converts from a legacy range to a non-legacy range, potentially panicking.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the legacy range iterator has been exhausted.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use core::range::legacy;
+    /// use core::range::RangeInclusive;
+    ///
+    /// let single: legacy::RangeInclusive<i32> = 0..=1;
+    /// let single = RangeInclusive::from(single);
+    /// assert_eq!((single.start, single.last), (0, 1));
+    ///
+    /// let empty: legacy::RangeInclusive<i32> = 0..=0;
+    /// let empty = RangeInclusive::from(empty);
+    /// assert_eq!((empty.start, empty.last), (0, 0));
+    /// ```
+    ///
+    /// ```should_panic
+    /// use core::range::legacy;
+    /// use core::range::RangeInclusive;
+    ///
+    /// let mut exhausted: legacy::RangeInclusive<i32> = 0..=0;
+    /// exhausted.next();
+    /// # if exhausted.is_empty() {
+    /// # // assert!s don't work correctly in `should_panic` doctests since you
+    /// # // can't assert the panic message. Skip the rest of the test instead,
+    /// # // so that the expected panic doesn't happen and the test fails.
+    /// assert!(exhausted.is_empty());
+    /// let _ = RangeInclusive::from(exhausted); // this panics
+    /// # }
+    /// ```
     #[inline]
     fn from(value: legacy::RangeInclusive<T>) -> Self {
         assert!(
             !value.exhausted,
-            "attempted to convert from an exhausted `legacy::RangeInclusive` (unspecified behavior)"
+            "attempted to convert from an exhausted `legacy::RangeInclusive`"
         );
 
         let (start, last) = value.into_inner();
@@ -444,14 +476,14 @@ impl<T> const From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
 #[lang = "RangeFromCopy"]
 #[derive(Copy, Hash)]
 #[derive_const(Clone, PartialEq, Eq)]
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 pub struct RangeFrom<Idx> {
     /// The lower bound of the range (inclusive).
-    #[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_from_api", since = "1.96.0")]
     pub start: Idx,
 }
 
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeFrom<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.start.fmt(fmt)?;
@@ -475,7 +507,7 @@ impl<Idx: Step> RangeFrom<Idx> {
     /// assert_eq!(i.next(), Some(16));
     /// assert_eq!(i.next(), Some(25));
     /// ```
-    #[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_from_api", since = "1.96.0")]
     #[inline]
     pub fn iter(&self) -> RangeFromIter<Idx> {
         self.clone().into_iter()
@@ -499,7 +531,7 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     /// assert!(!RangeFrom::from(f32::NAN..).contains(&0.5));
     /// ```
     #[inline]
-    #[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_from_api", since = "1.96.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
     pub const fn contains<U>(&self, item: &U) -> bool
     where
@@ -510,9 +542,9 @@ impl<Idx: PartialOrd<Idx>> RangeFrom<Idx> {
     }
 }
 
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeFrom<T> {
+const impl<T> RangeBounds<T> for RangeFrom<T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(&self.start)
     }
@@ -527,9 +559,9 @@ impl<T> const RangeBounds<T> for RangeFrom<T> {
 /// If you need to use this implementation where `T` is unsized,
 /// consider using the `RangeBounds` impl for a 2-tuple of [`Bound<&T>`][Bound],
 /// i.e. replace `start..` with `(Bound::Included(start), Bound::Unbounded)`.
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeFrom<&T> {
+const impl<T> RangeBounds<T> for RangeFrom<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Included(self.start)
     }
@@ -540,7 +572,7 @@ impl<T> const RangeBounds<T> for RangeFrom<&T> {
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const IntoBounds<T> for RangeFrom<T> {
+const impl<T> IntoBounds<T> for RangeFrom<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Included(self.start), Unbounded)
     }
@@ -548,7 +580,7 @@ impl<T> const IntoBounds<T> for RangeFrom<T> {
 
 #[unstable(feature = "one_sided_range", issue = "69780")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const OneSidedRange<T> for RangeFrom<T>
+const impl<T> OneSidedRange<T> for RangeFrom<T>
 where
     Self: RangeBounds<T>,
 {
@@ -557,17 +589,17 @@ where
     }
 }
 
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-impl<T> const From<RangeFrom<T>> for legacy::RangeFrom<T> {
+const impl<T> From<RangeFrom<T>> for legacy::RangeFrom<T> {
     #[inline]
     fn from(value: RangeFrom<T>) -> Self {
         Self { start: value.start }
     }
 }
-#[stable(feature = "new_range_from_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_from_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
-impl<T> const From<legacy::RangeFrom<T>> for RangeFrom<T> {
+const impl<T> From<legacy::RangeFrom<T>> for RangeFrom<T> {
     #[inline]
     fn from(value: legacy::RangeFrom<T>) -> Self {
         Self { start: value.start }
@@ -619,14 +651,14 @@ impl<T> const From<legacy::RangeFrom<T>> for RangeFrom<T> {
 #[lang = "RangeToInclusiveCopy"]
 #[doc(alias = "..=")]
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 pub struct RangeToInclusive<Idx> {
     /// The upper bound of the range (inclusive)
-    #[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
     pub last: Idx,
 }
 
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 impl<Idx: fmt::Debug> fmt::Debug for RangeToInclusive<Idx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "..=")?;
@@ -650,7 +682,7 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     /// assert!(!(..=f32::NAN).contains(&0.5));
     /// ```
     #[inline]
-    #[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]
     pub const fn contains<U>(&self, item: &U) -> bool
     where
@@ -661,13 +693,13 @@ impl<Idx: PartialOrd<Idx>> RangeToInclusive<Idx> {
     }
 }
 
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 impl<T> From<legacy::RangeToInclusive<T>> for RangeToInclusive<T> {
     fn from(value: legacy::RangeToInclusive<T>) -> Self {
         Self { last: value.end }
     }
 }
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 impl<T> From<RangeToInclusive<T>> for legacy::RangeToInclusive<T> {
     fn from(value: RangeToInclusive<T>) -> Self {
         Self { end: value.last }
@@ -677,9 +709,9 @@ impl<T> From<RangeToInclusive<T>> for legacy::RangeToInclusive<T> {
 // RangeToInclusive<Idx> cannot impl From<RangeTo<Idx>>
 // because underflow would be possible with (..0).into()
 
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeToInclusive<T> {
+const impl<T> RangeBounds<T> for RangeToInclusive<T> {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
@@ -688,9 +720,9 @@ impl<T> const RangeBounds<T> for RangeToInclusive<T> {
     }
 }
 
-#[stable(feature = "new_range_to_inclusive_api", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "new_range_to_inclusive_api", since = "1.96.0")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const RangeBounds<T> for RangeToInclusive<&T> {
+const impl<T> RangeBounds<T> for RangeToInclusive<&T> {
     fn start_bound(&self) -> Bound<&T> {
         Unbounded
     }
@@ -701,7 +733,7 @@ impl<T> const RangeBounds<T> for RangeToInclusive<&T> {
 
 #[unstable(feature = "range_into_bounds", issue = "136903")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const IntoBounds<T> for RangeToInclusive<T> {
+const impl<T> IntoBounds<T> for RangeToInclusive<T> {
     fn into_bounds(self) -> (Bound<T>, Bound<T>) {
         (Unbounded, Included(self.last))
     }
@@ -709,7 +741,7 @@ impl<T> const IntoBounds<T> for RangeToInclusive<T> {
 
 #[unstable(feature = "one_sided_range", issue = "69780")]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
-impl<T> const OneSidedRange<T> for RangeToInclusive<T>
+const impl<T> OneSidedRange<T> for RangeToInclusive<T>
 where
     Self: RangeBounds<T>,
 {

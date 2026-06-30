@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-pub(crate) mod update_certified_core_symbols;
-
 use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
@@ -13,7 +11,7 @@ use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use crate::ferrocene::tool::{Blanket, SYMBOL_PATH, SymbolReport};
+use crate::ferrocene::tool::{Blanket, SymbolReport};
 use crate::utils::channel::GitInfo;
 use crate::utils::exec::{self, BootstrapCommand};
 use crate::utils::{build_stamp, helpers};
@@ -126,27 +124,31 @@ impl CertifiedCoreSymbols {
     }
 }
 
-pub(super) const CERTIFIED_CORE_SYMBOLS_ALIAS: &str = "certified-core-symbols";
-
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(SYMBOL_PATH).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
-    }
-
-    fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CertifiedCoreSymbols::new(run.builder, run.target));
+        run.never()
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        if !builder.config.std_debug_assertions {
+            panic!("generating the core symbol report requires `rust.debug-assertions-std=true`");
+        }
+
         let CertifiedCoreSymbols { build_compiler, target } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
         // c.f. check::std
-        let mut cargo =
-            Cargo::new(builder, build_compiler, Mode::Std, SourceType::InTree, target, Kind::Check);
+        let mut cargo = Cargo::new(
+            builder,
+            build_compiler,
+            Mode::Std,
+            SourceType::InTree,
+            target,
+            Kind::SymbolReport,
+        );
         let crates = vec!["core".to_owned()]; // currently, only core is certified
         std_cargo(builder, target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);

@@ -478,6 +478,11 @@ impl AsciiChar {
     #[inline]
     #[ferrocene::prevalidated]
     pub const unsafe fn from_u8_unchecked(b: u8) -> Self {
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "`ascii::Char::from_u8_unchecked` input cannot exceed 127.",
+            (b: u8 = b) => b <= 127,
+        );
         // SAFETY: Our safety precondition is that `b` is in-range.
         unsafe { transmute(b) }
     }
@@ -953,7 +958,8 @@ impl AsciiChar {
         self.to_u8().is_ascii_hexdigit()
     }
 
-    /// Checks if the value is a punctuation character:
+    /// Checks if the value is a punctuation or symbol character
+    /// (i.e. not alphanumeric, whitespace, or control):
     ///
     /// - 0x21 ..= 0x2F `! " # $ % & ' ( ) * + , - . /`, or
     /// - 0x3A ..= 0x40 `: ; < = > ? @`, or
@@ -993,7 +999,8 @@ impl AsciiChar {
         self.to_u8().is_ascii_punctuation()
     }
 
-    /// Checks if the value is a graphic character:
+    /// Checks if the value is a graphic character
+    /// (i.e. not whitespace or control):
     /// 0x21 '!' ..= 0x7E '~'.
     ///
     /// # Examples
@@ -1162,7 +1169,7 @@ macro_rules! into_int_impl {
         $(
             #[unstable(feature = "ascii_char", issue = "110998")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-            impl const From<AsciiChar> for $ty {
+            const impl From<AsciiChar> for $ty {
                 #[inline]
                 fn from(chr: AsciiChar) -> $ty {
                     chr as u8 as $ty

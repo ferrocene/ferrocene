@@ -34,7 +34,9 @@ struct S5;
 //~| NOTE for more information, visit
 struct S6;
 
-#[cfg(a())] //~ ERROR invalid predicate `a`
+#[cfg(a())] //~ ERROR malformed `cfg` attribute input
+//~| NOTE valid arguments are `any`, `all`, `not` or `target`
+//~| NOTE for more information, visit
 struct S7;
 
 #[cfg(a = 10)] //~ ERROR malformed `cfg` attribute input
@@ -59,5 +61,5 @@ generate_s10!(concat!("nonexistent"));
 
 fn main() {}
 
-// ferrocene-annotations: fls_dd9xh3wdjudo
-// Attribute cfg_attr
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

@@ -32,11 +32,7 @@ impl ast::Comment {
     }
 
     pub fn prefix(&self) -> &'static str {
-        let &(prefix, _kind) = CommentKind::BY_PREFIX
-            .iter()
-            .find(|&(prefix, kind)| self.kind() == *kind && self.text().starts_with(prefix))
-            .unwrap();
-        prefix
+        self.kind().prefix()
     }
 
     /// Returns the textual content of a doc comment node as a single string with prefix and suffix
@@ -319,8 +315,8 @@ impl ast::CString {
         let mut prev_end = 0;
         let mut has_error = None;
         let extend_unit = |buf: &mut Vec<u8>, unit: MixedUnit| match unit {
-            MixedUnit::Char(c) => buf.extend(c.encode_utf8(&mut [0; 4]).as_bytes()),
-            MixedUnit::HighByte(b) => buf.push(b),
+            MixedUnit::Char(c) => buf.extend(c.get().encode_utf8(&mut [0; 4]).as_bytes()),
+            MixedUnit::HighByte(b) => buf.push(b.get()),
         };
         unescape_c_str(text, |char_range, unescaped| match (unescaped, buf.capacity() == 0) {
             (Ok(u), false) => extend_unit(&mut buf, u),

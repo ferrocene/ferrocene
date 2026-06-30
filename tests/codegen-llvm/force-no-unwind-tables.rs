@@ -10,4 +10,5 @@ fn foo() {
     panic!();
 }
 
+// CHECK-NOT: !"uwtable"
 // ferrocene-annotations: um_rustc_C_panic

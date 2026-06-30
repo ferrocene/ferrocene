@@ -116,6 +116,7 @@ impl [u8] {
     ///
     /// The caller must guarantee that the slices are equal in length, and the
     /// slice lengths are greater than or equal to `N` bytes.
+    #[ferrocene::prevalidated]
     #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
     #[inline]
     const fn eq_ignore_ascii_case_chunks<const N: usize>(&self, other: &[u8]) -> bool {
@@ -126,6 +127,7 @@ impl [u8] {
         let (other_chunks, _) = other.as_chunks::<N>();
 
         // Branchless check to encourage auto-vectorization
+        #[ferrocene::prevalidated]
         #[inline(always)]
         const fn eq_ignore_ascii_inner<const L: usize>(lhs: &[u8; L], rhs: &[u8; L]) -> bool {
             let mut equal_ascii = true;
@@ -604,6 +606,7 @@ fn is_ascii_sse2(bytes: &[u8]) -> bool {
 ///
 /// Uses explicit SSE2 intrinsics to prevent LLVM from auto-vectorizing with
 /// broken AVX-512 code that extracts mask bits one-by-one.
+#[ferrocene::prevalidated]
 #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]

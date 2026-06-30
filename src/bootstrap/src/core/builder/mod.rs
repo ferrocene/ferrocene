@@ -367,7 +367,7 @@ pub enum PathSet {
     /// command-line value of `std` will match if `library/std` is in the
     /// set.
     ///
-    /// NOTE: the paths within a set should always be aliases of one another.
+    /// NOTE: the paths within a set should all select the same unit of work.
     /// For example, `src/librustdoc` and `src/tools/rustdoc` should be in the same set,
     /// but `library/core` and `library/std` generally should not, unless there's no way (for that Step)
     /// to build them separately.
@@ -566,10 +566,7 @@ impl<'a> ShouldRun<'a> {
         self
     }
 
-    /// single, non-aliased path
-    ///
-    /// Must be an on-disk path; use `alias` for names that do not correspond to on-disk paths.
-    pub fn path(mut self, path: &str) -> Self {
+    fn assert_valid_path(&self, path: &str) {
         let submodules_paths = self.builder.submodule_paths();
 
         // assert only if `p` isn't submodule
@@ -579,9 +576,28 @@ impl<'a> ShouldRun<'a> {
                 "`should_run.path` should correspond to a real on-disk path - use `alias` if there is no relevant path: {path}"
             );
         }
+    }
+
+    /// A single path
+    ///
+    /// Must be an on-disk path; use [`alias`][Self::alias] for names that do not
+    /// correspond to on-disk paths.
+    pub fn path(mut self, path: &str) -> Self {
+        self.assert_valid_path(path);
 
         let task = TaskPath { path: path.into(), kind: Some(self.kind) };
         self.paths.insert(PathSet::Set(BTreeSet::from_iter([task])));
+        self
+    }
+
+    /// Multiple on-disk paths that should select the same unit of work.
+    pub fn selectors(mut self, paths: &[&str]) -> Self {
+        let mut set = BTreeSet::new();
+        for path in paths {
+            self.assert_valid_path(path);
+            set.insert(TaskPath { path: (*path).into(), kind: Some(self.kind) });
+        }
+        self.paths.insert(PathSet::Set(set));
         self
     }
 
@@ -654,7 +670,8 @@ pub enum Kind {
     Setup,
     Vendor,
     Perf,
-    Sign, // for Ferrocene
+    Sign,         // for Ferrocene
+    SymbolReport, // for Ferrocene
 }
 
 impl Kind {
@@ -678,7 +695,8 @@ impl Kind {
             Kind::Setup => "setup",
             Kind::Vendor => "vendor",
             Kind::Perf => "perf",
-            Kind::Sign => "sign", // for Ferrocene
+            Kind::Sign => "sign",                  // for Ferrocene
+            Kind::SymbolReport => "symbol_report", // for Ferrocene
         }
     }
 
@@ -873,6 +891,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::GenerateTarball,
                 crate::ferrocene::test::DiffUpstream,
                 crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
+                crate::ferrocene::test::flip_link::FlipLink,
                 crate::core::build_steps::toolstate::ToolStateCheck,
                 test::Tidy,
                 test::BootstrapPy,
@@ -920,6 +939,8 @@ impl<'a> Builder<'a> {
                 test::CargoMiri,
                 test::Clippy,
                 test::CompiletestTest,
+                test::StdarchVerify,
+                test::IntrinsicTest,
                 test::CrateRunMakeSupport,
                 test::CrateBuildHelper,
                 test::RustdocJSStd,
@@ -1070,9 +1091,7 @@ impl<'a> Builder<'a> {
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
-                crate::ferrocene::run::CertifiedCoreSymbols,
                 crate::ferrocene::run::CoverageReport,
-                crate::ferrocene::run::update_certified_core_symbols::UpdateCertifiedCoreSymbols,
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,
@@ -1108,6 +1127,8 @@ impl<'a> Builder<'a> {
             // special-cased in Build::build()
             Kind::Format | Kind::Perf => vec![],
             Kind::MiriTest | Kind::MiriSetup => unreachable!(),
+            // Ferrocene addition
+            Kind::SymbolReport => unreachable!(),
         }
     }
 
@@ -1784,6 +1805,16 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
 
     pub fn exec_ctx(&self) -> &ExecutionContext {
         &self.config.exec_ctx
+    }
+
+    /// When to rebuild LLVM. Currently includes the LLVM commit hash and the configuration from
+    /// bootstrap.toml.
+    pub(crate) fn llvm_cache_key(&self) -> String {
+        format!(
+            "sha={sha}\nkey={key}",
+            sha = self.in_tree_llvm_info.sha().unwrap_or_default(),
+            key = self.config.llvm_cache_key,
+        )
     }
 }
 

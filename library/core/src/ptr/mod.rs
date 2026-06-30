@@ -262,16 +262,15 @@
 //! [`with_addr`] method:
 //!
 //! ```text
-//!     /// Creates a new pointer with the given address.
-//!     ///
-//!     /// This performs the same operation as an `addr as ptr` cast, but copies
-//!     /// the *provenance* of `self` to the new pointer.
-//!     /// This allows us to dynamically preserve and propagate this important
-//!     /// information in a way that is otherwise impossible with a unary cast.
-//!     ///
-//!     /// This is equivalent to using `wrapping_offset` to offset `self` to the
-//!     /// given address, and therefore has all the same capabilities and restrictions.
-//!     pub fn with_addr(self, addr: usize) -> Self;
+//! /// Creates a new pointer with the given address and the provenance  of `self`.
+//! ///
+//! /// This is similar to a `addr as *const T` cast,
+//! /// but copies the provenance of `self` to the new pointer.
+//! /// This avoids the inherent ambiguity of the unary cast.
+//! ///
+//! /// This is equivalent to using `wrapping_offset` to offset `self` to the given address,
+//! /// and therefore has all the same capabilities and restrictions.
+//! pub fn with_addr(self, addr: usize) -> Self;
 //! ```
 //!
 //! So you're still able to drop down to the address representation and do whatever
@@ -413,7 +412,7 @@ use crate::num::NonZero;
 use crate::{fmt, hash, intrinsics, ub_checks};
 
 #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-#[deprecated(since = "CURRENT_RUSTC_VERSION", note = "moved from `ptr` to `mem`")]
+#[deprecated(since = "1.96.0", note = "moved from `ptr` to `mem`")]
 /// Deprecated re-export of [mem::Alignment].
 pub type Alignment = mem::Alignment;
 
@@ -806,21 +805,34 @@ pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {
 /// assert!(weak.upgrade().is_none());
 /// ```
 #[ferrocene::prevalidated]
+#[inline(always)]
 #[stable(feature = "drop_in_place", since = "1.8.0")]
-#[lang = "drop_in_place"]
-#[allow(unconditional_recursion)]
 #[rustc_diagnostic_item = "ptr_drop_in_place"]
 #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
-#[ferrocene::prevalidated]
 pub const unsafe fn drop_in_place<T: PointeeSized>(to_drop: *mut T)
+where
+    T: [const] Destruct,
+{
+    // Due to historic reasons, `drop_in_place` takes a pointer rather than a reference,
+    // which results in worse codegen since we don't apply noalias/dereferenceable llvm
+    // attributes to pointer arguments. To workaround this without breaking public
+    // interface, `drop_in_place` calls the lang item, rather than being one directly.
+
+    // SAFETY:
+    // - compiler glue has the same safety requirements as this function
+    // - the pointer must be valid as per the safety requirement of this function
+    unsafe { drop_glue(&mut *to_drop) }
+}
+
+/// Helper function for `drop_in_place`. The compiler replaces this by the actual drop glue.
+#[ferrocene::prevalidated]
+#[lang = "drop_glue"]
+pub(crate) const unsafe fn drop_glue<T: PointeeSized>(_: &mut T)
 where
     T: [const] Destruct,
 {
     // Code here does not matter - this is replaced by the
     // real drop glue by the compiler.
-
-    // SAFETY: see comment above
-    unsafe { drop_in_place(to_drop) }
 }
 
 /// Creates a null raw pointer.
@@ -2069,6 +2081,21 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 /// [allocation]: crate::ptr#allocated-object
 /// [atomic]: crate::sync::atomic#memory-model-for-atomic-accesses
 ///
+/// # Load splitting
+///
+/// Exactly which hardware loads are performed by this function is, in general, highly target-dependent.
+///
+/// For a simple scalar, such as when `T` is a thin pointer, this will typically be one load assuming
+/// your target supports a load of exactly that size and alignment.
+///
+/// For anything else, it will be split into multiple loads in some unspecified way.
+/// This can happen even for scalars: notably, on many targets loading a `u128` will still need to be split,
+/// despite being "one" scalar.  On many targets loading anything larger than a pointer will need to be split.
+/// On all current targets a load larger than 64 bytes will need to be split.
+/// Any load whose size is not a power of two will also almost certainly need to be split.
+///
+/// There is no stability guarantee on how that splitting happens.  It may change at any point.
+///
 /// # Safety
 ///
 /// Like [`read`], `read_volatile` creates a bitwise copy of `T`, regardless of whether `T` is
@@ -2162,6 +2189,21 @@ pub unsafe fn read_volatile<T>(src: *const T) -> T {
 ///
 /// [allocation]: crate::ptr#allocated-object
 /// [atomic]: crate::sync::atomic#memory-model-for-atomic-accesses
+///
+/// # Store splitting
+///
+/// Exactly which hardware stores are performed by this function is, in general, highly target-dependent.
+///
+/// For a simple scalar, such as when `T` is a thin pointer, this will typically be one store assuming
+/// your target supports a store of exactly that size and alignment.
+///
+/// For anything else, it will be split into multiple stores in some unspecified way.
+/// This can happen even for scalars: notably, on many targets storing a `u128` will still need to be split,
+/// despite being "one" scalar.  On many targets storing anything larger than a pointer will need to be split.
+/// On all current targets a store larger than 64 bytes will need to be split.
+/// Any store whose size is not a power of two will also almost certainly need to be split.
+///
+/// There is no stability guarantee on how that splitting happens.  It may change at any point.
 ///
 /// # Safety
 ///
@@ -2607,21 +2649,21 @@ impl<F: FnPtr> Ord for F {
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> hash::Hash for F {
     fn hash<HH: hash::Hasher>(&self, state: &mut HH) {
-        state.write_usize(self.addr() as _)
+        state.write_usize(self.addr().addr())
     }
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> fmt::Pointer for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::pointer_fmt_inner(self.addr() as _, f)
+        fmt::pointer_fmt_inner(self.addr().addr(), f)
     }
 }
 
 #[stable(feature = "fnptr_impls", since = "1.4.0")]
 impl<F: FnPtr> fmt::Debug for F {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::pointer_fmt_inner(self.addr() as _, f)
+        fmt::pointer_fmt_inner(self.addr().addr(), f)
     }
 }
 

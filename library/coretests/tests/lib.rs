@@ -1,4 +1,5 @@
 // tidy-alphabetical-start
+#![cfg_attr(not(panic = "abort"), feature(reentrant_lock))]
 #![cfg_attr(target_has_atomic = "128", feature(integer_atomics))]
 #![feature(array_ptr_get)]
 #![feature(array_try_from_fn)]
@@ -7,11 +8,11 @@
 #![feature(ascii_char_variants)]
 #![feature(async_iter_from_iter)]
 #![feature(async_iterator)]
-#![feature(bool_to_result)]
 #![feature(borrowed_buf_init)]
 #![feature(bstr)]
+#![feature(casefold)]
 #![feature(cfg_target_has_reliable_f16_f128)]
-#![feature(char_max_len)]
+#![feature(char_internals)]
 #![feature(clone_to_uninit)]
 #![feature(cmp_minmax)]
 #![feature(const_array)]
@@ -36,6 +37,7 @@
 #![feature(const_unsigned_bigint_helpers)]
 #![feature(core_intrinsics)]
 #![feature(core_intrinsics_fallbacks)]
+#![feature(core_io)]
 #![feature(core_io_borrowed_buf)]
 #![feature(core_private_bignum)]
 #![feature(core_private_diy_float)]
@@ -50,7 +52,6 @@
 #![feature(extern_types)]
 #![feature(f16)]
 #![feature(f128)]
-#![feature(float_algebraic)]
 #![feature(float_exact_integer_constants)]
 #![feature(float_gamma)]
 #![feature(float_minimum_maximum)]
@@ -65,6 +66,8 @@
 #![feature(hashmap_internals)]
 #![feature(int_from_ascii)]
 #![feature(int_roundings)]
+#![feature(integer_casts)]
+#![feature(io_slice_as_bytes)]
 #![feature(ip)]
 #![feature(is_ascii_octdigit)]
 #![feature(iter_advance_by)]
@@ -79,6 +82,7 @@
 #![feature(iterator_try_collect)]
 #![feature(iterator_try_reduce)]
 #![feature(layout_for_ptr)]
+#![feature(macro_metavar_expr_concat)]
 #![feature(maybe_dangling)]
 #![feature(maybe_uninit_fill)]
 #![feature(maybe_uninit_uninit_array_transpose)]
@@ -86,7 +90,6 @@
 #![feature(never_type)]
 #![feature(next_index)]
 #![feature(non_exhaustive_omitted_patterns_lint)]
-#![feature(nonzero_from_str_radix)]
 #![feature(num_internals)]
 #![feature(numfmt)]
 #![feature(one_sided_range)]
@@ -98,7 +101,6 @@
 #![feature(portable_simd)]
 #![feature(ptr_alignment_type)]
 #![feature(ptr_metadata)]
-#![feature(result_option_map_or_default)]
 #![feature(rustc_attrs)]
 #![feature(signed_bigint_helpers)]
 #![feature(slice_from_ptr_range)]
@@ -119,6 +121,7 @@
 #![feature(trusted_random_access)]
 #![feature(try_blocks)]
 #![feature(try_find)]
+#![feature(try_from_int_error_kind)]
 #![feature(try_trait_v2)]
 #![feature(type_info)]
 #![feature(uint_carryless_mul)]
@@ -126,10 +129,10 @@
 #![feature(unicode_internals)]
 #![feature(unsize)]
 #![feature(unwrap_infallible)]
-#![feature(widening_mul)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]
+#![deny(lossy_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
 // Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
 #![feature(cfg_target_has_atomic)]
@@ -141,7 +144,6 @@
 #![feature(bound_as_ref)]
 #![feature(bound_copied)]
 #![feature(c_void_variant)]
-#![feature(char_internals)]
 #![feature(const_raw_ptr_comparison)]
 #![feature(control_flow_into_value)]
 #![feature(debug_closure_helpers)]
@@ -277,7 +279,13 @@ fn check_that_qemu_cpu_was_set() {
             assert_eq!("cortex-a53", qemu_cpu);
         }
     } else if cfg!(target_arch = "arm") {
-        assert_eq!("cortex-m4", qemu_cpu);
+        if cfg!(target_feature = "mclass") {
+            assert_eq!("cortex-m4", qemu_cpu);
+        } else if cfg!(target_feature = "rclass") {
+            assert_eq!("cortex-r5f", qemu_cpu);
+        } else {
+            panic!("extend this logic")
+        }
     } else {
         panic!("extend this logic")
     }

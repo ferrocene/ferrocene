@@ -12,12 +12,14 @@ use rustc_errors::{ErrorGuaranteed, MultiSpan};
 use rustc_hir as hir;
 use rustc_hir::LangItem;
 use rustc_hir::def_id::DefId;
-use rustc_macros::{HashStable, TyDecodable, TyEncodable, TypeFoldable, extension};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable, TypeFoldable, extension};
 use rustc_span::{DUMMY_SP, Span, Symbol, kw, sym};
 use rustc_type_ir::TyKind::*;
 use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::walk::TypeWalker;
-use rustc_type_ir::{self as ir, BoundVar, CollectAndApply, TypeVisitableExt, elaborate};
+use rustc_type_ir::{
+    self as ir, BoundVar, CollectAndApply, MayBeErased, TypeVisitableExt, elaborate,
+};
 use tracing::instrument;
 use ty::util::IntTypeExt;
 
@@ -27,7 +29,7 @@ use crate::traits::ObligationCause;
 use crate::ty::InferTy::*;
 use crate::ty::{
     self, AdtDef, Const, Discr, GenericArg, GenericArgs, GenericArgsRef, List, ParamEnv, Region,
-    Ty, TyCtxt, TypeFlags, TypeSuperVisitable, TypeVisitable, TypeVisitor, UintTy, ValTree,
+    Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitor, UintTy, ValTree,
 };
 
 // Re-export and re-parameterize some `I = TyCtxt<'tcx>` types here
@@ -37,9 +39,11 @@ pub type TypeAndMut<'tcx> = ir::TypeAndMut<TyCtxt<'tcx>>;
 pub type AliasTy<'tcx> = ir::AliasTy<TyCtxt<'tcx>>;
 pub type AliasTyKind<'tcx> = ir::AliasTyKind<TyCtxt<'tcx>>;
 pub type FnSig<'tcx> = ir::FnSig<TyCtxt<'tcx>>;
+pub type FnSigKind<'tcx> = ir::FnSigKind<TyCtxt<'tcx>>;
 pub type Binder<'tcx, T> = ir::Binder<TyCtxt<'tcx>, T>;
 pub type EarlyBinder<'tcx, T> = ir::EarlyBinder<TyCtxt<'tcx>, T>;
-pub type TypingMode<'tcx> = ir::TypingMode<TyCtxt<'tcx>>;
+pub type Unnormalized<'tcx, T> = ir::Unnormalized<TyCtxt<'tcx>, T>;
+pub type TypingMode<'tcx, S = MayBeErased> = ir::TypingMode<TyCtxt<'tcx>, S>;
 pub type TypingModeEqWrapper<'tcx> = ir::TypingModeEqWrapper<TyCtxt<'tcx>>;
 pub type Placeholder<'tcx, T> = ir::Placeholder<TyCtxt<'tcx>, T>;
 pub type PlaceholderRegion<'tcx> = ir::PlaceholderRegion<TyCtxt<'tcx>>;
@@ -157,7 +161,9 @@ impl<'tcx> ty::CoroutineArgs<TyCtxt<'tcx>> {
                 if tcx.is_async_drop_in_place_coroutine(def_id) {
                     layout.field_tys[*field].ty
                 } else {
-                    ty::EarlyBinder::bind(layout.field_tys[*field].ty).instantiate(tcx, self.args)
+                    ty::EarlyBinder::bind(layout.field_tys[*field].ty)
+                        .instantiate(tcx, self.args)
+                        .skip_norm_wip()
                 }
             })
         })
@@ -171,7 +177,7 @@ impl<'tcx> ty::CoroutineArgs<TyCtxt<'tcx>> {
     }
 }
 
-#[derive(Debug, Copy, Clone, HashStable, TypeFoldable, TypeVisitable)]
+#[derive(Debug, Copy, Clone, StableHash, TypeFoldable, TypeVisitable)]
 pub enum UpvarArgs<'tcx> {
     Closure(GenericArgsRef<'tcx>),
     Coroutine(GenericArgsRef<'tcx>),
@@ -272,7 +278,7 @@ pub type PolyFnSig<'tcx> = Binder<'tcx, FnSig<'tcx>>;
 pub type CanonicalPolyFnSig<'tcx> = Canonical<'tcx, Binder<'tcx, FnSig<'tcx>>>;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, TyEncodable, TyDecodable)]
-#[derive(HashStable)]
+#[derive(StableHash)]
 pub struct ParamTy {
     pub index: u32,
     pub name: Symbol,
@@ -306,7 +312,7 @@ impl<'tcx> ParamTy {
 }
 
 #[derive(Copy, Clone, Hash, TyEncodable, TyDecodable, Eq, PartialEq, Ord, PartialOrd)]
-#[derive(HashStable)]
+#[derive(StableHash)]
 pub struct ParamConst {
     pub index: u32,
     pub name: Symbol,
@@ -873,7 +879,7 @@ impl<'tcx> Ty<'tcx> {
                     ty_param.into()
                 } else {
                     assert!(has_default);
-                    tcx.type_of(param.def_id).instantiate(tcx, args).into()
+                    tcx.type_of(param.def_id).instantiate(tcx, args).skip_norm_wip().into()
                 }
             }
         });
@@ -1121,12 +1127,6 @@ impl<'tcx> Ty<'tcx> {
         self.0.0
     }
 
-    // FIXME(compiler-errors): Think about removing this.
-    #[inline(always)]
-    pub fn flags(self) -> TypeFlags {
-        self.0.0.flags
-    }
-
     #[inline]
     pub fn is_unit(self) -> bool {
         match self.kind() {
@@ -1277,7 +1277,10 @@ impl<'tcx> Ty<'tcx> {
             ScalableElt::ElementCount(_) => (NumScalableVectors::for_non_tuple(), *def),
             ScalableElt::Container => (
                 NumScalableVectors::from_field_count(def.non_enum_variant().fields.len())?,
-                def.non_enum_variant().fields[FieldIdx::ZERO].ty(tcx, args).ty_adt_def()?,
+                def.non_enum_variant().fields[FieldIdx::ZERO]
+                    .ty(tcx, args)
+                    .skip_norm_wip()
+                    .ty_adt_def()?,
             ),
         };
         let Some(ScalableElt::ElementCount(element_count)) = vec_def.repr().scalable else {
@@ -1286,7 +1289,7 @@ impl<'tcx> Ty<'tcx> {
         let variant = vec_def.non_enum_variant();
         assert_eq!(variant.fields.len(), 1);
         let field_ty = variant.fields[FieldIdx::ZERO].ty(tcx, args);
-        Some((element_count, field_ty, num_vectors))
+        Some((element_count, field_ty.skip_norm_wip(), num_vectors))
     }
 
     pub fn simd_size_and_type(self, tcx: TyCtxt<'tcx>) -> (u64, Ty<'tcx>) {
@@ -1297,7 +1300,7 @@ impl<'tcx> Ty<'tcx> {
         let variant = def.non_enum_variant();
         assert_eq!(variant.fields.len(), 1);
         let field_ty = variant.fields[FieldIdx::ZERO].ty(tcx, args);
-        let Array(f0_elem_ty, f0_len) = field_ty.kind() else {
+        let Array(f0_elem_ty, f0_len) = field_ty.skip_norm_wip().kind() else {
             bug!("Simd type has non-array field type {field_ty:?}")
         };
         // FIXME(repr_simd): https://github.com/rust-lang/rust/pull/78863#discussion_r522784112
@@ -1730,7 +1733,7 @@ impl<'tcx> Ty<'tcx> {
     pub fn ptr_metadata_ty_or_tail(
         self,
         tcx: TyCtxt<'tcx>,
-        normalize: impl FnMut(Ty<'tcx>) -> Ty<'tcx>,
+        normalize: impl FnMut(Unnormalized<'tcx, Ty<'tcx>>) -> Ty<'tcx>,
     ) -> Result<Ty<'tcx>, Ty<'tcx>> {
         let tail = tcx.struct_tail_raw(self, &ObligationCause::dummy(), normalize, || {});
         match tail.kind() {
@@ -1751,28 +1754,28 @@ impl<'tcx> Ty<'tcx> {
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
             | ty::Never
-            | ty::Error(_)
+            | ty::Error(_) => Ok(tcx.types.unit),
             // Extern types have metadata = ().
-            | ty::Foreign(..)
+            ty::Foreign(..) => Ok(tcx.types.unit),
             // If returned by `struct_tail_raw` this is a unit struct
             // without any fields, or not a struct, and therefore is Sized.
-            | ty::Adt(..)
+            ty::Adt(..) => Ok(tcx.types.unit),
             // If returned by `struct_tail_raw` this is the empty tuple,
             // a.k.a. unit type, which is Sized
-            | ty::Tuple(..) => Ok(tcx.types.unit),
+            ty::Tuple(..) => Ok(tcx.types.unit),
 
             ty::Str | ty::Slice(_) => Ok(tcx.types.usize),
 
             ty::Dynamic(_, _) => {
                 let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, DUMMY_SP);
-                Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]))
+                Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]).skip_norm_wip())
             }
 
             // We don't know the metadata of `self`, but it must be equal to the
             // metadata of `tail`.
             ty::Param(_) | ty::Alias(..) => Err(tail),
 
-            | ty::UnsafeBinder(_) => todo!("FIXME(unsafe_binder)"),
+            ty::UnsafeBinder(_) => todo!("FIXME(unsafe_binder)"),
 
             ty::Infer(ty::TyVar(_))
             | ty::Pat(..)
@@ -1789,7 +1792,7 @@ impl<'tcx> Ty<'tcx> {
     pub fn ptr_metadata_ty(
         self,
         tcx: TyCtxt<'tcx>,
-        normalize: impl FnMut(Ty<'tcx>) -> Ty<'tcx>,
+        normalize: impl FnMut(Unnormalized<'tcx, Ty<'tcx>>) -> Ty<'tcx>,
     ) -> Ty<'tcx> {
         match self.ptr_metadata_ty_or_tail(tcx, normalize) {
             Ok(metadata) => metadata,
@@ -1815,7 +1818,7 @@ impl<'tcx> Ty<'tcx> {
         if pointee_ty.has_trivial_sizedness(tcx, SizedTraitKind::Sized) {
             tcx.types.unit
         } else {
-            match pointee_ty.ptr_metadata_ty_or_tail(tcx, |x| x) {
+            match pointee_ty.ptr_metadata_ty_or_tail(tcx, |x| x.skip_norm_wip()) {
                 Ok(metadata_ty) => metadata_ty,
                 Err(tail_ty) => {
                     let metadata_def_id = tcx.require_lang_item(LangItem::Metadata, DUMMY_SP);
@@ -1956,9 +1959,9 @@ impl<'tcx> Ty<'tcx> {
 
             ty::Tuple(tys) => tys.last().is_none_or(|ty| ty.has_trivial_sizedness(tcx, sizedness)),
 
-            ty::Adt(def, args) => def
-                .sizedness_constraint(tcx, sizedness)
-                .is_none_or(|ty| ty.instantiate(tcx, args).has_trivial_sizedness(tcx, sizedness)),
+            ty::Adt(def, args) => def.sizedness_constraint(tcx, sizedness).is_none_or(|ty| {
+                ty.instantiate(tcx, args).skip_norm_wip().has_trivial_sizedness(tcx, sizedness)
+            }),
 
             ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) | ty::Bound(..) => false,
 
@@ -2169,6 +2172,6 @@ mod size_asserts {
     use super::*;
     // tidy-alphabetical-start
     static_assert_size!(TyKind<'_>, 32);
-    static_assert_size!(ty::WithCachedTypeInfo<TyKind<'_>>, 56);
+    static_assert_size!(ty::WithCachedTypeInfo<TyKind<'_>>, 40);
     // tidy-alphabetical-end
 }

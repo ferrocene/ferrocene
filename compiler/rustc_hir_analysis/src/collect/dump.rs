@@ -3,8 +3,27 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{find_attr, intravisit};
 use rustc_middle::hir::nested_filter;
-use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt, Unnormalized};
 use rustc_span::sym;
+
+pub(crate) fn generics(tcx: TyCtxt<'_>) {
+    for did in tcx.hir_crate_items(()).definitions() {
+        if did == hir::def_id::CRATE_DEF_ID {
+            continue;
+        }
+
+        if find_attr!(tcx, did, RustcDumpGenerics) {
+            let span = tcx.def_span(did);
+
+            let mut diag =
+                tcx.dcx().struct_span_err(span, format!("{}: {did:?}", sym::rustc_dump_generics));
+
+            let generics = tcx.generics_of(did);
+            diag.span_note(tcx.def_span(did), format!("{generics:#?}"));
+            diag.emit();
+        }
+    }
+}
 
 pub(crate) fn opaque_hidden_types(tcx: TyCtxt<'_>) {
     if !find_attr!(tcx, crate, RustcDumpHiddenTypeOfOpaques) {
@@ -20,9 +39,9 @@ pub(crate) fn opaque_hidden_types(tcx: TyCtxt<'_>) {
             continue;
         }
 
-        let ty = tcx.type_of(id).instantiate_identity();
+        let ty = tcx.type_of(id).instantiate_identity().skip_norm_wip();
         let span = tcx.def_span(id);
-        tcx.dcx().emit_err(crate::errors::TypeOf { span, ty });
+        tcx.dcx().emit_err(crate::diagnostics::TypeOf { span, ty });
     }
 }
 
@@ -32,7 +51,12 @@ pub(crate) fn predicates_and_item_bounds(tcx: TyCtxt<'_>) {
         let attrs = tcx.get_all_attrs(id);
 
         if find_attr!(attrs, RustcDumpPredicates) {
-            let preds = tcx.predicates_of(id).instantiate_identity(tcx).predicates;
+            let preds = tcx
+                .predicates_of(id)
+                .instantiate_identity(tcx)
+                .predicates
+                .into_iter()
+                .map(Unnormalized::skip_norm_wip);
             let span = tcx.def_span(id);
 
             let mut diag = tcx.dcx().struct_span_err(span, sym::rustc_dump_predicates.as_str());
@@ -47,7 +71,7 @@ pub(crate) fn predicates_and_item_bounds(tcx: TyCtxt<'_>) {
 
             match tcx.def_kind(id) {
                 DefKind::AssocTy => {
-                    let bounds = tcx.item_bounds(id).instantiate_identity();
+                    let bounds = tcx.item_bounds(id).instantiate_identity().skip_norm_wip();
                     let span = tcx.def_span(id);
 
                     let mut diag = tcx.dcx().struct_span_err(span, name);
@@ -96,10 +120,9 @@ pub(crate) fn def_parents(tcx: TyCtxt<'_>) {
             for did in [did].into_iter().chain(anon_ct_finder.anon_consts) {
                 let span = tcx.def_span(did);
 
-                let mut diag = tcx.dcx().struct_span_err(
-                    span,
-                    format!("{}: {did:?}", sym::rustc_dump_def_parents.as_str()),
-                );
+                let mut diag = tcx
+                    .dcx()
+                    .struct_span_err(span, format!("{}: {did:?}", sym::rustc_dump_def_parents));
 
                 let mut current_did = did.to_def_id();
                 while let Some(parent_did) = tcx.opt_parent(current_did) {
@@ -123,14 +146,14 @@ pub(crate) fn vtables<'tcx>(tcx: TyCtxt<'tcx>) {
         let vtable_entries = match tcx.hir_item(id).kind {
             hir::ItemKind::Impl(hir::Impl { of_trait: Some(_), .. }) => {
                 let trait_ref = tcx.impl_trait_ref(def_id).instantiate_identity();
-                if trait_ref.has_non_region_param() {
+                if trait_ref.skip_normalization().has_non_region_param() {
                     tcx.dcx().span_err(
                         attr_span,
                         "`rustc_dump_vtable` must be applied to non-generic impl",
                     );
                     continue;
                 }
-                if !tcx.is_dyn_compatible(trait_ref.def_id) {
+                if !tcx.is_dyn_compatible(trait_ref.skip_normalization().def_id) {
                     tcx.dcx().span_err(
                         attr_span,
                         "`rustc_dump_vtable` must be applied to dyn-compatible trait",

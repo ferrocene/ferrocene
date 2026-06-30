@@ -5,7 +5,7 @@
 )]
 #![feature(ascii_char)]
 #![feature(ascii_char_variants)]
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![feature(file_buffered)]
 #![feature(formatting_options)]
 #![feature(iter_intersperse)]
@@ -13,8 +13,10 @@
 #![feature(rustc_private)]
 #![feature(test)]
 #![feature(trim_prefix_suffix)]
+#![feature(variant_count)]
 #![recursion_limit = "256"]
 #![warn(rustc::internal)]
+#![warn(rustc::symbol_intern_string_literal)]
 // tidy-alphabetical-end
 
 // N.B. these need `extern crate` even in 2018 edition
@@ -81,6 +83,7 @@ use rustc_span::{BytePos, Span, SyntaxContext};
 use tracing::info;
 
 use crate::clean::utils::DOC_RUST_LANG_ORG_VERSION;
+use crate::config::EmitType;
 use crate::error::Error;
 use crate::formats::cache::Cache;
 
@@ -457,6 +460,14 @@ fn opts() -> Vec<RustcOptGroup> {
                 By default, it is at `forbid` level.",
             "LEVEL",
         ),
+        opt(
+            Stable,
+            Multi,
+            "",
+            "remap-path-prefix",
+            "Remap source names in compiler messages",
+            "FROM=TO",
+        ),
         opt(Unstable, Opt, "", "index-page", "Markdown file to be used as index page", "PATH"),
         opt(
             Unstable,
@@ -533,7 +544,7 @@ fn opts() -> Vec<RustcOptGroup> {
             "",
         ),
         opt(
-            Unstable,
+            Stable,
             Multi,
             "",
             "emit",
@@ -551,11 +562,11 @@ fn opts() -> Vec<RustcOptGroup> {
         ),
         opt(
             Unstable,
-            Multi,
+            Opt,
             "",
-            "remap-path-prefix",
-            "Remap source names in compiler messages",
-            "FROM=TO",
+            "remap-path-scope",
+            "Defines which scopes of paths should be remapped by `--remap-path-prefix`",
+            "[macro,diagnostics,debuginfo,coverage,object,all]",
         ),
         opt(
             Unstable,
@@ -870,7 +881,9 @@ fn main_args(early_dcx: &mut EarlyDiagCtxt, at_args: &[String]) {
                     };
                     rustc_interface::create_and_enter_global_ctxt(compiler, krate, |tcx| {
                         let has_dep_info = render_options.dep_info().is_some();
-                        markdown::render_and_write(file, render_options, edition)?;
+                        if render_options.emit.contains(&EmitType::HtmlNonStaticFiles) {
+                            markdown::render_and_write(file, render_options, edition)?;
+                        }
                         if has_dep_info {
                             // Register the loaded external files in the source map so they show up in depinfo.
                             // We can't load them via the source map because it gets created after we process the options.

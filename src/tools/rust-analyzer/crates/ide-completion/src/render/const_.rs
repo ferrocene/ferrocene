@@ -6,12 +6,15 @@ use syntax::ToSmolStr;
 
 use crate::{item::CompletionItem, render::RenderContext};
 
-pub(crate) fn render_const(ctx: RenderContext<'_>, const_: hir::Const) -> Option<CompletionItem> {
+pub(crate) fn render_const(
+    ctx: RenderContext<'_, '_>,
+    const_: hir::Const,
+) -> Option<CompletionItem> {
     let _p = tracing::info_span!("render_const").entered();
     render(ctx, const_)
 }
 
-fn render(ctx: RenderContext<'_>, const_: hir::Const) -> Option<CompletionItem> {
+fn render(ctx: RenderContext<'_, '_>, const_: hir::Const) -> Option<CompletionItem> {
     let db = ctx.db();
     let name = const_.name(db)?;
     let (name, escaped_name) =
@@ -21,7 +24,7 @@ fn render(ctx: RenderContext<'_>, const_: hir::Const) -> Option<CompletionItem> 
     let mut item =
         CompletionItem::new(SymbolKind::Const, ctx.source_range(), name, ctx.completion.edition);
     item.set_documentation(ctx.docs(const_))
-        .set_deprecated(ctx.is_deprecated(const_) || ctx.is_deprecated_assoc_item(const_))
+        .set_deprecated(ctx.is_deprecated(const_, const_.as_assoc_item(db)))
         .detail(detail)
         .set_relevance(ctx.completion_relevance());
 

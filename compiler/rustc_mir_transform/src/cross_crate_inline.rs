@@ -1,7 +1,7 @@
 use rustc_hir::attrs::InlineAttr;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::find_attr;
+use rustc_hir::{self as hir, find_attr};
 use rustc_middle::bug;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
@@ -43,6 +43,12 @@ fn cross_crate_inlinable(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
         return true;
     }
 
+    if let hir::Constness::Const { always: true } = tcx.constness(def_id) {
+        // Comptime functions only exist during const eval and can never be passed
+        // to codegen. The const eval MIR pipeline also doesn't inline anything at all.
+        return false;
+    }
+
     // Obey source annotations first; this is important because it means we can use
     // #[inline(never)] to force code generation.
     match codegen_fn_attrs.inline {
@@ -58,7 +64,7 @@ fn cross_crate_inlinable(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
         return true;
     }
 
-    let sig = tcx.fn_sig(def_id).instantiate_identity();
+    let sig = tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip();
     for ty in sig.inputs().skip_binder().iter().chain(std::iter::once(&sig.output().skip_binder()))
     {
         // FIXME(f16_f128): in order to avoid crashes building `core`, always inline to skip

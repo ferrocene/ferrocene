@@ -5,7 +5,7 @@ use hir::{EnumVariant, HasCrate, Module, ModuleDef, Name};
 use ide_db::{
     FxHashSet, RootDatabase,
     defs::Definition,
-    helpers::mod_path_to_ast,
+    helpers::mod_path_to_ast_with_factory,
     imports::insert_use::{ImportScope, InsertUseConfig, insert_use_with_editor},
     path_transform::PathTransform,
     search::FileReference,
@@ -40,7 +40,7 @@ use crate::{AssistContext, AssistId, Assists};
 // ```
 pub(crate) fn extract_struct_from_enum_variant(
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
 ) -> Option<()> {
     let variant = ctx.find_node_at_offset::<ast::Variant>()?;
     let field_list = extract_field_list_if_applicable(&variant)?;
@@ -60,8 +60,8 @@ pub(crate) fn extract_struct_from_enum_variant(
         "Extract struct from enum variant",
         target,
         |builder| {
-            let make = SyntaxFactory::with_mappings();
-            let mut editor = builder.make_editor(variant.syntax());
+            let editor = builder.make_editor(variant.syntax());
+            let make = editor.make();
             let edition = enum_hir.krate(ctx.db()).edition(ctx.db());
             let variant_hir_name = variant_hir.name(ctx.db());
             let enum_module_def = ModuleDef::from(enum_hir);
@@ -87,7 +87,7 @@ pub(crate) fn extract_struct_from_enum_variant(
                 if processed.is_empty() {
                     continue;
                 }
-                let mut file_editor = builder.make_editor(processed[0].0.syntax());
+                let file_editor = builder.make_editor(processed[0].0.syntax());
                 processed.into_iter().for_each(|(path, node, import)| {
                     apply_references(
                         ctx.config.insert_use,
@@ -95,11 +95,9 @@ pub(crate) fn extract_struct_from_enum_variant(
                         node,
                         import,
                         edition,
-                        &mut file_editor,
-                        &make,
+                        &file_editor,
                     )
                 });
-                file_editor.add_mappings(make.take());
                 builder.add_file_edits(file_id.file_id(ctx.db()), file_editor);
             }
 
@@ -112,20 +110,12 @@ pub(crate) fn extract_struct_from_enum_variant(
                     references,
                 );
                 processed.into_iter().for_each(|(path, node, import)| {
-                    apply_references(
-                        ctx.config.insert_use,
-                        path,
-                        node,
-                        import,
-                        edition,
-                        &mut editor,
-                        &make,
-                    )
+                    apply_references(ctx.config.insert_use, path, node, import, edition, &editor)
                 });
             }
 
             let generic_params = enum_ast.generic_param_list().and_then(|known_generics| {
-                extract_generic_params(&make, &known_generics, &field_list)
+                extract_generic_params(make, &known_generics, &field_list)
             });
 
             // resolve GenericArg in field_list to actual type
@@ -148,13 +138,13 @@ pub(crate) fn extract_struct_from_enum_variant(
             };
 
             let (comments_for_struct, comments_to_delete) =
-                collect_variant_comments(&make, variant.syntax());
+                collect_variant_comments(make, variant.syntax());
             for element in &comments_to_delete {
                 editor.delete(element.clone());
             }
 
             let def = create_struct_def(
-                &make,
+                make,
                 variant_name.clone(),
                 &field_list,
                 generic_params.clone(),
@@ -173,15 +163,10 @@ pub(crate) fn extract_struct_from_enum_variant(
             insert_items.extend(comments_for_struct);
             insert_items.push(def.syntax().clone().into());
             insert_items.push(make.whitespace(&format!("\n\n{indent}")).into());
-            editor.insert_all_with_whitespace(
-                Position::before(enum_ast.syntax()),
-                insert_items,
-                &make,
-            );
+            editor.insert_all_with_whitespace(Position::before(enum_ast.syntax()), insert_items);
 
-            update_variant(&make, &mut editor, &variant, generic_params);
+            update_variant(&editor, &variant, generic_params);
 
-            editor.add_mappings(make.finish_with_mappings());
             builder.add_file_edits(ctx.vfs_file_id(), editor);
         },
     )
@@ -230,6 +215,7 @@ fn extract_generic_params(
 ) -> Option<ast::GenericParamList> {
     let mut generics = known_generics.generic_params().map(|param| (param, false)).collect_vec();
 
+    #[expect(clippy::unnecessary_fold, reason = "this function has side effects")]
     let tagged_one = match field_list {
         Either::Left(field_list) => field_list
             .fields()
@@ -340,15 +326,15 @@ fn create_struct_def(
 }
 
 fn update_variant(
-    make: &SyntaxFactory,
-    editor: &mut SyntaxEditor,
+    editor: &SyntaxEditor,
     variant: &ast::Variant,
     generics: Option<ast::GenericParamList>,
 ) -> Option<()> {
+    let make = editor.make();
     let name = variant.name()?;
     let generic_args = generics
         .filter(|generics| generics.generic_params().count() > 0)
-        .map(|generics| generics.to_generic_args());
+        .map(|generics| generics.to_generic_args(make));
     // FIXME: replace with a `ast::make` constructor
     let ty = match generic_args {
         Some(generic_args) => make.ty(&format!("{name}{generic_args}")),
@@ -407,16 +393,15 @@ fn apply_references(
     node: SyntaxNode,
     import: Option<(ImportScope, hir::ModPath)>,
     edition: Edition,
-    editor: &mut SyntaxEditor,
-    make: &SyntaxFactory,
+    editor: &SyntaxEditor,
 ) {
+    let make = editor.make();
     if let Some((scope, path)) = import {
         insert_use_with_editor(
             &scope,
-            mod_path_to_ast(&path, edition),
+            mod_path_to_ast_with_factory(make, &path, edition),
             &insert_use_cfg,
             editor,
-            make,
         );
     }
     // deep clone to prevent cycle
@@ -427,7 +412,7 @@ fn apply_references(
 }
 
 fn process_references(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     visited_modules: &mut FxHashSet<Module>,
     enum_module_def: &ModuleDef,
     variant_hir_name: &Name,

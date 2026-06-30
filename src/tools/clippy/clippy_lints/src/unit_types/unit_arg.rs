@@ -159,7 +159,7 @@ fn lint_unit_args<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>, args_to_
 fn is_expr_default_nested<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>) -> bool {
     is_expr_default(cx, expr)
         || matches!(expr.kind, ExprKind::Block(block, _)
-        if block.expr.is_some() && is_expr_default_nested(cx, block.expr.unwrap()))
+        if block.expr.is_some_and(|e| is_expr_default_nested(cx, e)))
 }
 
 enum MaybeTypeUncertain<'tcx> {
@@ -231,9 +231,8 @@ fn fmt_stmts_and_call(
         let block_indent = call_expr_indent + 4;
         stmts_and_call_snippet = reindent_multiline(&stmts_and_call_snippet, true, Some(block_indent));
         stmts_and_call_snippet = format!(
-            "{{\n{}{}\n{}}}",
+            "{{\n{}{stmts_and_call_snippet}\n{}}}",
             " ".repeat(block_indent),
-            &stmts_and_call_snippet,
             " ".repeat(call_expr_indent)
         );
     }

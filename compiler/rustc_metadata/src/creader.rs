@@ -1,10 +1,8 @@
 //! Validates all used crates and extern libraries and loads their metadata
 
 use std::collections::BTreeMap;
-use std::error::Error;
 use std::path::Path;
 use std::str::FromStr;
-use std::time::Duration;
 use std::{cmp, env, iter};
 
 use rustc_ast::expand::allocator::{ALLOC_ERROR_HANDLER, AllocatorKind, global_fn_name};
@@ -15,7 +13,6 @@ use rustc_data_structures::svh::Svh;
 use rustc_data_structures::sync::{self, FreezeReadGuard, FreezeWriteGuard};
 use rustc_data_structures::unord::UnordMap;
 use rustc_expand::base::SyntaxExtension;
-use rustc_fs_util::try_canonicalize;
 use rustc_hir as hir;
 use rustc_hir::def_id::{CrateNum, LOCAL_CRATE, LocalDefId, StableCrateId};
 use rustc_hir::definitions::Definitions;
@@ -23,7 +20,7 @@ use rustc_index::IndexVec;
 use rustc_middle::bug;
 use rustc_middle::ty::data_structures::IndexSet;
 use rustc_middle::ty::{TyCtxt, TyCtxtFeed};
-use rustc_proc_macro::bridge::client::ProcMacro;
+use rustc_proc_macro::bridge::client::Client as ProcMacroClient;
 use rustc_session::config::mitigation_coverage::DeniedPartialMitigationLevel;
 use rustc_session::config::{
     CrateType, ExtendedTargetModifierInfo, ExternLocation, Externs, OptionsTargetModifiers,
@@ -39,7 +36,7 @@ use rustc_span::{DUMMY_SP, Ident, Span, Symbol, sym};
 use rustc_target::spec::{PanicStrategy, Target};
 use tracing::{debug, info, trace};
 
-use crate::errors;
+use crate::diagnostics;
 use crate::locator::{CrateError, CrateLocator, CratePaths, CrateRejections};
 use crate::rmeta::{
     CrateDep, CrateMetadata, CrateNumMap, CrateRoot, MetadataBlob, TargetModifiers,
@@ -109,21 +106,6 @@ pub(crate) struct Library {
 enum LoadResult {
     Previous(CrateNum),
     Loaded(Library),
-}
-
-/// A reference to `CrateMetadata` that can also give access to whole crate store when necessary.
-#[derive(Clone, Copy)]
-pub(crate) struct CrateMetadataRef<'a> {
-    pub cdata: &'a CrateMetadata,
-    pub cstore: &'a CStore,
-}
-
-impl std::ops::Deref for CrateMetadataRef<'_> {
-    type Target = CrateMetadata;
-
-    fn deref(&self) -> &Self::Target {
-        self.cdata
-    }
 }
 
 struct CrateDump<'a>(&'a CStore);
@@ -245,11 +227,8 @@ impl CStore {
         self.metas[cnum].is_some()
     }
 
-    pub(crate) fn get_crate_data(&self, cnum: CrateNum) -> CrateMetadataRef<'_> {
-        let cdata = self.metas[cnum]
-            .as_ref()
-            .unwrap_or_else(|| panic!("Failed to get crate data for {cnum:?}"));
-        CrateMetadataRef { cdata, cstore: self }
+    pub(crate) fn get_crate_data(&self, cnum: CrateNum) -> &CrateMetadata {
+        self.metas[cnum].as_ref().unwrap_or_else(|| panic!("Failed to get crate data for {cnum:?}"))
     }
 
     pub(crate) fn get_crate_data_mut(&mut self, cnum: CrateNum) -> &mut CrateMetadata {
@@ -284,14 +263,13 @@ impl CStore {
     }
 
     pub fn all_proc_macro_def_ids(&self, tcx: TyCtxt<'_>) -> impl Iterator<Item = DefId> {
-        self.iter_crate_data()
-            .flat_map(move |(krate, data)| data.proc_macros_for_crate(tcx, krate, self))
+        self.iter_crate_data().flat_map(move |(krate, data)| data.proc_macros_for_crate(tcx, krate))
     }
 
     fn push_dependencies_in_postorder(&self, deps: &mut IndexSet<CrateNum>, cnum: CrateNum) {
         if !deps.contains(&cnum) {
-            let data = self.get_crate_data(cnum);
-            for dep in data.dependencies() {
+            let cdata = self.get_crate_data(cnum);
+            for dep in cdata.dependencies() {
                 if dep != cnum {
                     self.push_dependencies_in_postorder(deps, dep);
                 }
@@ -347,8 +325,11 @@ impl CStore {
             return;
         }
         let level = tcx
-            .lint_level_at_node(lint::builtin::UNUSED_CRATE_DEPENDENCIES, rustc_hir::CRATE_HIR_ID)
-            .level;
+            .lint_level_spec_at_node(
+                lint::builtin::UNUSED_CRATE_DEPENDENCIES,
+                rustc_hir::CRATE_HIR_ID,
+            )
+            .level();
         if level != lint::Level::Allow {
             let unused_externs =
                 self.unused_externs.iter().map(|ident| ident.to_ident_string()).collect::<Vec<_>>();
@@ -381,7 +362,7 @@ impl CStore {
 
             match (flag_local_value, flag_extern_value) {
                 (Some(local_value), Some(extern_value)) => {
-                    tcx.dcx().emit_err(errors::IncompatibleTargetModifiers {
+                    tcx.dcx().emit_err(diagnostics::IncompatibleTargetModifiers {
                         span,
                         extern_crate,
                         local_crate,
@@ -392,7 +373,7 @@ impl CStore {
                     })
                 }
                 (None, Some(extern_value)) => {
-                    tcx.dcx().emit_err(errors::IncompatibleTargetModifiersLMissed {
+                    tcx.dcx().emit_err(diagnostics::IncompatibleTargetModifiersLMissed {
                         span,
                         extern_crate,
                         local_crate,
@@ -402,7 +383,7 @@ impl CStore {
                     })
                 }
                 (Some(local_value), None) => {
-                    tcx.dcx().emit_err(errors::IncompatibleTargetModifiersRMissed {
+                    tcx.dcx().emit_err(diagnostics::IncompatibleTargetModifiersRMissed {
                         span,
                         extern_crate,
                         local_crate,
@@ -474,7 +455,7 @@ impl CStore {
     pub fn report_incompatible_target_modifiers(&self, tcx: TyCtxt<'_>, krate: &Crate) {
         for flag_name in &tcx.sess.opts.cg.unsafe_allow_abi_mismatch {
             if !OptionsTargetModifiers::is_target_modifier(flag_name) {
-                tcx.dcx().emit_err(errors::UnknownTargetModifierUnsafeAllowed {
+                tcx.dcx().emit_err(diagnostics::UnknownTargetModifierUnsafeAllowed {
                     span: krate.spans.inner_span.shrink_to_lo(),
                     flag_name: flag_name.clone(),
                 });
@@ -518,7 +499,7 @@ impl CStore {
                     }
                     *errors += 1;
 
-                    tcx.dcx().emit_err(errors::MitigationLessStrictInDependency {
+                    tcx.dcx().emit_err(diagnostics::MitigationLessStrictInDependency {
                         span: krate.spans.inner_span.shrink_to_lo(),
                         mitigation_name: my_mitigation.kind.to_string(),
                         mitigation_level: my_mitigation.level.level_str().to_string(),
@@ -541,7 +522,7 @@ impl CStore {
             if data.has_async_drops() {
                 let extern_crate = data.name();
                 let local_crate = tcx.crate_name(LOCAL_CRATE);
-                tcx.dcx().emit_warn(errors::AsyncDropTypesInDependency {
+                tcx.dcx().emit_warn(diagnostics::AsyncDropTypesInDependency {
                     span: krate.spans.inner_span.shrink_to_lo(),
                     extern_crate,
                     local_crate,
@@ -669,14 +650,13 @@ impl CStore {
                 None => (&source, &crate_root),
             };
             let dlsym_dylib = dlsym_source.dylib.as_ref().expect("no dylib for a proc-macro crate");
-            Some(self.dlsym_proc_macros(tcx.sess, dlsym_dylib, dlsym_root.stable_crate_id())?)
+            Some(self.dlsym_proc_macros(dlsym_dylib, dlsym_root.stable_crate_id())?)
         } else {
             None
         };
 
         let crate_metadata = CrateMetadata::new(
             tcx,
-            self,
             metadata,
             crate_root,
             raw_proc_macros,
@@ -865,12 +845,12 @@ impl CStore {
                 // `private-dependency` when `register_crate` is called for the first time. Then it must be updated to
                 // `public-dependency` here.
                 let private_dep = self.is_private_dep(&tcx.sess.opts.externs, name, private_dep);
-                let data = self.get_crate_data_mut(cnum);
-                if data.is_proc_macro_crate() {
+                let cdata = self.get_crate_data_mut(cnum);
+                if cdata.is_proc_macro_crate() {
                     dep_kind = CrateDepKind::MacrosOnly;
                 }
-                data.set_dep_kind(cmp::max(data.dep_kind(), dep_kind));
-                data.update_and_private_dep(private_dep);
+                cdata.set_dep_kind(cmp::max(cdata.dep_kind(), dep_kind));
+                cdata.update_and_private_dep(private_dep);
                 Ok(cnum)
             }
             (LoadResult::Loaded(library), host_library) => {
@@ -965,30 +945,10 @@ impl CStore {
 
     fn dlsym_proc_macros(
         &self,
-        sess: &Session,
         path: &Path,
         stable_crate_id: StableCrateId,
-    ) -> Result<&'static [ProcMacro], CrateError> {
-        let sym_name = sess.generate_proc_macro_decls_symbol(stable_crate_id);
-        debug!("trying to dlsym proc_macros {} for symbol `{}`", path.display(), sym_name);
-
-        unsafe {
-            let result = load_symbol_from_dylib::<*const &[ProcMacro]>(path, &sym_name);
-            match result {
-                Ok(result) => {
-                    debug!("loaded dlsym proc_macros {} for symbol `{}`", path.display(), sym_name);
-                    Ok(*result)
-                }
-                Err(err) => {
-                    debug!(
-                        "failed to dlsym proc_macros {} for symbol `{}`",
-                        path.display(),
-                        sym_name
-                    );
-                    Err(err.into())
-                }
-            }
-        }
+    ) -> Result<&'static [ProcMacroClient], CrateError> {
+        Ok(crate::host_dylib::dlsym_proc_macros(path, stable_crate_id)?)
     }
 
     fn inject_panic_runtime(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
@@ -1045,16 +1005,18 @@ impl CStore {
         ) else {
             return;
         };
-        let data = self.get_crate_data(cnum);
+        let cdata = self.get_crate_data(cnum);
 
         // Sanity check the loaded crate to ensure it is indeed a panic runtime
         // and the panic strategy is indeed what we thought it was.
-        if !data.is_panic_runtime() {
-            tcx.dcx().emit_err(errors::CrateNotPanicRuntime { crate_name: name });
+        if !cdata.is_panic_runtime() {
+            tcx.dcx().emit_err(diagnostics::CrateNotPanicRuntime { crate_name: name });
         }
-        if data.required_panic_strategy() != Some(desired_strategy) {
-            tcx.dcx()
-                .emit_err(errors::NoPanicStrategy { crate_name: name, strategy: desired_strategy });
+        if cdata.required_panic_strategy() != Some(desired_strategy) {
+            tcx.dcx().emit_err(diagnostics::NoPanicStrategy {
+                crate_name: name,
+                strategy: desired_strategy,
+            });
         }
 
         self.injected_panic_runtime = Some(cnum);
@@ -1086,11 +1048,11 @@ impl CStore {
         ) else {
             return;
         };
-        let data = self.get_crate_data(cnum);
+        let cdata = self.get_crate_data(cnum);
 
         // Sanity check the loaded crate to ensure it is indeed a profiler runtime
-        if !data.is_profiler_runtime() {
-            tcx.dcx().emit_err(errors::NotProfilerRuntime { crate_name: name });
+        if !cdata.is_profiler_runtime() {
+            tcx.dcx().emit_err(diagnostics::NotProfilerRuntime { crate_name: name });
         }
     }
 
@@ -1098,8 +1060,10 @@ impl CStore {
         self.has_global_allocator =
             match &*fn_spans(krate, Symbol::intern(&global_fn_name(sym::alloc))) {
                 [span1, span2, ..] => {
-                    tcx.dcx()
-                        .emit_err(errors::NoMultipleGlobalAlloc { span2: *span2, span1: *span1 });
+                    tcx.dcx().emit_err(diagnostics::NoMultipleGlobalAlloc {
+                        span2: *span2,
+                        span1: *span1,
+                    });
                     true
                 }
                 spans => !spans.is_empty(),
@@ -1107,8 +1071,10 @@ impl CStore {
         let alloc_error_handler = Symbol::intern(&global_fn_name(ALLOC_ERROR_HANDLER));
         self.has_alloc_error_handler = match &*fn_spans(krate, alloc_error_handler) {
             [span1, span2, ..] => {
-                tcx.dcx()
-                    .emit_err(errors::NoMultipleAllocErrorHandler { span2: *span2, span1: *span1 });
+                tcx.dcx().emit_err(diagnostics::NoMultipleAllocErrorHandler {
+                    span2: *span2,
+                    span1: *span1,
+                });
                 true
             }
             spans => !spans.is_empty(),
@@ -1146,7 +1112,7 @@ impl CStore {
             if data.has_global_allocator() {
                 match global_allocator {
                     Some(other_crate) => {
-                        tcx.dcx().emit_err(errors::ConflictingGlobalAlloc {
+                        tcx.dcx().emit_err(diagnostics::ConflictingGlobalAlloc {
                             crate_name: data.name(),
                             other_crate_name: other_crate,
                         });
@@ -1160,7 +1126,7 @@ impl CStore {
             if data.has_alloc_error_handler() {
                 match alloc_error_handler {
                     Some(other_crate) => {
-                        tcx.dcx().emit_err(errors::ConflictingAllocErrorHandler {
+                        tcx.dcx().emit_err(diagnostics::ConflictingAllocErrorHandler {
                             crate_name: data.name(),
                             other_crate_name: other_crate,
                         });
@@ -1180,7 +1146,7 @@ impl CStore {
             if !attr::contains_name(&krate.attrs, sym::default_lib_allocator)
                 && !self.iter_crate_data().any(|(_, data)| data.has_default_lib_allocator())
             {
-                tcx.dcx().emit_err(errors::GlobalAllocRequired);
+                tcx.dcx().emit_err(diagnostics::GlobalAllocRequired);
             }
             self.allocator_kind = Some(AllocatorKind::Default);
         }
@@ -1243,9 +1209,9 @@ impl CStore {
         };
 
         // Sanity check that the loaded crate is `#![compiler_builtins]`
-        let cmeta = self.get_crate_data(cnum);
-        if !cmeta.is_compiler_builtins() {
-            tcx.dcx().emit_err(errors::CrateNotCompilerBuiltins { crate_name: cmeta.name() });
+        let cdata = self.get_crate_data(cnum);
+        if !cdata.is_compiler_builtins() {
+            tcx.dcx().emit_err(diagnostics::CrateNotCompilerBuiltins { crate_name: cdata.name() });
         }
     }
 
@@ -1277,7 +1243,7 @@ impl CStore {
                 lint::builtin::UNUSED_CRATE_DEPENDENCIES,
                 span,
                 ast::CRATE_NODE_ID,
-                errors::UnusedCrateDependency {
+                diagnostics::UnusedCrateDependency {
                     extern_crate: name_interned,
                     local_crate: tcx.crate_name(LOCAL_CRATE),
                 },
@@ -1314,7 +1280,7 @@ impl CStore {
             // Make a point span rather than covering the whole file
             let span = krate.spans.inner_span.shrink_to_lo();
 
-            tcx.sess.dcx().emit_err(errors::WasmCAbi { span });
+            tcx.sess.dcx().emit_err(diagnostics::WasmCAbi { span });
         }
     }
 
@@ -1424,118 +1390,4 @@ fn fn_spans(krate: &ast::Crate, name: Symbol) -> Vec<Span> {
     let mut f = Finder { name, spans: Vec::new() };
     visit::walk_crate(&mut f, krate);
     f.spans
-}
-
-fn format_dlopen_err(e: &(dyn std::error::Error + 'static)) -> String {
-    e.sources().map(|e| format!(": {e}")).collect()
-}
-
-fn attempt_load_dylib(path: &Path) -> Result<libloading::Library, libloading::Error> {
-    #[cfg(target_os = "aix")]
-    if let Some(ext) = path.extension()
-        && ext.eq("a")
-    {
-        // On AIX, we ship all libraries as .a big_af archive
-        // the expected format is lib<name>.a(libname.so) for the actual
-        // dynamic library
-        let library_name = path.file_stem().expect("expect a library name");
-        let mut archive_member = std::ffi::OsString::from("a(");
-        archive_member.push(library_name);
-        archive_member.push(".so)");
-        let new_path = path.with_extension(archive_member);
-
-        // On AIX, we need RTLD_MEMBER to dlopen an archived shared
-        let flags = libc::RTLD_LAZY | libc::RTLD_LOCAL | libc::RTLD_MEMBER;
-        return unsafe { libloading::os::unix::Library::open(Some(&new_path), flags) }
-            .map(|lib| lib.into());
-    }
-
-    unsafe { libloading::Library::new(&path) }
-}
-
-// On Windows the compiler would sometimes intermittently fail to open the
-// proc-macro DLL with `Error::LoadLibraryExW`. It is suspected that something in the
-// system still holds a lock on the file, so we retry a few times before calling it
-// an error.
-fn load_dylib(path: &Path, max_attempts: usize) -> Result<libloading::Library, String> {
-    assert!(max_attempts > 0);
-
-    let mut last_error = None;
-
-    for attempt in 0..max_attempts {
-        debug!("Attempt to load proc-macro `{}`.", path.display());
-        match attempt_load_dylib(path) {
-            Ok(lib) => {
-                if attempt > 0 {
-                    debug!(
-                        "Loaded proc-macro `{}` after {} attempts.",
-                        path.display(),
-                        attempt + 1
-                    );
-                }
-                return Ok(lib);
-            }
-            Err(err) => {
-                // Only try to recover from this specific error.
-                if !matches!(err, libloading::Error::LoadLibraryExW { .. }) {
-                    debug!("Failed to load proc-macro `{}`. Not retrying", path.display());
-                    let err = format_dlopen_err(&err);
-                    // We include the path of the dylib in the error ourselves, so
-                    // if it's in the error, we strip it.
-                    if let Some(err) = err.strip_prefix(&format!(": {}", path.display())) {
-                        return Err(err.to_string());
-                    }
-                    return Err(err);
-                }
-
-                last_error = Some(err);
-                std::thread::sleep(Duration::from_millis(100));
-                debug!("Failed to load proc-macro `{}`. Retrying.", path.display());
-            }
-        }
-    }
-
-    debug!("Failed to load proc-macro `{}` even after {} attempts.", path.display(), max_attempts);
-
-    let last_error = last_error.unwrap();
-    let message = if let Some(src) = last_error.source() {
-        format!("{} ({src}) (retried {max_attempts} times)", format_dlopen_err(&last_error))
-    } else {
-        format!("{} (retried {max_attempts} times)", format_dlopen_err(&last_error))
-    };
-    Err(message)
-}
-
-pub enum DylibError {
-    DlOpen(String, String),
-    DlSym(String, String),
-}
-
-impl From<DylibError> for CrateError {
-    fn from(err: DylibError) -> CrateError {
-        match err {
-            DylibError::DlOpen(path, err) => CrateError::DlOpen(path, err),
-            DylibError::DlSym(path, err) => CrateError::DlSym(path, err),
-        }
-    }
-}
-
-pub unsafe fn load_symbol_from_dylib<T: Copy>(
-    path: &Path,
-    sym_name: &str,
-) -> Result<T, DylibError> {
-    // Make sure the path contains a / or the linker will search for it.
-    let path = try_canonicalize(path).unwrap();
-    let lib =
-        load_dylib(&path, 5).map_err(|err| DylibError::DlOpen(path.display().to_string(), err))?;
-
-    let sym = unsafe { lib.get::<T>(sym_name.as_bytes()) }
-        .map_err(|err| DylibError::DlSym(path.display().to_string(), format_dlopen_err(&err)))?;
-
-    // Intentionally leak the dynamic library. We can't ever unload it
-    // since the library can make things that will live arbitrarily long.
-    let sym = unsafe { sym.into_raw() };
-    std::mem::forget(lib);
-
-    Ok(*sym)
 }

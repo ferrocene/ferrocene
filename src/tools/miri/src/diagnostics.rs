@@ -18,7 +18,7 @@ pub enum TerminationInfo {
         leak_check: bool,
     },
     Abort(String),
-    /// Miri was interrupted by a Ctrl+C from the user
+    /// Miri was interrupted by a Ctrl+C from the user.
     Interrupted,
     UnsupportedInIsolation(String),
     StackedBorrowsUb {
@@ -32,6 +32,8 @@ pub enum TerminationInfo {
         history: tree_diagnostics::HistoryData,
     },
     Int2PtrWithStrictProvenance,
+    /// GenMC determined that the execution should stop.
+    GenmcSkip,
     /// All threads are blocked.
     GlobalDeadlock,
     /// Some thread discovered a deadlock condition (e.g. in a mutex with reentrancy checking).
@@ -81,6 +83,7 @@ impl fmt::Display for TerminationInfo {
             TreeBorrowsUb { title, .. } => write!(f, "{title}"),
             GlobalDeadlock => write!(f, "the evaluated program deadlocked"),
             LocalDeadlock => write!(f, "a thread deadlocked"),
+            GenmcSkip => write!(f, "GenMC wants to skip this execution"),
             MultipleSymbolDefinitions { link_name, .. } =>
                 write!(f, "multiple definitions of symbol `{link_name}`"),
             SymbolShimClashing { link_name, .. } =>
@@ -106,7 +109,17 @@ impl fmt::Debug for TerminationInfo {
     }
 }
 
-impl MachineStopType for TerminationInfo {}
+impl MachineStopType for TerminationInfo {
+    fn with_validation_path(&mut self, path: String) {
+        use TerminationInfo::*;
+        match self {
+            StackedBorrowsUb { help, .. } => {
+                help.push(format!("while retagging field {path}"));
+            }
+            _ => {}
+        }
+    }
+}
 
 /// Miri specific diagnostics
 pub enum NonHaltingDiagnostic {
@@ -141,6 +154,10 @@ pub enum NonHaltingDiagnostic {
         effective_failure_ordering: AtomicReadOrd,
     },
     FileInProcOpened,
+    ConnectingSocketGetsockname,
+    SocketAddressResolution {
+        error: std::io::Error,
+    },
 }
 
 /// Level of Miri specific diagnostics
@@ -240,6 +257,10 @@ pub fn report_result<'tcx>(
                 Some("unsupported operation"),
             StackedBorrowsUb { .. } | TreeBorrowsUb { .. } | DataRace { .. } =>
                 Some("Undefined Behavior"),
+            GenmcSkip => {
+                assert!(ecx.machine.data_race.as_genmc_ref().is_some());
+                return Some((0, false));
+            }
             LocalDeadlock => {
                 labels.push(format!("thread got stuck here"));
                 None
@@ -643,6 +664,10 @@ impl<'tcx> MiriMachine<'tcx> {
             | WeakMemoryOutdatedLoad { .. } =>
                 ("tracking was triggered here".to_string(), DiagLevel::Note),
             FileInProcOpened => ("open a file in `/proc`".to_string(), DiagLevel::Warning),
+            ConnectingSocketGetsockname =>
+                ("Called `getsockname` on connecting socket".to_string(), DiagLevel::Warning),
+            SocketAddressResolution { .. } =>
+                ("error during address resolution".to_string(), DiagLevel::Warning),
         };
 
         let title = match &e {
@@ -691,12 +716,27 @@ impl<'tcx> MiriMachine<'tcx> {
                 format!("GenMC currently does not model the failure ordering for `compare_exchange`. {was_upgraded_msg}. Miri with GenMC might miss bugs related to this memory access.")
             }
             FileInProcOpened => format!("files in `/proc` can bypass the Abstract Machine and might not work properly in Miri"),
+            ConnectingSocketGetsockname => format!("connecting sockets return unspecified socket addresses on Windows hosts"),
+            SocketAddressResolution { error } => format!("address resolution failed: {error}"),
         };
 
         let notes = match &e {
             ProgressReport { block_count } => {
                 vec![note!("so far, {block_count} basic blocks have been executed")]
             }
+            ConnectingSocketGetsockname =>
+                vec![
+                    note!(
+                        "Windows hosts do not provide `local_addr` information while the socket is still connecting, which might break the assumptions of code compiled for Unix targets"
+                    ),
+                    note!(
+                        "an unspecified socket address (e.g. `0.0.0.0:0`) will be returned instead"
+                    ),
+                ],
+            SocketAddressResolution { .. } =>
+                vec![note!(
+                    "Miri cannot return proper error information from this call; only a generic error code is being returned"
+                )],
             _ => vec![],
         };
 

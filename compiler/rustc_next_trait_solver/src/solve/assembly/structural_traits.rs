@@ -4,12 +4,12 @@
 use derive_where::derive_where;
 use rustc_type_ir::data_structures::HashMap;
 use rustc_type_ir::inherent::*;
-use rustc_type_ir::lang_items::{SolverLangItem, SolverTraitLangItem};
+use rustc_type_ir::lang_items::{SolverProjectionLangItem, SolverTraitLangItem};
 use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::solve::inspect::ProbeKind;
 use rustc_type_ir::{
     self as ty, Binder, FallibleTypeFolder, Interner, Movability, Mutability, TypeFoldable,
-    TypeSuperFoldable, Upcast as _, elaborate,
+    TypeSuperFoldable, Unnormalized, Upcast as _, elaborate,
 };
 use rustc_type_ir_macros::{TypeFoldable_Generic, TypeVisitable_Generic};
 use tracing::instrument;
@@ -87,6 +87,7 @@ where
             .cx()
             .coroutine_hidden_types(def_id)
             .instantiate(cx, args)
+            .skip_norm_wip()
             .map_bound(|bound| bound.types.to_vec())),
 
         ty::UnsafeBinder(bound_ty) => Ok(bound_ty.map_bound(|ty| vec![ty])),
@@ -94,15 +95,20 @@ where
         // For `PhantomData<T>`, we pass `T`.
         ty::Adt(def, args) if def.is_phantom_data() => Ok(ty::Binder::dummy(vec![args.type_at(0)])),
 
-        ty::Adt(def, args) => {
-            Ok(ty::Binder::dummy(def.all_field_tys(cx).iter_instantiated(cx, args).collect()))
-        }
+        ty::Adt(def, args) => Ok(ty::Binder::dummy(
+            def.all_field_tys(cx)
+                .iter_instantiated(cx, args)
+                .map(Unnormalized::skip_norm_wip)
+                .collect(),
+        )),
 
         ty::Alias(ty::AliasTy { kind: ty::Opaque { def_id }, args, .. }) => {
             // We can resolve the `impl Trait` to its concrete type,
             // which enforces a DAG between the functions requiring
             // the auto trait bounds in question.
-            Ok(ty::Binder::dummy(vec![cx.type_of(def_id).instantiate(cx, args)]))
+            Ok(ty::Binder::dummy(vec![
+                cx.type_of(def_id.into()).instantiate(cx, args).skip_norm_wip(),
+            ]))
         }
     }
 }
@@ -178,7 +184,7 @@ where
         //   even if the ADT is {meta,pointee,}sized for all possible args.
         ty::Adt(def, args) => {
             if let Some(crit) = def.sizedness_constraint(ecx.cx(), sizedness) {
-                Ok(ty::Binder::dummy(vec![crit.instantiate(ecx.cx(), args)]))
+                Ok(ty::Binder::dummy(vec![crit.instantiate(ecx.cx(), args).skip_norm_wip()]))
             } else {
                 Ok(ty::Binder::dummy(vec![]))
             }
@@ -264,6 +270,7 @@ where
             .cx()
             .coroutine_hidden_types(def_id)
             .instantiate(ecx.cx(), args)
+            .skip_norm_wip()
             .map_bound(|bound| bound.types.to_vec())),
     }
 }
@@ -281,6 +288,7 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
             if sig.skip_binder().is_fn_trait_compatible() && !cx.has_target_features(def_id) {
                 Ok(Some(
                     sig.instantiate(cx, args)
+                        .skip_norm_wip()
                         .map_bound(|sig| (Ty::new_tup(cx, sig.inputs().as_slice()), sig.output())),
                 ))
             } else {
@@ -535,7 +543,8 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
                 );
             }
 
-            let future_output_def_id = cx.require_lang_item(SolverLangItem::FutureOutput);
+            let future_output_def_id =
+                cx.require_projection_lang_item(SolverProjectionLangItem::FutureOutput);
             let future_output_ty = Ty::new_projection(cx, future_output_def_id, [sig.output()]);
             Ok((
                 bound_sig.rebind(AsyncCallableRelevantTypes {
@@ -590,7 +599,8 @@ fn fn_item_to_async_callable<I: Interner>(
     let nested = vec![
         bound_sig.rebind(ty::TraitRef::new(cx, future_trait_def_id, [sig.output()])).upcast(cx),
     ];
-    let future_output_def_id = cx.require_lang_item(SolverLangItem::FutureOutput);
+    let future_output_def_id =
+        cx.require_projection_lang_item(SolverProjectionLangItem::FutureOutput);
     let future_output_ty = Ty::new_projection(cx, future_output_def_id, [sig.output()]);
     Ok((
         bound_sig.rebind(AsyncCallableRelevantTypes {
@@ -636,7 +646,8 @@ fn coroutine_closure_to_ambiguous_coroutine<I: Interner>(
     args: ty::CoroutineClosureArgs<I>,
     sig: ty::CoroutineClosureSignature<I>,
 ) -> I::Ty {
-    let upvars_projection_def_id = cx.require_lang_item(SolverLangItem::AsyncFnKindUpvars);
+    let upvars_projection_def_id =
+        cx.require_projection_lang_item(SolverProjectionLangItem::AsyncFnKindUpvars);
     let tupled_upvars_ty = Ty::new_projection(
         cx,
         upvars_projection_def_id,
@@ -678,6 +689,7 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
             {
                 Ok((
                     sig.instantiate(cx, args)
+                        .skip_norm_wip()
                         .map_bound(|sig| (Ty::new_tup(cx, sig.inputs().as_slice()), sig.output())),
                     def_id.into(),
                     args,
@@ -759,6 +771,7 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
             let mut const_conditions: Vec<_> = adt_def
                 .all_field_tys(cx)
                 .iter_instantiated(cx, args)
+                .map(Unnormalized::skip_norm_wip)
                 .map(|field_ty| ty::TraitRef::new(cx, destruct_def_id, [field_ty]))
                 .collect();
             match adt_def.destructor(cx) {
@@ -884,6 +897,7 @@ where
         cx,
         cx.explicit_super_predicates_of(trait_ref.def_id)
             .iter_instantiated(cx, trait_ref.args)
+            .map(Unnormalized::skip_norm_wip)
             .map(|(pred, _)| pred),
     ));
 
@@ -896,8 +910,11 @@ where
             continue;
         }
 
-        requirements
-            .extend(cx.item_bounds(associated_type_def_id).iter_instantiated(cx, trait_ref.args));
+        requirements.extend(
+            cx.item_bounds(associated_type_def_id)
+                .iter_instantiated(cx, trait_ref.args)
+                .map(Unnormalized::skip_norm_wip),
+        );
     }
 
     let mut replace_projection_with: HashMap<_, Vec<_>> = HashMap::default();
@@ -932,7 +949,7 @@ struct ReplaceProjectionWith<'a, 'b, I: Interner, D: SolverDelegate<Interner = I
     ecx: &'a mut EvalCtxt<'b, D>,
     param_env: I::ParamEnv,
     self_ty: I::Ty,
-    mapping: &'a HashMap<I::DefId, Vec<ty::Binder<I, ty::ProjectionPredicate<I>>>>,
+    mapping: &'a HashMap<I::TraitAssocTermId, Vec<ty::Binder<I, ty::ProjectionPredicate<I>>>>,
     nested: Vec<Goal<I, I::Predicate>>,
 }
 
@@ -946,11 +963,11 @@ where
         source_projection: ty::Binder<I, ty::ProjectionPredicate<I>>,
         target_projection: ty::AliasTerm<I>,
     ) -> bool {
-        source_projection.item_def_id() == target_projection.def_id
+        source_projection.item_def_id() == target_projection.expect_projection_def_id()
             && self
                 .ecx
                 .probe(|_| ProbeKind::ProjectionCompatibility)
-                .enter_without_propagated_nested_goals(|ecx| -> Result<_, NoSolution> {
+                .enter_without_propagated_nested_goals(|ecx| {
                     let source_projection = ecx.instantiate_binder_with_infer(source_projection);
                     ecx.eq(self.param_env, source_projection.projection_term, target_projection)?;
                     ecx.try_evaluate_added_goals()
@@ -970,7 +987,7 @@ where
             return Ok(None);
         }
 
-        let Some(replacements) = self.mapping.get(&alias_term.def_id) else {
+        let Some(replacements) = self.mapping.get(&alias_term.expect_projection_def_id()) else {
             return Ok(None);
         };
 

@@ -54,7 +54,7 @@ fn main() -> Result<(), String> {
                     vv.into_iter().flatten().collect_vec()
                 })?;
 
-            if filepath.ends_with("sve.spec.yml") || filepath.ends_with("sve2.spec.yml") {
+            if input.ctx.generate_load_store_tests {
                 let loads = intrinsics.iter()
                     .filter_map(|i| {
                         if matches!(i.test, Test::Load(..)) {
@@ -166,7 +166,7 @@ use super::*;{uses_neon}
 
 "#,
         uses_neon = if generated_input.ctx.uses_neon_types {
-            "\nuse crate::core_arch::arch::aarch64::*;"
+            "\nuse crate::core_arch::arch::aarch64::*;\nuse super::{AsSigned, AsUnsigned};"
         } else {
             ""
         },

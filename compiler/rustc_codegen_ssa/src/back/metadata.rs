@@ -20,7 +20,7 @@ use rustc_metadata::fs::METADATA_FILENAME;
 use rustc_middle::bug;
 use rustc_session::Session;
 use rustc_span::sym;
-use rustc_target::spec::{CfgAbi, LlvmAbi, Os, RelocModel, Target, ef_avr_arch};
+use rustc_target::spec::{CfgAbi, Env, LlvmAbi, Os, RelocModel, Target, ef_avr_arch};
 use tracing::debug;
 
 use super::apple;
@@ -36,7 +36,7 @@ use super::apple;
 /// <dd>The metadata can be found in the `.rustc` section of the shared library.</dd>
 /// </dl>
 #[derive(Debug)]
-pub(crate) struct DefaultMetadataLoader;
+pub struct DefaultMetadataLoader;
 
 static AIX_METADATA_SYMBOL_NAME: &'static str = "__aix_rust_metadata";
 
@@ -216,7 +216,9 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
     file.set_sub_architecture(sub_architecture);
     if sess.target.is_like_darwin {
         if macho_is_arm64e(&sess.target) {
-            file.set_macho_cpu_subtype(object::macho::CPU_SUBTYPE_ARM64E);
+            file.set_macho_cpu_subtype(
+                object::macho::CPU_SUBTYPE_ARM64E | object::macho::CPU_SUBTYPE_PTRAUTH_ABI,
+            );
         }
 
         file.set_macho_build_version(macho_object_build_version_for_target(sess))
@@ -254,7 +256,15 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
     // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
     let os_abi = elf_os_abi(sess);
     let abi_version = 0;
-    add_gnu_property_note(&mut file, architecture, binary_format, endianness);
+    // Ferrocene change:
+    // aarch64-unknown_nto_qnx710 uses GNU LD 2.32, and that version does not
+    // support the linker section added here.
+    // Adding the section makes the linker emit warnings.
+    let is_aarch64_qnx71 =
+        (architecture == Architecture::Aarch64) && (sess.target.env == Env::Nto71);
+    if !is_aarch64_qnx71 {
+        add_gnu_property_note(&mut file, architecture, binary_format, endianness);
+    }
     file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
     Some(file)
 }
@@ -396,6 +406,7 @@ pub(super) fn elf_e_flags(architecture: Architecture, sess: &Session) -> u32 {
                 _ => EF_PPC64_ABI_UNKNOWN,
             }
         }
+        Architecture::Sparc32Plus => elf::EF_SPARC_32PLUS,
         _ => 0,
     }
 }

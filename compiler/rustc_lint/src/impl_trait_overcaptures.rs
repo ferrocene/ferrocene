@@ -17,12 +17,13 @@ use rustc_middle::ty::relate::{
 };
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
+    Unnormalized,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint::fcw;
 use rustc_session::{declare_lint, declare_lint_pass};
 use rustc_span::{Span, Symbol};
-use rustc_trait_selection::errors::{
+use rustc_trait_selection::diagnostics::{
     AddPreciseCapturingForOvercapture, impl_trait_overcapture_suggestion,
 };
 use rustc_trait_selection::regions::OutlivesEnvironmentBuildExt;
@@ -141,7 +142,7 @@ enum ParamKind {
 }
 
 fn check_fn(tcx: TyCtxt<'_>, parent_def_id: LocalDefId) {
-    let sig = tcx.fn_sig(parent_def_id).instantiate_identity();
+    let sig = tcx.fn_sig(parent_def_id).instantiate_identity().skip_norm_wip();
 
     let mut in_scope_parameters = FxIndexMap::default();
     // Populate the in_scope_parameters list first with all of the generics in scope
@@ -246,7 +247,7 @@ where
             && self.tcx.is_impl_trait_in_trait(def_id)
         {
             // visit the opaque of the RPITIT
-            self.tcx.type_of(def_id).instantiate(self.tcx, args).visit_with(self)
+            self.tcx.type_of(def_id).instantiate(self.tcx, args).skip_norm_wip().visit_with(self)
         } else if let ty::Alias(ty::AliasTy { kind: ty::Opaque { def_id }, args: opaque_ty_args, .. }) = *t.kind()
             && let Some(opaque_def_id) = def_id.as_local()
             // Don't recurse infinitely on an opaque
@@ -360,9 +361,9 @@ where
             // have no uncaptured args, then we should warn to the user that
             // it's redundant to capture all args explicitly.
             if new_capture_rules
-                && let Some((captured_args, capturing_span)) =
-                    opaque.bounds.iter().find_map(|bound| match *bound {
-                        hir::GenericBound::Use(a, s) => Some((a, s)),
+                && let Some((use_idx, captured_args, capturing_span)) =
+                    opaque.bounds.iter().enumerate().find_map(|(i, bound)| match *bound {
+                        hir::GenericBound::Use(a, s) => Some((i, a, s)),
                         _ => None,
                     })
             {
@@ -399,11 +400,25 @@ where
                     .iter()
                     .all(|(def_id, _)| explicitly_captured.contains(def_id))
                 {
+                    // Extend the removal span to include the `+` joiner adjacent
+                    // to `use<...>`, so applying the suggestion does not leave
+                    // behind a stray `+` that fails to parse.
+                    let suggestion_span = if let Some(next) = opaque.bounds.get(use_idx + 1) {
+                        capturing_span.with_hi(next.span().lo())
+                    } else if let Some(prev_idx) = use_idx.checked_sub(1) {
+                        let prev = opaque.bounds[prev_idx];
+                        capturing_span.with_lo(prev.span().hi())
+                    } else {
+                        // `impl use<...>` with no other bound is not valid
+                        // syntax, so this branch is unreachable in practice.
+                        capturing_span
+                    };
+
                     self.tcx.emit_node_span_lint(
                         IMPL_TRAIT_REDUNDANT_CAPTURES,
                         self.tcx.local_def_id_to_hir_id(opaque_def_id),
                         opaque_span,
-                        ImplTraitRedundantCapturesLint { capturing_span },
+                        ImplTraitRedundantCapturesLint { capturing_span: suggestion_span },
                     );
                 }
             }
@@ -412,7 +427,12 @@ where
             // in this lint as well. Interestingly, one place that I expect this lint to fire
             // is for `impl for<'a> Bound<Out = impl Other>`, since `impl Other` will begin
             // to capture `'a` in e2024 (even though late-bound vars in opaques are not allowed).
-            for clause in self.tcx.item_bounds(def_id).iter_instantiated(self.tcx, opaque_ty_args) {
+            for clause in self
+                .tcx
+                .item_bounds(def_id)
+                .iter_instantiated(self.tcx, opaque_ty_args)
+                .map(Unnormalized::skip_norm_wip)
+            {
                 clause.visit_with(self)
             }
         }

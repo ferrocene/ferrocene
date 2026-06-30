@@ -6,7 +6,7 @@ use std::borrow::Cow;
 use rustc_abi::Align;
 use rustc_hir::attrs::{InlineAttr, InstructionSetAttr, Linkage, OptimizeAttr, RtsanSetting};
 use rustc_hir::def_id::DefId;
-use rustc_macros::{HashStable, TyDecodable, TyEncodable};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::Symbol;
 use rustc_target::spec::SanitizerSet;
 
@@ -56,11 +56,19 @@ impl<'tcx> TyCtxt<'tcx> {
             }
         }
 
+        // Ensure closure shims have the optimization properties of their closure applied to them.
+        if let InstanceKind::ClosureOnceShim { call_once: _, closure, track_caller: _ } =
+            instance_kind
+        {
+            let closure_attrs = self.codegen_fn_attrs(closure);
+            attrs.to_mut().optimize = closure_attrs.optimize;
+        }
+
         attrs
     }
 }
 
-#[derive(Clone, TyEncodable, TyDecodable, HashStable, Debug)]
+#[derive(Clone, TyEncodable, TyDecodable, StableHash, Debug)]
 pub struct CodegenFnAttrs {
     pub flags: CodegenFnAttrFlags,
     /// Parsed representation of the `#[inline]` attribute
@@ -112,12 +120,30 @@ pub struct CodegenFnAttrs {
     pub objc_class: Option<Symbol>,
     /// The `#[rustc_objc_selector = "..."]` attribute.
     pub objc_selector: Option<Symbol>,
+    /// The `#[instrument_fn]` attribute.
+    pub instrument_fn: InstrumentFnAttr,
 
     // Ferrocene addition
     pub validated: Option<ferrocene::Validated>,
 }
 
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, HashStable, PartialEq, Eq)]
+#[derive(Copy, Clone, TyEncodable, TyDecodable, StableHash, Debug)]
+pub enum InstrumentFnAttr {
+    /// Always instrument function
+    On,
+    /// Never instrument function
+    Off,
+    /// Instrument based on command line options, if any.
+    Default,
+}
+
+const impl Default for InstrumentFnAttr {
+    fn default() -> Self {
+        InstrumentFnAttr::Default
+    }
+}
+
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash, PartialEq, Eq)]
 pub enum TargetFeatureKind {
     /// The feature is implied by another feature, rather than explicitly added by the
     /// `#[target_feature]` attribute
@@ -128,7 +154,7 @@ pub enum TargetFeatureKind {
     Forced,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, TyEncodable, TyDecodable, HashStable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, TyEncodable, TyDecodable, StableHash)]
 pub struct TargetFeature {
     /// The name of the target feature (e.g. "avx")
     pub name: Symbol,
@@ -136,7 +162,7 @@ pub struct TargetFeature {
     pub kind: TargetFeatureKind,
 }
 
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, HashStable)]
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct PatchableFunctionEntry {
     /// Nops to prepend to the function
     prefix: u8,
@@ -159,7 +185,7 @@ impl PatchableFunctionEntry {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, TyEncodable, TyDecodable, HashStable)]
+#[derive(Clone, Copy, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub struct CodegenFnAttrFlags(u32);
 bitflags::bitflags! {
     impl CodegenFnAttrFlags: u32 {
@@ -242,6 +268,7 @@ impl CodegenFnAttrs {
             patchable_function_entry: None,
             objc_class: None,
             objc_selector: None,
+            instrument_fn: InstrumentFnAttr::default(),
 
             // Ferrocene addition
             validated: None,
@@ -275,13 +302,13 @@ impl CodegenFnAttrs {
     }
 }
 
-#[derive(Clone, Copy, Debug, HashStable, TyEncodable, TyDecodable, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, StableHash, TyEncodable, TyDecodable, Eq, PartialEq)]
 pub struct SanitizerFnAttrs {
     pub disabled: SanitizerSet,
     pub rtsan_setting: RtsanSetting,
 }
 
-impl const Default for SanitizerFnAttrs {
+const impl Default for SanitizerFnAttrs {
     fn default() -> Self {
         Self { disabled: SanitizerSet::empty(), rtsan_setting: RtsanSetting::default() }
     }

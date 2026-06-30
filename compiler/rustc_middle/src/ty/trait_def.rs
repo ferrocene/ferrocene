@@ -5,7 +5,7 @@ use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::{self as hir, find_attr};
-use rustc_macros::{Decodable, Encodable, HashStable};
+use rustc_macros::{Decodable, Encodable, StableHash};
 use rustc_span::Span;
 use tracing::debug;
 
@@ -16,17 +16,17 @@ use crate::ty::print::{with_crate_prefix, with_no_trimmed_paths};
 use crate::ty::{Ident, Ty, TyCtxt};
 
 /// A trait's definition with type information.
-#[derive(HashStable, Encodable, Decodable)]
+#[derive(StableHash, Encodable, Decodable)]
 pub struct TraitDef {
     pub def_id: DefId,
+
+    /// Restrictions on trait implementations.
+    pub impl_restriction: ImplRestrictionKind,
 
     pub safety: hir::Safety,
 
     /// Whether this trait is `const`.
     pub constness: hir::Constness,
-
-    /// Restrictions on trait implementations.
-    pub impl_restriction: ImplRestrictionKind,
 
     /// If `true`, then this trait had the `#[rustc_paren_sugar]`
     /// attribute, indicating that it should be used with `Foo()`
@@ -85,7 +85,7 @@ pub struct TraitDef {
 
 /// Whether this trait is treated specially by the standard library
 /// specialization lint.
-#[derive(HashStable, PartialEq, Clone, Copy, Encodable, Decodable)]
+#[derive(StableHash, PartialEq, Clone, Copy, Encodable, Decodable)]
 pub enum TraitSpecializationKind {
     /// The default. Specializing on this trait is not allowed.
     None,
@@ -102,7 +102,7 @@ pub enum TraitSpecializationKind {
 }
 
 /// Whether the trait implementation is unrestricted or restricted within a specific module.
-#[derive(HashStable, PartialEq, Clone, Copy, Encodable, Decodable)]
+#[derive(StableHash, PartialEq, Clone, Copy, Encodable, Decodable)]
 pub enum ImplRestrictionKind {
     /// The restriction does not affect this trait, and it can be implemented anywhere.
     Unrestricted,
@@ -147,7 +147,7 @@ impl ImplRestrictionKind {
     }
 }
 
-#[derive(Default, Debug, HashStable)]
+#[derive(Default, Debug, StableHash)]
 pub struct TraitImpls {
     blanket_impls: Vec<DefId>,
     /// Impls indexed by their simplified self type, for fast lookup.
@@ -273,7 +273,7 @@ pub(super) fn trait_impls_of_provider(tcx: TyCtxt<'_>, trait_id: DefId) -> Trait
     for &impl_def_id in tcx.local_trait_impls(trait_id) {
         let impl_def_id = impl_def_id.to_def_id();
 
-        let impl_self_ty = tcx.type_of(impl_def_id).instantiate_identity();
+        let impl_self_ty = tcx.type_of(impl_def_id).instantiate_identity().skip_norm_wip();
 
         if let Some(simplified_self_ty) =
             fast_reject::simplify_type(tcx, impl_self_ty, TreatParams::InstantiateWithInfer)

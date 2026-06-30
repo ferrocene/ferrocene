@@ -61,6 +61,9 @@ pub struct CompletionItem {
     pub documentation: Option<Documentation<'static>>,
 
     /// Whether this item is marked as deprecated
+    ///
+    /// NOTE: this field is used in the LSP protocol. For the use of this information in completion
+    /// scoring, see [`CompletionRelevance::is_deprecated`].
     pub deprecated: bool,
 
     /// If completing a function call, ask the editor to show parameter popup
@@ -84,7 +87,15 @@ pub struct CompletionItem {
     pub ref_match: Option<(CompletionItemRefMode, TextSize)>,
 
     /// The import data to add to completion's edits.
-    pub import_to_add: SmallVec<[String; 1]>,
+    pub import_to_add: SmallVec<[CompletionItemImport; 1]>,
+}
+
+#[derive(Clone, UpmapFromRaFixture)]
+pub struct CompletionItemImport {
+    /// The path to import.
+    pub path: String,
+    /// Whether to import `as _`.
+    pub as_underscore: bool,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -170,6 +181,9 @@ pub struct CompletionRelevance {
     /// }
     /// ```
     pub is_local: bool,
+    /// This is missing variant in the patterns.
+    /// Maybe this can also be used for struct fields.
+    pub is_missing: bool,
     /// Populated when the completion item comes from a trait (impl).
     pub trait_: Option<CompletionRelevanceTraitInfo>,
     /// This is set when an import is suggested in a use item whose name is already imported.
@@ -184,6 +198,13 @@ pub struct CompletionRelevance {
     pub function: Option<CompletionRelevanceFn>,
     /// true when there is an `await.method()` or `iter().method()` completion.
     pub is_skipping_completion: bool,
+    /// if inherent impl already exists in current module, user may not want to implement it again.
+    pub has_local_inherent_impl: bool,
+    /// Set when the completion item is deprecated.
+    ///
+    /// NOTE: This is duplicated from [`CompletionItem::deprecated`] in order to allow using this
+    /// information in the calculation of the relevance score.
+    pub is_deprecated: bool,
 }
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct CompletionRelevanceTraitInfo {
@@ -268,6 +289,7 @@ impl CompletionRelevance {
             exact_name_match,
             type_match,
             is_local,
+            is_missing,
             is_name_already_imported,
             requires_import,
             is_private_editable,
@@ -275,21 +297,26 @@ impl CompletionRelevance {
             trait_,
             function,
             is_skipping_completion,
+            has_local_inherent_impl,
+            is_deprecated,
         } = self;
 
         // only applicable for completions within use items
         // lower rank for conflicting import names
         if is_name_already_imported {
-            score -= 1;
+            score -= 15;
         }
         // slightly prefer locals
         if is_local {
-            score += 1;
+            score += 2;
+        }
+        if is_missing {
+            score += 2;
         }
 
         // lower rank private things
         if !is_private_editable {
-            score += 1;
+            score += 10;
         }
 
         if let Some(trait_) = trait_ {
@@ -310,10 +337,10 @@ impl CompletionRelevance {
 
         // lower rank for items that need an import
         if requires_import {
-            score -= 1;
+            score -= 12;
         }
         if exact_name_match {
-            score += 20;
+            score += 40;
         }
         match postfix_match {
             Some(CompletionRelevancePostfixMatch::Exact) => score += 100,
@@ -321,16 +348,26 @@ impl CompletionRelevance {
             None => (),
         };
         score += match type_match {
-            Some(CompletionRelevanceTypeMatch::Exact) => 18,
-            Some(CompletionRelevanceTypeMatch::CouldUnify) => 5,
+            Some(CompletionRelevanceTypeMatch::Exact) => 35,
+            Some(CompletionRelevanceTypeMatch::CouldUnify) => 15,
             None => 0,
         };
         if let Some(function) = function {
-            let mut fn_score = match function.return_type {
-                CompletionRelevanceReturnType::DirectConstructor => 15,
-                CompletionRelevanceReturnType::Builder => 10,
-                CompletionRelevanceReturnType::Constructor => 5,
-                CompletionRelevanceReturnType::Other => 0u32,
+            let mut fn_score = if requires_import {
+                // Rank constructors that require imports lower than those who don't.
+                match function.return_type {
+                    CompletionRelevanceReturnType::DirectConstructor => 8,
+                    CompletionRelevanceReturnType::Builder => 5,
+                    CompletionRelevanceReturnType::Constructor => 3,
+                    CompletionRelevanceReturnType::Other => 0u32,
+                }
+            } else {
+                match function.return_type {
+                    CompletionRelevanceReturnType::DirectConstructor => 15,
+                    CompletionRelevanceReturnType::Builder => 10,
+                    CompletionRelevanceReturnType::Constructor => 5,
+                    CompletionRelevanceReturnType::Other => 0u32,
+                }
             };
 
             // When a fn is bumped due to return type:
@@ -346,6 +383,15 @@ impl CompletionRelevance {
 
             score += fn_score;
         };
+
+        if has_local_inherent_impl {
+            score -= 8;
+        }
+
+        // lower rank for deprecated items
+        if is_deprecated {
+            score -= 15;
+        }
 
         score
     }
@@ -506,7 +552,7 @@ pub(crate) struct Builder {
 
 impl Builder {
     pub(crate) fn from_resolution(
-        ctx: &CompletionContext<'_>,
+        ctx: &CompletionContext<'_, '_>,
         path_ctx: &PathCompletionCtx<'_>,
         local_name: hir::Name,
         resolution: hir::ScopeDef,
@@ -575,10 +621,24 @@ impl Builder {
             None => TextEdit::replace(self.source_range, insert_text),
         };
 
+        // Copy `deprecated` to `self.relevance.is_deprecated`
+        let relevance = CompletionRelevance { is_deprecated: self.deprecated, ..self.relevance };
+
         let import_to_add = self
             .imports_to_add
             .into_iter()
-            .map(|import| import.import_path.display(db, self.edition).to_string())
+            .map(|import| {
+                let path = import.import_path.display(db, self.edition).to_string();
+                let as_underscore =
+                    if let hir::ItemInNs::Types(hir::ModuleDef::Trait(trait_to_import)) =
+                        import.item_to_import
+                    {
+                        trait_to_import.prefer_underscore_import(db)
+                    } else {
+                        false
+                    };
+                CompletionItemImport { path, as_underscore }
+            })
             .collect();
 
         CompletionItem {
@@ -596,7 +656,7 @@ impl Builder {
             kind: self.kind,
             deprecated: self.deprecated,
             trigger_call_info: self.trigger_call_info,
-            relevance: self.relevance,
+            relevance,
             ref_match: self.ref_match,
             import_to_add,
         }
@@ -667,6 +727,15 @@ impl Builder {
         self
     }
     pub(crate) fn set_relevance(&mut self, relevance: CompletionRelevance) -> &mut Builder {
+        // The default value of `CompletionRelevance.is_deprecated` is `false`, so it being `true`
+        // would mean it was set manually. Advise using the other function instead.
+        //
+        // This is technically not necessary, because `deprecated` will get reconciled in
+        // `Builder::build` anyway -- it just helps keep the callers consistent.
+        assert!(
+            !relevance.is_deprecated,
+            "`deprecated` should be set using `Builder::set_deprecated` instead"
+        );
         self.relevance = relevance;
         self
     }
@@ -701,8 +770,24 @@ mod tests {
     use test_utils::assert_eq_text;
 
     use super::{
-        CompletionRelevance, CompletionRelevancePostfixMatch, CompletionRelevanceTypeMatch,
+        CompletionItem, CompletionItemKind, CompletionRelevance, CompletionRelevancePostfixMatch,
+        CompletionRelevanceTypeMatch,
     };
+
+    #[test]
+    fn builder_deprecated_from_set_deprecated() {
+        // setting just `item.deprecated` also sets `item.relevance.is_deprecated`
+        let mut builder = CompletionItem::new(
+            CompletionItemKind::Expression,
+            Default::default(),
+            "",
+            syntax::Edition::DEFAULT,
+        );
+        builder.set_deprecated(true);
+        let item = builder.build(&Default::default());
+        assert!(item.deprecated);
+        assert!(item.relevance.is_deprecated);
+    }
 
     /// Check that these are CompletionRelevance are sorted in ascending order
     /// by their relevance score.
@@ -756,15 +841,17 @@ mod tests {
                 is_private_editable: true,
                 ..default
             }],
-            vec![Cr {
-                trait_: Some(crate::item::CompletionRelevanceTraitInfo {
-                    notable_trait: false,
-                    is_op_method: true,
-                }),
-                ..default
-            }],
+            vec![
+                Cr {
+                    trait_: Some(crate::item::CompletionRelevanceTraitInfo {
+                        notable_trait: false,
+                        is_op_method: true,
+                    }),
+                    ..default
+                },
+                Cr { is_private_editable: true, ..default },
+            ],
             vec![Cr { postfix_match: Some(CompletionRelevancePostfixMatch::NonExact), ..default }],
-            vec![Cr { is_private_editable: true, ..default }],
             vec![default],
             vec![Cr { is_local: true, ..default }],
             vec![Cr { type_match: Some(CompletionRelevanceTypeMatch::CouldUnify), ..default }],

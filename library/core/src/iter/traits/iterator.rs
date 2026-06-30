@@ -109,6 +109,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_next_chunk", issue = "98326")]
+    #[ferrocene::prevalidated]
     fn next_chunk<const N: usize>(
         &mut self,
     ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>>
@@ -223,20 +224,16 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn count(self) -> usize
     where
         Self: Sized + [const] Destruct,
         Self::Item: [const] Destruct,
     {
-        #[ferrocene::prevalidated]
-        // FIXME(const-hack): revert this to a const closure
-        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
-        #[rustc_inherit_overflow_checks]
-        const fn plus_one<T: [const] Destruct>(accum: usize, _elem: T) -> usize {
-            accum + 1
-        }
-        self.fold(0, plus_one)
+        self.fold(
+            0,
+            #[rustc_inherit_overflow_checks]
+            const |accum, _elem| accum + 1,
+        )
     }
 
     /// Consumes the iterator, returning the last element.
@@ -3724,7 +3721,7 @@ pub const trait Iterator {
         Sum::sum(self)
     }
 
-    /// Iterates over the entire iterator, multiplying all the elements
+    /// Iterates over the entire iterator, multiplying all the elements.
     ///
     /// An empty iterator returns the one value of the type.
     ///
@@ -4371,6 +4368,7 @@ impl<I: Iterator + ?Sized> IteratorRefSpec for &mut I {
 impl<I: Iterator> IteratorRefSpec for &mut I {
     impl_fold_via_try_fold! { spec_fold -> spec_try_fold }
 
+    #[ferrocene::prevalidated]
     fn spec_try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         F: FnMut(B, Self::Item) -> R,

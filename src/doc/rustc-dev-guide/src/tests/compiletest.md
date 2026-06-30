@@ -156,11 +156,12 @@ series of steps.
 Compiletest starts with an empty directory with the `-C incremental` flag, and
 then runs the compiler for each revision, reusing the incremental results from previous steps.
 
-The revisions should start with:
+Each revision name must start with one of:
 
-* `cfail` — the test should fail to compile
-* `cpass` — the test should compile successully
-* `rpass` — the test should compile and run successfully
+* `cpass` - the test must compile successfully (check build, no codegen)
+* `bfail` — the test must fail to compile (full build, with codegen)
+* `bpass` — the test must compile successully (full build, with codegen)
+* `rpass` — the test must compile and run successfully
 
 To make the revisions unique, you should add a suffix like `rpass1` and `rpass2`.
 
@@ -185,15 +186,10 @@ fn foo() {
 fn main() { foo(); }
 ```
 
-`cfail` tests support the `forbid-output` directive to specify that a certain
+Incremental tests support the `forbid-output` directive to specify that a certain
 substring must not appear anywhere in the compiler output.
 This can be useful to ensure certain errors do not appear, but this can be fragile as error messages
 change over time, and a test may no longer be checking the right thing but will still pass.
-
-`cfail` tests support the `should-ice` directive to specify that a test should
-cause an Internal Compiler Error (ICE).
-This is a highly specialized directive
-to check that the incremental cache continues to work after an ICE.
 
 Incremental tests may use the attribute `#[rustc_clean(...)]` attribute.
 This attribute compares the fingerprint from the current compilation session with the previous one.
@@ -283,15 +279,25 @@ the debugger currently being used:
 By passing the `--debugger` option to compiletest, you can specify a single debugger to run tests with.
 For example, `./x test tests/debuginfo -- --debugger gdb` will only test GDB commands.
 
-> **Note on running lldb debuginfo tests locally**
+> **Note on running lldb debuginfo tests locally with a prebuilt lldb
+> distribution**
 >
 > If you want to run lldb debuginfo tests locally, then currently on Windows it
 > is required that:
+>
+> # LLDB 21
 >
 > - You have Python 3.10 installed.
 > - You have `python310.dll` available in your `PATH` env var. This is not
 >   provided by the standard Python installer you obtain from `python.org`; you
 >   need to add this to `PATH` manually.
+>
+> # LLDB 22
+>
+> - You have Python 3.11 installed.
+> - You have `python311.dll` available in your `PATH`.
+> - It is recommended that you acquire a Python installation via `pymanager`,
+>   which has follow-up installer scripts to help you configure `PATH`.
 >
 > Otherwise the lldb debuginfo tests can produce crashes in mysterious ways.
 
@@ -462,7 +468,8 @@ as they must be compilable by a stage 0 rustc that may be a beta or even stable 
 
 By default, run-make tests print each subprocess command and its stdout/stderr.
 When running with `--no-capture` on `panic=abort` test suites (such as `cg_clif`),
-this can flood the terminal. Omit `--verbose-run-make-subprocess-output` to
+this can flood the terminal.
+Omit `--verbose-run-make-subprocess-output` to
 suppress this output for passing tests — failing tests always print regardless:
 
 ```bash
@@ -824,13 +831,14 @@ check for any problems that might arise.
 To run the tests in a different mode, you need to pass the `--compare-mode` CLI flag:
 
 ```bash
-./x test tests/ui --compare-mode=chalk
+./x test tests/ui --compare-mode=next-solver
 ```
 
 The possible compare modes are:
 
-- `polonius` — Runs with Polonius with `-Zpolonius`.
-- `chalk` — Runs with Chalk with `-Zchalk`.
+- `polonius` — Runs with Polonius with `-Zpolonius=next`.
+- `next-solver` — Runs with the next trait solver with `-Znext-solver`.
+- `next-solver-coherence` — Runs coherence with the next trait solver with `-Znext-solver=coherence`.
 - `split-dwarf` — Runs with unpacked split-DWARF with `-Csplit-debuginfo=unpacked`.
 - `split-dwarf-single` — Runs with packed split-DWARF with `-Csplit-debuginfo=packed`.
 

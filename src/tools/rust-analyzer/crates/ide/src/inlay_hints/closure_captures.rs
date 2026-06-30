@@ -2,7 +2,7 @@
 //!
 //! Tests live in [`bind_pat`][super::bind_pat] module.
 use ide_db::famous_defs::FamousDefs;
-use ide_db::text_edit::{TextRange, TextSize};
+use span::Edition;
 use stdx::{TupleExt, never};
 use syntax::ast::{self, AstNode};
 
@@ -15,6 +15,7 @@ pub(super) fn hints(
     FamousDefs(sema, _): &FamousDefs<'_, '_>,
     config: &InlayHintsConfig<'_>,
     closure: ast::ClosureExpr,
+    edition: Edition,
 ) -> Option<()> {
     if !config.closure_capture_hints {
         return None;
@@ -27,14 +28,11 @@ pub(super) fn hints(
         return None;
     }
 
-    let (range, label) = match closure.move_token() {
-        Some(t) => (t.text_range(), InlayHintLabel::default()),
+    let (range, label, position, pad_right) = match closure.move_token() {
+        Some(t) => (t.text_range(), InlayHintLabel::default(), InlayHintPosition::After, false),
         None => {
-            let prev_token = closure.syntax().first_token()?.prev_token()?.text_range();
-            (
-                TextRange::new(prev_token.end() - TextSize::from(1), prev_token.end()),
-                InlayHintLabel::from("move"),
-            )
+            let l_pipe = closure.param_list()?.pipe_token()?.text_range();
+            (l_pipe, InlayHintLabel::from("move"), InlayHintPosition::Before, true)
         }
     };
     let mut hint = InlayHint {
@@ -42,9 +40,9 @@ pub(super) fn hints(
         kind: InlayKind::ClosureCapture,
         label,
         text_edit: None,
-        position: InlayHintPosition::After,
+        position,
         pad_left: false,
-        pad_right: true,
+        pad_right,
         resolve_parent: Some(closure.syntax().text_range()),
     };
     hint.label.append_str("(");
@@ -60,7 +58,7 @@ pub(super) fn hints(
                 hir::CaptureKind::MutableRef => "&mut ",
                 hir::CaptureKind::Move => "",
             },
-            capture.display_place(sema.db)
+            capture.display_place_source_code(sema.db, edition)
         );
         if never!(label.is_empty()) {
             continue;
@@ -105,7 +103,7 @@ mod tests {
         check_with_config(
             InlayHintsConfig { closure_capture_hints: true, ..DISABLED_CONFIG },
             r#"
-//- minicore: copy, derive
+//- minicore: copy, derive, fn
 
 
 #[derive(Copy, Clone)]
@@ -119,29 +117,75 @@ fn main() {
     let mut baz = NonCopy;
     let qux = &mut NonCopy;
     || {
-// ^ move(&foo, bar, baz, qux)
+ // ^ move(&foo, bar, baz, qux)
         foo;
         bar;
         baz;
         qux;
     };
     || {
-// ^ move(&foo, &bar, &baz, &qux)
+ // ^ move(&foo, &bar, &baz, &qux)
         &foo;
         &bar;
         &baz;
         &qux;
     };
     || {
-// ^ move(&mut baz)
+ // ^ move(&mut baz)
         &mut baz;
     };
     || {
-// ^ move(&mut baz, &mut *qux)
+ // ^ move(&mut baz, &mut *qux)
         baz = NonCopy;
         *qux = NonCopy;
     };
 }
+"#,
+        );
+    }
+
+    #[test]
+    fn all_capture_kinds_async_closure() {
+        check_with_config(
+            InlayHintsConfig { closure_capture_hints: true, ..DISABLED_CONFIG },
+            r#"
+//- minicore: copy, derive, fn, future, async_fn
+
+#[derive(Copy, Clone)]
+struct Copy;
+
+struct NonCopy;
+
+fn main() {
+    let foo = Copy;
+    let bar = NonCopy;
+    let mut baz = NonCopy;
+    let qux = &mut NonCopy;
+    async || {
+       // ^ move(&foo, bar, baz, qux)
+        foo;
+        bar;
+        baz;
+        qux;
+    };
+    async || {
+       // ^ move(&foo, &bar, &baz, &qux)
+        &foo;
+        &bar;
+        &baz;
+        &qux;
+    };
+    async || {
+       // ^ move(&mut baz)
+        &mut baz;
+    };
+    async || {
+       // ^ move(&mut baz, &mut *qux)
+        baz = NonCopy;
+        *qux = NonCopy;
+    };
+}
+
 "#,
         );
     }
@@ -156,6 +200,19 @@ fn main() {
     let foo = u32;
     move || {
 //  ^^^^ (foo)
+        foo;
+    };
+}
+"#,
+        );
+        check_with_config(
+            InlayHintsConfig { closure_capture_hints: true, ..DISABLED_CONFIG },
+            r#"
+//- minicore: copy, derive
+fn main() {
+    let foo = u32;
+    async move || {
+      //  ^^^^ (foo)
         foo;
     };
 }

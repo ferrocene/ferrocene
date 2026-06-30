@@ -7,13 +7,13 @@ use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, LazyAttrTokenStream, Spacing, TokenTree,
 };
 use rustc_ast::{
-    self as ast, AttrItemKind, AttrKind, AttrStyle, Attribute, DUMMY_NODE_ID, EarlyParsedAttribute,
-    HasAttrs, HasTokens, MetaItem, MetaItemInner, NodeId, NormalAttr,
+    self as ast, AttrItemKind, AttrKind, AttrStyle, Attribute, EarlyParsedAttribute, HasAttrs,
+    HasTokens, MetaItem, MetaItemInner, NodeId, NormalAttr,
 };
 use rustc_attr_parsing::parser::AllowExprMetavar;
 use rustc_attr_parsing::{
-    self as attr, AttributeParser, CFG_TEMPLATE, EvalConfigResult, ShouldEmit, eval_config_entry,
-    parse_cfg,
+    self as attr, AttributeParser, AttributeSafety, CFG_TEMPLATE, EvalConfigResult, ShouldEmit,
+    eval_config_entry, parse_cfg,
 };
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_errors::msg;
@@ -27,11 +27,11 @@ use rustc_hir::{
 };
 use rustc_parse::parser::Recovery;
 use rustc_session::Session;
-use rustc_session::parse::feature_err;
-use rustc_span::{DUMMY_SP, STDLIB_STABLE_CRATES, Span, Symbol, sym};
+use rustc_session::errors::feature_err;
+use rustc_span::{STDLIB_STABLE_CRATES, Span, Symbol, sym};
 use tracing::instrument;
 
-use crate::errors::{
+use crate::diagnostics::{
     CrateNameInCfgAttr, CrateTypeInCfgAttr, FeatureNotAllowed, FeatureRemoved,
     FeatureRemovedReason, InvalidCfg, RemoveExprNotSupported,
 };
@@ -51,14 +51,7 @@ pub fn features(sess: &Session, krate_attrs: &[Attribute], crate_name: Symbol) -
     let mut features = Features::default();
 
     if let Some(hir::Attribute::Parsed(AttributeKind::Feature(feature_idents, _))) =
-        AttributeParser::parse_limited(
-            sess,
-            krate_attrs,
-            &[sym::feature],
-            DUMMY_SP,
-            DUMMY_NODE_ID,
-            Some(&features),
-        )
+        AttributeParser::parse_limited(sess, krate_attrs, &[sym::feature])
     {
         for feature_ident in feature_idents {
             // If the enabled feature has been removed, issue an error.
@@ -289,7 +282,7 @@ impl<'a> StripUnconfigured<'a> {
                 rustc_lint_defs::builtin::UNUSED_ATTRIBUTES,
                 cfg_attr.span,
                 ast::CRATE_NODE_ID,
-                crate::errors::CfgAttrNoAttributes,
+                crate::diagnostics::CfgAttrNoAttributes,
             );
         }
 
@@ -398,6 +391,7 @@ impl<'a> StripUnconfigured<'a> {
             parse_cfg,
             &CFG_TEMPLATE,
             AllowExprMetavar::Yes,
+            AttributeSafety::Normal,
         ) else {
             // Cfg attribute was not parsable, give up
             return EvalConfigResult::True;

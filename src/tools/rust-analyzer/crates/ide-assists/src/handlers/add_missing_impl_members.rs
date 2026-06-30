@@ -45,7 +45,10 @@ use crate::{
 //     }
 // }
 // ```
-pub(crate) fn add_missing_impl_members(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<()> {
+pub(crate) fn add_missing_impl_members(
+    acc: &mut Assists,
+    ctx: &AssistContext<'_, '_>,
+) -> Option<()> {
     add_missing_impl_members_inner(
         acc,
         ctx,
@@ -89,7 +92,7 @@ pub(crate) fn add_missing_impl_members(acc: &mut Assists, ctx: &AssistContext<'_
 // ```
 pub(crate) fn add_missing_default_members(
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
 ) -> Option<()> {
     add_missing_impl_members_inner(
         acc,
@@ -103,7 +106,7 @@ pub(crate) fn add_missing_default_members(
 
 fn add_missing_impl_members_inner(
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     mode: DefaultMethods,
     ignore_items: IgnoreAssocItems,
     assist_id: &'static str,
@@ -148,9 +151,10 @@ fn add_missing_impl_members_inner(
 
     let target = impl_def.syntax().text_range();
     acc.add(AssistId::quick_fix(assist_id), label, target, |edit| {
-        let make = SyntaxFactory::with_mappings();
+        let editor = edit.make_editor(impl_def.syntax());
+        let make = editor.make();
         let new_item = add_trait_assoc_items_to_impl(
-            &make,
+            make,
             &ctx.sema,
             ctx.config,
             &missing_items,
@@ -166,7 +170,7 @@ fn add_missing_impl_members_inner(
         let mut first_new_item = if let DefaultMethods::No = mode
             && let ast::AssocItem::Fn(func) = &first_new_item
             && let Some(body) = try_gen_trait_body(
-                &make,
+                make,
                 ctx,
                 func,
                 trait_ref,
@@ -175,7 +179,7 @@ fn add_missing_impl_members_inner(
             )
             && let Some(func_body) = func.body()
         {
-            let (mut func_editor, _) = SyntaxEditor::new(first_new_item.syntax().clone());
+            let (func_editor, _) = SyntaxEditor::new(first_new_item.syntax().clone());
             func_editor.replace(func_body.syntax(), body.syntax());
             ast::AssocItem::cast(func_editor.finish().new_root().clone())
         } else {
@@ -188,9 +192,8 @@ fn add_missing_impl_members_inner(
             .chain(other_items.iter().cloned())
             .collect::<Vec<_>>();
 
-        let mut editor = edit.make_editor(impl_def.syntax());
         if let Some(assoc_item_list) = impl_def.assoc_item_list() {
-            assoc_item_list.add_items(&mut editor, new_assoc_items);
+            assoc_item_list.add_items(&editor, new_assoc_items);
         } else {
             let assoc_item_list = make.assoc_item_list(new_assoc_items);
             editor.insert_all(
@@ -218,14 +221,13 @@ fn add_missing_impl_members_inner(
                 editor.add_annotation(first_new_item.syntax(), tabstop);
             };
         };
-        editor.add_mappings(make.finish_with_mappings());
         edit.add_file_edits(ctx.vfs_file_id(), editor);
     })
 }
 
 fn try_gen_trait_body(
     make: &SyntaxFactory,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     func: &ast::Fn,
     trait_ref: hir::TraitRef<'_>,
     impl_def: &ast::Impl,
@@ -2619,6 +2621,87 @@ impl Allocator for System {
     }
 }
 "#,
+        );
+    }
+
+    #[test]
+    fn does_not_include_defaulted_assoc_types() {
+        check_assist_not_applicable(
+            add_missing_impl_members,
+            r#"
+trait Trait {
+    type NotRequired = ();
+}
+
+struct Struct;
+
+impl Trait for Struct {
+    $0
+}
+        "#,
+        );
+    }
+
+    #[test]
+    fn drop_pin_drop() {
+        check_assist_not_applicable(
+            add_missing_impl_members,
+            r#"
+//- minicore: drop, pin
+struct Foo;
+impl Drop for Foo {$0
+    fn drop(&mut self) {}
+}
+        "#,
+        );
+        check_assist_not_applicable(
+            add_missing_impl_members,
+            r#"
+//- minicore: drop, pin
+struct Foo;
+impl Drop for Foo {$0
+    fn pin_drop(self: core::pin::Pin<&mut Self>) {}
+}
+        "#,
+        );
+
+        check_assist_not_applicable(
+            add_missing_default_members,
+            r#"
+//- minicore: drop, pin
+struct Foo;
+impl Drop for Foo {$0
+    fn drop(&mut self) {}
+}
+        "#,
+        );
+        check_assist_not_applicable(
+            add_missing_default_members,
+            r#"
+//- minicore: drop, pin
+struct Foo;
+impl Drop for Foo {$0
+    fn pin_drop(self: core::pin::Pin<&mut Self>) {}
+}
+        "#,
+        );
+
+        check_assist(
+            add_missing_impl_members,
+            r#"
+//- minicore: drop, pin
+struct Foo;
+impl Drop for Foo {$0
+}
+        "#,
+            r#"
+struct Foo;
+impl Drop for Foo {
+    fn drop(&mut self) {
+        ${0:todo!()}
+    }
+}
+        "#,
         );
     }
 }

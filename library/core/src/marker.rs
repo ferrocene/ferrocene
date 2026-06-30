@@ -849,7 +849,7 @@ impl<T: PointeeSized> Copy for PhantomData<T> {}
 impl<T: PointeeSized> Clone for PhantomData<T> {
     #[ferrocene::prevalidated]
     fn clone(&self) -> Self {
-        Self
+        *self
     }
 }
 
@@ -859,7 +859,7 @@ unsafe impl<T: PointeeSized> TrivialClone for PhantomData<T> {}
 
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
-impl<T: PointeeSized> const Default for PhantomData<T> {
+const impl<T: PointeeSized> Default for PhantomData<T> {
     fn default() -> Self {
         Self
     }
@@ -1026,6 +1026,7 @@ pub auto trait Unpin {}
 // will likely eventually be deprecated, and all new code should be using `UnsafePinned` instead.
 #[stable(feature = "pin", since = "1.33.0")]
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[rustc_diagnostic_item = "PhantomPinned"]
 pub struct PhantomPinned;
 
 #[stable(feature = "pin", since = "1.33.0")]
@@ -1348,5 +1349,21 @@ pub macro CoercePointee($item:item) {
 #[unstable(feature = "coerce_pointee_validated", issue = "none")]
 #[doc(hidden)]
 pub trait CoercePointeeValidated {
+    /* compiler built-in */
+}
+
+/// Allows value to be reborrowed as exclusive, creating a copy of the value
+/// that disables the source for reads and writes for the lifetime of the copy.
+#[lang = "reborrow"]
+#[unstable(feature = "reborrow", issue = "145612")]
+pub trait Reborrow {
+    /* compiler built-in */
+}
+
+/// Allows reborrowable value to be reborrowed as shared, creating a copy
+/// that disables the source for writes for the lifetime of the copy.
+#[lang = "coerce_shared"]
+#[unstable(feature = "reborrow", issue = "145612")]
+pub trait CoerceShared<Target: Copy>: Reborrow {
     /* compiler built-in */
 }

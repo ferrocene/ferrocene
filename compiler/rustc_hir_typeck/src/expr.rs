@@ -22,16 +22,15 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath, find_attr, is_range_literal};
 use rustc_hir_analysis::NoVariantNamed;
-use rustc_hir_analysis::errors::NoFieldOnType;
+use rustc_hir_analysis::diagnostics::NoFieldOnType;
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
 use rustc_infer::infer::{self, DefineOpaqueTypes, InferOk, RegionVariableOrigin};
 use rustc_infer::traits::query::NoSolution;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AllowTwoPhase};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
-use rustc_middle::ty::{self, AdtKind, GenericArgsRef, Ty, TypeVisitableExt};
+use rustc_middle::ty::{self, AdtKind, GenericArgsRef, Ty, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
-use rustc_session::errors::ExprParenthesesNeeded;
-use rustc_session::parse::feature_err;
+use rustc_session::errors::{ExprParenthesesNeeded, feature_err};
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::hygiene::DesugaringKind;
 use rustc_span::{Ident, Span, Spanned, Symbol, kw, sym};
@@ -41,7 +40,7 @@ use tracing::{debug, instrument, trace};
 
 use crate::Expectation::{self, ExpectCastableToType, ExpectHasType, NoExpectation};
 use crate::coercion::CoerceMany;
-use crate::errors::{
+use crate::diagnostics::{
     AddressOfTemporaryTaken, BaseExpressionDoubleDot, BaseExpressionDoubleDotAddExpr,
     BaseExpressionDoubleDotRemove, CantDereference, FieldMultiplySpecifiedInInitializer,
     FunctionalRecordUpdateOnNonStruct, HelpUseLatestEdition, NakedAsmOutsideNakedFn,
@@ -57,25 +56,7 @@ use crate::{
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(crate) fn precedence(&self, expr: &hir::Expr<'_>) -> ExprPrecedence {
         let has_attr = |id: HirId| -> bool {
-            for attr in self.tcx.hir_attrs(id) {
-                // For the purpose of rendering suggestions, disregard attributes
-                // that originate from desugaring of any kind. For example, `x?`
-                // desugars to `#[allow(unreachable_code)] match ...`. Failing to
-                // ignore the prefix attribute in the desugaring would cause this
-                // suggestion:
-                //
-                //     let y: u32 = x?.try_into().unwrap();
-                //                    ++++++++++++++++++++
-                //
-                // to be rendered as:
-                //
-                //     let y: u32 = (x?).try_into().unwrap();
-                //                  +  +++++++++++++++++++++
-                if attr.span().desugaring_kind().is_none() {
-                    return true;
-                }
-            }
-            false
+            self.tcx.hir_attrs(id).iter().any(hir::Attribute::is_prefix_attr_for_suggestions)
         };
 
         // Special case: range expressions are desugared to struct literals in HIR,
@@ -101,7 +82,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // While we don't allow *arbitrary* coercions here, we *do* allow
         // coercions from ! to `expected`.
-        if self.try_structurally_resolve_type(expr.span, ty).is_never()
+        if self.resolve_vars_with_obligations(ty).is_never()
             && self.tcx.expr_guaranteed_to_constitute_read_for_never(expr)
         {
             if let Some(adjustments) = self.typeck_results.borrow().adjustments().get(expr.hir_id) {
@@ -319,7 +300,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // unless it's a place expression that isn't being read from, in which case
         // diverging would be unsound since we may never actually read the `!`.
         // e.g. `let _ = *never_ptr;` with `never_ptr: *const !`.
-        if self.try_structurally_resolve_type(expr.span, ty).is_never()
+        if self.resolve_vars_with_obligations(ty).is_never()
             && self.tcx.expr_guaranteed_to_constitute_read_for_never(expr)
         {
             self.diverges.set(self.diverges.get() | Diverges::always(expr.span));
@@ -473,7 +454,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
         let hint = expected.only_has_type(self).map_or(NoExpectation, |ty| {
-            match self.try_structurally_resolve_type(expr.span, ty).kind() {
+            match self.resolve_vars_with_obligations(ty).kind() {
                 ty::Ref(_, ty, _) | ty::RawPtr(ty, _) => {
                     if oprnd.is_syntactic_place_expr() {
                         // Places may legitimately have unsized types.
@@ -594,7 +575,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.add_required_obligations_with_code(expr.span, def_id, args, |_, _| {
                     code.clone()
                 });
-                return tcx.type_of(def_id).instantiate(tcx, args);
+                return tcx.type_of(def_id).instantiate(tcx, args).skip_norm_wip();
             }
         }
 
@@ -1206,7 +1187,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let cond_diverges = self.diverges.get();
         self.diverges.set(Diverges::Maybe);
 
-        let expected = orig_expected.try_structurally_resolve_and_adjust_for_branches(self, sp);
+        let expected = orig_expected.try_structurally_resolve_and_adjust_for_branches(self);
         let then_ty = self.check_expr_with_expectation(then_expr, expected);
         let then_diverges = self.diverges.get();
         self.diverges.set(Diverges::Maybe);
@@ -1476,7 +1457,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expected: Expectation<'tcx>,
     ) -> Ty<'tcx> {
         let rcvr_t = self.check_expr(rcvr);
-        let rcvr_t = self.try_structurally_resolve_type(rcvr.span, rcvr_t);
+        let rcvr_t = self.resolve_vars_with_obligations(rcvr_t);
 
         match self.lookup_method(rcvr_t, segment, segment.ident.span, expr, rcvr, args) {
             Ok(method) => {
@@ -1489,12 +1470,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     method.sig.output(),
                     expected,
                     args,
-                    method.sig.c_variadic,
+                    method.sig.c_variadic(),
                     TupleArgumentsFlag::DontTupleArguments,
                     Some(method.def_id),
                 );
 
-                self.check_call_abi(method.sig.abi, expr.span);
+                self.check_call_abi(method.sig.abi(), expr.span);
 
                 method.sig.output()
             }
@@ -1663,11 +1644,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let coerce_to = expected
                 .to_option(self)
                 .and_then(|uty| {
-                    self.try_structurally_resolve_type(expr.span, uty)
+                    self.resolve_vars_with_obligations(uty)
                         .builtin_index()
                         // Avoid using the original type variable as the coerce_to type, as it may resolve
                         // during the first coercion instead of being the LUB type.
-                        .filter(|t| !self.try_structurally_resolve_type(expr.span, *t).is_ty_var())
+                        .filter(|t| !self.resolve_vars_with_obligations(*t).is_ty_var())
                 })
                 .unwrap_or_else(|| self.next_ty_var(expr.span));
             let mut coerce = CoerceMany::with_capacity(coerce_to, args.len());
@@ -1743,7 +1724,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let count_span = count.span;
         let count = self.try_structurally_resolve_const(
             count_span,
-            self.normalize(count_span, self.lower_const_arg(count, tcx.types.usize)),
+            self.normalize(
+                count_span,
+                Unnormalized::new_wip(self.lower_const_arg(count, tcx.types.usize)),
+            ),
         );
 
         if let Some(count) = count.try_to_target_usize(tcx) {
@@ -1789,7 +1773,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Ty<'tcx> {
         let mut expectations = expected
             .only_has_type(self)
-            .and_then(|ty| self.try_structurally_resolve_type(expr.span, ty).opt_tuple_fields())
+            .and_then(|ty| self.resolve_vars_with_obligations(ty).opt_tuple_fields())
             .unwrap_or_default()
             .iter();
 
@@ -1863,7 +1847,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) {
         let tcx = self.tcx;
 
-        let adt_ty = self.try_structurally_resolve_type(path_span, adt_ty);
+        let adt_ty = self.resolve_vars_with_obligations(adt_ty);
         let adt_ty_hint = expected.only_has_type(self).and_then(|expected| {
             self.fudge_inference_if_ok(|| {
                 let ocx = ObligationCtxt::new(self);
@@ -2095,7 +2079,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             .map(|f| {
                                 let fru_ty = self.normalize(
                                     expr.span,
-                                    self.field_ty(base_expr.span, f, fresh_args),
+                                    Unnormalized::new_wip(self.field_ty(
+                                        base_expr.span,
+                                        f,
+                                        fresh_args,
+                                    )),
                                 );
                                 let ident =
                                     self.tcx.adjust_ident(f.ident(self.tcx), variant.def_id);
@@ -2366,7 +2354,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 variant.fields.iter().find(|field| field.ident(self.tcx) == last_expr_field.ident)
             && let range_def_id = self.tcx.lang_items().range_struct()
             && variant_field
-                .and_then(|field| field.ty(self.tcx, args).ty_adt_def())
+                .and_then(|field| field.ty(self.tcx, args).skip_norm_wip().ty_adt_def())
                 .map(|adt| adt.did())
                 != range_def_id
         {
@@ -2480,7 +2468,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let fn_sig = self
                         .tcx
                         .fn_sig(item.def_id)
-                        .instantiate(self.tcx, self.fresh_args_for_item(span, item.def_id));
+                        .instantiate(self.tcx, self.fresh_args_for_item(span, item.def_id))
+                        .skip_norm_wip();
                     let ret_ty = self.tcx.instantiate_bound_regions_with_erased(fn_sig.output());
                     if !self.can_eq(self.param_env, ret_ty, adt_ty) {
                         return None;
@@ -2592,7 +2581,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         ),
                     );
                     err.span_label(field.ident.span, "field does not exist");
-                    let fn_sig = self.tcx.fn_sig(def_id).instantiate_identity();
+                    let fn_sig = self.tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip();
                     let inputs = fn_sig.inputs().skip_binder();
                     let fields = format!(
                         "({})",
@@ -2620,7 +2609,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 _ => {
                     err.span_label(variant_ident_span, format!("`{ty}` defined here"));
                     err.span_label(field.ident.span, "field does not exist");
-                    let fn_sig = self.tcx.fn_sig(def_id).instantiate_identity();
+                    let fn_sig = self.tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip();
                     let inputs = fn_sig.inputs().skip_binder();
                     let fields = format!(
                         "({})",
@@ -3215,7 +3204,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     {
                         err.span_label(field.span, "this is an associated function, not a method");
                         err.note("found the following associated function; to be used as method, it must have a `self` parameter");
-                        let impl_ty = self.tcx.type_of(impl_def_id).instantiate_identity();
+                        let impl_ty =
+                            self.tcx.type_of(impl_def_id).instantiate_identity().skip_norm_wip();
                         err.span_note(
                             self.tcx.def_span(item.def_id),
                             format!("the candidate is defined in an impl for the type `{impl_ty}`"),
@@ -3365,7 +3355,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 .map(|field_def| {
                                     (
                                         field_def.ident(self.tcx).normalize_to_macros_2_0(),
-                                        field_def.ty(self.tcx, args),
+                                        field_def.ty(self.tcx, args).skip_norm_wip(),
                                     )
                                 })
                                 .collect::<Vec<_>>(),
@@ -3586,11 +3576,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let element_ty = ocx.normalize(
                 &cause,
                 self.param_env,
-                Ty::new_projection_from_args(
+                Unnormalized::new(Ty::new_projection_from_args(
                     self.tcx,
                     index_trait_output_def_id,
                     impl_trait_ref.args,
-                ),
+                )),
             );
 
             let true_errors = ocx.try_evaluate_obligations();
@@ -3771,7 +3761,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         self.tcx.adjust_ident_and_get_scope(field, container_def.did(), block);
 
                     if !self.tcx.features().offset_of_enum() {
-                        rustc_session::parse::feature_err(
+                        rustc_session::errors::feature_err(
                             &self.tcx.sess,
                             sym::offset_of_enum,
                             ident.span,

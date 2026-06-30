@@ -52,6 +52,7 @@ where
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn try_fold<Acc, Fold, R>(&mut self, init: Acc, mut fold: Fold) -> R
     where
         Self: Sized,

@@ -716,7 +716,7 @@ impl<'a> State<'a> {
 
                 match of_trait {
                     None => {
-                        if let hir::Constness::Const = constness {
+                        if let hir::Constness::Const { always: false } = constness {
                             self.word_nbsp("const");
                         }
                         impl_generics(self)
@@ -733,7 +733,7 @@ impl<'a> State<'a> {
 
                         impl_generics(self);
 
-                        if let hir::Constness::Const = constness {
+                        if let hir::Constness::Const { always: false } = constness {
                             self.word_nbsp("const");
                         }
 
@@ -757,21 +757,21 @@ impl<'a> State<'a> {
                 }
                 self.bclose(item.span, cb);
             }
-            hir::ItemKind::Trait(
+            hir::ItemKind::Trait {
+                impl_restriction,
                 constness,
                 is_auto,
                 safety,
-                impl_restriction,
                 ident,
                 generics,
                 bounds,
-                trait_items,
-            ) => {
+                items: trait_items,
+            } => {
                 let (cb, ib) = self.head("");
+                self.print_impl_restriction(impl_restriction);
                 self.print_constness(constness);
                 self.print_is_auto(is_auto);
                 self.print_safety(safety);
-                self.print_impl_restriction(impl_restriction);
                 self.word_nbsp("trait");
                 self.print_ident(ident);
                 self.print_generic_params(generics.params);
@@ -951,7 +951,7 @@ impl<'a> State<'a> {
         self.maybe_print_comment(ti.span.lo());
         self.print_attrs(self.attrs(ti.hir_id()));
         match ti.kind {
-            hir::TraitItemKind::Const(ty, default, _) => {
+            hir::TraitItemKind::Const(ty, default) => {
                 self.print_associated_const(ti.ident, ti.generics, ty, default);
             }
             hir::TraitItemKind::Fn(ref sig, hir::TraitFn::Required(arg_idents)) => {
@@ -1645,6 +1645,7 @@ impl<'a> State<'a> {
                 fn_arg_span: _,
                 kind: _,
                 def_id: _,
+                explicit_captures: _,
             }) => {
                 self.print_closure_binder(binder, bound_generic_params);
                 self.print_constness(constness);
@@ -2264,8 +2265,11 @@ impl<'a> State<'a> {
         assert!(arg_idents.is_empty() || body_id.is_none());
         let mut i = 0;
         let mut print_arg = |s: &mut Self, ty: Option<&hir::Ty<'_>>| {
-            if i == 0 && decl.implicit_self.has_implicit_self() {
-                s.print_implicit_self(&decl.implicit_self);
+            if Some(i) == decl.splatted().map(usize::from) {
+                s.word("#[splat]");
+            }
+            if i == 0 && decl.implicit_self().has_implicit_self() {
+                s.print_implicit_self(&decl.implicit_self());
             } else {
                 if let Some(arg_ident) = arg_idents.get(i) {
                     if let Some(arg_ident) = arg_ident {
@@ -2289,7 +2293,7 @@ impl<'a> State<'a> {
             print_arg(s, Some(ty));
             s.end(ib);
         });
-        if decl.c_variadic {
+        if decl.c_variadic() {
             if !decl.inputs.is_empty() {
                 self.word(", ");
             }
@@ -2529,14 +2533,6 @@ impl<'a> State<'a> {
                     }
                 }
             }
-            hir::WherePredicateKind::EqPredicate(hir::WhereEqPredicate {
-                lhs_ty, rhs_ty, ..
-            }) => {
-                self.print_type(lhs_ty);
-                self.space();
-                self.word_space("=");
-                self.print_type(rhs_ty);
-            }
         }
     }
 
@@ -2630,7 +2626,8 @@ impl<'a> State<'a> {
     fn print_constness(&mut self, s: hir::Constness) {
         match s {
             hir::Constness::NotConst => {}
-            hir::Constness::Const => self.word_nbsp("const"),
+            hir::Constness::Const { always: false } => self.word_nbsp("const"),
+            hir::Constness::Const { always: true } => { /* printed as an attribute */ }
         }
     }
 

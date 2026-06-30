@@ -82,6 +82,7 @@ book!(
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct UnstableBook {
+    build_compiler: Compiler,
     target: TargetSelection,
 }
 
@@ -97,11 +98,24 @@ impl Step for UnstableBook {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(UnstableBook { target: run.target });
+        // Bump the stage to 2, because the unstable book requires an in-tree compiler.
+        // At the same time, since this step is enabled by default, we don't want `x doc` to fail
+        // in stage 1.
+        let stage = if run.builder.config.is_explicit_stage() || run.builder.top_stage >= 2 {
+            run.builder.top_stage
+        } else {
+            2
+        };
+
+        run.builder.ensure(UnstableBook {
+            build_compiler: prepare_doc_compiler(run.builder, run.target, stage),
+            target: run.target,
+        });
     }
 
     fn run(self, builder: &Builder<'_>) {
-        builder.ensure(UnstableBookGen { target: self.target });
+        builder
+            .ensure(UnstableBookGen { build_compiler: self.build_compiler, target: self.target });
         builder.ensure(RustbookSrc {
             target: self.target,
             name: "unstable-book".to_owned(),
@@ -969,13 +983,7 @@ impl Step for Rustc {
         // see https://github.com/rust-lang/rust/pull/122066#issuecomment-1983049222
         // If there is any bug, please comment out the next line.
         cargo.rustdocflag("--generate-link-to-definition");
-        // FIXME: Currently, `--generate-macro-expansion` option is buggy in `beta` rustdoc. To
-        // allow CI to pass, we only enable the option in stage 2 and higher.
-        // cfg(bootstrap)
-        // ^ Adding this so it's not forgotten when the new release is done.
-        if builder.top_stage > 1 {
-            cargo.rustdocflag("--generate-macro-expansion");
-        }
+        cargo.rustdocflag("--generate-macro-expansion");
 
         compile::rustc_cargo(builder, &mut cargo, target, &build_compiler, &self.crates);
         cargo.arg("-Zskip-rustdoc-fingerprint");
@@ -1308,6 +1316,7 @@ impl Step for ErrorIndex {
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct UnstableBookGen {
+    build_compiler: Compiler,
     target: TargetSelection,
 }
 
@@ -1324,11 +1333,15 @@ impl Step for UnstableBookGen {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(UnstableBookGen { target: run.target });
+        run.builder.ensure(UnstableBookGen {
+            build_compiler: prepare_doc_compiler(run.builder, run.target, run.builder.top_stage),
+            target: run.target,
+        });
     }
 
     fn run(self, builder: &Builder<'_>) {
         let target = self.target;
+        let rustc_path = builder.rustc(self.build_compiler);
 
         builder.info(&format!("Generating unstable book md files ({target})"));
         let out = builder.md_doc_out(target).join("unstable-book");
@@ -1338,6 +1351,7 @@ impl Step for UnstableBookGen {
         cmd.arg(builder.src.join("library"));
         cmd.arg(builder.src.join("compiler"));
         cmd.arg(builder.src.join("src"));
+        cmd.arg(rustc_path);
         cmd.arg(out);
 
         cmd.run(builder);

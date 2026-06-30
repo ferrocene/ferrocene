@@ -117,9 +117,9 @@ impl Res {
             DefKind::Fn | DefKind::AssocFn => return Suggestion::Function,
             // FIXME: handle macros with multiple kinds, and attribute/derive macros that aren't
             // proc macros
-            DefKind::Macro(MacroKinds::BANG) => return Suggestion::Macro,
-
+            DefKind::Macro(MacroKinds::ATTR) => "attribute",
             DefKind::Macro(MacroKinds::DERIVE) => "derive",
+            DefKind::Macro(_) => return Suggestion::Macro,
             DefKind::Struct => "struct",
             DefKind::Enum => "enum",
             DefKind::Trait => "trait",
@@ -311,7 +311,7 @@ impl<'tcx> LinkCollector<'_, 'tcx> {
 
         match ty_res {
             Res::Def(DefKind::Enum | DefKind::TyAlias, did) => {
-                match tcx.type_of(did).instantiate_identity().kind() {
+                match tcx.type_of(did).instantiate_identity().skip_norm_wip().kind() {
                     ty::Adt(def, _) if def.is_enum() => {
                         if let Some(variant) =
                             def.variants().iter().find(|v| v.name == variant_name)
@@ -328,7 +328,12 @@ impl<'tcx> LinkCollector<'_, 'tcx> {
                             })
                         }
                     }
-                    _ => unreachable!(),
+                    _ => Err(UnresolvedPath {
+                        item_id,
+                        module_id,
+                        partial_res: Some(Res::Def(DefKind::TyAlias, did)),
+                        unresolved: variant_name.to_string().into(),
+                    }),
                 }
             }
             _ => Err(UnresolvedPath {
@@ -509,7 +514,9 @@ fn resolve_self_ty<'tcx>(
     };
 
     match tcx.def_kind(self_id) {
-        DefKind::Impl { .. } => ty_to_res(tcx, tcx.type_of(self_id).instantiate_identity()),
+        DefKind::Impl { .. } => {
+            ty_to_res(tcx, tcx.type_of(self_id).instantiate_identity().skip_norm_wip())
+        }
         DefKind::Use => None,
         def_kind => Some(Res::Def(def_kind, self_id)),
     }
@@ -606,7 +613,8 @@ fn resolve_associated_item<'tcx>(
             // Resolve the link on the type the alias points to.
             // FIXME: if the associated item is defined directly on the type alias,
             // it will show up on its documentation page, we should link there instead.
-            let Some(aliased_res) = ty_to_res(tcx, tcx.type_of(alias_did).instantiate_identity())
+            let Some(aliased_res) =
+                ty_to_res(tcx, tcx.type_of(alias_did).instantiate_identity().skip_norm_wip())
             else {
                 return vec![];
             };
@@ -686,7 +694,7 @@ fn resolve_assoc_on_adt<'tcx>(
 ) -> Vec<(Res, DefId)> {
     debug!("looking for associated item named {item_ident} for item {adt_def_id:?}");
     let root_res = Res::from_def_id(tcx, adt_def_id);
-    let adt_ty = tcx.type_of(adt_def_id).instantiate_identity();
+    let adt_ty = tcx.type_of(adt_def_id).instantiate_identity().skip_norm_wip();
     let adt_def = adt_ty.ty_adt_def().expect("must be ADT");
     // Checks if item_name is a variant of the `SomeItem` enum
     if ns == TypeNS && adt_def.is_enum() {
@@ -747,7 +755,7 @@ fn resolve_assoc_on_simple_type<'tcx>(
     // Although having both would be ambiguous, use impl version for compatibility's sake.
     // To handle that properly resolve() would have to support
     // something like [`ambi_fn`](<SomeStruct as SomeTrait>::ambi_fn)
-    let ty = tcx.type_of(ty_def_id).instantiate_identity();
+    let ty = tcx.type_of(ty_def_id).instantiate_identity().skip_norm_wip();
     let trait_assoc_items = resolve_associated_trait_item(ty, module_id, item_ident, ns, tcx)
         .into_iter()
         .map(|item| (root_res, item.def_id))
@@ -1489,7 +1497,7 @@ impl LinkCollector<'_, '_> {
             Some((sp, _)) => sp,
             None => item.attr_span(self.cx.tcx),
         };
-        rustc_session::parse::feature_err(
+        rustc_session::errors::feature_err(
             self.cx.tcx.sess,
             sym::intra_doc_pointers,
             span,
@@ -2019,7 +2027,8 @@ fn resolution_failure(
                 )
             };
             // ignore duplicates
-            let mut variants_seen = SmallVec::<[_; 3]>::new();
+            let mut variants_seen =
+                SmallVec::<[_; const { mem::variant_count::<ResolutionFailure<'_>>() }]>::new();
             for mut failure in kinds {
                 let variant = mem::discriminant(&failure);
                 if variants_seen.contains(&variant) {
@@ -2041,17 +2050,37 @@ fn resolution_failure(
 
                     // Check if _any_ parent of the path gets resolved.
                     // If so, report it and say the first which failed; if not, say the first path segment didn't resolve.
+                    // Also check if `path_str` is an invalid path.
+
+                    // Examples of `path_str` that are invalid:
+                    // - "std::::path", during splitting this would yield an empty segment
+                    // - "std:::path", this would eventually yield "std:"
+                    let mut path_is_invalid = false;
+                    let is_invalid_segment =
+                        |segment: &str| segment.is_empty() || segment.contains(':');
+
                     let mut name = path_str;
                     'outer: loop {
                         // FIXME(jynelson): this might conflict with my `Self` fix in #76467
                         let Some((start, end)) = name.rsplit_once("::") else {
+                            // `name` is now the first path segment, which didn't resolve.
                             // avoid bug that marked [Quux::Z] as missing Z, not Quux
+                            if is_invalid_segment(name) {
+                                path_is_invalid = true;
+                                break;
+                            }
                             if partial_res.is_none() {
                                 *unresolved = name.into();
+                                // If `partial_res` somehow had a value, we preserve the original `unresolved`.
                             }
                             break;
                         };
-                        name = start;
+                        if is_invalid_segment(end) {
+                            // If any segment is invalid, stop and say so, instead of saying
+                            // "no item named ...", which would look nonsensical.
+                            path_is_invalid = true;
+                            break;
+                        }
                         for ns in [TypeNS, ValueNS, MacroNS] {
                             if let Ok(v_res) =
                                 collector.resolve(start, ns, None, item_id, module_id)
@@ -2064,7 +2093,13 @@ fn resolution_failure(
                                 }
                             }
                         }
-                        *unresolved = end.into();
+                        if start.is_empty() && partial_res.is_none() {
+                            // `start` being empty means `path_str` was written like "::path::to::item".
+                            // In this case, `end` is the first path segment that we should report.
+                            *unresolved = end.into();
+                            break;
+                        }
+                        name = start;
                     }
 
                     let last_found_module = match *partial_res {
@@ -2074,7 +2109,9 @@ fn resolution_failure(
                     };
                     // See if this was a module: `[path]` or `[std::io::nope]`
                     if let Some(module) = last_found_module {
-                        let note = if partial_res.is_some() {
+                        let note = if path_is_invalid {
+                            "invalid path separator".into()
+                        } else if partial_res.is_some() {
                             // Part of the link resolved; e.g. `std::io::nonexistent`
                             let module_name = tcx.item_name(module);
                             format!("no item named `{unresolved}` in module `{module_name}`")
@@ -2121,7 +2158,8 @@ fn resolution_failure(
                         Res::Primitive(_) => None,
                     };
                     let is_struct_variant = |did| {
-                        if let ty::Adt(def, _) = tcx.type_of(did).instantiate_identity().kind()
+                        if let ty::Adt(def, _) =
+                            tcx.type_of(did).instantiate_identity().skip_norm_wip().kind()
                             && def.is_enum()
                             && let Some(variant) =
                                 def.variants().iter().find(|v| v.name == res.name(tcx))
@@ -2307,7 +2345,7 @@ fn report_malformed_generics(
                     );
                     "fully-qualified syntax is unsupported"
                 }
-                MalformedGenerics::InvalidPathSeparator => "has invalid path separator",
+                MalformedGenerics::InvalidPathSeparator => "invalid path separator",
                 MalformedGenerics::TooManyAngleBrackets => "too many angle brackets",
                 MalformedGenerics::EmptyAngleBrackets => "empty angle brackets",
             };

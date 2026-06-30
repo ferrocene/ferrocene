@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, LazyLock};
 
-use crate::common::Config;
+use crate::common::{Config, PassFailMode, TestMode};
 use crate::directives::{
     DirectiveLine, NormalizeKind, NormalizeRule, TestProps, parse_and_update_aux,
     parse_edition_range, split_flags,
@@ -115,9 +115,6 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 props.pp_exact = config.parse_pp_exact(ln);
             }
         }),
-        handler(SHOULD_ICE, |config, ln, props| {
-            config.set_name_directive(ln, SHOULD_ICE, &mut props.should_ice);
-        }),
         handler(BUILD_AUX_DOCS, |config, ln, props| {
             config.set_name_directive(ln, BUILD_AUX_DOCS, &mut props.build_aux_docs);
         }),
@@ -199,17 +196,11 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 &mut props.check_test_line_numbers_match,
             );
         }),
-        multi_handler(&["check-pass", "build-pass", "run-pass"], |config, ln, props| {
-            props.update_pass_mode(ln, config);
+        multi_handler(PassFailMode::STR_VARIANTS, |config, ln, props| {
+            props.update_pass_fail_mode(ln, config);
         }),
-        multi_handler(
-            &["check-fail", "build-fail", "run-fail", "run-crash", "run-fail-or-crash"],
-            |config, ln, props| {
-                props.update_fail_mode(ln, config);
-            },
-        ),
-        handler(IGNORE_PASS, |config, ln, props| {
-            config.set_name_directive(ln, IGNORE_PASS, &mut props.ignore_pass);
+        handler("no-pass-override", |config, ln, props| {
+            config.set_name_directive(ln, ln.name, &mut props.no_pass_override);
         }),
         multi_handler(
             &[
@@ -314,6 +305,18 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
             if let Some(flags) = config.parse_name_value_directive(ln, LLVM_COV_FLAGS) {
                 props.llvm_cov_flags.extend(split_flags(&flags));
             }
+        }),
+        handler("skip-filecheck", |config, ln, props| {
+            let directive_name = ln.name;
+            // FIXME(Zalathar): Someday we should add unified support for declaring
+            // and checking which modes are supported by each directive.
+            if !matches!(config.mode, TestMode::Assembly | TestMode::Codegen | TestMode::MirOpt) {
+                panic!(
+                    "directive `//@ {directive_name}` is not supported by this test suite (mode: {mode:?})",
+                    mode = config.mode
+                );
+            }
+            config.set_name_directive(ln, directive_name, &mut props.skip_filecheck);
         }),
         handler(FILECHECK_FLAGS, |config, ln, props| {
             if let Some(flags) = config.parse_name_value_directive(ln, FILECHECK_FLAGS) {

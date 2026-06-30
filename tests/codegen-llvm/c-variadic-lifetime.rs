@@ -11,11 +11,14 @@ unsafe extern "C" fn variadic(a: f64, mut args: ...) -> f64 {
     // CHECK: call void @llvm.lifetime.start.p0({{(i64 [0-9]+, )?}}ptr nonnull %args)
     // CHECK: call void @llvm.va_start.p0(ptr nonnull %args)
 
-    let b = args.arg::<f64>();
-    let c = args.arg::<f64>();
+    let b = args.next_arg::<f64>();
+    let c = args.next_arg::<f64>();
 
     a + b + c
 
-    // CHECK: call void @llvm.va_end.p0(ptr nonnull %args)
+    // We no longer call the LLVM va_end.
+    // CHECK-NOT: call void @llvm.va_end
+
+    // But we do still explicitly end the lifetime of the VaList.
     // CHECK: call void @llvm.lifetime.end.p0({{(i64 [0-9]+, )?}}ptr nonnull %args)
 }

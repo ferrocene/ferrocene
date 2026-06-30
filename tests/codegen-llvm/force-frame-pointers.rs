@@ -9,6 +9,7 @@
 //@ [NonLeaf] ignore-x86_64-apple-darwin
 //@ [NonLeaf] ignore-windows-gnu
 //@ [NonLeaf] ignore-thumb
+//@ [NonLeaf] ignore-armv7r (ferrocene addition) not supported by this architecture
 // result is platform-dependent based on platform's frame pointer settings
 
 #![crate_type = "lib"]
@@ -16,3 +17,6 @@
 // Always: attributes #{{.*}} "frame-pointer"="all"
 // NonLeaf: attributes #{{.*}} "frame-pointer"="non-leaf"
 pub fn foo() {}
+
+// Always: !{{[0-9]+}} = !{i32 7, !"frame-pointer", i32 2}
+// NonLeaf: !{{[0-9]+}} = !{i32 7, !"frame-pointer", i32 1}

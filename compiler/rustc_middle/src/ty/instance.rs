@@ -6,7 +6,7 @@ use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, DefKind, Namespace};
 use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::lang_items::LangItem;
-use rustc_macros::{HashStable, Lift, TyDecodable, TyEncodable};
+use rustc_macros::{Lift, StableHash, TyDecodable, TyEncodable};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::{DUMMY_SP, Span};
 use tracing::{debug, instrument};
@@ -29,7 +29,7 @@ use crate::ty::{
 /// Note: the `Lift` impl is currently not used by rustc, but is used by
 /// rustc_codegen_cranelift when the `jit` feature is enabled.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, TyEncodable, TyDecodable)]
-#[derive(HashStable, Lift, TypeFoldable, TypeVisitable)]
+#[derive(StableHash, Lift, TypeFoldable, TypeVisitable)]
 pub struct Instance<'tcx> {
     pub def: InstanceKind<'tcx>,
     pub args: GenericArgsRef<'tcx>,
@@ -41,7 +41,7 @@ pub struct Instance<'tcx> {
 /// Currently, this is only used when KCFI is enabled, as only KCFI needs to treat those two
 /// `ReifyShim`s differently.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-#[derive(TyEncodable, TyDecodable, HashStable)]
+#[derive(TyEncodable, TyDecodable, StableHash)]
 pub enum ReifyReason {
     /// The `ReifyShim` was created to produce a function pointer. This happens when:
     /// * A vtable entry is directly converted to a function call (e.g. creating a fn ptr from a
@@ -58,7 +58,7 @@ pub enum ReifyReason {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-#[derive(TyEncodable, TyDecodable, HashStable, TypeFoldable, TypeVisitable, Lift)]
+#[derive(TyEncodable, TyDecodable, StableHash, TypeFoldable, TypeVisitable, Lift)]
 pub enum InstanceKind<'tcx> {
     /// A user-defined callable item.
     ///
@@ -122,7 +122,7 @@ pub enum InstanceKind<'tcx> {
     ///
     /// This generates a body that will just borrow the (owned) self type,
     /// and dispatch to the `FnMut::call_mut` instance for the closure.
-    ClosureOnceShim { call_once: DefId, track_caller: bool },
+    ClosureOnceShim { call_once: DefId, closure: DefId, track_caller: bool },
 
     /// `<[FnMut/Fn coroutine-closure] as FnOnce>::call_once`
     ///
@@ -147,11 +147,13 @@ pub enum InstanceKind<'tcx> {
     /// Proxy shim for async drop of future (def_id, proxy_cor_ty, impl_cor_ty)
     FutureDropPollShim(DefId, Ty<'tcx>, Ty<'tcx>),
 
-    /// `core::ptr::drop_in_place::<T>`.
+    /// `core::ptr::drop_glue::<T>`.
     ///
-    /// The `DefId` is for `core::ptr::drop_in_place`.
-    /// The `Option<Ty<'tcx>>` is either `Some(T)`, or `None` for empty drop
-    /// glue.
+    /// The `DefId` is for `core::ptr::drop_glue`.
+    /// The `Option<Ty<'tcx>>` is either `Some(T)`, or `None` for empty drop glue.
+    ///
+    /// The type must be monomorphic; for polymorphic drop glue use
+    /// `rustc_mir_transform::build_drop_shim`.
     DropGlue(DefId, Option<Ty<'tcx>>),
 
     /// Compiler-generated `<T as Clone>::clone` implementation.
@@ -248,7 +250,7 @@ impl<'tcx> InstanceKind<'tcx> {
             | InstanceKind::Virtual(def_id, _)
             | InstanceKind::Intrinsic(def_id)
             | InstanceKind::ThreadLocalShim(def_id)
-            | InstanceKind::ClosureOnceShim { call_once: def_id, track_caller: _ }
+            | InstanceKind::ClosureOnceShim { call_once: def_id, closure: _, track_caller: _ }
             | ty::InstanceKind::ConstructCoroutineInClosureShim {
                 coroutine_closure_def_id: def_id,
                 receiver_by_ref: _,
@@ -293,7 +295,7 @@ impl<'tcx> InstanceKind<'tcx> {
         use rustc_hir::definitions::DefPathData;
         let def_id = match *self {
             ty::InstanceKind::Item(def) => def,
-            ty::InstanceKind::DropGlue(_, Some(_)) => return false,
+            ty::InstanceKind::DropGlue(_, Some(ty)) => return ty.is_array(),
             ty::InstanceKind::AsyncDropGlueCtorShim(_, ty) => return ty.is_coroutine(),
             ty::InstanceKind::FutureDropPollShim(_, _, _) => return false,
             ty::InstanceKind::AsyncDropGlue(_, _) => return false,
@@ -308,10 +310,14 @@ impl<'tcx> InstanceKind<'tcx> {
 
     pub fn requires_caller_location(&self, tcx: TyCtxt<'_>) -> bool {
         match *self {
-            InstanceKind::Item(def_id) | InstanceKind::Virtual(def_id, _) => {
+            InstanceKind::Item(def_id)
+            | InstanceKind::Virtual(def_id, _)
+            | InstanceKind::VTableShim(def_id) => {
                 tcx.body_codegen_attrs(def_id).flags.contains(CodegenFnAttrFlags::TRACK_CALLER)
             }
-            InstanceKind::ClosureOnceShim { call_once: _, track_caller } => track_caller,
+            InstanceKind::ClosureOnceShim { call_once: _, closure: _, track_caller } => {
+                track_caller
+            }
             _ => false,
         }
     }
@@ -381,8 +387,7 @@ impl<'tcx> fmt::Display for Instance<'tcx> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         ty::tls::with(|tcx| {
             let mut p = FmtPrinter::new(tcx, Namespace::ValueNS);
-            let instance = tcx.lift(*self).expect("could not lift for printing");
-            instance.print(&mut p)?;
+            tcx.lift(*self).print(&mut p)?;
             let s = p.into_buffer();
             f.write_str(&s)
         })
@@ -633,7 +638,7 @@ impl<'tcx> Instance<'tcx> {
         span: Span,
     ) -> Instance<'tcx> {
         debug!("resolve_for_vtable(def_id={:?}, args={:?})", def_id, args);
-        let fn_sig = tcx.fn_sig(def_id).instantiate_identity();
+        let fn_sig = tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip();
         let is_vtable_shim = !fn_sig.inputs().skip_binder().is_empty()
             && fn_sig.input(0).skip_binder().is_param(0)
             && tcx.generics_of(def_id).has_self;
@@ -717,8 +722,8 @@ impl<'tcx> Instance<'tcx> {
         }
     }
 
-    pub fn resolve_drop_in_place(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ty::Instance<'tcx> {
-        let def_id = tcx.require_lang_item(LangItem::DropInPlace, DUMMY_SP);
+    pub fn resolve_drop_glue(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ty::Instance<'tcx> {
+        let def_id = tcx.require_lang_item(LangItem::DropGlue, DUMMY_SP);
         let args = tcx.mk_args(&[ty.into()]);
         Instance::expect_resolve(
             tcx,
@@ -765,7 +770,8 @@ impl<'tcx> Instance<'tcx> {
             .def_id;
         let track_caller =
             tcx.codegen_fn_attrs(closure_did).flags.contains(CodegenFnAttrFlags::TRACK_CALLER);
-        let def = ty::InstanceKind::ClosureOnceShim { call_once, track_caller };
+        let def =
+            ty::InstanceKind::ClosureOnceShim { call_once, closure: closure_did, track_caller };
 
         let self_ty = Ty::new_closure(tcx, closure_did, args);
 
@@ -863,9 +869,9 @@ impl<'tcx> Instance<'tcx> {
     {
         let v = v.map_bound(|v| *v);
         if let Some(args) = self.args_for_mir_body() {
-            v.instantiate(tcx, args)
+            v.instantiate(tcx, args).skip_norm_wip()
         } else {
-            v.instantiate_identity()
+            v.instantiate_identity().skip_norm_wip()
         }
     }
 

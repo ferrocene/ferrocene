@@ -1,8 +1,6 @@
 use crate::cmp;
 use crate::fmt::{self, Debug};
-use crate::iter::{
-    FusedIterator, InPlaceIterable, SourceIter, TrustedFused, TrustedLen, UncheckedIterator,
-};
+use crate::iter::{FusedIterator, InPlaceIterable, SourceIter, TrustedFused, TrustedLen};
 use crate::num::NonZero;
 
 /// An iterator that iterates two other iterators simultaneously.
@@ -136,7 +134,6 @@ where
 }
 
 // Zip specialization trait
-#[doc(hidden)]
 trait ZipImpl<A, B> {
     type Item;
     fn new(a: A, b: B) -> Self;
@@ -218,7 +215,6 @@ macro_rules! zip_impl_general_defaults {
 }
 
 // General Zip impl
-#[doc(hidden)]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: Iterator,
@@ -263,7 +259,6 @@ where
     }
 }
 
-#[doc(hidden)]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccessNoCoerce + Iterator,
@@ -304,7 +299,6 @@ where
     }
 }
 
-#[doc(hidden)]
 impl<A, B> ZipImpl<A, B> for Zip<A, B>
 where
     A: TrustedRandomAccess + Iterator,
@@ -469,13 +463,6 @@ unsafe impl<A, B> TrustedLen for Zip<A, B>
 where
     A: TrustedLen,
     B: TrustedLen,
-{
-}
-
-impl<A, B> UncheckedIterator for Zip<A, B>
-where
-    A: UncheckedIterator,
-    B: UncheckedIterator,
 {
 }
 

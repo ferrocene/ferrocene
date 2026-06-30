@@ -61,7 +61,7 @@ use std::{fmt, mem::ManuallyDrop};
 
 use base_db::{
     CrateGraphBuilder, CratesMap, FileSourceRootInput, FileText, Files, Nonce, SourceDatabase,
-    SourceRoot, SourceRootId, SourceRootInput, query_group, set_all_crates_with_durability,
+    SourceRoot, SourceRootId, SourceRootInput, set_all_crates_with_durability,
 };
 use hir::{
     FilePositionWrapper, FileRangeWrapper,
@@ -112,7 +112,7 @@ impl Clone for RootDatabase {
             storage: self.storage.clone(),
             files: self.files.clone(),
             crates_map: self.crates_map.clone(),
-            nonce: Nonce::new(),
+            nonce: self.nonce,
         }
     }
 }
@@ -160,7 +160,7 @@ impl SourceDatabase for RootDatabase {
     }
 
     fn file_source_root(&self, id: vfs::FileId) -> FileSourceRootInput {
-        self.files.file_source_root(id)
+        self.files.file_source_root(self, id)
     }
 
     fn set_file_source_root_with_durability(
@@ -179,6 +179,10 @@ impl SourceDatabase for RootDatabase {
 
     fn nonce_and_revision(&self) -> (Nonce, salsa::Revision) {
         (self.nonce, salsa::plumbing::ZalsaDatabase::zalsa(self).current_revision())
+    }
+
+    fn line_column(&self, file: FileId, offset: syntax::TextSize) -> Result<(u32, u32), ()> {
+        line_index(self, file).try_line_col(offset).map(|lc| (lc.line, lc.col)).ok_or(())
     }
 }
 
@@ -252,15 +256,20 @@ impl RootDatabase {
     }
 }
 
-#[query_group::query_group]
-pub trait LineIndexDatabase: base_db::SourceDatabase {
-    #[salsa::invoke_interned(line_index)]
-    fn line_index(&self, file_id: FileId) -> Arc<LineIndex>;
-}
-
-fn line_index(db: &dyn LineIndexDatabase, file_id: FileId) -> Arc<LineIndex> {
-    let text = db.file_text(file_id).text(db);
-    Arc::new(LineIndex::new(text))
+pub fn line_index(db: &dyn SourceDatabase, file_id: FileId) -> &Arc<LineIndex> {
+    #[salsa::interned]
+    pub struct InternedFileId {
+        id: FileId,
+    }
+    #[salsa::tracked(returns(ref))]
+    fn line_index<'db>(
+        db: &'db dyn SourceDatabase,
+        file_id: InternedFileId<'db>,
+    ) -> Arc<LineIndex> {
+        let text = db.file_text(file_id.id(db)).text(db);
+        Arc::new(LineIndex::new(text))
+    }
+    line_index(db, InternedFileId::new(db, file_id))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -380,7 +389,7 @@ pub enum Severity {
     Allow,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct MiniCore<'a>(&'a str);
 
 impl<'a> MiniCore<'a> {
@@ -392,6 +401,21 @@ impl<'a> MiniCore<'a> {
     #[inline]
     pub const fn default() -> Self {
         Self(test_utils::MiniCore::RAW_SOURCE)
+    }
+}
+
+impl std::fmt::Debug for MiniCore<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_tuple("MiniCore");
+        if self.0 == test_utils::MiniCore::RAW_SOURCE {
+            // Don't print the whole contents if they correspond to the default.
+            // The `format_args!` makes it so that the output is
+            // `MiniCore(<default>)` and not `MiniCore("<default>").
+            d.field(&format_args!("<default>"));
+        } else {
+            d.field(&self.0);
+        };
+        d.finish()
     }
 }
 

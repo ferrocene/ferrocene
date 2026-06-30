@@ -141,7 +141,7 @@ fn has_unstable_into_iter_predicate<'tcx>(
         }
         // `IntoIterator::into_iter` has no additional method args.
         let into_iter_fn_args =
-            cx.tcx.instantiate_bound_regions_with_erased(trait_pred).trait_ref.args;
+            cx.tcx.instantiate_bound_regions_with_erased(trait_pred.skip_norm_wip()).trait_ref.args;
         let Ok(Some(instance)) = ty::Instance::try_resolve(
             cx.tcx,
             cx.typing_env(),
@@ -292,7 +292,8 @@ fn is_ty_or_ty_ctxt(cx: &LateContext<'_>, path: &hir::Path<'_>) -> Option<String
         }
         // Only lint on `&Ty` and `&TyCtxt` if it is used outside of a trait.
         Res::SelfTyAlias { alias_to: did, is_trait_impl: false, .. } => {
-            if let ty::Adt(adt, args) = cx.tcx.type_of(did).instantiate_identity().kind()
+            if let ty::Adt(adt, args) =
+                cx.tcx.type_of(did).instantiate_identity().skip_norm_wip().kind()
                 && let Some(name @ (sym::Ty | sym::TyCtxt)) = cx.tcx.get_diagnostic_name(adt.did())
             {
                 return Some(format!("{}<{}>", name, args[0]));
@@ -368,7 +369,12 @@ declare_tool_lint! {
     report_in_external_macro: true
 }
 
-declare_lint_pass!(TypeIr => [DIRECT_USE_OF_RUSTC_TYPE_IR, NON_GLOB_IMPORT_OF_TYPE_IR_INHERENT, USAGE_OF_TYPE_IR_INHERENT, USAGE_OF_TYPE_IR_TRAITS]);
+declare_lint_pass!(TypeIr => [
+    DIRECT_USE_OF_RUSTC_TYPE_IR,
+    NON_GLOB_IMPORT_OF_TYPE_IR_INHERENT,
+    USAGE_OF_TYPE_IR_INHERENT,
+    USAGE_OF_TYPE_IR_TRAITS
+]);
 
 impl<'tcx> LateLintPass<'tcx> for TypeIr {
     fn check_expr(&mut self, cx: &LateContext<'tcx>, expr: &'tcx hir::Expr<'tcx>) {
@@ -560,8 +566,6 @@ fn is_span_ctxt_call(cx: &LateContext<'_>, expr: &hir::Expr<'_>) -> bool {
 declare_tool_lint! {
     /// The `symbol_intern_string_literal` detects `Symbol::intern` being called on a string literal
     pub rustc::SYMBOL_INTERN_STRING_LITERAL,
-    // rustc_driver crates out of the compiler can't/shouldn't add preinterned symbols;
-    // bootstrap will deny this manually
     Allow,
     "Forbid uses of string literals in `Symbol::intern`, suggesting preinterning instead",
     report_in_external_macro: true

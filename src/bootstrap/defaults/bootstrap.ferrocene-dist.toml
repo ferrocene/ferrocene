@@ -172,7 +172,8 @@ channel = "auto-detect"
 [target]
 # We default to the self-contained lld linker on Linux GNU targets.
 x86_64-unknown-linux-gnu.default-linker-linux-override = 'self-contained-lld-cc'
-aarch-unknown-linux-gnu.default-linker-linux-override = 'self-contained-lld-cc'
+aarch64-unknown-linux-gnu.default-linker-linux-override = 'self-contained-lld-cc'
+aarch64-rhivos2-linux-gnu.default-linker-linux-override = 'self-contained-lld-cc'
 
 # Disable the profiler runtime for WASM. The profiler runtime depends on libc, which is not
 # available on WASM bare metal.

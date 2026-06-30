@@ -277,6 +277,7 @@ RecordFieldList =
 
 RecordField =
   Attr* Visibility? 'unsafe'?
+  MutRestriction?
   Name ':' Type ('=' default_val:ConstArg)?
 
 TupleFieldList =
@@ -284,11 +285,15 @@ TupleFieldList =
 
 TupleField =
   Attr* Visibility?
+  MutRestriction?
   Type
 
 FieldList =
   RecordFieldList
 | TupleFieldList
+
+MutRestriction =
+  'mut' VisibilityInner
 
 Enum =
   Attr* Visibility?
@@ -300,7 +305,7 @@ VariantList =
 
 Variant =
   Attr* Visibility?
-  Name FieldList? ('=' ConstArg)?
+  (Name | '_') FieldList? ('=' ConstArg)?
 
 Union =
   Attr* Visibility?
@@ -323,6 +328,7 @@ VariantDef =
 Const =
   Attr* Visibility?
   'default'?
+  'type'?
   'const' (Name | '_') GenericParamList? ':' Type
   ('=' body:Expr)?
   WhereClause? ';'
@@ -336,9 +342,13 @@ Static =
 Trait =
   Attr* Visibility?
   'unsafe'? 'auto'?
+  ImplRestriction?
   'trait' Name GenericParamList?
   (((':' TypeBoundList?)? WhereClause? AssocItemList) |
   ('=' TypeBoundList? WhereClause? ';'))
+
+ImplRestriction =
+  'impl' VisibilityInner
 
 AssocItemList =
   '{' Attr* AssocItem* '}'
@@ -368,8 +378,10 @@ ExternItem =
 | TypeAlias
 
 Visibility =
-  'pub' ('(' 'in'? Path ')')?
+  'pub' VisibilityInner?
 
+VisibilityInner =
+  '(' 'in'? Path ')'
 
 //****************************//
 // Statements and Expressions //
@@ -430,6 +442,12 @@ Expr =
 | YeetExpr
 | LetExpr
 | UnderscoreExpr
+| IncludeBytesExpr
+
+// We need a special expression for this because we don't have access to the file,
+// and emitting a specific array will have problems with the length.
+IncludeBytesExpr =
+  'builtin' '#' 'include_bytes'
 
 OffsetOfExpr =
   Attr* 'builtin' '#' 'offset_of' '(' Type ',' fields:(NameRef ('.' NameRef)* ) ')'
@@ -653,6 +671,7 @@ Type =
 | NeverType
 | ParenType
 | PathType
+| PatternType
 | PtrType
 | RefType
 | SliceType
@@ -693,6 +712,9 @@ FnPtrType =
 
 ForType =
   ForBinder Type
+
+PatternType =
+  'builtin' '#' 'pattern_type' '(' Type 'is' Pat ')'
 
 ImplTraitType =
   'impl' TypeBoundList
@@ -736,6 +758,14 @@ Pat =
 | TuplePat
 | TupleStructPat
 | ConstBlockPat
+| DerefPat
+| NotNull
+
+NotNull =
+    '!' 'null'
+
+DerefPat =
+    'builtin' '#' 'deref' '(' Pat ')'
 
 LiteralPat =
   '-'? Literal

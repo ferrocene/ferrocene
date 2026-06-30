@@ -8,8 +8,9 @@ use build_helper::symbol_report::SymbolReport;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::run::update_certified_core_symbols::TRACKED_FILE;
-use crate::ferrocene::run::{self, CERTIFIED_CORE_SYMBOLS_ALIAS, update_certified_core_symbols};
+use crate::ferrocene::run;
+
+const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.csv";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols;
@@ -19,7 +20,7 @@ impl Step for CertifiedCoreSymbols {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path(TRACKED_FILE).alias(CERTIFIED_CORE_SYMBOLS_ALIAS)
+        run.path(TRACKED_FILE)
     }
 
     fn is_default_step(builder: &Builder<'_>) -> bool {
@@ -31,10 +32,6 @@ impl Step for CertifiedCoreSymbols {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        if !builder.config.std_debug_assertions && !builder.config.dry_run() {
-            panic!("x t {TRACKED_FILE} requires `rust.debug-assertions-std=true`");
-        }
-
         builder.info(&format!("Testing {TRACKED_FILE}"));
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
         let actual_symbol_report_path =
@@ -45,10 +42,10 @@ impl Step for CertifiedCoreSymbols {
         }
 
         // load the expected list of qualified functions
-        let expected_path = Path::new(update_certified_core_symbols::TRACKED_FILE);
+        let expected_path = Path::new(TRACKED_FILE);
         let mut expected: Vec<String> = Default::default();
-        let reader = builder.read(expected_path);
-        for qualified_name in reader.lines() {
+        let expected_content = builder.read(expected_path);
+        for qualified_name in expected_content.lines() {
             expected.push(qualified_name.to_string());
         }
 
@@ -60,23 +57,27 @@ impl Step for CertifiedCoreSymbols {
 
         // compare the two
         if actual == expected {
-            builder.info(&format!("The certified core symbol report is up to date."));
+            builder.info(&format!("{TRACKED_FILE} is up to date."));
         } else {
-            builder.info(&format!(
-                "Diff of {} and {}:",
-                expected_path.display(),
-                actual_symbol_report_path.display(),
-            ));
-
             let actual_content = actual.join("\n");
-            let expected_content = builder.read(expected_path);
-            diff_text(&expected_content, &actual_content);
+            if builder.config.cmd.bless() {
+                std::fs::write(TRACKED_FILE, actual_content).unwrap();
+                builder.info(&format!("Updated {TRACKED_FILE}"));
+            } else {
+                builder.info(&format!(
+                    "Diff of {} and {}:",
+                    expected_path.display(),
+                    actual_symbol_report_path.display(),
+                ));
 
-            builder.info(&format!(
-                "The certified core symbol report is out of date. \
-                Run `./x run update-certified-core-symbols` to update it."
-            ));
-            crate::exit!(1);
+                diff_text(&expected_content, &actual_content);
+
+                builder.info(&format!(
+                    "The certified core symbol report is out of date. \
+                    Run `./x test {TRACKED_FILE} --bless` to update it."
+                ));
+                crate::exit!(1);
+            }
         }
     }
 }

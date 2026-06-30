@@ -15,15 +15,13 @@ use ide_db::{
     syntax_helpers::{node_ext::preorder_expr, prettify_macro_expansion},
 };
 use itertools::Itertools;
-use stdx::format_to;
 use syntax::{
     AstNode, AstToken, Direction, NodeOrToken, SourceFile,
     SyntaxKind::*,
     SyntaxNode, SyntaxToken, T, TextRange, TextSize, WalkEvent,
     ast::{
         self, HasArgList, HasAttrs, HasGenericParams, HasName, HasTypeBounds, Whitespace,
-        edit::{AstNodeEdit, IndentLevel},
-        edit_in_place::AttrsOwnerEdit,
+        edit::{AstNodeEdit, AttrsOwnerEdit, IndentLevel},
         make,
         prec::ExprPrecedence,
         syntax_factory::SyntaxFactory,
@@ -184,7 +182,11 @@ pub fn filter_assoc_items(
                 (default_methods, def.body()),
                 (DefaultMethods::Only, Some(_)) | (DefaultMethods::No, None)
             ),
-            _ => default_methods == DefaultMethods::No,
+            ast::AssocItem::TypeAlias(def) => matches!(
+                (default_methods, def.ty()),
+                (DefaultMethods::Only, Some(_)) | (DefaultMethods::No, None)
+            ),
+            ast::AssocItem::MacroCall(_) => unreachable!(),
         })
         .collect();
 
@@ -223,7 +225,7 @@ pub fn add_trait_assoc_items_to_impl(
                     let item_prettified = prettify_macro_expansion(
                         sema.db,
                         original_item.syntax().clone(),
-                        &span_map,
+                        span_map,
                         target_scope.krate().into(),
                     );
                     if let Some(formatted) = ast::AssocItem::cast(item_prettified) {
@@ -243,25 +245,26 @@ pub fn add_trait_assoc_items_to_impl(
                     PathTransform::trait_impl(target_scope, &source_scope, trait_, impl_.clone());
                 cloned_item = ast::AssocItem::cast(transform.apply(cloned_item.syntax())).unwrap();
             }
-            cloned_item.remove_attrs_and_docs();
-            cloned_item
+            let (editor, cloned_item) = SyntaxEditor::with_ast_node(&cloned_item);
+            cloned_item.remove_attrs_and_docs(&editor);
+            ast::AssocItem::cast(editor.finish().new_root().clone()).unwrap()
         })
         .filter_map(|item| match item {
             ast::AssocItem::Fn(fn_) if fn_.body().is_none() => {
-                let (mut fn_editor, fn_) = SyntaxEditor::with_ast_node(&fn_);
+                let (fn_editor, fn_) = SyntaxEditor::with_ast_node(&fn_);
                 let fill_expr: ast::Expr = match config.expr_fill_default {
                     ExprFillDefaultMode::Todo | ExprFillDefaultMode::Default => make.expr_todo(),
                     ExprFillDefaultMode::Underscore => make.expr_underscore().into(),
                 };
                 let new_body = make.block_expr(None::<ast::Stmt>, Some(fill_expr));
-                fn_.replace_or_insert_body(&mut fn_editor, new_body);
+                fn_.replace_or_insert_body(&fn_editor, new_body);
                 let new_fn_ = fn_editor.finish().new_root().clone();
                 ast::AssocItem::cast(new_fn_)
             }
             ast::AssocItem::TypeAlias(type_alias) => {
-                let (mut type_alias_editor, type_alias) = SyntaxEditor::with_ast_node(&type_alias);
+                let (type_alias_editor, type_alias) = SyntaxEditor::with_ast_node(&type_alias);
                 if let Some(type_bound_list) = type_alias.type_bound_list() {
-                    type_bound_list.remove(&mut type_alias_editor);
+                    type_bound_list.remove(&type_alias_editor);
                 };
                 let type_alias = type_alias_editor.finish().new_root().clone();
                 ast::AssocItem::cast(type_alias)
@@ -346,10 +349,10 @@ fn invert_special_case(make: &SyntaxFactory, expr: &ast::Expr) -> Option<ast::Ex
 
 pub(crate) fn insert_attributes(
     before: impl Element,
-    edit: &mut SyntaxEditor,
+    editor: &SyntaxEditor,
     attrs: impl IntoIterator<Item = ast::Attr>,
-    make: &SyntaxFactory,
 ) {
+    let make = editor.make();
     let mut attrs = attrs.into_iter().peekable();
     if attrs.peek().is_none() {
         return;
@@ -357,12 +360,10 @@ pub(crate) fn insert_attributes(
     let elem = before.syntax_element();
     let indent = IndentLevel::from_element(&elem);
     let whitespace = format!("\n{indent}");
-    edit.insert_all(
-        syntax::syntax_editor::Position::before(elem),
-        attrs
-            .flat_map(|attr| [attr.syntax().clone().into(), make.whitespace(&whitespace).into()])
-            .collect(),
-    );
+    let elements: Vec<syntax::SyntaxElement> = attrs
+        .flat_map(|attr| [attr.syntax().clone().into(), make.whitespace(&whitespace).into()])
+        .collect();
+    editor.insert_all(syntax::syntax_editor::Position::before(elem), elements);
 }
 
 pub(crate) fn next_prev() -> impl Iterator<Item = Direction> {
@@ -385,18 +386,21 @@ pub(crate) fn does_pat_match_variant(pat: &ast::Pat, var: &ast::Pat) -> bool {
     pat_head == var_head
 }
 
-pub(crate) fn does_pat_variant_nested_or_literal(ctx: &AssistContext<'_>, pat: &ast::Pat) -> bool {
+pub(crate) fn does_pat_variant_nested_or_literal(
+    ctx: &AssistContext<'_, '_>,
+    pat: &ast::Pat,
+) -> bool {
     check_pat_variant_nested_or_literal_with_depth(ctx, pat, 0)
 }
 
-fn check_pat_variant_from_enum(ctx: &AssistContext<'_>, pat: &ast::Pat) -> bool {
+fn check_pat_variant_from_enum(ctx: &AssistContext<'_, '_>, pat: &ast::Pat) -> bool {
     ctx.sema.type_of_pat(pat).is_none_or(|ty: hir::TypeInfo<'_>| {
         ty.adjusted().as_adt().is_some_and(|adt| matches!(adt, hir::Adt::Enum(_)))
     })
 }
 
 fn check_pat_variant_nested_or_literal_with_depth(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     pat: &ast::Pat,
     depth_after_refutable: usize,
 ) -> bool {
@@ -412,6 +416,8 @@ fn check_pat_variant_nested_or_literal_with_depth(
         | ast::Pat::MacroPat(_)
         | ast::Pat::PathPat(_)
         | ast::Pat::BoxPat(_)
+        | ast::Pat::DerefPat(_)
+        | ast::Pat::NotNull(_)
         | ast::Pat::ConstBlockPat(_) => true,
 
         ast::Pat::IdentPat(ident_pat) => ident_pat.pat().is_some_and(|pat| {
@@ -483,7 +489,7 @@ pub(crate) fn expr_fill_default(config: &AssistConfig) -> ast::Expr {
 ///  - `Some(None)`: no impl exists.
 ///  - `Some(Some(_))`: an impl exists, with no matching function names.
 pub(crate) fn find_struct_impl(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     adt: &ast::Adt,
     names: &[String],
 ) -> Option<Option<ast::Impl>> {
@@ -532,102 +538,6 @@ fn has_any_fn(imp: &ast::Impl, names: &[String]) -> bool {
     false
 }
 
-/// Find the end of the `impl` block for the given `ast::Impl`.
-//
-// FIXME: this partially overlaps with `find_struct_impl`
-pub(crate) fn find_impl_block_end(impl_def: ast::Impl, buf: &mut String) -> Option<TextSize> {
-    buf.push('\n');
-    let end = impl_def
-        .assoc_item_list()
-        .and_then(|it| it.r_curly_token())?
-        .prev_sibling_or_token()?
-        .text_range()
-        .end();
-    Some(end)
-}
-
-/// Generates the surrounding `impl Type { <code> }` including type and lifetime
-/// parameters.
-// FIXME: migrate remaining uses to `generate_impl`
-pub(crate) fn generate_impl_text(adt: &ast::Adt, code: &str) -> String {
-    generate_impl_text_inner(adt, None, true, code)
-}
-
-fn generate_impl_text_inner(
-    adt: &ast::Adt,
-    trait_text: Option<&str>,
-    trait_is_transitive: bool,
-    code: &str,
-) -> String {
-    // Ensure lifetime params are before type & const params
-    let generic_params = adt.generic_param_list().map(|generic_params| {
-        let lifetime_params =
-            generic_params.lifetime_params().map(ast::GenericParam::LifetimeParam);
-        let ty_or_const_params = generic_params.type_or_const_params().filter_map(|param| {
-            let param = match param {
-                ast::TypeOrConstParam::Type(param) => {
-                    // remove defaults since they can't be specified in impls
-                    let mut bounds =
-                        param.type_bound_list().map_or_else(Vec::new, |it| it.bounds().collect());
-                    if let Some(trait_) = trait_text {
-                        // Add the current trait to `bounds` if the trait is transitive,
-                        // meaning `impl<T> Trait for U<T>` requires `T: Trait`.
-                        if trait_is_transitive {
-                            bounds.push(make::type_bound_text(trait_));
-                        }
-                    };
-                    // `{ty_param}: {bounds}`
-                    let param = make::type_param(param.name()?, make::type_bound_list(bounds));
-                    ast::GenericParam::TypeParam(param)
-                }
-                ast::TypeOrConstParam::Const(param) => {
-                    // remove defaults since they can't be specified in impls
-                    let param = make::const_param(param.name()?, param.ty()?);
-                    ast::GenericParam::ConstParam(param)
-                }
-            };
-            Some(param)
-        });
-
-        make::generic_param_list(itertools::chain(lifetime_params, ty_or_const_params))
-    });
-
-    // FIXME: use syntax::make & mutable AST apis instead
-    // `trait_text` and `code` can't be opaque blobs of text
-    let mut buf = String::with_capacity(code.len());
-
-    // Copy any cfg attrs from the original adt
-    buf.push_str("\n\n");
-    let cfg_attrs = adt.attrs().filter(|attr| matches!(attr.meta(), Some(ast::Meta::CfgMeta(_))));
-    cfg_attrs.for_each(|attr| buf.push_str(&format!("{attr}\n")));
-
-    // `impl{generic_params} {trait_text} for {name}{generic_params.to_generic_args()}`
-    buf.push_str("impl");
-    if let Some(generic_params) = &generic_params {
-        format_to!(buf, "{generic_params}");
-    }
-    buf.push(' ');
-    if let Some(trait_text) = trait_text {
-        buf.push_str(trait_text);
-        buf.push_str(" for ");
-    }
-    buf.push_str(&adt.name().unwrap().text());
-    if let Some(generic_params) = generic_params {
-        format_to!(buf, "{}", generic_params.to_generic_args());
-    }
-
-    match adt.where_clause() {
-        Some(where_clause) => {
-            format_to!(buf, "\n{where_clause}\n{{\n{code}\n}}");
-        }
-        None => {
-            format_to!(buf, " {{\n{code}\n}}");
-        }
-    }
-
-    buf
-}
-
 /// Generates the corresponding `impl Type {}` including type and lifetime
 /// parameters.
 pub(crate) fn generate_impl_with_item(
@@ -635,15 +545,11 @@ pub(crate) fn generate_impl_with_item(
     adt: &ast::Adt,
     body: Option<ast::AssocItemList>,
 ) -> ast::Impl {
-    generate_impl_inner_with_factory(make, false, adt, None, true, body)
+    generate_impl_inner(make, false, adt, None, true, body)
 }
 
-pub(crate) fn generate_impl_with_factory(make: &SyntaxFactory, adt: &ast::Adt) -> ast::Impl {
-    generate_impl_inner_with_factory(make, false, adt, None, true, None)
-}
-
-pub(crate) fn generate_impl(adt: &ast::Adt) -> ast::Impl {
-    generate_impl_inner(false, adt, None, true, None)
+pub(crate) fn generate_impl(make: &SyntaxFactory, adt: &ast::Adt) -> ast::Impl {
+    generate_impl_inner(make, false, adt, None, true, None)
 }
 
 /// Generates the corresponding `impl <trait> for Type {}` including type
@@ -656,7 +562,7 @@ pub(crate) fn generate_trait_impl(
     adt: &ast::Adt,
     trait_: ast::Type,
 ) -> ast::Impl {
-    generate_impl_inner_with_factory(make, is_unsafe, adt, Some(trait_), true, None)
+    generate_impl_inner(make, is_unsafe, adt, Some(trait_), true, None)
 }
 
 /// Generates the corresponding `impl <trait> for Type {}` including type
@@ -668,7 +574,7 @@ pub(crate) fn generate_trait_impl_intransitive(
     adt: &ast::Adt,
     trait_: ast::Type,
 ) -> ast::Impl {
-    generate_impl_inner_with_factory(make, false, adt, Some(trait_), false, None)
+    generate_impl_inner(make, false, adt, Some(trait_), false, None)
 }
 
 pub(crate) fn generate_trait_impl_intransitive_with_item(
@@ -677,7 +583,7 @@ pub(crate) fn generate_trait_impl_intransitive_with_item(
     trait_: ast::Type,
     body: ast::AssocItemList,
 ) -> ast::Impl {
-    generate_impl_inner_with_factory(make, false, adt, Some(trait_), false, Some(body))
+    generate_impl_inner(make, false, adt, Some(trait_), false, Some(body))
 }
 
 pub(crate) fn generate_trait_impl_with_item(
@@ -687,79 +593,10 @@ pub(crate) fn generate_trait_impl_with_item(
     trait_: ast::Type,
     body: ast::AssocItemList,
 ) -> ast::Impl {
-    generate_impl_inner_with_factory(make, is_unsafe, adt, Some(trait_), true, Some(body))
+    generate_impl_inner(make, is_unsafe, adt, Some(trait_), true, Some(body))
 }
 
 fn generate_impl_inner(
-    is_unsafe: bool,
-    adt: &ast::Adt,
-    trait_: Option<ast::Type>,
-    trait_is_transitive: bool,
-    body: Option<ast::AssocItemList>,
-) -> ast::Impl {
-    // Ensure lifetime params are before type & const params
-    let generic_params = adt.generic_param_list().map(|generic_params| {
-        let lifetime_params =
-            generic_params.lifetime_params().map(ast::GenericParam::LifetimeParam);
-        let ty_or_const_params = generic_params.type_or_const_params().filter_map(|param| {
-            let param = match param {
-                ast::TypeOrConstParam::Type(param) => {
-                    // remove defaults since they can't be specified in impls
-                    let mut bounds =
-                        param.type_bound_list().map_or_else(Vec::new, |it| it.bounds().collect());
-                    if let Some(trait_) = &trait_ {
-                        // Add the current trait to `bounds` if the trait is transitive,
-                        // meaning `impl<T> Trait for U<T>` requires `T: Trait`.
-                        if trait_is_transitive {
-                            bounds.push(make::type_bound(trait_.clone()));
-                        }
-                    };
-                    // `{ty_param}: {bounds}`
-                    let param = make::type_param(param.name()?, make::type_bound_list(bounds));
-                    ast::GenericParam::TypeParam(param)
-                }
-                ast::TypeOrConstParam::Const(param) => {
-                    // remove defaults since they can't be specified in impls
-                    let param = make::const_param(param.name()?, param.ty()?);
-                    ast::GenericParam::ConstParam(param)
-                }
-            };
-            Some(param)
-        });
-
-        make::generic_param_list(itertools::chain(lifetime_params, ty_or_const_params))
-    });
-    let generic_args =
-        generic_params.as_ref().map(|params| params.to_generic_args().clone_for_update());
-    let adt_assoc_bounds = trait_
-        .as_ref()
-        .zip(generic_params.as_ref())
-        .and_then(|(trait_, params)| generic_param_associated_bounds(adt, trait_, params));
-
-    let ty = make::ty_path(make::ext::ident_path(&adt.name().unwrap().text()));
-
-    let cfg_attrs = adt.attrs().filter(|attr| matches!(attr.meta(), Some(ast::Meta::CfgMeta(_))));
-    match trait_ {
-        Some(trait_) => make::impl_trait(
-            cfg_attrs,
-            is_unsafe,
-            None,
-            None,
-            generic_params,
-            generic_args,
-            false,
-            trait_,
-            ty,
-            adt_assoc_bounds,
-            adt.where_clause(),
-            body,
-        ),
-        None => make::impl_(cfg_attrs, generic_params, generic_args, ty, adt.where_clause(), body),
-    }
-    .clone_for_update()
-}
-
-fn generate_impl_inner_with_factory(
     make: &SyntaxFactory,
     is_unsafe: bool,
     adt: &ast::Adt,
@@ -799,12 +636,11 @@ fn generate_impl_inner_with_factory(
 
         make.generic_param_list(itertools::chain(lifetime_params, ty_or_const_params))
     });
-    let generic_args =
-        generic_params.as_ref().map(|params| params.to_generic_args().clone_for_update());
-    let adt_assoc_bounds =
-        trait_.as_ref().zip(generic_params.as_ref()).and_then(|(trait_, params)| {
-            generic_param_associated_bounds_with_factory(make, adt, trait_, params)
-        });
+    let generic_args = generic_params.as_ref().map(|params| params.to_generic_args(make));
+    let adt_assoc_bounds = trait_
+        .as_ref()
+        .zip(generic_params.as_ref())
+        .and_then(|(trait_, params)| generic_param_associated_bounds(make, adt, trait_, params));
 
     let ty: ast::Type = make.ty_path(make.ident_path(&adt.name().unwrap().text())).into();
 
@@ -829,51 +665,6 @@ fn generate_impl_inner_with_factory(
 }
 
 fn generic_param_associated_bounds(
-    adt: &ast::Adt,
-    trait_: &ast::Type,
-    generic_params: &ast::GenericParamList,
-) -> Option<ast::WhereClause> {
-    let in_type_params = |name: &ast::NameRef| {
-        generic_params
-            .generic_params()
-            .filter_map(|param| match param {
-                ast::GenericParam::TypeParam(type_param) => type_param.name(),
-                _ => None,
-            })
-            .any(|param| param.text() == name.text())
-    };
-    let adt_body = match adt {
-        ast::Adt::Enum(e) => e.variant_list().map(|it| it.syntax().clone()),
-        ast::Adt::Struct(s) => s.field_list().map(|it| it.syntax().clone()),
-        ast::Adt::Union(u) => u.record_field_list().map(|it| it.syntax().clone()),
-    };
-    let mut trait_where_clause = adt_body
-        .into_iter()
-        .flat_map(|it| it.descendants())
-        .filter_map(ast::Path::cast)
-        .filter_map(|path| {
-            let qualifier = path.qualifier()?.as_single_segment()?;
-            let qualifier = qualifier
-                .name_ref()
-                .or_else(|| match qualifier.type_anchor()?.ty()? {
-                    ast::Type::PathType(path_type) => path_type.path()?.as_single_name_ref(),
-                    _ => None,
-                })
-                .filter(in_type_params)?;
-            Some((qualifier, path.segment()?.name_ref()?))
-        })
-        .map(|(qualifier, assoc_name)| {
-            let segments = [qualifier, assoc_name].map(make::path_segment);
-            let path = make::path_from_segments(segments, false);
-            let bounds = Some(make::type_bound(trait_.clone()));
-            make::where_pred(either::Either::Right(make::ty_path(path)), bounds)
-        })
-        .unique_by(|it| it.syntax().to_string())
-        .peekable();
-    trait_where_clause.peek().is_some().then(|| make::where_clause(trait_where_clause))
-}
-
-fn generic_param_associated_bounds_with_factory(
     make: &SyntaxFactory,
     adt: &ast::Adt,
     trait_: &ast::Type,
@@ -917,28 +708,6 @@ fn generic_param_associated_bounds_with_factory(
         .unique_by(|it| it.syntax().to_string())
         .peekable();
     trait_where_clause.peek().is_some().then(|| make.where_clause(trait_where_clause))
-}
-
-pub(crate) fn add_method_to_adt(
-    builder: &mut SourceChangeBuilder,
-    adt: &ast::Adt,
-    impl_def: Option<ast::Impl>,
-    method: &str,
-) {
-    let mut buf = String::with_capacity(method.len() + 2);
-    if impl_def.is_some() {
-        buf.push('\n');
-    }
-    buf.push_str(method);
-
-    let start_offset = impl_def
-        .and_then(|impl_def| find_impl_block_end(impl_def, &mut buf))
-        .unwrap_or_else(|| {
-            buf = generate_impl_text(adt, &buf);
-            adt.syntax().text_range().end()
-        });
-
-    builder.insert(start_offset, buf);
 }
 
 #[derive(Debug)]
@@ -1073,8 +842,8 @@ pub(crate) fn convert_reference_type<'db>(
 }
 
 fn could_deref_to_target(ty: &hir::Type<'_>, target: &hir::Type<'_>, db: &dyn HirDatabase) -> bool {
-    let ty_ref = ty.add_reference(hir::Mutability::Shared);
-    let target_ref = target.add_reference(hir::Mutability::Shared);
+    let ty_ref = ty.add_reference(db, hir::Mutability::Shared);
+    let target_ref = target.add_reference(db, hir::Mutability::Shared);
     ty_ref.could_coerce_to(db, &target_ref)
 }
 
@@ -1102,7 +871,7 @@ fn handle_as_ref_slice(
     famous_defs: &FamousDefs<'_, '_>,
 ) -> Option<(ReferenceConversionType, bool)> {
     let type_argument = ty.type_arguments().next()?;
-    let slice_type = hir::Type::new_slice(type_argument);
+    let slice_type = hir::Type::new_slice(db, type_argument);
 
     ty.impls_trait(db, famous_defs.core_convert_AsRef()?, slice::from_ref(&slice_type)).then_some((
         ReferenceConversionType::AsRefSlice,
@@ -1268,7 +1037,7 @@ pub(crate) fn add_group_separators(s: &str, group_size: usize) -> String {
 
 /// Replaces the record expression, handling field shorthands including inside macros.
 pub(crate) fn replace_record_field_expr(
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
     edit: &mut SourceChangeBuilder,
     record_field: ast::RecordExprField,
     initializer: ast::Expr,
@@ -1413,13 +1182,5 @@ pub(crate) fn is_never_block(
     sema: &Semantics<'_, RootDatabase>,
     block_expr: &ast::BlockExpr,
 ) -> bool {
-    if let Some(tail_expr) = block_expr.tail_expr() {
-        sema.type_of_expr(&tail_expr).is_some_and(|ty| ty.original.is_never())
-    } else if let Some(ast::Stmt::ExprStmt(expr_stmt)) = block_expr.statements().last()
-        && let Some(expr) = expr_stmt.expr()
-    {
-        sema.type_of_expr(&expr).is_some_and(|ty| ty.original.is_never())
-    } else {
-        false
-    }
+    sema.expr_is_diverging(&block_expr.clone().into())
 }

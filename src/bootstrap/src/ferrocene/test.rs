@@ -2,8 +2,10 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 pub(crate) mod certified_core_symbols;
+pub(crate) mod flip_link;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
@@ -142,7 +144,7 @@ impl Step for GenerateTarball {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        builder.info("test generate-tarball");
+        builder.info("Testing ferrocene/tools/generate-tarball");
 
         let compiler = builder.compiler(0, self.target);
         let cargo = tool::prepare_tool_cargo(
@@ -162,6 +164,7 @@ impl Step for GenerateTarball {
             "generate-tarball",
             self.target,
             builder,
+            builder.ensure(SetupFailedTestsFile),
         );
     }
 
@@ -197,7 +200,7 @@ impl Step for DiffUpstream {
             compiler: builder.compiler(builder.top_stage, host),
         });
 
-        builder.info("test diff-upstream");
+        builder.info("Testing ferrocene/tools/diff-upstream");
         let mut cmd = BootstrapCommand::new("ferrocene/tools/diff-upstream/diff.py");
         cmd.arg("--hide-diff");
         cmd.run(builder);

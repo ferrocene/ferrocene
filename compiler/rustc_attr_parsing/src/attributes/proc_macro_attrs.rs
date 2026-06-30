@@ -1,4 +1,4 @@
-use rustc_hir::lints::AttributeLintKind;
+use rustc_feature::AttributeStability;
 use rustc_session::lint::builtin::AMBIGUOUS_DERIVE_HELPERS;
 
 use super::prelude::*;
@@ -7,63 +7,62 @@ const PROC_MACRO_ALLOWED_TARGETS: AllowedTargets =
     AllowedTargets::AllowList(&[Allow(Target::Fn), Warn(Target::Crate), Warn(Target::MacroCall)]);
 
 pub(crate) struct ProcMacroParser;
-impl<S: Stage> NoArgsAttributeParser<S> for ProcMacroParser {
+impl NoArgsAttributeParser for ProcMacroParser {
     const PATH: &[Symbol] = &[sym::proc_macro];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = PROC_MACRO_ALLOWED_TARGETS;
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::ProcMacro;
+    const STABILITY: AttributeStability = AttributeStability::Stable;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::ProcMacro;
 }
 
 pub(crate) struct ProcMacroAttributeParser;
-impl<S: Stage> NoArgsAttributeParser<S> for ProcMacroAttributeParser {
+impl NoArgsAttributeParser for ProcMacroAttributeParser {
     const PATH: &[Symbol] = &[sym::proc_macro_attribute];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = PROC_MACRO_ALLOWED_TARGETS;
-    const CREATE: fn(Span) -> AttributeKind = AttributeKind::ProcMacroAttribute;
+    const STABILITY: AttributeStability = AttributeStability::Stable;
+    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::ProcMacroAttribute;
 }
 
 pub(crate) struct ProcMacroDeriveParser;
-impl<S: Stage> SingleAttributeParser<S> for ProcMacroDeriveParser {
+impl SingleAttributeParser for ProcMacroDeriveParser {
     const PATH: &[Symbol] = &[sym::proc_macro_derive];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = PROC_MACRO_ALLOWED_TARGETS;
     const TEMPLATE: AttributeTemplate = template!(
         List: &["TraitName", "TraitName, attributes(name1, name2, ...)"],
         "https://doc.rust-lang.org/reference/procedural-macros.html#derive-macros"
     );
+    const STABILITY: AttributeStability = AttributeStability::Stable;
 
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let (trait_name, helper_attrs) = parse_derive_like(cx, args, true)?;
         Some(AttributeKind::ProcMacroDerive {
             trait_name: trait_name.expect("Trait name is mandatory, so it is present"),
             helper_attrs,
-            span: cx.attr_span,
         })
     }
 }
 
 pub(crate) struct RustcBuiltinMacroParser;
-impl<S: Stage> SingleAttributeParser<S> for RustcBuiltinMacroParser {
+impl SingleAttributeParser for RustcBuiltinMacroParser {
     const PATH: &[Symbol] = &[sym::rustc_builtin_macro];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::MacroDef)]);
     const TEMPLATE: AttributeTemplate =
         template!(List: &["TraitName", "TraitName, attributes(name1, name2, ...)"]);
+    const STABILITY: AttributeStability = unstable!(rustc_attrs);
 
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let (builtin_name, helper_attrs) = parse_derive_like(cx, args, false)?;
-        Some(AttributeKind::RustcBuiltinMacro { builtin_name, helper_attrs, span: cx.attr_span })
+        Some(AttributeKind::RustcBuiltinMacro { builtin_name, helper_attrs })
     }
 }
 
-fn parse_derive_like<S: Stage>(
-    cx: &mut AcceptContext<'_, '_, S>,
+fn parse_derive_like(
+    cx: &mut AcceptContext<'_, '_>,
     args: &ArgParser,
     trait_name_mandatory: bool,
 ) -> Option<(Option<Symbol>, ThinVec<Symbol>)> {
-    let Some(list) = args.list() else {
+    let Some(list) = args.as_list() else {
         // For #[rustc_builtin_macro], it is permitted to leave out the trait name
-        if args.no_args().is_ok() && !trait_name_mandatory {
+        if args.as_no_args().is_ok() && !trait_name_mandatory {
             return Some((None, ThinVec::new()));
         }
         let attr_span = cx.attr_span;
@@ -89,10 +88,7 @@ fn parse_derive_like<S: Stage>(
         cx.adcx().expected_identifier(trait_ident.span);
         return None;
     }
-    if let Err(e) = trait_attr.args().no_args() {
-        cx.adcx().expected_no_args(e);
-        return None;
-    };
+    cx.expect_no_args(trait_attr.args())?;
 
     // Parse optional attributes
     let mut attributes = ThinVec::new();
@@ -105,10 +101,7 @@ fn parse_derive_like<S: Stage>(
             cx.adcx().expected_specific_argument(attrs.span(), &[sym::attributes]);
             return None;
         }
-        let Some(attr_list) = attr_list.args().list() else {
-            cx.adcx().expected_list(attrs.span(), attr_list.args());
-            return None;
-        };
+        let attr_list = cx.expect_list(attr_list.args(), attrs.span())?;
 
         // Parse item in `attributes(...)` argument
         for attr in attr_list.mixed() {
@@ -116,10 +109,7 @@ fn parse_derive_like<S: Stage>(
                 cx.adcx().expected_identifier(attr.span());
                 return None;
             };
-            if let Err(e) = attr.args().no_args() {
-                cx.adcx().expected_no_args(e);
-                return None;
-            };
+            cx.expect_no_args(attr.args())?;
             let Some(ident) = attr.path().word() else {
                 cx.adcx().expected_identifier(attr.path().span());
                 return None;
@@ -131,7 +121,7 @@ fn parse_derive_like<S: Stage>(
             if rustc_feature::is_builtin_attr_name(ident.name) {
                 cx.emit_lint(
                     AMBIGUOUS_DERIVE_HELPERS,
-                    AttributeLintKind::AmbiguousDeriveHelpers,
+                    crate::diagnostics::AmbiguousDeriveHelpers,
                     ident.span,
                 );
             }

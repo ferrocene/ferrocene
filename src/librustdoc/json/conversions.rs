@@ -69,12 +69,37 @@ impl JsonRenderer<'_> {
             }
             _ => from_clean_item(item, self),
         };
+
+        // Rustdoc JSON keeps re-exports as `Use` items, so their stability describes
+        // the local `pub use` declaration. The imported target item's stability
+        // remains available through `inner.use.id`.
+        //
+        // We use raw stability attributes here instead of `clean::Item::stability()`,
+        // which is the effective stability rustdoc uses for rendering paths.
+        // For example, a stable `pub use` inside an unstable module is effectively unstable
+        // through that module path, but the `Use` declaration itself is still stable.
+        // In that example, `clean::Item::stability()` would return "unstable" as
+        // the effective stability, which is appropriate for HTML but makes JSON uses harder.
+        //
+        // JSON consumers already have to do path-based reasoning to reconstruct item reachability,
+        // names, and stability. Keeping component-wise stability allows them to easily reconstruct
+        // stability from the module, use item, and target item records.
+        let stability_def_id = if matches!(&item.kind, clean::ImportItem(_)) {
+            item.inline_stmt_id
+                .map(|def_id| def_id.to_def_id())
+                .or_else(|| item.item_id.as_def_id())
+        } else {
+            item.item_id.as_def_id()
+        };
+        let stability = stability_def_id.and_then(|def_id| self.tcx.lookup_stability(def_id));
+
         Some(Item {
             id,
             crate_id: item_id.krate().as_u32(),
             name: name.map(|sym| sym.to_string()),
             span: span.and_then(|span| span.into_json(self)),
             visibility: visibility.into_json(self),
+            stability: stability.map(|s| Box::new(s.into_json(self))),
             docs,
             attrs,
             deprecation: deprecation.into_json(self),
@@ -203,6 +228,24 @@ impl FromClean<attrs::Deprecation> for Deprecation {
     }
 }
 
+impl FromClean<hir::Stability> for Stability {
+    fn from_clean(stab: &hir::Stability, _renderer: &JsonRenderer<'_>) -> Self {
+        let feature = stab.feature.to_string();
+        let level = match stab.level {
+            hir::StabilityLevel::Stable { since, .. } => StabilityLevel::Stable {
+                since: match since {
+                    hir::StableSince::Version(since) => Some(since.to_string()),
+                    hir::StableSince::Current => Some(hir::RustcVersion::CURRENT.to_string()),
+                    // Match rustdoc HTML: malformed stable-since values are omitted.
+                    hir::StableSince::Err(_) => None,
+                },
+            },
+            hir::StabilityLevel::Unstable { .. } => StabilityLevel::Unstable,
+        };
+        Stability { feature, level }
+    }
+}
+
 impl FromClean<clean::GenericArgs> for Option<Box<GenericArgs>> {
     fn from_clean(generic_args: &clean::GenericArgs, renderer: &JsonRenderer<'_>) -> Self {
         use clean::GenericArgs::*;
@@ -232,7 +275,7 @@ impl FromClean<clean::GenericArg> for GenericArg {
         match arg {
             Lifetime(l) => GenericArg::Lifetime(l.into_json(renderer)),
             Type(t) => GenericArg::Type(t.into_json(renderer)),
-            Const(box c) => GenericArg::Const(c.into_json(renderer)),
+            Const(c) => GenericArg::Const(c.into_json(renderer)),
             Infer => GenericArg::Infer,
         }
     }
@@ -309,7 +352,7 @@ fn from_clean_item(item: &clean::Item, renderer: &JsonRenderer<'_>) -> ItemEnum 
             type_: ci.type_.into_json(renderer),
             const_: ci.kind.into_json(renderer),
         },
-        MacroItem(m) => ItemEnum::Macro(m.source.clone()),
+        MacroItem(m, _) => ItemEnum::Macro(m.source.clone()),
         ProcMacroItem(m) => ItemEnum::ProcMacro(m.into_json(renderer)),
         PrimitiveItem(p) => {
             ItemEnum::Primitive(Primitive {
@@ -336,7 +379,8 @@ fn from_clean_item(item: &clean::Item, renderer: &JsonRenderer<'_>) -> ItemEnum 
             bounds: b.into_json(renderer),
             type_: Some(t.item_type.as_ref().unwrap_or(&t.type_).into_json(renderer)),
         },
-        // `convert_item` early returns `None` for stripped items, keywords and attributes.
+        // `convert_item` early returns `None` for stripped items, keywords, attributes and
+        // "special" macro rules.
         KeywordItem | AttributeItem => unreachable!(),
         StrippedItem(inner) => {
             match inner.as_ref() {
@@ -409,7 +453,7 @@ impl FromClean<rustc_hir::FnHeader> for FunctionHeader {
         };
         FunctionHeader {
             is_async: header.is_async(),
-            is_const: header.is_const(),
+            is_const: matches!(header.constness, rustc_hir::Constness::Const { .. }),
             is_unsafe,
             abi: header.abi.into_json(renderer),
         }
@@ -496,7 +540,7 @@ impl FromClean<clean::WherePredicate> for WherePredicate {
                     })
                     .collect(),
             },
-            EqPredicate { lhs, rhs } => WherePredicate::EqPredicate {
+            ProjectionPredicate { lhs, rhs } => WherePredicate::EqPredicate {
                 // The LHS currently has type `Type` but it should be a `QualifiedPath` since it may
                 // refer to an associated const. However, `EqPredicate` shouldn't exist in the first
                 // place: <https://github.com/rust-lang/rust/141368>.
@@ -898,8 +942,8 @@ impl FromClean<ItemType> for ItemKind {
             Keyword => ItemKind::Keyword,
             Attribute => ItemKind::Attribute,
             TraitAlias => ItemKind::TraitAlias,
-            ProcAttribute => ItemKind::ProcAttribute,
-            ProcDerive => ItemKind::ProcDerive,
+            ProcAttribute | DeclMacroAttribute => ItemKind::ProcAttribute,
+            ProcDerive | DeclMacroDerive => ItemKind::ProcDerive,
         }
     }
 }
@@ -921,6 +965,8 @@ fn maybe_from_hir_attr(attr: &hir::Attribute, item_id: ItemId, tcx: TyCtxt<'_>) 
 
     vec![match kind {
         AK::Deprecated { .. } => return Vec::new(), // Handled separately into Item::deprecation.
+        AK::Stability { .. } => return Vec::new(),  // Handled separately into Item::stability
+
         AK::DocComment { .. } => unreachable!("doc comments stripped out earlier"),
 
         AK::MacroExport { .. } => Attribute::MacroExport,
@@ -932,14 +978,14 @@ fn maybe_from_hir_attr(attr: &hir::Attribute, item_id: ItemId, tcx: TyCtxt<'_>) 
             item_id.as_def_id().expect("all items that could have #[repr] have a DefId"),
         ),
         AK::ExportName { name, span: _ } => Attribute::ExportName(name.to_string()),
-        AK::LinkSection { name, span: _ } => Attribute::LinkSection(name.to_string()),
+        AK::LinkSection { name } => Attribute::LinkSection(name.to_string()),
         AK::TargetFeature { features, .. } => Attribute::TargetFeature {
             enable: features.iter().map(|(feat, _span)| feat.to_string()).collect(),
         },
 
         AK::NoMangle(_) => Attribute::NoMangle,
         AK::NonExhaustive(_) => Attribute::NonExhaustive,
-        AK::AutomaticallyDerived(_) => Attribute::AutomaticallyDerived,
+        AK::AutomaticallyDerived => Attribute::AutomaticallyDerived,
         AK::Doc(d) => {
             fn toggle_attr(ret: &mut Vec<Attribute>, name: &str, v: &Option<rustc_span::Span>) {
                 if v.is_some() {
@@ -960,6 +1006,7 @@ fn maybe_from_hir_attr(attr: &hir::Attribute, item_id: ItemId, tcx: TyCtxt<'_>) 
             }
 
             let DocAttribute {
+                first_span: _,
                 aliases,
                 hidden,
                 inline,

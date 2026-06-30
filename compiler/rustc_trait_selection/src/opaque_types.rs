@@ -9,7 +9,7 @@ use rustc_middle::ty::{
 };
 use rustc_span::{ErrorGuaranteed, Span};
 
-use crate::errors::NonGenericOpaqueTypeParam;
+use crate::diagnostics::NonGenericOpaqueTypeParam;
 use crate::regions::OutlivesEnvironmentBuildExt;
 use crate::traits::ObligationCtxt;
 
@@ -80,6 +80,7 @@ pub fn opaque_type_has_defining_use_args<'tcx>(
             .tcx
             .type_of_opaque_hir_typeck(opaque_type_key.def_id)
             .instantiate_identity()
+            .skip_norm_wip()
             .error_reported()?;
     }
 

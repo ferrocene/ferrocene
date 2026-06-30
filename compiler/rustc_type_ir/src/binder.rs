@@ -5,7 +5,7 @@ use std::ops::{ControlFlow, Deref};
 
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
-use rustc_macros::{Decodable_NoContext, Encodable_NoContext, HashStable_NoContext};
+use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash, StableHash_NoContext};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
 };
@@ -14,9 +14,8 @@ use tracing::instrument;
 use crate::data_structures::SsoHashSet;
 use crate::fold::{FallibleTypeFolder, TypeFoldable, TypeFolder, TypeSuperFoldable};
 use crate::inherent::*;
-use crate::lift::Lift;
 use crate::visit::{Flags, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use crate::{self as ty, DebruijnIndex, Interner, UniverseIndex};
+use crate::{self as ty, DebruijnIndex, Interner, UniverseIndex, Unnormalized};
 
 /// `Binder` is a binder for higher-ranked lifetimes or types. It is part of the
 /// compiler's representation for things like `for<'a> Fn(&'a isize)`
@@ -27,31 +26,14 @@ use crate::{self as ty, DebruijnIndex, Interner, UniverseIndex};
 ///
 /// `Decodable` and `Encodable` are implemented for `Binder<T>` using the `impl_binder_encode_decode!` macro.
 #[derive_where(Clone, Copy, Hash, PartialEq, Debug; I: Interner, T)]
-#[derive(GenericTypeVisitable)]
-#[cfg_attr(feature = "nightly", derive(HashStable_NoContext))]
+#[derive(GenericTypeVisitable, Lift_Generic)]
+#[cfg_attr(feature = "nightly", derive(StableHash_NoContext))]
 pub struct Binder<I: Interner, T> {
     value: T,
     bound_vars: I::BoundVarKinds,
 }
 
 impl<I: Interner, T: Eq> Eq for Binder<I, T> {}
-
-// FIXME: We manually derive `Lift` because the `derive(Lift_Generic)` doesn't
-// understand how to turn `T` to `T::Lifted` in the output `type Lifted`.
-impl<I: Interner, U: Interner, T> Lift<U> for Binder<I, T>
-where
-    T: Lift<U>,
-    I::BoundVarKinds: Lift<U, Lifted = U::BoundVarKinds>,
-{
-    type Lifted = Binder<U, T::Lifted>;
-
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(Binder {
-            value: self.value.lift_to_interner(cx)?,
-            bound_vars: self.bound_vars.lift_to_interner(cx)?,
-        })
-    }
-}
 
 #[cfg(feature = "nightly")]
 macro_rules! impl_binder_encode_decode {
@@ -365,7 +347,7 @@ impl<I: Interner> TypeVisitor<I> for ValidateBoundVars<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct EarlyBinder<I: Interner, T> {
     value: T,
@@ -375,13 +357,17 @@ pub struct EarlyBinder<I: Interner, T> {
 
 impl<I: Interner, T: Eq> Eq for EarlyBinder<I, T> {}
 
-/// For early binders, you should first call `instantiate` before using any visitors.
+// FIXME(154045): Recommended as per https://github.com/rust-lang/rust/issues/154045, this is so sad :((
 #[cfg(feature = "nightly")]
-impl<I: Interner, T> !TypeFoldable<I> for ty::EarlyBinder<I, T> {}
+macro_rules! generate { ($( $tt:tt )*) => { $( $tt )* } }
 
-/// For early binders, you should first call `instantiate` before using any visitors.
 #[cfg(feature = "nightly")]
-impl<I: Interner, T> !TypeVisitable<I> for ty::EarlyBinder<I, T> {}
+generate!(
+    /// For early binders, you should first call `instantiate` before using any visitors.
+    impl<I: Interner, T> !TypeFoldable<I> for ty::EarlyBinder<I, T> {}
+    /// For early binders, you should first call `instantiate` before using any visitors.
+    impl<I: Interner, T> !TypeVisitable<I> for ty::EarlyBinder<I, T> {}
+);
 
 impl<I: Interner, T> EarlyBinder<I, T> {
     pub fn bind(value: T) -> EarlyBinder<I, T> {
@@ -459,8 +445,8 @@ where
 
     /// Similar to [`instantiate_identity`](EarlyBinder::instantiate_identity),
     /// but on an iterator of `TypeFoldable` values.
-    pub fn iter_identity(self) -> Iter::IntoIter {
-        self.value.into_iter()
+    pub fn iter_identity(self) -> impl Iterator<Item = Unnormalized<I, Iter::Item>> {
+        self.value.into_iter().map(Unnormalized::new)
     }
 }
 
@@ -475,7 +461,7 @@ where
     Iter::Item: TypeFoldable<I>,
     A: SliceLike<Item = I::GenericArg>,
 {
-    type Item = Iter::Item;
+    type Item = Unnormalized<I, Iter::Item>;
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(
@@ -526,8 +512,8 @@ where
 
     /// Similar to [`instantiate_identity`](EarlyBinder::instantiate_identity),
     /// but on an iterator of values that deref to a `TypeFoldable`.
-    pub fn iter_identity_copied(self) -> IterIdentityCopied<Iter> {
-        IterIdentityCopied { it: self.value.into_iter() }
+    pub fn iter_identity_copied(self) -> IterIdentityCopied<I, Iter> {
+        IterIdentityCopied { it: self.value.into_iter(), _tcx: PhantomData }
     }
 }
 
@@ -542,7 +528,7 @@ where
     Iter::Item: Deref,
     <Iter::Item as Deref>::Target: Copy + TypeFoldable<I>,
 {
-    type Item = <Iter::Item as Deref>::Target;
+    type Item = Unnormalized<I, <Iter::Item as Deref>::Target>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next().map(|value| {
@@ -576,19 +562,20 @@ where
 {
 }
 
-pub struct IterIdentityCopied<Iter: IntoIterator> {
+pub struct IterIdentityCopied<I: Interner, Iter: IntoIterator> {
     it: Iter::IntoIter,
+    _tcx: PhantomData<fn() -> I>,
 }
 
-impl<Iter: IntoIterator> Iterator for IterIdentityCopied<Iter>
+impl<I: Interner, Iter: IntoIterator> Iterator for IterIdentityCopied<I, Iter>
 where
     Iter::Item: Deref,
     <Iter::Item as Deref>::Target: Copy,
 {
-    type Item = <Iter::Item as Deref>::Target;
+    type Item = Unnormalized<I, <Iter::Item as Deref>::Target>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.it.next().map(|i| *i)
+        self.it.next().map(|i| Unnormalized::new(*i))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -596,18 +583,18 @@ where
     }
 }
 
-impl<Iter: IntoIterator> DoubleEndedIterator for IterIdentityCopied<Iter>
+impl<I: Interner, Iter: IntoIterator> DoubleEndedIterator for IterIdentityCopied<I, Iter>
 where
     Iter::IntoIter: DoubleEndedIterator,
     Iter::Item: Deref,
     <Iter::Item as Deref>::Target: Copy,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.it.next_back().map(|i| *i)
+        self.it.next_back().map(|i| Unnormalized::new(*i))
     }
 }
 
-impl<Iter: IntoIterator> ExactSizeIterator for IterIdentityCopied<Iter>
+impl<I: Interner, Iter: IntoIterator> ExactSizeIterator for IterIdentityCopied<I, Iter>
 where
     Iter::IntoIter: ExactSizeIterator,
     Iter::Item: Deref,
@@ -638,7 +625,7 @@ impl<I: Interner, T: Iterator> Iterator for EarlyBinderIter<I, T> {
 }
 
 impl<I: Interner, T: TypeFoldable<I>> ty::EarlyBinder<I, T> {
-    pub fn instantiate<A>(self, cx: I, args: A) -> T
+    pub fn instantiate<A>(self, cx: I, args: A) -> Unnormalized<I, T>
     where
         A: SliceLike<Item = I::GenericArg>,
     {
@@ -651,10 +638,10 @@ impl<I: Interner, T: TypeFoldable<I>> ty::EarlyBinder<I, T> {
                 "{:?} has parameters, but no args were provided in instantiate",
                 self.value,
             );
-            return self.value;
+            return Unnormalized::new(self.value);
         }
         let mut folder = ArgFolder { cx, args: args.as_slice(), binders_passed: 0 };
-        self.value.fold_with(&mut folder)
+        Unnormalized::new(self.value.fold_with(&mut folder))
     }
 
     /// Makes the identity replacement `T0 => T0, ..., TN => TN`.
@@ -665,8 +652,16 @@ impl<I: Interner, T: TypeFoldable<I>> ty::EarlyBinder<I, T> {
     /// - Outside of `foo`, `T` is bound (represented by the presence of `EarlyBinder`).
     /// - Inside of the body of `foo`, we treat `T` as a placeholder by calling
     /// `instantiate_identity` to discharge the `EarlyBinder`.
-    pub fn instantiate_identity(self) -> T {
-        self.value
+    pub fn instantiate_identity(self) -> Unnormalized<I, T> {
+        // FIXME(#155345): In case the bound value was already normalized, this
+        // is unnecessary. We may want to track explicitly whether `EarlyBinder`
+        // contains something that has been normalized already.
+        // Also do that for other types who have `instantiate_identity` method,
+        // e.g., `GenericPredicates` and `ConstConditions`.
+        //
+        // This is annoying, as e.g. `type_of` for opaque types is normalized,
+        // while `type_of` for free type aliases is not.
+        Unnormalized::new(self.value)
     }
 
     /// Returns the inner value, but only if it contains no bound vars.
@@ -942,10 +937,7 @@ impl<'a, I: Interner> ArgFolder<'a, I> {
 /// solver, canonicalization is hot and there are some pathological cases where
 /// this is needed (`post-mono-higher-ranked-hang`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(
-    feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
-)]
+#[cfg_attr(feature = "nightly", derive(Encodable_NoContext, Decodable_NoContext, StableHash))]
 #[derive(TypeVisitable_Generic, GenericTypeVisitable, TypeFoldable_Generic)]
 pub enum BoundVarIndexKind {
     Bound(DebruijnIndex),
@@ -956,12 +948,13 @@ pub enum BoundVarIndexKind {
 /// identified by both a universe, as well as a name residing within that universe. Distinct bound
 /// regions/types/consts within the same universe simply have an unknown relationship to one
 #[derive_where(Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash; I: Interner, T)]
-#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable)]
+#[derive(TypeVisitable_Generic, TypeFoldable_Generic, GenericTypeVisitable, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct Placeholder<I: Interner, T> {
+    #[lift(identity)]
     pub universe: UniverseIndex,
     pub bound: T,
     #[type_foldable(identity)]
@@ -979,28 +972,12 @@ impl<I: Interner, T: fmt::Debug> fmt::Debug for ty::Placeholder<I, T> {
     }
 }
 
-impl<I: Interner, U: Interner, T> Lift<U> for Placeholder<I, T>
-where
-    T: Lift<U>,
-{
-    type Lifted = Placeholder<U, T::Lifted>;
-
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(Placeholder {
-            universe: self.universe,
-            bound: self.bound.lift_to_interner(cx)?,
-            _tcx: PhantomData,
-        })
-    }
-}
-
 #[derive_where(Clone, Copy, PartialEq, Eq, Hash; I: Interner)]
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
-
 pub enum BoundRegionKind<I: Interner> {
     /// An anonymous region parameter for a given fn (&T)
     Anon,
@@ -1061,7 +1038,7 @@ impl<I: Interner> BoundRegionKind<I> {
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum BoundTyKind<I: Interner> {
     Anon,
@@ -1072,7 +1049,7 @@ pub enum BoundTyKind<I: Interner> {
 #[derive(Lift_Generic, GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub enum BoundVariableKind<I: Interner> {
     Ty(BoundTyKind<I>),
@@ -1107,7 +1084,7 @@ impl<I: Interner> BoundVariableKind<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, HashStable_NoContext, Decodable_NoContext)
+    derive(Encodable_NoContext, StableHash_NoContext, Decodable_NoContext)
 )]
 pub struct BoundRegion<I: Interner> {
     pub var: ty::BoundVar,
@@ -1165,25 +1142,15 @@ impl<I: Interner> PlaceholderRegion<I> {
 }
 
 #[derive_where(Clone, Copy, PartialEq, Eq, Hash; I: Interner)]
-#[derive(GenericTypeVisitable)]
+#[derive(GenericTypeVisitable, Lift_Generic)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct BoundTy<I: Interner> {
+    #[lift(identity)]
     pub var: ty::BoundVar,
     pub kind: BoundTyKind<I>,
-}
-
-impl<I: Interner, U: Interner> Lift<U> for BoundTy<I>
-where
-    BoundTyKind<I>: Lift<U, Lifted = BoundTyKind<U>>,
-{
-    type Lifted = BoundTy<U>;
-
-    fn lift_to_interner(self, cx: U) -> Option<Self::Lifted> {
-        Some(BoundTy { var: self.var, kind: self.kind.lift_to_interner(cx)? })
-    }
 }
 
 impl<I: Interner> fmt::Debug for ty::BoundTy<I> {
@@ -1234,7 +1201,7 @@ impl<I: Interner> PlaceholderType<I> {
 #[derive(GenericTypeVisitable)]
 #[cfg_attr(
     feature = "nightly",
-    derive(Encodable_NoContext, Decodable_NoContext, HashStable_NoContext)
+    derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct BoundConst<I: Interner> {
     pub var: ty::BoundVar,

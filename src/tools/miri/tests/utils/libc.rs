@@ -1,7 +1,19 @@
 //! Utils that need libc.
 #![allow(dead_code)]
 
-use std::{fmt, io};
+use std::{fmt, io, time};
+
+pub enum Retry {
+    NoRetry,
+    RetryAfter(time::Duration),
+}
+pub use Retry::*;
+
+/// Return the last OS error.
+pub fn errno() -> i32 {
+    // libc has no portable way to do this so we use std.
+    io::Error::last_os_error().raw_os_error().unwrap()
+}
 
 /// Handles the usual libc function that returns `-1` to indicate an error.
 #[track_caller]
@@ -19,86 +31,101 @@ pub fn errno_check<T: From<i8> + Ord + fmt::Debug>(ret: T) {
     assert_eq!(errno_result(ret).unwrap(), 0i8.into(), "wrong successful result");
 }
 
-pub unsafe fn read_all(
-    fd: libc::c_int,
+/// Invoke the `read` function until `buf` is full. `retry` contols the behavior on EAGAIN.
+/// Panics if we get EOF before the buffer is filled.
+#[track_caller]
+pub unsafe fn read_exact_generic(
     buf: *mut libc::c_void,
     count: libc::size_t,
-) -> libc::ssize_t {
+    retry: Retry,
+    read: impl Fn(*mut libc::c_void, libc::size_t) -> libc::ssize_t,
+) -> io::Result<()> {
     assert!(count > 0);
     let mut read_so_far = 0;
     while read_so_far < count {
-        let res = libc::read(fd, buf.add(read_so_far), count - read_so_far);
+        let res = read(buf.add(read_so_far), count - read_so_far);
         if res < 0 {
-            return res;
+            if let RetryAfter(duration) = retry {
+                if errno() == libc::EAGAIN {
+                    // Emulate blocking behavior by sleeping a bit and then trying again.
+                    std::thread::sleep(duration);
+                    continue;
+                }
+            }
+            return Err(io::Error::last_os_error());
         }
         if res == 0 {
-            // EOF
-            break;
+            // We expected more data but got EOF.
+            panic!(
+                "could not fill buffer with {count} bytes: EOF received after {read_so_far} bytes"
+            );
         }
         read_so_far += res as libc::size_t;
     }
-    return read_so_far as libc::ssize_t;
+    Ok(())
 }
 
 /// Try to fill the given slice by reading from `fd`. Panic if that many bytes could not be read.
 #[track_caller]
-pub fn read_all_into_slice(fd: libc::c_int, buf: &mut [u8]) -> io::Result<()> {
-    let res = errno_result(unsafe { read_all(fd, buf.as_mut_ptr().cast(), buf.len()) })?;
-    assert_eq!(res as usize, buf.len());
-    Ok(())
+pub fn read_exact(fd: libc::c_int, buf: &mut [u8]) -> io::Result<()> {
+    unsafe {
+        read_exact_generic(buf.as_mut_ptr().cast(), buf.len(), NoRetry, |buf, count| {
+            libc::read(fd, buf, count)
+        })
+    }
 }
 
 /// Read exactly `N` bytes from `fd`. Error if that many bytes could not be read.
 #[track_caller]
-pub fn read_all_into_array<const N: usize>(fd: libc::c_int) -> io::Result<[u8; N]> {
+pub fn read_exact_array<const N: usize>(fd: libc::c_int) -> io::Result<[u8; N]> {
     let mut buf = [0; N];
-    read_all_into_slice(fd, &mut buf)?;
+    read_exact(fd, &mut buf)?;
     Ok(buf)
 }
 
 /// Do a single read from `fd` and return the part of the buffer that was written into,
 /// and the rest.
 #[track_caller]
-pub fn read_into_slice(fd: libc::c_int, buf: &mut [u8]) -> io::Result<(&mut [u8], &mut [u8])> {
+pub fn read_split_slice(fd: libc::c_int, buf: &mut [u8]) -> io::Result<(&mut [u8], &mut [u8])> {
     let res = errno_result(unsafe { libc::read(fd, buf.as_mut_ptr().cast(), buf.len()) })?;
     Ok(buf.split_at_mut(res as usize))
 }
 
-/// Read from `fd` until we get EOF and return the part of the buffer that was written into,
-/// and the rest.
-#[track_caller]
-pub fn read_until_eof_into_slice(
-    fd: libc::c_int,
-    buf: &mut [u8],
-) -> io::Result<(&mut [u8], &mut [u8])> {
-    let res = errno_result(unsafe { read_all(fd, buf.as_mut_ptr().cast(), buf.len()) })?;
-    Ok(buf.split_at_mut(res as usize))
-}
-
-pub unsafe fn write_all(
-    fd: libc::c_int,
+/// Invoke the `write` function until `buf` is full. `retry` controls the behavior on EAGAIN.
+pub unsafe fn write_all_generic(
     buf: *const libc::c_void,
     count: libc::size_t,
-) -> libc::ssize_t {
+    retry: Retry,
+    write: impl Fn(*const libc::c_void, libc::size_t) -> libc::ssize_t,
+) -> io::Result<()> {
     assert!(count > 0);
     let mut written_so_far = 0;
     while written_so_far < count {
-        let res = libc::write(fd, buf.add(written_so_far), count - written_so_far);
+        let res = write(buf.add(written_so_far), count - written_so_far);
         if res < 0 {
-            return res;
+            if let RetryAfter(duration) = retry {
+                if errno() == libc::EAGAIN {
+                    // Emulate blocking behavior by sleeping a bit and then trying again.
+                    std::thread::sleep(duration);
+                    continue;
+                }
+            }
+            return Err(io::Error::last_os_error());
         }
         // Apparently a return value of 0 is just a short write, nothing special (unlike reads).
         written_so_far += res as libc::size_t;
     }
-    return written_so_far as libc::ssize_t;
+    return Ok(());
 }
 
 /// Write the entire `buf` to `fd`. Panic if not all bytes could be written.
 #[track_caller]
-pub fn write_all_from_slice(fd: libc::c_int, buf: &[u8]) -> io::Result<()> {
-    let res = errno_result(unsafe { write_all(fd, buf.as_ptr().cast(), buf.len()) })?;
-    assert_eq!(res as usize, buf.len());
-    Ok(())
+pub fn write_all(fd: libc::c_int, buf: &[u8]) -> io::Result<()> {
+    unsafe {
+        write_all_generic(buf.as_ptr().cast(), buf.len(), NoRetry, |buf, count| {
+            libc::write(fd, buf, count)
+        })
+    }
 }
 
 #[cfg(any(target_os = "linux", target_os = "android", target_os = "illumos"))]
@@ -107,7 +134,7 @@ pub mod epoll {
     use libc::c_int;
     pub use libc::{EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
     // Re-export some constants we need a lot for this.
-    pub use libc::{EPOLLET, EPOLLHUP, EPOLLIN, EPOLLOUT, EPOLLRDHUP};
+    pub use libc::{EPOLLERR, EPOLLET, EPOLLHUP, EPOLLIN, EPOLLOUT, EPOLLRDHUP};
 
     use super::*;
 
@@ -137,31 +164,66 @@ pub mod epoll {
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd, Ev { events, data: fd })
     }
 
+    /// Call `epoll_wait` on `epfd` with the provided `timeout`.
+    /// It fetches at most `max_events` events from `epfd` and
+    /// ensures that the returned events match the `expected` events.
     #[track_caller]
-    pub fn check_epoll_wait<const N: usize>(epfd: i32, expected: &[Ev], timeout: i32) {
-        let mut array: [libc::epoll_event; N] = [libc::epoll_event { events: 0, u64: 0 }; N];
+    pub fn check_epoll_wait_partial(epfd: i32, expected: &[Ev], max_events: usize, timeout: i32) {
+        let mut events = vec![libc::epoll_event { events: 0, u64: 0 }; max_events];
         let num = errno_result(unsafe {
-            libc::epoll_wait(epfd, array.as_mut_ptr(), N.try_into().unwrap(), timeout)
+            libc::epoll_wait(epfd, events.as_mut_ptr(), i32::try_from(max_events).unwrap(), timeout)
         })
         .expect("epoll_wait returned an error");
-        let got = &mut array[..num.try_into().unwrap()];
-        let got = got
+        let got = events
             .iter()
+            .take(num as usize)
             .map(|e| Ev { events: e.events.cast_signed(), data: e.u64.try_into().unwrap() })
             .collect::<Vec<_>>();
-        assert_eq!(got, expected, "got wrong notifications");
+        assert_eq!(got, expected, "got wrong ready events");
     }
 
+    /// Call `epoll_wait` on `epfd` with the provided `timeout` and ensure
+    /// that the set of *all* ready events matches `expected`.
     #[track_caller]
-    pub fn check_epoll_wait_noblock<const N: usize>(epfd: i32, expected: &[Ev]) {
-        check_epoll_wait::<N>(epfd, expected, 0);
+    pub fn check_epoll_wait(epfd: i32, expected: &[Ev], timeout: i32) {
+        // We set `max_events` to `expected.len() + 1` to ensure that there are no additional ready
+        // events besides those which are contained in `expected`.
+        check_epoll_wait_partial(epfd, &expected, expected.len() + 1, timeout);
+    }
+
+    /// This does the same as [`check_epoll_wait`] just without blocking (zero `timeout`).
+    #[track_caller]
+    pub fn check_epoll_wait_noblock(epfd: i32, expected: &[Ev]) {
+        check_epoll_wait(epfd, expected, 0);
+    }
+
+    /// Query the current epoll readiness of a file descriptor.
+    /// This is done by creating a new epoll instance, adding the
+    /// fd to the epoll interests and then performing a zero-timeout
+    /// wait.
+    pub fn current_epoll_readiness<const N: usize>(fd: i32, interests: i32) -> c_int {
+        let epfd = errno_result(unsafe { libc::epoll_create1(0) }).unwrap();
+        // Add fd with all possible interests to epoll instance.
+        epoll_ctl_add(epfd, fd, interests).unwrap();
+
+        let mut array: [libc::epoll_event; N] = [libc::epoll_event { events: 0, u64: 0 }; N];
+        let num = errno_result(unsafe {
+            // Use zero-timeout to just query without waiting.
+            libc::epoll_wait(epfd, array.as_mut_ptr(), N.try_into().unwrap(), 0)
+        })
+        .expect("epoll_wait returned an error");
+
+        let mut readiness = 0;
+        let events = &mut array[..num.try_into().unwrap()];
+        events.iter().for_each(|e| {
+            readiness |= e.events.cast_signed();
+        });
+        readiness
     }
 }
 
 pub mod net {
-    use std::io;
-
-    use super::{errno_check, errno_result};
+    use super::*;
 
     /// IPv4 localhost address bytes
     pub const IPV4_LOCALHOST: [u8; 4] = [127, 0, 0, 1];
@@ -211,11 +273,8 @@ pub mod net {
 
     /// Create an IPv4 TCP socket which listens on a random port at the localhost address.
     /// Returns the socket file descriptor and the actual socket address the socket is listening on.
-    pub fn make_listener_ipv4(
-        options: libc::c_int,
-    ) -> io::Result<(libc::c_int, libc::sockaddr_in)> {
-        let sockfd =
-            unsafe { errno_result(libc::socket(libc::AF_INET, libc::SOCK_STREAM | options, 0))? };
+    pub fn make_listener_ipv4() -> io::Result<(libc::c_int, libc::sockaddr_in)> {
+        let sockfd = unsafe { errno_result(libc::socket(libc::AF_INET, libc::SOCK_STREAM, 0))? };
         // Turn address into socket address with a random free port.
         let addr = sock_addr_ipv4(IPV4_LOCALHOST, 0);
         unsafe {
@@ -239,11 +298,8 @@ pub mod net {
 
     /// Create an IPv6 TCP socket which listens on a random port at the localhost address.
     /// Returns the socket file descriptor and the actual socket address the socket is listening on.
-    pub fn make_listener_ipv6(
-        options: libc::c_int,
-    ) -> io::Result<(libc::c_int, libc::sockaddr_in6)> {
-        let sockfd =
-            unsafe { errno_result(libc::socket(libc::AF_INET6, libc::SOCK_STREAM | options, 0))? };
+    pub fn make_listener_ipv6() -> io::Result<(libc::c_int, libc::sockaddr_in6)> {
+        let sockfd = unsafe { errno_result(libc::socket(libc::AF_INET6, libc::SOCK_STREAM, 0))? };
         // Turn address into socket address with a random free port.
         let addr = sock_addr_ipv6(IPV6_LOCALHOST, 0);
         unsafe {
@@ -276,25 +332,27 @@ pub mod net {
     }
 
     /// Connect the socket to the specified IPv4 address.
-    pub fn connect_ipv4(sockfd: libc::c_int, addr: libc::sockaddr_in) {
+    pub fn connect_ipv4(sockfd: libc::c_int, addr: libc::sockaddr_in) -> io::Result<()> {
         unsafe {
-            errno_check(libc::connect(
+            errno_result(libc::connect(
                 sockfd,
                 (&addr as *const libc::sockaddr_in).cast(),
                 size_of::<libc::sockaddr_in>() as libc::socklen_t,
-            ));
+            ))?;
         }
+        Ok(())
     }
 
     /// Connect the socket to the specified IPv6 address.
-    pub fn connect_ipv6(sockfd: libc::c_int, addr: libc::sockaddr_in6) {
+    pub fn connect_ipv6(sockfd: libc::c_int, addr: libc::sockaddr_in6) -> io::Result<()> {
         unsafe {
-            errno_check(libc::connect(
+            errno_result(libc::connect(
                 sockfd,
                 (&addr as *const libc::sockaddr_in6).cast(),
                 size_of::<libc::sockaddr_in6>() as libc::socklen_t,
-            ));
+            ))?;
         }
+        Ok(())
     }
 
     /// Set a socket option. It's the caller's responsibility to ensure that `T` is
@@ -320,6 +378,35 @@ pub mod net {
             )
         })?;
         Ok(())
+    }
+
+    /// Get a socket option. It's the caller's responsibility that `T` is
+    /// associated with the given socket option.
+    ///
+    /// This function is directly copied from the standard library implementation
+    /// for sockets on UNIX targets.
+    pub fn getsockopt<T: Copy>(
+        sockfd: libc::c_int,
+        level: libc::c_int,
+        option_name: libc::c_int,
+    ) -> io::Result<T> {
+        let mut option_value = std::mem::MaybeUninit::<T>::zeroed();
+        let mut option_len = size_of::<T>() as libc::socklen_t;
+        let provided_len = option_len;
+
+        errno_result(unsafe {
+            libc::getsockopt(
+                sockfd,
+                level,
+                option_name,
+                option_value.as_mut_ptr().cast(),
+                &mut option_len,
+            )
+        })?;
+        // Ensure that there was no truncation.
+        assert!(option_len == provided_len);
+
+        Ok(unsafe { option_value.assume_init() })
     }
 
     /// Wraps a call to a platform function that returns an IPv4 socket address.
@@ -383,46 +470,5 @@ pub mod net {
         };
 
         Ok((value, address))
-    }
-
-    pub unsafe fn recv_all(
-        fd: libc::c_int,
-        buf: *mut libc::c_void,
-        count: libc::size_t,
-        flags: libc::c_int,
-    ) -> libc::ssize_t {
-        assert!(count > 0);
-        let mut read_so_far = 0;
-        while read_so_far < count {
-            let res = libc::recv(fd, buf.add(read_so_far), count - read_so_far, flags);
-            if res < 0 {
-                return res;
-            }
-            if res == 0 {
-                // EOF
-                break;
-            }
-            read_so_far += res as libc::size_t;
-        }
-        return read_so_far as libc::ssize_t;
-    }
-
-    pub unsafe fn send_all(
-        fd: libc::c_int,
-        buf: *const libc::c_void,
-        count: libc::size_t,
-        flags: libc::c_int,
-    ) -> libc::ssize_t {
-        assert!(count > 0);
-        let mut written_so_far = 0;
-        while written_so_far < count {
-            let res = libc::send(fd, buf.add(written_so_far), count - written_so_far, flags);
-            if res < 0 {
-                return res;
-            }
-            // Apparently a return value of 0 is just a short write, nothing special (unlike reads).
-            written_so_far += res as libc::size_t;
-        }
-        return written_so_far as libc::ssize_t;
     }
 }

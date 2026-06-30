@@ -1,4 +1,3 @@
-use hir::next_solver::{DbInterner, TypingMode};
 use ide_db::{RootDatabase, famous_defs::FamousDefs};
 use syntax::ast::{self, AstNode, HasName, edit::AstNodeEdit, syntax_factory::SyntaxFactory};
 use syntax::syntax_editor::Position;
@@ -27,7 +26,7 @@ use crate::{
 // ```
 pub(crate) fn generate_from_impl_for_enum(
     acc: &mut Assists,
-    ctx: &AssistContext<'_>,
+    ctx: &AssistContext<'_, '_>,
 ) -> Option<()> {
     let variant = ctx.find_node_at_offset::<ast::Variant>()?;
     let adt = ast::Adt::Enum(variant.parent_enum());
@@ -40,19 +39,18 @@ pub(crate) fn generate_from_impl_for_enum(
         "Generate `From` impl for this enum variant(s)",
         target,
         |edit| {
-            let make = SyntaxFactory::with_mappings();
+            let editor = edit.make_editor(adt.syntax());
+            let make = editor.make();
             let indent = adt.indent_level();
             let mut elements = Vec::new();
 
             for variant_info in variants {
-                let impl_ = build_from_impl(&make, &adt, variant_info).indent(indent);
+                let impl_ = build_from_impl(make, &adt, variant_info).indent(indent);
                 elements.push(make.whitespace(&format!("\n\n{indent}")).into());
                 elements.push(impl_.syntax().clone().into());
             }
 
-            let mut editor = edit.make_editor(adt.syntax());
             editor.insert_all(Position::after(adt.syntax()), elements);
-            editor.add_mappings(make.finish_with_mappings());
             edit.add_file_edits(file_id, editor);
         },
     )
@@ -108,7 +106,10 @@ struct VariantInfo {
     ty: ast::Type,
 }
 
-fn selected_variants(ctx: &AssistContext<'_>, variant: &ast::Variant) -> Option<Vec<VariantInfo>> {
+fn selected_variants(
+    ctx: &AssistContext<'_, '_>,
+    variant: &ast::Variant,
+) -> Option<Vec<VariantInfo>> {
     variant
         .parent_enum()
         .variant_list()?
@@ -157,16 +158,12 @@ fn existing_from_impl(
     let variant = sema.to_def(variant)?;
     let krate = variant.module(db).krate(db);
     let from_trait = FamousDefs(sema, krate).core_convert_From()?;
-    let interner = DbInterner::new_with(db, krate.base());
-    use hir::next_solver::infer::DbInternerInferExt;
-    let infcx = interner.infer_ctxt().build(TypingMode::non_body_analysis());
 
-    let variant = variant.instantiate_infer(&infcx);
     let enum_ = variant.parent_enum(sema.db);
     let field_ty = variant.fields(sema.db).first()?.ty(sema.db);
     let enum_ty = enum_.ty(sema.db);
     tracing::debug!(?enum_, ?field_ty, ?enum_ty);
-    enum_ty.impls_trait(infcx, from_trait, &[field_ty]).then_some(())
+    enum_ty.has_any_impl(db, from_trait, &[field_ty]).then_some(())
 }
 
 #[cfg(test)]

@@ -3,18 +3,18 @@ use std::sync::Arc;
 use rustc_ast::*;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::definitions::DefPathData;
 use rustc_hir::{self as hir, LangItem, Target};
 use rustc_middle::span_bug;
 use rustc_span::{DesugaringKind, Ident, Span, Spanned, respan};
 
-use super::errors::{
+use crate::diagnostics::{
     ArbitraryExpressionInPattern, ExtraDoubleDot, MisplacedDoubleDot, SubTupleBinding,
 };
-use super::{ImplTraitContext, LoweringContext, ParamMode, ResolverAstLoweringExt};
-use crate::{AllowReturnTypeNotation, ImplTraitPosition};
+use crate::{
+    AllowReturnTypeNotation, ImplTraitContext, ImplTraitPosition, LoweringContext, ParamMode,
+};
 
-impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
+impl<'hir> LoweringContext<'_, 'hir> {
     pub(crate) fn lower_pat(&mut self, pattern: &Pat) -> &'hir hir::Pat<'hir> {
         self.arena.alloc(self.lower_pat_mut(pattern))
     }
@@ -288,7 +288,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         hir_id: hir::HirId,
         lower_sub: impl FnOnce(&mut Self) -> Option<&'hir hir::Pat<'hir>>,
     ) -> hir::PatKind<'hir> {
-        match self.resolver.get_partial_res(p.id).map(|d| d.expect_full_res()) {
+        match self.get_partial_res(p.id).map(|d| d.expect_full_res()) {
             // `None` can occur in body-less function signatures
             res @ (None | Some(Res::Local(_))) => {
                 let binding_id = match res {
@@ -538,8 +538,7 @@ impl<'hir, R: ResolverAstLoweringExt<'hir>> LoweringContext<'_, 'hir, R> {
         // We're generating a range end that didn't exist in the AST,
         // so the def collector didn't create the def ahead of time. That's why we have to do
         // it here.
-        let def_id =
-            self.create_def(node_id, None, DefKind::AnonConst, DefPathData::LateAnonConst, span);
+        let def_id = self.create_def(node_id, None, DefKind::AnonConst, span);
         let hir_id = self.lower_node_id(node_id);
 
         let unstable_span = self.mark_span_with_reason(

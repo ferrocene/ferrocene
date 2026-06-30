@@ -205,6 +205,14 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
+
+    fn check_impl_item_post(
+        &mut self,
+        cx: &LateContext<'tcx>,
+        item: &'tcx rustc_hir::ImplItem<'tcx>,
+    ) {
+        LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
 }
 
 struct LintState<'tcx> {
@@ -303,10 +311,21 @@ struct Use<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug)]
+enum UnvalidatedImplCause<'tcx> {
+    /// An associated function from the source type's impl of one of the traits we were casting to.
+    ///
+    /// FIXME(diagnostics): this should have all unvalidated items in the impl, not just the first.
+    AssocFn(DefId),
+    /// Only occurs pre-mono.
+    UnresolvedGenericImpl(rustc_middle::ty::PolyTraitRef<'tcx>),
+}
+
+#[derive(Copy, Clone, Debug)]
 enum UseKind<'tcx> {
     Called(Instance<'tcx>),
     FnPtrCast(Instance<'tcx>),
-    TraitObjectCast(DefId, Ty<'tcx>),
+    /// The `Ty` is the source type of the cast. We don't currently store the destination type.
+    TraitObjectCast(UnvalidatedImplCause<'tcx>, Ty<'tcx>),
     /// Only occurs for consts and statics.
     ContainsFnPtr(DefId, Ty<'tcx>),
 }
@@ -316,7 +335,10 @@ impl<'tcx> Use<'tcx> {
         match self.kind {
             UseKind::Called(instance) | UseKind::FnPtrCast(instance) => instance.def_id(),
             UseKind::ContainsFnPtr(id, _) => id,
-            UseKind::TraitObjectCast(assoc_fn, _) => assoc_fn,
+            UseKind::TraitObjectCast(UnvalidatedImplCause::AssocFn(id), _) => id,
+            UseKind::TraitObjectCast(UnvalidatedImplCause::UnresolvedGenericImpl(trait_ref), _) => {
+                trait_ref.def_id()
+            }
         }
     }
 

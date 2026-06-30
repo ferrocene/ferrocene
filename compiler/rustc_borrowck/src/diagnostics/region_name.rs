@@ -6,7 +6,7 @@ use rustc_errors::{Diag, EmissionGuarantee};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
 use rustc_middle::ty::print::RegionHighlightMode;
-use rustc_middle::ty::{self, GenericArgKind, GenericArgsRef, RegionVid, Ty};
+use rustc_middle::ty::{self, GenericArgKind, GenericArgsRef, RegionVid, Ty, Unnormalized};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{DUMMY_SP, Span, Symbol, kw, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -111,9 +111,12 @@ impl RegionName {
             | RegionNameSource::NamedEarlyParamRegion(span) => {
                 diag.span_label(*span, format!("lifetime `{self}` defined here"));
             }
-            RegionNameSource::SynthesizedFreeEnvRegion(span, note) => {
+            RegionNameSource::SynthesizedFreeEnvRegion(span, closure_trait) => {
                 diag.span_label(*span, format!("lifetime `{self}` represents this closure's body"));
-                diag.note(*note);
+                diag.note(format!(
+                    "closure implements `{closure_trait}`, so references to captured variables \
+                     can't escape the closure"
+                ));
             }
             RegionNameSource::AnonRegionFromArgument(RegionNameHighlight::CannotMatchHirTy(
                 span,
@@ -326,9 +329,15 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
                 ty::LateParamRegionKind::ClosureEnv => {
                     let def_ty = self.regioncx.universal_regions().defining_ty;
 
-                    let closure_kind = match def_ty {
-                        DefiningTy::Closure(_, args) => args.as_closure().kind(),
-                        DefiningTy::CoroutineClosure(_, args) => args.as_coroutine_closure().kind(),
+                    let (is_lending_coroutine_closure, closure_kind) = match def_ty {
+                        DefiningTy::Closure(_, args) => (false, args.as_closure().kind()),
+                        DefiningTy::CoroutineClosure(_, args) => {
+                            let args = args.as_coroutine_closure();
+                            (
+                                !args.tupled_upvars_ty().is_ty_var() && args.has_self_borrows(),
+                                args.kind(),
+                            )
+                        }
                         _ => {
                             // Can't have BrEnv in functions, constants or coroutines.
                             bug!("BrEnv outside of closure.");
@@ -340,23 +349,19 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
                         bug!("Closure is not defined by a closure expr");
                     };
                     let region_name = self.synthesize_region_name();
-                    let note = match closure_kind {
-                        ty::ClosureKind::Fn => {
-                            "closure implements `Fn`, so references to captured variables \
-                             can't escape the closure"
-                        }
-                        ty::ClosureKind::FnMut => {
-                            "closure implements `FnMut`, so references to captured variables \
-                             can't escape the closure"
-                        }
-                        ty::ClosureKind::FnOnce => {
-                            bug!("BrEnv in a `FnOnce` closure");
-                        }
+                    let closure_trait = match (is_lending_coroutine_closure, closure_kind) {
+                        (false, kind) => kind.as_str(),
+                        (true, ty::ClosureKind::Fn) => "AsyncFn",
+                        (true, ty::ClosureKind::FnMut) => "AsyncFnMut",
+                        (true, ty::ClosureKind::FnOnce) => "AsyncFnOnce",
                     };
 
                     Some(RegionName {
                         name: region_name,
-                        source: RegionNameSource::SynthesizedFreeEnvRegion(fn_decl_span, note),
+                        source: RegionNameSource::SynthesizedFreeEnvRegion(
+                            fn_decl_span,
+                            closure_trait,
+                        ),
                     })
                 }
 
@@ -418,7 +423,7 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
 
         // Get the parent fn's signature with liberated late-bound regions,
         // so we have `ReLateParam` instead of `ReBound`.
-        let parent_fn_sig = tcx.fn_sig(parent_def_id).instantiate_identity();
+        let parent_fn_sig = tcx.fn_sig(parent_def_id).instantiate_identity().skip_norm_wip();
         let liberated_sig = tcx.liberate_late_bound_regions(parent_def_id, parent_fn_sig);
         let parent_param_ty = *liberated_sig.inputs().get(param_index)?;
 
@@ -499,18 +504,18 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
         fr: RegionVid,
     ) -> Option<RegionName> {
         let implicit_inputs = self.regioncx.universal_regions().defining_ty.implicit_inputs();
-        let argument_index = self.regioncx.get_argument_index_for_region(self.infcx.tcx, fr)?;
+        let user_arg_index = self.regioncx.get_user_arg_index_for_region(self.infcx.tcx, fr)?;
 
         let arg_ty = self.regioncx.universal_regions().unnormalized_input_tys
-            [implicit_inputs + argument_index];
+            [implicit_inputs + user_arg_index];
         let (_, span) = self.regioncx.get_argument_name_and_span_for_region(
             self.body,
             self.local_names(),
-            argument_index,
+            user_arg_index,
         );
 
         let highlight = self
-            .get_argument_hir_ty_for_highlighting(argument_index)
+            .get_argument_hir_ty_for_highlighting(user_arg_index)
             .and_then(|arg_hir_ty| self.highlight_if_we_can_match_hir_ty(fr, arg_ty, arg_hir_ty))
             .unwrap_or_else(|| {
                 // `highlight_if_we_cannot_match_hir_ty` needs to know the number we will give to
@@ -528,10 +533,11 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
 
     fn get_argument_hir_ty_for_highlighting(
         &self,
-        argument_index: usize,
+        user_arg_index: usize,
     ) -> Option<&hir::Ty<'tcx>> {
         let fn_decl = self.infcx.tcx.hir_fn_decl_by_hir_id(self.mir_hir_id())?;
-        let argument_hir_ty: &hir::Ty<'_> = fn_decl.inputs.get(argument_index)?;
+        // Closures don't have implicit self arguments in HIR, so use `user_arg_index` directly.
+        let argument_hir_ty: &hir::Ty<'_> = fn_decl.inputs.get(user_arg_index)?;
         match argument_hir_ty.kind {
             // This indicates a variable with no type annotation, like
             // `|x|`... in that case, we can't highlight the type but
@@ -1023,10 +1029,10 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
             return None;
         };
 
-        let found = tcx
-            .any_free_region_meets(&tcx.type_of(region_parent).instantiate_identity(), |r| {
-                r.kind() == ty::ReEarlyParam(region)
-            });
+        let found = tcx.any_free_region_meets(
+            &tcx.type_of(region_parent).instantiate_identity().skip_norm_wip(),
+            |r| r.kind() == ty::ReEarlyParam(region),
+        );
 
         Some(RegionName {
             name: self.synthesize_region_name(),
@@ -1051,12 +1057,15 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
             return None;
         };
 
-        let predicates = self
+        let predicates: Vec<_> = self
             .infcx
             .tcx
             .predicates_of(self.body.source.def_id())
             .instantiate_identity(self.infcx.tcx)
-            .predicates;
+            .predicates
+            .into_iter()
+            .map(Unnormalized::skip_norm_wip)
+            .collect();
 
         if let Some(upvar_index) = self
             .regioncx

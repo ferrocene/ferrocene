@@ -164,11 +164,11 @@ macro_rules! assert_ne {
 /// assert_matches!(a, Some(x) if x > 100);
 /// // assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
-#[stable(feature = "assert_matches", since = "1.95.0")]
+#[stable(feature = "assert_matches", since = "1.96.0")]
 #[allow_internal_unstable(panic_internals)]
 #[rustc_macro_transparency = "semiopaque"]
 pub macro assert_matches {
-    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
+    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {{
         match $left {
             $( $pattern )|+ $( if $guard )? => {}
             ref left_val => {
@@ -179,8 +179,8 @@ pub macro assert_matches {
                 );
             }
         }
-    },
-    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )?, $($arg:tt)+) => {
+    }},
+    ($left:expr, $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )?, $($arg:tt)+) => {{
         match $left {
             $( $pattern )|+ $( if $guard )? => {}
             ref left_val => {
@@ -191,7 +191,7 @@ pub macro assert_matches {
                 );
             }
         }
-    },
+    }},
 }
 
 /// Selects code at compile-time based on `cfg` predicates.
@@ -229,6 +229,7 @@ pub macro assert_matches {
 /// };
 /// ```
 #[stable(feature = "cfg_select", since = "1.95.0")]
+#[doc(alias = "cfg_if", alias = "cfg-if")]
 #[rustc_diagnostic_item = "cfg_select"]
 #[rustc_builtin_macro]
 pub macro cfg_select($($tt:tt)*) {
@@ -391,7 +392,7 @@ macro_rules! debug_assert_ne {
 /// debug_assert_matches!(a, Some(x) if x > 100);
 /// // debug_assert_matches!(a, Some(x) if x < 100); // panics
 /// ```
-#[stable(feature = "assert_matches", since = "1.95.0")]
+#[stable(feature = "assert_matches", since = "1.96.0")]
 #[allow_internal_unstable(assert_matches)]
 #[rustc_macro_transparency = "semiopaque"]
 pub macro debug_assert_matches($($arg:tt)*) {
@@ -1624,6 +1625,48 @@ pub(crate) mod builtin {
     #[allow_internal_unstable(core_intrinsics)]
     #[rustc_builtin_macro]
     pub macro autodiff_reverse($item:item) {
+        /* compiler built-in */
+    }
+
+    /// The `offload_kernel` macro is applied to a function to generate two separate
+    /// definitions: a host-side wrapper for dispatch and a device-side kernel.
+    ///
+    /// The macro does not perform the offload itself. It generates the necessary
+    /// code required by the compiler's offloading infrastructure.
+    ///
+    /// ### Usage example:
+    ///
+    /// ```rust,ignore (offload requires a -Z flag)
+    /// #[offload_kernel]
+    /// fn foo(a: &[f32], b: &[f32], c: *mut f32) {
+    ///     *c = a[0] + b[0];
+    /// }
+    /// ```
+    ///
+    /// This expands to the host-side function:
+    ///
+    /// ```rust,ignore (offload requires a -Z flag)
+    /// #[unsafe(no_mangle)]
+    /// #[inline(never)]
+    /// fn foo(_: &[f32], _: &[f32], _: *mut f32) {
+    ///     ::core::panicking::panic("not implemented")
+    /// }
+    /// ```
+    ///
+    /// And the device-side kernel:
+    ///
+    /// ```rust,ignore (offload requires a -Z flag)
+    /// #[rustc_offload_kernel]
+    /// #[unsafe(no_mangle)]
+    /// unsafe extern "gpu-kernel" fn foo(a: &[f32], b: &[f32], c: *mut f32) {
+    ///     *c = a[0] + b[0];
+    /// }
+    /// ```
+    #[unstable(feature = "gpu_offload", issue = "131513")]
+    #[allow_internal_unstable(rustc_attrs)]
+    #[allow_internal_unstable(core_intrinsics)]
+    #[rustc_builtin_macro]
+    pub macro offload_kernel($item:item) {
         /* compiler built-in */
     }
 

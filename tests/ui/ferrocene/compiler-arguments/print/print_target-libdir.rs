@@ -7,15 +7,18 @@
 // If this test fails on a new platform, add a new normalization annotation:
 //@ normalize-stdout: "x86_64-unknown-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout: "x86_64-pc-nto-qnx710" -> "$$TARGET"
+//@ normalize-stdout: "x86_64-pc-nto-qnx800" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-rhivos2-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-ferrocene.facade" -> "$$TARGET"
 //@ normalize-stdout: "aarch64r82-unknown-ferrocene.facade" -> "$$TARGET"
 //@ normalize-stdout: "aarch64v8r-unknown-ferrocene.facade" -> "$$TARGET"
+//@ normalize-stdout: "armv7r-ferrocene.facade-eabihf" -> "$$TARGET"
 //@ normalize-stdout: "thumbv7em-ferrocene.facade-eabihf" -> "$$TARGET"
 //@ normalize-stdout: "thumbv7em-ferrocene.facade-eabi" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-apple-darwin" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-nto-qnx710" -> "$$TARGET"
+//@ normalize-stdout: "aarch64-unknown-nto-qnx800" -> "$$TARGET"
 
 fn main() {}
 

@@ -26,9 +26,9 @@ use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::print::{PrintTraitRefExt as _, with_no_trimmed_paths};
 use rustc_middle::ty::{
-    self, CandidatePreferenceMode, DeepRejectCtxt, GenericArgsRef, PolyProjectionPredicate,
-    SizedTraitKind, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingMode, Upcast, elaborate,
-    may_use_unstable_feature,
+    self, CandidatePreferenceMode, CantBeErased, DeepRejectCtxt, GenericArgsRef,
+    PolyProjectionPredicate, SizedTraitKind, Ty, TyCtxt, TypeFoldable, TypeVisitableExt,
+    TypingMode, Unnormalized, Upcast, elaborate, may_use_unstable_feature,
 };
 use rustc_next_trait_solver::solve::AliasBoundKind;
 use rustc_span::Symbol;
@@ -199,6 +199,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         }
     }
 
+    pub fn typing_mode(&self) -> TypingMode<'tcx, CantBeErased> {
+        self.infcx.typing_mode_raw().assert_not_erased()
+    }
+
     pub fn with_query_mode(
         infcx: &'cx InferCtxt<'tcx>,
         query_mode: TraitQueryMode,
@@ -210,7 +214,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     /// Enables tracking of intercrate ambiguity causes. See
     /// the documentation of [`Self::intercrate_ambiguity_causes`] for more.
     pub fn enable_tracking_intercrate_ambiguity_causes(&mut self) {
-        assert!(self.infcx.typing_mode().is_coherence());
+        assert!(self.typing_mode().is_coherence());
         assert!(self.intercrate_ambiguity_causes.is_none());
 
         self.intercrate_ambiguity_causes = Some(FxIndexSet::default());
@@ -223,7 +227,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     pub fn take_intercrate_ambiguity_causes(
         &mut self,
     ) -> FxIndexSet<IntercrateAmbiguityCause<'tcx>> {
-        assert!(self.infcx.typing_mode().is_coherence());
+        assert!(self.typing_mode().is_coherence());
 
         self.intercrate_ambiguity_causes.take().unwrap_or_default()
     }
@@ -604,7 +608,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             None => self.check_recursion_limit(&obligation, &obligation)?,
         }
 
-        if sizedness_fast_path(self.tcx(), obligation.predicate, obligation.param_env) {
+        if !self.infcx.disable_trait_solver_fast_paths()
+            && sizedness_fast_path(self.tcx(), obligation.predicate, obligation.param_env)
+        {
             return Ok(EvaluatedToOk);
         }
 
@@ -752,7 +758,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     if pred.0.has_free_regions()
                         || pred.0.has_bound_regions()
                         || pred.0.has_non_region_infer()
-                        || pred.0.has_non_region_infer()
+                        || pred.0.has_non_region_param()
                     {
                         Ok(EvaluatedToOkModuloRegions)
                     } else {
@@ -875,13 +881,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                             c1, c2
                         );
 
-                        use rustc_hir::def::DefKind;
                         match (c1.kind(), c2.kind()) {
                             (ty::ConstKind::Unevaluated(a), ty::ConstKind::Unevaluated(b))
-                                if a.def == b.def
+                                if a.kind == b.kind
                                     && matches!(
-                                        tcx.def_kind(a.def),
-                                        DefKind::AssocConst { .. }
+                                        a.kind,
+                                        ty::UnevaluatedConstKind::Projection { .. }
+                                            | ty::UnevaluatedConstKind::Inherent { .. }
                                     ) =>
                             {
                                 if let Ok(InferOk { obligations, value: () }) = self
@@ -981,9 +987,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         }
                         ty::ConstKind::Error(_) => return Ok(EvaluatedToOk),
                         ty::ConstKind::Value(cv) => cv.ty,
-                        ty::ConstKind::Unevaluated(uv) => {
-                            self.tcx().type_of(uv.def).instantiate(self.tcx(), uv.args)
-                        }
+                        ty::ConstKind::Unevaluated(uv) => uv.type_of(self.tcx()).skip_norm_wip(),
                         // FIXME(generic_const_exprs): See comment in `fulfill.rs`
                         ty::ConstKind::Expr(_) => return Ok(EvaluatedToOk),
                         ty::ConstKind::Placeholder(_) => {
@@ -1018,7 +1022,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         previous_stack: TraitObligationStackList<'o, 'tcx>,
         mut obligation: PolyTraitObligation<'tcx>,
     ) -> Result<EvaluationResult, OverflowError> {
-        if !self.infcx.typing_mode().is_coherence()
+        if !self.typing_mode().is_coherence()
             && obligation.is_global()
             && obligation.param_env.caller_bounds().iter().all(|bound| bound.has_param())
         {
@@ -1111,6 +1115,14 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         let reached_depth = stack.reached_depth.get();
         if reached_depth >= stack.depth {
             debug!("CACHE MISS");
+            self.insert_evaluation_cache(param_env, fresh_trait_pred, dep_node, result);
+            stack.cache().on_completion(stack.dfn);
+        } else if let Some(_guar) = self.infcx.tainted_by_errors() {
+            // When an error has occurred, we allow global caching of results even if they
+            // appear stack-dependent. This prevents exponential re-evaluation of cycles
+            // in the presence of errors, avoiding compiler hangs like #150907.
+            // This is safe because compilation will fail anyway.
+            debug!("CACHE MISS (tainted by errors)");
             self.insert_evaluation_cache(param_env, fresh_trait_pred, dep_node, result);
             stack.cache().on_completion(stack.dfn);
         } else {
@@ -1449,7 +1461,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             && let ty::ImplPolarity::Reservation = tcx.impl_polarity(def_id)
         {
             if let Some(intercrate_ambiguity_clauses) = &mut self.intercrate_ambiguity_causes {
-                let message = find_attr!(tcx, def_id, RustcReservationImpl(_, message) => *message);
+                let message = find_attr!(tcx, def_id, RustcReservationImpl(message) => *message);
                 if let Some(message) = message {
                     debug!(
                         "filter_reservation_impls: \
@@ -1467,12 +1479,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
 
     fn is_knowable<'o>(&mut self, stack: &TraitObligationStack<'o, 'tcx>) -> Result<(), Conflict> {
         let obligation = &stack.obligation;
-        match self.infcx.typing_mode() {
+        match self.typing_mode() {
             TypingMode::Coherence => {}
-            TypingMode::Analysis { .. }
-            | TypingMode::Borrowck { .. }
-            | TypingMode::PostBorrowckAnalysis { .. }
-            | TypingMode::PostAnalysis => return Ok(()),
+            TypingMode::Typeck { .. }
+            | TypingMode::PostTypeckUntilBorrowck { .. }
+            | TypingMode::PostBorrowck { .. }
+            | TypingMode::PostAnalysis
+            | TypingMode::Codegen => return Ok(()),
         }
 
         debug!("is_knowable()");
@@ -1500,7 +1513,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             return false;
         }
 
-        match self.infcx.typing_mode() {
+        match self.typing_mode() {
             // Avoid using the global cache during coherence and just rely
             // on the local cache. It is really just a simplification to
             // avoid us having to fear that coherence results "pollute"
@@ -1516,22 +1529,20 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // However, if we disqualify *all* goals from being cached, perf suffers.
             // This is likely fixed by better caching in general in the new solver.
             // See: <https://github.com/rust-lang/rust/issues/132064>.
-            TypingMode::Analysis {
-                defining_opaque_types_and_generators: defining_opaque_types,
-            }
-            | TypingMode::Borrowck { defining_opaque_types } => {
+            TypingMode::Typeck { defining_opaque_types_and_generators: defining_opaque_types }
+            | TypingMode::PostTypeckUntilBorrowck { defining_opaque_types } => {
                 defining_opaque_types.is_empty()
                     || (!pred.has_opaque_types() && !pred.has_coroutines())
             }
             // The hidden types of `defined_opaque_types` is not local to the current
             // inference context, so we can freely move this to the global cache.
-            TypingMode::PostBorrowckAnalysis { .. } => true,
+            TypingMode::PostBorrowck { .. } => true,
             // The global cache is only used if there are no opaque types in
             // the defining scope or we're outside of analysis.
             //
             // FIXME(#132279): This is still incorrect as we treat opaque types
             // and default associated items differently between these two modes.
-            TypingMode::PostAnalysis => true,
+            TypingMode::PostAnalysis | TypingMode::Codegen => true,
         }
     }
 
@@ -1669,7 +1680,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 self.tcx().item_self_bounds(def_id)
             };
 
-            for bound in relevant_bounds.instantiate(self.tcx(), alias_ty.args) {
+            for bound in relevant_bounds.instantiate(self.tcx(), alias_ty.args).skip_norm_wip() {
                 for_each(self, bound, idx, alias_bound_kind)?;
                 idx += 1;
             }
@@ -1759,7 +1770,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         env_predicate: PolyProjectionPredicate<'tcx>,
         potentially_unnormalized_candidates: bool,
     ) -> ProjectionMatchesProjection {
-        debug_assert_eq!(obligation.predicate.def_id, env_predicate.item_def_id());
+        let def_id = obligation.predicate.expect_projection_def_id();
+        debug_assert_eq!(def_id, env_predicate.item_def_id());
 
         let mut nested_obligations = PredicateObligations::new();
         let infer_predicate = self.infcx.instantiate_binder_with_fresh_vars(
@@ -1795,7 +1807,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             });
 
         if is_match {
-            let generics = self.tcx().generics_of(obligation.predicate.def_id);
+            let generics = self.tcx().generics_of(def_id);
             // FIXME(generic_associated_types): Addresses aggressive inference in #92917.
             // If this type is a GAT, and of the GAT args resolve to something new,
             // that means that we must have newly inferred something about the GAT.
@@ -2184,7 +2196,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
             ty::Adt(def, args) => {
                 if let Some(crit) = def.sizedness_constraint(self.tcx(), sizedness) {
-                    ty::Binder::dummy(vec![crit.instantiate(self.tcx(), args)])
+                    ty::Binder::dummy(vec![crit.instantiate(self.tcx(), args).skip_norm_wip()])
                 } else {
                     ty::Binder::dummy(vec![])
                 }
@@ -2256,6 +2268,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 .tcx
                 .coroutine_hidden_types(def_id)
                 .instantiate(self.infcx.tcx, args)
+                .skip_norm_wip()
                 .map_bound(|witness| witness.types.to_vec()),
 
             ty::Closure(_, args) => ty::Binder::dummy(args.as_closure().upvar_tys().to_vec()),
@@ -2388,6 +2401,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 .tcx
                 .coroutine_hidden_types(def_id)
                 .instantiate(self.infcx.tcx, args)
+                .skip_norm_wip()
                 .map_bound(|witness| AutoImplConstituents {
                     types: witness.types.to_vec(),
                     assumptions: witness.assumptions.to_vec(),
@@ -2402,7 +2416,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             }
 
             ty::Adt(def, args) => ty::Binder::dummy(AutoImplConstituents {
-                types: def.all_fields().map(|f| f.ty(self.tcx(), args)).collect(),
+                types: def.all_fields().map(|f| f.ty(self.tcx(), args).skip_norm_wip()).collect(),
                 assumptions: vec![],
             }),
 
@@ -2415,7 +2429,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                     // the auto trait bounds in question.
                     let ty = self.tcx().type_of_opaque(def_id);
                     ty::Binder::dummy(AutoImplConstituents {
-                        types: vec![ty.instantiate(self.tcx(), args)],
+                        types: vec![ty.instantiate(self.tcx(), args).skip_norm_wip()],
                         assumptions: vec![],
                     })
                 }
@@ -2518,7 +2532,8 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
         let impl_args = self.infcx.fresh_args_for_item(obligation.cause.span, impl_def_id);
 
-        let trait_ref = impl_trait_header.trait_ref.instantiate(self.tcx(), impl_args);
+        let trait_ref =
+            impl_trait_header.trait_ref.instantiate(self.tcx(), impl_args).skip_norm_wip();
         debug!(?impl_trait_header);
 
         let Normalized { value: impl_trait_ref, obligations: mut nested_obligations } =
@@ -2550,7 +2565,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         nested_obligations.extend(obligations);
 
         if impl_trait_header.polarity == ty::ImplPolarity::Reservation
-            && !self.infcx.typing_mode().is_coherence()
+            && !self.typing_mode().is_coherence()
         {
             debug!("reservation impls only apply in intercrate mode");
             return Err(());
@@ -2850,7 +2865,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 param_env,
                 cause.clone(),
                 recursion_depth,
-                predicate,
+                predicate.skip_norm_wip(),
                 &mut obligations,
             );
             obligations.push(Obligation {
@@ -2863,7 +2878,11 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
         // Register any outlives obligations from the trait here, cc #124336.
         if tcx.def_kind(def_id) == (DefKind::Impl { of_trait: true }) {
-            for clause in tcx.impl_super_outlives(def_id).iter_instantiated(tcx, args) {
+            for clause in tcx
+                .impl_super_outlives(def_id)
+                .iter_instantiated(tcx, args)
+                .map(Unnormalized::skip_norm_wip)
+            {
                 let clause = normalize_with_depth_to(
                     self,
                     param_env,
@@ -2885,14 +2904,15 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
     }
 
     pub(super) fn should_stall_coroutine(&self, def_id: DefId) -> bool {
-        match self.infcx.typing_mode() {
-            TypingMode::Analysis { defining_opaque_types_and_generators: stalled_generators } => {
+        match self.typing_mode() {
+            TypingMode::Typeck { defining_opaque_types_and_generators: stalled_generators } => {
                 def_id.as_local().is_some_and(|def_id| stalled_generators.contains(&def_id))
             }
             TypingMode::Coherence
             | TypingMode::PostAnalysis
-            | TypingMode::Borrowck { defining_opaque_types: _ }
-            | TypingMode::PostBorrowckAnalysis { defined_opaque_types: _ } => false,
+            | TypingMode::Codegen
+            | TypingMode::PostTypeckUntilBorrowck { defining_opaque_types: _ }
+            | TypingMode::PostBorrowck { defined_opaque_types: _ } => false,
         }
     }
 }

@@ -273,7 +273,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for $u_narrower {
+            const impl Step for $u_narrower {
                 step_identical_methods!();
                 step_unsigned_methods!();
 
@@ -311,7 +311,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for $i_narrower {
+            const impl Step for $i_narrower {
                 step_identical_methods!();
                 step_signed_methods!($u_narrower);
 
@@ -381,7 +381,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for $u_wider {
+            const impl Step for $u_wider {
                 step_identical_methods!();
                 step_unsigned_methods!();
 
@@ -415,7 +415,7 @@ macro_rules! step_integer_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for $i_wider {
+            const impl Step for $i_wider {
                 step_identical_methods!();
                 step_signed_methods!($u_wider);
 
@@ -536,7 +536,7 @@ macro_rules! step_nonzero_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for NonZero<$narrower> {
+            const impl Step for NonZero<$narrower> {
                 step_nonzero_identical_methods!($narrower);
 
                 #[inline]
@@ -562,7 +562,7 @@ macro_rules! step_nonzero_impls {
             #[allow(unreachable_patterns)]
             #[unstable(feature = "step_trait", reason = "recently redesigned", issue = "42168")]
             #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-            impl const Step for NonZero<$wider> {
+            const impl Step for NonZero<$wider> {
                 step_nonzero_identical_methods!($wider);
 
                 #[inline]
@@ -596,7 +596,7 @@ step_nonzero_impls! {
 
 #[unstable(feature = "step_trait", issue = "42168")]
 #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-impl const Step for char {
+const impl Step for char {
     #[inline]
     fn steps_between(&start: &char, &end: &char) -> (usize, Option<usize>) {
         let start = start as u32;
@@ -684,7 +684,7 @@ impl const Step for char {
 
 #[unstable(feature = "step_trait", issue = "42168")]
 #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-impl const Step for AsciiChar {
+const impl Step for AsciiChar {
     #[inline]
     fn steps_between(&start: &AsciiChar, &end: &AsciiChar) -> (usize, Option<usize>) {
         Step::steps_between(&start.to_u8(), &end.to_u8())
@@ -727,7 +727,7 @@ impl const Step for AsciiChar {
 
 #[unstable(feature = "step_trait", issue = "42168")]
 #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-impl const Step for Ipv4Addr {
+const impl Step for Ipv4Addr {
     #[inline]
     fn steps_between(&start: &Ipv4Addr, &end: &Ipv4Addr) -> (usize, Option<usize>) {
         u32::steps_between(&start.to_bits(), &end.to_bits())
@@ -760,7 +760,7 @@ impl const Step for Ipv4Addr {
 
 #[unstable(feature = "step_trait", issue = "42168")]
 #[rustc_const_unstable(feature = "step_trait", issue = "42168")]
-impl const Step for Ipv6Addr {
+const impl Step for Ipv6Addr {
     #[inline]
     fn steps_between(&start: &Ipv6Addr, &end: &Ipv6Addr) -> (usize, Option<usize>) {
         u128::steps_between(&start.to_bits(), &end.to_bits())

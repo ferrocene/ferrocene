@@ -119,6 +119,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
+  ferrocene: ferrocene/ferrocene-common@0.0.2
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -126,28 +127,30 @@ jobs:
   # is the place for it.
   misc-checks:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
       - run:
           name: Perform licensing checks
           command: |
             uvx reuse@5.1.1 --include-submodules lint
-      - ferrocene-ci
+      - ferrocene/ci
 
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -155,14 +158,15 @@ jobs:
         ./x.py dist ferrocene-sbom
     steps:
       - ferrocene-job-dist:
-          llvm-subset: false
+          llvm_subset: false
 
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -174,8 +178,9 @@ jobs:
 
   x86_64-linux-docs:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -195,8 +200,9 @@ jobs:
 
   x86_64-linux-dist:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -209,8 +215,9 @@ jobs:
 
   x86_64-linux-dist-tools:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -223,8 +230,9 @@ jobs:
 
   x86_64-linux-dist-targets:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -238,8 +246,9 @@ jobs:
 
   x86_64-linux-dist-targets-qnx8:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -253,8 +262,9 @@ jobs:
 
   x86_64-linux-dist-src:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -265,12 +275,13 @@ jobs:
           restore-from-job: x86_64-linux-build
           # We need the whole LLVM clone to be able to include the full source
           # code into the tarball we ship to customers.
-          llvm-subset: false
+          llvm_subset: false
 
   x86_64-linux-generic-test-container:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     parameters:
       job:
         type: string
@@ -293,8 +304,9 @@ jobs:
 
   x86_64-linux-traceability-matrix:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -303,18 +315,19 @@ jobs:
         ferrocene/ci/scripts/fetch-test-outcomes.sh
         ./x.py run ferrocene/tools/traceability-matrix
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - ferrocene-ci
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
+      - ferrocene/ci
       - store_artifacts:
           path: build/x86_64-unknown-linux-gnu/ferrocene/traceability-matrix.html
           destination: reports
 
   x86_64-linux-library-coverage:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -322,18 +335,19 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
       # - run:
       #     name: Restore files from the x86_64-linux-build job
       #     command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
-      - ferrocene-ci
+      - ferrocene/ci
 
   x86_64-linux-llvm:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -346,25 +360,26 @@ jobs:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
           steps:
-            - aws-oidc-auth
-            - ferrocene-checkout
-            - ferrocene-ci
+            - ferrocene/aws_oidc_auth
+            - ferrocene/checkout
+            - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
 
   x86_64-linux-self-test:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
+      - ferrocene/git_shallow_clone:
           depth: 1
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -372,16 +387,17 @@ jobs:
 
   x86_64-linux-self-test-qnx8:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
     steps:
-      - ferrocene-git-shallow-clone:
+      - ferrocene/git_shallow_clone:
           depth: 1
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - setup-qnx8-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
@@ -410,9 +426,9 @@ jobs:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-uv
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout
+      - ferrocene/setup_uv
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -444,9 +460,9 @@ jobs:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-uv
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout
+      - ferrocene/setup_uv
       - setup-qnx8-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -460,8 +476,9 @@ jobs:
 
   aarch64-linux-llvm:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -474,17 +491,18 @@ jobs:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
           steps:
-            - aws-oidc-auth
-            - ferrocene-checkout
-            - ferrocene-ci
+            - ferrocene/aws_oidc_auth
+            - ferrocene/checkout
+            - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
 
   aarch64-linux-build:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -498,8 +516,9 @@ jobs:
 
   aarch64-linux-dist:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -512,8 +531,9 @@ jobs:
 
   aarch64-linux-dist-tools:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -526,8 +546,9 @@ jobs:
 
   aarch64-linux-generic-test-container:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     parameters:
       job:
         type: string
@@ -547,24 +568,26 @@ jobs:
 
   aarch64-linux-self-test:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
     steps:
-      - ferrocene-git-shallow-clone:
+      - ferrocene/git_shallow_clone:
           depth: 1
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
   aarch64-linux-library-coverage:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -572,10 +595,10 @@ jobs:
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - ferrocene-ci
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
+      - ferrocene/ci
 
   aarch64-linux-rhivos2-test-container:
     executor: docker-aarch64-ubuntu-20-rhivos2-test-server
@@ -620,15 +643,15 @@ jobs:
               - << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
               - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
-            - ferrocene-checkout
+            - ferrocene/checkout
             # Darwin does not come with awscli, setup it before aws steps
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-            - aws-oidc-auth
+            - ferrocene/aws_oidc_auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
-            - setup-uv
-            - ferrocene-ci
+            - ferrocene/setup_uv
+            - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
@@ -708,15 +731,15 @@ jobs:
       - when:
           condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
-            - ferrocene-git-shallow-clone:
+            - ferrocene/git_shallow_clone:
                 depth: 1
             # Darwin does not come with awscli, setup it before aws steps
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-            - aws-oidc-auth
+            - ferrocene/aws_oidc_auth
             - ferrocene-setup-darwin
-            - setup-uv
+            - ferrocene/setup_uv
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -779,11 +802,11 @@ jobs:
               - << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
               - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
-            - aws-oidc-auth
-            - ferrocene-checkout
+            - ferrocene/aws_oidc_auth
+            - ferrocene/checkout
             - ferrocene-setup-windows
-            - setup-uv
-            - ferrocene-ci
+            - ferrocene/setup_uv
+            - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
@@ -828,11 +851,11 @@ jobs:
       - when:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
-            - ferrocene-git-shallow-clone:
+            - ferrocene/git_shallow_clone:
                 depth: 1
-            - aws-oidc-auth
+            - ferrocene/aws_oidc_auth
             - ferrocene-setup-windows
-            - setup-uv
+            - ferrocene/setup_uv
             - setup-qnx-toolchain: {}
             - run:
                 name: Download dist artifacts and run the self-test tool
@@ -854,11 +877,11 @@ jobs:
       - when:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
-            - ferrocene-git-shallow-clone:
+            - ferrocene/git_shallow_clone:
                 depth: 1
-            - aws-oidc-auth
+            - ferrocene/aws_oidc_auth
             - ferrocene-setup-windows
-            - setup-uv
+            - ferrocene/setup_uv
             - setup-qnx8-toolchain: {}
             - run:
                 name: Download dist artifacts and run the self-test tool
@@ -889,9 +912,9 @@ jobs:
       SCRIPT: |
         sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-uv
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout
+      - ferrocene/setup_uv
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
@@ -904,7 +927,7 @@ jobs:
             aws ecr get-login-password --region us-east-1 \
               | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
             docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      - ferrocene-ci:
+      - ferrocene/ci:
           wrapper: |
             docker run \
               --rm \
@@ -938,9 +961,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-uv
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout
+      - ferrocene/setup_uv
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
@@ -972,9 +995,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - aws-oidc-auth
-      - ferrocene-checkout
-      - setup-uv
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout
+      - ferrocene/setup_uv
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
@@ -1014,8 +1037,8 @@ jobs:
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-            - aws-oidc-auth
-            - ferrocene-git-shallow-clone:
+            - ferrocene/aws_oidc_auth
+            - ferrocene/git_shallow_clone:
                 depth: 1
             - setup_remote_docker:
                 version: default
@@ -1051,8 +1074,8 @@ jobs:
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-            - aws-oidc-auth
-            - ferrocene-git-shallow-clone:
+            - ferrocene/aws_oidc_auth
+            - ferrocene/git_shallow_clone:
                 depth: 1
             - setup_remote_docker:
                 version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
@@ -1076,8 +1099,8 @@ jobs:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
-      - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
+      - ferrocene/aws_oidc_auth
+      - ferrocene/git_shallow_clone:
           depth: 1
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
@@ -1104,8 +1127,8 @@ jobs:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
-      - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
+      - ferrocene/aws_oidc_auth
+      - ferrocene/git_shallow_clone:
           depth: 1
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
@@ -1125,8 +1148,9 @@ jobs:
   # Misc jobs
   wasm-dist-oxidos:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -1139,8 +1163,9 @@ jobs:
 
   finish-build:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -1164,8 +1189,8 @@ jobs:
               - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
               - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
-            - aws-oidc-auth
-            - ferrocene-git-shallow-clone:
+            - ferrocene/aws_oidc_auth
+            - ferrocene/git_shallow_clone:
                 depth: 1
             - run:
                 name: Restore files from the x86_64-linux-build
@@ -1197,8 +1222,9 @@ jobs:
   # run. See the `skip` workflow for more information.
   skip:
     executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      name: ferrocene/docker
+      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     steps:
       - run:
@@ -1769,8 +1795,8 @@ commands:
         type: string
         default: linux # Or `windows` or `darwin`
     steps:
-      - ferrocene-checkout:
-          llvm-subset: true
+      - ferrocene/checkout:
+          llvm_subset: true
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1778,7 +1804,7 @@ commands:
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1789,8 +1815,8 @@ commands:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-      - setup-uv
-      - ferrocene-ci
+      - ferrocene/setup_uv
+      - ferrocene/ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
       # too much data (slowing down uploads and downloads).
@@ -1810,7 +1836,7 @@ commands:
       restore-from-job:
         type: string
         default: ""
-      llvm-subset:
+      llvm_subset:
         type: boolean
         default: true
       qnx7:
@@ -1820,8 +1846,8 @@ commands:
         type: boolean
         default: false
     steps:
-      - ferrocene-checkout:
-          llvm-subset: << parameters.llvm-subset >>
+      - ferrocene/checkout:
+          llvm_subset: << parameters.llvm_subset >>
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1829,7 +1855,7 @@ commands:
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1840,7 +1866,7 @@ commands:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
-      - setup-uv
+      - ferrocene/setup_uv
       - when:
           condition: <<parameters.restore-from-job>>
           steps:
@@ -1857,7 +1883,7 @@ commands:
             equal: [<<parameters.qnx8>>, true]
           steps:
             - setup-qnx8-toolchain: {}
-      - ferrocene-ci
+      - ferrocene/ci
 
   ferrocene-job-test-container:
     description: Collection of steps for test jobs in containers
@@ -1868,8 +1894,8 @@ commands:
         type: string
         default: linux # Or `windows` or `darwin`
     steps:
-      - ferrocene-checkout:
-          llvm-subset: true
+      - ferrocene/checkout:
+          llvm_subset: true
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1877,8 +1903,8 @@ commands:
             - aws-cli/install:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
-      - setup-uv
-      - aws-oidc-auth
+      - ferrocene/setup_uv
+      - ferrocene/aws_oidc_auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1887,7 +1913,7 @@ commands:
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
-      - ferrocene-ci
+      - ferrocene/ci
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs
@@ -1909,13 +1935,13 @@ commands:
         type: boolean
         default: true
     steps:
-      - aws-oidc-auth
+      - ferrocene/aws_oidc_auth
       - when:
           condition: << parameters.checkout-source >>
           steps:
-            - ferrocene-checkout:
-                llvm-subset: true
-      - setup-uv
+            - ferrocene/checkout:
+                llvm_subset: true
+      - ferrocene/setup_uv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1985,7 +2011,7 @@ commands:
                     << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
                     bash -c "<< parameters.emulator-script >>"
 
-      - ferrocene-ci:
+      - ferrocene/ci:
           wrapper: |
             docker run \
               --rm \
@@ -1999,26 +2025,6 @@ commands:
               --interactive \
               --tty \
               << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
-
-  ferrocene-git-shallow-clone:
-    description: Perform a shallow `git clone`
-    parameters:
-      depth:
-        type: integer
-    steps:
-      - run:
-          name: Clone the source code
-          command: |
-            # There is no need to use any deploy key or SSH for CI, as the
-            # Ferrocene repository is public anyway. Also, on Windows the
-            # deploy key doesn't seem to be injected into the VM, so using
-            # HTTPS fixes that problem too.
-            repo_url="$(echo "${CIRCLE_REPOSITORY_URL}" | sed 's#^git@github.com:#https://github.com/#')"
-
-            git init .
-            git remote add origin "${repo_url}"
-            git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
-            git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
   ferrocene-setup-darwin:
     description: Prepare the Darwin environment
@@ -2034,73 +2040,6 @@ commands:
           name: Setup Windows environment
           command: ferrocene/ci/scripts/setup-windows.sh
 
-  # This task can be skipped inside docker containers, it's mainly intended for Mac/Windows hosts.
-  setup-uv:
-    description: Setup uv
-    steps:
-      - run:
-          name: Setup uv
-          command: ferrocene/ci/scripts/setup-uv.sh
-
-  ferrocene-checkout:
-    description: Checkout the Ferrocene source code
-    parameters:
-      llvm-subset:
-        type: boolean
-        default: false
-    steps:
-      - ferrocene-git-shallow-clone:
-          depth: 2
-      - when:
-          condition: << parameters.llvm-subset >>
-          steps:
-            - run:
-                name: Clone a subset of the llvm-project monorepo
-                command: ferrocene/ci/scripts/clone-llvm-subset.sh
-      - run:
-          name: Checkout the submodules
-          command: ferrocene/ci/scripts/checkout-submodules.sh
-      - run:
-          name: Unshallow the clone on the beta channel
-          command: ferrocene/ci/scripts/unshallow-on-beta.sh
-      - run:
-          name: Change the files modification time to a consistent date
-          command: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
-      - run:
-          name: Show the current environment
-          command: ferrocene/ci/scripts/show-environment.sh
-
-  ferrocene-ci:
-    description: Common CI steps for Ferrocene
-    parameters:
-      wrapper:
-        type: string
-        default: ""
-    steps:
-      - run:
-          name: Execute the build
-          no_output_timeout: 20m
-          command: << parameters.wrapper >> ferrocene/ci/run.sh
-
-      - run:
-          name: Generate resource usage report
-          command: |
-            mkdir -p /tmp/metrics
-            ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
-            cp build/metrics.json /tmp/metrics/raw.json
-
-      - run:
-          name: Upload artifacts to S3
-          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
-          # We want to upload artifacts even when the build is failing, to be
-          # able to retrieve and investigate them. They won't be making into a
-          # release anyway, sine the "finish-build" job will not be executed in
-          # case of a failure.
-          when: always
-
-      - store_artifacts:
-          path: /tmp/metrics
-          destination: metrics
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
@@ -2140,53 +2079,7 @@ commands:
                 name: Set PATH to include QNX800 tools
                 command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
 
-  aws-oidc-auth:
-    description: Authenticate with AWS using OIDC
-    steps:
-      - run:
-          name: Prepare environment for AWS authentication
-          command: |
-            # Load the JWT token into a file
-            touch /tmp/awsjwt
-            chmod 0600 /tmp/awsjwt
-            echo "${CIRCLE_OIDC_TOKEN_V2}" > /tmp/awsjwt
-
-            set_env() {
-              echo "export $1=\"$2\"" >> "${BASH_ENV}"
-            }
-
-            # Set environment variables to authenticate with OIDC
-            set_env AWS_WEB_IDENTITY_TOKEN_FILE /tmp/awsjwt
-            set_env AWS_ROLE_SESSION_NAME circleci
-            set_env AWS_DEFAULT_REGION us-east-1
-
-            # Avoid reaching out to the EC2 metadata server, which just
-            # timeouts outside of EC2.
-            set_env AWS_EC2_METADATA_DISABLED true
-
-            # Some versions of AWS CLI fail if `less` is not installed, so
-            # disable pager support to suppress the error.
-            set_env AWS_PAGER ""
-
-      - run:
-          name: Authenticate with AWS
-          command: aws sts get-caller-identity
-
 executors:
-  # Execute on a docker runner with a custom image
-  docker-custom-image:
-    parameters:
-      registry:
-        type: string
-        default: << pipeline.parameters.docker-repository-url--ci-docker-images >>
-      image-tag:
-        type: string
-    docker:
-      - image: << parameters.registry >>:<< parameters.image-tag >>
-        aws_auth:
-          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
-          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
-
   # This executor spins up a secondary container with the remote testserver running in a RHIVOS2 image
   # The image is built specifically for this run.
   docker-aarch64-ubuntu-20-rhivos2-test-server:

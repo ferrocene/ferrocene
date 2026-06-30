@@ -327,7 +327,7 @@ A :dt:`path prefix` is a :t:`path` with its last :t:`path segment` and
 If a :t:`simple path` appears in a :t:`use import` and starts with a
 :t:`path segment` expressed as either :t:`keyword` ``crate``, :t:`keyword`
 ``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``super``, then the
-:t:`path` shall be the :t:`simple path prefix` of a :t:`glob import` or a
+:t:`path` shall be the :t:`common path prefix` of a :t:`glob import` or a
 :t:`nesting import`, or the :t:`path` of a :t:`simple import`.
 
 :dp:`fls_kv5bpq8rf1j9`
@@ -991,15 +991,15 @@ Use Imports
      | SimpleImport
 
    GlobImport ::=
-       SimplePathPrefix? $$*$$
+       CommonPathPrefix? $$*$$
 
    NestingImport ::=
-       SimplePathPrefix? $${$$ UseImportContentList? $$}$$
+       CommonPathPrefix? $${$$ UseImportContentList? $$}$$
 
    SimpleImport ::=
        SimplePath Renaming?
 
-   SimplePathPrefix ::=
+   CommonPathPrefix ::=
        SimplePath? $$::$$
 
    UseImportContentList ::=
@@ -1013,7 +1013,7 @@ A :t:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 :t:`use import` resides.
 
 :dp:`fls_sxo1jb25pl8a`
-A :t:`simple path prefix` is the leading :t:`simple path` of a :t:`glob import`
+A :dt:`common path prefix` is the leading :t:`simple path` of a :t:`glob import`
 or a :t:`nesting import`.
 
 :dp:`fls_WAA4WmohGu6T`
@@ -1031,15 +1031,15 @@ An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
 
    * :dp:`fls_2UyFcB6Our1v`
      If the :t:`use import` is a :t:`glob import` then start with the
-     :t:`[path segment]s` of the :t:`glob import`'s :t:`simple path prefix`.
+     :t:`[path segment]s` of the :t:`glob import`'s :t:`common path prefix`.
 
    * :dp:`fls_irdKqoYzBM0M`
      If the :t:`use import` is a :t:`nesting import` then start with the
-     :t:`[path segment]s` of the :t:`nesting import`'s :t:`simple path prefix`.
+     :t:`[path segment]s` of the :t:`nesting import`'s :t:`common path prefix`.
 
 #. :dp:`fls_gAWsqibl4GLq`
    Then if the current :t:`use import` is the child of a :t:`nesting import`,
-   prepend the :t:`nesting import`'s :t:`simple path prefix` to the
+   prepend the :t:`nesting import`'s :t:`common path prefix` to the
    :t:`import path prefix`. Repeat this step with the :t:`nesting import` as
    the current :t:`use import`.
 
@@ -1095,10 +1095,10 @@ An :t:`entity` imported by a :t:`simple import` subject to a :t:`renaming` with 
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common
-:t:`simple path prefix` for its nested :t:`[use import]s`.
+:t:`common path prefix` for its nested :t:`[use import]s`.
 
 :dp:`fls_iNUBX5fJAI1N`
-A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
+A :t:`glob import` outside of a :t:`nesting import` without a :t:`common path
 prefix` is rejected, but may still be consumed by :t:`[macro]s`.
 
 :dp:`fls_wB3fVglLOqbZ`

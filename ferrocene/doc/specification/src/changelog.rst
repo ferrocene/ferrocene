@@ -172,10 +172,15 @@ Language changes in Rust 1.95.0
 
 FLS maintenance
 ---------------
-New paragraphs:
 
-- :p:`fls_CSuxTkwR96j9`
-- :p:`fls_LV94x3HlpBWk`
+- Changed paragraph: :p:`fls_1941wid94hlg`
+
+- New paragraphs:
+
+  - :p:`fls_CSuxTkwR96j9`
+  - :p:`fls_LV94x3HlpBWk`
+
+- Replace the term "simple path prefix" with "common path prefix", to improve clarity.
 
 Language changes in Rust 1.94.0
 -------------------------------

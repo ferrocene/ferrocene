@@ -4111,14 +4111,6 @@ A :dt:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 
 See :s:`SimplePath`.
 
-simple path prefix
-^^^^^^^^^^^^^^^^^^
-
-A :dt:`simple path prefix` is the leading :t:`simple path` of a
-:t:`glob import` or a :t:`nesting import`.
-
-See :s:`SimplePathPrefix`.
-
 simple path public modifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

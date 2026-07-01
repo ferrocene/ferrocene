@@ -243,7 +243,7 @@ jobs:
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -377,7 +377,7 @@ jobs:
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
@@ -437,7 +437,7 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: x86_64-pc-nto-qnx800
+      FERROCENE_TARGETS: x86_64-pc-qnx
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
@@ -849,7 +849,7 @@ jobs:
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
     steps:
       - when:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
@@ -968,7 +968,7 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
+      FERROCENE_TARGETS: aarch64-unknown-qnx
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:

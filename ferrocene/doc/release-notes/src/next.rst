@@ -15,6 +15,6 @@ New features
 * The ``flip-link`` tool is now quality managed. See the User Manual for documentation.
 * Three new targets are now supported and qualified for safety critical use:
 
-  * :target-with-tuple:`aarch64-unknown-nto-qnx800`
+  * :target-with-tuple:`aarch64-unknown-qnx`
   * :target-with-tuple:`armv7r-none-eabihf`
-  * :target-with-tuple:`x86_64-pc-nto-qnx800`
+  * :target-with-tuple:`x86_64-pc-qnx`

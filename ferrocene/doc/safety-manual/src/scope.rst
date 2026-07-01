@@ -41,7 +41,7 @@ This qualification is restricted to the following environment:
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`aarch64-unknown-nto-qnx800`
+     - :target:`aarch64-unknown-qnx`
      - ``core``
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``
@@ -71,7 +71,7 @@ This qualification is restricted to the following environment:
      - ``proc_macro``
 
    * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`x86_64-pc-nto-qnx800`
+     - :target:`x86_64-pc-qnx`
      - ``core``
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``

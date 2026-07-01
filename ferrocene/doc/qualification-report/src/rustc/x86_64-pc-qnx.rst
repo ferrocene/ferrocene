@@ -3,4 +3,4 @@
 
 .. render-outcomes-template:: templates/tests.jinja2
    :host: x86_64-unknown-linux-gnu
-   :target: x86_64-pc-nto-qnx800
+   :target: x86_64-pc-qnx

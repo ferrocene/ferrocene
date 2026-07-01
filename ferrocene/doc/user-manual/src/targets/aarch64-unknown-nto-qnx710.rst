@@ -7,7 +7,7 @@
 ====================================
 
 The ``aarch64-unknown-nto-qnx710`` Ferrocene target provides support for QNX on
-ARMv8-A processors operating in Aarch64 mode.
+ARMv8-A processors operating in AArch64 mode.
 
 .. note::
 

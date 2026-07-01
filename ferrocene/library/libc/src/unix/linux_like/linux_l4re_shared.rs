@@ -129,13 +129,13 @@ s! {
         // the #if block in the future to include the following fields, these
         // will probably need including here. tsidea, skrap
         // QNX (NTO) platform does not define these fields
-        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto", target_os = "qnx")))]
         pub dlpi_adds: c_ulonglong,
-        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto", target_os = "qnx")))]
         pub dlpi_subs: c_ulonglong,
-        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto", target_os = "qnx")))]
         pub dlpi_tls_modid: size_t,
-        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto", target_os = "qnx")))]
         pub dlpi_tls_data: *mut c_void,
     }
 

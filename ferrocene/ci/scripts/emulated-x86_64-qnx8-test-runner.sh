@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 . "$(dirname $0)"/qnx-common.sh
 
-nto_target=x86_64-pc-nto-qnx800
+nto_target=x86_64-pc-qnx
 vm_hostname=x86_64-qnx8-vm
 
 start_vm() {

@@ -965,6 +965,10 @@ jobs:
       tag:
         description: The tag of the image that needs to be build
         type: string
+      restore_from_job:
+        description: Restore build result from a previous job
+        type: string
+        default: ""
       rebuild:
         description: Whether the image should be rebuilt or not
         type: boolean
@@ -984,6 +988,15 @@ jobs:
                 depth: 1
             - setup_remote_docker:
                 version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
+            - when:
+                condition: << parameters.restore_from_job >>
+                steps:
+                  - run:
+                      name: Install required packages
+                      command: sudo apt update && sudo apt install zstd
+                  - run:
+                      name: Restore files from the << parameters.restore_from_job>> job
+                      command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore_from_job>>
             - run:
                 name: Build and upload the Docker image, if needed
                 command: ferrocene/ci/scripts/build-and-push-docker-image.sh
@@ -993,62 +1006,6 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
-
-  # The image gets built for every job because it needs to contain build results per job
-  build-docker-rhivos2-test-server-aarch64:
-    description: Build and upload a Docker image for a rhivos2 container with a remote testserver.
-    docker:
-      - image: cimg/base:current
-    resource_class: arm.medium # 2-core
-    steps:
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
-      - ferrocene/aws_oidc_auth
-      - ferrocene/git_shallow_clone:
-          depth: 1
-      - setup_remote_docker:
-          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
-      - run:
-          name: Install required packages
-          command: sudo apt update && sudo apt install zstd
-      - run:
-          name: Restore files from the aarch64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
-      - run:
-          name: Build and upload the Docker image
-          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
-          environment:
-            IMAGE_NAME: rhivos-2.0-test-server
-            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
-
-  # The image gets built for every job because it needs to contain build results per job
-  build-docker-rhel-test-server-aarch64:
-    description: Job that builds and uploads a Docker image for a rhel container with a remote testserver.
-    docker:
-      - image: cimg/base:current
-    resource_class: arm.medium # 2-core
-    steps:
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
-      - ferrocene/aws_oidc_auth
-      - ferrocene/git_shallow_clone:
-          depth: 1
-      - setup_remote_docker:
-          version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
-      - run:
-          name: Install required packages
-          command: sudo apt update && sudo apt install zstd
-      - run:
-          name: Restore files from the aarch64-linux-build job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
-      - run:
-          name: Build and upload the Docker image
-          command: ferrocene/ci/scripts/build-and-push-docker-image.sh
-          environment:
-            IMAGE_NAME: rhel-10.1-test-server
-            IMAGE_TAG: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1577,12 +1534,28 @@ workflows:
             - x86_64-linux-dist
 
       # RHEL Test Infrastructure
-      - build-docker-rhel-test-server-aarch64:
+      # The image gets built for every job because it needs to contain build results per job
+      - build-docker:
+          name: build-docker-rhel-test-server-aarch64
+          image: rhel-10.1-test-server
+          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
+          rebuild: true
+          resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
+          restore_from_job: aarch64-linux-build
           requires:
             - aarch64-linux-build
 
       # RHIVOS2 Test Infrastructure
-      - build-docker-rhivos2-test-server-aarch64:
+      # The image gets built for every job because it needs to contain build results per job
+      - build-docker:
+          name: build-docker-rhivos2-test-server-aarch64
+          image: rhivos-2.0-test-server
+          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+          rebuild: true
+          resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
+          restore_from_job: aarch64-linux-build
           requires:
             - aarch64-linux-build
       - aarch64-linux-rhivos2-test-container:

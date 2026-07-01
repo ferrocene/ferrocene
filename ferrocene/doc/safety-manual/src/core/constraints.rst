@@ -17,7 +17,7 @@ Only use certified subset
 Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
 The user shall only use the certified subset of the core library.
-The list of the certified subset is documented in the `Certified core library API docs <../../certification/api-docs/core/index.html>`_.
+The certified subset is documented by annotations in the `Certified standard library API docs <../../index.html#library-apis>`_.
 Compliance must be proven by following :ref:`core/subset:Compliance with subset`.
 
 Only use stable functions

@@ -4,7 +4,7 @@
 Certified subset
 ================
 
-The `Certified core library API docs <../../certification/api-docs/core/index.html>`_ is the authoritative document stating which items are included in the certified subset of the core library.
+The `Certified standard library API docs <../../certification/index.html#library-apis>`_ is the authoritative document stating which items are included in the certified subset of the Rust standard library.
 
 Compliance with subset
 ----------------------

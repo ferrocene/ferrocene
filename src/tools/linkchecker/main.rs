@@ -92,6 +92,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
         "core\\io\\slice::sort_by_key",
         "#method.sort_by_cached_key"
     ]),
+<<<<<<< ferrocene/main
 
     // Ferrocene-specific:
     //
@@ -103,6 +104,25 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // the certified API docs.
     ("certification/api-docs/help.html", &["certification/api-docs/index.html"]),
     ("certification/api-docs/settings.html", &["certification/api-docs/index.html"]),
+||||||| 4429659e474
+=======
+    ("alloc/io/struct.IoSlice.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "alloc/io/slice::sort_by_key",
+        "alloc\\io\\slice::sort_by_key",
+        "#method.sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
+    ("alloc/io/struct.IoSliceMut.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "alloc/io/slice::sort_by_key",
+        "alloc\\io\\slice::sort_by_key",
+        "#method.sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 ];
 
 #[rustfmt::skip]

@@ -4,7 +4,13 @@
 
 //@ normalize-stderr: "note: compiler flags.*\n\n" -> ""
 //@ normalize-stderr: "note: rustc.*running on.*" -> "note: rustc {version} running on {platform}"
+<<<<<<< ferrocene/main
 //@ normalize-stderr: "thread.*panicked at .*" -> ""
+||||||| 4429659e474
+//@ normalize-stderr: "thread.*panicked at compiler.*" -> ""
+=======
+//@ normalize-stderr: "thread 'rustc'.*panicked.*:\n.*\n" -> ""
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 //@ normalize-stderr: " +\d{1,}: .*\n" -> ""
 //@ normalize-stderr: " + at .*\n" -> ""
 //@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""

@@ -700,7 +700,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         // We are trying to avoid reporting this error if other related errors were reported.
-        if res != Res::Err && inner_attr && !self.tcx.features().custom_inner_attributes() {
+        if res != Res::Err && inner_attr && !self.features.custom_inner_attributes() {
             let is_macro = match res {
                 Res::Def(..) => true,
                 Res::NonMacroAttr(..) => false,
@@ -728,8 +728,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             && let [namespace, attribute, ..] = &*path.segments
             && namespace.ident.name == sym::diagnostic
             && !DIAGNOSTIC_ATTRIBUTES.iter().any(|(attr, feature)| {
-                attribute.ident.name == *attr
-                    && feature.is_none_or(|f| self.tcx.features().enabled(f))
+                attribute.ident.name == *attr && feature.is_none_or(|f| self.features.enabled(f))
             })
         {
             let name = attribute.ident.name;
@@ -751,7 +750,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 let candidates = DIAGNOSTIC_ATTRIBUTES
                     .iter()
                     .filter_map(|(attr, feature)| {
-                        feature.is_none_or(|f| self.tcx.features().enabled(f)).then_some(*attr)
+                        feature.is_none_or(|f| self.features.enabled(f)).then_some(*attr)
                     })
                     .collect::<Vec<_>>();
 
@@ -1113,7 +1112,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             let feature = stability.feature;
 
             let is_allowed =
-                |feature| self.tcx.features().enabled(feature) || span.allows_unstable(feature);
+                |feature| self.features.enabled(feature) || span.allows_unstable(feature);
             let allowed_by_implication = implied_by.is_some_and(|feature| is_allowed(feature));
             if !is_allowed(feature) && !allowed_by_implication {
                 stability::report_unstable(
@@ -1243,7 +1242,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     ) -> SyntaxExtension {
         let mut ext = compile_declarative_macro(
             self.tcx.sess,
-            self.tcx.features(),
+            self.features,
             macro_def,
             ident,
             attrs,

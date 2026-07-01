@@ -8,8 +8,8 @@
 //@ needs-sanitizer-support
 //@ needs-sanitizer-address
 
-// Ferrocene addition: Our CI runs this target under QEMU, which does not support (most) sanitizers
-//@ ignore-aarch64-unknown-linux-gnu
+// Ferrocene addition: QEMU user mode does not support (most) sanitizers
+//@ ignore-qemu
 
 // Ferrocene addition: Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs
 // investigation.

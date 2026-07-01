@@ -4,12 +4,7 @@
 // ignore-tidy-linelength
 
 // Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
-//@ ignore-aarch64-unknown-ferrocene.facade
-//@ ignore-aarch64r82-unknown-ferrocene.facade
-//@ ignore-aarch64v8r-unknown-ferrocene.facade
-//@ ignore-armv7r-ferrocene.facade-eabihf
-//@ ignore-thumbv7em-ferrocene.facade-eabi
-//@ ignore-thumbv7em-ferrocene.facade-eabihf
+//@ ignore-qemu
 
 fn main() {
     assert!(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16 + 17 + 18 + 19 + 20 + 21 + 22 + 23 + 24 + 25 == 0);

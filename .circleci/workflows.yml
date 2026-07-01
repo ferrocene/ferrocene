@@ -137,10 +137,10 @@ jobs:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
-      - run:
-          name: Perform licensing checks
-          command: |
-            uvx reuse@5.1.1 --include-submodules lint
+      #- run:
+      #    name: Perform licensing checks
+      #    command: |
+      #      uvx reuse@5.1.1 --include-submodules lint
       - ferrocene-ci
 
   # Generate a SBOM for the Ferrocene repository

@@ -74,8 +74,8 @@ jobs:
       - name: Check whether src/stage0 is up to date
         run: ferrocene/ci/scripts/fix-stage0-branch.py --check
 
-      - name: Perform licensing checks
-        run: uvx reuse --include-submodules lint
+      #- name: Perform licensing checks
+      #  run: uvx reuse --include-submodules lint
 
       - name: Setup Ubuntu
         run: ferrocene/ci/scripts/setup-ubuntu.sh

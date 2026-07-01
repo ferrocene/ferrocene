@@ -19,8 +19,9 @@ start_vm() {
     check_ip_address_is_free
 
     qemu-system-x86_64 \
+        -enable-kvm \
         -smp 2 \
-        -m 1G \
+        -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0 \
         -pidfile "${emulatordir}"/qemu.pid \

@@ -285,10 +285,13 @@ EOF
 RUN <<-EOF
     set -xe
     mkdir /home/ci
+    addgroup --gid 993 kvm # we only need the group, not any of the supporting infrastructure
     addgroup --gid 1000 ci
     addgroup --gid 1001 ci-usergroup
     adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci
     adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
+    adduser ci kvm
+    adduser ci-user kvm
     chown -R ci: /home/ci
 EOF
 USER ci

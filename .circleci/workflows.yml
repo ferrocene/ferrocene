@@ -119,7 +119,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@0.0.2
+  ferrocene: ferrocene/ferrocene-common@dev:main
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -950,70 +950,6 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
 
-  # Docker jobs
-
-  # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
-  # If the image exists in the remote storage and is up to date, the job will
-  # early exit without doing any work.
-  #
-  # To build an aarch64 image use an aarch64 resource class, to build an x68_64 image
-  # use an x86_64 resource class
-  build-docker:
-    description: Job that builds and uploads a Docker image on, if needed.
-    docker:
-      - image: cimg/base:current
-    parameters:
-      resource_class:
-        description: the resource_class to use (determines the target architecture)
-        type: string
-      image:
-        description: The image that needs to be built
-        type: string
-      tag:
-        description: The tag of the image that needs to be build
-        type: string
-      restore_from_job:
-        description: Restore build result from a previous job
-        type: string
-        default: ""
-      rebuild:
-        description: Whether the image should be rebuilt or not
-        type: boolean
-      awscli_version:
-        description: The AWS-CLI version to install for auth
-        type: string
-    resource_class: << parameters.resource_class >>
-    steps:
-      - when:
-          condition: << parameters.rebuild >>
-          steps:
-            - aws-cli/install:
-                version: << parameters.awscli_version >>
-                override_installed: true
-            - ferrocene/aws_oidc_auth
-            - ferrocene/git_shallow_clone:
-                depth: 1
-            - setup_remote_docker:
-                version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
-            - when:
-                condition: << parameters.restore_from_job >>
-                steps:
-                  - run:
-                      name: Install required packages
-                      command: sudo apt update && sudo apt install zstd
-                  - run:
-                      name: Restore files from the << parameters.restore_from_job>> job
-                      command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore_from_job>>
-            - run:
-                name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
-                environment:
-                  IMAGE_NAME: << parameters.image >>
-                  IMAGE_TAG: << parameters.tag >>
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
-
   # Misc jobs
   wasm-dist-oxidos:
     executor: *executor-x86_64-ubuntu-20
@@ -1105,7 +1041,7 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
-      - build-docker:
+      - ferrocene/build_docker:
           name: build-docker--ubuntu-20--x86_64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -1113,7 +1049,7 @@ workflows:
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
-      - build-docker:
+      - ferrocene/build_docker:
           name: build-docker--ubuntu-24--x86_64
           image: ubuntu-24
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
@@ -1121,7 +1057,7 @@ workflows:
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
-      - build-docker:
+      - ferrocene/build_docker:
           name: build-docker--ubuntu-20--aarch64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
@@ -1542,7 +1478,7 @@ workflows:
 
       # RHEL Test Infrastructure
       # The image gets built for every job because it needs to contain build results per job
-      - build-docker:
+      - ferrocene/build_docker:
           name: build-docker-rhel-test-server-aarch64
           image: rhel-10.1-test-server
           tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
@@ -1555,7 +1491,7 @@ workflows:
 
       # RHIVOS2 Test Infrastructure
       # The image gets built for every job because it needs to contain build results per job
-      - build-docker:
+      - ferrocene/build_docker:
           name: build-docker-rhivos2-test-server-aarch64
           image: rhivos-2.0-test-server
           tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server

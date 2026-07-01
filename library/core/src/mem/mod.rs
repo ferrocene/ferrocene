@@ -1229,6 +1229,7 @@ pub const unsafe fn transmute_prefix<Src, Dst>(src: Src) -> Dst {
 ///
 /// unsafe { transmute_neo::<u32, u16>(123) };
 /// ```
+#[ferrocene::prevalidated]
 #[unstable(feature = "transmute_neo", issue = "155079")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[inline]

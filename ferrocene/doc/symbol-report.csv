@@ -5800,12 +5800,12 @@ core::char::methods::<impl char>::escape_unicode
 core::char::methods::<impl char>::from_u32_unchecked
 core::char::methods::<impl char>::is_ascii
 core::char::methods::<impl char>::is_ascii_whitespace
+core::char::methods::<impl char>::is_assigned
 core::char::methods::<impl char>::is_control
 core::char::methods::<impl char>::is_default_ignorable
 core::char::methods::<impl char>::is_format_control
 core::char::methods::<impl char>::is_grapheme_extender
 core::char::methods::<impl char>::is_private_use
-core::char::methods::<impl char>::is_unassigned
 core::char::methods::<impl char>::is_whitespace
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
@@ -6925,6 +6925,7 @@ core::mem::size_of_val_raw
 core::mem::swap
 core::mem::take
 core::mem::transmute_copy
+core::mem::transmute_neo
 core::mem::zeroed
 core::num::<impl i128>::abs
 core::num::<impl i128>::abs_diff

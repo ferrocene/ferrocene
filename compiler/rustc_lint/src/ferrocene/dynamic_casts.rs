@@ -10,7 +10,7 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
-    self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, Ty, TyCtxt,
+    self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, ShimKind, Ty, TyCtxt,
     TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
 use rustc_span::Span;
@@ -196,10 +196,10 @@ impl<'tcx> LintState<'tcx> {
                     let trait_id = fn_trait_ref.unwrap().def_id();
                     let target_kind = tcx.fn_trait_kind_from_def_id(trait_id).unwrap();
                     Instance {
-                        def: ty::InstanceKind::ConstructCoroutineInClosureShim {
+                        def: ty::InstanceKind::Shim(ShimKind::ConstructCoroutineInClosure {
                             coroutine_closure_def_id,
                             receiver_by_ref: target_kind != ty::ClosureKind::FnOnce,
-                        },
+                        }),
                         args,
                     }
                 };

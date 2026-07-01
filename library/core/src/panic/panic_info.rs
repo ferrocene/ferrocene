@@ -90,16 +90,10 @@ impl<'a> PanicInfo<'a> {
     ///
     /// panic!("Normal panic");
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    pub fn location(&self) -> Option<&Location<'_>> {
-||||||| 4429659e474
-    pub fn location(&self) -> Option<&Location<'_>> {
-=======
     pub fn location(&self) -> Option<&'static Location<'static>> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // NOTE: If this is changed to sometimes return None,
         // deal with that case in std::panicking::default_hook and core::panicking::panic_fmt.
         Some(self.location)

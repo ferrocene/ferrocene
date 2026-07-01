@@ -30,7 +30,8 @@ use rustc_middle::mono::MonoItem;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
-    self, EarlyBinder, GenericArgsRef, Instance, InstanceKind, TyCtxt, TypeFoldable, TypingEnv,
+    self, EarlyBinder, GenericArgsRef, Instance, InstanceKind, ShimKind, TyCtxt, TypeFoldable,
+    TypingEnv,
 };
 use rustc_span::Span;
 use tracing::{debug, info, trace};
@@ -402,7 +403,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 // If T is a function type, the compiler synthesizes an impl, so we'll check
                 // the trait declaration in libcore which isn't what we want. Check if the
                 // function is annotated instead.
-                if let InstanceKind::FnPtrShim(_, ty) | InstanceKind::FnPtrAddrShim(_, ty) =
+                if let InstanceKind::Shim(ShimKind::FnPtr(_, ty) | ShimKind::FnPtrAddr(_, ty)) =
                     instance.def
                     && let ty::FnDef(fn_item, fn_args) = ty.kind()
                 {
@@ -415,7 +416,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
             TerminatorKind::Drop { place, .. } => {
                 let (ty, _) = self.monomorphize_args(place.ty(self.body, tcx));
                 let instance = Instance::resolve_drop_glue(tcx, ty.ty);
-                if matches!(instance.def, InstanceKind::DropGlue(_, None)) {
+                if matches!(instance.def, InstanceKind::Shim(ShimKind::DropGlue(_, None))) {
                     debug!("ty `{ty:?}` does not need to be dropped");
                     return None;
                 }
@@ -449,7 +450,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
         let args = self.instance.instantiate_mir_and_normalize_erasing_regions(
             tcx,
             env,
-            EarlyBinder::bind(generic_args),
+            EarlyBinder::bind(tcx, generic_args),
         );
         (args, env)
     }

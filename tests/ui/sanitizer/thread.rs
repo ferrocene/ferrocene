@@ -21,6 +21,10 @@
 //@ error-pattern: allocated by main thread
 //@ ignore-backends: gcc
 
+// Ferrocene addition: Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs
+// investigation.
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 #![feature(rustc_private)]
 extern crate libc;
 

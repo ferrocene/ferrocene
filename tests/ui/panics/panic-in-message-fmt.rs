@@ -9,6 +9,14 @@
 //@ normalize-stderr: "(core/src/panicking\.rs):[0-9]+:[0-9]+" -> "$1:$$LINE:$$COL"
 //@ ignore-emscripten "RuntimeError" junk in output
 
+// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
+//@ ignore-aarch64-unknown-ferrocene.facade
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+//@ ignore-aarch64v8r-unknown-ferrocene.facade
+//@ ignore-armv7r-ferrocene.facade-eabihf
+//@ ignore-thumbv7em-ferrocene.facade-eabi
+//@ ignore-thumbv7em-ferrocene.facade-eabihf
+
 use std::fmt::{Display, self};
 
 struct MyStruct;

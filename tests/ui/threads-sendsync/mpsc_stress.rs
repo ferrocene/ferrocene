@@ -2,6 +2,9 @@
 //@ compile-flags:--test
 //@ needs-threads
 
+// Ferrocene addition: libstd test that segfaults on QEMU 8.2.2 but works on newer QEMU versions
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc::{channel, RecvError, RecvTimeoutError, TryRecvError};
 use std::sync::Arc;

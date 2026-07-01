@@ -9,6 +9,14 @@
 //@ compile-flags: -Ctarget-feature=+crt-static -Crpath=no -Crelocation-model=static
 //@ ignore-backends: gcc
 
+// Ferrocene addition: QEMU user space emulation behaves differently when spawning processes fails
+//@ ignore-aarch64-unknown-ferrocene.facade
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+//@ ignore-aarch64v8r-unknown-ferrocene.facade
+//@ ignore-armv7r-ferrocene.facade-eabihf
+//@ ignore-thumbv7em-ferrocene.facade-eabi
+//@ ignore-thumbv7em-ferrocene.facade-eabihf
+
 #![feature(exit_status_error)]
 #![feature(rustc_private)]
 // on aarch64, "Using 'getaddrinfo' in statically linked applications requires at runtime the shared

@@ -7,6 +7,24 @@
 //@ ignore-android: FIXME(#142855)
 //@ ignore-sgx: (x86 machine code cannot be directly executed)
 
+// Ferrocene addition: <assert.h> is not available for inclusion on these platforms
+//@ ignore-thumbv7em-ferrocene.facade-eabi
+//@ ignore-thumbv7em-ferrocene.facade-eabihf
+
+// Ferrocene addition: This test fails with linker errors on `-lpthread`, `-ldl`, and `-lrt` on
+// these platforms
+//@ ignore-armv7r-ferrocene.facade-eabihf
+//@ ignore-aarch64-unknown-nto-qnx710
+//@ ignore-x86_64-pc-nto-qnx710
+//@ ignore-aarch64-unknown-nto-qnx800
+//@ ignore-x86_64-pc-nto-qnx800
+
+// Ferrocene addition: libcheckrust includes symbols which cannot be used without `-fPIC` on
+// these platforms
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+//@ ignore-aarch64v8r-unknown-ferrocene.facade
+//@ ignore-aarch64-unknown-ferrocene.facade
+
 use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
 
 fn main() {

@@ -6,6 +6,10 @@
 //@ run-fail
 //@ error-pattern: HWAddressSanitizer: tag-mismatch
 
+// Ferrocene addition: Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs
+// investigation.
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 use std::hint::black_box;
 
 fn main() {

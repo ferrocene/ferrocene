@@ -23,6 +23,14 @@
 //@ ignore-backends: gcc
 //@ ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
 
+// Ferrocene addition: These targets cannot unwind
+//@ ignore-aarch64-unknown-ferrocene.facade
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+//@ ignore-aarch64v8r-unknown-ferrocene.facade
+//@ ignore-armv7r-ferrocene.facade-eabihf
+//@ ignore-thumbv7em-ferrocene.facade-eabi
+//@ ignore-thumbv7em-ferrocene.facade-eabihf
+
 use std::alloc::{Layout, handle_alloc_error};
 use std::process::Command;
 use std::{env, str};

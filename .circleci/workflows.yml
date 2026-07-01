@@ -126,7 +126,7 @@ jobs:
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
   misc-checks:
-    executor:
+    executor: &executor-x86_64-ubuntu-20
       name: ferrocene/docker
       image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
@@ -147,10 +147,7 @@ jobs:
 
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -163,10 +160,7 @@ jobs:
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -177,10 +171,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -199,10 +190,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -214,10 +202,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-tools:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -229,10 +214,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -245,9 +227,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
-    executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -260,10 +240,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -277,10 +254,7 @@ jobs:
           llvm_subset: false
 
   x86_64-linux-generic-test-container:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     parameters:
       job:
         type: string
@@ -302,10 +276,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-traceability-matrix:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -323,10 +294,7 @@ jobs:
           destination: reports
 
   x86_64-linux-library-coverage:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -343,10 +311,7 @@ jobs:
       - ferrocene/ci
 
   x86_64-linux-llvm:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -367,10 +332,7 @@ jobs:
           command: echo
 
   x86_64-linux-self-test:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -384,23 +346,20 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  # x86_64-linux-self-test-qnx8:
-  #   executor:
-  #     name: ferrocene/docker
-  #     image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #     registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
-  #   resource_class: ferrocene/k8s-amd64-tiny
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
-  #   steps:
-  #     - ferrocene/git_shallow_clone:
-  #         depth: 1
-  #     - ferrocene/aws_oidc_auth
-  #     - setup-qnx8-toolchain: {}
-  #     - run:
-  #         name: Download dist artifacts and run the self-test tool
-  #         command: ferrocene/ci/scripts/run-self-test.sh
+  x86_64-linux-self-test-qnx8:
+    executor: *executor-x86_64-ubuntu-20
+    resource_class: ferrocene/k8s-amd64-tiny
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
+    steps:
+      - ferrocene/git_shallow_clone:
+          depth: 1
+      - ferrocene/aws_oidc_auth
+      - setup-qnx8-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
@@ -474,7 +433,7 @@ jobs:
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
-    executor:
+    executor: &executor-aarch64-ubuntu-20
       name: ferrocene/docker
       image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
@@ -498,10 +457,7 @@ jobs:
           command: echo
 
   aarch64-linux-build:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -514,10 +470,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -529,10 +482,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-dist-tools:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -544,10 +494,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-generic-test-container:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     parameters:
       job:
         type: string
@@ -566,10 +513,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -583,10 +527,7 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   aarch64-linux-library-coverage:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-aarch64-ubuntu-20
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -863,31 +804,31 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # x86_64-windows-self-test-qnx8:
-  #   executor:
-  #     name: win/server-2022
-  #     size: medium # 4-core
-  #     shell: bash.exe -euo pipefail
-  #   environment:
-  #     FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
-  #     FERROCENE_HOST: x86_64-pc-windows-msvc
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
-  #   steps:
-  #     - when:
-  #         condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
-  #         steps:
-  #           - ferrocene/git_shallow_clone:
-  #               depth: 1
-  #           - ferrocene/aws_oidc_auth
-  #           - ferrocene-setup-windows
-  #           - ferrocene/setup_uv
-  #           - setup-qnx8-toolchain: {}
-  #           - run:
-  #               name: Download dist artifacts and run the self-test tool
-  #               command: ferrocene/ci/scripts/run-self-test.sh
-  #     - run:
-  #         name: Empty step to make sure the job always has steps
-  #         command: echo
+  x86_64-windows-self-test-qnx8:
+    executor:
+      name: win/server-2022
+      size: medium # 4-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
+    steps:
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene/git_shallow_clone:
+                depth: 1
+            - ferrocene/aws_oidc_auth
+            - ferrocene-setup-windows
+            - ferrocene/setup_uv
+            - setup-qnx8-toolchain: {}
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # Test VMs
 
@@ -1146,10 +1087,7 @@ jobs:
 
   # Misc jobs
   wasm-dist-oxidos:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -1161,10 +1099,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   finish-build:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -1220,10 +1155,7 @@ jobs:
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
-    executor:
-      name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
+    executor: *executor-x86_64-ubuntu-20
     resource_class: ferrocene/k8s-amd64-tiny
     steps:
       - run:

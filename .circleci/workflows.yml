@@ -949,12 +949,16 @@ jobs:
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
   # If the image exists in the remote storage and is up to date, the job will
   # early exit without doing any work.
-  build-docker-x86_64:
-    description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
+  build-docker:
+    description: Job that builds and uploads a Docker image on, if needed.
     docker:
       - image: cimg/base:current
-    resource_class: large # 4-core
     parameters:
+      architecture:
+        description: The architecture to build for (currently either x86_64 or aarch64)
+        type: string
+      resource_class:
+        description: the resource_class to use (must match the architecture)
       image:
         description: The image that needs to be built
         type: string
@@ -964,49 +968,16 @@ jobs:
       rebuild:
         description: Whether the image should be rebuilt or not
         type: boolean
+      awscli_version:
+        description: The AWS-CLI version to install for auth
+        type: string
+    resource_class: << parameters.resource_class >>
     steps:
       - when:
           condition: << parameters.rebuild >>
           steps:
             - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-            - ferrocene/aws_oidc_auth
-            - ferrocene/git_shallow_clone:
-                depth: 1
-            - setup_remote_docker:
-                version: default
-            - run:
-                name: Build and upload the Docker image, if needed
-                command: ferrocene/ci/scripts/build-and-push-docker-image.sh
-                environment:
-                  IMAGE_NAME: << parameters.image >>
-                  IMAGE_TAG: << parameters.tag >>
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
-
-  build-docker-aarch64:
-    description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
-    docker:
-      - image: cimg/base:current
-    resource_class: arm.medium # 2-core
-    parameters:
-      image:
-        description: The image that needs to be built
-        type: string
-      tag:
-        description: The tag of the image that needs to be build
-        type: string
-      rebuild:
-        description: Whether the image should be rebuilt or not
-        type: boolean
-    steps:
-      - when:
-          condition: << parameters.rebuild >>
-          steps:
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
+                version: << parameters.awscli_version >>
                 override_installed: true
             - ferrocene/aws_oidc_auth
             - ferrocene/git_shallow_clone:
@@ -1170,23 +1141,29 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
-      - build-docker-x86_64:
+      - build-docker:
           name: build-docker--ubuntu-20--x86_64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
 
-      - build-docker-x86_64:
+      - build-docker:
           name: build-docker--ubuntu-24--x86_64
           image: ubuntu-24
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
 
-      - build-docker-aarch64:
+      - build-docker:
           name: build-docker--ubuntu-20--aarch64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20 >>
+          resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
           requires:

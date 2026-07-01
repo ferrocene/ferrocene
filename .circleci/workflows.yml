@@ -965,6 +965,7 @@ jobs:
         type: string
       resource_class:
         description: the resource_class to use (must match the architecture)
+        type: string
       image:
         description: The image that needs to be built
         type: string

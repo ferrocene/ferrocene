@@ -102,12 +102,6 @@ qualified upon request.
      - Full
      - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets RHIVOS2 automotive linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using using the :ref:`aarch64-unknown-linux-gnu` host compiler.
 
-   * - :ref:`aarch64-unknown-nto-qnx710`
-     - ``aarch64-unknown-nto-qnx710``
-     - Cross-compilation
-     - Full
-     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
-
    * - :ref:`armv7r-none-eabihf`
      - ``armv7r-none-eabihf``
      - Cross-compilation
@@ -138,11 +132,7 @@ qualified upon request.
      - Full
      - \-
 
-   * - :ref:`x86_64-pc-nto-qnx710`
-     - ``x86_64-pc-nto-qnx710``
-     - Cross-compilation
-     - Full
-     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
 
    * - :ref:`x86_64-pc-nto-qnx800`
      - ``x86_64-pc-nto-qnx800``

@@ -25,12 +25,10 @@ qualification, in accordance to the standards above.
    rustc/aarch64-unknown-linux-gnu
    rustc/aarch64-rhivos2-linux-gnu
    rustc/aarch64-unknown-none
-   rustc/aarch64-unknown-nto-qnx710
    rustc/aarch64-unknown-nto-qnx800
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
    rustc/x86_64-unknown-linux-gnu
-   rustc/x86_64-pc-nto-qnx710
    rustc/x86_64-pc-nto-qnx800
 
 .. appendices::

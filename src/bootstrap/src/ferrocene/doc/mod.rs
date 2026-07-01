@@ -730,6 +730,12 @@ sphinx_books! [
         src: "ferrocene/doc/core-certification",
         dest: "certification/core",
     },
+    {
+        ty: QNX7Manual,
+        name: "qnx7-manual",
+        src: "ferrocene/doc/qnx7-manual",
+        dest: "certification/targets",
+    },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

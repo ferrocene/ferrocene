@@ -5712,6 +5712,7 @@ const impl<T> Default for &[T] {
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 const impl<T> Default for &mut [T] {
     /// Creates a mutable empty slice.
+    #[ferrocene::prevalidated]
     fn default() -> Self {
         &mut []
     }

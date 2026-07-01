@@ -8329,6 +8329,7 @@ core::slice::<impl [T]>::starts_with
 core::slice::<impl [T]>::swap
 core::slice::<impl [T]>::swap_unchecked::precondition_check
 core::slice::<impl [T]>::windows
+core::slice::<impl core::default::Default for &mut [T]>::default
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks::eq_ignore_ascii_inner

@@ -1029,6 +1029,60 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
+  alias-docker-x86_64:
+    description: Specialized version of build-docker-x86_64 for running on main and tagging the image as such
+    docker:
+      - image: cimg/base:current
+    resource_class: large # 4-core
+    parameters:
+      image:
+        description: The image that needs to be built
+        type: string
+      tag:
+        description: The tag of the image that needs to be built
+        type: string
+      alias:
+        description: The tag of the alias to push
+        type: string
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Maybe build x86_64-<< parameters.image >> and upload
+          environment:
+            ECR_REPOSITORY: ci-docker-images
+            ECR_REGION: us-east-1
+          command: |
+            account="$(aws sts get-caller-identity --region "${ECR_REGION}" | jq -r .Account)"
+            registry="${account}.dkr.ecr.${ECR_REGION}.amazonaws.com"
+
+            aws ecr get-login-password --region "${ECR_REGION}" \
+              | docker login --username AWS --password-stdin "${registry}"
+
+            manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.tag >>' --output text --query 'images[].imageManifest')"
+            if [[ "$?" -ne '0' ]]; then
+              echo "image << parameters.tag >> doesn't exist, building..."
+              IMAGE_NAME="<< parameters.image >>" \
+                IMAGE_TAG="<< parameters.tag >>" \
+                ferrocene/ci/scripts/build-and-push-docker-image.sh
+              manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.tag >>' --output text --query 'images[].imageManifest')"
+            else
+              alias_manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.alias >>' --output text --query 'images[].imageManifest')"
+              src_digest="$(echo "$manifest" | jq -r .config.digest)"
+              alias_digest="$(echo "$alias_manifest" | jq -r .config.digest)"
+              if [[ "$src_digest" == "$alias_digest" ]]; then
+                echo "alias << parameters.alias >> already points to << parameters.tag >>"
+                exit 0
+              fi
+            fi
+            aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag '<< parameters.alias >>' --image-manifest "$manifest"
+
   build-docker-aarch64:
     description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
     docker:
@@ -1065,6 +1119,60 @@ jobs:
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
+
+  alias-docker-aarch64:
+    description: Specialized version of build-docker-aarch64 for running on main and tagging the image as such
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    parameters:
+      image:
+        description: The image that needs to be built
+        type: string
+      tag:
+        description: The tag of the image that needs to be built
+        type: string
+      alias:
+        description: The tag of the alias to push
+        type: string
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Maybe build x86_64-<< parameters.image >> and upload
+          environment:
+            ECR_REPOSITORY: ci-docker-images
+            ECR_REGION: us-east-1
+          command: |
+            account="$(aws sts get-caller-identity --region "${ECR_REGION}" | jq -r .Account)"
+            registry="${account}.dkr.ecr.${ECR_REGION}.amazonaws.com"
+
+            aws ecr get-login-password --region "${ECR_REGION}" \
+              | docker login --username AWS --password-stdin "${registry}"
+
+            manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.tag >>' --output text --query 'images[].imageManifest')"
+            if [[ "$?" -ne '0' ]]; then
+              echo "image << parameters.tag >> doesn't exist, building..."
+              IMAGE_NAME="<< parameters.image >>" \
+                IMAGE_TAG="<< parameters.tag >>" \
+                ferrocene/ci/scripts/build-and-push-docker-image.sh
+              manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.tag >>' --output text --query 'images[].imageManifest')"
+            else
+              alias_manifest="$(aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag='<< parameters.alias >>' --output text --query 'images[].imageManifest')"
+              src_digest="$(echo "$manifest" | jq -r .config.digest)"
+              alias_digest="$(echo "$alias_manifest" | jq -r .config.digest)"
+              if [[ "$src_digest" == "$alias_digest" ]]; then
+                echo "alias << parameters.alias >> already points to << parameters.tag >>"
+                exit 0
+              fi
+            fi
+            aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag '<< parameters.alias >>' --image-manifest "$manifest"
 
   # The image gets built for every job because it needs to contain build results per job
   build-docker-rhivos2-test-server-aarch64:
@@ -1760,6 +1868,29 @@ workflows:
             value: << pipeline.git.branch >>
     jobs:
       - skip
+
+  # workflow for miscellaneous tasks that don't affect the status of a commit
+  misc:
+    jobs:
+      # tag built docker images with the `:main` tag
+      - alias-docker-x86_64:
+          filters: pipeline.git.branch == "main"
+          name: alias-docker-x86_64-ubuntu-20
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          alias: x86_64-ubuntu-20
+      - alias-docker-x86_64:
+          name: alias-docker-x86_64-ubuntu-24
+          filters: pipeline.git.branch == "main"
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          alias: x86_64-ubuntu-24
+      - alias-docker-aarch64:
+          name: alias-docker-aarch64-ubuntu-20
+          filters: pipeline.git.branch == "main"
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          alias: aarch64-ubuntu-20
 
 commands:
   ferrocene-job-build:

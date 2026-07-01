@@ -1,21 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-[["tests/ui"]]
-tests = [
-    "tests/ui/symbol-names/verbose.rs",
-    "tests/ui/type/issue-94187-verbose-type-name.rs",
-]
-targets = ["aarch64-apple-darwin",]
-reason = "TODO: to be investigated"
-
-[["tests/crashes"]]
-tests = [
-    "tests/crashes/120175.rs",
-]
-targets = ["aarch64-apple-darwin",]
-reason = "This test is fixed on upstream as of 7db184056909045802a66299947dc81c8e43e605"
-
 [["tests/run-make"]]
 tests = [
     "tests/run-make/sanitizer-cdylib-link",
@@ -63,8 +48,6 @@ reason = "QEMU user space emulation behaves differently when spawning processes 
 
 [["tests/ui"]]
 tests = [
-    "tests/ui/extern/extern-types-field-offset.rs",
-    "tests/ui/extern/extern-types-size_of_val.rs",
     "tests/ui/hygiene/panic-location.rs",
     "tests/ui/intrinsics/const-eval-select-backtrace-std.rs",
     "tests/ui/intrinsics/const-eval-select-backtrace.rs",
@@ -83,16 +66,6 @@ tests = [
 ]
 targets = ["aarch64-unknown-ferrocene.facade", "aarch64r82-unknown-ferrocene.facade", "aarch64v8r-unknown-ferrocene.facade", "armv7r-ferrocene.facade-eabihf", "thumbv7em-ferrocene.facade-eabi", "thumbv7em-ferrocene.facade-eabihf"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
-
-[["tests/debuginfo"]]
-tests = ["tests/debuginfo/basic-types.rs", "tests/debuginfo/basic-types-metadata.rs", "tests/debuginfo/basic-types-globals-metadata.rs"]
-targets = ["x86_64-unknown-linux-gnu"]
-reason = "The tests do not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/128913"
-
-[["tests/debuginfo"]]
-tests = ["tests/debuginfo/basic-types-mut-globals.rs"]
-targets = ["x86_64-unknown-linux-gnu"]
-reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648"
 
 [["tests/debuginfo"]]
 tests = ["tests/debuginfo"]

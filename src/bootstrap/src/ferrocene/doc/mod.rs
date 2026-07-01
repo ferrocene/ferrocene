@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-pub(crate) mod certified_api_docs;
 pub(crate) mod code_coverage;
 #[cfg(test)]
 mod tests;
@@ -11,7 +10,6 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
-use self::certified_api_docs::CertifiedApiDocs;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
@@ -583,13 +581,19 @@ macro_rules! sphinx_books {
                     });
                 )*
 
-                // Generate the API docs for the certified crates
-                builder.ensure(CertifiedApiDocs {target: self.target});
+                let compiler = builder.compiler(builder.top_stage, builder.host_target);
+
+                // Generate the API docs, with labels for certified functions
+                builder.ensure(crate::core::build_steps::doc::Std::from_build_compiler(
+                    compiler,
+                    self.target,
+                    crate::core::build_steps::doc::DocumentationFormat::Html,
+                ));
 
                 // Generate the Traceability Matrix
                 builder.ensure(TraceabilityMatrix {
                     target: self.target,
-                    compiler: builder.compiler(builder.top_stage, builder.host_target),
+                    compiler: compiler,
                 });
 
                 // Also regenerate the index file, so that the "Ferrocene documentation" link in

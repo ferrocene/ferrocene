@@ -10,9 +10,10 @@ Product Documentation
 ---------------------
 
 - :doc:`user-manual:index`
-- The `Certified core library API docs <../../api-docs/core/index.html>`_, which include
+- The `Certified standard library API docs <../../index.html#library-apis>`_, which include
    - Requirements (the function doc-comments)
    - Software Design (the module doc-comments)
+   - Labels for which Rust standard library functions are certified
 
 Functional Safety Documentation
 -------------------------------

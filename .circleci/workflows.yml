@@ -381,12 +381,9 @@ jobs:
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
-      - ferrocene/aws_oidc_auth
       - ferrocene/checkout
-      - ferrocene/setup_uv
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -415,12 +412,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
-      - ferrocene/aws_oidc_auth
       - ferrocene/checkout
-      - ferrocene/setup_uv
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx8-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -584,13 +578,9 @@ jobs:
               - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
             - ferrocene/checkout
-            # Darwin does not come with awscli, setup it before aws steps
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-            - ferrocene/aws_oidc_auth
-            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
-            - ferrocene/setup_uv
+            - ferrocene/setup:
+                awscli_version: << pipeline.parameters.awscli-version >>
+                os: darwin
             - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -673,13 +663,9 @@ jobs:
           steps:
             - ferrocene/git_shallow_clone:
                 depth: 1
-            # Darwin does not come with awscli, setup it before aws steps
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-            - ferrocene/aws_oidc_auth
-            - ferrocene-setup-darwin
-            - ferrocene/setup_uv
+            - ferrocene/setup:
+                awscli_version: << pipeline.parameters.awscli-version >>
+                os: darwin
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -742,10 +728,10 @@ jobs:
               - << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
               - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
-            - ferrocene/aws_oidc_auth
             - ferrocene/checkout
-            - ferrocene-setup-windows
-            - ferrocene/setup_uv
+            - ferrocene/setup:
+                awscli_version: << pipeline.parameters.awscli-version >>
+                os: windows
             - ferrocene/ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -793,9 +779,9 @@ jobs:
           steps:
             - ferrocene/git_shallow_clone:
                 depth: 1
-            - ferrocene/aws_oidc_auth
-            - ferrocene-setup-windows
-            - ferrocene/setup_uv
+            - ferrocene/setup:
+                awscli_version: << pipeline.parameters.awscli-version >>
+                os: windows
             - setup-qnx-toolchain: {}
             - run:
                 name: Download dist artifacts and run the self-test tool
@@ -819,9 +805,9 @@ jobs:
           steps:
             - ferrocene/git_shallow_clone:
                 depth: 1
-            - ferrocene/aws_oidc_auth
-            - ferrocene-setup-windows
-            - ferrocene/setup_uv
+            - ferrocene/setup:
+                awscli_version: << pipeline.parameters.awscli-version >>
+                os: windows
             - setup-qnx8-toolchain: {}
             - run:
                 name: Download dist artifacts and run the self-test tool
@@ -852,12 +838,9 @@ jobs:
       SCRIPT: |
         sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
-      - ferrocene/aws_oidc_auth
       - ferrocene/checkout
-      - ferrocene/setup_uv
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - run:
           name: Restore files from the x86_64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
@@ -901,12 +884,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - ferrocene/aws_oidc_auth
       - ferrocene/checkout
-      - ferrocene/setup_uv
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -935,12 +915,9 @@ jobs:
       SCRIPT: |
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
-      - ferrocene/aws_oidc_auth
       - ferrocene/checkout
-      - ferrocene/setup_uv
-      - aws-cli/install:
-          version: << pipeline.parameters.awscli-version >>
-          override_installed: true
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx8-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
@@ -1615,25 +1592,9 @@ commands:
     steps:
       - ferrocene/checkout:
           llvm_subset: true
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-      - ferrocene/aws_oidc_auth
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - ferrocene-setup-darwin
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "windows"]
-          steps:
-            - ferrocene-setup-windows
-      - ferrocene/setup_uv
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
+          os: <<parameters.os>>
       - ferrocene/ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -1666,25 +1627,9 @@ commands:
     steps:
       - ferrocene/checkout:
           llvm_subset: << parameters.llvm_subset >>
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-      - ferrocene/aws_oidc_auth
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - ferrocene-setup-darwin
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "windows"]
-          steps:
-            - ferrocene-setup-windows
-      - ferrocene/setup_uv
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
+          os: <<parameters.os>>
       - when:
           condition: <<parameters.restore-from-job>>
           steps:
@@ -1714,20 +1659,9 @@ commands:
     steps:
       - ferrocene/checkout:
           llvm_subset: true
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - aws-cli/install:
-                version: << pipeline.parameters.awscli-version >>
-                override_installed: true
-      - ferrocene/setup_uv
-      - ferrocene/aws_oidc_auth
-      - when:
-          condition:
-            equal: [<<parameters.os>>, "darwin"]
-          steps:
-            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
+          os: <<parameters.os>>
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1753,13 +1687,13 @@ commands:
         type: boolean
         default: true
     steps:
-      - ferrocene/aws_oidc_auth
       - when:
           condition: << parameters.checkout-source >>
           steps:
             - ferrocene/checkout:
                 llvm_subset: true
-      - ferrocene/setup_uv
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1843,21 +1777,6 @@ commands:
               --interactive \
               --tty \
               << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
-
-  ferrocene-setup-darwin:
-    description: Prepare the Darwin environment
-    steps:
-      - run:
-          name: Setup Darwin environment
-          command: ferrocene/ci/scripts/setup-darwin.sh
-
-  ferrocene-setup-windows:
-    description: Prepare the Windows environment
-    steps:
-      - run:
-          name: Setup Windows environment
-          command: ferrocene/ci/scripts/setup-windows.sh
-
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain

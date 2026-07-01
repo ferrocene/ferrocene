@@ -955,16 +955,16 @@ jobs:
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
   # If the image exists in the remote storage and is up to date, the job will
   # early exit without doing any work.
+  #
+  # To build an aarch64 image use an aarch64 resource class, to build an x68_64 image
+  # use an x86_64 resource class
   build-docker:
     description: Job that builds and uploads a Docker image on, if needed.
     docker:
       - image: cimg/base:current
     parameters:
-      architecture:
-        description: The architecture to build for (currently either x86_64 or aarch64)
-        type: string
       resource_class:
-        description: the resource_class to use (must match the architecture)
+        description: the resource_class to use (determines the target architecture)
         type: string
       image:
         description: The image that needs to be built

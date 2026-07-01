@@ -49,7 +49,14 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-aarch64",
     "ignore-aarch64-pc-windows-msvc",
     "ignore-aarch64-rhivos2-linux-gnu",
+    // Ferrocene addition
+    "ignore-aarch64-unknown-ferrocene.facade",
     "ignore-aarch64-unknown-linux-gnu",
+    // Ferrocene additions
+    "ignore-aarch64-unknown-nto-qnx710",
+    "ignore-aarch64-unknown-nto-qnx800",
+    "ignore-aarch64r82-unknown-ferrocene.facade",
+    "ignore-aarch64v8r-unknown-ferrocene.facade",
     "ignore-aix",
     "ignore-android",
     "ignore-apple",
@@ -58,6 +65,8 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-arm-unknown-linux-gnueabihf",
     "ignore-arm-unknown-linux-musleabi",
     "ignore-arm-unknown-linux-musleabihf",
+    // Ferrocene addition
+    "ignore-armv7r-ferrocene.facade-eabihf",
     "ignore-auxiliary",
     "ignore-avr",
     "ignore-backends",
@@ -125,6 +134,9 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-std-debug-assertions",
     "ignore-test",
     "ignore-thumb",
+    // Ferrocene addition
+    "ignore-thumbv7em-ferrocene.facade-eabi",
+    "ignore-thumbv7em-ferrocene.facade-eabihf",
     "ignore-thumbv8m.base-none-eabi",
     "ignore-thumbv8m.main-none-eabi",
     "ignore-tvos",
@@ -147,6 +159,9 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-x86",
     "ignore-x86_64",
     "ignore-x86_64-apple-darwin",
+    // Ferrocene additions
+    "ignore-x86_64-pc-nto-qnx710",
+    "ignore-x86_64-pc-nto-qnx800",
     "ignore-x86_64-pc-windows-gnu",
     "ignore-x86_64-pc-windows-gnullvm",
     "ignore-x86_64-unknown-linux-gnu",

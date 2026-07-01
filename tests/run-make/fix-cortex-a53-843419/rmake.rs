@@ -1,6 +1,10 @@
 //@ only-aarch64
 //@ ignore-apple On Mac, we can be sure the CPU is never an a53 (Apple doesn't make those)
 
+// Ferrocene addition: This errata does not affect Armv8-R AArch64 processors
+//@ ignore-aarch64r82-unknown-ferrocene.facade
+//@ ignore-aarch64v8r-unknown-ferrocene.facade
+
 // Regression test for rust-lang/rust#118095
 
 use run_make_support::regex::Regex;

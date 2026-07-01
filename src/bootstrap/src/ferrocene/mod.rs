@@ -15,15 +15,13 @@ pub(crate) mod test_outcomes;
 pub(crate) mod test_variants;
 pub(crate) mod tool;
 
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use build_helper::ci::CiEnv;
 use build_helper::git::get_closest_upstream_commit;
 
 use crate::builder::Builder;
-use crate::core::config::{Config, TargetSelection};
-use crate::t;
+use crate::core::config::Config;
 use crate::utils::exec::{BootstrapCommand, command};
 
 /// Helper function used to download files from S3. This is used to be able to download artifacts
@@ -76,34 +74,6 @@ pub(crate) fn download_from_local_filesystem(path: &str, dest: &Path, help_on_er
         }
         std::process::exit(1);
     }
-}
-
-pub(crate) fn ignored_tests_for_suite(
-    builder: &Builder<'_>,
-    target: TargetSelection,
-    suite: &str,
-) -> Vec<String> {
-    #[derive(serde_derive::Deserialize)]
-    struct Item {
-        tests: Vec<String>,
-        targets: Vec<String>,
-        // Other fields ignored here...
-    }
-
-    let contents: HashMap<String, Vec<Item>> = t!(toml::from_slice(&t!(std::fs::read(
-        builder.src.join("ferrocene").join("ignored-tests.toml")
-    ))));
-
-    let triple = target.triple.to_string();
-    contents
-        .get(suite)
-        .map(|s| s.as_slice())
-        .unwrap_or(&[])
-        .iter()
-        .filter(|item| item.targets.contains(&triple))
-        .flat_map(|item| item.tests.iter())
-        .map(|i| i.clone())
-        .collect()
 }
 
 fn ferrocene_channel(builder: &Builder<'_>, ferrocene_version: &str) -> String {

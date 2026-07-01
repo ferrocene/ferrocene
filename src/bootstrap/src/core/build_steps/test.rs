@@ -2172,6 +2172,18 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             crate::exit!(1);
         }
 
+        // Ferrocene addition: Skip debuginfo tests on certain targets where they don't work
+        const DEBUGINFO_DISABLED_TARGETS: [&'static str; 5] = [
+            "aarch64r82-unknown-ferrocene.facade",
+            "aarch64v8r-unknown-ferrocene.facade",
+            "aarch64-unknown-ferrocene.facade",
+            "thumbv7em-ferrocene.facade-eabi",
+            "thumbv7em-ferrocene.facade-eabihf",
+        ];
+        if self.suite == "debuginfo" && DEBUGINFO_DISABLED_TARGETS.contains(&&*self.target.triple) {
+            return;
+        }
+
         let mut test_compiler = self.test_compiler;
         let target = self.target;
         let mode = self.mode;
@@ -2550,11 +2562,6 @@ Please disable assertions with `rust.debug-assertions = false`.
         for exclude in &builder.config.skip {
             cmd.arg("--skip");
             cmd.arg(exclude);
-        }
-
-        for ignored in crate::ferrocene::ignored_tests_for_suite(builder, self.target, self.path) {
-            cmd.arg("--skip");
-            cmd.arg(&ignored);
         }
 
         // Get paths from cmd args

@@ -18,14 +18,6 @@ reason = "This test is fixed on upstream as of 7db184056909045802a66299947dc81c8
 
 [["tests/run-make"]]
 tests = [
-    "tests/run-coverage",
-    "tests/run-coverage-rustdoc",
-]
-targets = ["aarch64-unknown-linux-gnu", "aarch64-rhivos2-linux-gnu"]
-reason = "The tests generates profraw files to analyze, but remote-test is not capable of pushing those files back to the client yet"
-
-[["tests/run-make"]]
-tests = [
     "tests/run-make/sanitizer-cdylib-link",
     "tests/run-make/sanitizer-dylib-link",
     "tests/run-make/sanitizer-staticlib-link"

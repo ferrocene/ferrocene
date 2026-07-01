@@ -4,9 +4,7 @@
 //@ needs-subprocess
 
 // Ferrocene addition: QEMU user space emulation behaves differently with argv0
-//@ ignore-aarch64-unknown-ferrocene.facade
-//@ ignore-thumbv7em-ferrocene.facade-eabi
-//@ ignore-thumbv7em-ferrocene.facade-eabihf
+//@ ignore-qemu
 
 use std::env;
 use std::os::unix::process::CommandExt;

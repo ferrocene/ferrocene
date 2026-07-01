@@ -534,7 +534,7 @@ impl siginfo_t {
             _si_errno: c_int,
             si_addr: *mut c_void,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_addr)).si_addr
+        (*(self as *const siginfo_t).cast::<siginfo_si_addr>()).si_addr
     }
 
     pub unsafe fn si_status(&self) -> c_int {
@@ -547,7 +547,7 @@ impl siginfo_t {
             _si_errno: c_int,
             si_status: c_int,
         }
-        (*(self as *const siginfo_t as *const siginfo_sigchld)).si_status
+        (*(self as *const siginfo_t).cast::<siginfo_sigchld>()).si_status
     }
 
     pub unsafe fn si_pid(&self) -> pid_t {
@@ -568,7 +568,7 @@ impl siginfo_t {
             _si_errno: c_int,
             si_value: sigval,
         }
-        (*(self as *const siginfo_t as *const siginfo_si_value)).si_value
+        (*(self as *const siginfo_t).cast::<siginfo_si_value>()).si_value
     }
 }
 
@@ -1020,7 +1020,7 @@ pub const LC_TIME_MASK: c_int = 1 << 5;
 pub const LC_MESSAGES_MASK: c_int = 1 << 6;
 pub const LC_GLOBAL_LOCALE: locale_t = -1isize as locale_t;
 
-pub const SEM_FAILED: *mut sem_t = core::ptr::null_mut();
+pub const SEM_FAILED: *mut sem_t = ptr::null_mut();
 
 pub const ST_RDONLY: c_ulong = 0x80000;
 pub const ST_NOSUID: c_ulong = 0;
@@ -1691,9 +1691,7 @@ f! {
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
-        for slot in (*set).fds_bits.iter_mut() {
-            *slot = 0;
-        }
+        (*set).fds_bits.fill(0);
     }
 
     pub fn CPU_ALLOC_SIZE(count: c_int) -> size_t {
@@ -1712,10 +1710,9 @@ f! {
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
-        for slot in cpuset.bits.iter_mut() {
-            *slot = 0;
-        }
+        cpuset.bits.fill(0);
     }
+
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
         if cpu < size_in_bits {
@@ -1762,7 +1759,7 @@ f! {
         if (*mhdr).msg_controllen as usize >= size_of::<cmsghdr>() {
             (*mhdr).msg_control.cast()
         } else {
-            core::ptr::null_mut()
+            ptr::null_mut()
         }
     }
 
@@ -1770,7 +1767,7 @@ f! {
         let next = (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr;
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next as usize + CMSG_ALIGN(size_of::<cmsghdr>()) as usize > max {
-            core::ptr::null_mut()
+            ptr::null_mut()
         } else {
             next
         }

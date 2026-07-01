@@ -84,7 +84,7 @@ impl siginfo_t {
             __pad1: Padding<c_int>,
             _pid: crate::pid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer))._pid
+        (*(self as *const siginfo_t).cast::<siginfo_timer>())._pid
     }
 
     pub unsafe fn si_uid(&self) -> crate::uid_t {
@@ -98,7 +98,7 @@ impl siginfo_t {
             _pid: crate::pid_t,
             _uid: crate::uid_t,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer))._uid
+        (*(self as *const siginfo_t).cast::<siginfo_timer>())._uid
     }
 
     pub unsafe fn si_value(&self) -> crate::sigval {
@@ -113,7 +113,7 @@ impl siginfo_t {
             _uid: crate::uid_t,
             value: crate::sigval,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer)).value
+        (*(self as *const siginfo_t).cast::<siginfo_timer>()).value
     }
 
     pub unsafe fn si_status(&self) -> c_int {
@@ -128,7 +128,7 @@ impl siginfo_t {
             _uid: crate::uid_t,
             status: c_int,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer)).status
+        (*(self as *const siginfo_t).cast::<siginfo_timer>()).status
     }
 }
 
@@ -1331,20 +1331,20 @@ cfg_if! {
             ptm_pad1: Padding::new([0; 3]),
             ptm_unused: Padding::new(0),
             ptm_pad2: Padding::new([0; 3]),
-            ptm_waiters: 0 as *mut _,
+            ptm_waiters: ptr::null_mut(),
             ptm_owner: 0,
             ptm_recursed: 0,
-            ptm_spare2: 0 as *mut _,
+            ptm_spare2: ptr::null_mut(),
         };
     } else {
         pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
             ptm_magic: 0x33330003,
             ptm_errorcheck: 0,
             ptm_unused: Padding::new(0),
-            ptm_waiters: 0 as *mut _,
+            ptm_waiters: ptr::null_mut(),
             ptm_owner: 0,
             ptm_recursed: 0,
-            ptm_spare2: 0 as *mut _,
+            ptm_spare2: ptr::null_mut(),
         };
     }
 }
@@ -1352,21 +1352,21 @@ cfg_if! {
 pub const PTHREAD_COND_INITIALIZER: pthread_cond_t = pthread_cond_t {
     ptc_magic: 0x55550005,
     ptc_lock: 0,
-    ptc_waiters_first: 0 as *mut _,
-    ptc_waiters_last: 0 as *mut _,
-    ptc_mutex: 0 as *mut _,
-    ptc_private: 0 as *mut _,
+    ptc_waiters_first: ptr::null_mut(),
+    ptc_waiters_last: ptr::null_mut(),
+    ptc_mutex: ptr::null_mut(),
+    ptc_private: ptr::null_mut(),
 };
 pub const PTHREAD_RWLOCK_INITIALIZER: pthread_rwlock_t = pthread_rwlock_t {
     ptr_magic: 0x99990009,
     ptr_interlock: 0,
-    ptr_rblocked_first: 0 as *mut _,
-    ptr_rblocked_last: 0 as *mut _,
-    ptr_wblocked_first: 0 as *mut _,
-    ptr_wblocked_last: 0 as *mut _,
+    ptr_rblocked_first: ptr::null_mut(),
+    ptr_rblocked_last: ptr::null_mut(),
+    ptr_wblocked_first: ptr::null_mut(),
+    ptr_wblocked_last: ptr::null_mut(),
     ptr_nreaders: 0,
     ptr_owner: 0,
-    ptr_private: 0 as *mut _,
+    ptr_private: ptr::null_mut(),
 };
 pub const PTHREAD_MUTEX_NORMAL: c_int = 0;
 pub const PTHREAD_MUTEX_ERRORCHECK: c_int = 1;
@@ -1825,7 +1825,7 @@ f! {
         let next = cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize) + _ALIGN(size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
             (cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         }
@@ -2234,7 +2234,7 @@ extern "C" {
     pub fn _lwp_park(
         clock: crate::clockid_t,
         flags: c_int,
-        ts: *const crate::timespec,
+        ts: *mut crate::timespec,
         unpark: crate::lwpid_t,
         hint: *const c_void,
         unparkhint: *mut c_void,

@@ -742,6 +742,15 @@ pub const FILENAME_MAX: c_uint = 4096;
 pub const FOPEN_MAX: c_uint = 20;
 pub const POSIX_FADV_DONTNEED: c_int = 4;
 pub const POSIX_FADV_NOREUSE: c_int = 5;
+pub const POSIX_SPAWN_RESETIDS: c_short = 1;
+pub const POSIX_SPAWN_SETPGROUP: c_short = 2;
+pub const POSIX_SPAWN_SETSIGDEF: c_short = 4;
+pub const POSIX_SPAWN_SETSIGMASK: c_short = 8;
+pub const POSIX_SPAWN_SETSCHEDPARAM: c_short = 16;
+pub const POSIX_SPAWN_SETSCHEDULER: c_short = 32;
+pub const POSIX_SPAWN_USEVFORK: c_short = 64;
+pub const POSIX_SPAWN_SETSID: c_short = 128;
+pub const POSIX_SPAWN_CLOEXEC_DEFAULT: c_short = 256;
 pub const L_tmpnam: c_uint = 4096;
 pub const TMP_MAX: c_uint = 308915776;
 pub const _PC_LINK_MAX: c_int = 1;
@@ -2613,6 +2622,16 @@ pub const FUTEX_PRIVATE_FLAG: c_int = 128;
 pub const FUTEX_CLOCK_REALTIME: c_int = 256;
 pub const FUTEX_CMD_MASK: c_int = !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
 
+pub const FUTEX2_SIZE_U8: c_int = 0x00;
+pub const FUTEX2_SIZE_U16: c_int = 0x01;
+pub const FUTEX2_SIZE_U32: c_int = 0x02;
+pub const FUTEX2_SIZE_U64: c_int = 0x03;
+pub const FUTEX2_NUMA: c_int = 0x04;
+pub const FUTEX2_PRIVATE: c_int = FUTEX_PRIVATE_FLAG;
+pub const FUTEX2_SIZE_MASK: c_int = 0x03;
+pub const FUTEX_32: c_int = FUTEX2_SIZE_U32;
+pub const FUTEX_WAITV_MAX: c_int = 128;
+
 // linux/errqueue.h
 pub const SO_EE_ORIGIN_NONE: u8 = 0;
 pub const SO_EE_ORIGIN_LOCAL: u8 = 1;
@@ -3123,7 +3142,6 @@ pub const KERN_PROF: c_int = 6;
 pub const KERN_NODENAME: c_int = 7;
 pub const KERN_DOMAINNAME: c_int = 8;
 pub const KERN_PANIC: c_int = 15;
-pub const KERN_REALROOTDEV: c_int = 16;
 pub const KERN_SPARC_REBOOT: c_int = 21;
 pub const KERN_CTLALTDEL: c_int = 22;
 pub const KERN_PRINTK: c_int = 23;
@@ -3193,7 +3211,6 @@ pub const VM_SWAPPINESS: c_int = 19;
 pub const VM_LOWMEM_RESERVE_RATIO: c_int = 20;
 pub const VM_MIN_FREE_KBYTES: c_int = 21;
 pub const VM_MAX_MAP_COUNT: c_int = 22;
-pub const VM_LAPTOP_MODE: c_int = 23;
 pub const VM_BLOCK_DUMP: c_int = 24;
 pub const VM_HUGETLB_GROUP: c_int = 25;
 pub const VM_VFS_CACHE_PRESSURE: c_int = 26;
@@ -3322,9 +3339,9 @@ f! {
         let next = (cmsg as usize + super::CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr;
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if (next.offset(1)) as usize > max {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
-            next as *mut cmsghdr
+            next.cast()
         }
     }
 
@@ -3335,9 +3352,7 @@ f! {
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
-        for slot in cpuset.__bits.iter_mut() {
-            *slot = 0;
-        }
+        cpuset.__bits.fill(0);
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
@@ -3403,6 +3418,9 @@ safe_f! {
 }
 
 extern "C" {
+    pub fn setpwent();
+    pub fn endpwent();
+    pub fn getpwent() -> *mut passwd;
     pub fn setgrent();
     pub fn endgrent();
     pub fn getgrent() -> *mut crate::group;
@@ -3532,6 +3550,20 @@ extern "C" {
         flags: c_int,
         new_value: *const itimerspec,
         old_value: *mut itimerspec,
+    ) -> c_int;
+    pub fn timer_create(
+        clockid: crate::clockid_t,
+        sevp: *mut crate::sigevent,
+        timerid: *mut crate::timer_t,
+    ) -> c_int;
+    pub fn timer_delete(timerid: crate::timer_t) -> c_int;
+    pub fn timer_getoverrun(timerid: crate::timer_t) -> c_int;
+    pub fn timer_gettime(timerid: crate::timer_t, curr_value: *mut crate::itimerspec) -> c_int;
+    pub fn timer_settime(
+        timerid: crate::timer_t,
+        flags: c_int,
+        new_value: *const crate::itimerspec,
+        old_value: *mut crate::itimerspec,
     ) -> c_int;
     pub fn syscall(num: c_long, ...) -> c_long;
     pub fn sched_getaffinity(
@@ -3788,7 +3820,7 @@ impl siginfo_t {
             _si_code: c_int,
             si_addr: *mut c_void,
         }
-        (*(self as *const siginfo_t as *const siginfo_sigfault)).si_addr
+        (*(self as *const siginfo_t).cast::<siginfo_sigfault>()).si_addr
     }
 
     pub unsafe fn si_value(&self) -> crate::sigval {
@@ -3801,13 +3833,13 @@ impl siginfo_t {
             _si_overrun: c_int,
             si_sigval: crate::sigval,
         }
-        (*(self as *const siginfo_t as *const siginfo_timer)).si_sigval
+        (*(self as *const siginfo_t).cast::<siginfo_timer>()).si_sigval
     }
 }
 
 impl siginfo_t {
     unsafe fn sifields(&self) -> &sifields {
-        &(*(self as *const siginfo_t as *const siginfo_f)).sifields
+        &(*(self as *const siginfo_t).cast::<siginfo_f>()).sifields
     }
 
     pub unsafe fn si_pid(&self) -> crate::pid_t {

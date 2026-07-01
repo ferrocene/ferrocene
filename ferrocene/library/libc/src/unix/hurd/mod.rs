@@ -3336,19 +3336,19 @@ pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
 };
 pub const PTHREAD_COND_INITIALIZER: pthread_cond_t = pthread_cond_t {
     __lock: __PTHREAD_SPIN_LOCK_INITIALIZER,
-    __queue: 0i64 as *mut __pthread,
-    __attr: 0i64 as *mut __pthread_condattr,
+    __queue: ptr::null_mut(),
+    __attr: ptr::null_mut(),
     __wrefs: 0,
-    __data: 0i64 as *mut c_void,
+    __data: ptr::null_mut(),
 };
 pub const PTHREAD_RWLOCK_INITIALIZER: pthread_rwlock_t = pthread_rwlock_t {
     __held: __PTHREAD_SPIN_LOCK_INITIALIZER,
     __lock: __PTHREAD_SPIN_LOCK_INITIALIZER,
     __readers: 0,
-    __readerqueue: 0i64 as *mut __pthread,
-    __writerqueue: 0i64 as *mut __pthread,
-    __attr: 0i64 as *mut __pthread_rwlockattr,
-    __data: 0i64 as *mut c_void,
+    __readerqueue: ptr::null_mut(),
+    __writerqueue: ptr::null_mut(),
+    __attr: ptr::null_mut(),
+    __data: ptr::null_mut(),
 };
 pub const PTHREAD_STACK_MIN: size_t = 0;
 
@@ -3363,9 +3363,9 @@ const fn CMSG_ALIGN(len: usize) -> usize {
 f! {
     pub fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
         if (*mhdr).msg_controllen as usize >= size_of::<cmsghdr>() {
-            (*mhdr).msg_control.cast::<cmsghdr>()
+            (*mhdr).msg_control.cast()
         } else {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         }
     }
 
@@ -3383,16 +3383,16 @@ f! {
 
     pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
         if ((*cmsg).cmsg_len as usize) < size_of::<cmsghdr>() {
-            return core::ptr::null_mut::<cmsghdr>();
+            return ptr::null_mut();
         }
         let next = (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr;
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if (next.offset(1)) as usize > max
             || next as usize + CMSG_ALIGN((*next).cmsg_len as usize) > max
         {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
-            next.cast::<cmsghdr>()
+            next.cast()
         }
     }
 
@@ -3403,9 +3403,7 @@ f! {
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
-        for slot in cpuset.bits.iter_mut() {
-            *slot = 0;
-        }
+        cpuset.bits.fill(0);
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
@@ -3472,9 +3470,7 @@ f! {
     }
 
     pub fn FD_ZERO(set: *mut fd_set) -> () {
-        for slot in (*set).fds_bits.iter_mut() {
-            *slot = 0;
-        }
+        (*set).fds_bits.fill(0);
     }
 }
 

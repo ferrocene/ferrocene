@@ -12,7 +12,8 @@
 #![deny(ferrocene::unvalidated)]
 #![feature(try_trait_v2)]
 
-use core::{convert::Infallible, ops::*};
+use core::convert::Infallible;
+use core::ops::*;
 
 #[derive(Copy, Clone)]
 struct Unvalidated;

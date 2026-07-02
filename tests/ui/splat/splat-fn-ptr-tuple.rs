@@ -10,6 +10,9 @@
 //@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""
 //@ normalize-stderr: ".*--> .*/splat-fn-ptr-tuple.rs:\d{1,}:\d{1,}.*\n" -> ""
 
+// Ferrocene addition
+//@ normalize-stderr: "appreciate a bug report: .*" -> "appreciate a bug report"
+
 //! Test using `#[splat]` on tuple arguments of simple functions.
 //! Currently ICEs, but if we fix it, we'll want to know and update this test to pass.
 

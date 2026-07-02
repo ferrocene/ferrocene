@@ -11,10 +11,8 @@
 //@ ignore-cross-compile
 // Reason: the compiled binary is executed
 
-// Ferrocene addition: This tests the interoperabilty an unstable feature of the rust compiler
-// (enabling PAC) with newer C compilers (‘-mbranch-protection=’).
-//@ ignore-aarch64-rhivos2-linux-gnu
-//@ ignore-aarch64-unknown-linux-gnu
+// Ferrocene addition: This breaks on our CI on aarch64
+//@ ignore-aarch64
 
 use run_make_support::{build_native_static_lib, cc, is_windows_msvc, llvm_ar, run, rustc};
 

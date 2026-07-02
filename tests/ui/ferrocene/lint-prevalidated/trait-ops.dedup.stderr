@@ -32,32 +32,23 @@ LL |     x += x;
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:88:5
    |
-LL |         | Sub => type Output; fn sub(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Sub>::sub` is unvalidated
+LL |         | BitAnd => type Output; fn bitand(self, Self) -> Self;
+   |                                     ------ `<Unvalidated as core::ops::BitAnd>::bitand` is unvalidated
 ...
-LL |     x - x;
+LL |     x & x;
    |     ^^^^^
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:89:5
    |
-LL |         | Mul => type Output; fn mul(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Mul>::mul` is unvalidated
+LL |         | BitAndAssign => fn bitand_assign(&mut self, Self);
+   |                              ------------- `<Unvalidated as core::ops::BitAndAssign>::bitand_assign` is unvalidated
 ...
-LL |     x * x;
-   |     ^^^^^
+LL |     x &= x;
+   |     ^^^^^^
 
 error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:90:5
-   |
-LL |         | Div => type Output; fn div(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Div>::div` is unvalidated
-...
-LL |     x / x;
-   |     ^^^^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:91:5
    |
 LL |         | BitOr => type Output; fn bitor(self, Self) -> Self;
    |                                    ----- `<Unvalidated as core::ops::BitOr>::bitor` is unvalidated
@@ -66,16 +57,16 @@ LL |     x | x;
    |     ^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:92:5
+  --> $DIR/trait-ops.rs:91:5
    |
-LL |         | BitAnd => type Output; fn bitand(self, Self) -> Self;
-   |                                     ------ `<Unvalidated as core::ops::BitAnd>::bitand` is unvalidated
+LL |         | BitOrAssign => fn bitor_assign(&mut self, Self);
+   |                             ------------ `<Unvalidated as core::ops::BitOrAssign>::bitor_assign` is unvalidated
 ...
-LL |     x & x;
-   |     ^^^^^
+LL |     x |= x;
+   |     ^^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:93:5
+  --> $DIR/trait-ops.rs:92:5
    |
 LL |         | BitXor => type Output; fn bitxor(self, Self) -> Self;
    |                                     ------ `<Unvalidated as core::ops::BitXor>::bitxor` is unvalidated
@@ -84,61 +75,16 @@ LL |     x ^ x;
    |     ^^^^^
 
 error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:93:5
+   |
+LL |         | BitXorAssign => fn bitxor_assign(&mut self, Self);
+   |                              ------------- `<Unvalidated as core::ops::BitXorAssign>::bitxor_assign` is unvalidated
+...
+LL |     x ^= x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:94:5
-   |
-LL |         | Rem => type Output; fn rem(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Rem>::rem` is unvalidated
-...
-LL |     x % x;
-   |     ^^^^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:95:5
-   |
-LL |         | Shl => type Output; fn shl(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Shl>::shl` is unvalidated
-...
-LL |     x << x;
-   |     ^^^^^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:96:5
-   |
-LL |         | Shr => type Output; fn shr(self, Self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Shr>::shr` is unvalidated
-...
-LL |     x >> x;
-   |     ^^^^^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:97:5
-   |
-LL |         | Neg => type Output; fn neg(self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Neg>::neg` is unvalidated
-...
-LL |     -x;
-   |     ^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:98:5
-   |
-LL |         | Not => type Output; fn not(self) -> Self;
-   |                                  --- `<Unvalidated as core::ops::Not>::not` is unvalidated
-...
-LL |     !x;
-   |     ^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:99:5
-   |
-LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
-   |                           -- `<Unvalidated as PartialEq>::eq` is unvalidated
-...
-LL |     x == x;
-   |     ^^^^^^
-
-error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:100:5
    |
 LL |         | Deref => type Target; fn deref(&self) -> &Self;
    |                                    ----- `<Unvalidated as core::ops::Deref>::deref` is unvalidated
@@ -147,7 +93,7 @@ LL |     *x;
    |     ^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:101:5
+  --> $DIR/trait-ops.rs:95:5
    |
 LL |         | DerefMut => fn deref_mut(&mut self) -> &mut Self;
    |                          --------- `<Unvalidated as core::ops::DerefMut>::deref_mut` is unvalidated
@@ -156,7 +102,88 @@ LL |     *x = Unvalidated;
    |     ^^
 
 error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:96:5
+   |
+LL |         | Div => type Output; fn div(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Div>::div` is unvalidated
+...
+LL |     x / x;
+   |     ^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:97:5
+   |
+LL |         | DivAssign => fn div_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::DivAssign>::div_assign` is unvalidated
+...
+LL |     x /= x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:98:6
+   |
+LL |         | Index<Idx> => type Output; fn index(&self, Idx) -> &Self;
+   |                                         ----- `<Unvalidated as core::ops::Index<i32>>::index` is unvalidated
+...
+LL |     x[0];
+   |      ^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:99:6
+   |
+LL |         | IndexMut<Idx> => fn index_mut(&mut self, Idx) -> &mut Self;
+   |                               --------- `<Unvalidated as core::ops::IndexMut<i32>>::index_mut` is unvalidated
+...
+LL |     x[0] = Unvalidated;
+   |      ^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:100:5
+   |
+LL |         | Mul => type Output; fn mul(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Mul>::mul` is unvalidated
+...
+LL |     x * x;
+   |     ^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:101:5
+   |
+LL |         | MulAssign => fn mul_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::MulAssign>::mul_assign` is unvalidated
+...
+LL |     x *= x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:102:5
+   |
+LL |         | Neg => type Output; fn neg(self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Neg>::neg` is unvalidated
+...
+LL |     -x;
+   |     ^^
+
+error: validated function calls an unvalidated method
   --> $DIR/trait-ops.rs:103:5
+   |
+LL |         | Not => type Output; fn not(self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Not>::not` is unvalidated
+...
+LL |     !x;
+   |     ^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:104:5
+   |
+LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
+   |                           -- `<Unvalidated as PartialEq>::eq` is unvalidated
+...
+LL |     x == x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:105:5
    |
 LL |         | PartialEq => fn eq(&self, &Self) -> bool; fn ne(&self, &Self) -> bool;
    |                                                        -- `<Unvalidated as PartialEq>::ne` is unvalidated
@@ -165,7 +192,79 @@ LL |     x != x;
    |     ^^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/trait-ops.rs:130:5
+  --> $DIR/trait-ops.rs:106:5
+   |
+LL |         | Rem => type Output; fn rem(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Rem>::rem` is unvalidated
+...
+LL |     x % x;
+   |     ^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:107:5
+   |
+LL |         | RemAssign => fn rem_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::RemAssign>::rem_assign` is unvalidated
+...
+LL |     x %= x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:108:5
+   |
+LL |         | Shl => type Output; fn shl(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Shl>::shl` is unvalidated
+...
+LL |     x << x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:109:5
+   |
+LL |         | ShlAssign => fn shl_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::ShlAssign>::shl_assign` is unvalidated
+...
+LL |     x <<= x;
+   |     ^^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:110:5
+   |
+LL |         | Shr => type Output; fn shr(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Shr>::shr` is unvalidated
+...
+LL |     x >> x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:111:5
+   |
+LL |         | ShrAssign => fn shr_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::ShrAssign>::shr_assign` is unvalidated
+...
+LL |     x >>= x;
+   |     ^^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:112:5
+   |
+LL |         | Sub => type Output; fn sub(self, Self) -> Self;
+   |                                  --- `<Unvalidated as core::ops::Sub>::sub` is unvalidated
+...
+LL |     x - x;
+   |     ^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:113:5
+   |
+LL |         | SubAssign => fn sub_assign(&mut self, Self);
+   |                           ---------- `<Unvalidated as core::ops::SubAssign>::sub_assign` is unvalidated
+...
+LL |     x -= x;
+   |     ^^^^^^
+
+error: validated function calls an unvalidated method
+  --> $DIR/trait-ops.rs:140:5
    |
 LL |     fn branch(self) -> ControlFlow<Option<Infallible>> {
    |        ------ `<Unvalidated as core::ops::Try>::branch` is unvalidated
@@ -174,7 +273,7 @@ LL |     x?;
    |     ^^
    |
 note: `ops2` is validated
-  --> $DIR/trait-ops.rs:128:4
+  --> $DIR/trait-ops.rs:138:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -182,7 +281,7 @@ LL | fn ops2() -> Unvalidated {
    |    ^^^^
 
 error: validated function calls an unvalidated associated function
-  --> $DIR/trait-ops.rs:130:5
+  --> $DIR/trait-ops.rs:140:5
    |
 LL |     fn from_residual(_: Option<Infallible>) -> Self {
    |        ------------- `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
@@ -190,5 +289,5 @@ LL |     fn from_residual(_: Option<Infallible>) -> Self {
 LL |     x?;
    |     ^^
 
-error: aborting due to 19 previous errors
+error: aborting due to 30 previous errors
 

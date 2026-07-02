@@ -85,22 +85,32 @@ fn ops() {
     let mut x = Unvalidated;
     x + x; //~ ERROR unvalidated
     x += x; //~ ERROR unvalidated
-    x - x; //~ ERROR unvalidated
-    x * x; //~ ERROR unvalidated
-    x / x; //~ ERROR unvalidated
-    x | x; //~ ERROR unvalidated
     x & x; //~ ERROR unvalidated
+    x &= x; //~ ERROR unvalidated
+    x | x; //~ ERROR unvalidated
+    x |= x; //~ ERROR unvalidated
     x ^ x; //~ ERROR unvalidated
-    x % x; //~ ERROR unvalidated
-    x << x; //~ ERROR unvalidated
-    x >> x; //~ ERROR unvalidated
+    x ^= x; //~ ERROR unvalidated
+    *x; //~ ERROR unvalidated
+    *x = Unvalidated; //~ ERROR unvalidated
+    x / x; //~ ERROR unvalidated
+    x /= x; //~ ERROR unvalidated
+    x[0]; //~ ERROR unvalidated
+    x[0] = Unvalidated; //~ ERROR unvalidated
+    x * x; //~ ERROR unvalidated
+    x *= x; //~ ERROR unvalidated
     -x; //~ ERROR unvalidated
     !x; //~ ERROR unvalidated
     x == x; //~ ERROR unvalidated
-    *x; //~ ERROR unvalidated
-    *x = Unvalidated; //~ ERROR unvalidated
-
     x != x; //~ ERROR unvalidated
+    x % x; //~ ERROR unvalidated
+    x %= x; //~ ERROR unvalidated
+    x << x; //~ ERROR unvalidated
+    x <<= x; //~ ERROR unvalidated
+    x >> x; //~ ERROR unvalidated
+    x >>= x; //~ ERROR unvalidated
+    x - x; //~ ERROR unvalidated
+    x -= x; //~ ERROR unvalidated
 
     // A `x..x` range does not actually call `start_bound`, so we can't test it here.
 }

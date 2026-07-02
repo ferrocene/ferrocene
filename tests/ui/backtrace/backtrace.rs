@@ -4,7 +4,6 @@
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
 //@ ignore-fuchsia Backtraces not symbolized
-//@ ignore-ferrocene.facade - backtraces not supported on the target
 //@ compile-flags:-g
 //@ compile-flags:-Cstrip=none
 

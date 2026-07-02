@@ -15,7 +15,6 @@
 //@ ignore-tvos needs the `.dSYM` files to be moved to the device
 //@ ignore-watchos needs the `.dSYM` files to be moved to the device
 //@ ignore-visionos needs the `.dSYM` files to be moved to the device
-//@ ignore-ferrocene.facade - backtraces not supported on the target
 
 // FIXME(#117097): backtrace (possibly unwinding mechanism) seems to be different on at least
 // `i686-mingw` (32-bit windows-gnu)? cc #128911.

@@ -3,7 +3,6 @@
 //@ needs-subprocess
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-fuchsia Backtraces not symbolized
-//@ ignore-ferrocene.facade - backtraces not supported on the target
 //@ compile-flags:-g
 //@ compile-flags:-Cstrip=none
 

@@ -536,10 +536,10 @@ jobs:
 
   aarch64-linux-rhivos2-test-container:
     executor:
-      ferrocene/facade_testserver:
-        image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-        test_image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
-        target:  aarch64-rhivos2-linux-gnu
+      name: ferrocene/facade_testserver
+      test_image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      testserver_image: 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+      target:  aarch64-rhivos2-linux-gnu
     parameters:
       tasks:
         type: string

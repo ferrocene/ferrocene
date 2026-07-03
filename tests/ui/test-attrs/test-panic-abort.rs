@@ -6,8 +6,8 @@
 //@ exec-env:RUST_BACKTRACE=0
 //@ normalize-stdout: "finished in \d+\.\d+s" -> "finished in $$TIME"
 
-// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
-//@ ignore-qemu
+// Ferrocene addition: Remove extra output line added by qemu
+//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
 
 //@ needs-subprocess
 

@@ -5,6 +5,10 @@
 
 set -xe
 
+# print our env
+
+env
+
 EMULATOR=""
 if $EMULATED; then EMULATOR=/opt/qemu-ferrocene/${QEMU_VERSION}/bin/${QEMU_ARCH}; fi
 ${EMULATOR} \

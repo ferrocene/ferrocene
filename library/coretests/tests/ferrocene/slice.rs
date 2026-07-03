@@ -116,7 +116,12 @@ fn slice_align_to_mut() {
     let mut large_buffer = vec![0_u8; 256 * 2];
     let arr = &mut large_buffer[1..2];
     // Check we're hitting target line in the function
-    assert!(arr.as_ptr().align_offset(align_of::<Foo>()) > arr.len(), "{} > {}", arr.as_ptr().align_offset(align_of::<Foo>()), arr.len());
+    assert!(
+        arr.as_ptr().align_offset(align_of::<Foo>()) > arr.len(),
+        "{} > {}",
+        arr.as_ptr().align_offset(align_of::<Foo>()),
+        arr.len()
+    );
     assert_eq!(
         unsafe { arr.align_to_mut::<Foo>() },
         ([0u8; 1].as_mut_slice(), [].as_mut_slice(), [].as_mut_slice()),

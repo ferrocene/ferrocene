@@ -1007,7 +1007,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::CompilerTechnicalReport,
                 crate::ferrocene::doc::CoreTechnicalReport,
                 crate::ferrocene::doc::code_coverage::AllCoverageReports,
-                crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs,
                 // QMS Document
                 crate::ferrocene::doc::InternalProcedures,
             ),
@@ -1803,16 +1802,6 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
 
     pub fn exec_ctx(&self) -> &ExecutionContext {
         &self.config.exec_ctx
-    }
-
-    /// When to rebuild LLVM. Currently includes the LLVM commit hash and the configuration from
-    /// bootstrap.toml.
-    pub(crate) fn llvm_cache_key(&self) -> String {
-        format!(
-            "sha={sha}\nkey={key}",
-            sha = self.in_tree_llvm_info.sha().unwrap_or_default(),
-            key = self.config.llvm_cache_key,
-        )
     }
 }
 

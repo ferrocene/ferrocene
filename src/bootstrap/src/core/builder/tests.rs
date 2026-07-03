@@ -1187,7 +1187,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         "
         );
@@ -1336,7 +1335,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         ");
     }
@@ -1422,7 +1420,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
         "
@@ -1511,7 +1508,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         "
         );
@@ -1618,7 +1614,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         [build] rustc 2 <host> -> std 2 <target1>
         "
@@ -1878,7 +1873,6 @@ mod snapshot {
         [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
-        [doc] rustc 2 <host> -> std 2 <host> crates=[core]
         [build] rustc 2 <host> -> std 2 <host>
         ");
     }
@@ -3205,7 +3199,6 @@ mod snapshot {
         [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Compiletest 2 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
-        [doc] rustc 2 <x86_64-unknown-linux-gnu> -> std 2 <x86_64-unknown-linux-gnu> crates=[core]
         ");
     }
 

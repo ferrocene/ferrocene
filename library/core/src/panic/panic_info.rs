@@ -14,7 +14,7 @@ use crate::panic::Location;
 #[ferrocene::prevalidated]
 pub struct PanicInfo<'a> {
     message: &'a fmt::Arguments<'a>,
-    location: &'a Location<'a>,
+    location: &'static Location<'static>,
     can_unwind: bool,
     force_no_backtrace: bool,
 }
@@ -36,7 +36,7 @@ impl<'a> PanicInfo<'a> {
     #[ferrocene::prevalidated]
     pub(crate) fn new(
         message: &'a fmt::Arguments<'a>,
-        location: &'a Location<'a>,
+        location: &'static Location<'static>,
         can_unwind: bool,
         force_no_backtrace: bool,
     ) -> Self {
@@ -90,13 +90,13 @@ impl<'a> PanicInfo<'a> {
     ///
     /// panic!("Normal panic");
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[stable(feature = "panic_hooks", since = "1.10.0")]
-    #[ferrocene::prevalidated]
-    pub fn location(&self) -> Option<&Location<'_>> {
+    pub fn location(&self) -> Option<&'static Location<'static>> {
         // NOTE: If this is changed to sometimes return None,
         // deal with that case in std::panicking::default_hook and core::panicking::panic_fmt.
-        Some(&self.location)
+        Some(self.location)
     }
 
     /// Returns the payload associated with the panic.

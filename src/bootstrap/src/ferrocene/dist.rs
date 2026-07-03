@@ -16,7 +16,6 @@ use crate::core::build_steps::doc::Rustc;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
-use crate::ferrocene::doc::certified_api_docs::CertifiedApiDocs;
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
@@ -54,15 +53,14 @@ impl Step for Docs {
         builder.ensure(Rustc::for_stage(builder, builder.top_stage, self.target));
         let compiler_doc_out = builder.compiler_doc_out(self.target);
 
-        // Build the documentation for certified crates
+        // Build coverage reports if relevant
         //
-        // NOTE: must be called before .add_directory, since it places the
-        // certified API docs in the doc_out
+        // NOTE: this must be called before .add_directory, since the coverage
+        // reports are placed under `doc_out`
         if self.target.has_certified_subset() {
-            builder.ensure(CertifiedApiDocs { target: self.target });
             builder.ensure(AllCoverageReports { target: self.target });
         } else {
-            builder.info(&format!("skipping Build certified-core-docs ({})", self.target));
+            builder.info(&format!("skipping Build ferrocene-coverage ({})", self.target));
         }
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");

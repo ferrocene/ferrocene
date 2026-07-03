@@ -79,9 +79,9 @@
                         <h3>Core library certification</h3>
                         <p>Phases and activities that describe the certification of a subset of the core library with the ASIL B level in accordance with ISO 26262 standard and the class SIL 2 in accordance with the IEC 61508 standard.</p>
                     </a>
-                    <a href="certification/api-docs/core/index.html">
-                        <h3>Certified core library API docs</h3>
-                        <p>The API documentation of certified subset of the core library.</p>
+                    <a href="#library-apis">
+                        <h3>Certified standard library API docs</h3>
+                        <p>Documentation for Rust's standard library, with annotations to indicate which functions are certified</p>
                     </a>
                     <a href="certification/core-technical-report.pdf" data-subset="signatures">
                         <h3>Certified core library Technical Report</h3>
@@ -113,15 +113,19 @@
                     </a>
                 </div>
             </section>
-            <section>
+            <section id="library-apis">
                 <h2>Library APIs</h2>
                 <p class="note">
                     Only a subset of libraries distributed with Ferrocene are pre-certified
-                    for safety-critical use. See <a href="#core-library-certification">Core library Certification Material</a>.
+                    for safety-critical use. The following documentation covers the entire Rust
+                    standard library, with pre-certified functions labelled accordingly.
                     <br />
                     Certification of the additional parts used is currently the obligation
                     of the user, for which Ferrous Systems provides support. The amount of
                     pre-certified APIs is expected to increase in future releases.
+                    <br />
+                    See <a href="#core-library-certification">Core library Certification Material</a>
+                    for more details.
                 </p>
                 <div class="docs">
                     <a href="core/index.html">

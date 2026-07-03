@@ -94,6 +94,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     ]),
 
     // Ferrocene-specific:
+    // NOTE: these are in a middle block to avoid conflicts when upstream adds more exclusions.
     //
     // The technical report is missing most of the time, as it's only included in stable releases.
     // This is fine though, because that section is hidden by the build system with `display: none`
@@ -103,6 +104,23 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     // the certified API docs.
     ("certification/api-docs/help.html", &["certification/api-docs/index.html"]),
     ("certification/api-docs/settings.html", &["certification/api-docs/index.html"]),
+
+    ("alloc/io/struct.IoSlice.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "alloc/io/slice::sort_by_key",
+        "alloc\\io\\slice::sort_by_key",
+        "#method.sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
+    ("alloc/io/struct.IoSliceMut.html", &[
+        "#method.to_ascii_uppercase",
+        "#method.to_ascii_lowercase",
+        "alloc/io/slice::sort_by_key",
+        "alloc\\io\\slice::sort_by_key",
+        "#method.sort_by_key",
+        "#method.sort_by_cached_key"
+    ]),
 ];
 
 #[rustfmt::skip]

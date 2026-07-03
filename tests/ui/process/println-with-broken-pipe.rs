@@ -14,6 +14,9 @@
 //@ normalize-stderr: "/rustc(?:-dev)?/[a-z0-9.]+/" -> ""
 //@ compile-flags: -Zon-broken-pipe=error
 
+// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
+//@ ignore-qemu
+
 // Test what the error message looks like when `println!()` panics because of
 // `std::io::ErrorKind::BrokenPipe`
 

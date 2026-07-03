@@ -885,7 +885,8 @@ impl Config {
 
         let unsupported_target = self.target_cfg().env == "sgx"
             || matches!(self.target_cfg().arch.as_str(), "wasm32" | "wasm64")
-            || self.target_cfg().os == "emscripten";
+            || self.target_cfg().os == "emscripten"
+            || self.target.contains("ferrocene.facade");
         !unsupported_target
     }
 

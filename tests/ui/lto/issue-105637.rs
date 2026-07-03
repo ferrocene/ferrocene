@@ -13,6 +13,9 @@
 //@ run-fail
 //@ check-run-results
 
+// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
+//@ ignore-qemu
+
 extern crate thinlto_dylib;
 
 use std::panic;

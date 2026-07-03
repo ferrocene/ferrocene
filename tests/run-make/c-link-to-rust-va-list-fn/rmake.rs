@@ -7,6 +7,11 @@
 //@ ignore-android: FIXME(#142855)
 //@ ignore-sgx: (x86 machine code cannot be directly executed)
 
+// Ferrocene addition: Various compile and link errors on these platforms:
+// missing <assert.h>, missing libraries, and breakage when not using -fPIC
+//@ ignore-ferrocene.facade
+//@ ignore-nto
+
 use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
 
 fn main() {

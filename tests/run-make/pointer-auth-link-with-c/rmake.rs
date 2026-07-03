@@ -11,6 +11,9 @@
 //@ ignore-cross-compile
 // Reason: the compiled binary is executed
 
+// Ferrocene addition: This breaks on our CI on aarch64
+//@ ignore-aarch64
+
 use run_make_support::{build_native_static_lib, cc, is_windows_msvc, llvm_ar, run, rustc};
 
 fn main() {

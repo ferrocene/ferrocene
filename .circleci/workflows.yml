@@ -390,7 +390,7 @@ jobs:
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -405,7 +405,7 @@ jobs:
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
         # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>
@@ -422,39 +422,39 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
-  # x86_64-qnx8-generic-test-vm:
-  #   executor: linux-vm
-  #   parameters:
-  #     job:
-  #       type: string
-  #     test-variant:
-  #       type: string
-  #     resource-class:
-  #       type: string
-  #     extra-args:
-  #       type: string
-  #       default: ""
-  #   resource_class: << parameters.resource-class >>
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: x86_64-pc-nto-qnx800
-  #     SCRIPT: |
-  #       set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-  #   steps:
-  #     - aws-cli/install:
-  #         version: << pipeline.parameters.awscli-version >>
-  #         override_installed: true
-  #     - aws-oidc-auth
-  #     - ferrocene-checkout
-  #     - setup-uv
-  #     - setup-qnx8-toolchain:
-  #         source-env-script: false
-  #     - ferrocene-job-test-vm:
-  #         checkout-source: false
-  #         docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #         run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-  #         restore-from-job: x86_64-linux-build
-  #         emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+  x86_64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      tasks:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -580,7 +580,7 @@ jobs:
   aarch64-linux-rhivos2-test-container:
     executor: docker-aarch64-ubuntu-20-rhivos2-test-server
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -594,7 +594,7 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         env | grep TEST_DEVICE_ADDR
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - ferrocene-job-test-container:
           restore-from-job: aarch64-linux-build
@@ -878,7 +878,7 @@ jobs:
         type: string
       target:
         type: string
-      job:
+      tasks:
         type: string
       resource-class:
         type: string
@@ -887,7 +887,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.target >>
       SCRIPT: |
-        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
+        sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -922,7 +922,7 @@ jobs:
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
     parameters:
-      job:
+      tasks:
         type: string
       test-variant:
         type: string
@@ -936,7 +936,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -953,39 +953,39 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
-  # aarch64-qnx8-generic-test-vm:
-  #   executor: linux-vm
-  #   parameters:
-  #     job:
-  #       type: string
-  #     test-variant:
-  #       type: string
-  #     resource-class:
-  #       type: string
-  #     extra-args:
-  #       type: string
-  #       default: ""
-  #   resource_class: << parameters.resource-class >>
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
-  #     SCRIPT: |
-  #       set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-  #   steps:
-  #     - aws-oidc-auth
-  #     - ferrocene-checkout
-  #     - setup-uv
-  #     - aws-cli/install:
-  #         version: << pipeline.parameters.awscli-version >>
-  #         override_installed: true
-  #     - setup-qnx8-toolchain:
-  #         source-env-script: false
-  #     - ferrocene-job-test-vm:
-  #         checkout-source: false
-  #         docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #         run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-  #         restore-from-job: x86_64-linux-build
-  #         emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
+  aarch64-qnx8-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      tasks:
+        type: string
+      test-variant:
+        type: string
+      resource-class:
+        type: string
+      extra-args:
+        type: string
+        default: ""
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800
+      SCRIPT: |
+        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-uv
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - setup-qnx8-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
 
   # Docker jobs
 
@@ -1257,32 +1257,24 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-compiletest
-            # - x86_64-qnx8-test-library
-            # - x86_64-qnx8-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-compiletest
-            # - aarch64-qnx8-test-library
-            # - aarch64-qnx8-test-compiletest
-            - aarch64-none-test-library
-            - aarch64-none-test-compiletest
-            - aarch64r82-none-test-library
-            - aarch64r82-none-test-compiletest
-            - aarch64v8r-none-test-library
-            - aarch64v8r-none-test-compiletest
-            - armv7r-eabihf-test-compiletest
-            - armv7r-eabihf-test-library
-            - thumbv7em-eabihf-test-library
-            - thumbv7em-eabihf-test-compiletest
-            - thumbv7em-eabi-test-library
-            - thumbv7em-eabi-test-compiletest
+            - x86_64-qnx-test-library-compiletest
+            # - x86_64-qnx8-test-library-compiletest
+            - aarch64-qnx-test-library-compiletest
+            # - aarch64-qnx8-test-library-compiletest
+            - aarch64-none-test-library-compiletest
+            - aarch64-none-test-target-cpu-library-compiletest
+            - aarch64r82-none-test-library-compiletest
+            - aarch64v8r-none-test-library-compiletest
+            - armv7r-eabihf-test-library-compiletest
+            - thumbv7em-eabihf-test-library-compiletest
+            - thumbv7em-eabihf-test-target-cpu-library-compiletest
+            - thumbv7em-eabi-test-library-compiletest
+            - thumbv7em-eabi-test-target-cpu-library-compiletest
             - aarch64-linux-test
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
             - aarch64-linux-library-coverage
-            - aarch64-linux-rhivos2-test-library
-            - aarch64-linux-rhivos2-compiletest
+            - aarch64-linux-rhivos2-test-library-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -1334,79 +1326,41 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64-none-test-compiletest
+          name: aarch64-none-test-library-compiletest
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64-none-test-target-cpu-compiletest
+          name: aarch64-none-test-target-cpu-library-compiletest
           target: aarch64-unknown-ferrocene.facade
           test-variant: 2021-specific-cortex-a53
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64-none-test-library
-          target: aarch64-unknown-ferrocene.facade
-          test-variant: 2021-cortex-a53
-          qemu-arch: qemu-aarch64
-          job: test:library-nostd
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: aarch64-none-test-target-cpu-library
-          target: aarch64-unknown-ferrocene.facade
-          test-variant: 2021-specific-cortex-a53
-          qemu-arch: qemu-aarch64
-          job: test:library-nostd
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: aarch64r82-none-test-compiletest
+          name: aarch64r82-none-test-library-compiletest
           target: aarch64r82-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-      - facade-generic-test:
-          name: aarch64r82-none-test-library
-          target: aarch64r82-unknown-ferrocene.facade
-          test-variant: 2021-neoverse-v1
-          qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: aarch64v8r-none-test-compiletest
+          name: aarch64v8r-none-test-library-compiletest
           target: aarch64v8r-unknown-ferrocene.facade
           test-variant: 2021-neoverse-v1
           qemu-arch: qemu-aarch64
-          job: qnx:compiletest-no-only-hosts
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-      - facade-generic-test:
-          name: aarch64v8r-none-test-library
-          target: aarch64v8r-unknown-ferrocene.facade
-          test-variant: 2021-neoverse-v1
-          qemu-arch: qemu-aarch64
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
@@ -1430,8 +1384,8 @@ workflows:
       #       - aarch64-linux-dist
 
       - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-library
-          job: test:library
+          name: x86_64-qnx-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1439,18 +1393,9 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - x86_64-qnx-generic-test-vm:
-          name: x86_64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
-          test-variant: "2021"
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
       # - x86_64-qnx8-generic-test-vm:
-      #     name: x86_64-qnx8-test-library
-      #     job: test:library
+      #     name: x86_64-qnx8-test-library-compiletest
+      #     tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
       #     test-variant: "2021"
       #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
       #     resource-class: large # 4-core
@@ -1458,118 +1403,59 @@ workflows:
       #       - x86_64-linux-build
       #       - build-docker--ubuntu-24--x86_64
 
-      # - x86_64-qnx8-generic-test-vm:
-      #     name: x86_64-qnx8-test-compiletest
-      #     job: qnx:compiletest-no-only-hosts
-      #     test-variant: "2021"
-      #     resource-class: xlarge # 8-core
-      #     requires:
-      #       - x86_64-linux-build
-      #       - build-docker--ubuntu-24--x86_64
-
       - facade-generic-test:
-          name: armv7r-eabihf-test-library
+          name: armv7r-eabihf-test-library-compiletest
           target: armv7r-ferrocene.facade-eabihf
           test-variant: 2021-cortex-r5f
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabihf-test-library
+          name: thumbv7em-eabihf-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabi-test-library
+          name: thumbv7em-eabi-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabihf-test-target-cpu-library
+          name: thumbv7em-eabihf-test-target-cpu-library-compiletest
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
 
       - facade-generic-test:
-          name: thumbv7em-eabi-test-target-cpu-library
+          name: thumbv7em-eabi-test-target-cpu-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-specific-cortex-m4
           qemu-arch: qemu-arm
-          job: test:library-nostd
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: armv7r-eabihf-test-compiletest
-          target: armv7r-ferrocene.facade-eabihf
-          test-variant: 2021-cortex-r5f
-          qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: thumbv7em-eabihf-test-compiletest
-          target: thumbv7em-ferrocene.facade-eabihf
-          test-variant: 2021-cortex-m4
-          qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: thumbv7em-eabi-test-compiletest
-          target: thumbv7em-ferrocene.facade-eabi
-          test-variant: 2021-cortex-m4
-          qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: thumbv7em-eabihf-test-target-cpu-compiletest
-          target: thumbv7em-ferrocene.facade-eabihf
-          test-variant: 2021-specific-cortex-m4
-          qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-
-      - facade-generic-test:
-          name: thumbv7em-eabi-test-target-cpu-compiletest
-          target: thumbv7em-ferrocene.facade-eabi
-          test-variant: 2021-specific-cortex-m4
-          qemu-arch: qemu-arm
-          job: qnx:compiletest-no-only-hosts
-          resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
 
       - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-library
-          job: test:library
+          name: aarch64-qnx-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large # 4-core
@@ -1577,30 +1463,12 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
-          name: aarch64-qnx-test-compiletest
-          job: qnx:compiletest-no-only-hosts
-          test-variant: "2021"
-          resource-class: xlarge # 8-core
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
-
       # - aarch64-qnx8-generic-test-vm:
-      #     name: aarch64-qnx8-test-library
-      #     job: test:library
+      #     name: aarch64-qnx8-test-library-compiletest
+      #     tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
       #     test-variant: "2021"
       #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
       #     resource-class: large # 4-core
-      #     requires:
-      #       - x86_64-linux-build
-      #       - build-docker--ubuntu-24--x86_64
-
-      # - aarch64-qnx8-generic-test-vm:
-      #     name: aarch64-qnx8-test-compiletest
-      #     job: qnx:compiletest-no-only-hosts
-      #     test-variant: "2021"
-      #     resource-class: xlarge # 8-core
       #     requires:
       #       - x86_64-linux-build
       #       - build-docker--ubuntu-24--x86_64
@@ -1658,17 +1526,8 @@ workflows:
           requires:
             - aarch64-linux-build
       - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-rhivos2-test-library
-          job: test:library
-          resource-class: ferrocene/k8s-rhel-10-arm64-medium
-          test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-            - build-docker-rhivos2-test-server-aarch64
-      # notably, this job needs significantly more memory.
-      - aarch64-linux-rhivos2-test-container:
-          name: aarch64-linux-rhivos2-compiletest
-          job: qnx:compiletest-no-only-hosts
+          name: aarch64-linux-rhivos2-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           resource-class: ferrocene/k8s-rhel-10-arm64-medium
           test-variant: "2021"
           requires:

@@ -78,7 +78,7 @@ Rename ``ferrocene/doc/release-notes/src/next.rst`` to
 Backport this PR according to :ref:`handling-backports`. Then, on the
 ``release/1.NN`` branch, remove the ``:upcoming-release:`` from the version.
 
-Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch with the following content: 
+Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch with the following content:
 
 .. code-block::
 
@@ -110,7 +110,7 @@ Delivering the documentation package
 
 Wait for the nightly beta, or manually cut a beta release onto production. Over email,
 send the assessor direct links to the ``ferrocene-docs`` and ``ferrocene-docs-signatures``
-packages, as well as a *semantic diff* of what changed since the last release.  
+packages, as well as a *semantic diff* of what changed since the last release.
 
 .. _release-technical-reports:
 
@@ -181,3 +181,29 @@ After publishing the stable release, send a PR to the ``main`` branch to:
 
 * Remove all mentions of ``:upcoming:`YY.MM``` in the documentation, where
   ``YY.MM`` is the current version number.
+
+Identify any forward ports
+--------------------------
+
+In some cases, releases may have small pull requests of last minute changes
+which did not end up yet on the development branch.
+
+If these changes do not have a related pull request to `main` they are
+labelled `needs-forward-port`.
+
+Before preparing for a release, ensure any pull requests labelled
+`needs-forward-port` have been submitted to the `main` branch.
+
+Typically the process is go through each `needs-forward-port` tagged pull
+request and:
+
+* ``git cherry-pick`` the commits onto a branch
+* ``git commit --amend`` the last commit and add the appropriate trailer
+  like how our backport process works
+
+.. code-block::
+
+    Ferrocene-forwardport-of: {pr_number}
+    Ferrocene-forwardported-commits: {commits}
+
+Once done, submit a pull request directly mentioning the forward ported pull requests.

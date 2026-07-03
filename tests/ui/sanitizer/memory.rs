@@ -17,6 +17,10 @@
 // This test case intentionally limits the usage of the std,
 // since it will be linked with an uninstrumented version of it.
 
+// Ferrocene addition: Sanitizers are not a qualified compiler feature. Support on RHIVOS2 needs
+// investigation.
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 #![feature(core_intrinsics)]
 #![allow(invalid_value)]
 #![no_main]

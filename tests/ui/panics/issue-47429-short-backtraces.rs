@@ -22,7 +22,6 @@
 //@ ignore-android FIXME #17520
 //@ ignore-openbsd no support for libbacktrace without filename
 //@ ignore-fuchsia Backtraces not symbolized
-//@ ignore-ferrocene.facade no backtrace support
 //@ needs-subprocess
 
 fn main() {

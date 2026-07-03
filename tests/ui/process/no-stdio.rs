@@ -2,6 +2,9 @@
 //@ ignore-android
 //@ needs-subprocess
 
+// Ferrocene addition: QEMU user space emulation behaves differently when spawning processes fails
+//@ ignore-qemu
+
 #![feature(rustc_private)]
 
 #[cfg(unix)]

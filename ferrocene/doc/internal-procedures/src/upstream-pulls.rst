@@ -134,12 +134,6 @@ CI shows at what stage the failure happened and how it is affecting the build.
 
    Failure on CircleCi
 
-Ignored tests
-^^^^^^^^^^^^^
-
-Ferrocene keeps a `file for ignored tests <https://github.com/ferrocene/ferrocene/blob/main/ferrocene/ignored-tests.toml>`_, and the reason.
-
-
 Commit and push
 ^^^^^^^^^^^^^^^
 

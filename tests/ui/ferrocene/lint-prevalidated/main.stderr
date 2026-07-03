@@ -1,5 +1,5 @@
 error: validated function calls an unvalidated function
-  --> $DIR/main.rs:6:5
+  --> $DIR/main.rs:8:5
    |
 LL | fn normal_def() {}
    |    ---------- `normal_def` is unvalidated
@@ -8,13 +8,13 @@ LL |     normal_def();
    |     ^^^^^^^^^^
    |
 note: `main` is validated
-  --> $DIR/main.rs:5:4
+  --> $DIR/main.rs:7:4
    |
 LL | fn main() {
    |    ^^^^
    = note: main functions are assumed to be validated
 note: the lint level is defined here
-  --> $DIR/main.rs:1:9
+  --> $DIR/main.rs:3:9
    |
 LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^

@@ -1260,6 +1260,7 @@ workflows:
           test_variant: 2021-cortex-r5f
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_cpu: cortex-r5f
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>

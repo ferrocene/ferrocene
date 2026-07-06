@@ -5,7 +5,7 @@
 //@ normalize-stderr: "/rustc(?:-dev)?/[a-z0-9.]+/" -> ""
 
 // Ferrocene addition: Remove extra output line added by qemu
-//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
+//@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
 //
 // Regression test for issue #70963
 // The reported panic location should not be `<::core::macros::panic macros>`.

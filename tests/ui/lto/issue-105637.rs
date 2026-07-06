@@ -14,7 +14,7 @@
 //@ check-run-results
 
 // Ferrocene addition: Remove extra output line added by qemu
-//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
+//@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
 
 extern crate thinlto_dylib;
 

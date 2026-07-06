@@ -5,7 +5,6 @@
 //@ build-fail
 
 #![crate_type = "lib"]
-#![no_std]
 #![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 struct ExplicitDropImpl;
@@ -16,7 +15,8 @@ fn has_drop_unreachable() {
 }
 
 #[ferrocene::prevalidated] //~ NOTE marked
-pub fn has_drop_reachable() { //~ NOTE validated
+pub fn has_drop_reachable() {
+    //~^ NOTE validated
     ExplicitDropImpl; //~ NOTE dropped here
 }
 

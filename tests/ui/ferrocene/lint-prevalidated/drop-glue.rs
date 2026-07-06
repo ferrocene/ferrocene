@@ -5,10 +5,8 @@
 // You can still use traits as long as the impls use custom types.
 
 //@ build-fail
-//@ compile-flags: -Z deduplicate-diagnostics=no
 
 #![crate_type = "lib"]
-#![no_std]
 #![deny(ferrocene::unvalidated)] //~ NOTE lint level
 
 struct ExplicitDropImpl;
@@ -20,7 +18,8 @@ fn has_drop_unreachable() {
 }
 
 #[ferrocene::prevalidated] //~ NOTE marked
-pub fn has_drop_reachable() { //~ NOTE validated
+pub fn has_drop_reachable() {
+    //~^ NOTE validated
     DropGlueOnly(ExplicitDropImpl); //~ NOTE dropped here
 }
 

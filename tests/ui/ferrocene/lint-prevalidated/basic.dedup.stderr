@@ -1,5 +1,5 @@
 error: validated method calls an unvalidated associated function
-  --> $DIR/basic.rs:73:9
+  --> $DIR/basic.rs:76:9
    |
 LL |         String::new()
    |         ^^^^^^^^^^^
@@ -10,7 +10,7 @@ LL |         String::new()
    |
    = help: contact Ferrocene support to see if this associated function is possible to certify
 note: `<Validated as ToString>::to_string` is validated
-  --> $DIR/basic.rs:72:8
+  --> $DIR/basic.rs:75:8
    |
 LL |     #[ferrocene::prevalidated]
    |     -------------------------- marked as validated here
@@ -23,7 +23,7 @@ LL | #![deny(ferrocene::unvalidated)]
    |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated closure calls an unvalidated function
-  --> $DIR/basic.rs:90:42
+  --> $DIR/basic.rs:93:42
    |
 LL | fn normal_def() {
    |    ---------- `normal_def` is unvalidated
@@ -32,7 +32,7 @@ LL | const CERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |                                          ^^^^^^^^^^
    |
 note: `CERTIFIED_CLOSURE_CONST::{closure#0}` is validated
-  --> $DIR/basic.rs:90:39
+  --> $DIR/basic.rs:93:39
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -40,7 +40,7 @@ LL | const CERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |                                       ^^
 
 error: validated closure calls an unvalidated function
-  --> $DIR/basic.rs:92:44
+  --> $DIR/basic.rs:95:44
    |
 LL | fn normal_def() {
    |    ---------- `normal_def` is unvalidated
@@ -49,7 +49,7 @@ LL | static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |                                            ^^^^^^^^^^
    |
 note: `CERTIFIED_CLOSURE_STATIC::{closure#0}` is validated
-  --> $DIR/basic.rs:92:41
+  --> $DIR/basic.rs:95:41
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -57,7 +57,7 @@ LL | static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |                                         ^^
 
 error: validated constant possibly calls an unvalidated method
-  --> $DIR/basic.rs:94:76
+  --> $DIR/basic.rs:97:76
    |
 LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
    |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
@@ -68,7 +68,7 @@ LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = 
    = note: once `Unvalidated` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_CONST` is validated
-  --> $DIR/basic.rs:94:7
+  --> $DIR/basic.rs:97:7
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -76,7 +76,7 @@ LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = 
    |       ^^^^^^^^^^^^^^^^^^^
 
 error: validated static possibly calls an unvalidated method
-  --> $DIR/basic.rs:97:78
+  --> $DIR/basic.rs:100:78
    |
 LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
    |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
@@ -87,7 +87,7 @@ LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) 
    = note: once `Unvalidated` is cast to a dynamic trait object, Ferrocene can no longer tell whether it is validated
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 note: `CERTIFIED_DYN_STATIC` is validated
-  --> $DIR/basic.rs:97:8
+  --> $DIR/basic.rs:100:8
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -95,7 +95,7 @@ LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) 
    |        ^^^^^^^^^^^^^^^^^^^^
 
 error: validated function calls an unvalidated function
-  --> $DIR/basic.rs:102:5
+  --> $DIR/basic.rs:105:5
    |
 LL | fn normal_def() {
    |    ---------- `normal_def` is unvalidated
@@ -104,7 +104,7 @@ LL |     normal_def();
    |     ^^^^^^^^^^
    |
 note: `validated` is validated
-  --> $DIR/basic.rs:101:4
+  --> $DIR/basic.rs:104:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -112,7 +112,7 @@ LL | fn validated() {
    |    ^^^^^^^^^
 
 error: validated function calls an unvalidated method
-  --> $DIR/basic.rs:107:5
+  --> $DIR/basic.rs:110:5
    |
 LL | #[derive(Clone)]
    |          ----- `<Unvalidated as Clone>::clone` is unvalidated
@@ -121,7 +121,7 @@ LL |     trait_fn_type(&Unvalidated);
    |     ^^^^^^^^^^^^^
 
 error: validated function possibly calls an unvalidated method
-  --> $DIR/basic.rs:111:51
+  --> $DIR/basic.rs:114:51
    |
 LL |     fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
    |        ----------- `<Unvalidated as PartialOrd>::partial_cmp` is unvalidated
@@ -133,7 +133,7 @@ LL |     let dyn_trait: &dyn PartialOrd<Unvalidated> = &Unvalidated;
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialOrd>::partial_cmp`
 
 error: validated function possibly calls an unvalidated method
-  --> $DIR/basic.rs:121:70
+  --> $DIR/basic.rs:124:70
    |
 LL |     fn ne(&self, _: &Self) -> bool {
    |        -- `<Unvalidated as PartialEq>::ne` is unvalidated
@@ -145,7 +145,7 @@ LL |     let dyn_trait_partially_validated: &dyn PartialEq<Unvalidated> = &Unval
    = note: as a precaution, it must assume you will eventually call `<Unvalidated as PartialEq>::ne`
 
 error: validated function calls an unvalidated method
-  --> $DIR/basic.rs:131:5
+  --> $DIR/basic.rs:134:5
    |
 LL |     fn inherent_fn(&self) {}
    |        ----------- `Unvalidated::inherent_fn` is unvalidated
@@ -154,16 +154,16 @@ LL |     Unvalidated.inherent_fn();
    |     ^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function calls an unvalidated associated function
-  --> $DIR/basic.rs:134:4
+  --> $DIR/basic.rs:137:5
    |
 LL |     fn generic_inherent_fn<T>(x: T) {}
    |        ------------------- `Unvalidated::generic_inherent_fn::<usize>` is unvalidated
 ...
-LL |    Unvalidated::generic_inherent_fn::<usize>(1);
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+LL |     Unvalidated::generic_inherent_fn::<usize>(1);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function uses an unvalidated constant
-  --> $DIR/basic.rs:139:5
+  --> $DIR/basic.rs:142:5
    |
 LL | const UNCERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |       ------------------------- `UNCERTIFIED_CLOSURE_CONST` is unvalidated
@@ -175,7 +175,7 @@ LL |     UNCERTIFIED_CLOSURE_CONST();
    = note: the Ferrocene compiler does not know if the `fn()` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/basic.rs:140:5
+  --> $DIR/basic.rs:143:5
    |
 LL | static UNCERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |        -------------------------- `UNCERTIFIED_CLOSURE_STATIC` is unvalidated
@@ -187,7 +187,7 @@ LL |     UNCERTIFIED_CLOSURE_STATIC();
    = note: the Ferrocene compiler does not know if the `fn()` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated constant
-  --> $DIR/basic.rs:141:5
+  --> $DIR/basic.rs:144:5
    |
 LL | const UNCERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |       --------------------- `UNCERTIFIED_DYN_CONST` is unvalidated
@@ -199,7 +199,7 @@ LL |     UNCERTIFIED_DYN_CONST.partial_cmp(&Unvalidated);
    = note: the Ferrocene compiler does not know if the `dyn PartialOrd<Unvalidated> + Sync` was verified, so it must assume it is unverified
 
 error: validated function uses an unvalidated static
-  --> $DIR/basic.rs:142:5
+  --> $DIR/basic.rs:145:5
    |
 LL | static UNCERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |        ---------------------- `UNCERTIFIED_DYN_STATIC` is unvalidated

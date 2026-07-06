@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# call as run-testserver.sh <TARGET> <TEST_DEVICE_ADDR> <EMULATED> <QEMU_VERSION> <QEMU_ARCH>
+# call as run-testserver.sh <TARGET> <TEST_DEVICE_ADDR> <EMULATED> <QEMU_VERSION> <QEMU_ARCH> <QEMU_CPU>
 set -xe
 
 TARGET=$1
@@ -11,6 +11,7 @@ TEST_DEVICE_ADDR=$2
 EMULATED=$3
 QEMU_VERSION=$4
 QEMU_ARCH=$5
+QEMU_CPU=$6
 
 env
 

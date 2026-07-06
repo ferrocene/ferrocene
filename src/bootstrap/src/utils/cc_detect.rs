@@ -25,8 +25,14 @@ use std::collections::HashSet;
 use std::iter;
 use std::path::{Path, PathBuf};
 
+<<<<<<< ferrocene/main
 use crate::core::config::TargetSelection;
 use crate::utils::cache::Interned;
+||||||| 7fb284d9037
+use crate::core::config::TargetSelection;
+=======
+use crate::core::config::{CompressDebuginfo, TargetSelection};
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
 
@@ -37,10 +43,18 @@ fn new_cc_build(build: &Build, target: TargetSelection) -> cc::Build {
         .opt_level(2)
         .warnings(false)
         .debug(false)
-        // Compress debuginfo
-        .flag_if_supported("-gz")
+        // We have to configure out_dir, otherwise flag_if_supported will not work
+        .out_dir(build.tempdir().join("cc-rs-out-dir"))
         .target(&target.triple)
         .host(&build.host_target.triple);
+
+    match build.config.compress_debuginfo(target) {
+        CompressDebuginfo::Zlib => {
+            cfg.flag_if_supported("-gz");
+        }
+        CompressDebuginfo::Off => {}
+    }
+
     match build.crt_static(target) {
         Some(a) => {
             cfg.static_crt(a);
@@ -101,11 +115,12 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     let config = build.config.target_config.get(&target);
     if let Some(cc) = config
         .and_then(|c| c.cc.clone())
-        .or_else(|| default_compiler(&mut cfg, Language::C, target, build))
+        .or_else(|| default_compiler(&cfg, Language::C, target, build))
     {
         cfg.compiler(cc);
     }
 
+<<<<<<< ferrocene/main
     // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
     // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
@@ -131,6 +146,19 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
     };
+||||||| 7fb284d9037
+    let compiler = cfg.get_compiler();
+    let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
+        ar
+    } else {
+        cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
+    };
+=======
+    let compiler = cfg.get_compiler();
+    let ar = config
+        .and_then(|c| c.ar.clone())
+        .or_else(|| cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok());
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
     build.cc.insert(target, compiler.clone());
     let mut cflags = build.cc_handled_clags(target, CLang::C);
@@ -142,7 +170,7 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
     cfg.cpp(true);
     let cxx_configured = if let Some(cxx) = config
         .and_then(|c| c.cxx.clone())
-        .or_else(|| default_compiler(&mut cfg, Language::CPlusPlus, target, build))
+        .or_else(|| default_compiler(&cfg, Language::CPlusPlus, target, build))
     {
         cfg.compiler(cxx);
         true
@@ -179,7 +207,7 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
 /// Determines the default compiler for a given target and language when not explicitly
 /// configured in `bootstrap.toml`.
 fn default_compiler(
-    cfg: &mut cc::Build,
+    cfg: &cc::Build,
     compiler: Language,
     target: TargetSelection,
     build: &Build,

@@ -784,7 +784,7 @@ mod desc {
     pub(crate) const parse_passes: &str = "a space-separated list of passes, or `all`";
     pub(crate) const parse_panic_strategy: &str = "either `unwind`, `abort`, or `immediate-abort`";
     pub(crate) const parse_on_broken_pipe: &str = "either `kill`, `error`, or `inherit`";
-    pub(crate) const parse_patchable_function_entry: &str = "either two comma separated integers (total_nops,prefix_nops), with prefix_nops <= total_nops, or one integer (total_nops)";
+    pub(crate) const parse_patchable_function_entry: &str = "a comma separated list of (prefix_nops,total_nops,section_name), (prefix_nops,total_nops), or (total_nops). Where prefix_nops <= total_nops where 0 < total_nops <= 255 and prefix_nops <= total_nops";
     pub(crate) const parse_opt_panic_strategy: &str = parse_panic_strategy;
     pub(crate) const parse_relro_level: &str = "one of: `full`, `partial`, or `off`";
     pub(crate) const parse_sanitizers: &str = "comma separated list of sanitizers: `address`, `cfi`, `dataflow`, `hwaddress`, `kcfi`, `kernel-address`, `kernel-hwaddress`, `leak`, `memory`, `memtag`, `safestack`, `shadow-call-stack`, `thread`, or 'realtime'";
@@ -1206,20 +1206,24 @@ pub mod parse {
     ) -> bool {
         let mut total_nops = 0;
         let mut prefix_nops = 0;
+        let mut section = None;
 
         if !parse_number(&mut total_nops, v) {
-            let parts = v.and_then(|v| v.split_once(',')).unzip();
-            if !parse_number(&mut total_nops, parts.0) {
+            let parts: Vec<_> = v.unwrap_or("").split(',').collect();
+            if parts.len() < 2 || parts.len() > 3 {
                 return false;
             }
-            if !parse_number(&mut prefix_nops, parts.1) {
+
+            if !parse_number(&mut total_nops, Some(parts[0])) {
                 return false;
             }
+            if !parse_number(&mut prefix_nops, Some(parts[1])) {
+                return false;
+            }
+            section = parts.get(2).map(|x| x.to_string());
         }
 
-        if let Some(pfe) =
-            PatchableFunctionEntry::from_total_and_prefix_nops(total_nops, prefix_nops)
-        {
+        if let Some(pfe) = PatchableFunctionEntry::from_parts(total_nops, prefix_nops, section) {
             *slot = pfe;
             return true;
         }
@@ -1617,7 +1621,7 @@ pub mod parse {
         let mut seen_instruction_threshold = false;
         let mut seen_skip_entry = false;
         let mut seen_skip_exit = false;
-        for option in v.into_iter().flat_map(|v| v.split(',')) {
+        for option in v.map(|v| v.split(',')).into_flat_iter() {
             match option {
                 "always" if !seen_always && !seen_never => {
                     options.always = true;
@@ -2294,6 +2298,8 @@ options! {
         `=LooseTypes`
         `=Inline`
         Multiple options can be combined with commas."),
+    autodiff_post_passes: Option<String> = (None, parse_opt_string, [TRACKED],
+        "set llvm passes to run after enzyme (no passes run when it is empty)"),
     #[rustc_lint_opt_deny_field_access("use `Session::binary_dep_depinfo` instead of this field")]
     binary_dep_depinfo: bool = (false, parse_bool, [TRACKED],
         "include artifacts (sysroot, crate dependencies) used during compilation in dep-info \
@@ -2650,6 +2656,7 @@ options! {
         "use the given `.prof` file for sampled profile-guided optimization (also known as AutoFDO)"),
     profiler_runtime: String = (String::from("profiler_builtins"), parse_string, [TRACKED],
         "name of the profiler runtime crate to automatically inject (default: `profiler_builtins`)"),
+    ptrauth_elf_got: bool = (false, parse_bool, [TRACKED], "enable signing of ELF GOT entries"),
     query_dep_graph: bool = (false, parse_bool, [UNTRACKED],
         "enable queries of the dependency graph for regression testing (default: no)"),
     randomize_layout: bool = (false, parse_bool, [TRACKED],

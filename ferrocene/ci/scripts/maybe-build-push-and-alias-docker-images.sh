@@ -29,12 +29,6 @@ aws ecr get-login-password --region "${ECR_REGION}" \
 
 manifest=""
 if manifest="$(get_manifest "$SRC")"; then
-    echo "image $SRC doesn't exist, building..."
-    IMAGE_NAME="$IMAGE" \
-    IMAGE_TAG="$SRC" \
-    ferrocene/ci/scripts/build-and-push-docker-image.sh
-    manifest="$(get_manifest "$SRC")"
-else
     alias_manifest="$(get_manifest "$ALIAS")"
     src_digest="$(echo "$manifest" | get_manifest_digest)"
     alias_digest="$(echo "$alias_manifest" | get_manifest_digest)"
@@ -42,6 +36,12 @@ else
         echo "alias $ALIAS already points to $SRC"
         exit 0
     fi
+else
+    echo "image $SRC doesn't exist, building..."
+    IMAGE_NAME="$IMAGE" \
+    IMAGE_TAG="$SRC" \
+    ferrocene/ci/scripts/build-and-push-docker-image.sh
+    manifest="$(get_manifest "$SRC")"
 fi
 
 aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag "$ALIAS" --image-manifest "$manifest"

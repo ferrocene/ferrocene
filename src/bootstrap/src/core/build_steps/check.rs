@@ -626,7 +626,9 @@ impl Step for GccCodegenBackend {
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
-        true
+        // Ferrocene modification: We do not support the gcc backend, so do not
+        // build it by default
+        false
     }
 
     fn make_run(run: RunConfig<'_>) {

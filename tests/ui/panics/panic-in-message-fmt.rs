@@ -9,8 +9,8 @@
 //@ normalize-stderr: "(core/src/panicking\.rs):[0-9]+:[0-9]+" -> "$1:$$LINE:$$COL"
 //@ ignore-emscripten "RuntimeError" junk in output
 
-// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
-//@ ignore-qemu
+// Ferrocene addition: Remove extra output line added by qemu
+//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
 
 use std::fmt::{Display, self};
 

@@ -13,8 +13,8 @@
 //@ run-fail
 //@ check-run-results
 
-// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
-//@ ignore-qemu
+// Ferrocene addition: Remove extra output line added by qemu
+//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
 
 extern crate thinlto_dylib;
 

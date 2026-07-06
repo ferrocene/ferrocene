@@ -3,8 +3,8 @@
 //@ compile-flags: -Zlocation-detail=none
 //@ exec-env:RUST_BACKTRACE=0
 
-// Ferrocene addition: QEMU user space emulation outputs an extra message when an abort happens
-//@ ignore-qemu
+// Ferrocene addition: Remove extra output line added by qemu
+//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
 
 fn main() {
     panic!("no location info");

@@ -17,21 +17,27 @@ account="$(aws sts get-caller-identity --region "${ECR_REGION}" | jq -r .Account
 registry="${account}.dkr.ecr.${ECR_REGION}.amazonaws.com"
 
 function get_manifest() {
-    aws ecr batch-get-image --repository-name "$ECR_REPOSITORY" --image-ids imageTag="$1" --output text --query 'images[].imageManifest'
+    aws ecr batch-get-image \
+        --repository-name "$ECR_REPOSITORY" \
+        --image-ids imageTag="$1" \
+        --output text \
+        --query 'images[].imageManifest' \
+        || return 1
 }
 
 function get_manifest_digest() {
-    jq -r .config.digest
+    echo "$1" | jq -r .config.digest
 }
 
 aws ecr get-login-password --region "${ECR_REGION}" \
     | docker login --username AWS --password-stdin "${registry}"
 
-manifest=""
-if manifest="$(get_manifest "$SRC")"; then
+src_manifest="$(get_manifest "$SRC")"
+src_digest="$(get_manifest_digest "$src_manifest")"
+if [[ -n "$src_digest" ]]; then
+    echo "image $SRC exists"
     alias_manifest="$(get_manifest "$ALIAS")"
-    src_digest="$(echo "$manifest" | get_manifest_digest)"
-    alias_digest="$(echo "$alias_manifest" | get_manifest_digest)"
+    alias_digest="$(get_manifest_digest "$alias_manifest")"
     if [[ "$src_digest" == "$alias_digest" ]]; then
         echo "alias $ALIAS already points to $SRC"
         exit 0
@@ -41,7 +47,8 @@ else
     IMAGE_NAME="$IMAGE" \
     IMAGE_TAG="$SRC" \
     ferrocene/ci/scripts/build-and-push-docker-image.sh
-    manifest="$(get_manifest "$SRC")"
+    src_manifest="$(get_manifest "$SRC")"
 fi
 
-aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag "$ALIAS" --image-manifest "$manifest"
+echo "aliasing $ALIAS to $SRC"
+aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag "$ALIAS" --image-manifest "$src_manifest"

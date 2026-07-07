@@ -1088,7 +1088,7 @@ pub fn walk_const_arg<'v, V: Visitor<'v>>(
     try_visit!(visitor.visit_id(*hir_id));
     match kind {
         ConstArgKind::Tup(exprs) => {
-            walk_list!(visitor, visit_const_arg, *exprs);
+            walk_list!(visitor, visit_const_arg_unambig, *exprs);
             V::Result::output()
         }
         ConstArgKind::Struct(qpath, field_exprs) => {
@@ -1468,7 +1468,8 @@ pub fn walk_path_segment<'v, V: Visitor<'v>>(
     visitor: &mut V,
     segment: &'v PathSegment<'v>,
 ) -> V::Result {
-    let PathSegment { ident, hir_id, res: _, args, infer_args: _ } = segment;
+    let PathSegment { ident, hir_id, res: _, args, infer_args: _, delegation_child_segment: _ } =
+        segment;
     try_visit!(visitor.visit_ident(*ident));
     try_visit!(visitor.visit_id(*hir_id));
     visit_opt!(visitor, visit_generic_args, *args);

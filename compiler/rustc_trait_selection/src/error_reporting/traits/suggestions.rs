@@ -334,7 +334,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             return;
         }
 
-        let fn_body_hir_id = self.tcx.local_def_id_to_hir_id(typeck_results.hir_owner.def_id);
         let mut private_candidate: Option<(Ty<'tcx>, Ty<'tcx>, Span)> = None;
 
         for (deref_base_ty, _) in (self.autoderef_steps)(base_ty) {
@@ -346,8 +345,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 continue;
             }
 
-            let (adjusted_ident, def_scope) =
-                self.tcx.adjust_ident_and_get_scope(field_ident, base_def.did(), fn_body_hir_id);
+            let (adjusted_ident, def_scope) = self.tcx.adjust_ident_and_get_scope(
+                field_ident,
+                base_def.did(),
+                typeck_results.hir_owner.def_id,
+            );
 
             let Some((_, field_def)) =
                 base_def.non_enum_variant().fields.iter_enumerated().find(|(_, field)| {
@@ -1611,7 +1613,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             _ => None,
         };
 
-        [typeck_results.expr_ty_adjusted_opt(expr)].into_iter().flatten().any(|expr_ty| {
+        typeck_results.expr_ty_adjusted_opt(expr).is_some_and(|expr_ty| {
             self.can_eq(obligation.param_env, expr_ty, old_self_ty)
                 || inner_old_self_ty
                     .is_some_and(|inner_ty| self.can_eq(obligation.param_env, expr_ty, inner_ty))
@@ -2556,6 +2558,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         err.children.clear();
 
         let mut span = obligation.cause.span;
+        let mut is_async_fn_return = false;
         if let DefKind::Closure = self.tcx.def_kind(obligation.cause.body_id)
             && let parent = self.tcx.local_parent(obligation.cause.body_id)
             && let DefKind::Fn | DefKind::AssocFn = self.tcx.def_kind(parent)
@@ -2571,9 +2574,18 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             // and
             // async fn foo() -> dyn Display Box<dyn { .. }>
             span = fn_sig.decl.output.span();
+            is_async_fn_return = true;
             err.span(span);
         }
         let body = self.tcx.hir_body_owned_by(obligation.cause.body_id);
+
+        if !is_async_fn_return
+            && let Node::Expr(hir::Expr { kind: hir::ExprKind::Closure(closure), .. }) =
+                self.tcx.hir_node_by_def_id(obligation.cause.body_id)
+            && matches!(closure.fn_decl.output, hir::FnRetTy::DefaultReturn(_))
+        {
+            return true;
+        }
 
         let mut visitor = ReturnsVisitor::default();
         visitor.visit_body(&body);
@@ -4467,7 +4479,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
             ObligationCauseCode::OpaqueReturnType(expr_info) => {
                 let (expr_ty, expr) = if let Some((expr_ty, hir_id)) = expr_info {
-                    let expr_ty = tcx.short_string(expr_ty, err.long_ty_path());
                     let expr = tcx.hir_expect_expr(hir_id);
                     (expr_ty, expr)
                 } else if let Some(body_id) = tcx.hir_node_by_def_id(body_id).body_id()
@@ -4482,15 +4493,27 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     && let ty::ClauseKind::Trait(pred) = pred.kind().skip_binder()
                     && self.can_eq(param_env, pred.self_ty(), expr_ty)
                 {
-                    let expr_ty = tcx.short_string(expr_ty, err.long_ty_path());
                     (expr_ty, expr)
                 } else {
                     return;
                 };
+                let expr_ty_string = tcx.short_string(expr_ty, err.long_ty_path());
+                if expr_ty.is_never()
+                    && let span = expr.span.source_callsite()
+                    && let Ok(snippet) = tcx.sess.source_map().span_to_snippet(span)
+                    && span != expr.span
+                {
+                    err.span_suggestion(
+                        span,
+                        "`!` can be coerced to any type; consider casting it to a concrete type that implements the trait",
+                        format!("{snippet} as /* Type */"),
+                        Applicability::HasPlaceholders,
+                    );
+                }
                 err.span_label(
                     expr.span,
                     with_forced_trimmed_paths!(format!(
-                        "return type was inferred to be `{expr_ty}` here",
+                        "return type was inferred to be `{expr_ty_string}` here",
                     )),
                 );
                 suggest_remove_deref(err, &expr);

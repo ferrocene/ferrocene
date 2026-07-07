@@ -2,7 +2,14 @@
 //@ compile-flags: -Copt-level=3
 //@ only-aarch64
 //@ only-linux
+<<<<<<< ferrocene/main
 //@ ignore-ferrocene.facade
+||||||| 7fb284d9037
+=======
+// aarch64-unknown-linux-pauthtest requires armv8.3-a, which includes Large System Extensions,
+// providing hardware implementations of atomic operations.
+//@ ignore-pauthtest
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 #![crate_type = "rlib"]
 

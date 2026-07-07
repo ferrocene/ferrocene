@@ -18,12 +18,11 @@ env
 EMULATOR=""
 if [[ "$EMULATED" == "true" ]]; then
     EMULATOR=/opt/qemu-ferrocene/${QEMU_VERSION}/bin/${QEMU_ARCH};
-    if [[ "" != $QEMU_CPU ]]; then
-        EMULATOR="${EMULATOR} -cpu ${QEMU_CPU}"
-    fi
 fi
 
-unset QEMU_CPU # qemu barfs if this is set to "", so we'll make sure to unset it.
+if [[ "" == $QEMU_CPU ]]; then
+    unset QEMU_CPU # qemu barfs if this is set to "", so we'll make sure to unset it.
+fi
 
 ${EMULATOR} \
 /bin/test-server/$1/remote-test-server -v --bind $TEST_DEVICE_ADDR

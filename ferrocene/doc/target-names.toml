@@ -37,6 +37,7 @@ x86_64-pc-nto-qnx800              = "x86-64 QNX® OS 8.0"
 x86_64-pc-windows-msvc            = "x86-64 Windows"
 x86_64-unknown-linux-gnu          = "x86-64 Linux (glibc)"
 x86_64-unknown-linux-musl         = "x86-64 Linux (musl)"
+x86_64-unknown-none               = "x86-64 bare-metal"
 
 # Removed targets
 x86_64-apple-darwin = "x86-64 macOS"

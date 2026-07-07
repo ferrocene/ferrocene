@@ -6925,6 +6925,7 @@ core::mem::size_of_val_raw
 core::mem::swap
 core::mem::take
 core::mem::transmute_copy
+core::mem::transmute_copy::precondition_check
 core::mem::transmute_neo
 core::mem::zeroed
 core::num::<impl i128>::abs

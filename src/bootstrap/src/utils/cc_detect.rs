@@ -25,14 +25,8 @@ use std::collections::HashSet;
 use std::iter;
 use std::path::{Path, PathBuf};
 
-<<<<<<< ferrocene/main
-use crate::core::config::TargetSelection;
-use crate::utils::cache::Interned;
-||||||| 7fb284d9037
-use crate::core::config::TargetSelection;
-=======
 use crate::core::config::{CompressDebuginfo, TargetSelection};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
 
@@ -120,7 +114,6 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
         cfg.compiler(cc);
     }
 
-<<<<<<< ferrocene/main
     // Ferrocene annotation: cc 1.1.32 and newer does not support custom targets outside of
     // build script context (rust-lang/cc-rs#1225). Map `.facade` targets back to the
     // targets they are test doubles for, and temporarily pass that triple to `cc` to determine
@@ -137,28 +130,13 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
         None
     };
     let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
-    let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
-        ar
-    } else {
+    let ar = config.and_then(|c| c.ar.clone()).or_else(|| {
         if facade_compiler.is_some() {
             let sub = replace_ferrocene_vendors(target.triple);
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
-    };
-||||||| 7fb284d9037
-    let compiler = cfg.get_compiler();
-    let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
-        ar
-    } else {
-        cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
-    };
-=======
-    let compiler = cfg.get_compiler();
-    let ar = config
-        .and_then(|c| c.ar.clone())
-        .or_else(|| cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok());
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    });
 
     build.cc.insert(target, compiler.clone());
     let mut cflags = build.cc_handled_clags(target, CLang::C);

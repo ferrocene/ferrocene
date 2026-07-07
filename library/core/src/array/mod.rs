@@ -1153,14 +1153,6 @@ const fn iter_next_chunk_erased<T>(
     mem::forget(guard);
     Ok(())
 }
-<<<<<<< ferrocene/main
-
-/// Ferrocene addition: Hidden module to test crate-internal functionality
-#[doc(hidden)]
-#[unstable(feature = "ferrocene_test", issue = "none")]
-pub mod ferrocene_test;
-||||||| 7fb284d9037
-=======
 
 /// Pulls `N` items from the back of `iter` and returns them as an array.
 /// If the iterator yields fewer than `N` items, `Err` is returned containing
@@ -1267,4 +1259,8 @@ fn iter_next_chunk_back_erased<T>(
     mem::forget(guard);
     Ok(())
 }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+pub mod ferrocene_test;

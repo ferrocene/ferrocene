@@ -5,17 +5,9 @@ use std::path::{Path, PathBuf};
 use super::{Builder, Kind};
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
-<<<<<<< ferrocene/main
-use crate::core::config::SplitDebuginfo;
 use crate::core::config::flags::{Color, FerroceneCoverageFor};
-use crate::ferrocene::code_coverage::Paths;
-||||||| 7fb284d9037
-use crate::core::config::SplitDebuginfo;
-use crate::core::config::flags::Color;
-=======
-use crate::core::config::flags::Color;
 use crate::core::config::{CompressDebuginfo, SplitDebuginfo};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::ferrocene::code_coverage::Paths;
 use crate::utils::build_stamp;
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_flags};
 use crate::{

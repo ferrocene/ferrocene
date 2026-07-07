@@ -1037,8 +1037,8 @@ jobs:
       image:
         description: The image that needs to be built
         type: string
-      tag:
-        description: The tag of the image that needs to be built
+      src:
+        description: The tag of the image that needs to be aliased
         type: string
       alias:
         description: The tag of the alias to push
@@ -1057,11 +1057,11 @@ jobs:
       - setup_remote_docker:
           version: default
       - run:
-          name: Maybe build x86_64-<< parameters.image >> and upload
+          name: alias << parameters.image >> from << parameters.src >> to << parameters.alias >>
           environment:
             ECR_REPOSITORY: ci-docker-images
             ECR_REGION: us-east-1
-          command: ferrocene/ci/scripts/maybe-build-push-and-alias-docker-images.sh '<< parameters.image >>' '<< parameters.tag >>' '<< parameters.alias >>'
+          command: ferrocene/ci/scripts/alias-docker-image-tag.sh '<< parameters.image >>' '<< parameters.src >>' '<< parameters.alias >>'
 
   build-docker-aarch64:
     description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
@@ -1655,28 +1655,52 @@ workflows:
       - skip
 
   tag-images:
+    when:
+      equal: [<< pipeline.git.branch >>, main]
     jobs:
-      # tag built docker images with the `:main` tag
-      - alias-docker:
-          filters: pipeline.git.branch == "main"
-          resource_class: large # 4-core
-          name: alias-docker-x86_64-ubuntu-20
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-20--x86_64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          alias: x86_64-ubuntu-20
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+
       - alias-docker:
-          filters: pipeline.git.branch == "main"
+          name: alias-docker-x86_64-ubuntu-20
+          requires:
+            - build-docker--ubuntu-20--x86_64
           resource_class: large # 4-core
-          name: alias-docker-x86_64-ubuntu-24
+          image: ubuntu-20
+          src: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          alias: x86_64-ubuntu-20
+
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24--x86_64
           image: ubuntu-24
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-          alias: x86_64-ubuntu-24
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
       - alias-docker:
-          filters: pipeline.git.branch == "main"
-          resource_class: arm.medium # 2-core
-          name: alias-docker-aarch64-ubuntu-20
+          name: alias-docker-x86_64-ubuntu-24
+          requires:
+            - build-docker--ubuntu-24--x86_64
+          resource_class: large # 4-core
+          image: ubuntu-24
+          src: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          alias: x86_64-ubuntu-24
+
+      - build-docker-aarch64:
+          name: build-docker--ubuntu-20--aarch64
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20 >>
+
+      - alias-docker:
+          name: alias-docker-aarch64-ubuntu-20
+          requires:
+            - build-docker--ubuntu-20--aarch64
+          resource_class: arm.medium # 2-core
+          image: ubuntu-20
+          src: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
           alias: aarch64-ubuntu-20
 
 commands:

@@ -26,29 +26,29 @@ function get_manifest() {
 }
 
 function get_manifest_digest() {
-    echo "$1" | jq -r .config.digest
+    echo "$1" | jq -er .config.digest
 }
 
 aws ecr get-login-password --region "${ECR_REGION}" \
     | docker login --username AWS --password-stdin "${registry}"
 
-src_manifest="$(get_manifest "$SRC")"
-src_digest="$(get_manifest_digest "$src_manifest")"
-if [[ -n "$src_digest" ]]; then
-    echo "image $SRC exists"
-    alias_manifest="$(get_manifest "$ALIAS")"
-    alias_digest="$(get_manifest_digest "$alias_manifest")"
-    if [[ "$src_digest" == "$alias_digest" ]]; then
-        echo "alias $ALIAS already points to $SRC"
-        exit 0
-    fi
-else
-    echo "image $SRC doesn't exist, building..."
-    IMAGE_NAME="$IMAGE" \
-    IMAGE_TAG="$SRC" \
-    ferrocene/ci/scripts/build-and-push-docker-image.sh
-    src_manifest="$(get_manifest "$SRC")"
+echo "getting source tag manifest..."
+if ! src_manifest="$(get_manifest "$SRC")" \
+    || ! src_digest="$(get_manifest_digest "$src_manifest")" \
+    || [[ -z "$src_digest" ]];
+then
+    echo "image $SRC does not exist"
+    exit 1
 fi
 
-echo "aliasing $ALIAS to $SRC"
+echo "getting alias tag manifest..."
+if alias_manifest="$(get_manifest "$ALIAS")" \
+    && alias_digest="$(get_manifest_digest "$alias_manifest")" \
+    && [[ "$src_digest" == "$alias_digest" ]];
+then
+    echo "alias $ALIAS already points to $SRC"
+    exit 0
+fi
+
+echo "aliasing $ALIAS to $SRC..."
 aws ecr put-image --repository-name "$ECR_REPOSITORY" --image-tag "$ALIAS" --image-manifest "$src_manifest"

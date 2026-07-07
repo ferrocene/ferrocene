@@ -4,6 +4,10 @@
 //@ normalize-stderr: "(core/src/panicking\.rs):[0-9]+:[0-9]+" -> "$1:$$LINE:$$COL"
 //@ normalize-stderr: "/rustc(?:-dev)?/[a-z0-9.]+/" -> ""
 //@ ignore-backends: gcc
+
+// Ferrocene addition: Remove extra output line added by qemu
+//@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
+
 #![feature(extern_types)]
 
 extern "C" {

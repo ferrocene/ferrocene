@@ -7,7 +7,7 @@
 //@ normalize-stdout: "finished in \d+\.\d+s" -> "finished in $$TIME"
 
 // Ferrocene addition: Remove extra output line added by qemu
-//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
+//@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
 
 //@ needs-subprocess
 

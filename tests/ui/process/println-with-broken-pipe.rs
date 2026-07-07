@@ -15,7 +15,7 @@
 //@ compile-flags: -Zon-broken-pipe=error
 
 // Ferrocene addition: Remove extra output line added by qemu
-//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
+//@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
 
 // Test what the error message looks like when `println!()` panics because of
 // `std::io::ErrorKind::BrokenPipe`

@@ -1142,12 +1142,12 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 ///     u32::from_ne_bytes(*bytes.first_chunk().unwrap()),
 /// );
 /// ```
+#[ferrocene::prevalidated]
 #[inline]
 #[must_use]
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_transmute_copy", since = "1.74.0")]
-#[ferrocene::prevalidated]
 pub const unsafe fn transmute_copy<Src: ?Sized, Dst>(src: &Src) -> Dst {
     // library UB because it's possible for the `Src` to be only a subset of the allocation
     // and thus for a failure to not be immediate language UB

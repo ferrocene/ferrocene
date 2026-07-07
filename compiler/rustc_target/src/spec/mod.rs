@@ -37,6 +37,8 @@
 //!
 //! [JSON]: https://json.org
 
+// ignore-tidy-filelength
+
 use core::result::Result;
 use std::borrow::Cow;
 use std::collections::BTreeMap;

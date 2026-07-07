@@ -2751,10 +2751,10 @@ macro_rules! atomic_int {
             /// assert_eq!(some_int, 100);
             /// ```
             ///
+            #[ferrocene::prevalidated]
             #[inline]
             #[$cfg_align]
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
-            #[ferrocene::prevalidated]
             pub fn from_mut(v: &mut $int_type) -> &mut Self {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:
@@ -2792,9 +2792,9 @@ macro_rules! atomic_int {
             ///         })
             /// });
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
-            #[ferrocene::prevalidated]
             pub fn get_mut_slice(this: &mut [Self]) -> &mut [$int_type] {
                 // SAFETY: the mutable reference guarantees unique ownership.
                 unsafe { &mut *(this as *mut [Self] as *mut [$int_type]) }
@@ -2826,10 +2826,10 @@ macro_rules! atomic_int {
             ///     assert_eq!(i, n as usize);
             /// }
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$cfg_align]
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
-            #[ferrocene::prevalidated]
             pub fn from_mut_slice(v: &mut [$int_type]) -> &mut [Self] {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:

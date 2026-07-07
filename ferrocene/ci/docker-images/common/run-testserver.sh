@@ -22,6 +22,8 @@ fi
 
 if [[ "" == $QEMU_CPU ]]; then
     unset QEMU_CPU # qemu barfs if this is set to "", so we'll make sure to unset it.
+else
+    export QEMU_CPU # we need to export the variable to make child processes use it
 fi
 
 ${EMULATOR} \

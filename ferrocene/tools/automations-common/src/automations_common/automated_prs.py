@@ -17,7 +17,6 @@ import subprocess
 
 
 DEFAULT_BASE_BRANCH = "main"
-ORIGIN = "origin"
 
 #####################
 #                   #
@@ -102,19 +101,21 @@ class AutomatedPR(abc.ABC):
     #                   #
     #####################
 
-    def create(self, dry_run=False):
+    def create(self, dry_run=False, origin='origin', repo=None):
         """
         Handle the creation of the PR, and open an issue if an error occurs.
         """
         self.dry_run = dry_run
-        self.origin = ORIGIN
+        self.origin = origin
+        self.repo = repo or os.environ.get("GITHUB_REPOSITORY") or 'ferrocene/ferrocene'
 
         self.http = requests.Session()
-        self.http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
+        if not self.dry_run:
+            self.http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
 
         self.repo_root = self.cmd_capture(["git", "rev-parse", "--show-toplevel"])
-        self.current_branch = self.cmd_capture(["git", "branch", "--show-current"])
         self.current_hash = self.cmd_capture(["git", "rev-parse", "HEAD"])
+        self.current_branch = self.cmd_capture(["git", "branch", "--show-current"]) or self.current_hash
 
         existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
         if existing_pull is not None:
@@ -135,9 +136,10 @@ class AutomatedPR(abc.ABC):
             + "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
         )
 
+        pr_number = None
         result = self.run()
         if result == AutomationResult.SUCCESS:
-            self.on_success(branch_name, existing_conflict_issue)
+            pr_number = self.on_success(branch_name, existing_conflict_issue)
         elif result == AutomationResult.FAILURE:
             self.on_failure(existing_conflict_issue)
         else:
@@ -148,9 +150,11 @@ class AutomatedPR(abc.ABC):
         # the following PRs will also include the changes of the previous PRs.
         self.cmd(["git", "reset", "--hard", self.current_hash], dry_run=self.dry_run)
 
+        return pr_number
+
     def on_success(self, branch_name, existing_conflict_issue):
         self.cmd(["git", "checkout", "-B", branch_name], dry_run=self.dry_run)
-        self.cmd(["git", "push", self.origin, branch_name, "-f"], dry_run=self.dry_run)
+        self.cmd(["git", "push", "--no-verify", self.origin, branch_name, "-f"], dry_run=self.dry_run)
 
         # Create the PR
         if self.dry_run:
@@ -199,6 +203,9 @@ class AutomatedPR(abc.ABC):
 
         self.cmd(["git", "checkout", self.current_branch], dry_run=self.dry_run)
         self.cmd(["git", "branch", "-D", branch_name], dry_run=self.dry_run)
+
+        if not self.dry_run:
+            return create_json['number']
 
     def on_failure(self, existing_conflict_issue):
         if self.dry_run:
@@ -312,5 +319,4 @@ class AutomatedPR(abc.ABC):
         """
         Return the API URL for the requested GitHub repository.
         """
-        repo = os.environ.get("GITHUB_REPOSITORY") or "ferrocene/ferrocene"
-        return f"https://api.github.com/repos/{repo}/{url}"
+        return f"https://api.github.com/repos/{self.repo}/{url}"

@@ -9,21 +9,19 @@ set -xe
 TARGET=$1
 TEST_DEVICE_ADDR=$2
 EMULATED=$3
-QEMU_VERSION=$4
-QEMU_ARCH=$5
-QEMU_CPU=$6
+EMULATOR_VERSION=$4
+EMULATOR_ARCH=$5
+EMULATOR_CPU=$6
 
 env
 
 EMULATOR=""
 if [[ "$EMULATED" == "true" ]]; then
-    EMULATOR=/opt/qemu-ferrocene/${QEMU_VERSION}/bin/${QEMU_ARCH};
+    EMULATOR=/opt/qemu-ferrocene/${EMULATOR_VERSION}/bin/${EMULATOR_ARCH};
 fi
 
-if [[ "" == $QEMU_CPU ]]; then
-    unset QEMU_CPU # qemu barfs if this is set to "", so we'll make sure to unset it.
-else
-    export QEMU_CPU # we need to export the variable to make child processes use it
+if [[ "" != "$EMULATOR_CPU" ]]; then
+    export QEMU_CPU="${EMULATOR_CPU}" # we need to export the variable to make child processes use it
 fi
 
 ${EMULATOR} \

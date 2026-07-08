@@ -13,8 +13,6 @@ USER root
 
 COPY --chmod=0755 --chown=root:ci ferrocene/ci/docker-images/common/run-testserver.sh /bin/run-testserver.sh
 
-RUN chown -R ci:ci /bin/test-server
-
 USER ci
 
 CMD [ "sleep", "5000" ]

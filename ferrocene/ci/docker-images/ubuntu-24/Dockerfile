@@ -92,6 +92,10 @@ RUN <<-EOF
     adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
     chown -R ci: /home/ci
 EOF
+
+# we use this as an entrypoint for the test-server
+COPY --chmod=0755 --chown=root:ci ferrocene/ci/docker-images/ubuntu-24/run-testserver.sh /bin/run-testserver.sh
+
 USER ci
 WORKDIR /home/ci
 

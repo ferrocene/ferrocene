@@ -454,7 +454,7 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
+          emulator-script: "set +u; source ./qnx-8.0.5/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -1986,18 +1986,21 @@ commands:
       source-env-script:
         type: boolean
         default: true
+      version:
+        type: string
+        default: "8.0.5"
     steps:
       - run:
-          name: Fetch QNX800 toolchain
+          name: Fetch QNX << parameters.version >> toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
+            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx8-<< parameters.version >>.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
           steps:
             - run:
-                name: Set PATH to include QNX800 tools
-                command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
+                name: Set PATH to include QNX << parameters.version >> tools
+                command: echo 'source $(pwd)/qnx-<< parameters.version >>/qnxsdp-env.sh' >> "$BASH_ENV"
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

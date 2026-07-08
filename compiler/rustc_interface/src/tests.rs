@@ -788,6 +788,7 @@ fn test_unstable_options_tracking_hash() {
     tracked!(annotate_moves, AnnotateMoves::Enabled(Some(1234)));
     tracked!(assume_incomplete_release, true);
     tracked!(autodiff, vec![AutoDiff::Enable, AutoDiff::NoTT]);
+    tracked!(autodiff_post_passes, Some("function(mem2reg,instsimplify,simplifycfg)".to_string()));
     tracked!(binary_dep_depinfo, true);
     tracked!(box_noalias, false);
     tracked!(
@@ -866,7 +867,7 @@ fn test_unstable_options_tracking_hash() {
     tracked!(panic_in_drop, PanicStrategy::Abort);
     tracked!(
         patchable_function_entry,
-        PatchableFunctionEntry::from_total_and_prefix_nops(10, 5)
+        PatchableFunctionEntry::from_parts(10, 5, None)
             .expect("total must be greater than or equal to prefix")
     );
     tracked!(plt, Some(true));

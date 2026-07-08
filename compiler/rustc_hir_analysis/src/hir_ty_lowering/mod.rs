@@ -483,7 +483,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let tcx = self.tcx();
         let parent_def_id = self.item_def_id();
         if let Res::Def(DefKind::ConstParam, _) = res
-            && tcx.def_kind(parent_def_id) == DefKind::AnonConst
+            && matches!(tcx.def_kind(parent_def_id), DefKind::AnonConst | DefKind::InlineConst)
             && let ty::AnonConstKind::MCG = tcx.anon_const_kind(parent_def_id)
         {
             let folder = ForbidParamUsesFolder {
@@ -512,15 +512,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         // Inline consts and closures can be nested inside anon consts that forbid generic
         // params (e.g. an enum discriminant). Walk up the def parent chain to find the
         // nearest enclosing AnonConst and use that to determine the context.
+        let parent_def_id = tcx.typeck_root_def_id(parent_def_id.into());
+
         let anon_const_def_id = match tcx.def_kind(parent_def_id) {
             DefKind::AnonConst => parent_def_id,
-            DefKind::InlineConst | DefKind::Closure => {
-                let root = tcx.typeck_root_def_id(parent_def_id.into());
-                match tcx.def_kind(root) {
-                    DefKind::AnonConst => root.expect_local(),
-                    _ => return None,
-                }
-            }
+            DefKind::InlineConst if tcx.is_type_system_inline_const(parent_def_id) => parent_def_id,
             _ => return None,
         };
 
@@ -870,7 +866,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             span,
             generic_args: segment.args(),
             infer_args: segment.infer_args,
-            create_synth_args: tcx.hir_is_delegation_child_segment(segment),
+            create_synth_args: segment.delegation_child_segment,
             incorrect_args: &arg_count.correct,
         };
 
@@ -1711,8 +1707,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             .inherent_impls(adt_did)
             .iter()
             .filter_map(|&impl_| {
-                let (item, scope) =
-                    self.probe_assoc_item_unchecked(name, assoc_tag, block, impl_)?;
+                let (item, scope) = self.probe_assoc_item_unchecked(name, assoc_tag, impl_)?;
                 Some(InherentAssocCandidate { impl_, assoc_item: item.def_id, scope })
             })
             .collect();
@@ -1788,7 +1783,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         span: Span,
         scope: DefId,
     ) -> Option<ty::AssocItem> {
-        let (item, scope) = self.probe_assoc_item_unchecked(ident, assoc_tag, block, scope)?;
+        let (item, scope) = self.probe_assoc_item_unchecked(ident, assoc_tag, scope)?;
         self.check_assoc_item(item.def_id, ident, scope, block, span);
         Some(item)
     }
@@ -1801,12 +1796,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         &self,
         ident: Ident,
         assoc_tag: ty::AssocTag,
-        block: HirId,
         scope: DefId,
     ) -> Option<(ty::AssocItem, /*scope*/ DefId)> {
         let tcx = self.tcx();
 
-        let (ident, def_scope) = tcx.adjust_ident_and_get_scope(ident, scope, block);
+        let (ident, def_scope) = tcx.adjust_ident_and_get_scope(ident, scope, self.item_def_id());
         // We have already adjusted the item name above, so compare with `.normalize_to_macros_2_0()`
         // instead of calling `filter_by_name_and_kind` which would needlessly normalize the
         // `ident` again and again.
@@ -3501,8 +3495,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     }
                     (FIRST_VARIANT, def.non_enum_variant())
                 };
-                let block = tcx.local_def_id_to_hir_id(item_def_id);
-                let (ident, def_scope) = tcx.adjust_ident_and_get_scope(field, def.did(), block);
+                let (ident, def_scope) =
+                    tcx.adjust_ident_and_get_scope(field, def.did(), item_def_id);
                 if let Some((field_idx, field)) = variant
                     .fields
                     .iter_enumerated()

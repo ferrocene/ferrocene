@@ -9,11 +9,11 @@ use rustc_hir::{self as hir, HirId, LangItem, find_attr};
 use rustc_hir_analysis::autoderef::Autoderef;
 use rustc_infer::infer::BoundRegionConversionTime;
 use rustc_infer::traits::{Obligation, ObligationCause, ObligationCauseCode};
+use rustc_middle::bug;
 use rustc_middle::ty::adjustment::{
     Adjust, Adjustment, AllowTwoPhase, AutoBorrow, AutoBorrowMutability,
 };
 use rustc_middle::ty::{self, FnSig, GenericArgsRef, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
-use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{Ident, Span, sym};
 use rustc_target::spec::{AbiMap, AbiMapping};
@@ -39,11 +39,11 @@ pub(crate) fn check_legal_trait_for_method_call(
     receiver: Option<Span>,
     expr_span: Span,
     trait_id: DefId,
-    body_id: DefId,
+    body_def_id: DefId,
 ) -> Result<(), ErrorGuaranteed> {
     if tcx.is_lang_item(trait_id, LangItem::Drop)
         // Allow calling `Drop::pin_drop` in `Drop::drop`
-        && !tcx.is_lang_item(tcx.parent(body_id), LangItem::Drop)
+        && !tcx.is_lang_item(tcx.parent(body_def_id), LangItem::Drop)
     {
         let sugg = if let Some(receiver) = receiver.filter(|s| !s.is_empty()) {
             diagnostics::ExplicitDestructorCallSugg::Snippet {
@@ -724,17 +724,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return None;
         };
 
-        let Some(path_res_id) = info.call_path_res else { return None };
-
         // Check that delegation has first provided arg and that the call path
         // resolves to a trait method (inherent methods are not yet supported).
         if arg_exprs.is_empty()
-            || !self.tcx.opt_associated_item(path_res_id).is_some_and(|i| i.is_method())
+            || !self.tcx.opt_associated_item(info.call_path_res).is_some_and(|i| i.is_method())
         {
             return None;
         }
 
-        Some(ProbeScope::Single(path_res_id))
+        Some(ProbeScope::Single(info.call_path_res))
     }
 
     /// Attempts to reinterpret `method(rcvr, args...)` as `rcvr.method(args...)`
@@ -1042,7 +1040,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         callee_did: DefId,
         callee_args: GenericArgsRef<'tcx>,
     ) {
-        let const_context = self.tcx.hir_body_const_context(self.body_id);
+        let const_context = self.tcx.hir_body_const_context(self.body_def_id);
 
         if let hir::Constness::Const { always: true } = self.tcx.constness(callee_did) {
             match const_context {
@@ -1062,7 +1060,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
 
         // If we have `rustc_do_not_const_check`, do not check `[const]` bounds.
-        if self.has_rustc_attrs && find_attr!(self.tcx, self.body_id, RustcDoNotConstCheck) {
+        if self.has_rustc_attrs && find_attr!(self.tcx, self.body_def_id, RustcDoNotConstCheck) {
             return;
         }
 
@@ -1186,11 +1184,16 @@ impl<'a, 'tcx> DeferredCallResolution<'tcx> {
                 );
             }
             None => {
-                span_bug!(
-                    self.call_expr.span,
-                    "Expected to find a suitable `Fn`/`FnMut`/`FnOnce` implementation for `{}`",
-                    self.closure_ty
-                )
+                let guar = fcx.tainted_by_errors().unwrap_or_else(|| {
+                    fcx.dcx().span_delayed_bug(
+                        self.call_expr.span,
+                        format!(
+                            "Expected to find a suitable `Fn`/`FnMut`/`FnOnce` implementation for `{}`",
+                            self.closure_ty
+                        ),
+                    )
+                });
+                fcx.write_resolution(self.call_expr.hir_id, Err(guar));
             }
         }
     }

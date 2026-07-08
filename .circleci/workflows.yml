@@ -1046,6 +1046,20 @@ workflows:
           resource_class: arm.medium
           awscli_version: << pipeline.parameters.awscli-version >>
 
+      # Facade Test Infrastructure
+      # The image gets built for every job because it needs to contain build results per job
+      # The image is currently based on our ubuntu 24.04. CI image and get rebuilt in line with that
+      - ferrocene/build_docker:
+          name: build-docker-facade-testserver-x86_64
+          image: facade-test-server
+          base_image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>.facade-testserver
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+          requires:
+            - build-docker--ubuntu-24--x86_64
+
       - misc-checks:
          requires:
            - build-docker--ubuntu-20--x86_64
@@ -1133,23 +1147,6 @@ workflows:
       - x86_64-linux-library-coverage:
           requires:
             - x86_64-linux-build
-
-
-      # Facade Test Infrastructure
-      # The image gets built for every job because it needs to contain build results per job
-      # The image is currently based on a plai ubuntu 24.04. base image
-      - ferrocene/build_docker:
-          name: build-docker-facade-testserver-x86_64
-          image: facade-test-server
-          base_image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.facade-testserver
-          rebuild: true
-          resource_class: large.gen2
-          awscli_version: << pipeline.parameters.awscli-version >>
-          restore_from_job: x86_64-linux-build
-          requires:
-            - x86_64-linux-build
-            - build-docker--ubuntu-20--x86_64
 
       - facade-generic-test:
           name: aarch64-none-test-library-compiletest
@@ -1249,7 +1246,7 @@ workflows:
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.facade-testserver
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>.facade-testserver
           requires:
             - x86_64-linux-build
             - build-docker-facade-testserver-x86_64

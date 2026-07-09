@@ -847,7 +847,11 @@ fn run_test(
     let output_file = make_maybe_absolute_path(output_file);
     if let Some(tool) = &rustdoc_options.test_runtool {
         let tool = make_maybe_absolute_path(tool.into());
-        cmd = Command::new(tool);
+        cmd = Command::new(&tool);
+        if doctest.is_multiple_tests() {
+            cmd.env("RUSTDOC_DOCTEST_BIN_PATH", &output_file);
+            cmd.env("RUSTDOC_DOCTEST_RUNNER_PATH", &tool);
+        }
         cmd.args(&rustdoc_options.test_runtool_args);
         cmd.arg(&output_file);
     } else {

@@ -11,6 +11,7 @@
 // missing <assert.h>, missing libraries, and breakage when not using -fPIC
 //@ ignore-ferrocene.facade
 //@ ignore-nto
+//@ ignore-qnx
 
 use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
 

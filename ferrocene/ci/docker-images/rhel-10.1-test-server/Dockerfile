@@ -10,7 +10,7 @@ FROM --platform=$TARGETPLATFORM registry.access.redhat.com/ubi10:10.1
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-COPY --chmod=0700 ferrocene/ci/docker-images/common/run-testserver.sh /bin/run-testserver.sh
+COPY --chmod=0700 ferrocene/ci/docker-images/ubuntu-24/run-testserver.sh /bin/run-testserver.sh
 
 RUN mkdir -p /bin/test-server/aarch64-unknown-linux-gnu
 RUN mkdir -p /bin/test-server/aarch64-rhivos2-linux-gnu

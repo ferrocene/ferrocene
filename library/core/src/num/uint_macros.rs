@@ -435,7 +435,8 @@ macro_rules! uint_impl {
         ///
         /// # Examples
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         /// #![feature(integer_cast_extras)]
         #[doc = concat!("let _ = ", stringify!($SelfT), "::MAX.strict_cast_signed();")]
         /// ```
@@ -934,7 +935,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = (", stringify!($SelfT), "::MAX - 2).strict_add(3);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1026,11 +1028,13 @@ macro_rules! uint_impl {
         ///
         /// The following panic because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 1", stringify!($SelfT), ".strict_add_signed(-2);")]
         /// ```
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = (", stringify!($SelfT), "::MAX - 2).strict_add_signed(3);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1090,7 +1094,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 0", stringify!($SelfT), ".strict_sub(1);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1212,11 +1217,13 @@ macro_rules! uint_impl {
         ///
         /// The following panic because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 1", stringify!($SelfT), ".strict_sub_signed(2);")]
         /// ```
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = (", stringify!($SelfT), "::MAX).strict_sub_signed(-1);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1422,7 +1429,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of division by zero:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = (1", stringify!($SelfT), ").strict_div(0);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1476,7 +1484,8 @@ macro_rules! uint_impl {
         /// ```
         /// The following panics because of division by zero:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = (1", stringify!($SelfT), ").strict_div_euclid(0);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1622,7 +1631,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of division by zero:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 5", stringify!($SelfT), ".strict_rem(0);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1678,7 +1688,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of division by zero:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 5", stringify!($SelfT), ".strict_rem_euclid(0);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -1980,7 +1991,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 1", stringify!($SelfT), ".strict_neg();")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -2037,7 +2049,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 0x10", stringify!($SelfT), ".strict_shl(129);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -2224,7 +2237,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = 0x10", stringify!($SelfT), ".strict_shr(129);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]
@@ -2451,7 +2465,8 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         #[doc = concat!("let _ = ", stringify!($SelfT), "::MAX.strict_pow(2);")]
         /// ```
         #[ferrocene::prevalidated]
@@ -4357,7 +4372,8 @@ macro_rules! uint_impl {
         ///
         /// The following will panic:
         ///
-        /// ```should_panic
+        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
         /// #![feature(integer_casts)]
         #[doc = concat!("let _ = 128", stringify!($SelfT), ".strict_cast::<i8>();")]
         /// ```

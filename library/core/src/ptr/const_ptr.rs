@@ -1417,7 +1417,8 @@ impl<T> *const T {
     /// You must ensure that the pointer is valid and not null before dereferencing
     /// the raw slice. A slice reference must never have a null pointer, even if it's empty.
     ///
-    /// ```rust,should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```rust,should_panic")]
     /// #![feature(ptr_cast_slice)]
     /// use std::ptr;
     /// let danger: *const [u8] = ptr::null::<u8>().cast_slice(0);

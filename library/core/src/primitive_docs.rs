@@ -346,7 +346,8 @@ impl ! {}
 /// ['\u{D800}', '\u{DFFF}', '\u{110000}'];
 /// ```
 ///
-/// ```should_panic
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// // Panics; from_u32 returns None.
 /// char::from_u32(0xDE01).unwrap();
 /// ```
@@ -880,7 +881,8 @@ mod prim_array {}
 /// ```
 ///
 /// It is not allowed to use subranges that start with lower bound bigger than `slice.len()`:
-/// ```should_panic
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// let x = vec![1, 2, 3];
 /// let _ = &x[4..4];
 /// ```

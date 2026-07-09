@@ -946,7 +946,8 @@ impl<T> Option<T> {
     /// assert_eq!(x.expect("fruits are healthy"), "value");
     /// ```
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// let x: Option<&str> = None;
     /// x.expect("fruits are healthy"); // panics with `fruits are healthy`
     /// ```
@@ -956,7 +957,8 @@ impl<T> Option<T> {
     /// We recommend that `expect` messages are used to describe the reason you
     /// _expect_ the `Option` should be `Some`.
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// # let slice: &[u8] = &[];
     /// let item = slice.get(0)
     ///     .expect("slice should not be empty");
@@ -1012,7 +1014,8 @@ impl<T> Option<T> {
     /// assert_eq!(x.unwrap(), "air");
     /// ```
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// let x: Option<&str> = None;
     /// assert_eq!(x.unwrap(), "air"); // fails
     /// ```

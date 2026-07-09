@@ -420,7 +420,8 @@ const impl<T> From<legacy::RangeInclusive<T>> for RangeInclusive<T> {
     /// assert_eq!((empty.start, empty.last), (0, 0));
     /// ```
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use core::range::legacy;
     /// use core::range::RangeInclusive;
     ///

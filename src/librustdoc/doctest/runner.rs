@@ -126,6 +126,7 @@ mod __doctest_mod {{
     use std::process::ExitCode;
 
     pub static BINARY_PATH: OnceLock<PathBuf> = OnceLock::new();
+    pub static RUNNER_PATH: OnceLock<PathBuf> = OnceLock::new();
     pub const RUN_OPTION: &str = \"RUSTDOC_DOCTEST_RUN_NB_TEST\";
 
     #[allow(unused)]
@@ -135,7 +136,14 @@ mod __doctest_mod {{
 
     #[allow(unused)]
     pub fn doctest_runner(bin: &std::path::Path, test_nb: usize) -> ExitCode {{
-        let out = std::process::Command::new(bin)
+        let cmd = if let Some(runner) = RUNNER_PATH.get() {{
+            let mut cmd = std::process::Command::new(runner);
+            cmd.arg(bin);
+            cmd
+        }} else {{
+            std::process::Command::new(bin)
+        }};
+        let out = cmd
             .env(self::RUN_OPTION, test_nb.to_string())
             .args(std::env::args().skip(1).collect::<Vec<_>>())
             .output()
@@ -173,9 +181,13 @@ let tests = {{
 }};
 let test_args = &[{test_args}];
 const ENV_BIN: &'static str = \"RUSTDOC_DOCTEST_BIN_PATH\";
+const RUNNER_BIN: &'static str = \"RUSTDOC_DOCTEST_RUNNER_PATH\";
 
 if let Ok(binary) = std::env::var(ENV_BIN) {{
     let _ = crate::__doctest_mod::BINARY_PATH.set(binary.into());
+    if let Ok(runner) = std::env::var(RUNNER_BIN) {{
+        let _ = crate::__doctest_mod::RUNNER_PATH.set(runner.into());
+    }}
     unsafe {{ std::env::remove_var(ENV_BIN); }}
     return std::process::Termination::report(test::test_main(test_args, tests, None));
 }} else if let Ok(nb_test) = std::env::var(__doctest_mod::RUN_OPTION) {{

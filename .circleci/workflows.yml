@@ -1262,6 +1262,7 @@ workflows:
             - aarch64-qnx-test-library-compiletest
             # - aarch64-qnx8-test-library-compiletest
             - aarch64-none-test-library-compiletest
+            - aarch64-none-library-coverage
             - aarch64-none-test-target-cpu-library-compiletest
             - aarch64r82-none-test-library-compiletest
             - aarch64v8r-none-test-library-compiletest
@@ -1331,6 +1332,16 @@ workflows:
           test-variant: 2021-cortex-a53
           qemu-arch: qemu-aarch64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: aarch64-none-library-coverage
+          target: aarch64-unknown-ferrocene.facade
+          test-variant: 2021-cortex-a53
+          qemu-arch: qemu-aarch64
+          tasks: --coverage=library library/core library/alloc --tests
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

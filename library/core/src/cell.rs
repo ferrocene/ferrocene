@@ -1126,7 +1126,8 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// An example of panic:
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::cell::RefCell;
     ///
     /// let c = RefCell::new(5);
@@ -1228,7 +1229,8 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// An example of panic:
     ///
-    /// ```should_panic
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::cell::RefCell;
     ///
     /// let c = RefCell::new(5);

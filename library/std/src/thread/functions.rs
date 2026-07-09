@@ -186,8 +186,7 @@ pub fn yield_now() {
 ///
 /// # Examples
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// use std::thread;
 ///
 /// struct SomeStruct;

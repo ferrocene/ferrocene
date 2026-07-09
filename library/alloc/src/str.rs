@@ -804,8 +804,7 @@ impl str {
     ///
     /// A panic upon overflow:
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// // this will panic at runtime
     /// let huge = "0123456789abcdef".repeat(usize::MAX);
     /// ```

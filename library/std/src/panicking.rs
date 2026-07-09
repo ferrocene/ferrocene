@@ -129,8 +129,7 @@ static HOOK: RwLock<Hook> = RwLock::new(Hook::Default);
 ///
 /// The following will print "Custom panic hook":
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// use std::panic;
 ///
 /// panic::set_hook(Box::new(|_| {
@@ -168,8 +167,7 @@ pub fn set_hook(hook: Box<dyn Fn(&PanicHookInfo<'_>) + 'static + Sync + Send>) {
 ///
 /// The following will print "Normal panic":
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// use std::panic;
 ///
 /// panic::set_hook(Box::new(|_| {
@@ -204,8 +202,7 @@ pub fn take_hook() -> Box<dyn Fn(&PanicHookInfo<'_>) + 'static + Sync + Send> {
 ///
 /// The following will print the custom message, and then the normal output of panic.
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// #![feature(panic_update_hook)]
 /// use std::panic;
 ///

@@ -90,7 +90,7 @@ need not be a literal, and is not interpreted as a format string.
 
 # Examples
 
-```should_panic
+```should_panic,ignore-ferrocene.facade
 # #![allow(unreachable_code)]
 panic!();
 panic!("this is a terrible mistake!");

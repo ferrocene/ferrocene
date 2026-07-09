@@ -1689,8 +1689,7 @@ impl<T> *mut T {
     /// You must ensure that the pointer is valid and not null before dereferencing
     /// the raw slice. A slice reference must never have a null pointer, even if it's empty.
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```rust,should_panic")]
+    /// ```rust,should_panic,ignore-ferrocene.facade
     /// #![feature(ptr_cast_slice)]
     /// use std::ptr;
     /// let danger: *mut [u8] = ptr::null_mut::<u8>().cast_slice(0);

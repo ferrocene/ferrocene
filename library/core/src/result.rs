@@ -1167,8 +1167,7 @@ impl<T, E> Result<T, E> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.expect("Testing expect"); // panics with `Testing expect: emergency failure`
     /// ```
@@ -1178,8 +1177,7 @@ impl<T, E> Result<T, E> {
     /// We recommend that `expect` messages are used to describe the reason you
     /// _expect_ the `Result` should be `Ok`.
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// let path = std::env::var("IMPORTANT_PATH")
     ///     .expect("env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`");
     /// ```
@@ -1238,8 +1236,7 @@ impl<T, E> Result<T, E> {
     /// assert_eq!(x.unwrap(), 2);
     /// ```
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.unwrap(); // panics with `emergency failure`
     /// ```
@@ -1307,8 +1304,7 @@ impl<T, E> Result<T, E> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// let x: Result<u32, &str> = Ok(10);
     /// x.expect_err("Testing expect_err"); // panics with `Testing expect_err: 10`
     /// ```
@@ -1335,8 +1331,7 @@ impl<T, E> Result<T, E> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+    /// ```should_panic,ignore-ferrocene.facade
     /// let x: Result<u32, &str> = Ok(2);
     /// x.unwrap_err(); // panics with `2`
     /// ```

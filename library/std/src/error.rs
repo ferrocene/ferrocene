@@ -75,8 +75,7 @@ use crate::fmt::{self, Write};
 /// Report prints the same output via `Display` and `Debug`, so it works well with
 /// [`Result::unwrap`]/[`Result::expect`] which print their `Err` variant via `Debug`:
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// #![feature(error_reporter)]
 /// use std::error::Report;
 /// # use std::error::Error;
@@ -124,8 +123,7 @@ use crate::fmt::{self, Write};
 /// the `Debug` output means `Report` is an ideal starting place for formatting errors returned
 /// from `main`.
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// #![feature(error_reporter)]
 /// use std::error::Report;
 /// # use std::error::Error;
@@ -172,8 +170,7 @@ use crate::fmt::{self, Write};
 /// output format. If you want to make sure your `Report`s are pretty printed and include backtrace
 /// you will need to manually convert and enable those flags.
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic,ignore-ferrocene.facade
 /// #![feature(error_reporter)]
 /// use std::error::Report;
 /// # use std::error::Error;

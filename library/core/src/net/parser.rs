@@ -469,7 +469,7 @@ enum AddrKind {
 /// `AddrParseError` may be thrown because the provided string does not parse as the given type,
 /// often because it includes information only handled by a different address type.
 ///
-/// ```should_panic
+/// ```should_panic,ignore-ferrocene.facade
 /// use std::net::IpAddr;
 /// let _foo: IpAddr = "127.0.0.1:8080".parse().expect("Cannot handle the socket port");
 /// ```

@@ -65,7 +65,7 @@ to developers debugging the panic ("expect as precondition").
 In the former case the expect message is used to describe the error that
 has occurred which is considered a bug. Consider the following example:
 
-```should_panic
+```should_panic,ignore-ferrocene.facade
 // Read environment variable, panic if it is not present
 let path = std::env::var("IMPORTANT_PATH").unwrap();
 ```
@@ -73,7 +73,7 @@ let path = std::env::var("IMPORTANT_PATH").unwrap();
 In the "expect as error message" style we would use expect to describe
 that the environment variable was not set when it should have been:
 
-```should_panic
+```should_panic,ignore-ferrocene.facade
 let path = std::env::var("IMPORTANT_PATH")
     .expect("env variable `IMPORTANT_PATH` is not set");
 ```
@@ -82,7 +82,7 @@ In the "expect as precondition" style, we would instead describe the
 reason we _expect_ the `Result` should be `Ok`. With this style we would
 prefer to write:
 
-```should_panic
+```should_panic,ignore-ferrocene.facade
 let path = std::env::var("IMPORTANT_PATH")
     .expect("env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`");
 ```

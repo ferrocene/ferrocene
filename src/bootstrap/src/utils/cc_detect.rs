@@ -82,6 +82,12 @@ pub fn fill_compilers(build: &mut Build) {
         }
 
         _ => {
+            // Ferrocene addition: Load the matching target for each facade target
+            let not_facade_targets = build.targets.iter().filter_map(|target| {
+                contains_ferrocene_vendors(target.triple)
+                    .then(|| TargetSelection::from_user(&replace_ferrocene_vendors(target.triple)))
+            });
+
             // For all targets we're going to need a C compiler for building some shims
             // and such as well as for being a linker for Rust code.
             build
@@ -90,6 +96,8 @@ pub fn fill_compilers(build: &mut Build) {
                 .chain(&build.hosts)
                 .cloned()
                 .chain(iter::once(build.host_target))
+                // Ferrocene addition: see above
+                .chain(not_facade_targets)
                 .collect()
         }
     };

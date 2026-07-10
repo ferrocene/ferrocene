@@ -108,7 +108,8 @@ fn main() {
         // Checks that only make sense for the compiler.
         check!(error_codes, &root_path, &[&compiler_path, &librustdoc_path]);
         check!(target_policy, &root_path);
-        check!(gcc_submodule, &root_path, &compiler_path);
+        // Ferrocene addition
+        //check!(gcc_submodule, &root_path, &compiler_path);
         check!(codegen, &compiler_path);
 
         // Checks that only make sense for the std libs.

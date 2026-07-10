@@ -85,10 +85,6 @@ expression: fix
     targets: [x86_64-unknown-linux-gnu]
     - Set({fix::cg_clif})
     - Set({fix::rustc_codegen_cranelift})
-[Fix] check::GccCodegenBackend
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({fix::cg_gcc})
-    - Set({fix::rustc_codegen_gcc})
 [Fix] check::Clippy
     targets: [x86_64-unknown-linux-gnu]
     - Set({fix::src/tools/clippy})

@@ -897,12 +897,12 @@ pub const SCM_TIMESTAMP: c_int = 0x02;
 // QNX Network Stack Versioning:
 //
 // The `if` block targets the legacy `io-pkt` stack.
-// - target_env = "nto70": QNX 7.0
-// - target_env = "nto71": Standard QNX 7.1 (default legacy stack)
+// - target_env = "nto70": QNX SDP 7.0
+// - target_env = "nto71": Standard QNX SDP 7.1 (default legacy stack)
 //
 // The `else` block targets the modern `io-sock` stack.
-// - target_env = "nto71_iosock": QNX 7.1 with the optional new stack
-// - target_env = "nto80": QNX 8.0
+// - target_env = "nto71_iosock": QNX SDP 7.1 with the optional net stack
+// - target_os = "qnx": QNX SDP 8.0
 cfg_if! {
     if #[cfg(any(target_env = "nto70", target_env = "nto71"))] {
         pub const SCM_CREDS: c_int = 0x04;
@@ -2397,7 +2397,7 @@ pub const PTHREAD_PROCESS_SHARED: c_int = 0x01;
 
 pub const PTHREAD_KEYS_MAX: usize = 128;
 
-#[cfg(not(any(target_env = "nto71", target_env = "nto80")))]
+#[cfg(not(any(target_env = "nto71", target_os = "qnx")))]
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x80000000,
     __owner: 0xffffffff,
@@ -2407,7 +2407,7 @@ pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x82000000,
     __owner: 0,
 };
-#[cfg(target_env = "nto80")]
+#[cfg(target_os = "qnx")]
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x80000000,
     __owner: 0,

@@ -85,10 +85,6 @@ expression: check
     targets: [x86_64-unknown-linux-gnu]
     - Set({check::cg_clif})
     - Set({check::rustc_codegen_cranelift})
-[Check] check::GccCodegenBackend
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({check::cg_gcc})
-    - Set({check::rustc_codegen_gcc})
 [Check] check::Clippy
     targets: [x86_64-unknown-linux-gnu]
     - Set({check::src/tools/clippy})

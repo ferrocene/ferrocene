@@ -80,7 +80,9 @@ impl Step for Gcc {
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("src/gcc").alias("gcc")
+        // Ferrocene modification: As we have removed the gcc submodule,
+        // `run.path("src/gcc")` would error out. Use `alias` instead.
+        run.alias("src/gcc").alias("gcc")
     }
 
     fn make_run(run: RunConfig<'_>) {

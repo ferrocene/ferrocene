@@ -131,6 +131,12 @@ pub fn codegen_backend_stamp(
     target: TargetSelection,
     backend: &CodegenBackendKind,
 ) -> BuildStamp {
+    // Ferrocene addition
+    if *backend == CodegenBackendKind::Gcc {
+        eprintln!("error: Ferrocene does not support the gcc codegen backend");
+        build_helper::exit!(1);
+    }
+
     BuildStamp::new(&builder.cargo_out(compiler, Mode::Codegen, target))
         .with_prefix(&format!("lib{}", backend.crate_name()))
 }

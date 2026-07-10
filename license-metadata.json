@@ -467,69 +467,6 @@
           {
             "children": [
               {
-                "children": [
-                  {
-                    "children": [
-                      {
-                        "directories": [],
-                        "files": [
-                          "analyzer-decls.h",
-                          "malloc-macro.h",
-                          "sarif-path-role.h"
-                        ],
-                        "license": {
-                          "copyright": [
-                            "2000-2024 Free Software Foundation, Inc"
-                          ],
-                          "spdx": "GPL-2.0-only"
-                        },
-                        "type": "group"
-                      }
-                    ],
-                    "license": {
-                      "copyright": [
-                        "2007-2011 Atheros Communications Inc",
-                        "2011-2012,2017 Qualcomm Atheros, Inc",
-                        "2016-2017 Erik Stromdahl <erik.stromdahl@gmail.com>"
-                      ],
-                      "spdx": "ISC"
-                    },
-                    "name": "c-c++-common/analyzer",
-                    "type": "directory"
-                  }
-                ],
-                "license": {
-                  "copyright": [
-                    "2000-2024 Free Software Foundation, Inc"
-                  ],
-                  "spdx": "GPL-2.0-only"
-                },
-                "name": "gcc/testsuite",
-                "type": "directory"
-              },
-              {
-                "license": {
-                  "copyright": [
-                    "2000-2024 Free Software Foundation, Inc"
-                  ],
-                  "spdx": "GCC-exception-3.1"
-                },
-                "name": "libstdc++-v3/config/os/aix/os_defines.h",
-                "type": "file"
-              }
-            ],
-            "license": {
-              "copyright": [
-                "1997-2024 Free Software Foundation, Inc"
-              ],
-              "spdx": "GPL-3.0-or-later"
-            },
-            "name": "src/gcc",
-            "type": "directory"
-          },
-          {
-            "children": [
-              {
                 "license": {
                   "copyright": [
                     "The Rust Project Developers (see https://thanks.rust-lang.org)"

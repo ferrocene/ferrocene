@@ -2020,7 +2020,6 @@ mod snapshot {
         [check] rustc 1 <host> -> rustc 2 <target1>
         [check] rustc 1 <host> -> Rustdoc 2 <target1>
         [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <target1>
-        [check] rustc 1 <host> -> rustc_codegen_gcc 2 <target1>
         [check] rustc 1 <host> -> Clippy 2 <target1>
         [check] rustc 1 <host> -> Miri 2 <target1>
         [check] rustc 1 <host> -> CargoMiri 2 <target1>

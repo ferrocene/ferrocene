@@ -56,7 +56,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-ferrocene.facade", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
-    TargetSpec { tuple: "aarch64-unknown-nto-qnx800", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "aarch64-unknown-qnx", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "aarch64r82-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec {
         tuple: "aarch64r82-unknown-none-softfloat",
@@ -103,7 +103,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { tuple: "thumbv8m.main-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "thumbv8m.main-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { tuple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
-    TargetSpec { tuple: "x86_64-pc-nto-qnx800", std: true, linker: Linker::BundledLld },
+    TargetSpec { tuple: "x86_64-pc-qnx", std: true, linker: Linker::BundledLld },
     TargetSpec { tuple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
 ];
 

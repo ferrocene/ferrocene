@@ -41,6 +41,7 @@ use crate::core::config::flags::{
 };
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
+use crate::ferrocene::doc::code_coverage::AllCoverageReports;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestCondition, TestVariant};
 use crate::ferrocene::tool::SymbolReport;
@@ -200,8 +201,29 @@ You can skip linkcheck with --skip src/tools/linkchecker"
             return;
         }
 
+        // Ferrocene note: The dependency list here should match Docs::run() in
+        // src/bootstrap/src/ferrocene/dist.rs
+        //
+        // Currently we leave out the compiler docs here, as we don't link to
+        // them from our public docs page yet. But we eventually plan to do so.
+        // When we do that, we'll need to:
+        // 1) Add
+        //      use crate::core::build_steps::doc::Rustc;
+        //      builder.ensure(Rustc::for_stage(builder, builder.top_stage, host));
+        //    to build the compiler docs
+        // 2) Teach the linkchecker about the remapping
+        //      .../compiler-doc -> .../doc/rustc-docs
+        //    which we apply in the dist tarball.
+
         // Build all the default documentation.
         builder.run_default_doc_steps();
+
+        // Build coverage reports if relevant
+        if host.has_certified_subset() {
+            builder.ensure(AllCoverageReports { target: host });
+        } else {
+            builder.info(&format!("skipping Build ferrocene-coverage ({})", host));
+        }
 
         // Build the linkchecker before calling `msg`, since GHA doesn't support nested groups.
         let linkchecker = builder.tool_cmd(Tool::Linkchecker);

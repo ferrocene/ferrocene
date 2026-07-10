@@ -175,10 +175,7 @@ FLS maintenance
 
 - Changed paragraph: :p:`fls_1941wid94hlg`
 
-- New paragraphs:
-
-  - :p:`fls_CSuxTkwR96j9`
-  - :p:`fls_LV94x3HlpBWk`
+- New paragraph: :p:`fls_LV94x3HlpBWk`
 
 - Replace the term "simple path prefix" with "common path prefix", to improve clarity.
 

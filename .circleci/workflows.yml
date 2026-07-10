@@ -1101,6 +1101,7 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+            - aarch64-none-test-library-compiletest
 
       - ferrocene/facade_generic_test:
           name: aarch64r82-none-test-library-compiletest
@@ -1201,9 +1202,9 @@ workflows:
             - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
-          name: thumbv7em-eabi-test-library-compiletest
-          target: thumbv7em-ferrocene.facade-eabi
-          test_variant: 2021-cortex-m4
+          name: thumbv7em-eabihf-test-target-cpu-library-compiletest
+          target: thumbv7em-ferrocene.facade-eabihf
+          test_variant: 2021-specific-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
           qemu_cpu: cortex-m4
@@ -1214,11 +1215,12 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+            - thumbv7em-eabihf-test-library-compiletest
 
       - ferrocene/facade_generic_test:
-          name: thumbv7em-eabihf-test-target-cpu-library-compiletest
-          target: thumbv7em-ferrocene.facade-eabihf
-          test_variant: 2021-specific-cortex-m4
+          name: thumbv7em-eabi-test-library-compiletest
+          target: thumbv7em-ferrocene.facade-eabi
+          test_variant: 2021-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
           qemu_cpu: cortex-m4
@@ -1244,6 +1246,7 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+            - thumbv7em-eabi-test-library-compiletest
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest

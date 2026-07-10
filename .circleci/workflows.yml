@@ -236,20 +236,20 @@ jobs:
           qnx7: true
           restore-from-job: x86_64-linux-build
 
-  # x86_64-linux-dist-targets-qnx8:
-  #   executor:
-  #     name: docker-custom-image
-  #     image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #   resource_class: ferrocene/k8s-amd64-large
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
-  #     SCRIPT: |
-  #       ./x.py --stage 2 dist rust-std
-  #   steps:
-  #     - ferrocene-job-dist:
-  #         qnx8: true
-  #         restore-from-job: x86_64-linux-build
+  x86_64-linux-dist-targets-qnx8:
+    executor:
+      name: docker-custom-image
+      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+    resource_class: ferrocene/k8s-amd64-large
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+      SCRIPT: |
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          qnx8: true
+          restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
     executor:
@@ -370,22 +370,22 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  # x86_64-linux-self-test-qnx8:
-  #   executor:
-  #     name: docker-custom-image
-  #     image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-  #   resource_class: ferrocene/k8s-amd64-tiny
-  #   environment:
-  #     FERROCENE_HOST: x86_64-unknown-linux-gnu
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
-  #   steps:
-  #     - ferrocene-git-shallow-clone:
-  #         depth: 1
-  #     - aws-oidc-auth
-  #     - setup-qnx8-toolchain: {}
-  #     - run:
-  #         name: Download dist artifacts and run the self-test tool
-  #         command: ferrocene/ci/scripts/run-self-test.sh
+  x86_64-linux-self-test-qnx8:
+    executor:
+      name: docker-custom-image
+      image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+    resource_class: ferrocene/k8s-amd64-tiny
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+    steps:
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - aws-oidc-auth
+      - setup-qnx8-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
@@ -841,31 +841,31 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # x86_64-windows-self-test-qnx8:
-  #   executor:
-  #     name: win/server-2022
-  #     size: medium # 4-core
-  #     shell: bash.exe -euo pipefail
-  #   environment:
-  #     FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
-  #     FERROCENE_HOST: x86_64-pc-windows-msvc
-  #     FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
-  #   steps:
-  #     - when:
-  #         condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
-  #         steps:
-  #           - ferrocene-git-shallow-clone:
-  #               depth: 1
-  #           - aws-oidc-auth
-  #           - ferrocene-setup-windows
-  #           - setup-uv
-  #           - setup-qnx8-toolchain: {}
-  #           - run:
-  #               name: Download dist artifacts and run the self-test tool
-  #               command: ferrocene/ci/scripts/run-self-test.sh
-  #     - run:
-  #         name: Empty step to make sure the job always has steps
-  #         command: echo
+  x86_64-windows-self-test-qnx8:
+    executor:
+      name: win/server-2022
+      size: medium # 4-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx800,x86_64-pc-nto-qnx800
+    steps:
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - aws-oidc-auth
+            - ferrocene-setup-windows
+            - setup-uv
+            - setup-qnx8-toolchain: {}
+            - run:
+                name: Download dist artifacts and run the self-test tool
+                command: ferrocene/ci/scripts/run-self-test.sh
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   # Test VMs
 
@@ -1258,9 +1258,9 @@ workflows:
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
             - x86_64-qnx-test-library-compiletest
-            # - x86_64-qnx8-test-library-compiletest
+            - x86_64-qnx8-test-library-compiletest
             - aarch64-qnx-test-library-compiletest
-            # - aarch64-qnx8-test-library-compiletest
+            - aarch64-qnx8-test-library-compiletest
             - aarch64-none-test-library-compiletest
             - aarch64-none-test-target-cpu-library-compiletest
             - aarch64r82-none-test-library-compiletest
@@ -1286,9 +1286,9 @@ workflows:
       - x86_64-linux-dist-targets:
           requires:
             - x86_64-linux-build
-      # - x86_64-linux-dist-targets-qnx8:
-      #     requires:
-      #       - x86_64-linux-build
+      - x86_64-linux-dist-targets-qnx8:
+          requires:
+            - x86_64-linux-build
       - x86_64-linux-dist-src:
           requires:
             - x86_64-linux-build
@@ -1376,12 +1376,12 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
-      # - x86_64-linux-self-test-qnx8:
-      #     requires:
-      #       - x86_64-linux-dist
-      #       - x86_64-linux-dist-tools
-      #       - x86_64-linux-dist-targets-qnx8
-      #       - aarch64-linux-dist
+      - x86_64-linux-self-test-qnx8:
+          requires:
+            - x86_64-linux-dist
+            - x86_64-linux-dist-tools
+            - x86_64-linux-dist-targets-qnx8
+            - aarch64-linux-dist
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library-compiletest
@@ -1393,15 +1393,15 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      # - x86_64-qnx8-generic-test-vm:
-      #     name: x86_64-qnx8-test-library-compiletest
-      #     tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
-      #     test-variant: "2021"
-      #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-      #     resource-class: large # 4-core
-      #     requires:
-      #       - x86_64-linux-build
-      #       - build-docker--ubuntu-24--x86_64
+      - x86_64-qnx8-generic-test-vm:
+          name: x86_64-qnx8-test-library-compiletest
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - facade-generic-test:
           name: armv7r-eabihf-test-library-compiletest
@@ -1463,15 +1463,15 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      # - aarch64-qnx8-generic-test-vm:
-      #     name: aarch64-qnx8-test-library-compiletest
-      #     tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
-      #     test-variant: "2021"
-      #     extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-      #     resource-class: large # 4-core
-      #     requires:
-      #       - x86_64-linux-build
-      #       - build-docker--ubuntu-24--x86_64
+      - aarch64-qnx8-generic-test-vm:
+          name: aarch64-qnx8-test-library-compiletest
+          tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
+          test-variant: "2021"
+          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
           requires:
@@ -1575,10 +1575,10 @@ workflows:
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets
-      # - x86_64-windows-self-test-qnx8:
-      #     requires:
-      #       - x86_64-windows-dist
-      #       - x86_64-linux-dist-targets-qnx8
+      - x86_64-windows-self-test-qnx8:
+          requires:
+            - x86_64-windows-dist
+            - x86_64-linux-dist-targets-qnx8
 
       - sbom-gen:
           requires:
@@ -1590,9 +1590,9 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
-            # - x86_64-linux-self-test-qnx8
+            - x86_64-linux-self-test-qnx8
             - x86_64-windows-self-test
-            # - x86_64-windows-self-test-qnx8
+            - x86_64-windows-self-test-qnx8
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test

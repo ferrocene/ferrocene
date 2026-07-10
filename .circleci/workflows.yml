@@ -135,12 +135,12 @@ jobs:
         ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
     steps:
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-checkout:
           llvm-subset: true
       - run:
           name: Perform licensing checks
           command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
             uvx reuse@5.1.1 --include-submodules lint
       - ferrocene-ci
 
@@ -169,10 +169,11 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
       SCRIPT: |
-        source ferrocene/ci/scripts/use-squid-cache.sh
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
-    steps: [ferrocene-job-build]
+    steps:
+      - use-cache-proxy
+      - ferrocene-job-build
 
   x86_64-linux-docs:
     executor:
@@ -321,11 +322,11 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
-        source ferrocene/ci/scripts/use-squid-cache.sh
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-checkout:
           llvm-subset: true
       # - run:
@@ -368,12 +369,11 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - aws-oidc-auth
+      - use-cache-proxy
       - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
-          command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
-            ferrocene/ci/scripts/run-self-test.sh
+          command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-linux-self-test-qnx8:
     executor:
@@ -387,12 +387,11 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - aws-oidc-auth
+      - use-cache-proxy
       - setup-qnx8-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
-          command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
-            ferrocene/ci/scripts/run-self-test.sh
+          command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-qnx-generic-test-vm:
     executor: linux-vm
@@ -497,12 +496,13 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
       SCRIPT: |
-        source ferrocene/ci/scripts/use-squid-cache.sh
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
         ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
-    steps: [ferrocene-job-build]
+    steps:
+      - use-cache-proxy
+      - ferrocene-job-build
 
   aarch64-linux-dist:
     executor:
@@ -649,7 +649,6 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
-        source ferrocene/ci/scripts/use-squid-cache.sh
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
@@ -809,7 +808,6 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
-        source ferrocene/ci/scripts/use-squid-cache.sh
         ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
@@ -900,6 +898,7 @@ jobs:
         sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-checkout
       - setup-uv
       - aws-cli/install:
@@ -916,7 +915,6 @@ jobs:
             docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
       - ferrocene-ci:
           wrapper: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
             docker run \
               --rm \
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
@@ -950,6 +948,7 @@ jobs:
         set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-checkout
       - setup-uv
       - aws-cli/install:
@@ -984,6 +983,7 @@ jobs:
         set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-checkout
       - setup-uv
       - aws-cli/install:
@@ -1026,6 +1026,7 @@ jobs:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
             - aws-oidc-auth
+            - use-cache-proxy
             - ferrocene-git-shallow-clone:
                 depth: 1
             - setup_remote_docker:
@@ -1063,6 +1064,7 @@ jobs:
                 version: << pipeline.parameters.awscli-version >>
                 override_installed: true
             - aws-oidc-auth
+            - use-cache-proxy
             - ferrocene-git-shallow-clone:
                 depth: 1
             - setup_remote_docker:
@@ -1088,15 +1090,14 @@ jobs:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-git-shallow-clone:
           depth: 1
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
       - run:
           name: Install required packages
-          command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
-            sudo apt update && sudo apt install zstd
+          command: sudo apt update && sudo apt install zstd
       - run:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
@@ -1118,15 +1119,14 @@ jobs:
           version: << pipeline.parameters.awscli-version >>
           override_installed: true
       - aws-oidc-auth
+      - use-cache-proxy
       - ferrocene-git-shallow-clone:
           depth: 1
       - setup_remote_docker:
           version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
       - run:
           name: Install required packages
-          command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
-            sudo apt update && sudo apt install zstd
+          command: sudo apt update && sudo apt install zstd
       - run:
           name: Restore files from the aarch64-linux-build job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore aarch64-linux-build
@@ -1180,6 +1180,7 @@ jobs:
               - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
             - aws-oidc-auth
+            - use-cache-proxy
             - ferrocene-git-shallow-clone:
                 depth: 1
             - run:
@@ -1914,9 +1915,7 @@ commands:
     steps:
       - run:
           name: Setup uv
-          command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
-            ferrocene/ci/scripts/setup-uv.sh
+          command: ferrocene/ci/scripts/setup-uv.sh
 
   ferrocene-checkout:
     description: Checkout the Ferrocene source code
@@ -1989,7 +1988,6 @@ commands:
           name: Fetch QNX710 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
             ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
@@ -2009,7 +2007,6 @@ commands:
           name: Fetch QNX800 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            source ferrocene/ci/scripts/use-squid-cache.sh
             ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
@@ -2049,6 +2046,15 @@ commands:
       - run:
           name: Authenticate with AWS
           command: aws sts get-caller-identity
+
+  use-cache-proxy:
+    description: Set environment variables for using CI cache proxy
+    steps:
+      - run:
+          name: Set environment variables for squid
+          command: |
+            echo 'export http_proxy="http://squid.ci-squid-cache.svc.cluster.local:3148"' >> "$BASH_ENV"
+            echo 'export https_proxy="https://squid.ci-squid-cache.svc.cluster.local:4148"' >> "$BASH_ENV"
 
 executors:
   # Execute on a docker runner with a custom image

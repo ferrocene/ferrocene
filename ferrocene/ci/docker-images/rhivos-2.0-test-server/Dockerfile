@@ -8,7 +8,8 @@ FROM --platform=$TARGETPLATFORM 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-RUN mkdir -p /bin/test-server/aarch64-rhivos2-linux-gnu
 COPY --chmod=0700 ferrocene/ci/docker-images/ubuntu-24/run-testserver.sh /bin/run-testserver.sh
-COPY build/aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /bin/test-server/aarch64-rhivos2-linux-gnu/remote-test-server
+
+RUN mkdir -p /shared/testserver/
+COPY build/aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /shared/testserver/remote-test-server
 CMD [ "sleep", "5000" ]

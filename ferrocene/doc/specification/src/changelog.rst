@@ -40,6 +40,17 @@ Language changes in Rust 1.97.0
 
 - `Allow trailing 'self' in imports in more cases <https://github.com/rust-lang/rust/pull/155137>`_
 
+  Changed paragraphs:
+
+  - :p:`fls_uSajfdSsbxna`
+  - :p:`fls_2bkcn83smy2y`
+  - :p:`fls_ar03D5rxjzy0`
+
+FLS maintenance
+---------------
+
+New paragraph: :p:`fls_oRdi3KXFbJcR`
+
 Language changes in Rust 1.96.0
 -------------------------------
 

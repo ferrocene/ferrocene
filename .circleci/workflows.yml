@@ -1129,6 +1129,21 @@ workflows:
           requires:
             - x86_64-linux-build
 
+      - ferrocene/facade_generic_test:
+          name: aarch64-none-test-library-compiletest-docker
+          target: aarch64-unknown-ferrocene.facade
+          test_variant: 2021-cortex-a53
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_cpu: cortex-a53
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+
       - facade-generic-test:
           name: aarch64-none-test-target-cpu-library-compiletest
           target: aarch64-unknown-ferrocene.facade
@@ -1138,6 +1153,21 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - ferrocene/facade_generic_test:
+          name: aarch64-none-test-target-cpu-library-compiletest-docker
+          target: aarch64-unknown-ferrocene.facade
+          test_variant: 2021-specific-cortex-a53
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_cpu: cortex-a53
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
 
       - facade-generic-test:
           name: aarch64r82-none-test-library-compiletest
@@ -1149,6 +1179,21 @@ workflows:
           requires:
             - x86_64-linux-build
 
+      - ferrocene/facade_generic_test:
+          name: aarch64r82-none-test-library-compiletest-docker
+          target: aarch64r82-unknown-ferrocene.facade
+          test_variant: 2021-neoverse-v1
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_cpu: neoverse-v1
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+
       - facade-generic-test:
           name: aarch64v8r-none-test-library-compiletest
           target: aarch64v8r-unknown-ferrocene.facade
@@ -1158,6 +1203,22 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+
+      - ferrocene/facade_generic_test:
+          name: aarch64v8r-none-test-library-compiletest-docker
+          target: aarch64v8r-unknown-ferrocene.facade
+          test_variant: 2021-neoverse-v1
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_cpu: neoverse-v1
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
 
       - wasm-dist-oxidos:
           requires:
@@ -1216,16 +1277,11 @@ workflows:
           qemu_cpu: cortex-r5f
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
-<<<<<<< HEAD
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
-          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator-<< pipeline.parameters.docker-images-hash >>--x86_64.facade-testserver
-=======
-          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
->>>>>>> 2fa6a5cc0a7 (fold the facade-testserver image into the ubuntu-24)
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+            - build-docker--emulator--x86_64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-library-compiletest
@@ -1237,6 +1293,21 @@ workflows:
           requires:
             - x86_64-linux-build
 
+      - ferrocene/facade_generic_test:
+          name: thumbv7em-eabihf-test-library-compiletest-docker
+          target: thumbv7em-ferrocene.facade-eabihf
+          test_variant: 2021-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_cpu: cortex-m4
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+
       - facade-generic-test:
           name: thumbv7em-eabi-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
@@ -1246,6 +1317,21 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - ferrocene/facade_generic_test:
+          name: thumbv7em-eabi-test-library-compiletest-docker
+          target: thumbv7em-ferrocene.facade-eabi
+          test_variant: 2021-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_cpu: cortex-m4
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
 
       - facade-generic-test:
           name: thumbv7em-eabihf-test-target-cpu-library-compiletest
@@ -1257,6 +1343,21 @@ workflows:
           requires:
             - x86_64-linux-build
 
+      - ferrocene/facade_generic_test:
+          name: thumbv7em-eabihf-test-target-cpu-library-compiletest-docker
+          target: thumbv7em-ferrocene.facade-eabihf
+          test_variant: 2021-specific-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_cpu: cortex-m4
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+
       - facade-generic-test:
           name: thumbv7em-eabi-test-target-cpu-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
@@ -1266,6 +1367,22 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+
+      - ferrocene/facade_generic_test:
+          name: thumbv7em-eabi-test-target-cpu-library-compiletestt-docker
+          target: thumbv7em-ferrocene.facade-eabi
+          test_variant: 2021-specific-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_cpu: cortex-m4
+          restore_from_job: x86_64-linux-build
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest

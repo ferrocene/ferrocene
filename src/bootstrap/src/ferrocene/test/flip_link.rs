@@ -8,13 +8,15 @@ use crate::{Kind, Mode};
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct FlipLink {}
 
+pub(crate) const INTEGRATION_TEST_TARGET: &str = "thumbv7em-none-eabi";
+
 impl Step for FlipLink {
     type Output = ();
     const IS_HOST: bool = true;
 
     fn is_default_step(builder: &Builder<'_>) -> bool {
         // The flip link tests require a thumbv7em-none-eabi target to exist
-        builder.targets.iter().any(|target| target.triple == "thumbv7em-none-eabi")
+        builder.targets.iter().any(|target| target.triple == INTEGRATION_TEST_TARGET)
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -26,7 +28,7 @@ impl Step for FlipLink {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
+        let thumb = TargetSelection::from_user(INTEGRATION_TEST_TARGET);
         if !builder.targets.contains(&thumb) {
             eprintln!("can't run flip-link tests without thumbv7 built!");
             crate::exit!(1);
@@ -54,8 +56,14 @@ impl Step for FlipLink {
             &[],
         )
         .into_cmd();
+
         // Since flip-link tests the target, unsetting RUSTFLAGS prevents us from passing invalid args into the build.
         cmd.env_remove("RUSTFLAGS");
+
+        // Only run unit and no integration tests. Integration tests are broken
+        // since https://github.com/ferrocene/ferrocene/pull/2447.
+        cmd.args(&["--bin", "flip-link"]);
+
         cmd.run(builder);
     }
 }

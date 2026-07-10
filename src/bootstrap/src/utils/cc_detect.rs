@@ -26,6 +26,7 @@ use std::iter;
 use std::path::{Path, PathBuf};
 
 use crate::core::config::{CompressDebuginfo, TargetSelection};
+use crate::ferrocene::test::flip_link;
 use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
@@ -82,6 +83,10 @@ pub fn fill_compilers(build: &mut Build) {
         }
 
         _ => {
+            if build.config.paths.contains(&PathBuf::from("flip-link")) {
+                build.targets.push(TargetSelection::from_user(flip_link::INTEGRATION_TEST_TARGET));
+            }
+
             // Ferrocene addition: Load the matching target for each facade target
             let not_facade_targets = build.targets.iter().filter_map(|target| {
                 contains_ferrocene_vendors(target.triple)

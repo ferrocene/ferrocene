@@ -37,7 +37,8 @@ jobs:
           override_installed: true
 
       - ferrocene/aws_oidc_auth
-      - ferrocene/checkout
+      - ferrocene/git_shallow_clone:
+          depth: 1
       - ferrocene/setup_uv
 
       - run:

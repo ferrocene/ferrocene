@@ -23,7 +23,7 @@ parameters:
 
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
-  ferrocene: ferrocene/ferrocene-common@0.0.2
+  ferrocene: ferrocene/ferrocene-common@26080.3.0
   continuation: circleci/continuation@0.2.0
 
 jobs:

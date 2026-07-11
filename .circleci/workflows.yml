@@ -119,7 +119,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@dev:main
+  ferrocene: ferrocene/ferrocene-common@26080.0.0
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an

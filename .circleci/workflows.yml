@@ -737,6 +737,7 @@ jobs:
             - ferrocene/checkout
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
                 llvm_build: true
             - ferrocene/ci
@@ -776,6 +777,7 @@ jobs:
           steps:
             - ferrocene-job-dist:
                 os: windows
+
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
@@ -797,6 +799,7 @@ jobs:
                 depth: 1
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
             - setup-qnx-toolchain: {}
             - run:
@@ -823,6 +826,7 @@ jobs:
                 depth: 1
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
             - setup-qnx8-toolchain: {}
             - run:
@@ -1467,11 +1471,18 @@ commands:
       llvm_build:
         type: boolean
         default: false
+      awscli_version:
+        type: string
+        default: << pipeline.parameters.awscli-version >>
+      override_installed:
+        type: boolean
+        default: false
     steps:
       - ferrocene/checkout:
           llvm_subset: true
       - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
+          awscli_version: << parameters.awscli_version >>
+          override_installed: << parameters.override_installed >>
           os: <<parameters.os>>
           llvm_build: << parameters.llvm_build >>
       - ferrocene/ci
@@ -1491,6 +1502,12 @@ commands:
       os:
         type: string
         default: linux # Or `windows` or `darwin`
+      awscli_version:
+        type: string
+        default: << pipeline.parameters.awscli-version >>
+      override_installed:
+        type: boolean
+        default: false
       restore-from-job:
         type: string
         default: ""
@@ -1507,8 +1524,9 @@ commands:
       - ferrocene/checkout:
           llvm_subset: << parameters.llvm_subset >>
       - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-          os: <<parameters.os>>    parameters:
+          awscli_version: << parameters.awscli_version >>
+          override_installed: << parameters.override_installed >>
+          os: <<parameters.os>>
           llvm_build: false
       - when:
           condition: <<parameters.restore-from-job>>

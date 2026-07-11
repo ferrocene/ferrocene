@@ -1078,6 +1078,7 @@ workflows:
           test_variant: 2021-cortex-a53
           emulated: "true"
           qemu_arch: qemu-aarch64
+          qemu_version: 11.0.1
           qemu_cpu: cortex-a53
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1093,6 +1094,7 @@ workflows:
           test_variant: 2021-specific-cortex-a53
           emulated: "true"
           qemu_arch: qemu-aarch64
+          qemu_version: 11.0.1
           qemu_cpu: cortex-a53
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1109,6 +1111,7 @@ workflows:
           test_variant: 2021-neoverse-v1
           emulated: "true"
           qemu_arch: qemu-aarch64
+          qemu_version: 11.0.1
           qemu_cpu: neoverse-v1
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1124,6 +1127,7 @@ workflows:
           test_variant: 2021-neoverse-v1
           emulated: "true"
           qemu_arch: qemu-aarch64
+          qemu_version: 11.0.1
           qemu_cpu: neoverse-v1
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1177,6 +1181,7 @@ workflows:
           test_variant: 2021-cortex-r5f
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_version: 11.0.1
           qemu_cpu: cortex-r5f
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1192,6 +1197,7 @@ workflows:
           test_variant: 2021-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_version: 11.0.1
           qemu_cpu: cortex-m4
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1207,6 +1213,7 @@ workflows:
           test_variant: 2021-specific-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_version: 11.0.1
           qemu_cpu: cortex-m4
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1223,6 +1230,7 @@ workflows:
           test_variant: 2021-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_version: 11.0.1
           qemu_cpu: cortex-m4
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
@@ -1238,6 +1246,7 @@ workflows:
           test_variant: 2021-specific-cortex-m4
           emulated: "true"
           qemu_arch: qemu-arm
+          qemu_version: 11.0.1
           qemu_cpu: cortex-m4
           restore_from_job: x86_64-linux-build
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)

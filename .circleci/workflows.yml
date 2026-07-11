@@ -119,7 +119,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@26080.0.0
+  ferrocene: ferrocene/ferrocene-common@26080.0.1
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -735,6 +735,7 @@ jobs:
             - ferrocene/checkout
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
             - ferrocene/ci
       - run:
@@ -764,6 +765,7 @@ jobs:
           steps:
             - ferrocene-job-dist:
                 os: windows
+
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
@@ -785,6 +787,7 @@ jobs:
                 depth: 1
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
             - setup-qnx-toolchain: {}
             - run:
@@ -811,6 +814,7 @@ jobs:
                 depth: 1
             - ferrocene/setup:
                 awscli_version: << pipeline.parameters.awscli-version >>
+                override_installed: false
                 os: windows
             - setup-qnx8-toolchain: {}
             - run:
@@ -1452,11 +1456,18 @@ commands:
       os:
         type: string
         default: linux # Or `windows` or `darwin`
+      awscli_version:
+        type: string
+        default: << pipeline.parameters.awscli-version >>
+      override_installed:
+        type: boolean
+        default: false
     steps:
       - ferrocene/checkout:
           llvm_subset: true
       - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
+          awscli_version: << parameters.awscli_version >>
+          override_installed: << parameters.override_installed >>
           os: <<parameters.os>>
       - ferrocene/ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -1475,6 +1486,12 @@ commands:
       os:
         type: string
         default: linux # Or `windows` or `darwin`
+      awscli_version:
+        type: string
+        default: << pipeline.parameters.awscli-version >>
+      override_installed:
+        type: boolean
+        default: false
       restore-from-job:
         type: string
         default: ""
@@ -1491,7 +1508,8 @@ commands:
       - ferrocene/checkout:
           llvm_subset: << parameters.llvm_subset >>
       - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
+          awscli_version: << parameters.awscli_version >>
+          override_installed: << parameters.override_installed >>
           os: <<parameters.os>>
       - when:
           condition: <<parameters.restore-from-job>>

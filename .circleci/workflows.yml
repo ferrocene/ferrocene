@@ -1341,7 +1341,24 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker--rhivos2-emulator--aarch64
+
       - llvm--aarch64-apple-darwin: {}
+
+      - ferrocene/facade_generic_test:
+          name: aarch64-linux-rhivos2-test-library-compiletest-docker
+          target: aarch64-rhivos2-linux-gnu
+          test_variant: "2021"
+          emulated: "false"
+          restore_from_job: aarch64-linux-build
+          ferrocene_host: aarch64-unknown-linux-gnu
+          resource_class: ferrocene/k8s-rhel-10-arm64-medium
+          tasks:  $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:rhivos-2.0-19-04-2026-testimage
+          requires:
+            - aarch64-linux-build
+
+      - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
             - llvm--aarch64-apple-darwin

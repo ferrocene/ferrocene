@@ -119,7 +119,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@26080.1.0
+  ferrocene: ferrocene/ferrocene-common@dev:main
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -1371,6 +1371,21 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker-rhivos2-test-server-aarch64
+
+      - ferrocene/facade_generic_test:
+          name: aarch64-linux-rhivos2-test-library-compiletest-docker
+          target: aarch64-rhivos2-linux-gnu
+          test_variant: "2021"
+          emulated: "false"
+          restore_from_job: aarch64-linux-build
+          ferrocene_host: aarch64-unknown-linux-gnu
+          resource_class: ferrocene/k8s-rhel-10-arm64-medium
+          tasks:  $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:rhivos-2.0-19-04-2026-testimage
+          requires:
+            - aarch64-linux-build
+
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:

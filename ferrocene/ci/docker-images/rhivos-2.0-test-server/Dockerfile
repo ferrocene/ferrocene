@@ -10,6 +10,4 @@ ARG BUILDPLATFORM
 
 COPY --chmod=0700 ferrocene/ci/docker-images/ubuntu-24/run-testserver.sh /bin/run-testserver.sh
 
-RUN mkdir -p /shared/testserver/
-COPY build/aarch64-unknown-linux-gnu/stage2-tools/aarch64-rhivos2-linux-gnu/release/remote-test-server /shared/testserver/remote-test-server
 CMD [ "sleep", "5000" ]

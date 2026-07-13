@@ -273,9 +273,10 @@ also accepts multiple options:
 
 * ``host`` (required): the target tuple of the host platform
 * ``target`` (required): the target tuple of the compilation target
-* ``bare_metal_test_target`` (optional): the target tuple of the special
-  target used for bare metal testing; it should be omitted if no special target
-  was used
+* ``library_compiletest_target`` (required): the target tuple of the target
+  used to run library and compiler tests. For targets that have a standard
+  library this is the same tuple as the compilation targets; for targets
+  without a standard library it will be a facade target
 * ``remote_testing`` (optional): whether the tests were executed on CI or on a
   remote machine/emulator; its presence without a value means ``true``, while
   its absence means ``false``
@@ -289,7 +290,7 @@ also accepts multiple options:
    .. render-outcomes-template:: templates/tests.jinja2
       :host: x86_64-unknown-linux-gnu
       :target: aarch64-unknown-none
-      :bare_metal_test_target: aarch64-unknown-ferrocene.facade
+      :library_compiletest_target: aarch64-unknown-ferrocene.facade
       :remote_testing:
 
 Rendering a summary of all test outcome pages

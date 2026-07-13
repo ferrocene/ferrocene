@@ -4,3 +4,4 @@
 .. render-outcomes-template:: templates/tests.jinja2
    :host: aarch64-unknown-linux-gnu
    :target: aarch64-unknown-linux-gnu
+   :library_compiletest_target: aarch64-unknown-linux-gnu

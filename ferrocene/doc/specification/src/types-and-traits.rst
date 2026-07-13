@@ -926,11 +926,13 @@ An :t:`unsafe function item type` is a :t:`function item type` where the related
 A :t:`function item type` is coercible to a :t:`function pointer type`.
 
 :dp:`fls_1941wid94hlg`
-A :t:`function item type` implements the :std:`core::clone::Clone` :t:`trait`,
-the :std:`core::marker::Copy` :t:`trait`, the :std:`core::ops::Fn` :t:`trait`,
-the :std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`,
-the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync`
-:t:`trait`.
+A :t:`function item type` implements the :std:`core::clone::Clone` :t:`trait`, the :std:`core::marker::Copy` :t:`trait`, the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync` :t:`trait`.
+
+:dp:`fls_CSuxTkwR96j9`
+A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the :std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`, unless the corresponding :t:`function`
+- is an :t:`unsafe function`, or
+- has :t:`attribute` :c:`target_feature`, or
+- does not have a :t:`Rust ABI`.
 
 .. _fls_3i4ou0dq64ny:
 
@@ -2496,8 +2498,13 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
      the :t:`type` of the :t:`[pattern]s`.
 
   #. :dp:`fls_st9onPgDrc8y`
-     Infer the :t:`[operand]s` of all :t:`[match arm guard]s` with
-     :t:`expected type` :c:`bool`.
+     Infer each :t:`match arm guard operand` and each
+     :t:`match arm guard condition operand` with :t:`expected type` :c:`bool`.
+
+  #. :dp:`fls_vQ3tHg9XmDkF`
+     Infer each :t:`match arm guard scrutinee` with the :t:`expected type` set
+     to the :t:`type` of the :t:`pattern` of the related
+     :t:`match arm guard let pattern`.
 
   #. :dp:`fls_F999gqcBfff9`
      Infer the :t:`match arm body` of every :t:`match arm` with the

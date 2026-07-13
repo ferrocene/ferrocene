@@ -23,18 +23,163 @@ Language changes in Rust 1.95.0
 -------------------------------
 
 - `Stabilize if let guards on match arms <https://github.com/rust-lang/rust/pull/141295>`_
+
+  Changed syntax: :s:`MatchArmGuard`
+
+  The FLS models the Rust 2021 syntax accepted by stable :t:`rustc` 1.95.0.
+  It does not add the Rust Reference's attribute position before a guard
+  ``let`` pattern because attributes remain unstable in that position.
+
+  New syntax:
+
+  - :s:`MatchArmGuardChain`
+  - :s:`MatchArmGuardCondition`
+  - :s:`MatchArmGuardConditionOperand`
+  - :s:`MatchArmGuardConditions`
+  - :s:`MatchArmGuardLetPattern`
+  - :s:`MatchArmGuardOperand`
+  - :s:`MatchArmGuardScrutinee`
+
+  New glossary entries:
+
+  - :t:`match arm guard chain`
+  - :t:`match arm guard condition`
+  - :t:`match arm guard condition operand`
+  - :t:`match arm guard let pattern`
+  - :t:`match arm guard operand`
+  - :t:`match arm guard scrutinee`
+
+  Updated glossary entries:
+
+  - :t:`let binding`
+
+  Changed existing paragraphs:
+
+  - :p:`fls_72JHo343O7jp`
+  - :p:`fls_6bwTtGKb7ba7`
+  - :p:`fls_bzhz5wjd90ii`
+  - :p:`fls_st9onPgDrc8y`
+  - :p:`fls_4dv7x9nh2h4e`
+  - :p:`fls_sbtx1l6n2tp2`
+  - :p:`fls_e02um1gb89d0`
+  - :p:`fls_lbsfhg42yiqy`
+  - :p:`fls_fnvr5w2wzxns`
+  - :p:`fls_ptk6yibqyfzi`
+  - :p:`fls_a5tmilqxdb6f`
+
+  New paragraphs:
+
+  - :p:`fls_3TGpt9OGydQi`
+  - :p:`fls_7OkU5RVrAyev`
+  - :p:`fls_Uv7QsP2nKcDx`
+  - :p:`fls_DT4N2rr6wpvZ`
+  - :p:`fls_gNQBzI92IAir`
+  - :p:`fls_Er5TmL9bXwVq`
+  - :p:`fls_AAuyKfxLgJ43`
+  - :p:`fls_Yq4NhC8sRpJm`
+  - :p:`fls_kM6dZv3PaNqT`
+  - :p:`fls_Lc8EwS5rYpBn`
+  - :p:`fls_Nc6JvS9rFaLm`
+  - :p:`fls_Qr3TcH8vNpKs`
+  - :p:`fls_Lm5WqZ2dJvYp`
+  - :p:`fls_Bx8KsV4nQdRt`
+  - :p:`fls_Mv2YpG7sLcHw`
+  - :p:`fls_Xd4LqN9vTrPm`
+  - :p:`fls_Hw6CkR3mVzQn`
+  - :p:`fls_gfD9XwVj5hab`
+  - :p:`fls_Zm9VxF5pQwLd`
+  - :p:`fls_Dp8aJr2LqYwS`
+  - :p:`fls_Wm4QvN7xTcRb`
+  - :p:`fls_Ks9FdL3pVxQa`
+  - :p:`fls_Rt5XcG8nMbPw`
+  - :p:`fls_Yh2NqT6vLsCk`
+  - :p:`fls_Cw2RsH7pVnQx`
+  - :p:`fls_Pb7MzD4wQkXe`
+  - :p:`fls_Fj8QpM3dLsVt`
+  - :p:`fls_Qf4VnH8sMxRa`
+  - :p:`fls_Kz7NvR2xYpWm`
+  - :p:`fls_Zc6TbK2wLpNd`
+  - :p:`fls_Bd9TmL4qVcNs`
+  - :p:`fls_Rp5HxK8wJqYd`
+  - :p:`fls_Vr9MqJ5xNsYd`
+  - :p:`fls_Nt6QmC3sLpXz`
+  - :p:`fls_Av4JyT9nMkRp`
+  - :p:`fls_Gc5RpT8nYvQm`
+  - :p:`fls_Nw2KxL7qVmRs`
+  - :p:`fls_Rh9TsD4vQpLm`
+  - :p:`fls_8Vrz9SNfjSh7`
+  - :p:`fls_X4y3QltM208J`
+  - :p:`fls_vQ3tHg9XmDkF`
+  - :p:`fls_Td7McP9rQxVn`
+  - :p:`fls_Jp4NsK8vYqRc`
+  - :p:`fls_Vq8LdN2xWmTs`
+  - :p:`fls_Et6PqW9nRcVm`
+  - :p:`fls_7yybrl2J37Et`
+
+  Removed paragraphs:
+
+  - :p:`fls_k7kliy101m0f`
+  - :p:`fls_k68zkb6jv0vz`
+  - :p:`fls_gbb6wbmher5z`
+  - :p:`fls_jl4av757yx8j`
+  - :p:`fls_wkh5wztauwhu`
+  - :p:`fls_f5f0x8jstp1g`
+  - :p:`fls_yk8l9zjh7i0d`
+
 - `irrefutable_let_patterns lint no longer lints on let chains <https://github.com/rust-lang/rust/pull/146832>`_
 
   - Lints are outside the scope of the FLS.
 
 - `Support importing path-segment keywords with renaming <https://github.com/rust-lang/rust/pull/146972>`_
+
+  - New paragraphs:
+
+    - :p:`fls_sUhnfV62HJrb`
+    - :p:`fls_QGdeRTe0H1Uc`
+    - :p:`fls_aam34hsRmKU2`
+    - :p:`fls_uSajfdSsbxna`
+    - :p:`fls_aam34hsRmKU2`
+
+  - Changed paragraphs:
+
+    - :p:`fls_2bkcn83smy2y`
+    - :p:`fls_iuzvtr3oax1o`
+    - :p:`fls_90hQvSh7Bfyg`
+    - :p:`fls_RUiFQ17bmRLt`
+    - :p:`fls_opn5n5t2mo3m`
+    - :p:`fls_7k88ypcgaoff`
+    - :p:`fls_yY58pFpkig9o`
+    - :p:`fls_ar03D5rxjzy0`
+
+  - Removed paragraphs:
+
+    - :p:`fls_cw006jhlboa`
+    - :p:`fls_hv3xT2CjZuxc`
+    - :p:`fls_Pxc0Ts8Y7pfW`
+    - :p:`fls_kz2Gij5wHXnl`
+
 - `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
 
   - The target is outside the scope of the FLS.
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
+
+  - This implementation-specifc behavior is outside the scope of the FLS.
+
 - `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
+
+FLS fixes/improvements
+----------------------
+
+- Changed paragraph: :p:`fls_1941wid94hlg`
+
+- New paragraphs:
+
+  - :p:`fls_CSuxTkwR96j9`
+  - :p:`fls_LV94x3HlpBWk`
+
+- Replace the term "simple path prefix" with "common path prefix", to improve clarity.
 
 Language changes in Rust 1.94.0
 -------------------------------

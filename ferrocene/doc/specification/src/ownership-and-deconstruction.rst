@@ -502,9 +502,14 @@ following :t:`[construct]s` are :t:`[drop construct]s`:
   :t:`block expression` that contains the :t:`statement`.
 
 * :dp:`fls_lbsfhg42yiqy`
-  The parent :t:`drop scope` of the :t:`operand` of a :t:`match arm guard` is
-  the :t:`drop scope` of the :t:`match arm` that contains the
-  :t:`match arm guard`.
+  The parent :t:`drop scope` of a :t:`match arm guard operand` or a
+  :t:`match arm guard condition operand` is the :t:`drop scope` of the
+  :t:`match arm` that contains the :t:`match arm guard`.
+
+* :dp:`fls_Jp4NsK8vYqRc`
+  The parent :t:`drop scope` of the :t:`match arm guard scrutinee` of a
+  :t:`match arm guard let pattern` is the :t:`drop scope` of the
+  :t:`match arm` that contains the :t:`match arm guard`.
 
 * :dp:`fls_5m3u3k6f00bd`
   The parent :t:`drop scope` of the :t:`operand` of a :t:`match arm` is the
@@ -533,8 +538,9 @@ A :t:`binding` declared in a :t:`let statement` is associated with the
 :t:`let statement`.
 
 :dp:`fls_fnvr5w2wzxns`
-A :t:`binding` declared in a :t:`match expression` is associated with the
-:t:`drop scope` of the :t:`match arm` of the :t:`match expression`.
+A :t:`binding` introduced by the :t:`pattern` of a :t:`match arm matcher`, or a
+:t:`let binding` introduced by a :t:`match arm guard let pattern`, is associated
+with the :t:`drop scope` of the related :t:`match arm`.
 
 :dp:`fls_1vZFa5mDEbXW`
 A :t:`binding` declared in a :t:`while let loop expression` is associated with
@@ -575,7 +581,13 @@ possible :t:`[drop scope]s` are as follows:
   The :t:`drop scope` of the :t:`operand` of a :t:`match arm`.
 
 * :dp:`fls_ptk6yibqyfzi`
-  The :t:`drop scope` of the :t:`operand` of a :t:`match arm guard`.
+  The :t:`drop scope` of a :t:`match arm guard operand` or a
+  :t:`match arm guard condition operand`.
+
+* :dp:`fls_Vq8LdN2xWmTs`
+  The :t:`drop scope` of the :t:`match arm` that contains the
+  :t:`match arm guard`, when the :t:`temporary` is created while evaluating a
+  :t:`match arm guard scrutinee` of a :t:`match arm guard let pattern`.
 
 * :dp:`fls_dltmd8e8c5ia`
   The :t:`drop scope` of the :t:`right operand` of a
@@ -699,8 +711,22 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
   declaration order, where the declaration order is defined by the first
   :t:`pattern-without-alternation`.
 
+* :dp:`fls_Et6PqW9nRcVm`
+  Evaluated :t:`[match arm guard let pattern]s` that have
+  :t:`[let binding]s` or :t:`[temporary]s` associated with the
+  :t:`drop scope` of a :t:`match arm` are processed in reverse source order.
+  For each such pattern, its :t:`[let binding]s`, if any, are dropped in reverse
+  declaration order before the :t:`[temporary]s` created while evaluating its
+  :t:`match arm guard scrutinee` are dropped in reverse creation order.
+
+* :dp:`fls_7yybrl2J37Et`
+  When a :t:`match arm guard` evaluates to ``false``, the
+  :t:`[let binding]s` and :t:`[temporary]s` associated with the related
+  :t:`match arm` are :t:`dropped` before the next :t:`pattern` or
+  :t:`match arm` is considered.
+
 * :dp:`fls_a5tmilqxdb6f`
-  :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
+  All other :t:`[temporary]s` are :t:`dropped` in reverse creation order.
 
 * :dp:`fls_g07zq3n55094`
   All other :t:`[binding]s` are :t:`dropped` in reverse declaration order.

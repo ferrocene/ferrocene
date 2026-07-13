@@ -35,6 +35,15 @@ find_last_commit_with_minor_version() {
     version="$1"
     root="$(git rev-parse --show-toplevel)"
 
+    # See if we are currently on the expected version.
+    # If so, we don't know when the next release branches, so we can't return the *last*
+    # commit with the right minor version.
+    # Instead we just return the current commit.
+    if [[ "$(git show "HEAD:${VERSION_FILE}")" = "${version}."* ]]; then
+        git rev-parse HEAD
+        return
+    fi
+
     # To find the last commit of the version we want to create a branch of, we
     # look for all the commits that changed the `src/version` file and collect
     # their *parents*. Since version numbers are tracked in that file, the

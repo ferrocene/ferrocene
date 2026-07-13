@@ -31,7 +31,7 @@ fetch_upstream_version() {
     fi
 }
 
-find_last_commit_with_version() {
+find_last_commit_with_minor_version() {
     version="$1"
     root="$(git rev-parse --show-toplevel)"
 
@@ -89,7 +89,7 @@ if git ls-remote "${FERROCENE_ORIGIN}" | awk '{print($2)}' | grep -Fx "refs/head
 else
     echo "branch ${branch_name} does not exist, pushing it" 1>&2
 
-    last_commit="$(find_last_commit_with_version "${minor_version}")"
+    last_commit="$(find_last_commit_with_minor_version "${minor_version}")"
 
     # Create the branch pointing to the commit. If the branch already exists
     # locally delete it beforehand.

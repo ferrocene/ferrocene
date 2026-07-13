@@ -54,7 +54,7 @@ find_last_commit_with_minor_version() {
         content="$(git show "${previous_commit}:${VERSION_FILE}")"
         # The star after "${version}" matches all trailing content. This is
         # needed to properly match the last patch release of the minor version.
-        if [[ "${content}" = "${version}"* ]]; then
+        if [[ "${content}" = "${version}."* ]]; then
             echo "${previous_commit}"
             return
         fi

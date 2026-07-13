@@ -116,7 +116,9 @@ class AutomatedPR(abc.ABC):
         self.current_branch = self.cmd_capture(["git", "branch", "--show-current"])
         self.current_hash = self.cmd_capture(["git", "rev-parse", "HEAD"])
 
-        existing_pull = self.__find_open("pulls", self.__resolved_pr_title(), self.pr_labels())
+        existing_pull = self.__find_open(
+            "pulls", self.__resolved_pr_title(), self.pr_labels()
+        )
         if existing_pull is not None:
             log("An automated PR is already open, a new one won't be created.")
             log(f"==> {existing_pull['html_url']}")
@@ -289,7 +291,7 @@ class AutomatedPR(abc.ABC):
     #####################
 
     def __resolved_pr_title(self):
-        if self.base_branch() == 'main':
+        if self.base_branch() == "main":
             return self.pr_title()
         version = self.base_branch().removeprefix("release/")
         return f"[{version}] {self.pr_title()}"

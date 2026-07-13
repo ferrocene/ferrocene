@@ -9,6 +9,7 @@ use crate::{HashSet, PathBuf, define_config, exit};
 define_config! {
     struct Ferrocene {
         channel: Option<String> = "channel",
+        check_test_outcomes_at_render_time: Option<bool> = "check-test-outcomes-at-render-time",
         aws_profile: Option<String> = "aws-profile",
         traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
         test_outcomes: Option<String> = "test-outcomes",

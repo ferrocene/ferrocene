@@ -136,7 +136,7 @@ mod __doctest_mod {{
 
     #[allow(unused)]
     pub fn doctest_runner(bin: &std::path::Path, test_nb: usize) -> ExitCode {{
-        let cmd = if let Some(runner) = RUNNER_PATH.get() {{
+        let mut cmd = if let Some(runner) = RUNNER_PATH.get() {{
             let mut cmd = std::process::Command::new(runner);
             cmd.arg(bin);
             cmd

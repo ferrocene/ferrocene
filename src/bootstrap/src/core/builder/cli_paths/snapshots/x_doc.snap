@@ -74,6 +74,15 @@ expression: doc
 [Doc] bootstrap::ferrocene::doc::ReleaseNotes
     targets: [aarch64-unknown-linux-gnu]
     - Set({doc::ferrocene/doc/release-notes})
+[Doc] bootstrap::ferrocene::doc::QNX7Manual
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/qnx7-manual})
+[Doc] bootstrap::ferrocene::doc::QNX8Manual
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/qnx8-manual})
+[Doc] bootstrap::ferrocene::doc::RHIVOSManual
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({doc::ferrocene/doc/rhivos-manual})
 [Doc] bootstrap::ferrocene::doc::DocumentList
     targets: [aarch64-unknown-linux-gnu]
     - Set({doc::ferrocene/doc/document-list})

@@ -995,6 +995,10 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::Specification,
                 crate::ferrocene::doc::UserManual,
                 crate::ferrocene::doc::ReleaseNotes,
+                //Targets
+                crate::ferrocene::doc::QNX7Manual,
+                crate::ferrocene::doc::QNX8Manual,
+                crate::ferrocene::doc::RHIVOSManual,
                 // Qualification Documents
                 crate::ferrocene::doc::DocumentList,
                 crate::ferrocene::doc::EvaluationPlan,

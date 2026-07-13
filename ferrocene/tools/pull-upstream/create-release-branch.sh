@@ -107,7 +107,7 @@ else
     fi
     git branch "${branch_name}" "${last_commit}"
 
-    git push "${FERROCENE_ORIGIN}" "${branch_name}"
+    git push --no-verify "${FERROCENE_ORIGIN}" "${branch_name}"
 fi
 
 # Let other parts of the GitHub Actions workflow know what the branch name is.

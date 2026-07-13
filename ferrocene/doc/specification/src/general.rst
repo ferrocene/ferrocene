@@ -144,6 +144,11 @@ listed below, which is informative:
 :dp:`fls_xgk91jrbpyoc`
 All appendices are informative.
 
+.. _fls_qfiIJmBBvelU:
+
+Subchapter segments
+^^^^^^^^^^^^^^^^^^^
+
 :dp:`fls_jc4upf6685bw`
 Each chapter is divided into subchapters that have a common structure. Each
 chapter and subchapter is then organized to include the following segments as is

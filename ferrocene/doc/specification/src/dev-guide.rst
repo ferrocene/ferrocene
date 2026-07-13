@@ -10,6 +10,16 @@ Developer Guide
 
 This document outlines the various formats, processes, and procedures associated with the maintenance of the FLS.
 
+Text maintenance
+----------------
+
+Enumeration
+~~~~~~~~~~~
+
+When enumerating multiple entities, sort them alphabetically.
+
+For example, in the sentence "A function item type implements the Clone, Copy, Send, and Sync traits", the enumerated traits are sorted alphabetically.
+
 Changelog maintenance
 ---------------------
 
@@ -85,3 +95,10 @@ Use the following sentence pattern for multiple syntax categories::
     - :s:`syntax_category`
 
 ``<Action>`` must denote either ``Changed``, ``New``, or ``Removed``.
+
+Merge ordering
+--------------
+
+To preserve the natural ordering of releases, merge all PRs related to release N before merging any PR related to release N+1.
+
+This merging strategy will allow the FLS team to eventually tag commits in order to deliniate FLS releases.

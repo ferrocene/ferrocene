@@ -2489,7 +2489,9 @@ See :s:`LessThanOrEqualsExpression`.
 let binding
 ^^^^^^^^^^^
 
-A :dt:`let binding` is the :t:`binding` introduced by a :t:`let statement`, an :t:`if let expression`, or a :t:`while let loop expression`.
+A :dt:`let binding` is a :t:`binding` introduced by the :t:`pattern` of a
+:t:`let statement`, an :t:`if let expression`, a :t:`while let loop expression`,
+or a :t:`match arm guard let pattern`.
 
 let initializer
 ^^^^^^^^^^^^^^^
@@ -2765,6 +2767,58 @@ A :dt:`match arm guard` is a :t:`construct` that provides additional filtering
 to a :t:`match arm matcher`.
 
 See :s:`MatchArmGuard`.
+
+match arm guard chain
+^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard chain` is a sequence of one or more
+:t:`[match arm guard condition]s`, separated by ``&&``.
+
+See :s:`MatchArmGuardChain`.
+
+match arm guard condition
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard condition` is a component of a
+:t:`match arm guard chain` that is either a
+:t:`match arm guard condition operand` or a
+:t:`match arm guard let pattern`.
+
+See :s:`MatchArmGuardCondition`.
+
+match arm guard condition operand
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard condition operand` is a :t:`match arm guard condition`
+that consists of an :t:`expression`.
+
+See :s:`MatchArmGuardConditionOperand`.
+
+match arm guard let pattern
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard let pattern` is a :t:`match arm guard condition` that
+consists of a :t:`pattern` and a :t:`match arm guard scrutinee`, and introduces
+the :t:`[binding]s` of its :t:`pattern` when :t:`pattern matching` succeeds.
+
+See :s:`MatchArmGuardLetPattern`.
+
+match arm guard operand
+^^^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard operand` is the :t:`operand` of a :t:`match arm guard`
+that does not have a :t:`match arm guard chain`.
+
+See :s:`MatchArmGuardOperand`.
+
+match arm guard scrutinee
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A :dt:`match arm guard scrutinee` is the :t:`expression` of a
+:t:`match arm guard let pattern` whose :t:`value` is matched against the
+:t:`pattern` of that :t:`match arm guard let pattern`.
+
+See :s:`MatchArmGuardScrutinee`.
 
 match arm matcher
 ^^^^^^^^^^^^^^^^^
@@ -4099,8 +4153,7 @@ See :s:`SimpleCStringLiteral`.
 simple import
 ^^^^^^^^^^^^^
 
-A :dt:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
-local :t:`name` by using an optional :t:`renaming`.
+A :dt:`simple import` is a :t:`use import` that brings a :t:`simple path` into scope, optionally with a :t:`renaming`.
 
 See :s:`SimpleImport`.
 
@@ -4111,14 +4164,6 @@ A :dt:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :t:`[identifier]s` or certain :t:`[keyword]s`.
 
 See :s:`SimplePath`.
-
-simple path prefix
-^^^^^^^^^^^^^^^^^^
-
-A :dt:`simple path prefix` is the leading :t:`simple path` of a
-:t:`glob import` or a :t:`nesting import`.
-
-See :s:`SimplePathPrefix`.
 
 simple path public modifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

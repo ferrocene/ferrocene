@@ -69,11 +69,13 @@ of a :t:`pattern-without-range`, except for when the :t:`pattern` is ``&mut``
 with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
 
 :dp:`fls_72JHo343O7jp`
-An or-pattern shall not appear in the :t:`pattern-without-alternation` of a
-:t:`closure parameter`, a :t:`function parameter`, or a :t:`let binding`.
+An :t:`or-pattern` shall not be used as the top-level :t:`pattern` of a
+:t:`closure parameter`, a :t:`function parameter`, or a :t:`let statement`.
 
 :dp:`fls_6bwTtGKb7ba7`
-A :dt:`let binding` is the :t:`binding` introduced by a :t:`let statement`, an :t:`if let expression`, or a :t:`while let loop expression`.
+A :dt:`let binding` is a :t:`binding` introduced by the :t:`pattern` of a
+:t:`let statement`, an :t:`if let expression`, a :t:`while let loop expression`,
+or a :t:`match arm guard let pattern`.
 
 :dp:`fls_8luyomzppck`
 Any two :t:`[subpattern]s` of an :t:`or-pattern` are subject to the following
@@ -1296,6 +1298,12 @@ follows:
   bound to a copy of the matched :t:`value` if its :t:`type` implements the
   :std:`core::marker::Copy` :t:`trait`, otherwise the :t:`binding` is bound to
   the move of the matched :t:`value`.
+
+:dp:`fls_X4y3QltM208J`
+For a :t:`binding` introduced by the :t:`pattern` of a
+:t:`match arm matcher` with a related :t:`match arm guard`, the timing of a
+copy or move into a :t:`by value` binding is specified by the
+:t:`match arm guard` dynamic semantics.
 
 .. _fls_jm6l7b90h6wa:
 

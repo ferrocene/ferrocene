@@ -18,7 +18,7 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="rust-lang/rust"
 VERSION_FILE="src/version"
-FERROCENE_ORIGIN="origin"
+: "${FERROCENE_ORIGIN:=origin}"
 
 fetch_upstream_version() {
     branch="$1"

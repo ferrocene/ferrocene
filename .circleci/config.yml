@@ -99,4 +99,5 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
+        - equal: [<< pipeline.git.branch >>, "carmen/use-squid-cache"]
     jobs: [setup]

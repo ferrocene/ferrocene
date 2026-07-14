@@ -1073,7 +1073,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1086,7 +1086,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1181,7 +1181,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1194,7 +1194,7 @@ workflows:
           tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1487,18 +1487,7 @@ commands:
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
       - ferrocene/restore_from_job:
-          from_job: << parameters.restore-from-job >>
-      - run:
-          name: Enable IPv6 for Docker
-          command: |
-            sudo mkdir -p /etc/docker
-            cat \<<EOF | sudo tee /etc/docker/daemon.json
-            {
-              "ipv6": true,
-              "fixed-cidr-v6": "2001:db8:1::/64"
-            }
-            EOF
-            sudo service docker restart
+          from_job: << parameters.restore-from-job>>
 
       - run:
           name: Pull the Docker image used for CI

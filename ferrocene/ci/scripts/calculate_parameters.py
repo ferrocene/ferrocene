@@ -215,7 +215,7 @@ def awscli_version(*dummy):
 
 # read from ferrocene/ci/qemu-version
 def qemu_version(*dummy):
-    return Path('../qemu-version').read_text()
+    return Path('ferrocene/ci/qemu-version').read_text()
 
 def prepare_parameters():
     replacements: dict[str, Callable[[str], str | bool]] = {

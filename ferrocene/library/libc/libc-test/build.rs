@@ -75,7 +75,7 @@ fn do_ctest() {
         t if t.contains("wasi") => test_wasi(t),
         t if t.contains("windows") => test_windows(t),
         t if t.contains("vxworks") => test_vxworks(t),
-        t if t.contains("nto-qnx") => test_neutrino(t),
+        t if t.contains("qnx") => test_neutrino(t),
         t if t.contains("aix") => return test_aix(t),
         t => panic!("unknown target {t}"),
     }
@@ -3357,7 +3357,7 @@ fn test_emscripten(target: &str) {
 }
 
 fn test_neutrino(target: &str) {
-    assert!(target.contains("nto-qnx"));
+    assert!(target.contains("qnx"));
 
     let mut cfg = ctest_cfg();
     if target.ends_with("_iosock") {

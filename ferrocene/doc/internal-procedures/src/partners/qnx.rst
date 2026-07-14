@@ -227,11 +227,11 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
     source qnx/qnx710-472/qnxsdp-env.sh
     qcc -v
 
-QNX 8.0.0
----------
+QNX SDP 8.0.5
+-------------
 
-Windows (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^^^
+Windows (QNX SDP 8.0.5)
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Launch "QNX Software Center", log in, if prompted.
 
@@ -239,11 +239,10 @@ Select "Add Installation...".
 
 Expand the "QNX® Software Development Platform 8.0" section.
 
-Select "QNX® Software Development Platform 8.0" and ensure the version is
-"Stable (8.0 BuildID 141)", you may need to uncheck "Show Only Latest Version"
-at the bottom of the window:
+Select "QNX® Software Development Platform 8.0.5" and ensure the version is
+"Stable (GA 8.0.5)":
 
-.. figure:: ../figures/qnx.png
+.. figure:: ../figures/qnx805.png
 
     QNX SDP Installation
 
@@ -254,8 +253,9 @@ License**.
 Choose an installation folder, we use ``D:\qnx\qnx800`` for the rest of this
 guide.
 
-In the "Install" screen, "QNX® Software Development Platform 8.0" should be
-selected. Hit "Next >", then hit "Finish".
+In the "Install" screen, several packages of different GA versions will be
+listed but the newest GA version should not be higher than 8.0.5. Hit
+"Next >", then hit "Finish".
 
 QNX Software Center will now download the toolchain. A summary will be
 produced after, dismiss it when you are satisfied.
@@ -264,8 +264,8 @@ Your installation will be located in the installation folder you chose.
 For example, ``D:\qnx\qnx800``.
 
 
-Linux (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^
+Linux (QNX SDP 8.0.5)
+^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
 
@@ -274,7 +274,7 @@ Linux (QNX 8.0.0)
     follow the Windows instructions above, starting from "Log in, if
     prompted" now.
 
-Install QNX 8.0.0 BuildID 141:
+Install QNX SDP 8.0.0 BuildID 141 along with patchset 8.0.5:
 
 .. code-block::
 
@@ -289,11 +289,11 @@ Install QNX 8.0.0 BuildID 141:
         -activateLicenseKey $LICENSE_KEY
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -mirrorBaseline qnx800-141 \
-        -destination qnx/qnx800-141
+        -mirrorBaseline qnx800-141
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -installBaseline com.qnx.qnx800/$QNX_VERSION \
+        -installPackage com.qnx.qnx800.patchset805/8.0.5.00390T202606231321L \
         -destination qnx/qnx800-141 \
         -cleanInstall
 
@@ -318,8 +318,8 @@ If everything is working, the output of ``qcc`` should be:
     to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
 
-CI/CD deployment (QNX 8.0.0)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CI/CD deployment (QNX SDP 8.0.5)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. note::
@@ -361,6 +361,7 @@ Create a deployment containing Linux and Windows toolchains:
             -installPackage com.qnx.qnx800.host.linux.x86_64=$QNX_LINUX_HOST_VERSION \
             -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
             -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
+            -installPackage com.qnx.qnx800.patchset805/8.0.5.00390T202606231321L \
             -destination qnx/qnx800-141 \
             -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \

@@ -1100,6 +1100,7 @@ pub mod consts {
     /// * `"illumos"`
     /// * `"l4re"`
     /// * `"nto"`
+    /// * `"qnx"`
     /// * `"redox"`
     /// * `"solaris"`
     /// * `"solid_asp3"`

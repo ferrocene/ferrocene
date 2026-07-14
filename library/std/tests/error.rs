@@ -117,7 +117,7 @@ fn error_with_no_sources_formats_multi_line_correctly() {
 // (`tests/ui/ferrocene/error-with-backtrace-outputs-correctly.rs`)
 // to avoid an OOM issue when the `std::error` API is used from a thread, which is what the test
 // runner does with all unit tests
-#[cfg_attr(all(target_arch = "aarch64", target_os = "nto"), ignore)]
+#[cfg_attr(all(target_arch = "aarch64", any(target_os = "nto", target_os = "qnx")), ignore)]
 fn error_with_backtrace_outputs_correctly_with_one_source() {
     let trace = Backtrace::force_capture();
     let expected = format!(
@@ -142,7 +142,7 @@ Stack backtrace:
 
 #[test]
 // NOTE(ignore/aarch64/nto) see `error_with_backtrace_outputs_correctly_with_one_source` for details
-#[cfg_attr(all(target_arch = "aarch64", target_os = "nto"), ignore)]
+#[cfg_attr(all(target_arch = "aarch64", any(target_os = "nto", target_os = "qnx")), ignore)]
 fn error_with_backtrace_outputs_correctly_with_two_sources() {
     let trace = Backtrace::force_capture();
     let expected = format!(

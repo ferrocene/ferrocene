@@ -68,3 +68,6 @@ fn main() {
     test_precise_analysis_drop_paths_not_captured_by_move();
     test_precise_analysis_long_path_missing();
 }
+
+// ferrocene-annotations: fls_g64vdciyb2is
+// Capture precision

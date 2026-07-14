@@ -4099,8 +4099,7 @@ See :s:`SimpleCStringLiteral`.
 simple import
 ^^^^^^^^^^^^^
 
-A :dt:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
-local :t:`name` by using an optional :t:`renaming`.
+A :dt:`simple import` is a :t:`use import` that brings a :t:`simple path` into scope, optionally with a :t:`renaming`.
 
 See :s:`SimpleImport`.
 
@@ -4111,14 +4110,6 @@ A :dt:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :t:`[identifier]s` or certain :t:`[keyword]s`.
 
 See :s:`SimplePath`.
-
-simple path prefix
-^^^^^^^^^^^^^^^^^^
-
-A :dt:`simple path prefix` is the leading :t:`simple path` of a
-:t:`glob import` or a :t:`nesting import`.
-
-See :s:`SimplePathPrefix`.
 
 simple path public modifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

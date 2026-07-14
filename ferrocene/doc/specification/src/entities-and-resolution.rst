@@ -295,23 +295,27 @@ A :t:`path segment` is an element of a :t:`path`.
 A :t:`path` is subject to :t:`path resolution`.
 
 :dp:`fls_opn5n5t2mo3m`
-If a :t:`path segment` is expressed as either :t:`keyword` ``crate``,
-:t:`keyword` ``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``Self``, then
-the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
+If a :t:`path segment` is expressed as either :t:`keyword` ``crate``, :t:`keyword` ``$crate``, or :t:`keyword` ``Self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
+
+:dp:`fls_uSajfdSsbxna`
+If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall either be the first or the last :t:`path segment` of the :t:`path`.
+
+:dp:`fls_oRdi3KXFbJcR`
+If the last :t:`path segment` of a :t:`path` is expressed as :t:`keyword` ``self``, the :t:`entity` brought into :t:`scope` shall be a :t:`module`, an :t:`enum`, or a :t:`trait`.
 
 :dp:`fls_774uryecc2sx`
 A :t:`path` that starts with a :t:`path segment` that is expressed as
 :t:`keyword` ``$crate`` shall appear only within a :t:`macro transcriber`.
 
 :dp:`fls_7k88ypcgaoff`
-If a :t:`path segment` is expressed as :t:`keyword` ``super``, then the
-:t:`path segment` shall either be the first :t:`path segment` of a :t:`path`,
-or the previous :t:`path segment` of the :t:`path` shall also be expressed as
-:t:`keyword` ``super``.
+If a :t:`path segment` is expressed as :t:`keyword` ``super``, then each :t:`path segment` that precedes it in the :t:`path` shall be expressed as :t:`keyword` ``super``, except that the first :t:`path segment` of the :t:`path` may be expressed as :t:`keyword` ``self``.
 
 :dp:`fls_7kb6ltajgiou`
 A :t:`global path` is a :t:`path` that starts with :t:`namespace qualifier`
 ``::``.
+
+:dp:`fls_P6dFw89ZDKv2`
+The first :t:`path segment` of a :t:`global path` shall be expressed as an :t:`identifier` whose :t:`name` matches the :t:`name` of a :t:`candidate external prelude entity`.
 
 :dp:`fls_n77icl6idazp`
 A :t:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
@@ -326,14 +330,8 @@ A :dt:`path prefix` is a :t:`path` with its last :t:`path segment` and
 If a :t:`simple path` appears in a :t:`use import` and starts with a
 :t:`path segment` expressed as either :t:`keyword` ``crate``, :t:`keyword`
 ``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``super``, then the
-:t:`path` shall be the :t:`simple path prefix` of a :t:`glob import` or a
-:t:`nesting import`, or the :t:`simple path` of a :t:`simple import`.
-
-:dp:`fls_cw006jhlboa`
-If a :t:`simple path` appears in a :t:`use import` and starts with a
-:t:`path segment` expressed as :t:`keyword` ``self``, then the :t:`path` shall
-be part of the :s:`UseImportContent` of a :t:`nesting import` as long as the
-:t:`path` is a :t:`single segment path`.
+:t:`path` shall be the :t:`common path prefix` of a :t:`glob import` or a
+:t:`nesting import`, or the :t:`path` of a :t:`simple import`.
 
 :dp:`fls_kv5bpq8rf1j9`
 A :t:`simple path` is subject to :t:`simple path resolution`.
@@ -996,15 +994,15 @@ Use Imports
      | SimpleImport
 
    GlobImport ::=
-       SimplePathPrefix? $$*$$
+       CommonPathPrefix? $$*$$
 
    NestingImport ::=
-       SimplePathPrefix? $${$$ UseImportContentList? $$}$$
+       CommonPathPrefix? $${$$ UseImportContentList? $$}$$
 
    SimpleImport ::=
        SimplePath Renaming?
 
-   SimplePathPrefix ::=
+   CommonPathPrefix ::=
        SimplePath? $$::$$
 
    UseImportContentList ::=
@@ -1018,7 +1016,7 @@ A :t:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 :t:`use import` resides.
 
 :dp:`fls_sxo1jb25pl8a`
-A :t:`simple path prefix` is the leading :t:`simple path` of a :t:`glob import`
+A :dt:`common path prefix` is the leading :t:`simple path` of a :t:`glob import`
 or a :t:`nesting import`.
 
 :dp:`fls_WAA4WmohGu6T`
@@ -1036,22 +1034,20 @@ An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
 
    * :dp:`fls_2UyFcB6Our1v`
      If the :t:`use import` is a :t:`glob import` then start with the
-     :t:`[path segment]s` of the :t:`glob import`'s :t:`simple path prefix`.
+     :t:`[path segment]s` of the :t:`glob import`'s :t:`common path prefix`.
 
    * :dp:`fls_irdKqoYzBM0M`
      If the :t:`use import` is a :t:`nesting import` then start with the
-     :t:`[path segment]s` of the :t:`nesting import`'s :t:`simple path prefix`.
+     :t:`[path segment]s` of the :t:`nesting import`'s :t:`common path prefix`.
 
 #. :dp:`fls_gAWsqibl4GLq`
    Then if the current :t:`use import` is the child of a :t:`nesting import`,
-   prepend the :t:`nesting import`'s :t:`simple path prefix` to the
+   prepend the :t:`nesting import`'s :t:`common path prefix` to the
    :t:`import path prefix`. Repeat this step with the :t:`nesting import` as
    the current :t:`use import`.
 
 :dp:`fls_2bkcn83smy2y`
-A :t:`simple import` is a :t:`use import` that brings all :t:`entities <entity>`
-it refers to into scope, optionally with a different
-:t:`name` than they are declared with by using a :t:`renaming`.
+A :dt:`simple import` is a :t:`use import` that brings into :t:`scope` an :t:`entity` selected by its :t:`simple import path`, or by its :t:`import path prefix` when its :t:`simple path` ends in :t:`keyword` ``self``.
 
 :dp:`fls_v3a6y2ze44v2`
 A :t:`glob import` is a :t:`use import` that brings all :t:`entities <entity>`
@@ -1075,22 +1071,17 @@ A :t:`glob import` brings :t:`[name]s` into :t:`scope` as follows:
 
 :dp:`fls_90hQvSh7Bfyg`
 A :dt:`simple import path` is the :t:`path` constructed by appending the last
-:t:`path segment` of a :t:`simple import`'s :t:`simple path` to the
+:t:`path segment` of the :t:`path` of the :t:`simple import` to the
 :t:`import path prefix`.
 
 :dp:`fls_wRmvtgQkFA6w`
 A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
 
-* :dp:`fls_kz2Gij5wHXnl`
-  If the :t:`simple path` is keyword ``self`` and:
+* :dp:`fls_yY58pFpkig9o`
+  If the :t:`simple import` appears in a :t:`nesting import` and the last :t:`path segment` of its :t:`simple path` is expressed as :t:`keyword` ``self``, then the :t:`simple import` brings the :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves to into :t:`scope`.
 
-  * :dp:`fls_yY58pFpkig9o`
-    The :t:`simple import` is in a :t:`nesting import`, then bring the
-    :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves
-    to into :t:`scope`.
-
-  * :dp:`fls_ar03D5rxjzy0`
-    Otherwise bring the containing :t:`module` into :t:`scope`.
+* :dp:`fls_ar03D5rxjzy0`
+  If the :t:`simple path` is expressed as :t:`keyword` ``self``, then the :t:`simple import` brings the :t:`entity` that its :t:`import path prefix` resolves to into :t:`scope`.
 
 * :dp:`fls_ce73bg0BqV1X`
   Otherwise bring all :t:`entities <entity>` that the :t:`simple import path`
@@ -1098,33 +1089,20 @@ A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
   :t:`simple import` into :t:`scope`.
 
 :dp:`fls_FILuR3pfwjw3`
-An :t:`Entity` imported by a :t:`simple import` subject to a
+An :t:`entity` imported by a :t:`simple import` subject to a
 :t:`renaming` with :t:`identifier` is brought into :t:`scope` under the
 :t:`name` declared by the :t:`renaming`.
 
 :dp:`fls_iQOgxNihUEr7`
-A :t:`trait` imported by a :t:`simple import` subject to a
-:t:`renaming` with character underscore ``_`` is added into :t:`scope` without
-a :t:`name`.
+An :t:`entity` imported by a :t:`simple import` subject to a :t:`renaming` with character underscore ``_`` is added into :t:`scope` without a :t:`name`.
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common
-:t:`simple path prefix` for its nested :t:`[use import]s`.
+:t:`common path prefix` for its nested :t:`[use import]s`.
 
 :dp:`fls_iNUBX5fJAI1N`
-A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
+A :t:`glob import` outside of a :t:`nesting import` without a :t:`common path
 prefix` is rejected, but may still be consumed by :t:`[macro]s`.
-
-:dp:`fls_RUiFQ17bmRLt`
-A :t:`simple import` with a :t:`simple path` with a single :t:`path segment` of
-keyword ``self`` shall be subject to the following:
-
-* :dp:`fls_hv3xT2CjZuxc`
-  It shall either appear in a :t:`nesting import` with a non-empty
-  :t:`import path prefix`, or
-
-* :dp:`fls_Pxc0Ts8Y7pfW`
-  It shall be subject to a :t:`renaming`.
 
 :dp:`fls_wB3fVglLOqbZ`
 It is a static error if two :t:`[glob import]s` import the same :t:`name` in the
@@ -1134,6 +1112,21 @@ same :t:`namespace` but refer to different :t:`entities <entity>` if the
 :dp:`fls_zmYSBW995kSN`
 If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
 the :t:`visibility` of the :t:`name` is the most permissive one.
+
+:dp:`fls_RUiFQ17bmRLt`
+When a :t:`path segment` expressed as :t:`keyword` ``self`` is used to import the current :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.
+
+:dp:`fls_sUhnfV62HJrb`
+A :t:`use import` with a single :t:`path segment` expressed as either :t:`keyword` ``crate`` or :t:`keyword` ``$crate`` shall be subject to a :t:`renaming`.
+
+:dp:`fls_QGdeRTe0H1Uc`
+When a :t:`path segment` expressed as :t:`keyword` ``super`` is used to import a parent :t:`module`, the imported :t:`entity` shall be subject to a :t:`renaming`.
+
+:dp:`fls_aam34hsRmKU2`
+A :t:`simple import` whose :t:`import path prefix` consists only of :t:`namespace qualifier` ``::`` and whose :t:`simple path` consists of a single :t:`path segment` expressed as :t:`keyword` ``self`` shall not be used.
+
+:dp:`fls_LV94x3HlpBWk`
+A :t:`simple import` shall not refer to :t:`[enum variant]s` through a :t:`type alias`.
 
 .. rubric:: Examples
 
@@ -1163,8 +1156,6 @@ The following is a selective import. The imported functions are
 
    use outer_module::inner_module
        {crate_visible_function, visible_function}
-
-.. rubric:: Legality Rules
 
 .. _fls_ydmnb7qnmzzq:
 

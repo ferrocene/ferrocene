@@ -19,22 +19,176 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.97.0
+-------------------------------
+
+- `Consider 'Result<T, Uninhabited>' and 'ControlFlow<Uninhabited, T>' to be equivalent to 'T' for must use lint <https://github.com/rust-lang/rust/pull/148214>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Add allow-by-default 'dead_code_pub_in_binary' lint for unused pub items in binary crates <https://github.com/rust-lang/rust/pull/149509>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Stabilize the 'div32', 'lam-bh', 'lamcas', 'ld-seq-sa' and 'scq' target features <https://github.com/rust-lang/rust/pull/154510>`_
+
+  - The target is outside the scope of the FLS
+
+- `Stabilize 'cfg(target_has_atomic_primitive_alignment)' <https://github.com/rust-lang/rust/pull/155006>`_
+
+  - Configuration options are environment-specific and not exhaustive
+
+- `Allow trailing 'self' in imports in more cases <https://github.com/rust-lang/rust/pull/155137>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_uSajfdSsbxna`
+  - :p:`fls_2bkcn83smy2y`
+  - :p:`fls_ar03D5rxjzy0`
+
+FLS maintenance
+---------------
+
+New paragraph: :p:`fls_oRdi3KXFbJcR`
+
+Language changes in Rust 1.96.0
+-------------------------------
+
+- `Allow passing expr metavariable to cfg <https://github.com/rust-lang/rust/pull/146961>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Always coerce never types in tuple expressions <https://github.com/rust-lang/rust/pull/147834>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Avoid incorrect inference guidance of function arguments in rare cases <https://github.com/rust-lang/rust/pull/150316>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
+- `Support s390x vector registers in inline assembly <https://github.com/rust-lang/rust/pull/154184>`_
+
+  - The target is outside the scope of the FLS.
+
+- `Allow using constants of type ManuallyDrop as patterns (fixing a regression introduced in 1.94.0) <https://github.com/rust-lang/rust/pull/154891>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
 Language changes in Rust 1.95.0
 -------------------------------
 
 - `Stabilize if let guards on match arms <https://github.com/rust-lang/rust/pull/141295>`_
+
+  Changed syntax: :s:`MatchArmGuard`
+
+  New syntax:
+
+  - :s:`MatchArmGuardChain`
+  - :s:`MatchArmGuardCondition`
+  - :s:`MatchArmGuardExpression`
+  - :s:`MatchArmGuardLetPattern`
+
+  New paragraphs:
+
+  - :p:`fls_UlxLrpyPlVmv`
+  - :p:`fls_XADcpJBUxSfv`
+  - :p:`fls_gfHe2Cy6WXsK`
+  - :p:`fls_QQep7FKA1EQX`
+  - :p:`fls_Wepy5R7FZQPU`
+  - :p:`fls_imEIc7PUUO1x`
+  - :p:`fls_fs4ZpXjt0Wqt`
+  - :p:`fls_DT4N2rr6wpvZ`
+  - :p:`fls_AAuyKfxLgJ43`
+  - :p:`fls_uCDQMkWx5OMS`
+
+  Removed paragraph: :p:`fls_sbtx1l6n2tp2`
+
 - `irrefutable_let_patterns lint no longer lints on let chains <https://github.com/rust-lang/rust/pull/146832>`_
 
   - Lints are outside the scope of the FLS.
 
 - `Support importing path-segment keywords with renaming <https://github.com/rust-lang/rust/pull/146972>`_
+
+  - New paragraphs:
+
+    - :p:`fls_sUhnfV62HJrb`
+    - :p:`fls_QGdeRTe0H1Uc`
+    - :p:`fls_aam34hsRmKU2`
+    - :p:`fls_uSajfdSsbxna`
+    - :p:`fls_aam34hsRmKU2`
+
+  - Changed paragraphs:
+
+    - :p:`fls_2bkcn83smy2y`
+    - :p:`fls_iuzvtr3oax1o`
+    - :p:`fls_90hQvSh7Bfyg`
+    - :p:`fls_RUiFQ17bmRLt`
+    - :p:`fls_opn5n5t2mo3m`
+    - :p:`fls_7k88ypcgaoff`
+    - :p:`fls_yY58pFpkig9o`
+    - :p:`fls_ar03D5rxjzy0`
+
+  - Removed paragraphs:
+
+    - :p:`fls_cw006jhlboa`
+    - :p:`fls_hv3xT2CjZuxc`
+    - :p:`fls_Pxc0Ts8Y7pfW`
+    - :p:`fls_kz2Gij5wHXnl`
+
 - `Stabilize ppc inline assembly <https://github.com/rust-lang/rust/pull/147996>`_
 
   - The target is outside the scope of the FLS.
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
+
+  New paragraphs:
+
+  - :p:`fls_LmPbrh0Cba8g`
+  - :p:`fls_nwgIMLkvD2Ol`
+  - :p:`fls_hOIImCr1c6IF`
+
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
+
+  - This implementation-specifc behavior is outside the scope of the FLS.
+
 - `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_33hfay24hx8u`
+  - :p:`fls_uqy5w9uc8gla`
+
+  New paragraphs, which mostly document behavior that existed before this release:
+
+  - :p:`fls_rdDT7jsaOMbs`
+  - :p:`fls_j9WyKVyOLFon`
+  - :p:`fls_TbfUxVf8PKPs`
+  - :p:`fls_4TESOxGpEY2h`
+  - :p:`fls_eNkZWskzznW6`
+  - :p:`fls_v8IFXHJnXhez`
+  - :p:`fls_gujpU7p5n9Zx`
+  - :p:`fls_t8tFLUg8O83Q`
+  - :p:`fls_RaONmCLH2KGM`
+  - :p:`fls_Vt9C9mKxHOwo`
+  - :p:`fls_Fs12dmznjsMf`
+  - :p:`fls_7EXHdE2eOVek`
+  - :p:`fls_iLH8X2U4ADHb`
+  - :p:`fls_HMJUXHrvOmPl`
+  - :p:`fls_Gj1znNpthHY6`
+  - :p:`fls_IFyJvb6mlFU4`
+  - :p:`fls_7NEEJgKSpQQ8`
+  - :p:`fls_kYFd3p06pWWV`
+  - :p:`fls_fATMTNUOHsfb`
+  - :p:`fls_fITor3jpmgrl`
+
+FLS maintenance
+---------------
+
+- Changed paragraph: :p:`fls_1941wid94hlg`
+
+- New paragraph: :p:`fls_LV94x3HlpBWk`
+
+- Replace the term "simple path prefix" with "common path prefix", to improve clarity.
 
 Language changes in Rust 1.94.0
 -------------------------------

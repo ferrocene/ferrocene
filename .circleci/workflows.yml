@@ -658,7 +658,7 @@ jobs:
   x86_64-windows-build:
     executor:
       name: win/server-2022
-      size: large # 8-core
+      size: xlarge # 8-core
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc

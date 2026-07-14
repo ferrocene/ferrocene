@@ -362,45 +362,6 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  x86_64-qnx-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      tasks:
-        type: string
-      test-variant:
-        type: string
-      resource-class:
-        type: string
-      extra-args:
-        type: string
-        default: ""
-      qnx_version:
-        description: The QNX version to install (currently supported qnx710-472, qnx800-141)
-        type: string
-      targets:
-        description: "The compilation target (must match qnx_version, supported: x86_64-pc-nto-qnx710, x86_64-pc-qnx)"
-        type: string
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << parameters.targets >>
-      SCRIPT: |
-        # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
-        set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-    steps:
-      - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx-toolchain:
-          source-env-script: false
-          qnx_version: << parameters.qnx_version >>
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-          restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
-
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
@@ -756,7 +717,7 @@ jobs:
           command: echo
 
   # Test VMs
-  aarch64-qnx-generic-test-vm:
+  qnx-generic-test-vm:
     executor: linux-vm
     parameters:
       tasks:
@@ -773,6 +734,9 @@ jobs:
         type: string
       targets:
         description: "The compilation target (must match qnx_version, supported: x86_64-pc-nto-qnx710, x86_64-pc-qnx)"
+        type: string
+      target_arch:
+        description: "The target architecture (must match target, suppored: aarch64, x86_64)"
         type: string
     resource_class: << parameters.resource-class >>
     environment:
@@ -792,7 +756,7 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
+          emulator-script: "set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-<< parameters.target_arch >>-<< parameters.qnx_version >>-test-runner.sh"
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1080,10 +1044,11 @@ workflows:
             - x86_64-linux-dist-targets-qnx8
             - aarch64-linux-dist
 
-      - x86_64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: x86_64-qnx-test-library-compiletest
           targets: x86_64-pc-nto-qnx710
           qnx_version: qnx710-472
+          target_arch: x86_64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
@@ -1092,10 +1057,11 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - x86_64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: x86_64-qnx8-test-library-compiletest
           qnx_version: qnx800-141
           targets: x86_64-pc-qnx
+          target_arch: x86_64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
@@ -1186,10 +1152,11 @@ workflows:
             - build-docker--ubuntu-24--x86_64
             - thumbv7em-eabi-test-library-compiletest
 
-      - aarch64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest
           targets: aarch64-unknown-nto-qnx710
           qnx_version: qnx710-472
+          target_arch: aarch64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
@@ -1198,10 +1165,11 @@ workflows:
             - x86_64-linux-build
             - build-docker--ubuntu-24--x86_64
 
-      - aarch64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: aarch64-qnx8-test-library-compiletest
           targets: aarch64-unknown-qnx
           qnx_version: qnx800-141
+          target_arch: aarch64
           tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults

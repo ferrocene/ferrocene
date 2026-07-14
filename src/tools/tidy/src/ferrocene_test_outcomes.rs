@@ -15,7 +15,7 @@ pub fn check(root_path: &Path, tidy_ctx: TidyCtx) {
 
         let target_page_path = entry.path();
         let contents = fs::read_to_string(&target_page_path).unwrap();
-        let option_names = ["host", "target", "library_compiletest_target"];
+        let option_names = ["host", "target", "tested_target_with_std"];
         for name in option_names {
             let option = format!(":{name}:");
             if !contents.contains(&option) {

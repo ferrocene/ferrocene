@@ -273,7 +273,7 @@ also accepts multiple options:
 
 * ``host`` (required): the target tuple of the host platform
 * ``target`` (required): the target tuple of the compilation target
-* ``library_compiletest_target`` (required): the target tuple of the target
+* ``tested_target_with_std`` (required): the target tuple of the target
   used to run library and compiler tests. For targets that have a standard
   library this is the same tuple as the compilation targets; for targets
   without a standard library it will be a facade target
@@ -290,7 +290,7 @@ also accepts multiple options:
    .. render-outcomes-template:: templates/tests.jinja2
       :host: x86_64-unknown-linux-gnu
       :target: aarch64-unknown-none
-      :library_compiletest_target: aarch64-unknown-ferrocene.facade
+      :tested_target_with_std: aarch64-unknown-ferrocene.facade
       :remote_testing:
 
 Rendering a summary of all test outcome pages

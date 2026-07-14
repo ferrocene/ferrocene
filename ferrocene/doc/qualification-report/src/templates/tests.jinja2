@@ -114,10 +114,10 @@ This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
      - :target:`{{ target }}`
      - ``{{ target }}``
 
-   {% if library_compiletest_target != target %}
+   {% if tested_target_with_std != target %}
    * - :ref:`Bare metal testing <qualification-plan:bare-metal-testing>` target:
      - :target:`{{ target }}`
-     - ``{{ library_compiletest_target }}``
+     - ``{{ tested_target_with_std }}``
    {% endif %}
 
 Test results
@@ -217,7 +217,7 @@ Library Test Suite
 
 {{ cargo_tests_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
 
-{% if library_compiletest_target %}
+{% if tested_target_with_std %}
 .. note::
 
    The ``std`` crate is not tested on :target:`{{ target }}` because it is not

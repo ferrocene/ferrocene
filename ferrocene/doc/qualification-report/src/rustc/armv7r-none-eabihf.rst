@@ -4,4 +4,4 @@
 .. render-outcomes-template:: ../../qualification-report/src/templates/tests.jinja2
    :host: x86_64-unknown-linux-gnu
    :target: armv7r-none-eabihf
-   :bare_metal_test_target: armv7r-ferrocene.facade-eabihf
+   :tested_target_with_std: armv7r-ferrocene.facade-eabihf

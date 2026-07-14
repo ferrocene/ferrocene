@@ -195,7 +195,7 @@ if __name__ == "__main__":
     repo = os.environ.get("GITHUB_REPOSITORY") or "ferrocene/ferrocene"
 
     subprocess.run(["git", "update-index", "--refresh"], check=False)
-    args = ["git", "diff-index", "--quiet", "HEAD"]
+    args = ["git", "diff-index", "--ignore-submodules=all", "--quiet", "HEAD"]
     if subprocess.run(args, check=False).returncode != 0:
         exit("error: all.py is not safe to run if you have uncommitted changes")
 

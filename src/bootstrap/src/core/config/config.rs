@@ -340,7 +340,6 @@ pub struct Config {
     pub uv: Option<PathBuf>,
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
-    pub ferrocene_check_test_outcomes_at_render_time: bool,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
     pub ferrocene_coverage_outcomes: FerroceneCoverageOutcomes,
@@ -1110,7 +1109,6 @@ impl Config {
 
         let mut ferrocene_raw_channel = "rolling".into();
         let mut ferrocene_aws_profile = Default::default();
-        let mut ferrocene_check_test_outcomes_at_render_time = Default::default();
         let mut ferrocene_traceability_matrix_mode = Default::default();
         let mut ferrocene_test_outcomes = Default::default();
         let mut ferrocene_coverage_outcomes = Default::default();
@@ -1132,8 +1130,6 @@ impl Config {
                 ferrocene_raw_channel = ci_channel;
             }
 
-            ferrocene_check_test_outcomes_at_render_time =
-                f.check_test_outcomes_at_render_time.unwrap_or(false);
             ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref() {
                 Some("local") | None => FerroceneTraceabilityMatrixMode::Local,
                 Some("ci") => FerroceneTraceabilityMatrixMode::Ci,
@@ -1756,7 +1752,6 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             uv: uv.map(PathBuf::from),
             ferrocene_raw_channel,
             ferrocene_aws_profile,
-            ferrocene_check_test_outcomes_at_render_time,
             ferrocene_traceability_matrix_mode,
             ferrocene_test_outcomes,
             ferrocene_coverage_outcomes,

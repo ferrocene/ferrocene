@@ -205,8 +205,3 @@ channel = "auto-detect"
 #
 # If this configuration is missing the traceability matrix might not be properly enforced.
 traceability-matrix-mode = "ci"
-
-# Checks that the target pages in the qualification report have at least one test (suite) outcome
-# This check takes effect during `./x doc ferrocene/doc/qualification-report` inside the
-# Sphinx extension. Search for `FERROCENE_CHECK_TEST_OUTCOMES_AT_RENDER_TIME` for more details
-check-test-outcomes-at-render-time = true

@@ -222,6 +222,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
+      - aws-oidc-auth
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
 
@@ -1639,22 +1640,26 @@ executors:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-aarch64-ubuntu-20:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-x86_64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   docker-aarch64-ubuntu-24:
     docker:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-24 >>
         aws_auth:
-          oidc_role_arn: $AWS_ROLE_ARN
+          aws_access_key_id: $ECR_PULL_AWS_ACCESS_KEY
+          aws_secret_access_key: $ECR_PULL_AWS_SECRET_KEY
   linux-vm:
     machine:
       image: default

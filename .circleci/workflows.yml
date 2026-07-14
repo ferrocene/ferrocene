@@ -116,6 +116,11 @@ parameters:
     type: string
     default: ""
 
+  # The qemu-version to run emulated tests in (read from ferrocene/ci/qemu-version by calcualate-params.py)
+  qemu-version:
+    type: string
+    default: ""
+
 orbs:
   win: circleci/windows@5.0
   ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source

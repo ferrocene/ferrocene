@@ -35,7 +35,7 @@ start_vm() {
         --accel tcg,thread=multi \
         -drive file="$sd_img",format=raw,if=sd,size=$sd_size,index=1 \
         -kernel "${emulatordir}/src/images/QNX-IFS" \
-        -m 4G \
+        -m 11G \
         -machine xlnx-zcu102 \
         -net nic,model=cadence_gem \
         -net nic,model=cadence_gem \

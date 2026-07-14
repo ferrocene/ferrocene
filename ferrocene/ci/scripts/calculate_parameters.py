@@ -43,9 +43,14 @@ REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
 # QNX targets only work on x86_64 Windows, x86_64 Linux, and x86_64 Mac
 # They must be excluded on, for example, aarch64 Mac
-QNX_TARGETS = [
+QNX71_TARGETS = [
     "aarch64-unknown-nto-qnx710",
     "x86_64-pc-nto-qnx710",
+    # the QNX 8.0 targets require a different SDP (QNX toolchain) so they'll go
+    # into different CI jobs (dist & self-test). we cannot list them together
+    # with the QNX7.1 targets here
+    # "aarch64-unknown-nto-qnx800",
+    # "x86_64-pc-nto-qnx800",
 ]
 
 GENERIC_BUILD_STD_TARGETS = [
@@ -84,7 +89,7 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
 # x86_64-unknown-linux-gnu builds our generic cross compilation targets
 # for us and is special cased somewhat. (This is used in `calculate_targets()`)
 X86_64_LINUX_BUILD_STD_TARGETS_ALL = (
-    X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+    X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX71_TARGETS
 )
 X86_64_LINUX_SELF_TEST_TARGETS = (
     X86_64_LINUX_BUILD_HOSTS
@@ -105,7 +110,7 @@ AARCH64_MAC_SELF_TEST_TARGETS = (
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = (
-    X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+    X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX71_TARGETS
 )
 
 s3 = boto3.client("s3", region_name=S3_REGION)

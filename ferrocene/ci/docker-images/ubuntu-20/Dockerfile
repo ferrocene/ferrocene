@@ -284,6 +284,10 @@ ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
 ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
 ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
+# Other compiler-builtins' C code won't be compiled to the right architecture
+# Sadly this cannot be configured in bootstrap.toml so we put it here
+ENV CFLAGS_aarch64_unknown_nto_qnx800=-Vgcc_ntoaarch64le_cxx
+
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 # FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+

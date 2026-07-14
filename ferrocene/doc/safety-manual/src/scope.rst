@@ -41,6 +41,12 @@ This qualification is restricted to the following environment:
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`aarch64-unknown-nto-qnx800`
+     - ``core``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
      - ``core``
      - ``alloc``
@@ -60,6 +66,12 @@ This qualification is restricted to the following environment:
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-pc-nto-qnx710`
+     - ``core``
+     - ``alloc``, ``std``, ``test``
+     - ``proc_macro``
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`x86_64-pc-nto-qnx800`
      - ``core``
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``

@@ -200,7 +200,8 @@ if __name__ == "__main__":
         exit("error: all.py is not safe to run if you have uncommitted changes")
 
     labels = list_backport_labels(repo)
-    for label in labels:
+    # Iterate in reverse order so we backport to the newest branches soonest
+    for label in reversed(labels):
         print(f"==> backporting PRs with label {label}")
         pr = BackportAllPR(repo, label, f"release/{label.removeprefix('backport:')}")
         pr.create(dry_run=dry_run)

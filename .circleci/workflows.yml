@@ -698,6 +698,9 @@ jobs:
             - ferrocene-job-dist:
                 restore-from-job: x86_64-windows-build
                 os: windows
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
 
   x86_64-windows-dist-tools:
     executor:

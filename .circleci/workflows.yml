@@ -618,7 +618,7 @@ jobs:
   x86_64-windows-llvm:
     executor:
       name: win/server-2022
-      size: large # 8-core
+      size: xlarge # 12-core
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
@@ -632,7 +632,7 @@ jobs:
       # # On Windows, we tune this down because the CircleCI's agent occasionally
       # tries to contact the runner and will time out, killing the build. We set
       # the LLVM parallelism to 7 to ensure 1 core is always free to respond.
-      LLVM_BUILD_PARALLELISM: 7
+      LLVM_BUILD_PARALLELISM: 15
     steps:
       - run:
           name: Make sure git autocrlf is false
@@ -655,7 +655,7 @@ jobs:
 
   # This job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
-  x86_64-windows-dist:
+  x86_64-windows-build:
     executor:
       name: win/server-2022
       size: large # 8-core
@@ -666,6 +666,28 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+    steps:
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-job-build:
+                os: windows
+
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  x86_64-windows-dist:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
@@ -675,6 +697,27 @@ jobs:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
             - ferrocene-job-dist:
+                restore-from-job: x86_64-windows-build
+                os: windows
+
+  x86_64-windows-dist-tools:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - when:
+          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+          steps:
+            - ferrocene-job-dist:
+                restore-from-job: x86_64-windows-build
                 os: windows
 
       - run:
@@ -1270,14 +1313,21 @@ workflows:
             - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
+      - x86_64-windows-build:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-dist-tools:
+          requires:
+            - x86_64-windows-build
       - x86_64-windows-self-test:
           qnx_version: qnx710-472
           targets: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
           requires:
             - x86_64-windows-dist
+            - x86_64-windows-dist-tools
             - x86_64-linux-dist-targets
       - x86_64-windows-self-test:
           name: x86_64-windows-self-test-qnx8
@@ -1285,6 +1335,7 @@ workflows:
           targets: aarch64-unknown-qnx,x86_64-pc-qnx
           requires:
             - x86_64-windows-dist
+            - x86_64-windows-dist-tools
             - x86_64-linux-dist-targets-qnx8
 
       - sbom-gen:

@@ -7,9 +7,12 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 
 // List of targets that we generate coverage for in CI
-const COVERAGE_TARGET_TRIPLES: [&'static str; 3] = [
+const COVERAGE_TARGET_TRIPLES: [&'static str; 6] = [
     "aarch64-unknown-ferrocene.facade",
     "aarch64-unknown-linux-gnu",
+    "armv7r-ferrocene.facade-eabihf",
+    "thumbv7em-ferrocene.facade-eabi",
+    "thumbv7em-ferrocene.facade-eabihf",
     "x86_64-unknown-linux-gnu",
 ];
 

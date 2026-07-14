@@ -1267,9 +1267,12 @@ workflows:
             - aarch64r82-none-test-library-compiletest
             - aarch64v8r-none-test-library-compiletest
             - armv7r-eabihf-test-library-compiletest
+            - armv7r-eabihf-library-coverage
             - thumbv7em-eabihf-test-library-compiletest
+            - thumbv7em-eabihf-library-coverage
             - thumbv7em-eabihf-test-target-cpu-library-compiletest
             - thumbv7em-eabi-test-library-compiletest
+            - thumbv7em-eabi-library-coverage
             - thumbv7em-eabi-test-target-cpu-library-compiletest
             - aarch64-linux-test
             - aarch64-linux-test-library
@@ -1425,6 +1428,16 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
+          name: armv7r-eabihf-library-coverage
+          target: armv7r-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-r5f
+          qemu-arch: qemu-arm
+          tasks: --coverage=library $(ferrocene/ci/split-tasks.py test:library-coverage) --tests
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
           name: thumbv7em-eabihf-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabihf
           test-variant: 2021-cortex-m4
@@ -1435,11 +1448,31 @@ workflows:
             - x86_64-linux-build
 
       - facade-generic-test:
+          name: thumbv7em-eabihf-library-coverage
+          target: thumbv7em-ferrocene.facade-eabihf
+          test-variant: 2021-cortex-m4
+          qemu-arch: qemu-arm
+          tasks: --coverage=library $(ferrocene/ci/split-tasks.py test:library-coverage) --tests
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
           name: thumbv7em-eabi-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
           test-variant: 2021-cortex-m4
           qemu-arch: qemu-arm
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library-nostd)
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - facade-generic-test:
+          name: thumbv7em-eabi-library-coverage
+          target: thumbv7em-ferrocene.facade-eabi
+          test-variant: 2021-cortex-m4
+          qemu-arch: qemu-arm
+          tasks: --coverage=library $(ferrocene/ci/split-tasks.py test:library-coverage) --tests
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

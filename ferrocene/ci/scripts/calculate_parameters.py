@@ -213,6 +213,9 @@ def workflow_id(*dummy):
 def awscli_version(*dummy):
     return Path("ferrocene/ci/awscli-version").read_text()
 
+# read from ferrocene/ci/qemu-version
+def qemu_version(*dummy):
+    return Path('../qemu-version').read_text()
 
 def prepare_parameters():
     replacements: dict[str, Callable[[str], str | bool]] = {
@@ -222,6 +225,7 @@ def prepare_parameters():
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
         "awscli-version": awscli_version,
+        "qemu-version": qemu_version,
     }
 
     parameters: dict[str, str | bool] = {}

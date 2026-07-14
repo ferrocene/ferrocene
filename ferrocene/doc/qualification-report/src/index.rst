@@ -27,6 +27,7 @@ qualification, in accordance to the standards above.
    rustc/aarch64-unknown-none
    rustc/aarch64-unknown-nto-qnx710
    rustc/aarch64-unknown-nto-qnx800
+   rustc/armv7r-none-eabihf
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
    rustc/x86_64-unknown-linux-gnu

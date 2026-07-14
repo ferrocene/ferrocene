@@ -618,7 +618,7 @@ jobs:
   x86_64-windows-llvm:
     executor:
       name: win/server-2022
-      size: xlarge # 12-core
+      size: 2xlarge # 32-core
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
@@ -632,7 +632,7 @@ jobs:
       # # On Windows, we tune this down because the CircleCI's agent occasionally
       # tries to contact the runner and will time out, killing the build. We set
       # the LLVM parallelism to 7 to ensure 1 core is always free to respond.
-      LLVM_BUILD_PARALLELISM: 15
+      LLVM_BUILD_PARALLELISM: 31
     steps:
       - run:
           name: Make sure git autocrlf is false

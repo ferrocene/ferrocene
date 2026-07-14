@@ -468,7 +468,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             }
                         }
                         if let Some(s) = parent_label {
-                            let body = obligation.cause.body_id;
+                            let body = obligation.cause.body_def_id;
                             err.span_label(tcx.def_span(body), s);
                         }
 
@@ -689,7 +689,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             violations,
                         );
                         if let hir::Node::Item(item) =
-                            self.tcx.hir_node_by_def_id(obligation.cause.body_id)
+                            self.tcx.hir_node_by_def_id(obligation.cause.body_def_id)
                             && let hir::ItemKind::Impl(impl_) = item.kind
                             && let None = impl_.of_trait
                             && let hir::TyKind::TraitObject(_, tagged_ptr) = impl_.self_ty.kind
@@ -735,7 +735,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     | ty::PredicateKind::Ambiguous
                     | ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature { .. })
                     | ty::PredicateKind::NormalizesTo { .. }
-                    | ty::PredicateKind::AliasRelate(..)
                     | ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType { .. }) => {
                         span_bug!(
                             span,
@@ -950,7 +949,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
         } else if let ty::Param(param) = trait_ref.self_ty().skip_binder().kind()
             && let Some(generics) =
-                self.tcx.hir_node_by_def_id(main_obligation.cause.body_id).generics()
+                self.tcx.hir_node_by_def_id(main_obligation.cause.body_def_id).generics()
         {
             let constraint = ty::print::with_no_trimmed_paths!(format!(
                 "[const] {}",
@@ -1145,7 +1144,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 }
             }
         }
-        let hir_id = self.tcx.local_def_id_to_hir_id(obligation.cause.body_id);
+        let hir_id = self.tcx.local_def_id_to_hir_id(obligation.cause.body_def_id);
         let Some(body_id) = self.tcx.hir_node(hir_id).body_id() else { return (false, false) };
         let ControlFlow::Break(expr) =
             (FindMethodSubexprOfTry { search_span: span }).visit_body(self.tcx.hir_body(body_id))
@@ -1383,7 +1382,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         ty: Ty<'tcx>,
         obligation: &PredicateObligation<'tcx>,
     ) -> Diag<'a> {
-        let def_id = obligation.cause.body_id;
+        let def_id = obligation.cause.body_def_id;
         let span = self.tcx.ty_span(def_id);
 
         let mut file = None;
@@ -1638,55 +1637,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                                 data.term,
                             )),
                             new_err,
-                        )
-                    } else {
-                        (None, error.err)
-                    }
-                }
-                ty::PredicateKind::AliasRelate(lhs, rhs, _) => {
-                    let derive_better_type_error =
-                        |alias_term: ty::AliasTerm<'tcx>, expected_term: ty::Term<'tcx>| {
-                            let ocx = ObligationCtxt::new(self);
-
-                            let normalized_term = ocx.normalize(
-                                &ObligationCause::dummy(),
-                                obligation.param_env,
-                                Unnormalized::new_wip(
-                                    alias_term.to_term(self.tcx, ty::IsRigid::No),
-                                ),
-                            );
-
-                            if let Err(terr) = ocx.eq(
-                                &ObligationCause::dummy(),
-                                obligation.param_env,
-                                expected_term,
-                                normalized_term,
-                            ) {
-                                Some((terr, self.resolve_vars_if_possible(normalized_term)))
-                            } else {
-                                None
-                            }
-                        };
-
-                    if let Some(lhs) = lhs.to_alias_term()
-                        && let ty::AliasTermKind::ProjectionTy { .. }
-                        | ty::AliasTermKind::ProjectionConst { .. } = lhs.kind
-                        && let Some((better_type_err, expected_term)) =
-                            derive_better_type_error(lhs, rhs)
-                    {
-                        (
-                            Some((lhs, self.resolve_vars_if_possible(expected_term), rhs)),
-                            better_type_err,
-                        )
-                    } else if let Some(rhs) = rhs.to_alias_term()
-                        && let ty::AliasTermKind::ProjectionTy { .. }
-                        | ty::AliasTermKind::ProjectionConst { .. } = rhs.kind
-                        && let Some((better_type_err, expected_term)) =
-                            derive_better_type_error(rhs, lhs)
-                    {
-                        (
-                            Some((rhs, self.resolve_vars_if_possible(expected_term), lhs)),
-                            better_type_err,
                         )
                     } else {
                         (None, error.err)
@@ -2326,18 +2276,80 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 {
                     return false;
                 }
+                let mut multi_span = MultiSpan::from_span(self.tcx.def_span(def_id));
                 let (desc, mention_castable) =
                     match (cand.self_ty().kind(), trait_pred.self_ty().skip_binder().kind()) {
                         (ty::FnPtr(..), ty::FnDef(..)) => {
                             (" implemented for fn pointer `", ", cast using `as`")
                         }
                         (ty::FnPtr(..), _) => (" implemented for fn pointer `", ""),
-                        _ => (" implemented for `", ""),
+                        _ => {
+                            let evaluate_obligations = || {
+                                let ocx = ObligationCtxt::new_with_diagnostics(self);
+                                self.enter_forall(trait_pred, |obligation_trait_ref| {
+                                    let impl_args = self.fresh_args_for_item(DUMMY_SP, def_id);
+                                    let impl_trait_ref = ocx.normalize(
+                                        &ObligationCause::dummy(),
+                                        param_env,
+                                        ty::EarlyBinder::bind(self.tcx, cand)
+                                            .instantiate(self.tcx, impl_args),
+                                    );
+                                    if ocx
+                                        .eq(
+                                            &ObligationCause::dummy(),
+                                            param_env,
+                                            obligation_trait_ref.trait_ref,
+                                            impl_trait_ref,
+                                        )
+                                        .is_err()
+                                    {
+                                        return Vec::new();
+                                    }
+                                    ocx.register_obligations(
+                                        self.tcx
+                                            .predicates_of(def_id)
+                                            .instantiate(self.tcx, impl_args)
+                                            .into_iter()
+                                            .map(|(clause, span)| {
+                                                Obligation::new(
+                                                    self.tcx,
+                                                    ObligationCause::dummy_with_span(span),
+                                                    param_env,
+                                                    clause.skip_normalization(),
+                                                )
+                                            }),
+                                    );
+                                    ocx.try_evaluate_obligations()
+                                })
+                            };
+                            let failing_obligations =
+                                if !self.tcx.predicates_of(def_id).predicates.is_empty() {
+                                    self.probe(|_| evaluate_obligations())
+                                } else {
+                                    Vec::new()
+                                };
+
+                            if failing_obligations.is_empty() {
+                                (" implemented for `", "")
+                            } else {
+                                for error in failing_obligations {
+                                    multi_span.push_span_label(
+                                        error.root_obligation.cause.span,
+                                        format!(
+                                            "unsatisfied requirement introduced here: `{}`",
+                                            error.root_obligation.predicate,
+                                        ),
+                                    );
+                                }
+
+                                (" conditionally implemented for `", "")
+                            }
+                        }
                     };
                 let trait_ = self.tcx.short_string(cand.print_trait_sugared(), err.long_ty_path());
                 let self_ty = self.tcx.short_string(cand.self_ty(), err.long_ty_path());
                 err.highlighted_span_help(
-                    self.tcx.def_span(def_id),
+                    multi_span,
                     vec![
                         StringPart::normal(format!("the trait `{trait_}` ")),
                         StringPart::highlighted("is"),
@@ -2857,7 +2869,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         // message, and fall back to regular note otherwise.
         if !self.maybe_note_obligation_cause_for_async_await(err, obligation) {
             self.note_obligation_cause_code(
-                obligation.cause.body_id,
+                obligation.cause.body_def_id,
                 err,
                 obligation.predicate,
                 obligation.param_env,
@@ -2872,7 +2884,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 obligation.cause.code(),
             );
             self.suggest_borrow_for_unsized_closure_return(
-                obligation.cause.body_id,
+                obligation.cause.body_def_id,
                 err,
                 obligation.predicate,
             );
@@ -3199,7 +3211,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         is_fn_trait: bool,
         suggested: bool,
     ) {
-        let body_def_id = obligation.cause.body_id;
+        let body_def_id = obligation.cause.body_def_id;
         let span = if let ObligationCauseCode::BinOp { rhs_span, .. } = obligation.cause.code() {
             *rhs_span
         } else {
@@ -3230,7 +3242,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 err,
                 trait_predicate,
                 None,
-                obligation.cause.body_id,
+                obligation.cause.body_def_id,
             );
         } else if trait_def_id.is_local()
             && self.tcx.trait_impls_of(trait_def_id).is_empty()
@@ -3786,7 +3798,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         {
                             trait_item_def_id.as_local()
                         } else {
-                            Some(obligation.cause.body_id)
+                            Some(obligation.cause.body_def_id)
                         };
                         if let Some(suggestion_def_id) = suggestion_def_id
                             && let Some(generics) = self.tcx.hir_get_generics(suggestion_def_id)

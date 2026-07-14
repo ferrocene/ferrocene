@@ -254,6 +254,8 @@ declare_features! (
     (unstable, anonymous_lifetime_in_impl_trait, "1.63.0", None),
     /// Allows checking whether or not the backend correctly supports unstable float types.
     (internal, cfg_target_has_reliable_f16_f128, "1.88.0", None),
+    /// Allows checking whether or not the target might have thread support.
+    (internal, cfg_target_has_threads, "CURRENT_RUSTC_VERSION", None),
     /// Allows identifying the `compiler_builtins` crate.
     (internal, compiler_builtins, "1.13.0", None),
     /// Allows skipping `ConstParamTy_` trait implementation checks
@@ -696,7 +698,7 @@ declare_features! (
     (unstable, powerpc_target_feature, "1.27.0", Some(150255)),
     /// The prfchw target feature on x86.
     (unstable, prfchw_target_feature, "1.78.0", Some(150256)),
-    /// Allows macro attributes on expressions, statements and non-inline modules.
+    /// Allows macro attributes on expressions and statements.
     (unstable, proc_macro_hygiene, "1.30.0", Some(54727)),
     /// Allows the use of raw-dylibs on ELF platforms
     (incomplete, raw_dylib_elf, "1.87.0", Some(135694)),

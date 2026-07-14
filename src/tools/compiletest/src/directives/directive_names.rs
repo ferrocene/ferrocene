@@ -113,10 +113,16 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-nvptx64-nvidia-cuda",
     "ignore-openbsd",
     "ignore-parallel-frontend",
+    "ignore-pauthtest",
     "ignore-powerpc",
     "ignore-powerpc64",
+<<<<<<< ferrocene/main
     "ignore-qemu",
     "ignore-qnx",
+||||||| 7fb284d9037
+=======
+    "ignore-qnx",
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     "ignore-remote",
     "ignore-riscv32",
     "ignore-riscv64",
@@ -260,6 +266,7 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "only-musl",
     "only-nightly",
     "only-nvptx64",
+    "only-pauthtest",
     "only-powerpc",
     "only-riscv32",
     "only-riscv64",

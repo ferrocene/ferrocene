@@ -22,7 +22,7 @@ use rustc_fs_util::{link_or_copy, path_to_c_string};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_session::config::{self, Lto, OutputType, Passes, SplitDwarfKind, SwitchWithOptPath};
-use rustc_span::{BytePos, InnerSpan, Pos, RemapPathScopeComponents, SpanData, SyntaxContext, sym};
+use rustc_span::{BytePos, InnerSpan, Pos, RemapPathScopeComponents, SpanData, SyntaxContext};
 use rustc_target::spec::{CodeModel, FloatAbi, RelocModel, SanitizerSet, SplitDebuginfo, TlsModel};
 use tracing::{debug, trace};
 
@@ -209,14 +209,8 @@ pub(crate) fn target_machine_factory(
 
     let code_model = to_llvm_code_model(sess.code_model());
 
-    let mut singlethread = sess.target.singlethread;
-
-    // On the wasm target once the `atomics` feature is enabled that means that
-    // we're no longer single-threaded, or otherwise we don't want LLVM to
-    // lower atomic operations to single-threaded operations.
-    if singlethread && sess.target.is_like_wasm && sess.target_features.contains(&sym::atomics) {
-        singlethread = false;
-    }
+    // This is used to set cfg_has_threads, so all logic must be in this method.
+    let singlethread = sess.target.singlethread(&sess.target_features);
 
     let triple = SmallCStr::new(&versioned_llvm_target(sess));
     let cpu = SmallCStr::new(llvm_util::target_cpu(sess));
@@ -566,6 +560,14 @@ pub(crate) unsafe fn llvm_optimize(
     let print_before_enzyme = config.autodiff.contains(&config::AutoDiff::PrintModBefore);
     let print_after_enzyme = config.autodiff.contains(&config::AutoDiff::PrintModAfter);
     let print_passes = config.autodiff.contains(&config::AutoDiff::PrintPasses);
+    let passes_after_enzyme = if autodiff_stage == AutodiffStage::PostAD {
+        config.autodiff_post_passes.as_deref()
+    } else {
+        None
+    };
+    let passes_after_enzyme_ptr =
+        passes_after_enzyme.map_or(std::ptr::null(), |s| s.as_c_char_ptr());
+    let passes_after_enzyme_len = passes_after_enzyme.map_or(0, |s| s.len());
     let merge_functions;
     let unroll_loops;
     let vectorize_slp;
@@ -795,6 +797,8 @@ pub(crate) unsafe fn llvm_optimize(
             llvm_selfprofiler,
             selfprofile_before_pass_callback,
             selfprofile_after_pass_callback,
+            passes_after_enzyme_ptr,
+            passes_after_enzyme_len,
             extra_passes.as_c_char_ptr(),
             extra_passes.len(),
             llvm_plugins.as_c_char_ptr(),

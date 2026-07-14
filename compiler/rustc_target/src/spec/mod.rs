@@ -40,11 +40,11 @@
 use core::result::Result;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::hash::{Hash, Hasher};
+use std::fmt;
+use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::{fmt, io};
 
 use rustc_abi::{
     Align, CVariadicStatus, CanonAbi, Endian, ExternAbi, Integer, Size, TargetDataLayout,
@@ -52,9 +52,7 @@ use rustc_abi::{
 };
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_error_messages::{DiagArgValue, IntoDiagArg, into_diag_arg_using_display};
-use rustc_fs_util::try_canonicalize;
 use rustc_macros::{BlobDecodable, Decodable, Encodable, StableHash};
-use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use rustc_span::{Symbol, kw, sym};
 use serde_json::Value;
 use tracing::debug;
@@ -67,11 +65,13 @@ pub mod crt_objects;
 mod abi_map;
 mod base;
 mod json;
+mod tuple;
 
 pub use abi_map::{AbiMap, AbiMapping};
 pub use base::apple;
 pub use base::avr::ef_avr_arch;
 pub use json::json_schema;
+pub use tuple::TargetTuple;
 
 /// Linker is called through a C/C++ compiler.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -991,7 +991,7 @@ crate::target_spec_enum! {
         /// On PowerPC only: build for SPE.
         PowerPcSpe = "powerpc-spe",
         /// On x86-32/64, aarch64, and S390x: do not use any FPU or SIMD registers for the ABI.
-        Softfloat = "softfloat", "x86-softfloat",
+        Softfloat = "softfloat",
     }
 
     parse_error_type = "rustc abi";
@@ -1488,6 +1488,7 @@ supported_targets! {
     ("armv7-unknown-linux-musleabihf", armv7_unknown_linux_musleabihf),
     ("aarch64-unknown-linux-gnu", aarch64_unknown_linux_gnu),
     ("aarch64-unknown-linux-musl", aarch64_unknown_linux_musl),
+    ("aarch64-unknown-linux-pauthtest", aarch64_unknown_linux_pauthtest),
     ("aarch64_be-unknown-linux-musl", aarch64_be_unknown_linux_musl),
     ("x86_64-unknown-linux-musl", x86_64_unknown_linux_musl),
     ("i686-unknown-linux-musl", i686_unknown_linux_musl),
@@ -1686,6 +1687,7 @@ supported_targets! {
     ("riscv32im-unknown-none-elf", riscv32im_unknown_none_elf),
     ("riscv32ima-unknown-none-elf", riscv32ima_unknown_none_elf),
     ("riscv32imc-unknown-none-elf", riscv32imc_unknown_none_elf),
+    ("riscv32imfc-unknown-none-elf", riscv32imfc_unknown_none_elf),
     ("riscv32imc-esp-espidf", riscv32imc_esp_espidf),
     ("riscv32imac-esp-espidf", riscv32imac_esp_espidf),
     ("riscv32imafc-esp-espidf", riscv32imafc_esp_espidf),
@@ -1835,6 +1837,12 @@ supported_targets! {
     ("x86_64-unknown-linux-gnuasan", x86_64_unknown_linux_gnuasan),
     ("x86_64-unknown-linux-gnumsan", x86_64_unknown_linux_gnumsan),
     ("x86_64-unknown-linux-gnutsan", x86_64_unknown_linux_gnutsan),
+
+    ("aarch64-oe-linux-gnu", aarch64_oe_linux_gnu),
+    ("armv7-oe-linux-gnueabihf", armv7_oe_linux_gnueabihf),
+    ("i686-oe-linux-gnu", i686_oe_linux_gnu),
+    ("riscv64-oe-linux-gnu", riscv64_oe_linux_gnu),
+    ("x86_64-oe-linux-gnu", x86_64_oe_linux_gnu),
 }
 
 /// Cow-Vec-Str: Cow<'static, [Cow<'static, str>]>
@@ -2083,6 +2091,7 @@ crate::target_spec_enum! {
         Ilp32e = "ilp32e",
         Llvm = "llvm",
         MacAbi = "macabi",
+        Pauthtest = "pauthtest",
         Sim = "sim",
         SoftFloat = "softfloat",
         Spe = "spe",
@@ -2123,6 +2132,8 @@ crate::target_spec_enum! {
         // PowerPC
         ElfV1 = "elfv1",
         ElfV2 = "elfv2",
+        // Pointer authentication: Pauthtest
+        Pauthtest = "pauthtest",
 
         Unspecified = "",
     }
@@ -2255,6 +2266,26 @@ impl Target {
                 CVariadicStatus::Stable
             }
         }
+    }
+
+    /// Is this target single-threaded?
+    ///
+    /// This affects both optimizations (e.g., atomics can be lowered to regular operations) and
+    /// is also exposed as cfg(target_has_threads).
+    pub fn singlethread(&self, target_features: &FxIndexSet<Symbol>) -> bool {
+        // On the wasm target once the `atomics` feature is enabled that means that
+        // we're no longer single-threaded, or otherwise we don't want LLVM to
+        // lower atomic operations to single-threaded operations.
+        //
+        // FIXME: This (probably?) implies that atomics should be a target modifier, at which point
+        // it probably makes sense to be a separate target to ship precompiled artifacts for it?
+        //
+        // cc #77839 (tracking issue for wasm atomics)
+        if self.singlethread && self.is_like_wasm && target_features.contains(&sym::atomics) {
+            return false;
+        }
+
+        self.singlethread
     }
 }
 
@@ -2571,7 +2602,8 @@ pub struct TargetOptions {
     pub requires_lto: bool,
 
     /// This target has no support for threads.
-    pub singlethread: bool,
+    // This is private because wasm changes this depending on target features.
+    singlethread: bool,
 
     /// Whether library functions call lowering/optimization is disabled in LLVM
     /// for this target unconditionally.
@@ -3409,9 +3441,10 @@ impl Target {
                 )
             }
             Arch::AArch64 => {
-                check!(
-                    self.llvm_abiname == LlvmAbi::Unspecified,
-                    "`llvm_abiname` is unused on aarch64"
+                check_matches!(
+                    self.llvm_abiname,
+                    LlvmAbi::Unspecified | LlvmAbi::Pauthtest,
+                    "invalid llvm ABI for aarch64"
                 );
                 check!(self.llvm_floatabi.is_none(), "`llvm_floatabi` is unused on aarch64");
                 // FIXME: Ensure that target_abi = "ilp32" correlates with actually using that ABI.
@@ -3424,6 +3457,7 @@ impl Target {
                             CfgAbi::Ilp32
                                 | CfgAbi::Llvm
                                 | CfgAbi::MacAbi
+                                | CfgAbi::Pauthtest
                                 | CfgAbi::Sim
                                 | CfgAbi::Uwp
                                 | CfgAbi::Unspecified
@@ -3891,142 +3925,3 @@ impl Target {
         Symbol::intern(&self.vendor)
     }
 }
-
-/// Either a target tuple string or a path to a JSON file.
-#[derive(Clone, Debug)]
-pub enum TargetTuple {
-    TargetTuple(String),
-    TargetJson {
-        /// Warning: This field may only be used by rustdoc. Using it anywhere else will lead to
-        /// inconsistencies as it is discarded during serialization.
-        path_for_rustdoc: PathBuf,
-        tuple: String,
-        contents: String,
-    },
-}
-
-// Use a manual implementation to ignore the path field
-impl PartialEq for TargetTuple {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::TargetTuple(l0), Self::TargetTuple(r0)) => l0 == r0,
-            (
-                Self::TargetJson { path_for_rustdoc: _, tuple: l_tuple, contents: l_contents },
-                Self::TargetJson { path_for_rustdoc: _, tuple: r_tuple, contents: r_contents },
-            ) => l_tuple == r_tuple && l_contents == r_contents,
-            _ => false,
-        }
-    }
-}
-
-// Use a manual implementation to ignore the path field
-impl Hash for TargetTuple {
-    fn hash<H: Hasher>(&self, state: &mut H) -> () {
-        match self {
-            TargetTuple::TargetTuple(tuple) => {
-                0u8.hash(state);
-                tuple.hash(state)
-            }
-            TargetTuple::TargetJson { path_for_rustdoc: _, tuple, contents } => {
-                1u8.hash(state);
-                tuple.hash(state);
-                contents.hash(state)
-            }
-        }
-    }
-}
-
-// Use a manual implementation to prevent encoding the target json file path in the crate metadata
-impl<S: Encoder> Encodable<S> for TargetTuple {
-    fn encode(&self, s: &mut S) {
-        match self {
-            TargetTuple::TargetTuple(tuple) => {
-                s.emit_u8(0);
-                s.emit_str(tuple);
-            }
-            TargetTuple::TargetJson { path_for_rustdoc: _, tuple, contents } => {
-                s.emit_u8(1);
-                s.emit_str(tuple);
-                s.emit_str(contents);
-            }
-        }
-    }
-}
-
-impl<D: Decoder> Decodable<D> for TargetTuple {
-    fn decode(d: &mut D) -> Self {
-        match d.read_u8() {
-            0 => TargetTuple::TargetTuple(d.read_str().to_owned()),
-            1 => TargetTuple::TargetJson {
-                path_for_rustdoc: PathBuf::new(),
-                tuple: d.read_str().to_owned(),
-                contents: d.read_str().to_owned(),
-            },
-            _ => {
-                panic!("invalid enum variant tag while decoding `TargetTuple`, expected 0..2");
-            }
-        }
-    }
-}
-
-impl TargetTuple {
-    /// Creates a target tuple from the passed target tuple string.
-    pub fn from_tuple(tuple: &str) -> Self {
-        TargetTuple::TargetTuple(tuple.into())
-    }
-
-    /// Creates a target tuple from the passed target path.
-    pub fn from_path(path: &Path) -> Result<Self, io::Error> {
-        let canonicalized_path = try_canonicalize(path)?;
-        let contents = std::fs::read_to_string(&canonicalized_path).map_err(|err| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                format!("target path {canonicalized_path:?} is not a valid file: {err}"),
-            )
-        })?;
-        let tuple = canonicalized_path
-            .file_stem()
-            .expect("target path must not be empty")
-            .to_str()
-            .expect("target path must be valid unicode")
-            .to_owned();
-        Ok(TargetTuple::TargetJson { path_for_rustdoc: canonicalized_path, tuple, contents })
-    }
-
-    /// Returns a string tuple for this target.
-    ///
-    /// If this target is a path, the file name (without extension) is returned.
-    pub fn tuple(&self) -> &str {
-        match *self {
-            TargetTuple::TargetTuple(ref tuple) | TargetTuple::TargetJson { ref tuple, .. } => {
-                tuple
-            }
-        }
-    }
-
-    /// Returns an extended string tuple for this target.
-    ///
-    /// If this target is a path, a hash of the path is appended to the tuple returned
-    /// by `tuple()`.
-    pub fn debug_tuple(&self) -> String {
-        use std::hash::DefaultHasher;
-
-        match self {
-            TargetTuple::TargetTuple(tuple) => tuple.to_owned(),
-            TargetTuple::TargetJson { path_for_rustdoc: _, tuple, contents: content } => {
-                let mut hasher = DefaultHasher::new();
-                content.hash(&mut hasher);
-                let hash = hasher.finish();
-                format!("{tuple}-{hash}")
-            }
-        }
-    }
-}
-
-impl fmt::Display for TargetTuple {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.debug_tuple())
-    }
-}
-
-into_diag_arg_using_display!(&TargetTuple);

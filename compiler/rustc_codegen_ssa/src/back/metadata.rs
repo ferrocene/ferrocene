@@ -24,6 +24,7 @@ use rustc_target::spec::{CfgAbi, Env, LlvmAbi, Os, RelocModel, Target, ef_avr_ar
 use tracing::debug;
 
 use super::apple;
+use crate::errors;
 
 /// The default metadata loader. This is used by cg_llvm and cg_clif.
 ///
@@ -378,7 +379,7 @@ pub(super) fn elf_e_flags(architecture: Architecture, sess: &Session) -> u32 {
             if let Some(ref cpu) = sess.opts.cg.target_cpu {
                 ef_avr_arch(cpu)
             } else {
-                bug!("AVR CPU not explicitly specified")
+                sess.dcx().emit_fatal(errors::CpuRequired)
             }
         }
         Architecture::Csky => {

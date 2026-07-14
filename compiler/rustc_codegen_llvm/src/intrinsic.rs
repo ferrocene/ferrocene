@@ -28,7 +28,7 @@ use rustc_session::lint::builtin::DEPRECATED_LLVM_INTRINSIC;
 use rustc_span::{ErrorGuaranteed, Span, Symbol, sym};
 use rustc_symbol_mangling::{mangle_internal_symbol, symbol_name_for_instance_in_crate};
 use rustc_target::callconv::PassMode;
-use rustc_target::spec::Arch;
+use rustc_target::spec::{Arch, LlvmAbi};
 use tracing::debug;
 
 use crate::abi::FnAbiLlvmExt;
@@ -37,6 +37,7 @@ use crate::builder::autodiff::{adjust_activity_to_abi, generate_enzyme_call};
 use crate::builder::gpu_offload::{
     OffloadKernelDims, gen_call_handling, gen_define_handling, register_offload,
 };
+use crate::common::pauth_fn_attrs;
 use crate::context::CodegenCx;
 use crate::declare::declare_raw_fn;
 use crate::errors::{
@@ -44,7 +45,7 @@ use crate::errors::{
     OffloadWithoutEnable, OffloadWithoutFatLTO, UnknownIntrinsic,
 };
 use crate::intrinsic::ty::typetree::fnc_typetrees;
-use crate::llvm::{self, Type, Value};
+use crate::llvm::{self, Attribute, AttributePlace, Type, Value};
 use crate::type_of::LayoutLlvmExt;
 use crate::va_arg::emit_va_arg;
 
@@ -224,7 +225,7 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                 )
             }
             sym::autodiff => {
-                return codegen_autodiff(self, tcx, instance, args, result_layout, result_place);
+                return codegen_autodiff(self, instance, args, result_layout, result_place);
             }
             sym::offload => {
                 if tcx.sess.opts.unstable_opts.offload.is_empty() {
@@ -1711,6 +1712,13 @@ fn get_rust_try_fn<'a, 'll, 'tcx>(
         hir::Safety::Unsafe,
     ));
     let rust_try = gen_fn(cx, "__rust_try", rust_fn_sig, codegen);
+    if cx.sess().target.llvm_abiname == LlvmAbi::Pauthtest {
+        let attrs: Vec<&Attribute> =
+            pauth_fn_attrs().iter().map(|name| llvm::CreateAttrString(cx.llcx, name)).collect();
+        let (_ty, rust_try_fn) = rust_try;
+        crate::attributes::apply_to_llfn(rust_try_fn, AttributePlace::Function, &attrs);
+    }
+
     cx.rust_try_fn.set(Some(rust_try));
     rust_try
 }
@@ -1735,12 +1743,12 @@ fn codegen_retag_inner<'ll, 'tcx>(
 
 fn codegen_autodiff<'ll, 'tcx>(
     bx: &mut Builder<'_, 'll, 'tcx>,
-    tcx: TyCtxt<'tcx>,
     instance: ty::Instance<'tcx>,
     args: &[OperandRef<'tcx, &'ll Value>],
     result_layout: ty::layout::TyAndLayout<'tcx>,
     result_place: Option<PlaceValue<&'ll Value>>,
 ) -> IntrinsicResult<'tcx, &'ll Value> {
+    let tcx = bx.tcx;
     if !tcx.sess.opts.unstable_opts.autodiff.contains(&rustc_session::config::AutoDiff::Enable) {
         let _ = tcx.dcx().emit_almost_fatal(AutoDiffWithoutEnable);
     }
@@ -1807,7 +1815,6 @@ fn codegen_autodiff<'ll, 'tcx>(
     // Build body
     generate_enzyme_call(
         bx,
-        bx.cx,
         fn_to_diff,
         &diff_symbol,
         llret_ty,

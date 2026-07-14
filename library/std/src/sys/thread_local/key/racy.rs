@@ -23,8 +23,8 @@ pub struct LazyKey {
 // as a TLS key.
 #[cfg(not(any(target_os = "nto", target_os = "qnx")))]
 const KEY_SENTVAL: usize = 0;
-// On QNX Neutrino, 0 is always returned when currently not in use.
-// Using 0 would mean to always create two keys and remote the first
+// On QNX SDP, 0 is always returned when currently not in use.
+// Using 0 would mean to always create two keys and remove the first
 // one (with value of 0) immediately afterwards.
 #[cfg(any(target_os = "nto", target_os = "qnx"))]
 const KEY_SENTVAL: usize = libc::PTHREAD_KEYS_MAX + 1;

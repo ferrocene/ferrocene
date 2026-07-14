@@ -5,8 +5,15 @@
 //@[x64] only-x86_64
 //@ needs-subprocess
 //@ ignore-fuchsia no exception handler registered for segfault
+<<<<<<< ferrocene/main
 //@ ignore-nto Crash analysis impossible at SIGSEGV in QNX Neutrino
 //@ ignore-qnx Crash analysis impossible at SIGSEGV in QNX Neutrino
+||||||| 7fb284d9037
+//@ ignore-nto Crash analysis impossible at SIGSEGV in QNX Neutrino
+=======
+//@ ignore-nto Crash analysis impossible at SIGSEGV in QNX SDP 7.x
+//@ ignore-qnx Crash analysis impossible at SIGSEGV in QNX SDP 8.0+
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 //@ ignore-ios Stack probes are enabled, but the SIGSEGV handler isn't
 //@ ignore-tvos Stack probes are enabled, but the SIGSEGV handler isn't
 //@ ignore-watchos Stack probes are enabled, but the SIGSEGV handler isn't

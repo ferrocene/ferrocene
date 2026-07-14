@@ -2492,6 +2492,8 @@ unsafe extern "C" {
         llvm_selfprofiler: *mut c_void,
         begin_callback: SelfProfileBeforePassCallback,
         end_callback: SelfProfileAfterPassCallback,
+        PostEnzymePasses: *const c_char,
+        PostEnzymePassesLen: size_t,
         ExtraPasses: *const c_char,
         ExtraPassesLen: size_t,
         LLVMPlugins: *const c_char,
@@ -2647,4 +2649,12 @@ unsafe extern "C" {
         Aliasee: &Value,
         Name: *const c_char,
     ) -> &'ll Value;
+
+    pub(crate) fn LLVMRustConstPtrAuth(
+        ptr: *const Value,
+        key: u32,
+        disc: u64,
+        addr_diversity: *const Value,
+        deactivation_symbol: *const Value,
+    ) -> *const Value;
 }

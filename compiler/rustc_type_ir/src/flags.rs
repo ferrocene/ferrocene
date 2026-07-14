@@ -202,8 +202,8 @@ impl<I: Interner> FlagComputation<I> {
     pub fn for_clauses(clauses: &[I::Clause]) -> FlagComputation<I> {
         let mut result = FlagComputation::new();
         for c in clauses {
-            result.add_flags(c.as_predicate().flags());
-            result.add_exclusive_binder(c.as_predicate().outer_exclusive_binder());
+            result.add_flags(c.flags());
+            result.add_exclusive_binder(c.outer_exclusive_binder());
         }
         result
     }
@@ -442,10 +442,6 @@ impl<I: Interner> FlagComputation<I> {
             ty::PredicateKind::NormalizesTo(ty::NormalizesTo { alias, term }) => {
                 self.add_alias_term(alias);
                 self.add_term(term);
-            }
-            ty::PredicateKind::AliasRelate(t1, t2, _) => {
-                self.add_term(t1);
-                self.add_term(t2);
             }
             ty::PredicateKind::Clause(ty::ClauseKind::UnstableFeature(_sym)) => {}
             ty::PredicateKind::Ambiguous => {}

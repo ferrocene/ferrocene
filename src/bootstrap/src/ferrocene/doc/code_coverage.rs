@@ -7,7 +7,7 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 
 // List of targets that we generate coverage for in CI
-const COVERAGE_TARGET_TRIPLES: [&'static str; 6] = [
+const COVERAGE_TARGET_TUPLES: [&str; 6] = [
     "aarch64-unknown-ferrocene.facade",
     "aarch64-unknown-linux-gnu",
     "armv7r-ferrocene.facade-eabihf",
@@ -46,18 +46,18 @@ impl Step for AllCoverageReports {
 
         builder.info("Copying coverage reports...");
 
-        for target_triple in COVERAGE_TARGET_TRIPLES {
-            let out_triple = target_triple.replace("ferrocene.facade", "none");
+        for target_tuple in COVERAGE_TARGET_TUPLES {
+            let out_tuple = target_tuple.replace("ferrocene.facade", "none");
 
-            let src = outcomes_dir.join(target_triple).join("certified-coverage-report.html");
+            let src = outcomes_dir.join(target_tuple).join("certified-coverage-report.html");
             let out =
-                builder.doc_out(self.target).join("coverage").join(out_triple).join("index.html");
+                builder.doc_out(self.target).join("coverage").join(out_tuple).join("index.html");
 
             if !src.exists() {
                 panic!(
                     "`x doc ferrocene-coverage` failed: no coverage report present in {} for target {}",
                     outcomes_dir.display(),
-                    target_triple
+                    target_tuple
                 );
             }
 

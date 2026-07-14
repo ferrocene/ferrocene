@@ -80,7 +80,7 @@ case "$1" in
         echo "Unpacking tar archive"
         # Unpacking is faster than packing and logging each file causes a significant
         # slowdown, so no verbose here.
-        unzstd --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x
+        zstd -d --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x
         echo "Done unpacking"
         echo "Restoring cyclic symlinks"
         uv run "${parent}/build_cache.py" post-download

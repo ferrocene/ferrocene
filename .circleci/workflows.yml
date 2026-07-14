@@ -708,6 +708,13 @@ jobs:
           command: echo
 
   x86_64-windows-self-test:
+    parameters:
+      qnx_version:
+        description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
+        type: string
+      targets:
+        description: The targets to test (must match qnx version)
+        type: string
     executor:
       name: win/server-2022
       size: medium # 4-core
@@ -715,7 +722,7 @@ jobs:
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
+      FERROCENE_TARGETS: << parameters.targets >>
     steps:
       - when:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
@@ -727,35 +734,7 @@ jobs:
                 override_installed: false
                 os: windows
             - setup-qnx-toolchain:
-                qnx_version: qnx710-472
-            - run:
-                name: Download dist artifacts and run the self-test tool
-                command: ferrocene/ci/scripts/run-self-test.sh
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
-
-  x86_64-windows-self-test-qnx8:
-    executor:
-      name: win/server-2022
-      size: medium # 4-core
-      shell: bash.exe -euo pipefail
-    environment:
-      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
-      FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
-    steps:
-      - when:
-          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
-          steps:
-            - ferrocene/git_shallow_clone:
-                depth: 1
-            - ferrocene/setup:
-                awscli_version: << pipeline.parameters.awscli-version >>
-                override_installed: false
-                os: windows
-            - setup-qnx-toolchain:
-                qnx_version: qnx800-141
+                qnx_version: << parameters.qnx_version >>
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -1377,10 +1356,15 @@ workflows:
           requires:
             - llvm--x86_64-pc-windows-msvc
       - x86_64-windows-self-test:
+          qnx_version: qnx710-472
+          targets: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets
-      - x86_64-windows-self-test-qnx8:
+      - x86_64-windows-self-test:
+          name: x86_64-windows-self-test-qnx8
+          qnx_version: qnx800-141
+          targets: aarch64-unknown-qnx,x86_64-pc-qnx
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets-qnx8

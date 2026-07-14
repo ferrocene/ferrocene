@@ -2,14 +2,7 @@
 
 **Tier: 3**
 
-<<<<<<< ferrocene/main
-Support for the [QNX®][qnx.com] [QNX Software Development Platform (SDP)], version 7.0, 7.1 and 8.0.
-||||||| 7fb284d9037
-The [QNX®][qnx.com] Neutrino (nto) Real-time operating system. Known as QNX OS
-from version 8 onwards.
-=======
 Support for the [QNX®](https://qnx.com) [QNX Software Development Platform (SDP)], version 7.0, 7.1 and 8.0.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 [QNX Software Development Platform (SDP)]: https://qnx.software/en/software/products-and-solutions/qnx-software-development-platform
 
@@ -126,23 +119,6 @@ change calling conventions or memory layout.
 
 ## Running the Rust test suite
 
-<<<<<<< ferrocene/main
-The test suites of the Rust compiler and standard library can be executed much
-like other Rust targets. The environment for testing should match the one used
-during compiler compilation (refer to `build_env` and `qcc`/`PATH` above) with
-the addition of the `TEST_DEVICE_ADDR` environment variable. The
-`TEST_DEVICE_ADDR` variable controls the remote runner and should point to a
-target running the `remote-test-server` executable.
-
-Note that some tests are failing which is why they are currently excluded by the
-target maintainers which can be seen in the following example.
-||||||| 7fb284d9037
-The test suites of the Rust compiler and standard library can be executed much like other Rust targets.
-The environment for testing should match the one used during compiler compilation (refer to `build_env` and `qcc`/`PATH` above) with the
-addition of the TEST_DEVICE_ADDR environment variable.
-The TEST_DEVICE_ADDR variable controls the remote runner and should point to the target, despite localhost being shown in the following example.
-Note that some tests are failing which is why they are currently excluded by the target maintainers which can be seen in the following example.
-=======
 The test suites of the Rust compiler and standard library can be executed much
 like other Rust targets. The environment for testing should match the one used
 during compiler compilation (refer to notes on `qnxsdp-env.sh` above) with
@@ -152,21 +128,12 @@ target running the `remote-test-server` executable.
 
 Note that some tests are failing which is why they are currently excluded by the
 target maintainers which can be seen in the following example.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 To run all tests on a x86_64 QNX Neutrino 7.1 target:
 
 ```bash
-<<<<<<< ferrocene/main
-export TEST_DEVICE_ADDR="1.2.3.4:12345" # must address the test target, can be a SSH tunnel
-export build_env=<see above>
-||||||| 7fb284d9037
-export TEST_DEVICE_ADDR="localhost:12345" # must address the test target, can be a SSH tunnel
-export build_env=<see above>
-=======
 source ~/qnx710/qnxsdp-env.sh
 export TEST_DEVICE_ADDR="1.2.3.4:12345" # must address the test target, can be a SSH tunnel
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 # Disable tests that only work on the host or don't make sense for this target.
 # See also:

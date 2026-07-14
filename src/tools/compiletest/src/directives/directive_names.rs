@@ -116,13 +116,8 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-pauthtest",
     "ignore-powerpc",
     "ignore-powerpc64",
-<<<<<<< ferrocene/main
     "ignore-qemu",
     "ignore-qnx",
-||||||| 7fb284d9037
-=======
-    "ignore-qnx",
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     "ignore-remote",
     "ignore-riscv32",
     "ignore-riscv64",

@@ -48,15 +48,9 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
     "powerpc64-unknown-linux-gnuelfv2",
-<<<<<<< ferrocene/main
-    "aarch64-unknown-qnx",
-    "x86_64-pc-qnx",
-||||||| 7fb284d9037
-=======
     "aarch64-unknown-linux-pauthtest", // Stage 0 compiler is not guaranteed to see the target yet.
     "aarch64-unknown-qnx",
     "x86_64-pc-qnx",
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

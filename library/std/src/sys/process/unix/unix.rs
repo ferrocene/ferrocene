@@ -196,16 +196,8 @@ impl Command {
     // On QNX SDP, fork can fail with EBADF in case "another thread might have opened
     // or closed a file descriptor while the fork() was occurring".
     // Documentation says "... or try calling fork() again". This is what we do here.
-<<<<<<< ferrocene/main
-    // See also https://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/f/fork.html
-    #[cfg(any(target_os = "nto", target_os = "qnx"))]
-||||||| 7fb284d9037
-    // See also https://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/f/fork.html
-    #[cfg(target_os = "nto")]
-=======
     // See also https://www.qnx.com/developers/docs/7.1/com.qnx.doc.neutrino.lib_ref/topic/f/fork.html
     #[cfg(any(target_os = "nto", target_os = "qnx"))]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     unsafe fn do_fork(&mut self) -> Result<pid_t, io::Error> {
         use crate::sys::io::errno;
 
@@ -564,16 +556,8 @@ impl Command {
         // On QNX SDP, posix_spawnp can fail with EBADF in case "another thread might have opened
         // or closed a file descriptor while the posix_spawn() was occurring".
         // Documentation says "... or try calling posix_spawn() again". This is what we do here.
-<<<<<<< ferrocene/main
-        // See also http://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/p/posix_spawn.html
-        #[cfg(any(target_os = "nto", target_os = "qnx"))]
-||||||| 7fb284d9037
-        // See also http://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/p/posix_spawn.html
-        #[cfg(target_os = "nto")]
-=======
         // See also https://www.qnx.com/developers/docs/7.1/com.qnx.doc.neutrino.lib_ref/topic/p/posix_spawn.html
         #[cfg(any(target_os = "nto", target_os = "qnx"))]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         unsafe fn retrying_libc_posix_spawnp(
             pid: *mut pid_t,
             file: *const c_char,

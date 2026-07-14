@@ -1147,18 +1147,7 @@ pub const fn copy<T: Copy>(x: &T) -> T {
 #[track_caller]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_stable(feature = "const_transmute_copy", since = "1.74.0")]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
-    assert!(
-        size_of::<Src>() >= size_of::<Dst>(),
-        "cannot transmute_copy if Dst is larger than Src"
-||||||| 7fb284d9037
-pub const unsafe fn transmute_copy<Src, Dst>(src: &Src) -> Dst {
-    assert!(
-        size_of::<Src>() >= size_of::<Dst>(),
-        "cannot transmute_copy if Dst is larger than Src"
-=======
 pub const unsafe fn transmute_copy<Src: ?Sized, Dst>(src: &Src) -> Dst {
     // library UB because it's possible for the `Src` to be only a subset of the allocation
     // and thus for a failure to not be immediate language UB
@@ -1169,7 +1158,6 @@ pub const unsafe fn transmute_copy<Src: ?Sized, Dst>(src: &Src) -> Dst {
             src_size: usize = size_of_val::<Src>(src),
             dst_size: usize = Dst::SIZE,
         ) => src_size >= dst_size
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     );
 
     // If Dst has a higher alignment requirement, src might not be suitably aligned.

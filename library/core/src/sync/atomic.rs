@@ -2753,14 +2753,8 @@ macro_rules! atomic_int {
             ///
             #[inline]
             #[$cfg_align]
-<<<<<<< ferrocene/main
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-            #[ferrocene::prevalidated]
-||||||| 7fb284d9037
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-=======
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+            #[ferrocene::prevalidated]
             pub fn from_mut(v: &mut $int_type) -> &mut Self {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:
@@ -2799,14 +2793,8 @@ macro_rules! atomic_int {
             /// });
             /// ```
             #[inline]
-<<<<<<< ferrocene/main
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-            #[ferrocene::prevalidated]
-||||||| 7fb284d9037
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-=======
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+            #[ferrocene::prevalidated]
             pub fn get_mut_slice(this: &mut [Self]) -> &mut [$int_type] {
                 // SAFETY: the mutable reference guarantees unique ownership.
                 unsafe { &mut *(this as *mut [Self] as *mut [$int_type]) }
@@ -2840,14 +2828,8 @@ macro_rules! atomic_int {
             /// ```
             #[inline]
             #[$cfg_align]
-<<<<<<< ferrocene/main
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-            #[ferrocene::prevalidated]
-||||||| 7fb284d9037
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-=======
             #[stable(feature = "atomic_from_mut", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+            #[ferrocene::prevalidated]
             pub fn from_mut_slice(v: &mut [$int_type]) -> &mut [Self] {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:

@@ -5,13 +5,8 @@
 //@ ignore-emscripten globals are used instead of thread locals
 //@ ignore-android does not use #[thread_local]
 //@ ignore-nto does not use #[thread_local]
-<<<<<<< ferrocene/main
 //@ ignore-qnx does not use #[thread_local]
 //@ ignore-ferrocene.facade no support for thread locals
-||||||| 7fb284d9037
-=======
-//@ ignore-qnx does not use #[thread_local]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 #![crate_type = "lib"]
 

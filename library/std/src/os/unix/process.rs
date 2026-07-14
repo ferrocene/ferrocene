@@ -18,16 +18,8 @@ cfg_select! {
         type UserId = u16;
         type GroupId = u16;
     }
-<<<<<<< ferrocene/main
-    any(target_os = "nto", target_os = "qnx") => {
-        // Both IDs are signed, see `sys/target_nto.h` of the QNX Neutrino SDP.
-||||||| 7fb284d9037
-    target_os = "nto" => {
-        // Both IDs are signed, see `sys/target_nto.h` of the QNX Neutrino SDP.
-=======
     any(target_os = "nto", target_os = "qnx") => {
         // Both IDs are signed, see `sys/target_nto.h` of the QNX SDP.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // Only positive values should be used, see e.g.
         // https://www.qnx.com/developers/docs/7.1/com.qnx.doc.neutrino.lib_ref/topic/s/setuid.html
         type UserId = i32;

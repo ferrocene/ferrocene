@@ -275,22 +275,10 @@ target | std | host | notes
 [`aarch64-unknown-linux-pauthtest`](platform-support/aarch64-unknown-linux-pauthtest.md) | ✓ | ✓ | ARM64 PAC ELF ABI
 [`aarch64-unknown-managarm-mlibc`](platform-support/managarm.md) | ? |  | ARM64 Managarm
 [`aarch64-unknown-netbsd`](platform-support/netbsd.md) | ✓ | ✓ | ARM64 NetBSD
-<<<<<<< ferrocene/main
-[`aarch64-unknown-nto-qnx700`](platform-support/nto-qnx.md) | ? |  | ARM64 QNX Neutrino 7.0 RTOS |
-[`aarch64-unknown-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX Neutrino 7.1 RTOS with default network stack (io-pkt) |
-[`aarch64-unknown-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX Neutrino 7.1 RTOS with new network stack (io-sock) |
-[`aarch64-unknown-qnx`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX SDP 8.0+ |
-||||||| 7fb284d9037
-[`aarch64-unknown-nto-qnx700`](platform-support/nto-qnx.md) | ? |  | ARM64 QNX Neutrino 7.0 RTOS |
-[`aarch64-unknown-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX Neutrino 7.1 RTOS with default network stack (io-pkt) |
-[`aarch64-unknown-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX Neutrino 7.1 RTOS with new network stack (io-sock) |
-[`aarch64-unknown-nto-qnx800`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX Neutrino 8.0 RTOS |
-=======
 [`aarch64-unknown-nto-qnx700`](platform-support/nto-qnx.md) | ? |  | ARM64 QNX SDP 7.0 |
 [`aarch64-unknown-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX SDP 7.1 with default network stack (io-pkt) |
 [`aarch64-unknown-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX SDP 7.1 with new network stack (io-sock) |
 [`aarch64-unknown-qnx`](platform-support/nto-qnx.md) | ✓ |  | ARM64 QNX SDP 8.0+ |
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [`aarch64-unknown-nuttx`](platform-support/nuttx.md) | ✓ |  | ARM64 with NuttX
 [`aarch64-unknown-openbsd`](platform-support/openbsd.md) | ✓ | ✓ | ARM64 OpenBSD
 [`aarch64-unknown-redox`](platform-support/redox.md) | ✓ |  | ARM64 Redox OS
@@ -462,19 +450,9 @@ target | std | host | notes
 [`x86_64-lynx-lynxos178`](platform-support/lynxos178.md) |  |  | x86_64 LynxOS-178
 [`x86_64-oe-linux-gnu`](platform-support/oe-linux-gnu.md) | ✓ |  | x86 64-bit OpenEmbedded/Yocto Linux (GNU)
 [`x86_64-pc-cygwin`](platform-support/x86_64-pc-cygwin.md) | ✓ |  | 64-bit x86 Cygwin |
-<<<<<<< ferrocene/main
-[`x86_64-pc-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX Neutrino 7.1 RTOS with default network stack (io-pkt) |
-[`x86_64-pc-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX Neutrino 7.1 RTOS with new network stack (io-sock) |
-[`x86_64-pc-qnx`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX SDP 8.0+ |
-||||||| 7fb284d9037
-[`x86_64-pc-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX Neutrino 7.1 RTOS with default network stack (io-pkt) |
-[`x86_64-pc-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX Neutrino 7.1 RTOS with new network stack (io-sock) |
-[`x86_64-pc-nto-qnx800`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX Neutrino 8.0 RTOS |
-=======
 [`x86_64-pc-nto-qnx710`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX SDP 7.1 with default network stack (io-pkt) |
 [`x86_64-pc-nto-qnx710_iosock`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX SDP 7.1 with new network stack (io-sock) |
 [`x86_64-pc-qnx`](platform-support/nto-qnx.md) | ✓ |  | x86 64-bit QNX SDP 8.0+ |
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [`x86_64-unikraft-linux-musl`](platform-support/unikraft-linux-musl.md) | ✓ |  | 64-bit Unikraft with musl 1.2.5
 `x86_64-unknown-dragonfly` | ✓ | ✓ | 64-bit DragonFlyBSD
 `x86_64-unknown-haiku` | ✓ | ✓ | 64-bit Haiku

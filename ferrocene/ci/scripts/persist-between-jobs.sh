@@ -8,6 +8,8 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
+parent=$(cd $(dirname $0) && pwd)
+
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
@@ -55,6 +57,8 @@ case "$1" in
         # Use verbose to produce output while packing so that we can see the job is
         # progressing. It shouldn't slow us down much here since we're largely dominated
         # by the effort of packing.
+        echo "Removing cyclic symlinks"
+        uv run "${parent}/build_cache.py" pre-upload
         echo "Creating tar archive"
         tar c --verbose --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Uploading tar archive"
@@ -78,6 +82,8 @@ case "$1" in
         # slowdown, so no verbose here.
         unzstd --stdout /tmp/persist_${CIRCLE_JOB}.tar.zst  | tar x
         echo "Done unpacking"
+        echo "Restoring cyclic symlinks"
+        uv run "${parent}/build_cache.py" post-download
         ;;
     *)
         usage 1>&2

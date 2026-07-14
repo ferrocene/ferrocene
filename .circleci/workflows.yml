@@ -340,7 +340,8 @@ jobs:
       - ferrocene/git_shallow_clone:
           depth: 1
       - ferrocene/aws_oidc_auth
-      - setup-qnx-toolchain: {}
+      - setup-qnx-toolchain:
+          qnx_version: qnx710-472
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -355,7 +356,8 @@ jobs:
       - ferrocene/git_shallow_clone:
           depth: 1
       - ferrocene/aws_oidc_auth
-      - setup-qnx8-toolchain: {}
+      - setup-qnx-toolchain:
+          qnx_version: qnx800-141
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -385,6 +387,7 @@ jobs:
           awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx-toolchain:
           source-env-script: false
+          qnx_version: qnx710-472
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -414,8 +417,9 @@ jobs:
       - ferrocene/checkout
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx8-toolchain:
+      - setup-qnx-toolchain:
           source-env-script: false
+          qnx_version: qnx800-141
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -761,7 +765,8 @@ jobs:
                 awscli_version: << pipeline.parameters.awscli-version >>
                 override_installed: false
                 os: windows
-            - setup-qnx-toolchain: {}
+            - setup-qnx-toolchain:
+                qnx_version: qnx710-472
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -788,7 +793,8 @@ jobs:
                 awscli_version: << pipeline.parameters.awscli-version >>
                 override_installed: false
                 os: windows
-            - setup-qnx8-toolchain: {}
+            - setup-qnx-toolchain:
+                qnx_version: qnx800-141
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -821,6 +827,7 @@ jobs:
           awscli_version: << pipeline.parameters.awscli-version >>
       - setup-qnx-toolchain:
           source-env-script: false
+          qnx_version: qnx710-472
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -850,8 +857,9 @@ jobs:
       - ferrocene/checkout
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx8-toolchain:
+      - setup-qnx-toolchain:
           source-env-script: false
+          qnx_version: qnx800-141
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
@@ -1482,12 +1490,14 @@ commands:
           condition:
             equal: [<<parameters.qnx7>>, true]
           steps:
-            - setup-qnx-toolchain: {}
+            - setup-qnx-toolchain:
+                qnx_version: qnx710-472
       - when:
           condition:
             equal: [<<parameters.qnx8>>, true]
           steps:
-            - setup-qnx8-toolchain: {}
+            - setup-qnx-toolchain:
+                qnx_version: qnx800-141
       - ferrocene/ci
 
   ferrocene-job-test-container:
@@ -1624,37 +1634,21 @@ commands:
       source-env-script:
         type: boolean
         default: true
+      qnx_version:
+        description: "The QNX version to set up (currently supported: qnx710-472, qnx800-141)"
+        type: string
     steps:
       - run:
-          name: Fetch QNX710 toolchain
+          name: Fetch << parameters.qnx_version >> toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
+            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
           steps:
             - run:
-                name: Set PATH to include QNX710 tools
-                command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
-
-  setup-qnx8-toolchain:
-    description: Setup QNX8 Toolchain
-    parameters:
-      source-env-script:
-        type: boolean
-        default: true
-    steps:
-      - run:
-          name: Fetch QNX800 toolchain
-          # On Windows, the virtualenv detection seems to struggle at times.
-          command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
-      - when:
-          condition: << parameters.source-env-script >>
-          steps:
-            - run:
-                name: Set PATH to include QNX800 tools
-                command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
+                name: Set PATH to include << parameters.qnx_version >> tools
+                command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
 
 executors:
   linux-vm:

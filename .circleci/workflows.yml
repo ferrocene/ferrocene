@@ -781,7 +781,8 @@ jobs:
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
-            - ferrocene-setup-windows
+            - ferrocene-setup-windows:
+                llvm_build: true
             - setup-uv
             - ferrocene-ci
       - run:
@@ -831,7 +832,7 @@ jobs:
             - ferrocene-git-shallow-clone:
                 depth: 1
             - aws-oidc-auth
-            - ferrocene-setup-windows
+            - ferrocene-setup-windows: {}
             - setup-uv
             - setup-qnx-toolchain: {}
             - run:
@@ -857,7 +858,7 @@ jobs:
             - ferrocene-git-shallow-clone:
                 depth: 1
             - aws-oidc-auth
-            - ferrocene-setup-windows
+            - ferrocene-setup-windows: {}
             - setup-uv
             - setup-qnx8-toolchain: {}
             - run:
@@ -1647,7 +1648,7 @@ commands:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
-            - ferrocene-setup-windows
+            - ferrocene-setup-windows: {}
       - setup-uv
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -1698,7 +1699,7 @@ commands:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
-            - ferrocene-setup-windows
+            - ferrocene-setup-windows: {}
       - setup-uv
       - when:
           condition: <<parameters.restore-from-job>>
@@ -1888,10 +1889,20 @@ commands:
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment
+    parameters:
+      llvm_build:
+        type: boolean
+        default: false
     steps:
       - run:
           name: Setup Windows environment
           command: ferrocene/ci/scripts/setup-windows.sh
+      - when:
+          condition: << parameters.llvm_build >>
+          steps:
+            - run:
+                name: Setup LLVM build dependencies
+                command: ferrocene/ci/scripts/setup-windows-llvm.sh
 
   # This task can be skipped inside docker containers, it's mainly intended for Mac/Windows hosts.
   setup-uv:

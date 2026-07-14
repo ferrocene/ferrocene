@@ -107,7 +107,7 @@ class AutomatedPR(abc.ABC):
         Handle the creation of the PR, and open an issue if an error occurs.
         """
         self.dry_run = dry_run
-        self.origin = ORIGIN
+        self.origin = os.environ.get("FERROCENE_REMOTE", ORIGIN)
 
         self.http = requests.Session()
         self.http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"

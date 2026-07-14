@@ -1486,6 +1486,7 @@ commands:
                 llvm_subset: true
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
+          override_installed: false
       - ferrocene/restore_from_job:
           from_job: << parameters.restore-from-job>>
 
@@ -1508,6 +1509,7 @@ commands:
                 name: Prepare emulator
                 command: |
                   docker run \
+                    --device /dev/kvm \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
@@ -1515,7 +1517,8 @@ commands:
                     --volume $(pwd):/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
-                    --user $(id -u):$(id -g) \
+                    --user "$(id -u):$(id -g)" \
+                    --group-add "$(getent group kvm | cut -d: -f3)" \
                     --network host \
                     --privileged \
                     --interactive \
@@ -1535,7 +1538,8 @@ commands:
                     --volume $(pwd):/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
-                    --user $(id -u):$(id -g) \
+                    --user "$(id -u):$(id -g)" \
+                    --group-add "$(getent group kvm | cut -d: -f3)" \
                     --network host \
                     --privileged \
                     --interactive \
@@ -1552,7 +1556,8 @@ commands:
               --volume $(pwd):/project \
               --volume $HOME/tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
-              --user $(id -u):$(id -g) \
+              --user "$(id -u):$(id -g)" \
+              --group-add "$(getent group kvm | cut -d: -f3)" \
               --network host \
               --interactive \
               --tty \

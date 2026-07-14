@@ -41,3 +41,12 @@ Project Documents
    * - :doc:`core-certification:index`
      - :document-id:`core-certification`
      - |ferrocene_version|
+   * - :doc:`qnx7-manual:index`
+     - :document-id:`qnx7-manual`
+     - |ferrocene_version|
+   * - :doc:`qnx8-manual:index`
+     - :document-id:`qnx8-manual`
+     - |ferrocene_version|
+   * - :doc:`rhivos-manual:index`
+     - :document-id:`rhivos-manual`
+     - |ferrocene_version|

@@ -1,27 +1,19 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-rhivos2-linux-gnu:
+.. _aarch64-unknown-linux-gnu:
 
-:target:`aarch64-rhivos2-linux-gnu`
+:target:`aarch64-unknown-linux-gnu`
 ===================================
 .. note::
 
-   This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets
-   Red Hat In-Vehicle Operating System 2 (RHIVOS 2). As per the RHIVOS 2 guidelines, qualified use requires
-   compilation on the matching host platform Red Hat Enterprise Linux 10 using using the
-   :ref:`aarch64-unknown-linux-gnu` host compiler.
+   Only qualified when cross-compiling to :ref:`aarch64-rhivos2-linux-gnu`.
 
-The ``aarch64-rhivos2-linux-gnu`` Ferrocene target provides support for Red Hat In-Vehicle Operating System 2
-(RHIVOS 2) on aarch64 using glibc 2.31 or higher.
+The ``aarch64-unknown-linux-gnu`` Ferrocene target provides support for Linux on
+aarch64 using glibc 2.31 or higher.
 
 Prerequisites
 -------------
-
-While this target is technically a full linux and capable of hosting a compiler,
-the target is only qualified if cross-compiled from RHEL 10 on aarch64 in the
-version specified by the RHIVOS 2 documentation. This requirement stems from the
-RHIVOS 2 assumptions of use. The host compiler is :target:`aarch64-unknown-linux-gnu`.
 
 This target uses the LLVM ``ld.lld`` linker. To locate the system C libraries
 required to create a functional Linux binary, this target drives the ``ld.lld``
@@ -39,15 +31,26 @@ You must have a C compiler which:
 - Supplies to ``ld.lld`` only those linker arguments specified in the
   :doc:`Safety Manual <safety-manual:rustc/options>`
 
-Please refer to the Red Hat Enterprise Linux 10 documentation for installation instructions.
+On Ubuntu 20.04 LTS you can install a suitable C compiler with:
+
+.. code-block::
+
+   $ sudo apt install gcc
 
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing <user-manual:rustc/install>` this
+target as a host platform:
+
+* ``rustc-aarch64-unknown-linux-gnu``
+* ``rust-std-aarch64-unknown-linux-gnu``
+* ``ferrocene-self-test-aarch64-unknown-linux-gnu``
+
+The following archives are needed when :doc:`installing <user-manual:rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-rhivos2-linux-gnu``
+* ``rust-std-aarch64-unknown-linux-gnu``
 
 Required compiler flags
 -----------------------
@@ -55,7 +58,7 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-- ``--target=aarch64-rhivos2-linux-gnu``
+- ``--target=aarch64-unknown-linux-gnu``
 
 - ``-C linker=<your-c-compiler>``
 

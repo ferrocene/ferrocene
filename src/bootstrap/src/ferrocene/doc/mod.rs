@@ -217,11 +217,7 @@ impl<P: CommandLineStep + IsSphinxBook> Step for SphinxBook<P> {
             ))
             .arg(format!(
                 "-Dqemu_version={}",
-                fs::read_to_string(
-                    &builder.src.join("ferrocene/ci/qemu-version")
-                )
-                .unwrap()
-                .trim()
+                fs::read_to_string(&builder.src.join("ferrocene/ci/qemu-version")).unwrap().trim()
             ));
 
         // Include the breadcrumbs in the generated documentation.

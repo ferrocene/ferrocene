@@ -249,9 +249,11 @@ def workflow_id(*dummy):
 def awscli_version(*dummy):
     return Path("ferrocene/ci/awscli-version").read_text()
 
+
 # read from ferrocene/ci/qemu-version
 def qemu_version(*dummy):
-    return Path('ferrocene/ci/qemu-version').read_text()
+    return Path("ferrocene/ci/qemu-version").read_text()
+
 
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:

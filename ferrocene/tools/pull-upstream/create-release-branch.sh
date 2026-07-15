@@ -107,6 +107,7 @@ else
     fi
     git branch "${branch_name}" "${last_commit}"
 
+    # `--no-verify` allows testing this script locally even when pre-commiit hooks are set up
     git push --no-verify "${FERROCENE_REMOTE}" "${branch_name}"
 fi
 

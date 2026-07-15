@@ -807,6 +807,10 @@ jobs:
       # It's theorhetically possible to split up this job just as we split up the linux builds,
       # but the long startup times at circle make it not efficient. It takes ~10 minutes until
       # the machine has started and installed all dependencies and is ready to start the actual job
+      #
+      # If you ever want to embark on that endeavour because you're in an environment where startup
+      # time of windows hosts are faster, then the script `ferrocene/ci/scripts/build_cache.py` will
+      # be helpful to build/restore the cache.
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.

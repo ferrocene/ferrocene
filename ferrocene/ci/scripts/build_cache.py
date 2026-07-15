@@ -17,25 +17,33 @@ import os
 import logging
 import shutil
 import platform
-import tarfile
 from pathlib import Path
 
 build_directory = Path("build")
 tarball_location = Path("build.tar")
 
+
 def get_problematic_symlinks(ferrocene_host):
     """
     In the build directory, there exists several cyclic symlinks.
 
-    We need to tear those down and rebuild them on restore, because many tools 
+    We need to tear those down and rebuild them on restore, because many tools
     don't understand this concept, and OOM.
     """
     return {
-        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "rustc-src"): os.getcwd(),
-        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "src"): os.getcwd(),
-        Path("build", ferrocene_host, "stage1", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path(
+            "build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "rustc-src"
+        ): os.getcwd(),
+        Path(
+            "build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "src"
+        ): os.getcwd(),
+        Path(
+            "build", ferrocene_host, "stage1", "lib", "rustlib", "rustc-src"
+        ): os.getcwd(),
         Path("build", ferrocene_host, "stage1", "lib", "rustlib", "src"): os.getcwd(),
-        Path("build", ferrocene_host, "stage2", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path(
+            "build", ferrocene_host, "stage2", "lib", "rustlib", "rustc-src"
+        ): os.getcwd(),
         Path("build", ferrocene_host, "stage2", "lib", "rustlib", "src"): os.getcwd(),
         Path("build", "host"): Path("build", ferrocene_host),
     }
@@ -50,7 +58,7 @@ def subcommand_pre_upload(ferrocene_host):
                 try:
                     shutil.rmtree(location)
                     logging.info(f"Removed cyclic link `{location}`, via rmtree")
-                except Exception as e:
+                except Exception:
                     os.unlink(location)
                     logging.info(f"Removed cyclic link `{location}`, via unlink")
             else:
@@ -88,7 +96,9 @@ def subcommand_post_download(ferrocene_host):
                 os.makedirs(parent)
             os.symlink(target, location, target_is_directory=True)
         else:
-            logging.info(f"Unable to link to `{target}` at `{location}`, does not exist")
+            logging.info(
+                f"Unable to link to `{target}` at `{location}`, does not exist"
+            )
 
     return
 
@@ -97,12 +107,17 @@ def arguments():
     parser = argparse.ArgumentParser(
         description="Handle cyclic links in the build directory",
     )
-    parser.add_argument('-v', '--verbose', action='count', default=0)
+    parser.add_argument("-v", "--verbose", action="count", default=0)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
-    store_parser = subparsers.add_parser("pre-upload", help="Prepare the build directory for cache upload.")
+    subparsers.add_parser(
+        "pre-upload", help="Prepare the build directory for cache upload."
+    )
 
-    retrieve_parser = subparsers.add_parser("post-download", help="Restore the build directory to a usable state (eg reconsitute cyclic symlinks).")
+    subparsers.add_parser(
+        "post-download",
+        help="Restore the build directory to a usable state (eg reconsitute cyclic symlinks).",
+    )
 
     return parser.parse_args()
 
@@ -117,11 +132,15 @@ def main():
             log_level = logging.DEBUG
         case _:
             log_level = logging.TRACE
-    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%I:%M:%S %p", level=log_level)
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)s: %(message)s",
+        datefmt="%I:%M:%S %p",
+        level=log_level,
+    )
 
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
-    except:
+    except Exception:
         print("Set FERROCENE_HOST environment to a Rust triple")
         exit(1)
 

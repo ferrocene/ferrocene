@@ -276,6 +276,7 @@
 #![feature(asm_experimental_arch)]
 #![feature(autodiff)]
 #![feature(cfg_sanitizer_cfi)]
+#![feature(cfg_target_has_threads)]
 #![feature(cfg_target_thread_local)]
 #![feature(cfi_encoding)]
 #![feature(const_trait_impl)]
@@ -286,6 +287,7 @@
 #![feature(doc_masked)]
 #![feature(doc_notable_trait)]
 #![feature(dropck_eyepatch)]
+#![feature(exact_div)]
 #![feature(f16)]
 #![feature(f128)]
 #![feature(ffi_const)]
@@ -374,6 +376,7 @@
 #![feature(random)]
 #![feature(raw_os_error_ty)]
 #![feature(seek_io_take_position)]
+#![feature(seek_stream_len)]
 #![feature(share_trait)]
 #![feature(slice_internals)]
 #![feature(slice_ptr_get)]
@@ -643,6 +646,9 @@ pub mod process;
 pub mod random;
 pub mod sync;
 pub mod time;
+#[cfg_attr(feature = "nightly", not(bootstrap))]
+#[unstable(feature = "view_type_macro", issue = "155938")]
+pub mod view;
 
 // Pull in `std_float` crate  into std. The contents of
 // `std_float` are in a different repository: rust-lang/portable-simd.
@@ -775,20 +781,23 @@ pub mod from {
     pub use core::from::From;
 }
 
-// Include a number of private modules that exist solely to provide
-// the rustdoc documentation for primitive types. Using `include!`
-// because rustdoc only looks for these modules at the crate level.
-include!("../../core/src/primitive_docs.rs");
+// We include the following files here *again* (they are already included in libcore)
+// so that they show up in search results for the std crate, and to avoid breaking
+// existing links:
+
+// documentation for built-in attributes. Using `include!` because rustdoc
+// only looks for these modules at the crate level.
+include!("../../core/src/attribute_docs.rs");
 
 // Include a number of private modules that exist solely to provide
 // the rustdoc documentation for the existing keywords. Using `include!`
 // because rustdoc only looks for these modules at the crate level.
-include!("keyword_docs.rs");
+include!("../../core/src/keyword_docs.rs");
 
-// Include private modules that exist solely to provide rustdoc
-// documentation for built-in attributes. Using `include!` because rustdoc
-// only looks for these modules at the crate level.
-include!("attribute_docs.rs");
+// Include a number of private modules that exist solely to provide
+// the rustdoc documentation for primitive types. Using `include!`
+// because rustdoc only looks for these modules at the crate level.
+include!("../../core/src/primitive_docs.rs");
 
 // This is required to avoid an unstable error when `restricted-std` is not
 // enabled. The use of #![feature(restricted_std)] in rustc-std-workspace-std

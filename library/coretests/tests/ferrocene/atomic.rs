@@ -154,23 +154,23 @@ fn atomic_fence_relaxed() {
     atomic::fence(atomic::Ordering::Relaxed);
 }
 
-// covers `core::sync::atomic::<$atomic_t>::fetch_update`
-macro_rules! test_atomic_fetch_update {
+// covers `core::sync::atomic::<$atomic_t>::try_update`
+macro_rules! test_atomic_try_update {
     ($($fn:ident => $atomic_t:ty,)*) => { $(
         #[test]
         fn $fn() {
             let atomic = <$atomic_t>::new(5);
 
-            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Ok(5)); // success
-            assert_eq!(atomic.fetch_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Err(10)); // failure
+            assert_eq!(atomic.try_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Ok(5)); // success
+            assert_eq!(atomic.try_update(atomic::Ordering::Relaxed, atomic::Ordering::Relaxed, |val| { if val == 5 { Some(10) } else { None } }), Err(10)); // failure
         }
     )*};
 }
-test_atomic_fetch_update!(
-    atomic_u8_fetch_update => atomic::AtomicU8,
-    atomic_u16_fetch_update => atomic::AtomicU16,
-    atomic_u32_fetch_update => atomic::AtomicU32,
-    atomic_usize_fetch_update => atomic::AtomicUsize,
+test_atomic_try_update!(
+    atomic_u8_try_update => atomic::AtomicU8,
+    atomic_u16_try_update => atomic::AtomicU16,
+    atomic_u32_try_update => atomic::AtomicU32,
+    atomic_usize_try_update => atomic::AtomicUsize,
 );
 
 // covers `<core::sync::atomic::<$atomic_t>:: as core::fmt::Debug>::fmt`

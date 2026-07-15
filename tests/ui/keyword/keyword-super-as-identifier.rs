@@ -1,5 +1,5 @@
 fn main() {
-    let super = 22; //~ ERROR too many leading `super` keywords
+    let super = 22; //~ ERROR too many leading `super` keywords within `crate`
 }
 
 // ferrocene-annotations: fls_7bxv8lybxm18

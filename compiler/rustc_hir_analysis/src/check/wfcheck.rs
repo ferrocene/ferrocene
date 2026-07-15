@@ -562,19 +562,18 @@ pub(crate) fn check_gat_where_clauses(tcx: TyCtxt<'_>, trait_def_id: LocalDefId)
 fn augment_param_env<'tcx>(
     tcx: TyCtxt<'tcx>,
     param_env: ty::ParamEnv<'tcx>,
-    new_predicates: Option<&FxIndexSet<ty::Clause<'tcx>>>,
+    new_clauses: Option<&FxIndexSet<ty::Clause<'tcx>>>,
 ) -> ty::ParamEnv<'tcx> {
-    let Some(new_predicates) = new_predicates else {
+    let Some(new_clauses) = new_clauses else {
         return param_env;
     };
 
-    if new_predicates.is_empty() {
+    if new_clauses.is_empty() {
         return param_env;
     }
 
-    let bounds = tcx.mk_clauses_from_iter(
-        param_env.caller_bounds().iter().chain(new_predicates.iter().cloned()),
-    );
+    let bounds = tcx
+        .mk_clauses_from_iter(param_env.caller_bounds().iter().chain(new_clauses.iter().copied()));
     // FIXME(compiler-errors): Perhaps there is a case where we need to normalize this
     // i.e. traits::normalize_param_env_or_error
     ty::ParamEnv::new(bounds)
@@ -1217,7 +1216,7 @@ fn check_eiis_fn(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     // does the function have an EiiImpl attribute? that contains the defid of a *macro*
     // that was used to mark the implementation. This is a two step process.
     for EiiImpl { resolution, span, .. } in
-        find_attr!(tcx, def_id, EiiImpls(impls) => impls).into_iter().flatten()
+        find_attr!(tcx, def_id, EiiImpls(impls) => impls).into_flat_iter()
     {
         let (foreign_item, name) = match resolution {
             EiiImplResolution::Macro(def_id) => {
@@ -1244,7 +1243,7 @@ fn check_eiis_static<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId, ty: Ty<'tcx>) 
     // does the function have an EiiImpl attribute? that contains the defid of a *macro*
     // that was used to mark the implementation. This is a two step process.
     for EiiImpl { resolution, span, .. } in
-        find_attr!(tcx, def_id, EiiImpls(impls) => impls).into_iter().flatten()
+        find_attr!(tcx, def_id, EiiImpls(impls) => impls).into_flat_iter()
     {
         let (foreign_item, name) = match resolution {
             EiiImplResolution::Macro(def_id) => {

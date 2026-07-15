@@ -1128,6 +1128,23 @@ impl<'tcx> TypingEnv<'tcx> {
         Self::new(tcx.param_env(def_id), TypingMode::non_body_analysis())
     }
 
+    /// Ideally we just use `TypingMode::PostTypeckUntilBorrowck`.
+    /// But that's not compatible with the old solver yet.
+    ///
+    /// FIXME: this should not be needed in the long term.
+    pub fn post_typeck_until_borrowck_for_mir_build(
+        tcx: TyCtxt<'tcx>,
+        def_id: LocalDefId,
+    ) -> TypingEnv<'tcx> {
+        if tcx.use_typing_mode_post_typeck_until_borrowck() {
+            TypingEnv::new(tcx.param_env(def_id.to_def_id()), ty::TypingMode::borrowck(tcx, def_id))
+        } else {
+            // FIXME(#132279): We're in a body, we should use a typing
+            // mode which reveals the opaque types defined by that body.
+            TypingEnv::non_body_analysis(tcx, def_id)
+        }
+    }
+
     pub fn post_analysis(tcx: TyCtxt<'tcx>, def_id: impl IntoQueryKey<DefId>) -> TypingEnv<'tcx> {
         TypingEnv::new(tcx.param_env_normalized_for_post_analysis(def_id), TypingMode::PostAnalysis)
     }
@@ -2137,18 +2154,17 @@ impl<'tcx> TyCtxt<'tcx> {
         ident
     }
 
-    // FIXME(vincenzopalazzo): move the HirId to a LocalDefId
     pub fn adjust_ident_and_get_scope(
         self,
         mut ident: Ident,
         scope: DefId,
-        block: hir::HirId,
+        item_id: LocalDefId,
     ) -> (Ident, DefId) {
         let scope = ident
             .span
             .normalize_to_macros_2_0_and_adjust(self.expn_that_defined(scope))
             .and_then(|actual_expansion| actual_expansion.expn_data().parent_module)
-            .unwrap_or_else(|| self.parent_module(block).to_def_id());
+            .unwrap_or_else(|| self.parent_module_from_def_id(item_id).to_def_id());
         (ident, scope)
     }
 

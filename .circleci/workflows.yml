@@ -890,7 +890,8 @@ jobs:
         sudo update-binfmts --import && sudo update-binfmts --enable << parameters.qemu-arch >> && ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
     steps:
       - aws-oidc-auth
-      - ferrocene-checkout
+      - ferrocene-checkout:
+          llvm-subset: true
       - setup-uv
       - aws-cli/install:
           version: << pipeline.parameters.awscli-version >>

@@ -1,13 +1,13 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-unknown-nto-qnx710:
+.. _x86_64-pc-nto-qnx710:
 
-:target:`aarch64-unknown-nto-qnx710`
-====================================
+:target:`x86_64-pc-nto-qnx710`
+==============================
 
-The ``aarch64-unknown-nto-qnx710`` Ferrocene target provides support for QNX on
-ARMv8-A processors operating in Aarch64 mode.
+The ``x86_64-pc-nto-qnx710`` Ferrocene target provides support for QNX on
+x86-64 processors.
 
 .. note::
 
@@ -52,10 +52,10 @@ Your organizational and licensing needs may differ.
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing <user-manual:rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-unknown-nto-qnx710``
+* ``rust-std-x86_64-pc-nto-qnx710``
 
 Required shell environment
 ------------------------------
@@ -82,8 +82,4 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-* ``--target=aarch64-unknown-nto-qnx710``
-
-.. _aarch64-ferrocene-nto-qnx710:
-
-.. NOTE: this is a std target so we redirect to a no-std equivalent for certified core.
+* ``--target=x86_64-pc-nto-qnx710``

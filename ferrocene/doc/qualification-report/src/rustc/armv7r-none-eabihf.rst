@@ -3,4 +3,5 @@
 
 .. render-outcomes-template:: templates/tests.jinja2
    :host: x86_64-unknown-linux-gnu
-   :target: aarch64-unknown-nto-qnx710
+   :target: armv7r-none-eabihf
+   :bare_metal_test_target: armv7r-ferrocene.facade-eabihf

@@ -10,10 +10,16 @@ This document contains the list of new features, changes and bug fixes included
 in Ferrocene releases.
 
 .. toctree::
-   :caption: Ferrocene 26.08 series
+   :caption: Ferrocene 26.11 series
    :maxdepth: 1
 
    next
+
+.. toctree::
+   :caption: Ferrocene 26.08 series
+   :maxdepth: 1
+
+   26.08.0
 
 .. toctree::
    :caption: Ferrocene 26.05 series:

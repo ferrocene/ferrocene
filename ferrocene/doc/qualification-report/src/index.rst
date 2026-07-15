@@ -23,13 +23,11 @@ qualification, in accordance to the standards above.
 
    rustc/index
    rustc/aarch64-unknown-linux-gnu
-   rustc/aarch64-rhivos2-linux-gnu
    rustc/aarch64-unknown-none
-   rustc/aarch64-unknown-nto-qnx710
+   rustc/armv7r-none-eabihf.rst
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
    rustc/x86_64-unknown-linux-gnu
-   rustc/x86_64-pc-nto-qnx710
 
 .. appendices::
    :caption: Appendices:

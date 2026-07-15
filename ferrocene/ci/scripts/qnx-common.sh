@@ -21,6 +21,12 @@ qnx7_set_up_bridge_network() {
     sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf
 }
 
+qnx8_set_up_bridge_network() {
+    echo
+    echo "===> setting up QEMU bridge network"
+    sudo "${qnxdir}"/host/common/mkqnximage/qemu/net.sh /usr/lib/qemu/qemu-bridge-helper /etc/qemu/bridge.conf nat
+}
+
 check_no_other_emulator_is_running() {
     if [ -f "${emulatordir}"/qemu.pid ]; then
         panic a previous instance of the emulator may already be running

@@ -10,7 +10,8 @@ This qualification applies to Ferrocene |ferrocene_version|, limited to:
   :doc:`specification:index`, and according to the requirements and
   restrictions outlined in this safety manual.
 
-This qualification is restricted to the following environment:
+This qualification is restricted to the environments listed in the following table,
+as well as environments listed in target specific documentation:
 
 .. list-table::
    :align: left
@@ -22,6 +23,12 @@ This qualification is restricted to the following environment:
      - Uncertified Libraries
      - Qualified Libraries
 
+   * - :target:`aarch64-unknown-linux-gnu`
+     - :target:`aarch64-rhivos2-linux-gnu`
+     - ``core``
+     - ``alloc``
+     -
+
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
      - ``core``
@@ -29,16 +36,11 @@ This qualification is restricted to the following environment:
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`aarch64-unknown-nto-qnx710`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
-     - ``proc_macro``
-
-   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`armv7r-none-eabihf`
      - ``core``
      - ``alloc``
      -
+
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
@@ -57,13 +59,6 @@ This qualification is restricted to the following environment:
      - ``core``
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``
-
-   * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`x86_64-pc-nto-qnx710`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
-     - ``proc_macro``
-
 
 The uncertified libraries provided are evaluated and tested within the scope of
 Ferrocene qualification for compiler use only. The use of these libraries by

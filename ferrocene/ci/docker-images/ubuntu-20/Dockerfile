@@ -281,6 +281,10 @@ ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
 ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
+ENV CFLAGS_aarch64_unknown_qnx=-Vgcc_ntoaarch64le_cxx
+ENV CC_aarch64_unknown_qnx=qcc
+ENV CFLAGS_x86_64_pc_qnx=-Vgcc_ntox86_64_cxx
+ENV CC_x86_64_pc_qnx=qcc
 ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
 ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 

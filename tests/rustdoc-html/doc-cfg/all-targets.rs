@@ -3,7 +3,7 @@
 //@ has all_targets/fn.foo.html \
 //  '//*[@id="main-content"]/*[@class="item-info"]/*[@class="stab portability"]' \
 //  'Available on GNU or Catalyst or Managarm C Library or MSVC or musl or Newlib or \
-//  Neutrino 7.0 or Neutrino 7.1 or Neutrino 7.1 with io-sock or Neutrino 8.0 or \
+//  QNX SDP 7.0 or QNX SDP 7.1 or QNX SDP 7.1 with io-sock or \
 //  OpenHarmony or relibc or SGX or Simulator or WASIp1 or WASIp2 or WASIp3 or \
 //  uClibc or V5 or target_env=fake_env only.'
 #[doc(cfg(any(
@@ -16,7 +16,6 @@
     target_env = "nto70",
     target_env = "nto71",
     target_env = "nto71_iosock",
-    target_env = "nto80",
     target_env = "ohos",
     target_env = "relibc",
     target_env = "sgx",
@@ -79,7 +78,7 @@ pub fn bar() {}
 //  BSD and Emscripten and ESP-IDF and FreeBSD and Fuchsia and Haiku and HelenOS \
 //  and Hermit and Horizon and GNU/Hurd and illumos and iOS and L4Re and Linux \
 //  and LynxOS-178 and macOS and Managarm and Motor OS and NetBSD and bare-metal \
-//  and QNX Neutrino and NuttX and OpenBSD and Play Station Portable and Play \
+//  and QNX SDP 7.x and QNX SDP 8.0+ and NuttX and OpenBSD and Play Station Portable and Play \
 //  Station 1 and QuRT and Redox OS and RTEMS OS and Solaris and SOLID ASP3 and \
 //  TEEOS and Trusty and tvOS and UEFI and VEXos and visionOS and Play Station \
 //  Vita and VxWorks and WASI and watchOS and Windows and Xous and zero knowledge \
@@ -111,6 +110,7 @@ pub fn bar() {}
     target_os = "netbsd",
     target_os = "none",
     target_os = "nto",
+    target_os = "qnx",
     target_os = "nuttx",
     target_os = "openbsd",
     target_os = "psp",

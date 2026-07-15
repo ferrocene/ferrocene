@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Issue: https://github.com/rust-lang/rust/issues/150103
 // ICE when using `::` at start of nested imports
 // caused by `{{root}}` appearing in diagnostic suggestions

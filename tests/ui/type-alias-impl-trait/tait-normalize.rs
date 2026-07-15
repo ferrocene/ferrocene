@@ -1,6 +1,7 @@
 //@ revisions: current next
 //@ [next] compile-flags: -Znext-solver
 //@ check-pass
+//@ edition: 2015..2018
 
 #![feature(type_alias_impl_trait)]
 

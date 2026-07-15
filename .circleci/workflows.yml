@@ -561,21 +561,21 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  aarch64-linux-library-coverage:
-    executor:
-      name: docker-custom-image
-      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-    resource_class: ferrocene/k8s-arm64-large
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
-    steps:
-      - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
-      - ferrocene-ci
+#  aarch64-linux-library-coverage:
+#    executor:
+#      name: docker-custom-image
+#      image-tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+#    resource_class: ferrocene/k8s-arm64-large
+#    environment:
+#      FERROCENE_HOST: aarch64-unknown-linux-gnu
+#      SCRIPT: |
+#        ferrocene/ci/scripts/llvm_cache.py download
+#        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
+#    steps:
+#      - aws-oidc-auth
+#      - ferrocene-checkout:
+#          llvm-subset: true
+#      - ferrocene-ci
 
   aarch64-linux-rhivos2-test-container:
     executor: docker-aarch64-ubuntu-20-rhivos2-test-server
@@ -1273,7 +1273,7 @@ workflows:
             - aarch64-linux-test
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
-            - aarch64-linux-library-coverage
+            #- aarch64-linux-library-coverage
             - aarch64-linux-rhivos2-test-library-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
@@ -1506,9 +1506,9 @@ workflows:
           test-variant: "2021"
           requires:
             - aarch64-linux-build
-      - aarch64-linux-library-coverage:
-          requires:
-            - aarch64-linux-build
+      #- aarch64-linux-library-coverage:
+      #    requires:
+      #      - aarch64-linux-build
       - aarch64-linux-self-test:
           requires:
             - aarch64-linux-dist

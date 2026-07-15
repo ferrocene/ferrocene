@@ -1,5 +1,5 @@
 error[E0433]: cannot find module or crate `Iuse` in the crate root
-  --> $DIR/nested-import-root-symbol-150103.rs:6:9
+  --> $DIR/nested-import-root-symbol-150103.rs:7:9
    |
 LL |     use Iuse::{ ::Fish };
    |         ^^^^ use of unresolved module or unlinked crate `Iuse`
@@ -10,7 +10,7 @@ LL + extern crate Iuse;
    |
 
 error[E0433]: the crate root in paths can only be used in start position
-  --> $DIR/nested-import-root-symbol-150103.rs:10:13
+  --> $DIR/nested-import-root-symbol-150103.rs:11:13
    |
 LL |     use A::{::Fish};
    |             ^ can only be used in path start position

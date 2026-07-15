@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test for #142064, internal error: entered unreachable code
 //
 //@ compile-flags: -Zthreads=2

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //! Regression test for <https://github.com/rust-lang/rust/issues/138225>
 
 pub struct A {

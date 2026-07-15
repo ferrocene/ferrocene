@@ -8,6 +8,9 @@
 # ```
 # You must be authenticated with AWS in order to download its package cache.
 
+# Increment this to force a rebuild in CI, even if you no other changes
+# Generation: 1
+
 # This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
 # container is below (FROM ubuntu:20.04). This is needed because the version of
 # QEMU in the Ubuntu 20.04 archives is too old, so we install QEMU on Ubuntu

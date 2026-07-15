@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+## installing dependencies takes long on windows, so we split out
+## the ones we need for building llvm into a seperate command
 set -xeuo pipefail
 IFS=$'\n\t'
 

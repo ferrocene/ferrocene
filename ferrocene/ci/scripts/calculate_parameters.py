@@ -247,7 +247,7 @@ def workflow_id(*dummy):
 
 # read from ferrocene/ci/awscli-version
 def awscli_version(*dummy):
-    return Path('ferrocene/ci/awscli-version').read_text()
+    return Path("ferrocene/ci/awscli-version").read_text()
 
 
 def prepare_parameters():

@@ -754,6 +754,8 @@ jobs:
   x86_64-windows-llvm:
     executor:
       name: win/server-2022
+      # Experimental choise: This makes the job take slightly more than half of the time
+      # for a 10-15% increase in cost.
       size: xlarge # 16-core
       shell: bash.exe -euo pipefail
     environment:
@@ -794,12 +796,17 @@ jobs:
   x86_64-windows-dist:
     executor:
       name: win/server-2022
+      # Experimental choise: This makes the job take slightly more than half of the time
+      # for a 10-15% increase in cost.
       size: xlarge # 16-core
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      # It's theorhetically possible to split up this job just as we split up the linux builds,
+      # but the long startup times at circle make it not efficient. It takes ~10 minutes until
+      # the machine has started and installed all dependencies and is ready to start the actual job
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.

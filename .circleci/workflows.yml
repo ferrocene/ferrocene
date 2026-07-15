@@ -751,8 +751,8 @@ jobs:
         set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
+      - ferrocene/aws_oidc_auth
+      - ferrocene/setup_uv
       - setup-qnx-toolchain:
           source-env-script: false
           qnx_version: << parameters.qnx_version >>

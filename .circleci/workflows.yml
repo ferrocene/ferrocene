@@ -1229,6 +1229,8 @@ workflows:
       or:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
+        - equal: [<< pipeline.git.branch >>, "automation/bors/auto"]
+        - equal: [<< pipeline.git.branch >>, "automation/bors/try"]
         - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
       - build-docker-x86_64:

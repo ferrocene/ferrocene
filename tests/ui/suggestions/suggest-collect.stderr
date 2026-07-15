@@ -32,12 +32,12 @@ error[E0308]: mismatched types
   --> $DIR/suggest-collect.rs:10:36
    |
 LL |     let res: Result<Vec<i32>, _> = ["1", "2"].into_iter().map(|s| s.parse::<i32>());
-   |              -------------------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<Vec<i32>, _>`, found `Map<Iter<'_, &str>, {closure@...}>`
+   |              -------------------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<Vec<i32>, _>`, found `Map<IntoIter<&str, 2>, {closure@...}>`
    |              |
    |              expected due to this
    |
    = note: expected enum `Result<Vec<i32>, _>`
-            found struct `Map<std::slice::Iter<'_, &str>, {closure@$DIR/suggest-collect.rs:10:63: 10:66}>`
+            found struct `Map<std::array::IntoIter<&str, 2>, {closure@$DIR/suggest-collect.rs:10:63: 10:66}>`
 help: consider using `.collect()` to convert the `Iterator` into a `Result<Vec<i32>, _>`
    |
 LL |     let res: Result<Vec<i32>, _> = ["1", "2"].into_iter().map(|s| s.parse::<i32>()).collect();

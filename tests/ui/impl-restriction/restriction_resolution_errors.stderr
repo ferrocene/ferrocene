@@ -83,7 +83,7 @@ LL +         pub impl(in c::b) trait T1 {}
    |
 help: consider importing this module
    |
-LL +         use a;
+LL +         use crate::a;
    |
 
 error[E0433]: cannot find module `c` in the crate root

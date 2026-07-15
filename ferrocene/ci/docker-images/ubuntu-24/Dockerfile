@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# Increment this to force a rebuild in CI, even if you no other changes
+# Generation: 1
+
 # From the root of this repository, build with
 # `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
 

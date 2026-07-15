@@ -25,7 +25,7 @@ import urllib.parse
 import yaml
 from typing import Callable
 from utils import llvm_cache
-
+from pathlib import Path
 
 # Path of the YAML file to extract the needed parameters from.
 CIRCLECI_CONFIGURATION = ".circleci/workflows.yml"
@@ -245,9 +245,9 @@ def workflow_id(*dummy):
     return os.environ.get("CIRCLE_WORKFLOW_ID")
 
 
-# This needs to be kept in sync with the version in ferrocene/ci/docker-images/common/install-awscli.sh
+# read from ferrocene/ci/awscli-version
 def awscli_version(*dummy):
-    return "2.35.11"
+    return Path("ferrocene/ci/awscli-version").read_text()
 
 
 def prepare_parameters():

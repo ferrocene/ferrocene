@@ -2,6 +2,8 @@
 //! Check that bounds checking are eliminated.
 
 //@ compile-flags: -Copt-level=2
+// FIXME(jyn514): this fails to optimize in 2021 edition, report it upstream
+//@ edition: 2015
 
 #![crate_type = "lib"]
 

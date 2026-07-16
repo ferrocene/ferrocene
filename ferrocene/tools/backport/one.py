@@ -149,21 +149,28 @@ def main():
         token = None
 
     metadata = get_pr_metadata(token, repository, pr_number)
-    base, head = metadata["base"]["sha"], metadata["head"]["sha"]
+    pr_target, head = metadata["base"]["sha"], metadata["head"]["sha"]
 
-    git("fetch", "--quiet", f"https://github.com/{repository}", base, head)
+    git("fetch", "--quiet", f"https://github.com/{repository}", pr_target, head)
 
-    authors = git_output("log", "--format=%aN <%aE>", f"{base}..{head}").splitlines()
+    # NOTE: you almost never want the pr_target; you want the "logical diff" between the
+    # merge base and the PR HEAD, which we calculate here.
+    # The difference is that this `merge-base` allows the PR to not be fully rebased
+    # against `main` HEAD.
+    merge_base = git_output("merge-base", pr_target, head).rstrip()
+    authors = git_output(
+        "log", "--format=%aN <%aE>", f"{merge_base}..{head}"
+    ).splitlines()
     primary_author = authors[0]
     co_authors = set(authors)
     co_authors.remove(primary_author)
     formatted_coauthors = ""
     if co_authors:
-        formatted_coauthors = "\n".join(
-            "Co-authored-by: {author}" for author in co_authors
+        formatted_coauthors = "\n\n" + "\n".join(
+            f"Co-authored-by: {author}" for author in sorted(co_authors)
         )
 
-    commits = git_output("log", "--format=%H", f"{base}..{head}")
+    commits = git_output("log", "--format=%H", f"{merge_base}..{head}")
     commits = commits.splitlines()
 
     formatted_commits = " ".join(commits)
@@ -191,8 +198,8 @@ Ferrocene-backported-commits: {formatted_commits}"""
     git("checkout", "--quiet", "--detach", "HEAD")
     # Set the index to the PR head, without modifying the working tree.
     git("reset", "--quiet", "--mixed", head)
-    # Set HEAD to the PR base.
-    git("reset", "--quiet", "--soft", base)
+    # Set HEAD to the merge base.
+    git("reset", "--quiet", "--soft", merge_base)
     # Squash all the PR changes into a single commit.
     git(
         "commit",

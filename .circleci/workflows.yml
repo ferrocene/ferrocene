@@ -256,9 +256,11 @@ jobs:
           # code into the tarball we ship to customers.
           llvm_subset: false
 
-  x86_64-linux-generic-test-container:
-    executor: *executor-x86_64-ubuntu-20
+  linux-generic-test-container:
+    executor: << parameters.executor >>
     parameters:
+      executor:
+        type: executor
       job:
         type: string
       test-variant:
@@ -268,15 +270,19 @@ jobs:
       extra-args:
         type: string
         default: ""
+      ferrocene_host:
+        type: string
+      restore_from_job:
+        type: string
     resource_class: << parameters.resource-class >>
     environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_HOST: << parameters.ferrocene_host >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - ferrocene-job-test-container:
-          restore-from-job: x86_64-linux-build
+          restore-from-job: << parameters.restore_from_job >>
 
   x86_64-linux-traceability-matrix:
     executor: *executor-x86_64-ubuntu-20
@@ -487,25 +493,6 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - ferrocene-job-dist:
-          restore-from-job: aarch64-linux-build
-
-  aarch64-linux-generic-test-container:
-    executor: *executor-aarch64-ubuntu-20
-    parameters:
-      job:
-        type: string
-      test-variant:
-        type: string
-      resource-class:
-        type: string
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >>
-    steps:
-      - ferrocene-job-test-container:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
@@ -1045,35 +1032,43 @@ workflows:
       - x86_64-linux-dist-src:
           requires:
             - x86_64-linux-build
-      - x86_64-linux-generic-test-container:
+      - linux-generic-test-container:
           name: x86_64-linux-test
+          executor: *executor-x86_64-ubuntu-20
           job: test
           resource-class: ferrocene/k8s-amd64-large
           test-variant: "2021"
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-generic-test-container:
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [ x86_64-linux-build ]
+      - linux-generic-test-container:
           name: x86_64-linux-test-flip-link
+          executor: *executor-x86_64-ubuntu-20
           job: test:flip-link
           resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"
           extra-args: --target thumbv7em-none-eabi
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-generic-test-container:
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [ x86_64-linux-build ]
+      - linux-generic-test-container:
           name: x86_64-linux-test-library
+          executor: *executor-x86_64-ubuntu-20
           job: test:library
           resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-generic-test-container:
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [ x86_64-linux-build ]
+      - linux-generic-test-container:
           name: x86_64-linux-compiletest
+          executor: *executor-x86_64-ubuntu-20
           job: test:compiletest
           resource-class: ferrocene/k8s-amd64-large
           test-variant: "2021"
-          requires:
-            - x86_64-linux-build
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [ x86_64-linux-build ]
       - x86_64-linux-library-coverage:
           requires:
             - x86_64-linux-build
@@ -1295,27 +1290,33 @@ workflows:
       - aarch64-linux-dist-tools:
           requires:
             - aarch64-linux-build
-      - aarch64-linux-generic-test-container:
+      - linux-generic-test-container:
           name: aarch64-linux-test
+          executor: *executor-aarch64-ubuntu-20
           job: test
           resource-class: ferrocene/k8s-arm64-large
           test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-generic-test-container:
+          ferrocene_host: aarch64-unknown-linux-gnu
+          restore_from_job: aarch64-linux-build
+          requires: [ aarch64-linux-build ]
+      - linux-generic-test-container:
           name: aarch64-linux-test-library
+          executor: *executor-aarch64-ubuntu-20
           job: test:library
           resource-class: ferrocene/k8s-arm64-medium
           test-variant: "2021"
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-generic-test-container:
+          ferrocene_host: aarch64-unknown-linux-gnu
+          restore_from_job: aarch64-linux-build
+          requires: [ aarch64-linux-build ]
+      - linux-generic-test-container:
           name: aarch64-linux-compiletest
+          executor: *executor-aarch64-ubuntu-20
           job: test:compiletest
           resource-class: ferrocene/k8s-arm64-large
           test-variant: "2021"
-          requires:
-            - aarch64-linux-build
+          ferrocene_host: aarch64-unknown-linux-gnu
+          restore_from_job: aarch64-linux-build
+          requires: [ aarch64-linux-build ]
       - aarch64-linux-library-coverage:
           requires:
             - aarch64-linux-build

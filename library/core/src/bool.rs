@@ -95,7 +95,7 @@ impl bool {
     /// // evaluated eagerly.
     /// assert_eq!(a, 2);
     /// ```
-    #[stable(feature = "bool_to_result", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "bool_to_result", since = "1.98.0")]
     #[rustc_const_unstable(feature = "const_bool", issue = "151531")]
     #[inline]
     #[ferrocene::prevalidated]
@@ -123,7 +123,7 @@ impl bool {
     /// // `ok_or_else`.
     /// assert_eq!(a, 1);
     /// ```
-    #[stable(feature = "bool_to_result", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "bool_to_result", since = "1.98.0")]
     #[rustc_const_unstable(feature = "const_bool", issue = "151531")]
     #[inline]
     #[ferrocene::prevalidated]

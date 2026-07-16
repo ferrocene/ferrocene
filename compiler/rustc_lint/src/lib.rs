@@ -23,6 +23,7 @@
 #![allow(internal_features)]
 #![feature(deref_patterns)]
 #![feature(iter_order_by)]
+#![feature(option_into_flat_iter)]
 #![feature(rustc_attrs)]
 #![feature(titlecase)]
 #![feature(try_blocks)]
@@ -32,6 +33,7 @@ mod async_closures;
 mod async_fn_in_trait;
 mod autorefs;
 pub mod builtin;
+mod c_void_returns;
 mod context;
 mod dangling;
 mod default_could_be_derived;
@@ -90,6 +92,7 @@ use async_closures::AsyncClosureUsage;
 use async_fn_in_trait::AsyncFnInTrait;
 use autorefs::*;
 use builtin::*;
+use c_void_returns::*;
 use dangling::*;
 use default_could_be_derived::DefaultCouldBeDerived;
 use deref_into_dyn_supertrait::*;
@@ -276,6 +279,7 @@ late_lint_methods!(
             LifetimeSyntax: LifetimeSyntax,
             InternalEqTraitMethodImpls: InternalEqTraitMethodImpls,
             ImplicitProvenanceCasts: ImplicitProvenanceCasts,
+            CVoidReturns: CVoidReturns,
         ]
     ]
 );

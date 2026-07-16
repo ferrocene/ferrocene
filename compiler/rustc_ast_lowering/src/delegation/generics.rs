@@ -12,7 +12,7 @@ use rustc_span::{Ident, Span, sym};
 use crate::LoweringContext;
 use crate::diagnostics::DelegationInfersMismatch;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub(super) enum GenericsPosition {
     Parent,
     Child,
@@ -155,7 +155,7 @@ impl<'hir> DelegationGenericArgsIterator<'hir> {
 impl<'hir> HirOrTyGenerics<'hir> {
     pub(super) fn into_hir_generics(&mut self, ctx: &mut LoweringContext<'_, 'hir>, span: Span) {
         if let HirOrTyGenerics::Ty(ty) = self {
-            let rename_self = matches!(ty.pos, GenericsPosition::Child);
+            let rename_self = ty.pos == GenericsPosition::Child;
             let params = ctx.uplift_delegation_generic_params(span, &ty.data, rename_self);
 
             *self = HirOrTyGenerics::Hir(DelegationGenerics {
@@ -216,6 +216,13 @@ impl<'hir> HirOrTyGenerics<'hir> {
                 .iter()
                 .find(|p| p.name.ident().name == kw::SelfUpper)
                 .expect("`Self` generic param is not found while expected"),
+        }
+    }
+
+    pub(crate) fn pos(&self) -> GenericsPosition {
+        match self {
+            HirOrTyGenerics::Ty(ty) => ty.pos,
+            HirOrTyGenerics::Hir(hir) => hir.pos,
         }
     }
 }
@@ -581,18 +588,28 @@ impl<'hir> LoweringContext<'_, 'hir> {
             p.def_id.to_def_id(),
         );
 
+        self.create_resolved_path(res, p.name.ident(), p.span)
+    }
+
+    pub(super) fn create_resolved_path(
+        &mut self,
+        res: Res,
+        ident: Ident,
+        span: Span,
+    ) -> hir::QPath<'hir> {
         hir::QPath::Resolved(
             None,
             self.arena.alloc(hir::Path {
                 segments: self.arena.alloc_slice(&[hir::PathSegment {
                     args: None,
                     hir_id: self.next_id(),
-                    ident: p.name.ident(),
+                    ident,
                     infer_args: false,
                     res,
+                    delegation_child_segment: false,
                 }]),
                 res,
-                span: p.span,
+                span,
             }),
         )
     }

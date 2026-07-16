@@ -21,7 +21,7 @@ start_vm() {
     qemu-system-x86_64 \
         -enable-kvm \
         -cpu host \
-        -smp 2 \
+        -smp 4 \
         -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0 \

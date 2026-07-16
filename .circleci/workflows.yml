@@ -117,7 +117,6 @@ parameters:
     default: ""
 
 orbs:
-  aws-cli: circleci/aws-cli@5.4.2
   win: circleci/windows@5.0
   ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
 

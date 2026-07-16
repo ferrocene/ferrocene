@@ -881,15 +881,18 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
-          requires:
-            - build-docker--ubuntu-20--x86_64
+         requires:
+           - build-docker--ubuntu-20--x86_64
+           - build-docker--ubuntu-24--x86_64
 
       - x86_64-linux-llvm:
           requires:
             - build-docker--ubuntu-20--x86_64
+            - build-docker--ubuntu-24--x86_64
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
+            - build-docker--ubuntu-24--x86_64
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -994,7 +997,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: aarch64-none-test-target-cpu-library-compiletest
@@ -1010,7 +1012,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
             - aarch64-none-test-library-compiletest
 
       - ferrocene/facade_generic_test:
@@ -1027,7 +1028,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: aarch64v8r-none-test-library-compiletest
@@ -1043,7 +1043,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - wasm-dist-oxidos:
           requires:
@@ -1074,7 +1073,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
@@ -1087,7 +1085,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: x86_64-qnx8-test-library
@@ -1100,7 +1097,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: x86_64-qnx8-test-compiletest
@@ -1113,7 +1109,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: armv7r-eabihf-test-library-compiletest
@@ -1129,7 +1124,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-library-compiletest
@@ -1145,7 +1139,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-target-cpu-library-compiletest
@@ -1161,7 +1154,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
             - thumbv7em-eabihf-test-library-compiletest
 
       - ferrocene/facade_generic_test:
@@ -1178,7 +1170,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabi-test-target-cpu-library-compiletest
@@ -1194,7 +1185,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
             - thumbv7em-eabi-test-library-compiletest
 
       - qnx-generic-test-vm:
@@ -1208,7 +1198,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
@@ -1221,7 +1210,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: aarch64-qnx8-test-library
@@ -1234,7 +1222,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - qnx-generic-test-vm:
           name: aarch64-qnx8-test-compiletest
@@ -1247,7 +1234,6 @@ workflows:
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
           requires:

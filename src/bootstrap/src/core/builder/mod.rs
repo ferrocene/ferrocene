@@ -878,7 +878,8 @@ impl<'a> Builder<'a> {
                 tool::LlvmBitcodeLinker,
                 tool::RustcPerf,
                 tool::WasmComponentLd,
-                tool::LldWrapper
+                tool::LldWrapper,
+                tool::RunMakeSupport,
             ),
             Kind::Clippy => describe!(
                 clippy::Std,

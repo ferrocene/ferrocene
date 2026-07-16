@@ -43,7 +43,7 @@ use rustc_middle::ty::{
     const_lit_matches_ty, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_session::errors::feature_err;
+use rustc_session::diagnostics::feature_err;
 use rustc_session::lint::builtin::AMBIGUOUS_ASSOCIATED_ITEMS;
 use rustc_span::{DUMMY_SP, Ident, Span, kw, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
@@ -51,7 +51,7 @@ use rustc_trait_selection::traits::{self, FulfillmentError};
 use tracing::{debug, instrument};
 
 use crate::check::check_abi;
-use crate::diagnostics::{BadReturnTypeNotation, NoFieldOnType};
+use crate::diagnostics::{self, BadReturnTypeNotation, NoFieldOnType};
 use crate::hir_ty_lowering::errors::{GenericsArgsErrExtend, prohibit_assoc_item_constraint};
 use crate::hir_ty_lowering::generics::{check_generic_arg_count, lower_generic_args};
 use crate::middle::resolve_bound_vars as rbv;
@@ -431,13 +431,16 @@ impl<'tcx> ForbidParamUsesFolder<'tcx> {
                 diag.span_note(impl_.self_ty.span, "not a concrete type");
             }
         }
-        if matches!(self.context, ForbidParamContext::ConstArgument)
-            && self.tcx.features().min_generic_const_args()
-        {
-            if !self.tcx.features().generic_const_args() {
-                diag.help("add `#![feature(generic_const_args)]` to allow generic expressions as the RHS of const items");
-            } else {
+        if matches!(self.context, ForbidParamContext::ConstArgument) {
+            if self.tcx.features().generic_const_args() {
                 diag.help("consider factoring the expression into a `type const` item and use it as the const argument instead");
+            } else if self.tcx.features().min_generic_const_args() {
+                diag.help("add `#![feature(generic_const_args)]` and extract the expression into a `type const` item");
+            } else if self.tcx.sess.is_nightly_build() {
+                diag.help(
+                    "add `#![feature(generic_const_exprs)]` to allow generic const expressions",
+                );
+                diag.help("alternatively, you can use `#![feature(generic_const_args)]` and extract the expression into a `type const` item");
             }
         }
         diag.emit()
@@ -482,16 +485,18 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     ) -> Result<(), ErrorGuaranteed> {
         let tcx = self.tcx();
         let parent_def_id = self.item_def_id();
+        // In this path, `Some(context)` should be `ConstArgument`: enum
+        // discriminants are handled earlier by resolve. We still use the helper so
+        // nested inline consts are checked in the outer const-argument context.
         if let Res::Def(DefKind::ConstParam, _) = res
-            && matches!(tcx.def_kind(parent_def_id), DefKind::AnonConst | DefKind::InlineConst)
-            && let ty::AnonConstKind::MCG = tcx.anon_const_kind(parent_def_id)
+            && let Some(context) = self.anon_const_forbids_generic_params()
         {
             let folder = ForbidParamUsesFolder {
                 tcx,
                 anon_const_def_id: parent_def_id,
                 span,
                 is_self_alias: false,
-                context: ForbidParamContext::ConstArgument,
+                context,
             };
             return Err(folder.error());
         }
@@ -507,22 +512,20 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
     /// contains params). Those cases are handled by `check_param_uses_if_mcg`.
     fn anon_const_forbids_generic_params(&self) -> Option<ForbidParamContext> {
         let tcx = self.tcx();
-        let parent_def_id = self.item_def_id();
+        let item_def_id = self.item_def_id();
 
         // Inline consts and closures can be nested inside anon consts that forbid generic
         // params (e.g. an enum discriminant). Walk up the def parent chain to find the
         // nearest enclosing AnonConst and use that to determine the context.
-        let parent_def_id = tcx.typeck_root_def_id(parent_def_id.into());
+        let anon_const_def_id = tcx.typeck_root_def_id_local(item_def_id);
 
-        let anon_const_def_id = match tcx.def_kind(parent_def_id) {
-            DefKind::AnonConst => parent_def_id,
-            DefKind::InlineConst if tcx.is_type_system_inline_const(parent_def_id) => parent_def_id,
-            _ => return None,
-        };
+        if tcx.def_kind(anon_const_def_id) != DefKind::AnonConst {
+            return None;
+        }
 
         match tcx.anon_const_kind(anon_const_def_id) {
             ty::AnonConstKind::MCG => Some(ForbidParamContext::ConstArgument),
-            ty::AnonConstKind::NonTypeSystem => {
+            ty::AnonConstKind::NonTypeSystemAnon => {
                 // NonTypeSystem anon consts only have accessible generic parameters in specific
                 // positions (ty patterns and field defaults — see `generics_of`). In all other
                 // positions (e.g. enum discriminants) generic parameters are not in scope.
@@ -532,7 +535,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     None
                 }
             }
-            ty::AnonConstKind::GCE | ty::AnonConstKind::RepeatExprCount => None,
+            ty::AnonConstKind::NonTypeSystemInline
+            | ty::AnonConstKind::GCE
+            | ty::AnonConstKind::RepeatExprCount => None,
         }
     }
 
@@ -1478,7 +1483,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             }
             TypeRelativePath::Ctor { ctor_def_id, args } => match tcx.def_kind(ctor_def_id) {
                 DefKind::Ctor(_, CtorKind::Fn) => {
-                    Ok(ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, ctor_def_id, args)))
+                    // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
+                    Ok(ty::Const::zero_sized(
+                        tcx,
+                        Ty::new_fn_def(tcx, ctor_def_id, ty::Binder::dummy(args)),
+                    ))
                 }
                 DefKind::Ctor(ctor_of, CtorKind::Const) => {
                     Ok(self.construct_const_ctor_value(ctor_def_id, ctor_of, args))
@@ -2370,7 +2379,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         self.check_param_uses_if_mcg(ct, tcx.hir_span(path_hir_id), false)
     }
 
-    /// Lower a [`hir::ConstArg`] to a (type-level) [`ty::Const`](Const).
+    /// Lower a [`hir::ConstArg`] to a (type-level) [`ty::Const`].
     #[instrument(skip(self), level = "debug")]
     pub fn lower_const_arg(&self, const_arg: &hir::ConstArg<'tcx>, ty: Ty<'tcx>) -> Const<'tcx> {
         let tcx = self.tcx();
@@ -2576,7 +2585,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             .map(|(field_def, arg)| {
                 self.lower_const_arg(
                     arg,
-                    tcx.type_of(field_def.did).instantiate(tcx, adt_args).skip_norm_wip(),
+                    tcx.type_of(field_def.did)
+                        .instantiate(tcx, adt_args.no_bound_vars().unwrap())
+                        .skip_norm_wip(),
                 )
             })
             .collect::<Vec<_>>();
@@ -2589,7 +2600,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         };
 
         let valtree = ty::ValTree::from_branches(tcx, opt_discr_const.into_iter().chain(fields));
-        let adt_ty = Ty::new_adt(tcx, adt_def, adt_args);
+        let adt_ty = Ty::new_adt(tcx, adt_def, adt_args.no_bound_vars().unwrap());
         ty::Const::new_value(tcx, valtree, adt_ty)
     }
 
@@ -2901,7 +2912,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     &path.segments[generic_segments[0].1],
                 );
 
-                ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, did, args))
+                // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
+                ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, did, ty::Binder::dummy(args)))
             }
             Res::Def(DefKind::AssocConst { .. }, did) => {
                 let trait_segment = if let [modules @ .., trait_, _item] = path.segments {
@@ -2932,7 +2944,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 );
 
                 if self.tcx().generics_of(did).own_synthetic_params_count() == 0 {
-                    ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, did, args))
+                    // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
+                    ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, did, ty::Binder::dummy(args)))
                 } else {
                     let tcx = self.tcx();
                     let generics = tcx.generics_of(did);
@@ -2949,7 +2962,11 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         }
                     });
 
-                    ty::Const::zero_sized(tcx, Ty::new_fn_def(tcx, did, args))
+                    // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
+                    ty::Const::zero_sized(
+                        tcx,
+                        Ty::new_fn_def(tcx, did, ty::Binder::dummy(args.collect::<Box<_>>())),
+                    )
                 }
             }
 
@@ -2973,7 +2990,6 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 | DefKind::Use
                 | DefKind::ForeignMod
                 | DefKind::AnonConst
-                | DefKind::InlineConst
                 | DefKind::Field
                 | DefKind::Impl { .. }
                 | DefKind::Closure
@@ -3401,6 +3417,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 *variant,
                 *field,
             ),
+            hir::TyKind::View(ty, fields) => {
+                self.lower_view(self.lower_ty(ty), fields, hir_ty.span)
+            }
+
             hir::TyKind::Err(guar) => Ty::new_error(tcx, *guar),
         };
 
@@ -3811,5 +3831,74 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         let adt_ty = Ty::new_adt(tcx, adt_def, args);
         ty::Const::new_value(tcx, valtree, adt_ty)
+    }
+
+    fn lower_view(&self, inner_ty: Ty<'tcx>, fields: &[Ident], ty_span: Span) -> Ty<'tcx> {
+        // Step 1: check that every field is unique, and keep a list of field that we know are
+        // unique.
+        let mut viewed_fields = Vec::<Ident>::with_capacity(fields.len());
+
+        for f in fields {
+            let f = f.normalize_to_macros_2_0();
+            // PERF: this is quadratic, but ~fine since the amount of fields is very low.
+            if let Some(previous_field_span) =
+                viewed_fields.iter().find_map(|f_| (*f_ == f).then_some(f_.span))
+            {
+                self.dcx().emit_err(diagnostics::ViewedFieldIsAlreadyPartOfTheView {
+                    name: f.name,
+                    span: f.span,
+                    previous_field_span,
+                });
+                continue;
+            }
+            viewed_fields.push(f);
+        }
+
+        // Step 2: check that the viewed type is a struct.
+        let variant = match inner_ty.kind() {
+            ty::Adt(def, _) if def.is_struct() => def.non_enum_variant(),
+
+            ty::Adt(def, _) => {
+                let guar = self.dcx().emit_err(diagnostics::OnlyStructsCanBeViewedAdt {
+                    ty: inner_ty,
+                    span: ty_span,
+                    article: def.article(),
+                    kind: def.descr(),
+                });
+                return Ty::new_error(self.tcx(), guar);
+            }
+
+            _ => {
+                let guar = self.dcx().emit_err(diagnostics::OnlyStructsCanBeViewedNonAdt {
+                    ty: inner_ty,
+                    span: ty_span,
+                });
+                return Ty::new_error(self.tcx(), guar);
+            }
+        };
+
+        // Step 3: check that every viewed field exists.
+        let mut viewed_indices = Vec::with_capacity(viewed_fields.len());
+        let mut error = None;
+        for field in viewed_fields {
+            let Some((_, field)) = variant
+                .fields
+                .iter_enumerated()
+                .find(|(_, f)| f.ident(self.tcx()).normalize_to_macros_2_0() == field)
+            else {
+                let err =
+                    self.dcx().emit_err(NoFieldOnType { span: field.span, field, ty: inner_ty });
+                error = Some(err);
+                continue;
+            };
+
+            viewed_indices.push(field);
+        }
+        if let Some(guar) = error {
+            return Ty::new_error(self.tcx(), guar);
+        }
+
+        // FIXME(scrabsha): actually lower view types.
+        inner_ty
     }
 }

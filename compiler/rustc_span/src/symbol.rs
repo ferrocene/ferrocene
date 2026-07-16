@@ -822,6 +822,7 @@ symbols! {
         diagnostic_on_unmatched_args,
         dialect,
         direct,
+        direct_const_arg,
         discriminant_kind,
         discriminant_type,
         discriminant_value,
@@ -1173,6 +1174,7 @@ symbols! {
         large_assignments,
         last,
         lasx,
+        late_bound_turbofishing,
         lateout,
         lazy_normalization_consts,
         lazy_type_alias,
@@ -1741,6 +1743,7 @@ symbols! {
         rust_analyzer,
         rust_begin_unwind,
         rust_cold_cc,
+        rust_dash_call: "rust-call",
         rust_eh_personality,
         rust_future,
         rust_logo,
@@ -1856,6 +1859,7 @@ symbols! {
         rustc_specialization_trait,
         rustc_std_internal_symbol,
         rustc_strict_coherence,
+        rustc_test_entrypoint_marker,
         rustc_test_marker,
         rustc_then_this_would_need,
         rustc_trivial_field_reads,
@@ -2658,6 +2662,7 @@ impl Symbol {
 
     /// Maps a string to its interned representation.
     #[rustc_diagnostic_item = "SymbolIntern"]
+    #[inline]
     pub fn intern(str: &str) -> Self {
         with_session_globals(|session_globals| session_globals.symbol_interner.intern_str(str))
     }
@@ -2670,6 +2675,7 @@ impl Symbol {
     /// interner. Interners are long-lived, and there are very few of them, and
     /// this function is typically used for short-lived things, so in practice
     /// it works out ok.
+    #[inline]
     pub fn as_str(&self) -> &str {
         with_session_globals(|session_globals| unsafe {
             std::mem::transmute::<&str, &str>(session_globals.symbol_interner.get_str(*self))

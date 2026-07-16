@@ -221,7 +221,7 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
             i.span,
             |this, feed| {
                 if let Some(ext) = opt_syn_ext {
-                    this.r.local_macro_map.insert(feed.def_id(), self.r.arenas.alloc_macro(ext));
+                    this.r.local_macro_map.insert(feed.def_id(), this.r.arenas.alloc_macro(ext));
                 }
 
                 this.with_parent(feed.def_id(), |this| {
@@ -423,28 +423,9 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
     }
 
     fn visit_anon_const(&mut self, constant: &'a AnonConst) {
-        // Note that `visit_anon_const` is skipped for AnonConst nodes wrapped in an
-        // ExprKind::ConstBlock - these are handled in visit_expr, and are DefKind::InlineConst.
-
-        // `MgcaDisambiguation::Direct` is set even when MGCA is disabled, so
-        // to avoid affecting stable we have to feature gate the not creating
-        // anon consts
-        if !self.r.features.min_generic_const_args() {
-            let parent = self
-                .create_def(constant.id, None, DefKind::AnonConst, constant.value.span)
-                .def_id();
-            return self.with_parent(parent, |this| visit::walk_anon_const(this, constant));
-        }
-
-        match constant.mgca_disambiguation {
-            MgcaDisambiguation::Direct => visit::walk_anon_const(self, constant),
-            MgcaDisambiguation::AnonConst => {
-                let parent = self
-                    .create_def(constant.id, None, DefKind::AnonConst, constant.value.span)
-                    .def_id();
-                self.with_parent(parent, |this| visit::walk_anon_const(this, constant));
-            }
-        };
+        let parent =
+            self.create_def(constant.id, None, DefKind::AnonConst, constant.value.span).def_id();
+        self.with_parent(parent, |this| visit::walk_anon_const(this, constant));
     }
 
     #[instrument(level = "debug", skip(self))]
@@ -459,17 +440,6 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
             ExprKind::Closure(..) | ExprKind::Gen(..) => {
                 let def = self.create_def(expr.id, None, DefKind::Closure, expr.span).def_id();
                 self.with_parent(def, |this| visit::walk_expr(this, expr));
-            }
-            ExprKind::ConstBlock(constant) => {
-                for attr in &expr.attrs {
-                    visit::walk_attribute(self, attr);
-                }
-
-                let def = self
-                    .create_def(constant.id, None, DefKind::InlineConst, constant.value.span)
-                    .def_id();
-                // use specifically walk_anon_const, not walk_expr, to skip self.visit_anon_const
-                self.with_parent(def, |this| visit::walk_anon_const(this, constant));
             }
             _ => visit::walk_expr(self, expr),
         }
@@ -623,12 +593,7 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
                 }
                 InlineAsmOperand::Const { anon_const } => {
                     let def = self
-                        .create_def(
-                            anon_const.id,
-                            None,
-                            DefKind::InlineConst,
-                            anon_const.value.span,
-                        )
+                        .create_def(anon_const.id, None, DefKind::AnonConst, anon_const.value.span)
                         .def_id();
                     self.with_parent(def, |this| visit::walk_anon_const(this, anon_const));
                 }

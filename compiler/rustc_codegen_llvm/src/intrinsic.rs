@@ -3,8 +3,8 @@ use std::ffi::c_uint;
 use std::{assert_matches, iter, ptr};
 
 use rustc_abi::{
-    AddressSpace, Align, BackendRepr, CVariadicStatus, Float, HasDataLayout, Integer,
-    NumScalableVectors, Primitive, Size, WrappingRange,
+    AddressSpace, Align, BackendRepr, CVariadicStatus, Float, HasDataLayout, NumScalableVectors,
+    Primitive, Size, WrappingRange,
 };
 use rustc_codegen_ssa::RetagInfo;
 use rustc_codegen_ssa::base::{compare_simd_types, wants_msvc_seh, wants_wasm_eh};
@@ -23,7 +23,7 @@ use rustc_middle::ty::offload_meta::OffloadMetadata;
 use rustc_middle::ty::{self, GenericArgsRef, Instance, SimdAlign, Ty, TyCtxt, TypingEnv};
 use rustc_middle::{bug, span_bug};
 use rustc_session::config::CrateType;
-use rustc_session::errors::feature_err;
+use rustc_session::diagnostics::feature_err;
 use rustc_session::lint::builtin::DEPRECATED_LLVM_INTRINSIC;
 use rustc_span::{ErrorGuaranteed, Span, Symbol, sym};
 use rustc_symbol_mangling::{mangle_internal_symbol, symbol_name_for_instance_in_crate};
@@ -315,11 +315,6 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                     Primitive::Pointer(_) => {
                         // Pointers are always OK.
                     }
-                    Primitive::Int(Integer::I128, _) => {
-                        // FIXME: maybe we should support these? At least on 32-bit powerpc
-                        // the logic in LLVM does not handle i128 correctly though.
-                        bug!("the va_arg intrinsic does not support `i128`/`u128`")
-                    }
                     Primitive::Int(..) => {
                         let int_width = self.cx().size_of(result_layout.ty).bits();
                         let target_c_int_width = self.cx().sess().target.options.c_int_width;
@@ -388,16 +383,6 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                         IntrinsicResult::WroteIntoPlace
                     };
                 }
-            }
-            sym::volatile_store => {
-                let dst = args[0].deref(self.cx());
-                args[1].val.volatile_store(self, dst);
-                return IntrinsicResult::Operand(OperandValue::ZeroSized);
-            }
-            sym::unaligned_volatile_store => {
-                let dst = args[0].deref(self.cx());
-                args[1].val.unaligned_volatile_store(self, dst);
-                return IntrinsicResult::Operand(OperandValue::ZeroSized);
             }
             sym::prefetch_read_data
             | sym::prefetch_write_data
@@ -574,7 +559,7 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                 let tp_ty = fn_args.type_at(0);
                 let layout = self.layout_of(tp_ty).layout;
                 let use_integer_compare = match layout.backend_repr() {
-                    Scalar(_) | ScalarPair(_, _) => true,
+                    Scalar(_) | ScalarPair { a: _, b: _, b_offset: _ } => true,
                     SimdVector { .. } => false,
                     SimdScalableVector { .. } => {
                         let err = tcx.dcx().emit_err(InvalidMonomorphization::NonScalableType {
@@ -934,7 +919,7 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
         let fn_ty = instance.ty(tcx, self.typing_env());
         let fn_sig = match *fn_ty.kind() {
             ty::FnDef(def_id, args) => tcx.instantiate_bound_regions_with_erased(
-                tcx.fn_sig(def_id).instantiate(tcx, args).skip_norm_wip(),
+                tcx.fn_sig(def_id).instantiate(tcx, args.no_bound_vars().unwrap()).skip_norm_wip(),
             ),
             _ => unreachable!(),
         };
@@ -1777,7 +1762,7 @@ fn codegen_autodiff<'ll, 'tcx>(
     let fn_to_diff = args[0].immediate();
 
     let (diff_id, diff_args) = match fn_args.into_type_list(tcx)[1].kind() {
-        ty::FnDef(def_id, diff_args) => (def_id, diff_args),
+        ty::FnDef(def_id, diff_args) => (def_id, diff_args.no_bound_vars().unwrap()),
         _ => bug!("invalid args"),
     };
 
@@ -1840,7 +1825,7 @@ fn codegen_offload<'ll, 'tcx>(
     let fn_args = instance.args;
 
     let (target_id, target_args) = match fn_args.into_type_list(tcx)[0].kind() {
-        ty::FnDef(def_id, params) => (def_id, params),
+        ty::FnDef(def_id, params) => (def_id, params.no_bound_vars().unwrap()),
         _ => bug!("invalid offload intrinsic arg"),
     };
 

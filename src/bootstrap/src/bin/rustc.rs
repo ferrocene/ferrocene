@@ -23,8 +23,8 @@ use std::time::Instant;
 
 use arg_file_command::ArgFileCommand;
 use shared_helpers::{
-    dylib_path, dylib_path_var, exe, maybe_dump, parse_rustc_stage, parse_rustc_verbose,
-    parse_value_from_args,
+    collect_args, dylib_path, dylib_path_var, exe, maybe_dump, parse_rustc_stage,
+    parse_rustc_verbose, parse_value_from_args,
 };
 
 #[path = "../utils/shared_helpers.rs"]
@@ -37,7 +37,7 @@ mod arg_file_command;
 mod proc_macro_deps;
 
 fn main() {
-    let orig_args = env::args_os().skip(1).collect::<Vec<_>>();
+    let orig_args = collect_args();
     let mut args = orig_args.clone();
 
     // Ferrocene addition: do not enable `-Cinstrument-coverage` in the `compiler_builtins` crate.

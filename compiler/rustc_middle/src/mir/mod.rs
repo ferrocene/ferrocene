@@ -1701,6 +1701,8 @@ pub fn find_self_call<'tcx>(
         && let [Spanned { node: Operand::Move(self_place) | Operand::Copy(self_place), .. }, ..] =
             **args
     {
+        let fn_args = fn_args.no_bound_vars().unwrap();
+
         if self_place.as_local() == Some(local) {
             return Some((def_id, fn_args));
         }
@@ -1730,10 +1732,10 @@ mod size_asserts {
 
     use super::*;
     // tidy-alphabetical-start
-    static_assert_size!(BasicBlockData<'_>, 160);
+    static_assert_size!(BasicBlockData<'_>, 144);
     static_assert_size!(LocalDecl<'_>, 40);
     static_assert_size!(SourceScopeData<'_>, 64);
-    static_assert_size!(Statement<'_>, 56);
+    static_assert_size!(Statement<'_>, 40);
     static_assert_size!(Terminator<'_>, 104);
     static_assert_size!(VarDebugInfo<'_>, 88);
     // tidy-alphabetical-end

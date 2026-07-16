@@ -31,8 +31,8 @@ pub enum EiiImplResolution {
     /// what foreign item its associated with.
     Macro(DefId),
     /// Sometimes though, we already know statically and can skip some name resolution.
-    /// Stored together with the eii's name for diagnostics.
-    Known(EiiDecl),
+    /// DefId of the extern item that the EII implementation implements.
+    Known(DefId),
     /// For when resolution failed, but we want to continue compilation
     Error(ErrorGuaranteed),
 }
@@ -1635,6 +1635,9 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_strict_coherence]`.
     RustcStrictCoherence(Span),
+
+    /// Represents `#[rustc_test_entrypoint_marker]`
+    RustcTestEntrypointMarker,
 
     /// Represents `#[rustc_test_marker]`
     RustcTestMarker(Symbol),

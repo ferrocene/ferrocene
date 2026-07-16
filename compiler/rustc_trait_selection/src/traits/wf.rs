@@ -13,7 +13,7 @@ use rustc_middle::ty::{
     self, GenericArgsRef, Term, TermKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable,
     TypeVisitableExt, TypeVisitor,
 };
-use rustc_session::errors::feature_err;
+use rustc_session::diagnostics::feature_err;
 use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::{Span, sym};
 use tracing::{debug, instrument, trace};
@@ -824,6 +824,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
             }
 
             ty::FnDef(did, args) => {
+                let args = args.no_bound_vars().unwrap();
                 // HACK: Check the return type of function definitions for
                 // well-formedness to mostly fix #84533. This is still not
                 // perfect and there may be ways to abuse the fact that we

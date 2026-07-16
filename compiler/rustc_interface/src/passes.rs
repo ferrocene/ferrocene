@@ -39,7 +39,7 @@ use rustc_resolve::{Resolver, ResolverOutputs};
 use rustc_session::Session;
 use rustc_session::config::{CrateType, Input, OutFileName, OutputFilenames, OutputType};
 use rustc_session::cstore::Untracked;
-use rustc_session::errors::feature_err;
+use rustc_session::diagnostics::feature_err;
 use rustc_session::output::{filename_for_input, invalid_output_for_target};
 use rustc_session::search_paths::PathKind;
 use rustc_span::{
@@ -791,7 +791,7 @@ fn resolver_for_lowering_raw<'tcx>(
     &'tcx Steal<ast::Crate>,
     &'tcx ty::ResolverGlobalCtxt,
 ) {
-    let arenas = Resolver::arenas();
+    let arenas = WorkerLocal::new(|_| Resolver::arenas());
     let _ = tcx.registered_tools(()); // Uses `crate_for_resolver`.
     let (krate, pre_configured_attrs) = tcx.crate_for_resolver(()).steal();
     let mut resolver = Resolver::new(

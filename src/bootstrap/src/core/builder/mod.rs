@@ -25,6 +25,8 @@ use crate::core::build_steps::{
     check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, tool, vendor,
 };
 use crate::core::builder::cli_paths::CLIStepPath;
+use crate::core::builder::step_stack::StepRecord;
+pub use crate::core::builder::step_stack::StepStack;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageState;
@@ -32,10 +34,12 @@ use crate::utils::build_stamp::BuildStamp;
 use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
 use crate::utils::helpers::{self, LldThreads, add_dylib_path, exe, libdir, linker_args, t};
+use crate::utils::tracing::format_location;
 use crate::{Build, Crate, trace};
 
 mod cargo;
 mod cli_paths;
+mod step_stack;
 #[cfg(test)]
 mod tests;
 
@@ -522,29 +526,39 @@ pub struct ShouldRun<'a> {
 
     // use a BTreeSet to maintain sort order
     paths: BTreeSet<PathSet>,
+
+    default_to_suites_only: bool,
 }
 
 impl<'a> ShouldRun<'a> {
     fn new(builder: &'a Builder<'_>, kind: Kind) -> ShouldRun<'a> {
-        ShouldRun { builder, kind, paths: BTreeSet::new() }
+        ShouldRun { builder, kind, paths: BTreeSet::new(), default_to_suites_only: false }
     }
 
-    /// Indicates it should run if the command-line selects the given crate or
-    /// any of its (local) dependencies.
+    /// The corresponding step should run if the bootstrap command-line selects
+    /// the given crate or any of its (local) dependencies.
     ///
-    /// `make_run` will be called a single time with all matching command-line paths.
-    pub fn crate_or_deps(self, name: &str) -> Self {
-        let crates = self.builder.in_tree_crates(name, None);
-        self.crates(crates)
+    /// Delegates to [`Self::crate_or_deps_filtered`] with a filter that accepts all crates.
+    pub(crate) fn crate_or_deps(self, root_crate_name: &str) -> Self {
+        self.crate_or_deps_filtered(root_crate_name, |_: &Crate| true)
     }
 
-    /// Indicates it should run if the command-line selects any of the given crates.
+    /// The corresponding step should run if the bootstrap command-line selects
+    /// the given crate or any of its (local) dependencies, not counting any
+    /// crates rejected by the given filter function.
     ///
     /// `make_run` will be called a single time with all matching command-line paths.
-    ///
-    /// Prefer [`ShouldRun::crate_or_deps`] to this function where possible.
-    pub(crate) fn crates(mut self, crates: Vec<&Crate>) -> Self {
+    pub(crate) fn crate_or_deps_filtered(
+        mut self,
+        root_crate_name: &str,
+        crate_filter_fn: impl Fn(&Crate) -> bool,
+    ) -> Self {
+        let crates = self.builder.in_tree_crates(root_crate_name, None);
         for krate in crates {
+            if !crate_filter_fn(krate) {
+                continue;
+            }
+
             let path = krate.local_path(self.builder);
             self.paths.insert(PathSet::one(path, self.kind));
         }
@@ -642,6 +656,28 @@ impl<'a> ShouldRun<'a> {
             }
         }
         sets
+    }
+
+    /// When generating pathsets for a step that is being run "by default"
+    /// (i.e. when running bootstrap without an explicit command-line path),
+    /// discard any paths that were not registered as test suites.
+    ///
+    /// This is basically a hack to make path-based skipping work properly for
+    /// coverage tests, since otherwise the `coverage-map` and `coverage-run`
+    /// aliases would prevent `./x test --skip=tests` from skipping them.
+    pub(crate) fn default_to_suites_only(mut self) -> Self {
+        self.default_to_suites_only = true;
+        self
+    }
+
+    /// When the corresponding step is run "by default" (without explicit command-line paths),
+    /// act as though the user had explicitly specified these paths.
+    fn default_pathsets(&self) -> Vec<PathSet> {
+        let mut default_pathsets = self.paths.iter().cloned().collect::<Vec<_>>();
+        if self.default_to_suites_only {
+            default_pathsets.retain(|p| matches!(p, PathSet::Suite(_)));
+        }
+        default_pathsets
     }
 }
 
@@ -1208,6 +1244,7 @@ impl<'a> Builder<'a> {
             Subcommand::Sign { .. } => (Kind::Sign, &paths[..]), // for Ferrocene
         };
 
+        StepStack::with_current(|stack| stack.clear());
         Self::new_internal(build, kind, paths.to_owned())
     }
 
@@ -1673,6 +1710,12 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
                 graph.register_step_execution(&step, parent, self.config.dry_run());
             }
 
+            // The location has to be gathered in this function, to be correctly propagated with
+            // #[track_caller].
+            let location = format_location(*std::panic::Location::caller());
+            StepStack::with_current(|stack| {
+                stack.push(StepRecord { info: pretty_print_step(&step), location });
+            });
             stack.push(Box::new(step.clone()));
         }
 
@@ -1698,7 +1741,7 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
                     "step",
                     step_name = pretty_step_name::<S>(),
                     args = step_debug_args(&step),
-                    location = crate::utils::tracing::format_location(*std::panic::Location::caller())
+                    location = format_location(*std::panic::Location::caller())
                 );
                 span.entered()
             };
@@ -1725,6 +1768,10 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
             let mut stack = self.stack.borrow_mut();
             let cur_step = stack.pop().expect("step stack empty");
             assert_eq!(cur_step.downcast_ref(), Some(&step));
+
+            StepStack::with_current(|stack| {
+                stack.pop();
+            });
         }
         self.cache.put(step, out.clone());
         out

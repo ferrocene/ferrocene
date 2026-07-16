@@ -1781,7 +1781,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// [`as_ptr`]: Self::as_ptr
     /// [`as_non_null`]: Self::as_non_null
     #[must_use]
-    #[stable(feature = "box_as_ptr", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "box_as_ptr", since = "1.98.0")]
     #[rustc_never_returns_null_ptr]
     #[rustc_as_ptr]
     #[inline]
@@ -1830,7 +1830,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// [`as_ptr`]: Self::as_ptr
     /// [`as_non_null`]: Self::as_non_null
     #[must_use]
-    #[stable(feature = "box_as_ptr", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "box_as_ptr", since = "1.98.0")]
     #[rustc_never_returns_null_ptr]
     #[rustc_as_ptr]
     #[inline]

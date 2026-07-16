@@ -31,10 +31,10 @@ LL |     <Self as SVec>::Item<T>,
    |                         +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 lifetime argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 lifetime argument
    |
 note: associated type defined here, with 1 lifetime parameter: `'a`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -43,14 +43,14 @@ LL |     type Item<'a, T>;
    |          ^^^^ --
 help: add missing lifetime argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<'a>,
-   |                                         ++++
+LL |     Output = <dyn Index<<Self as SVec>::Item<'a>,
+   |                                             ++++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 generic argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 generic argument
    |
 note: associated type defined here, with 1 generic parameter: `T`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -59,8 +59,8 @@ LL |     type Item<'a, T>;
    |          ^^^^     -
 help: add missing generic argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<T>,
-   |                                         +++
+LL |     Output = <dyn Index<<Self as SVec>::Item<T>,
+   |                                             +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
   --> $DIR/ice-generic-type-alias-105742.rs:40:30
@@ -193,10 +193,10 @@ LL |     <Self as SVec>::Item<T>,
    |                         +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 lifetime argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 lifetime argument
    |
 note: associated type defined here, with 1 lifetime parameter: `'a`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -206,14 +206,14 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing lifetime argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<'a>,
-   |                                         ++++
+LL |     Output = <dyn Index<<Self as SVec>::Item<'a>,
+   |                                             ++++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 generic argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 generic argument
    |
 note: associated type defined here, with 1 generic parameter: `T`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -223,8 +223,8 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing generic argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<T>,
-   |                                         +++
+LL |     Output = <dyn Index<<Self as SVec>::Item<T>,
+   |                                             +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
   --> $DIR/ice-generic-type-alias-105742.rs:40:30
@@ -310,7 +310,7 @@ LL |    pub trait SVec: Index<
    | |            this trait is not dyn compatible...
 LL | |      <Self as SVec>::Item,
 ...  |
-LL | |/     Output = <Index<<Self as SVec>::Item,
+LL | |/     Output = <dyn Index<<Self as SVec>::Item,
 ...  ||
 LL | ||     Output = <Self as SVec>::Item> as SVec>::Item,
    | ||_________________________________________________^ ...because it uses `Self` as a type parameter
@@ -358,10 +358,10 @@ LL |     <Self as SVec>::Item<T>,
    |                         +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 lifetime argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 lifetime argument
    |
 note: associated type defined here, with 1 lifetime parameter: `'a`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -371,14 +371,14 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing lifetime argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<'a>,
-   |                                         ++++
+LL |     Output = <dyn Index<<Self as SVec>::Item<'a>,
+   |                                             ++++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 generic argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 generic argument
    |
 note: associated type defined here, with 1 generic parameter: `T`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -388,8 +388,8 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing generic argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<T>,
-   |                                         +++
+LL |     Output = <dyn Index<<Self as SVec>::Item<T>,
+   |                                             +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
   --> $DIR/ice-generic-type-alias-105742.rs:40:30
@@ -494,10 +494,10 @@ LL |     <Self as SVec>::Item<T>,
    |                         +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 lifetime argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 lifetime argument
    |
 note: associated type defined here, with 1 lifetime parameter: `'a`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -507,14 +507,14 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing lifetime argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<'a>,
-   |                                         ++++
+LL |     Output = <dyn Index<<Self as SVec>::Item<'a>,
+   |                                             ++++
 
 error[E0107]: missing generics for associated type `SVec::Item`
-  --> $DIR/ice-generic-type-alias-105742.rs:29:37
+  --> $DIR/ice-generic-type-alias-105742.rs:29:41
    |
-LL |     Output = <Index<<Self as SVec>::Item,
-   |                                     ^^^^ expected 1 generic argument
+LL |     Output = <dyn Index<<Self as SVec>::Item,
+   |                                         ^^^^ expected 1 generic argument
    |
 note: associated type defined here, with 1 generic parameter: `T`
   --> $DIR/ice-generic-type-alias-105742.rs:62:10
@@ -524,8 +524,8 @@ LL |     type Item<'a, T>;
    = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 help: add missing generic argument
    |
-LL |     Output = <Index<<Self as SVec>::Item<T>,
-   |                                         +++
+LL |     Output = <dyn Index<<Self as SVec>::Item<T>,
+   |                                             +++
 
 error[E0107]: missing generics for associated type `SVec::Item`
   --> $DIR/ice-generic-type-alias-105742.rs:40:30

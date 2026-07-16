@@ -55,7 +55,7 @@ pub trait PrivatePow<Y, N> {
 }
 pub type PrivatePowOut<A, Y, N> = <A as PrivatePow<Y, N>>::Output;
 
-pub type Add1<A> = <A as Add<::B1>>::Output;
+pub type Add1<A> = <A as Add<B1>>::Output;
 pub type Prod<A, B> = <A as Mul<B>>::Output;
 pub type Square<A> = <A as Mul>::Output;
 pub type Sum<A, B> = <A as Add<B>>::Output;

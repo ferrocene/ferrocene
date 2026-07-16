@@ -66,7 +66,7 @@ pub fn start(_: isize, _: *const *const u8) -> isize {
 }
 
 //~ MONO_ITEM fn run_closure @@ non_generic_closures-cgu.0[External]
-fn run_closure(f: &Fn(i32)) {
+fn run_closure(f: &dyn Fn(i32)) {
     f(3);
 }
 

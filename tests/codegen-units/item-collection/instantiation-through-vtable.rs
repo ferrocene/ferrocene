@@ -26,14 +26,14 @@ pub fn start(_: isize, _: *const *const u8) -> isize {
 
     //~ MONO_ITEM fn <Struct<u32> as Trait>::foo
     //~ MONO_ITEM fn <Struct<u32> as Trait>::bar
-    let r1 = &s1 as &Trait;
+    let r1 = &s1 as &dyn Trait;
     r1.foo();
     r1.bar();
 
     let s1 = Struct { _a: 0u64 };
     //~ MONO_ITEM fn <Struct<u64> as Trait>::foo
     //~ MONO_ITEM fn <Struct<u64> as Trait>::bar
-    let _ = &s1 as &Trait;
+    let _ = &s1 as &dyn Trait;
 
     0
 }

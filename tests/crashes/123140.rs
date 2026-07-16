@@ -3,4 +3,4 @@ trait Project {
     const SELF: Self;
 }
 
-fn take1(_: Project<SELF = { loop {} }>) {}
+fn take1(_: dyn Project<SELF = { loop {} }>) {}

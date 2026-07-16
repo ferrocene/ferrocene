@@ -1,4 +1,5 @@
 //@ known-bug: rust-lang/rust#126667
+//@ edition: 2015..2018
 #![warn(rust_2021_compatibility)]
 
 trait Static<'a> {}

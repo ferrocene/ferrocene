@@ -169,7 +169,8 @@ jobs:
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
+        ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
@@ -491,8 +492,8 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
+        ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
+        ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
         ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
     steps: [ferrocene-job-build]
 
@@ -642,8 +643,8 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
+        ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
+        ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
     steps:
       - when:
           condition: << pipeline.parameters.full-build-aarch64-darwin-host >>

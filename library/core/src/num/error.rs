@@ -155,7 +155,16 @@ impl fmt::Display for ParseIntError {
             IntErrorKind::PosOverflow => "number too large to fit in target type",
             IntErrorKind::NegOverflow => "number too small to fit in target type",
             IntErrorKind::Zero => "number would be zero for non-zero type",
-            IntErrorKind::NotAPowerOfTwo => "number is not a power of two",
+            IntErrorKind::NotAPowerOfTwo => {
+                #[cfg(feature = "ferrocene_test")]
+                unreachable!();
+                #[ferrocene::annotation(
+                    "This variant can't be constructed anywhere in the API surface. \
+                     Testing would require transmuting from a fake struct, the unreachable!() \
+                     above will indicate to us if this ever does become a live codepath."
+                )]
+                "number is not a power of two"
+            }
         }
         .fmt(f)
     }

@@ -1092,3 +1092,52 @@ fn test_filter_spec_assume_count_default() {
     let no_trusted_len: &mut dyn Iterator<Item = &i32> = &mut yes_trusted_len;
     assert_eq!(no_trusted_len.filter(|a| *a % 2 == 0).count(), 2);
 }
+
+// Covers `<core::str::iter::CharIndices<'a> as core::iter::traits::iterator::Iterator>::count`
+#[test]
+fn test_char_indices_count() {
+    let suspect = "Hello there, I'm a code coverage test";
+    assert_eq!(suspect.char_indices().count(), 37);
+}
+
+// Covers `<core::iter::adapters::map_while::MapWhile<I, P> as core::iter::traits::iterator::Iterator>::try_fold`
+#[test]
+fn test_map_while_try_fold() {
+    let mut iter = [1, 2, 3, 4, 5].iter().map_while(|x| if *x % 2 == 0 { Some(*x) } else { None });
+    let folded = iter.try_fold(0, |_acc, _x| None);
+    assert_eq!(folded, Some(0));
+}
+
+// Covers `core::array::<impl core::cmp::PartialOrd for [T; N]>::partial_cmp`
+#[test]
+fn test_partialord_slice_partialcmp() {
+    let x = [1, 2, 3];
+    let y = [4, 5, 6];
+    assert!(x.partial_cmp(&y).is_some());
+}
+
+// Covers `<&mut I as core::iter::traits::double_ended::DoubleEndedIteratorRefSpec>::spec_try_rfold`
+#[test]
+fn test_ref_spec_try_rfold() {
+    let mut suspect = [1, 2, 3, 4, 5];
+    let mut abstracted = suspect.iter_mut();
+    let folded: Result<_, core::str::Utf8Error> =
+        <&mut core::slice::IterMut<'_, _> as DoubleEndedIterator>::try_rfold(
+            &mut &mut abstracted,
+            0,
+            |acc, &mut x| Ok(acc + x),
+        );
+    assert_eq!(folded, Ok(15));
+}
+
+// Covers `<core::iter::adapters::scan::Scan<I, St, F> as core::iter::traits::iterator::Iterator>::try_fold`
+#[test]
+fn test_scan_iterator_try_fold() {
+    let mut iter: core::iter::Scan<_, _, _> =
+        [1, 2, 3, 4, 5].iter().scan(0, |acc: &mut usize, x: &usize| {
+            *acc += *x;
+            None
+        });
+    let folded = iter.try_fold(0, |_acc, _x: usize| None);
+    assert_eq!(folded, Some(0));
+}

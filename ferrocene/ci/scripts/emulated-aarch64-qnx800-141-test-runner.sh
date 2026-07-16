@@ -23,7 +23,7 @@ start_vm() {
     # set memory to 11G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+ and has two
     # variants which can run in parallel
     qemu-system-aarch64 \
-        -machine virt-4.2 \
+        -machine virt-10.2 \
         -cpu cortex-a57 \
         -smp 4 \
         -m 11G \

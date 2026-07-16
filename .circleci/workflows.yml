@@ -1530,6 +1530,7 @@ commands:
             # injected at VM startup
             docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >>
             docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:<< pipeline.parameters.qemu-version >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1540,6 +1541,8 @@ commands:
 
             - run:
                 name: Prepare emulator
+                environment:
+                  EMULATOR_PATH: /opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >>/bin/
                 command: |
                   docker run \
                     --device /dev/kvm \
@@ -1563,6 +1566,8 @@ commands:
             - run:
                 name: Execute emulator in the background
                 background: true
+                environment:
+                  EMULATOR_PATH: /opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >>/bin/
                 command: |
                   docker run \
                     --rm \
@@ -1577,6 +1582,7 @@ commands:
                     --privileged \
                     --interactive \
                     --tty \
+                    --mount type=image,source=harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:<< pipeline.parameters.qemu-version >>,target=/opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >> \
                     harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >> \
                     bash -c "<< parameters.emulator-script >>"
 

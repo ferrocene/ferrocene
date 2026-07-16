@@ -167,7 +167,7 @@ jobs:
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report

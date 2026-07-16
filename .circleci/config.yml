@@ -29,13 +29,12 @@ orbs:
 jobs:
   setup:
     docker:
-      - image: cimg/python:3.12
+    # We can't use our own mechanism to install aws-cli in our preferred version here because
+    # this is the workflow that reads our preferred version and calculates that paramter. So
+    # We use cimg/aws which comes with a somewhat recent version of aws-cli
+      - image: cimg/aws:2026.07
     resource_class: ferrocene/k8s-arm64-small # 1-core
     steps:
-      - aws-cli/install:
-          version: 2.35.11
-          override_installed: true
-
       - ferrocene/aws_oidc_auth
       - ferrocene/git_shallow_clone:
           depth: 1

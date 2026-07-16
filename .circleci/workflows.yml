@@ -197,7 +197,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx7: true
+          qnx_version: qnx710-472
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
@@ -213,7 +213,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx8: true
+          qnx_version: qnx800-141
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
@@ -1466,12 +1466,11 @@ commands:
       llvm_subset:
         type: boolean
         default: true
-      qnx7:
-        type: boolean
-        default: false
-      qnx8:
-        type: boolean
-        default: false
+      qnx_version:
+        description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
+        type: enum
+        enum: ["qnx710-472", "qnx800-141", ""]
+        default: ""
     steps:
       - ferrocene/checkout:
           llvm_subset: << parameters.llvm_subset >>
@@ -1484,19 +1483,9 @@ commands:
           condition: <<parameters.restore-from-job>>
           steps:
             - ferrocene/restore_from_job:
-                from_job: << parameters.restore-from-job >>
-      - when:
-          condition:
-            equal: [<<parameters.qnx7>>, true]
-          steps:
-            - setup-qnx-toolchain:
-                qnx_version: qnx710-472
-      - when:
-          condition:
-            equal: [<<parameters.qnx8>>, true]
-          steps:
-            - setup-qnx-toolchain:
-                qnx_version: qnx800-141
+                from_job: << parameters.restore-from-job>>
+      - setup-qnx-toolchain:
+          qnx_version: << parameters.qnx_version >>
       - ferrocene/ci
 
   ferrocene-job-test-container:
@@ -1628,21 +1617,27 @@ commands:
         type: boolean
         default: true
       qnx_version:
-        description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
+        description: "The QNX version to set up (currently supported: qnx710-472, qnx800-141). Empty string for none"
         type: enum
-        enum: ["qnx710-472", "qnx800-141"]
+        enum: ["qnx710-472", "qnx800-141", ""]
+        default: ""
     steps:
-      - run:
-          name: Fetch << parameters.qnx_version >> toolchain
-          # On Windows, the virtualenv detection seems to struggle at times.
-          command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
       - when:
-          condition: << parameters.source-env-script >>
+          condition:
+            not:
+              equal: ["", << parameters.qnx_version >>]
           steps:
             - run:
-                name: Set PATH to include << parameters.qnx_version >> tools
-                command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
+                name: Fetch << parameters.qnx_version >> toolchain
+                # On Windows, the virtualenv detection seems to struggle at times.
+                command: |
+                  ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
+            - when:
+                condition: << parameters.source-env-script >>
+                steps:
+                  - run:
+                      name: Set PATH to include << parameters.qnx_version >> tools
+                      command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
 
 executors:
   linux-vm:

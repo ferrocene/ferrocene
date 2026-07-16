@@ -195,6 +195,11 @@ fn test_utf8_chunks_next() {
     let mut chunks = replacement_character.utf8_chunks();
     assert_eq!("�", chunks.next().unwrap().valid());
     assert!(chunks.next().is_none());
+
+    let two_width_chars = "§ɮʃ ͒ʦ";
+    for two_width_char in two_width_chars.as_bytes().utf8_chunks() {
+        println!("{two_width_char:?}");
+    }
 }
 
 // covers:

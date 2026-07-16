@@ -162,6 +162,14 @@ impl [u8] {
                 if !eq_ignore_ascii_inner(a_rem, b_rem) {
                     return false;
                 }
+            } else {
+                #[ferrocene::annotation("
+                    This branch is not coverable from public API. \
+                    The only caller (`eq_ignore_ascii_case`) only calls this function if both values \
+                    are the same length, and that shared length is greater than the `N` chunk size.
+                    The `if` statement above is currently acting to destructure the returned values.
+                ")]
+                {}
             }
         }
 

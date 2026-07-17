@@ -408,7 +408,11 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                     && let ty::FnDef(fn_item, fn_args) = ty.kind()
                 {
                     debug!("found function item {fn_item:?}");
-                    instance = self.monomorphize_instance(*fn_item, fn_args, span);
+                    instance = self.monomorphize_instance(
+                        *fn_item,
+                        fn_args.no_bound_vars().unwrap(),
+                        span,
+                    );
                 }
 
                 (pre_mono_call, instance)

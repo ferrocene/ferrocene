@@ -535,6 +535,7 @@ impl Config {
             pgo: toml_pgo,
             profile: _,
             include: _,
+            ferrocene: _,
         } = toml;
 
         // Now override TOML values with flags, to make sure that we won't later override flags with

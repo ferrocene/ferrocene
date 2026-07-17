@@ -3441,8 +3441,6 @@
 <core::ops::range::RangeFull as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::RangeInclusive<&T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::RangeInclusive<&T> as core::ops::range::RangeBounds<T>>::start_bound
-<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next
-<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold
 <core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold
 <core::ops::range::RangeInclusive<Idx> as core::clone::Clone>::clone
@@ -3450,8 +3448,6 @@
 <core::ops::range::RangeInclusive<Idx> as core::cmp::PartialEq>::eq
 <core::ops::range::RangeInclusive<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::RangeInclusive<Idx> as core::hash::Hash>::hash
-<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next
-<core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back
 <core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold
 <core::ops::range::RangeInclusive<T> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold
 <core::ops::range::RangeInclusive<T> as core::ops::range::IntoBounds<T>>::into_bounds

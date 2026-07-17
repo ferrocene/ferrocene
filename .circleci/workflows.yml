@@ -980,8 +980,8 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
-         requires:
-           - build-docker--ubuntu-20--x86_64
+          requires:
+            - build-docker--ubuntu-20--x86_64
 
       - x86_64-linux-llvm:
           requires:

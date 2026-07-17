@@ -121,7 +121,10 @@ impl TargetSelection {
             | "armv7r-ferrocene.facade-eabihf"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-ferrocene.facade-eabihf" => true,
-            _ => todo!("expand this `match`"),
+            _ => {
+                // ignore-tidy-todo
+                todo!("expand this `match`");
+            }
         }
     }
 

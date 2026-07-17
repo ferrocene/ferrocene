@@ -548,7 +548,11 @@ pub const ENOMEDIUM: c_int = 93;
 pub const ENOTRECOVERABLE: c_int = 94;
 pub const EOWNERDEAD: c_int = 95;
 pub const EASYNC: c_int = 99;
+
+/// This symbols is prone to change across releases upstream.
+/// See the [usage guidelines](crate::#usage-guidelines) for details and use.
 pub const ELAST: c_int = 99;
+
 pub const RLIMIT_POSIXLOCKS: c_int = 11;
 #[deprecated(since = "0.2.64", note = "Not stable across OS versions")]
 pub const RLIM_NLIMITS: crate::rlim_t = 12;
@@ -1189,7 +1193,7 @@ f! {
         if next <= max {
             (cmsg as usize + _CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         } else {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         }
     }
 
@@ -1198,9 +1202,7 @@ f! {
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
-        for slot in cpuset.ary.iter_mut() {
-            *slot = 0;
-        }
+        cpuset.ary.fill(0);
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {

@@ -865,7 +865,7 @@ impl siginfo_t {
             _stime: crate::clock_t,
             _status: crate::c_int,
         }
-        (*(self as *const siginfo_t as *const siginfo_proc))._status
+        (*(self as *const siginfo_t).cast::<siginfo_proc>())._status
     }
 }
 
@@ -945,6 +945,9 @@ pub const EBADMSG: c_int = 92;
 pub const ENOTRECOVERABLE: c_int = 93;
 pub const EOWNERDEAD: c_int = 94;
 pub const EPROTO: c_int = 95;
+
+/// This symbols is prone to change across releases upstream.
+/// See the [usage guidelines](crate::#usage-guidelines) for details and use.
 pub const ELAST: c_int = 95;
 
 pub const F_DUPFD_CLOEXEC: c_int = 10;
@@ -1852,7 +1855,7 @@ f! {
         let next = cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize) + _ALIGN(size_of::<cmsghdr>());
         let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
         if next > max {
-            core::ptr::null_mut::<cmsghdr>()
+            ptr::null_mut()
         } else {
             (cmsg as usize + _ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
         }

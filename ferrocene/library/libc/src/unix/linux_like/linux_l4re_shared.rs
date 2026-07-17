@@ -85,13 +85,6 @@ s! {
         __val: [c_int; 2],
     }
 
-    pub struct packet_mreq {
-        pub mr_ifindex: c_int,
-        pub mr_type: c_ushort,
-        pub mr_alen: c_ushort,
-        pub mr_address: [c_uchar; 8],
-    }
-
     pub struct cpu_set_t {
         #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]
         bits: [u32; 32],
@@ -805,11 +798,9 @@ pub const EM_M32R: u16 = 88;
 pub const EM_MN10300: u16 = 89;
 pub const EM_MN10200: u16 = 90;
 pub const EM_PJ: u16 = 91;
-#[cfg(not(target_env = "uclibc"))]
 pub const EM_OPENRISC: u16 = 92;
 #[cfg(target_env = "uclibc")]
 pub const EM_OR1K: u16 = 92;
-#[cfg(not(target_env = "uclibc"))]
 pub const EM_ARC_A5: u16 = 93;
 pub const EM_XTENSA: u16 = 94;
 pub const EM_AARCH64: u16 = 183;
@@ -884,7 +875,6 @@ pub const AT_EXECFN: c_ulong = 31;
 // defined in arch/<arch>/include/uapi/asm/auxvec.h but has the same value
 // wherever it is defined.
 pub const AT_SYSINFO_EHDR: c_ulong = 33;
-#[cfg(not(target_env = "uclibc"))]
 pub const AT_MINSIGSTKSZ: c_ulong = 51;
 
 pub const GLOB_ERR: c_int = 1 << 0;
@@ -939,21 +929,16 @@ pub const PTHREAD_MUTEX_NORMAL: c_int = 0;
 pub const PTHREAD_MUTEX_RECURSIVE: c_int = 1;
 pub const PTHREAD_MUTEX_ERRORCHECK: c_int = 2;
 pub const PTHREAD_MUTEX_DEFAULT: c_int = PTHREAD_MUTEX_NORMAL;
-#[cfg(not(target_env = "uclibc"))]
 pub const PTHREAD_MUTEX_STALLED: c_int = 0;
-#[cfg(not(target_env = "uclibc"))]
 pub const PTHREAD_MUTEX_ROBUST: c_int = 1;
-#[cfg(not(target_env = "uclibc"))]
 pub const PTHREAD_PRIO_NONE: c_int = 0;
-#[cfg(not(target_env = "uclibc"))]
 pub const PTHREAD_PRIO_INHERIT: c_int = 1;
-#[cfg(not(target_env = "uclibc"))]
 pub const PTHREAD_PRIO_PROTECT: c_int = 2;
 pub const PTHREAD_PROCESS_PRIVATE: c_int = 0;
 pub const PTHREAD_PROCESS_SHARED: c_int = 1;
 pub const PTHREAD_INHERIT_SCHED: c_int = 0;
 pub const PTHREAD_EXPLICIT_SCHED: c_int = 1;
-#[cfg(not(all(target_os = "l4re", target_env = "uclibc")))]
+#[cfg(not(target_os = "l4re"))]
 pub const __SIZEOF_PTHREAD_COND_T: usize = 48;
 
 // netinet/in.h
@@ -1193,11 +1178,11 @@ pub const IUTF8: crate::tcflag_t = 0x00004000;
 #[cfg(not(all(target_env = "uclibc", target_arch = "mips")))]
 pub const CMSPAR: crate::tcflag_t = 0o10000000000;
 
-pub const MFD_CLOEXEC: c_uint = 0x0001;
-pub const MFD_ALLOW_SEALING: c_uint = 0x0002;
-pub const MFD_HUGETLB: c_uint = 0x0004;
 cfg_if! {
-    if #[cfg(not(target_env = "uclibc"))] {
+    if #[cfg(not(target_os = "l4re"))] {
+        pub const MFD_CLOEXEC: c_uint = 0x0001;
+        pub const MFD_ALLOW_SEALING: c_uint = 0x0002;
+        pub const MFD_HUGETLB: c_uint = 0x0004;
         pub const MFD_NOEXEC_SEAL: c_uint = 0x0008;
         pub const MFD_EXEC: c_uint = 0x0010;
         pub const MFD_HUGE_64KB: c_uint = 0x40000000;
@@ -1216,43 +1201,6 @@ cfg_if! {
         pub const MFD_HUGE_SHIFT: c_uint = 26;
     }
 }
-
-// linux/if_packet.h
-pub const PACKET_HOST: c_uchar = 0;
-pub const PACKET_BROADCAST: c_uchar = 1;
-pub const PACKET_MULTICAST: c_uchar = 2;
-pub const PACKET_OTHERHOST: c_uchar = 3;
-pub const PACKET_OUTGOING: c_uchar = 4;
-pub const PACKET_LOOPBACK: c_uchar = 5;
-#[cfg(not(target_os = "l4re"))]
-pub const PACKET_USER: c_uchar = 6;
-#[cfg(not(target_os = "l4re"))]
-pub const PACKET_KERNEL: c_uchar = 7;
-
-pub const PACKET_ADD_MEMBERSHIP: c_int = 1;
-pub const PACKET_DROP_MEMBERSHIP: c_int = 2;
-pub const PACKET_RECV_OUTPUT: c_int = 3;
-pub const PACKET_RX_RING: c_int = 5;
-pub const PACKET_STATISTICS: c_int = 6;
-cfg_if! {
-    if #[cfg(not(target_os = "l4re"))] {
-        pub const PACKET_COPY_THRESH: c_int = 7;
-        pub const PACKET_AUXDATA: c_int = 8;
-        pub const PACKET_ORIGDEV: c_int = 9;
-        pub const PACKET_VERSION: c_int = 10;
-        pub const PACKET_HDRLEN: c_int = 11;
-        pub const PACKET_RESERVE: c_int = 12;
-        pub const PACKET_TX_RING: c_int = 13;
-        pub const PACKET_LOSS: c_int = 14;
-        pub const PACKET_VNET_HDR: c_int = 15;
-        pub const PACKET_TX_TIMESTAMP: c_int = 16;
-        pub const PACKET_TIMESTAMP: c_int = 17;
-    }
-}
-
-pub const PACKET_MR_MULTICAST: c_int = 0;
-pub const PACKET_MR_PROMISC: c_int = 1;
-pub const PACKET_MR_ALLMULTI: c_int = 2;
 
 pub const SIOCADDRT: c_ulong = 0x0000890B;
 pub const SIOCDELRT: c_ulong = 0x0000890C;
@@ -1485,7 +1433,7 @@ f! {
         cmsg: *const crate::cmsghdr,
     ) -> *mut crate::cmsghdr {
         if ((*cmsg).cmsg_len as usize) < size_of::<crate::cmsghdr>() {
-            return core::ptr::null_mut::<crate::cmsghdr>();
+            return ptr::null_mut();
         }
 
         // FIXME(msrv): `.wrapping_byte_add()` stabilized in 1.75
@@ -1497,7 +1445,7 @@ f! {
         // In case the addition wrapped. `next_addr > max_addr`
         // would otherwise not work as intended.
         if (next_cmsg as usize) < (cmsg as usize) {
-            return core::ptr::null_mut();
+            return ptr::null_mut();
         }
 
         let mut max_addr = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
@@ -1510,7 +1458,7 @@ f! {
         }
 
         if next_cmsg as usize + size_of::<crate::cmsghdr>() > max_addr {
-            core::ptr::null_mut::<crate::cmsghdr>()
+            ptr::null_mut()
         } else {
             next_cmsg as *mut crate::cmsghdr
         }
@@ -1523,9 +1471,7 @@ f! {
     }
 
     pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
-        for slot in &mut cpuset.bits {
-            *slot = 0;
-        }
+        cpuset.bits.fill(0);
     }
 
     pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {

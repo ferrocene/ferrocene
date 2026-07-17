@@ -1,3 +1,5 @@
+//@ edition: 2015
+
 pub struct MyStruct(u32);
 
 pub trait MyTrait {

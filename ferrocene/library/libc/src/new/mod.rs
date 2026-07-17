@@ -180,11 +180,8 @@ cfg_if! {
         pub use linux::can::j1939::*;
         pub use linux::can::netlink::*;
         pub use linux::can::raw::*;
-<<<<<<< HEAD
-=======
         pub use linux::if_link::*;
         pub use linux::if_packet::*;
->>>>>>> a322a1d6a5fcabbf42877e735f7133a90a061c18
         pub use linux::keyctl::*;
         pub use linux::membarrier::*;
         pub use linux::mount::*;

@@ -74,13 +74,9 @@ fn do_ctest() {
         t if t.contains("wasi") => test_wasi(t),
         t if t.contains("windows") => test_windows(t),
         t if t.contains("vxworks") => test_vxworks(t),
-<<<<<<< HEAD
         t if t.contains("qnx") => test_neutrino(t),
-=======
-        t if t.contains("nto-qnx") => test_neutrino(t),
         // QuRT ctest requires a sched_yield stub (static inline in SDK).
         t if t.contains("qurt") => return,
->>>>>>> a322a1d6a5fcabbf42877e735f7133a90a061c18
         t if t.contains("aix") => return test_aix(t),
         t => panic!("unknown target {t}"),
     }

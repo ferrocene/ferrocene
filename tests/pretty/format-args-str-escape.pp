@@ -1,8 +1,7 @@
 #![feature(prelude_import)]
-#![no_std]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 //@ pretty-compare-only
 //@ pretty-mode:expanded
 //@ pp-exact:format-args-str-escape.pp

@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This test checks that a change in a CGU does not invalidate an unrelated CGU
 // during incremental ThinLTO.
 

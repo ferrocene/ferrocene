@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This test is almost identical to `cgu_invalided_via_import`, except that
 // the two versions of `inline_fn` are identical. Neither version of `inlined_fn`
 // ends up with any spans in its LLVM bitecode, so LLVM is able to skip

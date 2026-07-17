@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Zunstable-options --generate-link-to-definition
 
 #![crate_name = "foo"]

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags:-g
 //@ disable-gdb-pretty-printers
 //@ gdb-command:run

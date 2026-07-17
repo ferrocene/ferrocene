@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test where we change a type definition by adding a field.  Fns with
 // this type in their signature are recompiled, as are their callers.
 // Fns with that type used only in their body are also recompiled, but

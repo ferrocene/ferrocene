@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This test checks that the LTO phase is re-done for CGUs that import something
 // via ThinLTO and that imported thing changes while the definition of the CGU
 // stays untouched.

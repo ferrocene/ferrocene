@@ -690,8 +690,7 @@ jobs:
     parameters:
       qnx_version:
         description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
-        type: enum
-        enum: ["qnx710-472", "qnx800-141"]
+        type: string
       targets:
         description: The targets to test (must match qnx version)
         type: string
@@ -737,8 +736,7 @@ jobs:
         default: ""
       qnx_version:
         description: The QNX version to install (currently supported qnx710-472, qnx800-141)
-        type: enum
-        enum: ["qnx710-472", "qnx800-141"]
+        type: string
       targets:
         description: "The compilation target (must match qnx_version, supported: x86_64-pc-nto-qnx710, x86_64-pc-qnx)"
         type: string
@@ -903,14 +901,10 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-compiletest
             - x86_64-linux-library-coverage
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-compiletest
-            - x86_64-qnx8-test-library
-            - x86_64-qnx8-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-compiletest
-            - aarch64-qnx8-test-library
-            - aarch64-qnx8-test-compiletest
+            - x86_64-qnx-test-library-compiletest
+            - x86_64-qnx8-test-library-compiletest
+            - aarch64-qnx-test-library-compiletest
+            - aarch64-qnx8-test-library-compiletest
             - aarch64-none-test-library-compiletest
             - aarch64-none-test-target-cpu-library-compiletest
             - aarch64r82-none-test-library-compiletest
@@ -1063,11 +1057,11 @@ workflows:
             - aarch64-linux-dist
 
       - qnx-generic-test-vm:
-          name: x86_64-qnx-test-library
+          name: x86_64-qnx-test-library-compiletest
           targets: x86_64-pc-nto-qnx710
           qnx_version: qnx710-472
           target_arch: x86_64
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
@@ -1075,35 +1069,11 @@ workflows:
             - x86_64-linux-build
 
       - qnx-generic-test-vm:
-          name: x86_64-qnx-test-compiletest
-          targets: x86_64-pc-nto-qnx710
-          qnx_version: qnx710-472
-          target_arch: x86_64
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
-          requires:
-            - x86_64-linux-build
-
-      - qnx-generic-test-vm:
-          name: x86_64-qnx8-test-library
+          name: x86_64-qnx8-test-library-compiletest
           qnx_version: qnx800-141
           targets: x86_64-pc-qnx
           target_arch: x86_64
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
-          requires:
-            - x86_64-linux-build
-
-      - qnx-generic-test-vm:
-          name: x86_64-qnx8-test-compiletest
-          qnx_version: qnx800-141
-          targets: x86_64-pc-qnx
-          target_arch: x86_64
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
@@ -1188,11 +1158,11 @@ workflows:
             - thumbv7em-eabi-test-library-compiletest
 
       - qnx-generic-test-vm:
-          name: aarch64-qnx-test-library
+          name: aarch64-qnx-test-library-compiletest
           targets: aarch64-unknown-nto-qnx710
           qnx_version: qnx710-472
           target_arch: aarch64
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium
@@ -1200,35 +1170,11 @@ workflows:
             - x86_64-linux-build
 
       - qnx-generic-test-vm:
-          name: aarch64-qnx-test-compiletest
-          targets: aarch64-unknown-nto-qnx710
-          qnx_version: qnx710-472
-          target_arch: aarch64
-          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
-          requires:
-            - x86_64-linux-build
-
-      - qnx-generic-test-vm:
-          name: aarch64-qnx8-test-library
+          name: aarch64-qnx8-test-library-compiletest
           targets: aarch64-unknown-qnx
           qnx_version: qnx800-141
           target_arch: aarch64
-          tasks: $(ferrocene/ci/split-tasks.py test:library)
-          test-variant: "2021"
-          extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
-          requires:
-            - x86_64-linux-build
-
-      - qnx-generic-test-vm:
-          name: aarch64-qnx8-test-compiletest
-          targets: aarch64-unknown-qnx
-          qnx_version: qnx800-141
-          target_arch: aarch64
-          tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: ferrocene/vm-ubuntu-24-amd64-medium

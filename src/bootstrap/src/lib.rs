@@ -1714,8 +1714,13 @@ impl Build {
             version.push_str(" (");
 
             // Ferrocene addition
+            let channel = crate::ferrocene::ferrocene_release_channel(
+                &self.config.channel,
+                &self.config.ferrocene_raw_channel,
+                &self.ferrocene_version,
+            );
             version.push_str("Ferrocene ");
-            version.push_str(&self.ferrocene_version);
+            version.push_str(&channel);
             version.push(' ');
 
             version.push_str(s);
@@ -1723,7 +1728,12 @@ impl Build {
         } else {
             // Ferrocene addition
             use std::fmt::Write;
-            let _ = write!(version, " (Ferrocene {})", self.ferrocene_version);
+            let channel = crate::ferrocene::ferrocene_release_channel(
+                &self.config.channel,
+                &self.config.ferrocene_raw_channel,
+                &self.ferrocene_version,
+            );
+            let _ = write!(version, " (Ferrocene {})", channel);
         }
         version
     }

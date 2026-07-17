@@ -5,30 +5,30 @@ pub trait Bark {}
 
 mod private {
     // should be shown
-    impl ::Woof for ::Foo {}
+    impl crate::Woof for crate::Foo {}
 
     pub trait Bar {}
     pub struct Wibble;
 
     // these should not be shown
-    impl Bar for ::Foo {}
+    impl Bar for crate::Foo {}
     impl Bar for Wibble {}
-    impl ::Bark for Wibble {}
-    impl ::Woof for Wibble {}
+    impl crate::Bark for Wibble {}
+    impl crate::Woof for Wibble {}
 }
 
 #[doc(hidden)]
 pub mod hidden {
     // should be shown
-    impl ::Bark for ::Foo {}
+    impl crate::Bark for crate::Foo {}
 
     pub trait Qux {}
     pub struct Wobble;
 
 
     // these should only be shown if they're re-exported correctly
-    impl Qux for ::Foo {}
+    impl Qux for crate::Foo {}
     impl Qux for Wobble {}
-    impl ::Bark for Wobble {}
-    impl ::Woof for Wobble {}
+    impl crate::Bark for Wobble {}
+    impl crate::Woof for Wobble {}
 }

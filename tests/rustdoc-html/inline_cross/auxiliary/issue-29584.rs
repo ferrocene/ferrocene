@@ -6,5 +6,5 @@ pub struct Foo;
 mod bar {
     trait Bar {}
 
-    impl Bar for ::Foo {}
+    impl Bar for crate::Foo {}
 }

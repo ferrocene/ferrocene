@@ -55,14 +55,8 @@ impl_NumBufferTrait! {
 /// let n2 = -1972i32;
 /// assert_eq!(n2.format_into(&mut buf), "-1972");
 /// ```
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-#[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-||||||| 14cae681329
-#[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "int_format_into", since = "1.98.0")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub struct NumBuffer<T: NumBufferTrait> {
     pub(crate) buf: T::Buf,
     phantom: core::marker::PhantomData<T>,
@@ -78,17 +72,9 @@ impl<T: NumBufferTrait> core::fmt::Debug for NumBuffer<T> {
 #[stable(feature = "int_format_into", since = "1.98.0")]
 impl<T: NumBufferTrait> NumBuffer<T> {
     /// Initializes internal buffer.
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-||||||| 14cae681329
-    #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-    #[rustc_const_stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
-=======
     #[stable(feature = "int_format_into", since = "1.98.0")]
     #[rustc_const_stable(feature = "int_format_into", since = "1.98.0")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn new() -> Self {
         NumBuffer { buf: T::DEFAULT, phantom: core::marker::PhantomData }
     }

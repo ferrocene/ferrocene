@@ -1447,44 +1447,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     type Item = A;
 
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    default fn spec_next(&mut self) -> Option<A> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            let n =
-                Step::forward_checked(self.start.clone(), 1).expect("`Step` invariants not upheld");
-            mem::replace(&mut self.start, n)
-        } else {
-            self.exhausted = true;
-            self.start.clone()
-        })
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-||||||| 14cae681329
-    default fn spec_next(&mut self) -> Option<A> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            let n =
-                Step::forward_checked(self.start.clone(), 1).expect("`Step` invariants not upheld");
-            mem::replace(&mut self.start, n)
-        } else {
-            self.exhausted = true;
-            self.start.clone()
-        })
-    }
-
-    #[inline]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1514,44 +1477,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
     }
 
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    default fn spec_next_back(&mut self) -> Option<A> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            let n =
-                Step::backward_checked(self.end.clone(), 1).expect("`Step` invariants not upheld");
-            mem::replace(&mut self.end, n)
-        } else {
-            self.exhausted = true;
-            self.end.clone()
-        })
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-||||||| 14cae681329
-    default fn spec_next_back(&mut self) -> Option<A> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            let n =
-                Step::backward_checked(self.end.clone(), 1).expect("`Step` invariants not upheld");
-            mem::replace(&mut self.end, n)
-        } else {
-            self.exhausted = true;
-            self.end.clone()
-        })
-    }
-
-    #[inline]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     default fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1583,44 +1509,7 @@ impl<A: Step> RangeInclusiveIteratorImpl for ops::RangeInclusive<A> {
 
 impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn spec_next(&mut self) -> Option<T> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            // SAFETY: just checked precondition
-            let n = unsafe { Step::forward_unchecked(self.start, 1) };
-            mem::replace(&mut self.start, n)
-        } else {
-            self.exhausted = true;
-            self.start
-        })
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-||||||| 14cae681329
-    fn spec_next(&mut self) -> Option<T> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            // SAFETY: just checked precondition
-            let n = unsafe { Step::forward_unchecked(self.start, 1) };
-            mem::replace(&mut self.start, n)
-        } else {
-            self.exhausted = true;
-            self.start
-        })
-    }
-
-    #[inline]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -1650,44 +1539,7 @@ impl<T: TrustedStep> RangeInclusiveIteratorImpl for ops::RangeInclusive<T> {
     }
 
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn spec_next_back(&mut self) -> Option<T> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            // SAFETY: just checked precondition
-            let n = unsafe { Step::backward_unchecked(self.end, 1) };
-            mem::replace(&mut self.end, n)
-        } else {
-            self.exhausted = true;
-            self.end
-        })
-    }
-
-    #[inline]
-    #[ferrocene::prevalidated]
-||||||| 14cae681329
-    fn spec_next_back(&mut self) -> Option<T> {
-        if self.is_empty() {
-            return None;
-        }
-        let is_iterating = self.start < self.end;
-        Some(if is_iterating {
-            // SAFETY: just checked precondition
-            let n = unsafe { Step::backward_unchecked(self.end, 1) };
-            mem::replace(&mut self.end, n)
-        } else {
-            self.exhausted = true;
-            self.end
-        })
-    }
-
-    #[inline]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn spec_try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,

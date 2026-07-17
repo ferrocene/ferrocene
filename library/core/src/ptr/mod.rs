@@ -2144,19 +2144,13 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
+#[ferrocene::prevalidated]
 #[inline]
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_volatile", issue = "159094")]
 #[track_caller]
 #[rustc_diagnostic_item = "ptr_read_volatile"]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-pub unsafe fn read_volatile<T>(src: *const T) -> T {
-||||||| 14cae681329
-pub unsafe fn read_volatile<T>(src: *const T) -> T {
-=======
 pub const unsafe fn read_volatile<T>(src: *const T) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `volatile_load`.
     unsafe {
         ub_checks::assert_unsafe_precondition!(
@@ -2257,19 +2251,13 @@ pub const unsafe fn read_volatile<T>(src: *const T) -> T {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
+#[ferrocene::prevalidated]
 #[inline]
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_volatile", issue = "159094")]
 #[rustc_diagnostic_item = "ptr_write_volatile"]
 #[track_caller]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
-||||||| 14cae681329
-pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {
-=======
 pub const unsafe fn write_volatile<T>(dst: *mut T, src: T) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `volatile_store`.
     unsafe {
         ub_checks::assert_unsafe_precondition!(

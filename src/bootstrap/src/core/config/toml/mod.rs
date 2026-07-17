@@ -51,12 +51,8 @@ pub(crate) struct TomlConfig {
     pub(super) rust: Option<Rust>,
     pub(super) target: Option<HashMap<String, TomlTarget>>,
     pub(super) dist: Option<Dist>,
-<<<<<<< ferrocene/main
     pub(super) ferrocene: Option<Ferrocene>,
-||||||| 14cae681329
-=======
     pub(super) pgo: Option<Pgo>,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub(super) profile: Option<String>,
     pub(super) include: Option<Vec<PathBuf>>,
 }
@@ -66,23 +62,6 @@ impl Merge for TomlConfig {
         &mut self,
         parent_config_path: Option<PathBuf>,
         included_extensions: &mut HashSet<PathBuf>,
-<<<<<<< ferrocene/main
-        TomlConfig {
-            build,
-            install,
-            llvm,
-            gcc,
-            rust,
-            dist,
-            target,
-            profile,
-            change_id,
-            include,
-            ferrocene,
-        }: Self,
-||||||| 14cae681329
-        TomlConfig { build, install, llvm, gcc, rust, dist, target, profile, change_id, include }: Self,
-=======
         TomlConfig {
             build,
             install,
@@ -95,8 +74,8 @@ impl Merge for TomlConfig {
             profile,
             change_id,
             include,
+            ferrocene,
         }: Self,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {
@@ -118,12 +97,8 @@ impl Merge for TomlConfig {
         do_merge(&mut self.gcc, gcc, replace);
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
-<<<<<<< ferrocene/main
         do_merge(&mut self.ferrocene, ferrocene, replace);
-||||||| 14cae681329
-=======
         do_merge(&mut self.pgo, pgo, replace);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
         match (self.target.as_mut(), target) {
             (_, None) => {}

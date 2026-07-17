@@ -13,19 +13,9 @@
 //@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""
 //@ normalize-stderr: ".*--> .*/splat-fn-ptr-tuple.rs:\d{1,}:\d{1,}.*\n" -> ""
 
-<<<<<<< ferrocene/main
 // Ferrocene addition
 //@ normalize-stderr: "appreciate a bug report: .*" -> "appreciate a bug report"
 
-//! Test using `#[splat]` on tuple arguments of simple functions.
-//! Currently ICEs, but if we fix it, we'll want to know and update this test to pass.
-
-||||||| 14cae681329
-//! Test using `#[splat]` on tuple arguments of simple functions.
-//! Currently ICEs, but if we fix it, we'll want to know and update this test to pass.
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![allow(incomplete_features)]
 #![feature(splat)]
 

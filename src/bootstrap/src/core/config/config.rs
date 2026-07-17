@@ -601,14 +601,8 @@ impl Config {
             ccache: build_ccache,
             exclude: build_exclude,
             compiletest_allow_stage0: build_compiletest_allow_stage0,
-<<<<<<< ferrocene/main
             uv,
-        } = toml.build.unwrap_or_default();
-||||||| 14cae681329
-        } = toml.build.unwrap_or_default();
-=======
         } = toml_build.unwrap_or_default();
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
         let Install {
             prefix: install_prefix,

@@ -296,7 +296,7 @@ impl Step for Std {
                 eprintln!(
                     "error: cannot explicitly build profiler_builtins when collecting coverage for core"
                 );
-                build_helper::exit!(1);
+                crate::exit!(1);
             }
 
             // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when

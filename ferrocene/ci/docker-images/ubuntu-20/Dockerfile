@@ -120,6 +120,8 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
+        unzip \
+        xz-utils \
         sudo \
         gcc-10 \
         g++-10 \

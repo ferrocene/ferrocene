@@ -25,6 +25,14 @@ fn step_default_forward_and_backward() {
         fn backward_checked(start: Self, count: usize) -> Option<Self> {
             usize::backward_checked(start.0, count).map(Self)
         }
+
+        fn forward_overflowing(_: Self, _: usize) -> (Self, bool) {
+            unimplemented!()
+        }
+
+        fn backward_overflowing(_: Self, _: usize) -> (Self, bool) {
+            unimplemented!()
+        }
     }
 
     assert_eq!(unsafe { Step::forward_unchecked(Wrapper(0), 10) }, Wrapper(10));
@@ -457,6 +465,14 @@ impl core::iter::Step for Steppable {
             },
         }
     }
+
+    fn forward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
+    }
+
+    fn backward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
+    }
 }
 
 // Used to test Range bits.
@@ -516,6 +532,14 @@ impl core::iter::Step for SteppableBrokenStepsBetween {
                 _ => None,
             },
         }
+    }
+
+    fn forward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
+    }
+
+    fn backward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
     }
 }
 
@@ -784,6 +808,16 @@ impl core::iter::Step for StepWrapper {
     fn backward_checked(start: Self, count: usize) -> Option<Self> {
         u16::backward_checked(start.0, count).map(Self)
     }
+
+    fn forward_overflowing(start: Self, count: usize) -> (Self, bool) {
+        let (s, overflowing) = u16::forward_overflowing(start.0, count);
+        (Self(s), overflowing)
+    }
+
+    fn backward_overflowing(start: Self, count: usize) -> (Self, bool) {
+        let (s, overflowing) = u16::backward_overflowing(start.0, count);
+        (Self(s), overflowing)
+    }
 }
 
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
@@ -837,6 +871,16 @@ impl core::iter::Step for DoubleStepWrapper {
 
     fn backward_checked(start: Self, count: usize) -> Option<Self> {
         u16::backward_checked(start.0, 2 * count).map(Self)
+    }
+
+    fn forward_overflowing(start: Self, count: usize) -> (Self, bool) {
+        let (s, overflowing) = u16::forward_overflowing(start.0, 2 * count);
+        (Self(s), overflowing)
+    }
+
+    fn backward_overflowing(start: Self, count: usize) -> (Self, bool) {
+        let (s, overflowing) = u16::backward_overflowing(start.0, 2 * count);
+        (Self(s), overflowing)
     }
 }
 
@@ -915,6 +959,14 @@ impl core::iter::Step for TrustedDoubleStepWrapper {
 
     fn backward_checked(start: Self, count: usize) -> Option<Self> {
         u16::backward_checked(start.0, 2 * count).map(Self)
+    }
+
+    fn forward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
+    }
+
+    fn backward_overflowing(_: Self, _: usize) -> (Self, bool) {
+        unimplemented!()
     }
 }
 

@@ -69,7 +69,7 @@ cmd_prepare() {
     echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
     # for the rationale of using a custom TMPDIR, see the sibling x86_64-qnx8 script
     echo 'mkdir -p /data/tmp' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    echo 'TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

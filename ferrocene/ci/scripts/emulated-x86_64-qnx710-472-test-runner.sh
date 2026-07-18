@@ -77,7 +77,7 @@ lib/libpci.so.2.3|' "${ifsbuild}"
     local startup=output/build/startup.sh
     # UI tests and libstd tests will try to resolve 'localhost'
     echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    echo 'remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

@@ -975,6 +975,7 @@ impl<T> [T] {
     ///
     /// [`swap`]: slice::swap
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    #[ferrocene::prevalidated]
     #[unstable(feature = "slice_swap_unchecked", issue = "88539")]
     #[track_caller]
     pub const unsafe fn swap_unchecked(&mut self, a: usize, b: usize) {

@@ -8325,6 +8325,7 @@ core::slice::<impl [T]>::split_last
 core::slice::<impl [T]>::split_last_mut
 core::slice::<impl [T]>::starts_with
 core::slice::<impl [T]>::swap
+core::slice::<impl [T]>::swap_unchecked
 core::slice::<impl [T]>::swap_unchecked::precondition_check
 core::slice::<impl [T]>::windows
 core::slice::<impl core::default::Default for &mut [T]>::default

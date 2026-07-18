@@ -155,6 +155,7 @@ fn test_range_into_bounds() {
     assert_eq!((..).into_bounds(), (Bound::<i32>::Unbounded, Bound::<i32>::Unbounded));
 
     let mut range = 0..=0;
+    assert_eq!(range.clone().into_bounds(), (Bound::Included(0), Bound::Included(0)));
     range.next().unwrap();
     assert_eq!(range.into_bounds(), (Bound::Included(1), Bound::Included(0)));
 

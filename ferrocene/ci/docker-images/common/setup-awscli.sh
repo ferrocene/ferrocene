@@ -62,15 +62,7 @@ curl -Lo awscliv2.sig "${PACKAGE_URL}.sig"
 curl -Lo "awscliv2.zip" $PACKAGE_URL
 gpg --verify awscliv2.sig awscliv2.zip
 
-SHA=$(sha256sum awscliv2.zip | cut -f 1 -d " ")
-
 unzip -q -d /tmp/awscli awscliv2.zip
 # we want to update any install previously found
 /tmp/awscli/aws/install --update
 rm -rf /tmp/awscli awscliv2.zip awscliv2.sig
-
-# some of our environments record all downloaded packages here
-if [ test -x "/ferrocene/packages" ]; then
-    echo "Recording package download with sha $SHA"
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-fi

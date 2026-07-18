@@ -23,8 +23,7 @@ ARG BUILDPLATFORM
 
 RUN <<-EOF
     set -xe
-    mkdir -p /ferrocene/packages
-    touch /ferrocene/packages/downloads
+
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
     alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 
@@ -96,8 +95,6 @@ FROM --platform=$TARGETPLATFORM ubuntu:20.04
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-
-COPY --from=builder /ferrocene/packages/downloads /ferrocene/packages/downloads
 
 RUN <<-EOF
     set -xe

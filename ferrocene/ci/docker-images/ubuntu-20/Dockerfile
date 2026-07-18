@@ -15,7 +15,6 @@
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-
 FROM --platform=$TARGETPLATFORM ubuntu:20.04 AS builder
 
 ARG TARGETPLATFORM
@@ -89,6 +88,9 @@ COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-a
 COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 FROM --platform=$TARGETPLATFORM ubuntu:20.04
 
@@ -170,64 +172,11 @@ RUN <<-EOF
     rm -rf /var/lib/apt/lists/*
 EOF
 
-# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
-# are too old to be useful (they don't know about the `z` ISA flag).
-#
-# We get x86_64 Linux binaries from https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux
-#
-# These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
-# image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
-RUN <<-EOF
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        mkdir /opt/riscv-toolchain
-        PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
-        SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
-        curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
-        echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
-        tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
-        rm /tmp/riscv-toolchain.tar.gz
-        /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+# The runner will mount the toolchain image at the expected location
+ENV PATH "/opt/riscv-toolchain/ubuntu2004-20240407/bin:$PATH"
 
-        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-EOF
-ENV PATH "/opt/riscv-toolchain/bin:$PATH"
-
-# Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
-# old to run the rustdoc-js test suite. Note that we cannot install the most
-# recent NodeJS LTS release, as it's built with a more recent glibc version
-# than the one shipped with Ubuntu 20.04.
-#
-# If you are reading this comment because you need to upgrade past NodeJS 16,
-# you will unfortunately need to change this to build NodeJS from source.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x64"
-        SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="arm64"
-        SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    mkdir /opt/nodejs
-    PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
-    curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
-    echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
-    tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
-    rm /tmp/nodejs.tar.xz
-    /opt/nodejs/bin/node --version
-
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-EOF
-ENV PATH "/opt/nodejs/bin:$PATH"
+# The runner will mount the nodejs image at the expected location
+ENV PATH "/opt/nodejs/16.20.2/bin:$PATH"
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.

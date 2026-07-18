@@ -38,7 +38,9 @@ RUN <<-EOF
         ca-certificates \
         gpg \
         gpg-agent \
-        unzip
+        zstd \
+        unzip \
+        xz-utils
 
     # # Needed to install git during the build:
     # apt-install \
@@ -48,6 +50,35 @@ RUN <<-EOF
     #     gettext \
     #     libz-dev \
     #     libssl-dev
+EOF
+
+# Install pre-built packages for Ubuntu 20.
+# See ferrocene/ci/mirrors/README.md.
+# The result of unpacking these tarballs need to be copied over to the final image later
+COPY ferrocene/ci/mirrors/ ./mirrors/
+RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+RUN <<-EOF
+    set -eu
+
+    mkdir -p /mirrors/unpacked
+
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        host_platform=x86_64
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        host_platform=aarch64
+    fi
+    for tarball in \
+        musl-cross-make-${host_platform}-to-aarch64 \
+        musl-cross-make-${host_platform}-to-x86_64 \
+        cmake-3.21.1-${host_platform} \
+        python-3.12.3-${host_platform} \
+        gdb-12.1-${host_platform}
+    do
+        filename=mirrors/${tarball}.tar.xz
+        echo "extracting $tarball"
+        tar -C /mirrors/unpacked -xf "$filename"
+        rm "$filename"
+    done
 EOF
 
 # Install AWS CLI from the published binaries, as no source tarball is provided
@@ -67,8 +98,6 @@ ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
 COPY --from=builder /ferrocene/packages/downloads /ferrocene/packages/downloads
-
-COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 
 RUN <<-EOF
     set -xe
@@ -142,6 +171,10 @@ RUN <<-EOF
     rm -rf /var/lib/apt/lists/*
 EOF
 
+
+COPY --from=builder /mirrors/unpacked/. /usr/local/
+COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
+
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
 # are too old to be useful (they don't know about the `z` ISA flag).
 #
@@ -200,33 +233,6 @@ RUN <<-EOF
     echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 EOF
 ENV PATH "/opt/nodejs/bin:$PATH"
-
-
-# Install pre-built packages for Ubuntu 20.
-# See ferrocene/ci/mirrors/README.md.
-COPY ferrocene/ci/mirrors/ ./mirrors/
-RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
-RUN <<-EOF
-    set -eu
-
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        host_platform=x86_64
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        host_platform=aarch64
-    fi
-    for tarball in \
-        musl-cross-make-${host_platform}-to-aarch64 \
-        musl-cross-make-${host_platform}-to-x86_64 \
-        cmake-3.21.1-${host_platform} \
-        python-3.12.3-${host_platform} \
-        gdb-12.1-${host_platform}
-    do
-        filename=mirrors/${tarball}.tar.xz
-        echo "extracting $tarball"
-        tar -C /usr/local -xf "$filename"
-        rm "$filename"
-    done
-EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.

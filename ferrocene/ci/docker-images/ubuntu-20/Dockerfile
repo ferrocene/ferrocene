@@ -24,6 +24,7 @@ ARG BUILDPLATFORM
 RUN <<-EOF
     set -xe
     mkdir -p /ferrocene/packages
+    touch /ferrocene/packages/downloads
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
     alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 

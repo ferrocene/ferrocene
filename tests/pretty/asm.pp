@@ -1,8 +1,7 @@
 #![feature(prelude_import)]
-#![no_std]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 //@ pretty-mode:expanded
 //@ pp-exact:asm.pp
 //@ only-x86_64

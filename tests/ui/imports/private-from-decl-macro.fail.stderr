@@ -26,7 +26,7 @@ LL |     pub struct S {}
 LL |         let s = S;
    |                 ^
    |
-note: constant `m::S` exists but is inaccessible
+note: constant `crate::m::S` exists but is inaccessible
   --> $DIR/private-from-decl-macro.rs:10:5
    |
 LL |     const S: u8 = 0;

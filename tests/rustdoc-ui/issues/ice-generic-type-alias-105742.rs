@@ -26,7 +26,7 @@ pub trait SVec: Index<
     //~| ERROR missing generics for associated type `SVec::Item`
     //~| ERROR missing generics for associated type `SVec::Item`
     //~| ERROR missing generics for associated type `SVec::Item`
-    Output = <Index<<Self as SVec>::Item,
+    Output = <dyn Index<<Self as SVec>::Item,
     //~^ NOTE expected 1 lifetime argument
     //~| NOTE expected 1 generic argument
     //~| ERROR missing generics for associated type `SVec::Item`

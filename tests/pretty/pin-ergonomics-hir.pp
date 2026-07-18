@@ -6,7 +6,7 @@
 #![attr = Feature([pin_ergonomics#0])]
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 use std::pin::Pin;
 

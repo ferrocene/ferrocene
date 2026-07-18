@@ -1,3 +1,4 @@
+//@ edition: 2015
 // This is a regression test for <https://github.com/rust-lang/rust/issues/46506>.
 // This test ensures that if public re-exported is re-exported, it won't be inlined.
 

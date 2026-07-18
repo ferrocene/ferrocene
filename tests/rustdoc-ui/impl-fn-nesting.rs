@@ -17,7 +17,7 @@ pub fn f<B: UnknownBound>(a: UnknownType, b: B) {
     //~| ERROR cannot find trait `UnknownTrait` in this scope
     impl ValidTrait for UnknownType {}
     //~^ ERROR cannot find type `UnknownType` in this scope
-    impl ValidTrait for ValidType where ValidTrait: UnknownBound {}
+    impl ValidTrait for ValidType where dyn ValidTrait: UnknownBound {}
     //~^ ERROR cannot find trait `UnknownBound` in this scope
 
     /// This impl has documentation

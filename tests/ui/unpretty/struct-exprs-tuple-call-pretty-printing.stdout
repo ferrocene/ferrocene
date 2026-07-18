@@ -6,7 +6,7 @@
 #![attr = Feature([min_generic_const_args#0, adt_const_params#0])]
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 use std::marker::ConstParamTy;
 

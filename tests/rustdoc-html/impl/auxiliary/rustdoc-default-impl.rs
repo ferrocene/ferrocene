@@ -9,7 +9,7 @@ pub mod bar {
         fn foo(&self) {}
     }
 
-    impl Foo {
+    impl dyn Foo {
         pub fn test<T: Bar>(&self) {}
     }
 

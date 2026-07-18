@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions: bpass1 bpass2 bpass3
 //@ compile-flags: -Z query-dep-graph --test
 //@ ignore-backends: gcc

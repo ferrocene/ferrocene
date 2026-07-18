@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:mod-stackoverflow.rs
 //@ ignore-cross-compile
 

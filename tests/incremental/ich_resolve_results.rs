@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Check that the hash for `mod3::bar` changes when we change the
 // `use` to something different.
 

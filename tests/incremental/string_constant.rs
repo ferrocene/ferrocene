@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions: bpass1 bpass2
 //@ compile-flags: -Z query-dep-graph -Copt-level=0
 // FIXME(#62277): could be check-pass?

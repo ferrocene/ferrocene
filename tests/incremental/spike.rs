@@ -1,3 +1,4 @@
+//@ edition: 2015
 // A first "spike" for incremental compilation: here, we change the
 // content of the `make` function, and we find that we can reuse the
 // `y` module entirely (but not the `x` module).

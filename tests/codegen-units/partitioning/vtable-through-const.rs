@@ -40,8 +40,8 @@ mod mod1 {
     }
 
     // These are referenced, so they produce mono-items (see main)
-    pub const TRAIT1_REF: &'static Trait1 = &NeedsDrop as &Trait1;
-    pub const TRAIT1_GEN_REF: &'static Trait1Gen<u8> = &NeedsDrop as &Trait1Gen<u8>;
+    pub const TRAIT1_REF: &'static dyn Trait1 = &NeedsDrop as &dyn Trait1;
+    pub const TRAIT1_GEN_REF: &'static dyn Trait1Gen<u8> = &NeedsDrop as &dyn Trait1Gen<u8>;
     pub const ID_CHAR: fn(char) -> char = id::<char>;
 
     pub trait Trait2 {
@@ -66,8 +66,8 @@ mod mod1 {
     }
 
     // These are not referenced, so they do not produce mono-items
-    pub const TRAIT2_REF: &'static Trait2 = &NeedsDrop as &Trait2;
-    pub const TRAIT2_GEN_REF: &'static Trait2Gen<u8> = &NeedsDrop as &Trait2Gen<u8>;
+    pub const TRAIT2_REF: &'static dyn Trait2 = &NeedsDrop as &dyn Trait2;
+    pub const TRAIT2_GEN_REF: &'static dyn Trait2Gen<u8> = &NeedsDrop as &dyn Trait2Gen<u8>;
     pub const ID_I64: fn(i64) -> i64 = id::<i64>;
 }
 

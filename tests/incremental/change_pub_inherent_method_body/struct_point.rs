@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test where we change the body of a public, inherent method.
 
 //@ revisions: bpass1 bpass2

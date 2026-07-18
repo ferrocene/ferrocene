@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Test where we change the body of a private method in an impl.
 // We then test what sort of functions must be rebuilt as a result.
 

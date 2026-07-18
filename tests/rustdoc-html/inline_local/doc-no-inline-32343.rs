@@ -1,3 +1,4 @@
+//@ edition: 2015
 // https://github.com/rust-lang/rust/issues/32343
 #![crate_name="foobar"]
 

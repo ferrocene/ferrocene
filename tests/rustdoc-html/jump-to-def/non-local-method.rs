@@ -24,7 +24,7 @@ pub fn bar() {
     //@ has - '//a[@href="{{channel}}/alloc/boxed/struct.Box.html"]' 'Box'
     //@ has - '//a[@href="{{channel}}/alloc/boxed/struct.Box.html#method.new"]' 'new'
     let _ = Box::new(0);
-    //@ has - '//a[@href="#49"]' 'local_private'
+    //@ has - '//a[@href="#48"]' 'local_private'
     local_private();
 }
 
@@ -33,10 +33,9 @@ pub fn extern_call() {
     exit(0);
 }
 
-pub fn macro_call() -> Result<(), ()> {
-    //@ has - '//a[@href="{{channel}}/core/macro.try.html"]' 'try!'
-    try!(Err(()));
-    Ok(())
+pub fn macro_call() {
+    //@ has - '//a[@href="{{channel}}/core/macro.todo.html"]' 'todo!'
+    todo!("anything at all");
 }
 
 pub fn variant() {

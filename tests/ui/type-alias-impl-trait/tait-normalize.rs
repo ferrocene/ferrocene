@@ -1,6 +1,10 @@
 //@ revisions: current next
 //@ [next] compile-flags: -Znext-solver
 //@ check-pass
+//@ edition: 2015..2018
+
+// this fails in edition 2021; see tests/crashes/119786-1.rs
+//@ edition: 2015..2018
 
 #![feature(type_alias_impl_trait)]
 

@@ -1,4 +1,6 @@
 //@ compile-flags: -Copt-level=3
+// FIXME(jyn514): figure out why this fails in 2021 edition
+//@ edition: 2015
 // Test that we can avoid generating an element dropping loop when `vec::IntoIter` is consumed.
 #![crate_type = "lib"]
 

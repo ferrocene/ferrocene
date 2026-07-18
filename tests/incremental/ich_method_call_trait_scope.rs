@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Check that the hash for a method call is sensitive to the traits in
 // scope.
 

@@ -1,11 +1,11 @@
 //@ compile-flags: -Cmetadata=aux
 
 pub mod tree {
-    pub use tree;
+    pub use crate::tree;
 }
 
 pub mod tree2 {
     pub mod prelude {
-        pub use tree2;
+        pub use crate::tree2;
     }
 }

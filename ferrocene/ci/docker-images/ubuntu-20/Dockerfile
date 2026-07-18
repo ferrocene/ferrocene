@@ -171,10 +171,6 @@ RUN <<-EOF
     rm -rf /var/lib/apt/lists/*
 EOF
 
-
-COPY --from=builder /mirrors/unpacked/. /usr/local/
-COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
-
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
 # are too old to be useful (they don't know about the `z` ISA flag).
 #
@@ -262,6 +258,11 @@ ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 # FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+
 ENV CFLAGS_aarch64v8r_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 ENV CFLAGS_aarch64r82_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
+
+COPY --from=builder /mirrors/unpacked/. /usr/local/
+COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
+RUN ln -s /usr/local/aws-cli/v2/current/bin/aws /usr/local/bin/aws
+RUN ln -s /usr/local/aws-cli/v2/current/bin/aws_completer /usr/local/bin/aws_completer
 
 RUN <<-EOF
     set -xe

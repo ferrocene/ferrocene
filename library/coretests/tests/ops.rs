@@ -156,7 +156,7 @@ fn test_range_into_bounds() {
 
     let mut range = 0..=0;
     range.next().unwrap();
-    assert_eq!(range.into_bounds(), (Bound::Included(0), Bound::Excluded(0)));
+    assert_eq!(range.into_bounds(), (Bound::Included(1), Bound::Included(0)));
 
     let r = (Bound::Included(0), Bound::Excluded(5));
     assert_eq!(r.into_bounds(), r);

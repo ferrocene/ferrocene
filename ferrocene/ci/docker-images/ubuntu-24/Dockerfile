@@ -55,8 +55,6 @@ RUN <<-EOF
 
     # Needed to run QNX VMs
     apt-install \
-        qemu-system-arm \
-        qemu-system-x86 \
         qemu-kvm \
         bridge-utils \
         dnsmasq \

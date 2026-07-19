@@ -748,20 +748,17 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << parameters.targets >>
       SCRIPT: |
-        set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source /opt/qnx/<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=4 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - ferrocene/checkout
       - ferrocene/aws_oidc_auth
       - ferrocene/setup_uv
-      - setup-qnx-toolchain:
-          source-env-script: false
-          qnx_version: << parameters.qnx_version >>
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-<< parameters.target_arch >>-<< parameters.qnx_version >>-test-runner.sh"
+          emulator-script: "set +u; source /opt/qnx/<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-<< parameters.target_arch >>-<< parameters.qnx_version >>-test-runner.sh"
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -1489,6 +1486,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --volume /opt:/opt \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user "$(id -u):$(id -g)" \
                     --group-add "$(getent group kvm | cut -d: -f3)" \
@@ -1512,6 +1510,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --volume /opt:/opt \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user "$(id -u):$(id -g)" \
                     --group-add "$(getent group kvm | cut -d: -f3)" \
@@ -1531,6 +1530,7 @@ commands:
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \
+              --volume /opt:/opt \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user "$(id -u):$(id -g)" \
               --group-add "$(getent group kvm | cut -d: -f3)" \

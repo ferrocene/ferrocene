@@ -5,12 +5,12 @@
 ## of the desired qnx toolchain at the root.
 
 ## You need to download and place the qnx toolchain package
-# in  before building
+# in the current folder before building.
 
 ## QNX_VERSION=qnx710-472
 ## aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/${QNX_VERSION}-deployment.tar.zst ${QNX_VERSION}-deployment.tar.zst
-## docker build --tag harbor.infra.ferrous-systems.net/ferrocene-images/qnx:${QNX_VERSION} --file qnx.dockerfile --build-arg QNX_VERSION=${QNX_VERSION} .
-## docker push harbor.infra.ferrous-systems.net/ferrocene-images/qnx:${QNX_VERSION}
+## docker build --tag harbor.infra.ferrous-systems.net/ferrocene-images/qnx:${QNX_VERSION}-linux --file qnx.dockerfile --build-arg QNX_VERSION=${QNX_VERSION} .
+## docker push harbor.infra.ferrous-systems.net/ferrocene-images/qnx:${QNX_VERSION}-linux
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -35,8 +35,7 @@ EOF
 
 RUN mkdir -p /tmp/qnx
 COPY $QNX_VERSION-deployment.tar.zst /tmp/qnx-deployment.tar.zst
-WORKDIR /tmp/qnx
-RUN tar xf /tmp/qnx-deployment.tar.zst --strip=1
+RUN tar -C /tmp/qnx/ --strip=1 --exclude "*host/win64*" --exclude "*bat"  -xf /tmp/qnx-deployment.tar.zst
 
 FROM scratch
 

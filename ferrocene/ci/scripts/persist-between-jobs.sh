@@ -56,7 +56,7 @@ case "$1" in
         # progressing. It shouldn't slow us down much here since we're largely dominated
         # by the effort of packing.
         echo "Creating tar archive"
-        tar c --verbose --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
+        tar c --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Uploading tar archive"
         # if you intend to add retries here, configure them in the AWS cli settings
         # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html

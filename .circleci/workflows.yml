@@ -353,6 +353,7 @@ jobs:
       - ferrocene/aws_oidc_auth
       - setup-qnx-toolchain:
           qnx_version: qnx710-472
+          os: linux
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -369,6 +370,7 @@ jobs:
       - ferrocene/aws_oidc_auth
       - setup-qnx-toolchain:
           qnx_version: qnx800-141
+          os: linux
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -714,6 +716,7 @@ jobs:
                 os: windows
             - setup-qnx-toolchain:
                 qnx_version: << parameters.qnx_version >>
+                os: windows
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -1406,6 +1409,7 @@ commands:
                 from_job: << parameters.restore-from-job>>
       - setup-qnx-toolchain:
           qnx_version: << parameters.qnx_version >>
+          os: << parameters.os >>
       - ferrocene/ci
 
   ferrocene-job-test-container:
@@ -1542,6 +1546,9 @@ commands:
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
     parameters:
+      os:
+        type: enum
+        enum: ["linux", "windows", "darwin"]
       source-env-script:
         type: boolean
         default: true
@@ -1556,17 +1563,37 @@ commands:
             not:
               equal: ["", << parameters.qnx_version >>]
           steps:
-            - run:
-                name: Fetch << parameters.qnx_version >> toolchain
-                # On Windows, the virtualenv detection seems to struggle at times.
-                command: |
-                  ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
             - when:
-                condition: << parameters.source-env-script >>
+                # linux based runners have access to the qnx toolchain at /opt/qnx/<< parameters.qnx_version >>
+                condition:
+                  or:
+                    - equal: [<<parameters.os>>, "darwin"]
+                    - equal: [<<parameters.os>>, "windows"]
                 steps:
                   - run:
-                      name: Set PATH to include << parameters.qnx_version >> tools
-                      command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
+                      name: Fetch << parameters.qnx_version >> toolchain
+                      # On Windows, the virtualenv detection seems to struggle at times.
+                      command: |
+                        ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
+                  - when:
+                      condition: << parameters.source-env-script >>
+                      steps:
+                        - run:
+                            name: Set PATH to include << parameters.qnx_version >> tools
+                            command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
+            - unless:
+                # linux based runners have access to the qnx toolchain at /opt/qnx/<< parameters.qnx_version >>
+                condition:
+                  or:
+                    - equal: [<<parameters.os>>, "darwin"]
+                    - equal: [<<parameters.os>>, "windows"]
+                steps:
+                  - when:
+                      condition: << parameters.source-env-script >>
+                      steps:
+                        - run:
+                            name: Set PATH to include << parameters.qnx_version >> tools
+                            command: echo 'source /opt/qnx/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
 
 executors:
   linux-vm:

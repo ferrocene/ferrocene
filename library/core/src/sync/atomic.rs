@@ -616,7 +616,6 @@ impl AtomicBool {
     /// # Examples
     ///
     /// ```
-    /// #![feature(atomic_from_mut)]
     /// use std::sync::atomic::{AtomicBool, Ordering};
     ///
     /// let mut some_bool = true;
@@ -626,7 +625,7 @@ impl AtomicBool {
     /// ```
     #[inline]
     #[cfg(target_has_atomic_primitive_alignment = "8")]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn from_mut(v: &mut bool) -> &mut Self {
         // SAFETY: the mutable reference guarantees unique ownership, and
         // alignment of both `bool` and `Self` is 1.
@@ -641,7 +640,6 @@ impl AtomicBool {
     /// # Examples
     ///
     /// ```ignore-wasm
-    /// #![feature(atomic_from_mut)]
     /// use std::sync::atomic::{AtomicBool, Ordering};
     ///
     /// let mut some_bools = [const { AtomicBool::new(false) }; 10];
@@ -661,7 +659,7 @@ impl AtomicBool {
     /// });
     /// ```
     #[inline]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn get_mut_slice(this: &mut [Self]) -> &mut [bool] {
         // SAFETY: the mutable reference guarantees unique ownership.
         unsafe { &mut *(this as *mut [Self] as *mut [bool]) }
@@ -672,7 +670,6 @@ impl AtomicBool {
     /// # Examples
     ///
     /// ```rust,ignore-wasm
-    /// #![feature(atomic_from_mut)]
     /// use std::sync::atomic::{AtomicBool, Ordering};
     ///
     /// let mut some_bools = [false; 10];
@@ -686,7 +683,7 @@ impl AtomicBool {
     /// ```
     #[inline]
     #[cfg(target_has_atomic_primitive_alignment = "8")]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn from_mut_slice(v: &mut [bool]) -> &mut [Self] {
         // SAFETY: the mutable reference guarantees unique ownership, and
         // alignment of both `bool` and `Self` is 1.
@@ -1599,7 +1596,6 @@ impl<T> AtomicPtr<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(atomic_from_mut)]
     /// use std::sync::atomic::{AtomicPtr, Ordering};
     ///
     /// let mut data = 123;
@@ -1611,7 +1607,7 @@ impl<T> AtomicPtr<T> {
     /// ```
     #[inline]
     #[cfg(target_has_atomic_primitive_alignment = "ptr")]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn from_mut(v: &mut *mut T) -> &mut Self {
         let [] = [(); align_of::<AtomicPtr<()>>() - align_of::<*mut ()>()];
         // SAFETY:
@@ -1629,7 +1625,6 @@ impl<T> AtomicPtr<T> {
     /// # Examples
     ///
     /// ```ignore-wasm
-    /// #![feature(atomic_from_mut)]
     /// use std::ptr::null_mut;
     /// use std::sync::atomic::{AtomicPtr, Ordering};
     ///
@@ -1655,7 +1650,7 @@ impl<T> AtomicPtr<T> {
     /// });
     /// ```
     #[inline]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn get_mut_slice(this: &mut [Self]) -> &mut [*mut T] {
         // SAFETY: the mutable reference guarantees unique ownership.
         unsafe { &mut *(this as *mut [Self] as *mut [*mut T]) }
@@ -1668,7 +1663,6 @@ impl<T> AtomicPtr<T> {
     /// # Examples
     ///
     /// ```ignore-wasm
-    /// #![feature(atomic_from_mut)]
     /// use std::ptr::null_mut;
     /// use std::sync::atomic::{AtomicPtr, Ordering};
     ///
@@ -1690,7 +1684,7 @@ impl<T> AtomicPtr<T> {
     /// ```
     #[inline]
     #[cfg(target_has_atomic_primitive_alignment = "ptr")]
-    #[unstable(feature = "atomic_from_mut", issue = "76314")]
+    #[stable(feature = "atomic_from_mut", since = "1.98.0")]
     pub fn from_mut_slice(v: &mut [*mut T]) -> &mut [Self] {
         // SAFETY:
         //  - the mutable reference guarantees unique ownership.
@@ -2749,7 +2743,6 @@ macro_rules! atomic_int {
             /// # Examples
             ///
             /// ```
-            /// #![feature(atomic_from_mut)]
             #[doc = concat!($extra_feature, "use std::sync::atomic::{", stringify!($atomic_type), ", Ordering};")]
             ///
             /// let mut some_int = 123;
@@ -2760,8 +2753,8 @@ macro_rules! atomic_int {
             ///
             #[inline]
             #[$cfg_align]
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
             #[ferrocene::prevalidated]
+            #[stable(feature = "atomic_from_mut", since = "1.98.0")]
             pub fn from_mut(v: &mut $int_type) -> &mut Self {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:
@@ -2779,7 +2772,6 @@ macro_rules! atomic_int {
             /// # Examples
             ///
             /// ```ignore-wasm
-            /// #![feature(atomic_from_mut)]
             #[doc = concat!($extra_feature, "use std::sync::atomic::{", stringify!($atomic_type), ", Ordering};")]
             ///
             #[doc = concat!("let mut some_ints = [const { ", stringify!($atomic_type), "::new(0) }; 10];")]
@@ -2800,9 +2792,9 @@ macro_rules! atomic_int {
             ///         })
             /// });
             /// ```
-            #[inline]
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
             #[ferrocene::prevalidated]
+            #[inline]
+            #[stable(feature = "atomic_from_mut", since = "1.98.0")]
             pub fn get_mut_slice(this: &mut [Self]) -> &mut [$int_type] {
                 // SAFETY: the mutable reference guarantees unique ownership.
                 unsafe { &mut *(this as *mut [Self] as *mut [$int_type]) }
@@ -2821,7 +2813,6 @@ macro_rules! atomic_int {
             /// # Examples
             ///
             /// ```ignore-wasm
-            /// #![feature(atomic_from_mut)]
             #[doc = concat!($extra_feature, "use std::sync::atomic::{", stringify!($atomic_type), ", Ordering};")]
             ///
             /// let mut some_ints = [0; 10];
@@ -2835,10 +2826,10 @@ macro_rules! atomic_int {
             ///     assert_eq!(i, n as usize);
             /// }
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$cfg_align]
-            #[unstable(feature = "atomic_from_mut", issue = "76314")]
-            #[ferrocene::prevalidated]
+            #[stable(feature = "atomic_from_mut", since = "1.98.0")]
             pub fn from_mut_slice(v: &mut [$int_type]) -> &mut [Self] {
                 let [] = [(); align_of::<Self>() - align_of::<$int_type>()];
                 // SAFETY:

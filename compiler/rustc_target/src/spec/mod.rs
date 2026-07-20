@@ -1,3 +1,5 @@
+// ignore-tidy-filelength
+
 //! [Flexible target specification.](https://github.com/rust-lang/rfcs/pull/131)
 //!
 //! Rust targets a wide variety of usecases, and in the interest of flexibility,
@@ -1488,6 +1490,7 @@ supported_targets! {
     ("armv7-unknown-linux-musleabihf", armv7_unknown_linux_musleabihf),
     ("aarch64-unknown-linux-gnu", aarch64_unknown_linux_gnu),
     ("aarch64-unknown-linux-musl", aarch64_unknown_linux_musl),
+    ("aarch64-unknown-linux-pauthtest", aarch64_unknown_linux_pauthtest),
     ("aarch64_be-unknown-linux-musl", aarch64_be_unknown_linux_musl),
     ("x86_64-unknown-linux-musl", x86_64_unknown_linux_musl),
     ("i686-unknown-linux-musl", i686_unknown_linux_musl),
@@ -1686,6 +1689,7 @@ supported_targets! {
     ("riscv32im-unknown-none-elf", riscv32im_unknown_none_elf),
     ("riscv32ima-unknown-none-elf", riscv32ima_unknown_none_elf),
     ("riscv32imc-unknown-none-elf", riscv32imc_unknown_none_elf),
+    ("riscv32imfc-unknown-none-elf", riscv32imfc_unknown_none_elf),
     ("riscv32imc-esp-espidf", riscv32imc_esp_espidf),
     ("riscv32imac-esp-espidf", riscv32imac_esp_espidf),
     ("riscv32imafc-esp-espidf", riscv32imafc_esp_espidf),
@@ -1835,6 +1839,12 @@ supported_targets! {
     ("x86_64-unknown-linux-gnuasan", x86_64_unknown_linux_gnuasan),
     ("x86_64-unknown-linux-gnumsan", x86_64_unknown_linux_gnumsan),
     ("x86_64-unknown-linux-gnutsan", x86_64_unknown_linux_gnutsan),
+
+    ("aarch64-oe-linux-gnu", aarch64_oe_linux_gnu),
+    ("armv7-oe-linux-gnueabihf", armv7_oe_linux_gnueabihf),
+    ("i686-oe-linux-gnu", i686_oe_linux_gnu),
+    ("riscv64-oe-linux-gnu", riscv64_oe_linux_gnu),
+    ("x86_64-oe-linux-gnu", x86_64_oe_linux_gnu),
 }
 
 /// Cow-Vec-Str: Cow<'static, [Cow<'static, str>]>
@@ -2083,6 +2093,7 @@ crate::target_spec_enum! {
         Ilp32e = "ilp32e",
         Llvm = "llvm",
         MacAbi = "macabi",
+        Pauthtest = "pauthtest",
         Sim = "sim",
         SoftFloat = "softfloat",
         Spe = "spe",
@@ -2123,6 +2134,8 @@ crate::target_spec_enum! {
         // PowerPC
         ElfV1 = "elfv1",
         ElfV2 = "elfv2",
+        // Pointer authentication: Pauthtest
+        Pauthtest = "pauthtest",
 
         Unspecified = "",
     }
@@ -3409,9 +3422,10 @@ impl Target {
                 )
             }
             Arch::AArch64 => {
-                check!(
-                    self.llvm_abiname == LlvmAbi::Unspecified,
-                    "`llvm_abiname` is unused on aarch64"
+                check_matches!(
+                    self.llvm_abiname,
+                    LlvmAbi::Unspecified | LlvmAbi::Pauthtest,
+                    "invalid llvm ABI for aarch64"
                 );
                 check!(self.llvm_floatabi.is_none(), "`llvm_floatabi` is unused on aarch64");
                 // FIXME: Ensure that target_abi = "ilp32" correlates with actually using that ABI.
@@ -3424,6 +3438,7 @@ impl Target {
                             CfgAbi::Ilp32
                                 | CfgAbi::Llvm
                                 | CfgAbi::MacAbi
+                                | CfgAbi::Pauthtest
                                 | CfgAbi::Sim
                                 | CfgAbi::Uwp
                                 | CfgAbi::Unspecified

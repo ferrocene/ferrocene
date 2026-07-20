@@ -281,7 +281,7 @@ macro_rules! impl_Display {
             #[doc = concat!("assert_eq!(n2.format_into(&mut buf), ", stringify!($Signed::MAX), ".to_string());")]
             /// ```
             #[ferrocene::prevalidated]
-            #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
+            #[stable(feature = "int_format_into", since = "1.98.0")]
             pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
                 let mut offset;
 
@@ -326,7 +326,7 @@ macro_rules! impl_Display {
             #[doc = concat!("assert_eq!(n2.format_into(&mut buf), ", stringify!($Unsigned::MAX), ".to_string());")]
             /// ```
             #[ferrocene::prevalidated]
-            #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
+            #[stable(feature = "int_format_into", since = "1.98.0")]
             pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
                 let offset;
 
@@ -777,7 +777,7 @@ impl u128 {
     /// assert_eq!(n2.format_into(&mut buf2), u128::MAX.to_string());
     /// ```
     #[ferrocene::prevalidated]
-    #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "int_format_into", since = "1.98.0")]
     pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
         let diff = buf.buf.len() - U128_MAX_DEC_N;
         // FIXME: Once const generics are better, use `NumberBufferTrait::BUF_SIZE` as generic const
@@ -810,7 +810,7 @@ impl i128 {
     /// assert_eq!(n2.format_into(&mut buf), i128::MAX.to_string());
     /// ```
     #[ferrocene::prevalidated]
-    #[stable(feature = "int_format_into", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "int_format_into", since = "1.98.0")]
     pub fn format_into(self, buf: &mut NumBuffer<Self>) -> &str {
         let diff = buf.buf.len() - U128_MAX_DEC_N;
         // FIXME: Once const generics are better, use `NumberBufferTrait::BUF_SIZE` as generic const

@@ -163,6 +163,9 @@ fn main() {
             extra_checks,
             pos_args
         );
+
+        // Ferrocene addition
+        check!(ferrocene_test_outcomes, &root_path);
     });
 
     let failed_checks = tidy_ctx.into_failed_checks();

@@ -25,16 +25,12 @@ class RenderOutcomesTemplate(SphinxDirective):
         "host": docutils.parsers.rst.directives.unchanged_required,
         "target": docutils.parsers.rst.directives.unchanged_required,
         "upcoming": docutils.parsers.rst.directives.unchanged,
-        "bare_metal_test_target": docutils.parsers.rst.directives.unchanged,
+        "tested_target_with_std": docutils.parsers.rst.directives.unchanged,
         "remote_testing": docutils.parsers.rst.directives.flag,
     }
 
     def run(self):
-        # Grab the outcomes for the bare metal test target if specified:
-        tested_target = self.options.get(
-            "bare_metal_test_target",
-            self.options["target"],
-        )
+        tested_target = self.options["tested_target_with_std"]
 
         # Can be None if test outcomes were not injected.
         outcomes = (
@@ -68,7 +64,7 @@ class RenderOutcomesTemplate(SphinxDirective):
                 "upcoming": self.options["upcoming"]
                 if "upcoming" in self.options
                 else None,
-                "bare_metal_test_target": self.options.get("bare_metal_test_target"),
+                "tested_target_with_std": self.options["tested_target_with_std"],
                 "remote_testing": "remote_testing" in self.options,
                 "platform_outcomes": outcomes,
             },

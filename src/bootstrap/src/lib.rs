@@ -42,6 +42,10 @@ mod core;
 mod ferrocene;
 mod utils;
 
+// Ferrocene addition
+#[cfg(test)]
+mod tests;
+
 #[cfg(feature = "tracing")]
 pub use core::builder::STEP_SPAN_TARGET;
 pub use core::builder::{PathSet, StepStack};

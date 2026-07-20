@@ -5692,6 +5692,7 @@ core::array::<impl core::convert::TryFrom<&'a mut [T]> for &'a mut [T; N]>::try_
 core::array::<impl core::convert::TryFrom<&[T]> for [T; N]>::try_from
 core::array::<impl core::convert::TryFrom<&mut [T]> for [T; N]>::try_from
 core::array::<impl core::fmt::Debug for [T; N]>::fmt
+core::array::<impl core::hash::Hash for [T; N]>::hash
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a [T; N]>::into_iter
 core::array::<impl core::iter::traits::collect::IntoIterator for &'a mut [T; N]>::into_iter
 core::array::<impl core::ops::index::Index<I> for [T; N]>::index

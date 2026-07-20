@@ -357,6 +357,7 @@ impl<'a, T, const N: usize> const TryFrom<&'a mut [T]> for &'a mut [T; N] {
 /// ```
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Hash, const N: usize> Hash for [T; N] {
+    #[ferrocene::prevalidated]
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         Hash::hash(&self[..], state)
     }

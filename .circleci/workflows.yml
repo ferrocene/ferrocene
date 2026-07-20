@@ -1531,7 +1531,7 @@ commands:
           condition: <<parameters.restore-from-job>>
           steps:
             - ferrocene/restore_from_job:
-                from_job: << parameters.restore-from-job>>
+                from_job: << parameters.restore-from-job >>
       - when:
           condition:
             equal: [<<parameters.qnx7>>, true]
@@ -1559,7 +1559,7 @@ commands:
           awscli_version: << pipeline.parameters.awscli-version >>
           os: <<parameters.os>>
       - ferrocene/restore_from_job:
-          from_job: << parameters.restore-from-job>>
+          from_job: << parameters.restore-from-job >>
       - ferrocene/ci
 
   ferrocene-job-test-vm:
@@ -1590,7 +1590,7 @@ commands:
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
       - ferrocene/restore_from_job:
-          from_job: << parameters.restore-from-job>>
+          from_job: << parameters.restore-from-job >>
       - run:
           name: Enable IPv6 for Docker
           command: |

@@ -8,6 +8,17 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
+# If we have a local cache, the config directory exists and we read
+# our config from there. This nicely solves the problem of two competing
+# AWS config sets.
+if [ -d "/config/local-cache" ]; then
+  unset AWS_PROFILE
+  export AWS_ACCESS_KEY_ID=$(cat /config/local-cache/AWS_ACCESS_KEY_ID)
+  export AWS_SECRET_ACCESS_KEY=$(cat /config/local-cache/AWS_SECRET_ACCESS_KEY)
+  export AWS_ENDPOINT_URL="http://$(cat /config/local-cache/BUCKET_HOST):80"
+  export CACHE_BUCKET=$(cat /config/local-cache/BUCKET_NAME)
+fi
+
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
@@ -56,7 +67,7 @@ case "$1" in
         # progressing. It shouldn't slow us down much here since we're largely dominated
         # by the effort of packing.
         echo "Creating tar archive"
-        tar c --verbose --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
+        tar c --exclude build/metrics.json "$@" | zstd -10 -T0 -o /tmp/persist_${CIRCLE_JOB}.tar.zst
         echo "Uploading tar archive"
         # if you intend to add retries here, configure them in the AWS cli settings
         # read https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html

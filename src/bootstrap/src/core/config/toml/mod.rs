@@ -16,6 +16,7 @@ pub mod ferrocene;
 pub mod gcc;
 pub mod install;
 pub mod llvm;
+pub mod pgo;
 pub mod rust;
 pub mod target;
 
@@ -29,6 +30,7 @@ use llvm::Llvm;
 use rust::Rust;
 use target::TomlTarget;
 
+use crate::core::config::toml::pgo::Pgo;
 use crate::core::config::{Merge, ReplaceOpt};
 use crate::{Config, HashMap, HashSet, Path, PathBuf, exit, fs, t};
 
@@ -50,6 +52,7 @@ pub(crate) struct TomlConfig {
     pub(super) target: Option<HashMap<String, TomlTarget>>,
     pub(super) dist: Option<Dist>,
     pub(super) ferrocene: Option<Ferrocene>,
+    pub(super) pgo: Option<Pgo>,
     pub(super) profile: Option<String>,
     pub(super) include: Option<Vec<PathBuf>>,
 }
@@ -67,6 +70,7 @@ impl Merge for TomlConfig {
             rust,
             dist,
             target,
+            pgo,
             profile,
             change_id,
             include,
@@ -94,6 +98,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
         do_merge(&mut self.ferrocene, ferrocene, replace);
+        do_merge(&mut self.pgo, pgo, replace);
 
         match (self.target.as_mut(), target) {
             (_, None) => {}

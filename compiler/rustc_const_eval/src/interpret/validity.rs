@@ -947,7 +947,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
                 // Nothing to check.
                 interp_ok(true)
             }
-            ty::UnsafeBinder(_) => todo!("FIXME(unsafe_binder)"),
+            ty::UnsafeBinder(_) => unimplemented!("FIXME(unsafe_binder)"),
             // The above should be all the primitive types. The rest is compound, we
             // check them by visiting their fields/variants.
             ty::Adt(..)
@@ -1397,7 +1397,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValueVisitor<'tcx, M> for ValidityVisitor<'rt,
                                 self.path,
                                 Uninit { expected }
                             ),
-                        Immediate::Scalar(..) | Immediate::ScalarPair(..) =>
+                        Immediate::Scalar(..) | Immediate::ScalarPair { .. } =>
                             bug!("arrays/slices can never have Scalar/ScalarPair layout"),
                     }
                 };
@@ -1486,7 +1486,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValueVisitor<'tcx, M> for ValidityVisitor<'rt,
                             self.visit_scalar(scalar, scalar_layout)?;
                         }
                     }
-                    BackendRepr::ScalarPair(a_layout, b_layout) => {
+                    BackendRepr::ScalarPair { a: a_layout, b: b_layout, b_offset: _ } => {
                         // We can only proceed if *both* scalars need to be initialized.
                         // FIXME: find a way to also check ScalarPair when one side can be uninit but
                         // the other must be init.
@@ -1545,7 +1545,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValueVisitor<'tcx, M> for ValidityVisitor<'rt,
                             .expect("the above checks should have fully handled this situation");
                     }
                 }
-                BackendRepr::ScalarPair(a_layout, b_layout) => {
+                BackendRepr::ScalarPair { a: a_layout, b: b_layout, b_offset: _ } => {
                     // We can only proceed if *both* scalars need to be initialized.
                     // FIXME: find a way to also check ScalarPair when one side can be uninit but
                     // the other must be init.

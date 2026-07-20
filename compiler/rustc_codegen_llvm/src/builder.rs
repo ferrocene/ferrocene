@@ -793,9 +793,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                 }
             });
             OperandValue::Immediate(llval)
-        } else if let abi::BackendRepr::ScalarPair(a, b) = place.layout.backend_repr {
-            let b_offset = a.size(self).align_to(b.default_align(self).abi);
-
+        } else if let abi::BackendRepr::ScalarPair { a, b, b_offset } = place.layout.backend_repr {
             let mut load = |i, scalar: abi::Scalar, layout, align, offset| {
                 let llptr = if i == 0 {
                     place.val.llval
@@ -873,8 +871,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         unsafe {
             let store = llvm::LLVMBuildStore(self.llbuilder, val, ptr);
             let align = align.min(self.cx().tcx.sess.target.max_reliable_alignment());
-            let align =
-                if flags.contains(MemFlags::UNALIGNED) { 1 } else { align.bytes() as c_uint };
+            let align = align.bytes() as c_uint;
             llvm::LLVMSetAlignment(store, align);
             if flags.contains(MemFlags::VOLATILE) {
                 llvm::LLVMSetVolatile(store, llvm::TRUE);

@@ -155,8 +155,9 @@ fn test_range_into_bounds() {
     assert_eq!((..).into_bounds(), (Bound::<i32>::Unbounded, Bound::<i32>::Unbounded));
 
     let mut range = 0..=0;
+    assert_eq!(range.clone().into_bounds(), (Bound::Included(0), Bound::Included(0)));
     range.next().unwrap();
-    assert_eq!(range.into_bounds(), (Bound::Included(0), Bound::Excluded(0)));
+    assert_eq!(range.into_bounds(), (Bound::Included(1), Bound::Included(0)));
 
     let r = (Bound::Included(0), Bound::Excluded(5));
     assert_eq!(r.into_bounds(), r);
@@ -372,7 +373,12 @@ fn test_fmt() {
     let mut r = 1..=1;
     assert_eq!(format!("{:?}", r), "1..=1");
     r.next().unwrap();
-    assert_eq!(format!("{:?}", r), "1..=1 (exhausted)");
+    assert_eq!(format!("{:?}", r), "2..=1");
+
+    let mut r = 255_u8..=255;
+    assert_eq!(format!("{:?}", r), "255..=255");
+    r.next().unwrap();
+    assert_eq!(format!("{:?}", r), "0..=255 (exhausted)");
 
     assert_eq!(format!("{:?}", 1..1), "1..1");
     assert_eq!(format!("{:?}", 1..), "1..");

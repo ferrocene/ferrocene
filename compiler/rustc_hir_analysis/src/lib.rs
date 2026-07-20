@@ -90,7 +90,7 @@ use rustc_middle::mir::interpret::GlobalId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{Const, Ty, TyCtxt};
 use rustc_middle::{middle, ty};
-use rustc_session::errors::feature_err;
+use rustc_session::diagnostics::feature_err;
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_trait_selection::traits;
 
@@ -191,7 +191,7 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
         // `feed_anon_const_type`.
         // Also skip items for which typeck forwards to parent typeck.
         if !(def_kind == DefKind::AnonConst
-            || def_kind == DefKind::InlineConst && tcx.is_type_system_inline_const(item_def_id)
+            && tcx.anon_const_kind(item_def_id) != ty::AnonConstKind::NonTypeSystemInline
             || tcx.is_typeck_child(item_def_id.to_def_id()))
         {
             tcx.ensure_ok().typeck(item_def_id);

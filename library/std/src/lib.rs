@@ -322,6 +322,7 @@
 #![feature(borrowed_buf_init)]
 #![feature(bstr)]
 #![feature(bstr_internals)]
+#![feature(can_vector)]
 #![feature(cast_maybe_uninit)]
 #![feature(char_internals)]
 #![feature(clone_to_uninit)]
@@ -355,6 +356,7 @@
 #![feature(hint_must_use)]
 #![feature(int_from_ascii)]
 #![feature(io_error_inprogress)]
+#![feature(io_error_input_output_error)]
 #![feature(io_error_more)]
 #![feature(io_error_too_many_open_files)]
 #![feature(io_error_uncategorized)]
@@ -389,6 +391,7 @@
 #![feature(ub_checks)]
 #![feature(uint_carryless_mul)]
 #![feature(used_with_arg)]
+#![feature(write_all_vectored)]
 // tidy-alphabetical-end
 //
 // Library features (alloc):

@@ -5,8 +5,6 @@
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
-use build_helper::exit;
-
 use crate::builder::Builder;
 use crate::core::builder::{Cargo, Kind, ShouldRun, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
@@ -14,7 +12,7 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
-use crate::{BootstrapCommand, Compiler, Mode};
+use crate::{BootstrapCommand, Compiler, Mode, exit};
 
 pub(crate) fn instrument_coverage(
     builder: &Builder<'_>,

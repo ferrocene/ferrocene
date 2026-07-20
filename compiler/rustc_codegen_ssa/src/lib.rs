@@ -3,11 +3,11 @@
 #![feature(file_buffered)]
 #![feature(negative_impls)]
 #![feature(option_into_flat_iter)]
-#![feature(string_from_utf8_lossy_owned)]
 #![feature(trait_alias)]
 #![feature(try_blocks)]
 #![recursion_limit = "256"]
 // tidy-alphabetical-end
+#![cfg_attr(bootstrap, feature(string_from_utf8_lossy_owned))]
 
 //! This crate contains codegen code that is used by all codegen backends (LLVM and others).
 //! The backend-agnostic functions of this crate use functions defined in various traits that
@@ -40,7 +40,7 @@ use rustc_session::Session;
 use rustc_session::config::{CrateType, OutputFilenames, OutputType};
 use rustc_session::cstore::{self, CrateSource};
 use rustc_session::lint::builtin::LINKER_MESSAGES;
-use rustc_span::Symbol;
+use rustc_span::{Span, Symbol};
 
 pub mod assert_module_sources;
 pub mod back;
@@ -163,11 +163,12 @@ pub enum ModuleKind {
 }
 
 bitflags::bitflags! {
+    /// This previously had an `UNALIGNED` variant, but that should never be done via flags.
+    /// If you want something to be unaligned, see [`mir::place::PlaceRef::unaligned`].
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub struct MemFlags: u8 {
         const VOLATILE = 1 << 0;
         const NONTEMPORAL = 1 << 1;
-        const UNALIGNED = 1 << 2;
         /// Indicates that writing through the stored pointer is undefined behavior.
         /// Only valid on stores of pointers, or pairs where the first element is a pointer.
         /// In the latter case, the flag only applies to the first element of the pair.
@@ -215,7 +216,6 @@ bitflags::bitflags! {
 pub struct NativeLib {
     pub kind: NativeLibKind,
     pub name: Symbol,
-    pub filename: Option<Symbol>,
     pub cfg: Option<CfgEntry>,
     pub verbatim: bool,
     pub dll_imports: Vec<cstore::DllImport>,
@@ -225,7 +225,6 @@ impl From<&cstore::NativeLib> for NativeLib {
     fn from(lib: &cstore::NativeLib) -> Self {
         NativeLib {
             kind: lib.kind,
-            filename: lib.filename,
             name: lib.name,
             cfg: lib.cfg.clone(),
             verbatim: lib.verbatim.unwrap_or(false),
@@ -256,6 +255,19 @@ impl SymbolExport {
     }
 }
 
+#[derive(Clone, Debug, Encodable, Decodable)]
+pub struct EiiLinkageImplInfo {
+    pub span: Span,
+    pub impl_crate: CrateNum,
+}
+
+#[derive(Clone, Debug, Encodable, Decodable)]
+pub struct EiiLinkageInfo {
+    pub name: Symbol,
+    pub impls: Vec<EiiLinkageImplInfo>,
+    pub default_impl: Option<EiiLinkageImplInfo>,
+}
+
 /// Misc info we load from metadata to persist beyond the tcx.
 ///
 /// Note: though `CrateNum` is only meaningful within the same tcx, information within `CrateInfo`
@@ -282,6 +294,9 @@ pub struct CrateInfo {
     pub used_crate_source: UnordMap<CrateNum, Arc<CrateSource>>,
     pub used_crates: Vec<CrateNum>,
     pub dependency_formats: Arc<Dependencies>,
+    /// EII implementations used by the link-time duplicate check, so `-Zno-link` can serialize the data needed by a
+    /// later `-Zlink-only` invocation.
+    pub eii_linkage: Vec<EiiLinkageInfo>,
     pub windows_subsystem: Option<WindowsSubsystemKind>,
     pub natvis_debugger_visualizers: BTreeSet<DebuggerVisualizerFile>,
     pub lint_level_specs: CodegenLintLevelSpecs,

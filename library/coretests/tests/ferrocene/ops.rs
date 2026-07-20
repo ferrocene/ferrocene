@@ -78,6 +78,16 @@ fn test_range_inclusive_iterator_impl() {
         fn backward_checked(start: Self, count: usize) -> Option<Self> {
             i32::backward_checked(start.0, count).map(|a| UntrustedStep(a))
         }
+
+        fn forward_overflowing(start: Self, count: usize) -> (Self, bool) {
+            let (s, overflowing) = i32::forward_overflowing(start.0, count);
+            (Self(s), overflowing)
+        }
+
+        fn backward_overflowing(start: Self, count: usize) -> (Self, bool) {
+            let (s, overflowing) = i32::backward_overflowing(start.0, count);
+            (Self(s), overflowing)
+        }
     }
 
     let mut ri = core::ops::RangeInclusive::new(UntrustedStep(0), UntrustedStep(5));

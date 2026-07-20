@@ -1819,8 +1819,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     | DefKind::Static { .. }
                     | DefKind::AssocConst { .. }
                     | DefKind::Ctor(..)
-                    | DefKind::AnonConst
-                    | DefKind::InlineConst => self.mir_for_ctfe(def),
+                    | DefKind::AnonConst => self.mir_for_ctfe(def),
                     DefKind::Fn | DefKind::AssocFn
                         if matches!(
                             self.constness(def),
@@ -1834,7 +1833,9 @@ impl<'tcx> TyCtxt<'tcx> {
                     _ => self.optimized_mir(def),
                 }
             }
-            ty::InstanceKind::Intrinsic(..) => bug!("intrinsics have no instance MIR"),
+            ty::InstanceKind::Intrinsic(..) | ty::InstanceKind::LlvmIntrinsic(..) => {
+                bug!("intrinsics have no instance MIR")
+            }
             ty::InstanceKind::Virtual(..) => bug!("virtual dispatches have no instance MIR"),
             ty::InstanceKind::Shim(shim) => self.mir_shims(shim),
         };
@@ -2260,7 +2261,6 @@ impl<'tcx> TyCtxt<'tcx> {
             | DefKind::Use
             | DefKind::ForeignMod
             | DefKind::AnonConst
-            | DefKind::InlineConst
             | DefKind::Field
             | DefKind::LifetimeParam
             | DefKind::GlobalAsm

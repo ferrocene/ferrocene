@@ -182,7 +182,7 @@ impl<'tcx> LintState<'tcx> {
             ty::FnDef(maybe_trait_fn, generic_args) => {
                 // Indeterminate results are handled later by a post-mono pass that checks the
                 // instantiation is validated. For now just ignore errors.
-                try_instantiate(*maybe_trait_fn, generic_args).instance()
+                try_instantiate(*maybe_trait_fn, generic_args.no_bound_vars().unwrap()).instance()
             }
             ty::Closure(def_id, args) => {
                 Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))

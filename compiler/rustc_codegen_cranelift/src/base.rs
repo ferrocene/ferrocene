@@ -695,7 +695,7 @@ fn codegen_stmt<'tcx>(fx: &mut FunctionCx<'_, '_, 'tcx>, cur_block: Block, stmt:
                         }
                         UnOp::PtrMetadata => match layout.backend_repr {
                             BackendRepr::Scalar(_) => CValue::zst(dest_layout),
-                            BackendRepr::ScalarPair(_, _) => {
+                            BackendRepr::ScalarPair { a: _, b: _, b_offset: _ } => {
                                 CValue::by_val(operand.load_scalar_pair(fx).1, dest_layout)
                             }
                             _ => bug!("Unexpected `PtrToMetadata` operand: {operand:?}"),
@@ -717,7 +717,7 @@ fn codegen_stmt<'tcx>(fx: &mut FunctionCx<'_, '_, 'tcx>, cur_block: Block, stmt:
                                     fx.tcx,
                                     ty::TypingEnv::fully_monomorphized(),
                                     def_id,
-                                    args,
+                                    args.no_bound_vars().unwrap(),
                                 )
                                 .unwrap(),
                             );

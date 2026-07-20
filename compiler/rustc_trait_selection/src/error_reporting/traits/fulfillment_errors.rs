@@ -1,4 +1,4 @@
-// ignore-tidy-filelength
+// ignore-tidy-file-filelength
 use core::ops::ControlFlow;
 use std::borrow::Cow;
 use std::collections::hash_set;
@@ -16,7 +16,7 @@ use rustc_errors::{
 use rustc_hir::attrs::diagnostic::CustomDiagnostic;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::intravisit::Visitor;
-use rustc_hir::{self as hir, LangItem, Node, find_attr};
+use rustc_hir::{self as hir, LangItem, Node, expr_needs_parens, find_attr};
 use rustc_infer::infer::{InferOk, TypeTrace};
 use rustc_infer::traits::ImplSource;
 use rustc_infer::traits::solve::Goal;
@@ -29,8 +29,8 @@ use rustc_middle::ty::print::{
     PrintTraitRefExt as _, with_forced_trimmed_paths,
 };
 use rustc_middle::ty::{
-    self, GenericArgKind, TraitRef, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable,
-    TypeVisitableExt, Unnormalized, Upcast,
+    self, GenericArgKind, GenericParamDefKind, TraitRef, Ty, TyCtxt, TypeFoldable, TypeFolder,
+    TypeSuperFoldable, TypeVisitableExt, Unnormalized, Upcast,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::CrateNum;
@@ -916,11 +916,25 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     find_attr!(self.tcx, impl_did, OnConst {directive, ..} => directive.as_deref())
                         .flatten()
                 {
-                    let (_, format_args) = self.on_unimplemented_components(
+                    let (_, mut format_args) = self.on_unimplemented_components(
                         trait_ref,
                         main_obligation,
                         diag.long_ty_path(),
+                        false,
                     );
+                    if let ty::Adt(def, args) = trait_ref.self_ty().skip_binder().kind() {
+                        for param in self.tcx.generics_of(def.did()).own_params.iter() {
+                            match param.kind {
+                                GenericParamDefKind::Type { .. }
+                                | GenericParamDefKind::Const { .. } => {
+                                    format_args
+                                        .generic_args
+                                        .push((param.name, args[param.index as usize].to_string()));
+                                }
+                                _ => continue,
+                            }
+                        }
+                    }
                     let CustomDiagnostic { message, label, notes, parent_label: _ } =
                         command.eval(None, &format_args);
 
@@ -3784,13 +3798,24 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ty::ConstKind::Alias(_, alias_const) => {
                     let mut err =
                         self.dcx().struct_span_err(span, "unconstrained generic constant");
-                    let const_span = alias_const.kind.def_span(self.tcx);
 
+                    let const_span = alias_const.kind.def_span(self.tcx);
                     let const_ty = alias_const.type_of(self.tcx).skip_norm_wip();
-                    let cast = if const_ty != self.tcx.types.usize { " as usize" } else { "" };
+
                     let msg = "try adding a `where` bound";
                     if let Ok(snippet) = self.tcx.sess.source_map().span_to_snippet(const_span) {
-                        let code = format!("[(); {snippet}{cast}]:");
+                        let code = if const_ty == self.tcx.types.usize {
+                            format!("[(); {snippet}]:")
+                        } else if let ty::AliasConstKind::Anon { def_id } = alias_const.kind
+                            && let Some(local_def_id) = def_id.as_local()
+                            && let Some(local_body) = self.tcx.hir_maybe_body_owned_by(local_def_id)
+                            && expr_needs_parens(local_body.value)
+                        {
+                            format!("[(); ({snippet}) as usize]:")
+                        } else {
+                            format!("[(); {snippet} as usize]:")
+                        };
+
                         let suggestion_def_id = if let ObligationCauseCode::CompareImplItem {
                             trait_item_def_id,
                             ..
@@ -3800,6 +3825,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         } else {
                             Some(obligation.cause.body_def_id)
                         };
+
                         if let Some(suggestion_def_id) = suggestion_def_id
                             && let Some(generics) = self.tcx.hir_get_generics(suggestion_def_id)
                         {

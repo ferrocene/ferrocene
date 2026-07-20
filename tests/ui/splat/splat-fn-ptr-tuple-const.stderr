@@ -9,7 +9,7 @@ LL |     const R2: () = F2(1, 2);
 Box<dyn Any>
 stack backtrace:
 
-note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md
+note: we would appreciate a bug report: https://github.com/ferrocene/ferrocene/issues/new
 
 note: please make sure that you have updated to the latest nightly
 
@@ -34,7 +34,7 @@ LL |     const R1: () = F1((1, 2));
 Box<dyn Any>
 stack backtrace:
 
-note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md
+note: we would appreciate a bug report: https://github.com/ferrocene/ferrocene/issues/new
 
 note: please make sure that you have updated to the latest nightly
 

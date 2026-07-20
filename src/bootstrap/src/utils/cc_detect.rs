@@ -130,27 +130,13 @@ pub fn fill_target_compiler(build: &mut Build, target: TargetSelection) {
         None
     };
     let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
-<<<<<<< ferrocene/release/1.98
-    let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
-        ar
-    } else {
+    let ar = config.and_then(|c| c.ar.clone()).or_else(|| {
         if facade_compiler.is_some() {
             let sub = replace_ferrocene_vendors(target.triple);
             cfg.target(&sub);
         }
         cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
-    };
-||||||| 7fb284d9037
-    let ar = if let ar @ Some(..) = config.and_then(|c| c.ar.clone()) {
-        ar
-    } else {
-        cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok()
-    };
-=======
-    let ar = config
-        .and_then(|c| c.ar.clone())
-        .or_else(|| cfg.try_get_archiver().map(|c| PathBuf::from(c.get_program())).ok());
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+    });
 
     build.cc.insert(target, compiler.clone());
     let mut cflags = build.cc_handled_clags(target, CLang::C);

@@ -1,3 +1,5 @@
+// ignore-tidy-filelength
+
 //! [Flexible target specification.](https://github.com/rust-lang/rfcs/pull/131)
 //!
 //! Rust targets a wide variety of usecases, and in the interest of flexibility,

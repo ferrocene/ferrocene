@@ -1,5 +1,6 @@
 #![allow(clippy::match_like_matches_macro)]
 
+use std::env::VarError;
 use std::fs::File;
 use std::io::{
     BufRead,
@@ -11,14 +12,24 @@ use std::path::{
     Path,
     PathBuf,
 };
+use std::process::{
+    Command,
+    Stdio,
+};
+use std::sync::LazyLock;
 use std::{
     env,
     io,
 };
 
+use regex::Regex;
+
 fn do_cc() {
+    // NOTE: family could be one of: unix, windows, wasm, or multiple values
+    // (e.g. "unix,wasm")
+    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
     let target = env::var("TARGET").unwrap();
-    if cfg!(unix) || target.contains("cygwin") {
+    if family.contains("unix") || target.contains("cygwin") {
         let exclude = ["redox", "wasi", "wali", "qurt"];
         if !exclude.iter().any(|x| target.contains(x)) {
             let mut cmsg = cc::Build::new();
@@ -35,6 +46,7 @@ fn do_cc() {
             || target.contains("android")
             || target.contains("emscripten")
             || target.contains("fuchsia")
+            || target.contains("dragonfly")
             || target.contains("bsd")
             || target.contains("cygwin")
         {
@@ -176,6 +188,8 @@ fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut Path
 fn main() {
     // Avoid unnecessary re-building.
     println!("cargo:rerun-if-changed=build.rs");
+    // Ensure version checking works, even if we don't use it.
+    LazyLock::force(&VERSIONS);
 
     do_cc();
     do_ctest();
@@ -208,6 +222,7 @@ fn test_apple(target: &str) {
     assert!(target.contains("apple"));
     let x86_64 = target.contains("x86_64");
     let i686 = target.contains("i686");
+    let macos = VERSIONS.macos;
 
     let mut cfg = ctest_cfg();
 
@@ -305,6 +320,7 @@ fn test_apple(target: &str) {
         "sys/sem.h",
         "sys/shm.h",
         "sys/socket.h",
+        "sys/sockio.h",
         "sys/stat.h",
         "sys/statvfs.h",
         "sys/sys_domain.h",
@@ -333,6 +349,8 @@ fn test_apple(target: &str) {
 
     cfg.skip_struct(move |s| {
         match s.ident() {
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" => true,
             // FIXME(union): actually a union
             "sigval" => true,
             // FIXME(macos): The size is changed in recent macOSes.
@@ -366,8 +384,11 @@ fn test_apple(target: &str) {
             // https://github.com/apple-oss-distributions/xnu/commit/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea
             "ELAST" => true,
 
-            // FIXME(macos): bumped up on macOS 26, it's sizeof `vm_statistics64_data_t`
-            "HOST_VM_INFO64_COUNT" => true,
+            // FIXME(macos): bumped up on macOS 27, it's sizeof `vm_statistics64_data_t`
+            "HOST_VM_INFO64_COUNT" => macos.unwrap() < (27, 0),
+
+            // FIXME(macos): bumped up on macOS 27, from 16 to 32
+            "AIO_LISTIO_MAX" => macos.unwrap() < (27, 0),
 
             _ => false,
         }
@@ -375,8 +396,8 @@ fn test_apple(target: &str) {
 
     cfg.skip_alias(move |ty| {
         match ty.ident() {
-            // FIXME(macos): The size is changed in macOS 26.
-            "vm_statistics64_data_t" => true,
+            // FIXME(macos): The size is changed in macOS 27.
+            "vm_statistics64_data_t" => macos.unwrap() < (27, 0),
             _ => false,
         }
     });
@@ -416,6 +437,11 @@ fn test_apple(target: &str) {
             ("sigevent", "sigev_value") => true,
             _ => false,
         }
+    });
+
+    cfg.skip_struct_field_type(move |struct_, field| {
+        // The type of `bfl_u` is an anonymous union
+        (struct_.ident(), field.ident()) == ("bpf_dltlist", "bfl_u")
     });
 
     cfg.volatile_struct_field(|s, f| s.ident() == "aiocb" && f.ident() == "aio_buf");
@@ -636,6 +662,15 @@ fn test_openbsd(target: &str) {
     cfg.rename_struct_ty(|ty| ty.ends_with("_t").then_some(ty.to_string()));
     cfg.rename_union_ty(|ty| ty.ends_with("_t").then_some(ty.to_string()));
 
+    cfg.skip_struct(move |struct_| {
+        match struct_.ident() {
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "sem" | "timezone" => true,
+
+            _ => false,
+        }
+    });
+
     cfg.skip_struct_field(move |struct_, field| {
         match (struct_.ident(), field.ident()) {
             // conflicting with `p_type` macro from <resolve.h>.
@@ -762,6 +797,15 @@ fn test_cygwin(target: &str) {
         _ => false,
     });
 
+    cfg.skip_struct(move |struct_| {
+        match struct_.ident() {
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" => true,
+
+            _ => false,
+        }
+    });
+
     cfg.rename_struct_field(move |struct_, field| {
         match field.ident() {
             // Our stat *_nsec fields normally don't actually exist but are part
@@ -832,6 +876,23 @@ fn test_windows(target: &str) {
     }
     cfg.define("_WIN32_WINNT", Some("0x8000"));
 
+    let win_gnu_x86_time64 = match env::var("CARGO_CFG_LIBC_UNSTABLE_GNU_TIME_BITS") {
+        Ok(v) if v == "64" => true,
+        Ok(v) if v == "32" => false,
+        Ok(_) => {
+            panic!("Invalid value for `libc_unstable_gnu_time_bits`. Must be 32, 64 or unset.");
+        }
+        Err(_) => false,
+    };
+
+    // Needed for the Windows `time_t` test.
+    println!("cargo::rustc-check-cfg=cfg(gnu_time_bits64)");
+
+    if i686 && gnu && win_gnu_x86_time64 {
+        cfg.cfg("gnu_time_bits64", None);
+        println!("cargo::rustc-cfg=gnu_time_bits64");
+    }
+
     headers!(
         cfg,
         "direct.h",
@@ -889,7 +950,7 @@ fn test_windows(target: &str) {
         "SSIZE_T" if !gnu => true,
         "ssize_t" if !gnu => true,
         // FIXME(windows): The size and alignment of this type are incorrect
-        "time_t" if gnu && i686 => true,
+        "time_t" if gnu && i686 && !win_gnu_x86_time64 => true,
         _ => false,
     });
 
@@ -897,6 +958,8 @@ fn test_windows(target: &str) {
         match struct_.ident() {
             // FIXME(windows): The size and alignment of this struct are incorrect
             "timespec" if gnu && i686 => true,
+            // Extern types
+            "FILE" | "fpos_t" | "timezone" => true,
             _ => false,
         }
     });
@@ -1095,7 +1158,7 @@ fn test_solarish(target: &str) {
     );
 
     if is_illumos {
-        headers!(cfg, "sys/epoll.h", "sys/eventfd.h",);
+        headers!(cfg, "sys/epoll.h", "sys/eventfd.h", "sys/timerfd.h",);
     }
 
     if is_solaris {
@@ -1129,6 +1192,8 @@ fn test_solarish(target: &str) {
                 // expose stat.Xtim.tv_nsec fields
                 Some(field.ident().trim_end_matches("e_nsec").to_string() + ".tv_nsec")
             }
+            // epoll_event.data is a union in C; our `u64` field lives at `data.u64`
+            "epoll_event" if field.ident() == "u64" => Some("data.u64".to_string()),
             _ => None,
         }
     });
@@ -1156,6 +1221,15 @@ fn test_solarish(target: &str) {
         // explicitly support it. (A no-op is an acceptable implementation of EPOLLEXCLUSIVE.)
         "EPOLLEXCLUSIVE" if is_illumos => true,
 
+        // FIXME(illumos)
+        // illumos has changed this constant, see https://www.illumos.org/issues/16200 for details.
+        // We would like to keep this header value in sync with what is present in the illumos
+        // sysroot that rustc is cross compiled with. There is an in progress bump in
+        // https://github.com/illumos/sysroot/pull/5, however this will still predate the new value.
+        // When this does eventually make it to the sysroot we should update it in this crate and
+        // remove this test skip.
+        "PTHREAD_MUTEX_DEFAULT" if is_illumos => true,
+
         _ => false,
     });
 
@@ -1167,15 +1241,17 @@ fn test_solarish(target: &str) {
         false
     });
     cfg.skip_struct(move |struct_| {
-        // the union handling is a mess
-        if struct_.ident().contains("door_desc_t_") {
-            return true;
-        }
         match struct_.ident() {
             // union, not a struct
             "sigval" => true,
+            // the union handling is a mess
+            x if x.contains("door_desc_t_") => true,
             // a bunch of solaris-only fields
             "utmpx" if is_illumos => true,
+
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" | "ucred_t" => true,
+
             _ => false,
         }
     });
@@ -1286,10 +1362,7 @@ fn test_netbsd(target: &str) {
     let mut cfg = ctest_cfg();
 
     // Assume netbsd10 but check for netbsd9 for test config.
-    let netbsd9 = match try_command_output("uname", &["-sr"]) {
-        Some(s) if s.starts_with("NetBSD 9.") => true,
-        _ => false,
-    };
+    let netbsd9 = matches!(VERSIONS.netbsd, Some((9, _)));
 
     cfg.flag("-Wno-deprecated-declarations");
     cfg.define("_NETBSD_SOURCE", Some("1"));
@@ -1450,6 +1523,8 @@ fn test_netbsd(target: &str) {
             "ptrace_lwpinfo" => true,
             // ABI change in NetBSD10, with symbol versioning.
             "statvfs" if !netbsd9 => true,
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" | "_cpuset" | "sem" => true,
             _ => false,
         }
     });
@@ -1599,6 +1674,14 @@ fn test_dragonflybsd(target: &str) {
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
 
+    let dragonfly_version = if let Ok(version) = env::var("RUST_LIBC_UNSTABLE_DRAGONFLY_VERSION") {
+        let vers = parse_dragonfly_version(&version).unwrap();
+        println!("cargo:warning=setting DragonFly version to {vers}");
+        vers
+    } else {
+        which_dragonfly().unwrap_or(600_200)
+    };
+
     headers!(
         cfg,
         "aio.h",
@@ -1640,6 +1723,7 @@ fn test_dragonflybsd(target: &str) {
         "sched.h",
         "semaphore.h",
         "signal.h",
+        "spawn.h",
         "stddef.h",
         "stdint.h",
         "stdio.h",
@@ -1650,6 +1734,7 @@ fn test_dragonflybsd(target: &str) {
         "sys/ioctl.h",
         "sys/cpuctl.h",
         "sys/eui64.h",
+        "sys/extattr.h",
         "sys/ipc.h",
         "sys/kinfo.h",
         "sys/ktrace.h",
@@ -1659,6 +1744,7 @@ fn test_dragonflybsd(target: &str) {
         "sys/procctl.h",
         "sys/ptrace.h",
         "sys/reboot.h",
+        "sys/random.h",
         "sys/resource.h",
         "sys/rtprio.h",
         "sys/sched.h",
@@ -1684,8 +1770,8 @@ fn test_dragonflybsd(target: &str) {
         "util.h",
         "utime.h",
         "utmpx.h",
+        "vm/vm.h",
         "vfs/ufs/quota.h",
-        "vm/vm_map.h",
         "wchar.h",
         "iconv.h",
     );
@@ -1710,6 +1796,10 @@ fn test_dragonflybsd(target: &str) {
         match ty {
             // FIXME(dragonflybsd): OSX calls this something else
             "sighandler_t" => Some("sig_t".to_string()),
+            "lwpstat" => Some("enum lwpstat".to_string()),
+            "procstat" => Some("enum procstat".to_string()),
+            "vm_map_t" => Some("struct vm_map *".to_string()),
+            "vm_map_entry_t" => Some("struct vm_map_entry *".to_string()),
             _ => None,
         }
     });
@@ -1744,6 +1834,9 @@ fn test_dragonflybsd(target: &str) {
             // structs.
             "termios2" => true,
 
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "sem" | "timezone" => true,
+
             _ => false,
         }
     });
@@ -1761,10 +1854,57 @@ fn test_dragonflybsd(target: &str) {
             _ => false,
         }
     });
+    cfg.alias_is_c_enum(move |e| match e {
+        "lwpstat" | "procstat" => true,
+        _ => false,
+    });
 
     cfg.skip_const(move |constant| {
         match constant.ident() {
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
+
+            // Kernel-only symbols in DragonFly headers.
+            "DTYPE_VNODE" | "DTYPE_SOCKET" | "DTYPE_PIPE" | "DTYPE_FIFO" | "DTYPE_KQUEUE"
+            | "DTYPE_CRYPTO" | "DTYPE_MQUEUE" | "DTYPE_DMABUF" => true,
+
+            // Not exposed by current DragonFly userland headers.
+            "REG_DUMP"
+            | "REG_ASSERT"
+            | "REG_ATOI"
+            | "REG_ITOA"
+            | "REG_TRACE"
+            | "REG_LARGE"
+            | "MAP_RENAME"
+            | "MAP_NORESERVE"
+            | "CTL_UNSPEC"
+            | "KERN_PROF"
+            | "CTL_P1003_1B_UNUSED1"
+            | "CTL_P1003_1B_SEM_VALUE_MAX"
+            | "DOWNTIME"
+            | "SF_CACHE" => true,
+
+            // libc exposes the 6.0-compatible value for this version-dependent mask.
+            "KERN_PROC_FLAGMASK" => true,
+
+            // Renamed in current DragonFly headers.
+            "CPUCTL_RSMSR" | "UTX_DB_LASTLOG" => true,
+
+            // Introduced after DragonFly 5.8.
+            "AF_ARP"
+            | "PF_ARP"
+            | "IP_SENDSRCADDR"
+            | "F_GETPATH"
+            | "ENOTRECOVERABLE"
+            | "EOWNERDEAD"
+            | "SO_PASSCRED"
+            | "PROC_PDEATHSIG_CTL"
+            | "PROC_PDEATHSIG_STATUS"
+            | "KERN_STATIC_TLS_EXTRA"
+            | "KERN_MAXID"
+                if dragonfly_version < 600_000 =>
+            {
+                true
+            }
 
             // weird signed extension or something like that?
             "MS_NOUSER" => true,
@@ -1788,6 +1928,57 @@ fn test_dragonflybsd(target: &str) {
             "prlimit" | "prlimit64"        // non-int in 2nd arg
              => true,
 
+            // These are exposed unconditionally by libc, but older DragonFly
+            // headers cannot validate them.
+            "clock_nanosleep" | "pthread_getname_np" | "pthread_setname_np"
+                if dragonfly_version < 600_000 => true,
+            "pthread_getaffinity_np" | "pthread_setaffinity_np" if dragonfly_version < 600_000 => {
+                true
+            },
+            "fdatasync" | "getentropy" | "posix_fallocate" if dragonfly_version < 600_200 => true,
+            "malloc_usable_size" if dragonfly_version < 600_400 => true,
+            _ => false,
+        }
+    });
+
+    cfg.skip_alias(move |ty| {
+        match ty.ident() {
+            // sighandler_t is crazy across platforms
+            "sighandler_t" => true,
+            // Same as FreeBSD: `kvm_t` is an opaque handle used through
+            // pointers, and libc does not bind the private `struct __kvm`.
+            "kvm_t" => true,
+            _ => false,
+        }
+    });
+
+    cfg.skip_struct(move |struct_| {
+        match struct_.ident() {
+            // FIXME(dragonflybsd): These are tested as part of the linux_fcntl tests since
+            // there are header conflicts when including them with all the other
+            // structs.
+            "termios2" => true,
+
+            "ip_mreqn" if dragonfly_version < 600_000 => true,
+
+            _ => false,
+        }
+    });
+
+    cfg.skip_struct_field(move |struct_, field| {
+        match (struct_.ident(), field.ident()) {
+            // this is actually a union on linux, so we can't represent it well and
+            // just insert some padding.
+            ("siginfo_t", "_pad") => true,
+            // sigev_notify_thread_id is actually part of a sigev_un union
+            ("sigevent", "sigev_notify_thread_id") => true,
+            // Current DragonFly headers use these names instead.
+            ("kinfo_cputime", "cp_idel") => true,
+            // conflicting with `p_type` macro from <resolve.h>.
+            ("Elf32_Phdr", "p_type") | ("Elf64_Phdr", "p_type") => true,
+            ("kinfo_lwp", "kl_stat") | ("kinfo_proc", "kp_stat") => true,
+            ("utmpx", "ut_type") => true,
+            ("mcontext_t", "mc_fpregs") => true,
             _ => false,
         }
     });
@@ -1806,18 +1997,40 @@ fn test_dragonflybsd(target: &str) {
         }
     });
 
-    cfg.skip_struct_field(move |struct_, field| {
-        match (struct_.ident(), field.ident()) {
-            // this is actually a union on linux, so we can't represent it well and
-            // just insert some padding.
-            ("siginfo_t", "_pad") => true,
-            // sigev_notify_thread_id is actually part of a sigev_un union
-            ("sigevent", "sigev_notify_thread_id") => true,
-            _ => false,
-        }
-    });
-
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
+}
+
+fn parse_dragonfly_version(version: &str) -> Option<u32> {
+    let version = version.trim();
+
+    if let Ok(version) = version.parse::<u32>() {
+        // DragonFly's __DragonFly_version uses major * 100_000 + minor * 100.
+        // Accept compact test override spellings like 58, 60, 62, and 602.
+        return Some(match version {
+            0..=9 => version * 100_000,
+            10..=99 => (version / 10) * 100_000 + (version % 10) * 100,
+            100..=999 => (version / 100) * 100_000 + (version % 100) * 100,
+            _ => version,
+        });
+    }
+
+    let mut pieces = version.split(['.', '-']);
+    let major = pieces.next()?.parse::<u32>().ok()?;
+    let minor = pieces.next()?.parse::<u32>().ok()?;
+    Some(major * 100_000 + minor * 100)
+}
+
+fn which_dragonfly() -> Option<u32> {
+    if env::var("CARGO_CFG_TARGET_OS").ok()?.as_str() != "dragonfly" {
+        return None;
+    }
+
+    if try_command_output("uname", &["-s"])?.trim() != "DragonFly" {
+        return None;
+    }
+
+    let stdout = try_command_output("uname", &["-r"])?;
+    parse_dragonfly_version(stdout.trim())
 }
 
 fn test_wasi(target: &str) {
@@ -1892,6 +2105,14 @@ fn test_wasi(target: &str) {
         "SO_BROADCAST" | "SO_LINGER" => true,
 
         _ => false,
+    });
+
+    cfg.skip_struct(move |struct_| {
+        match struct_.ident() {
+            // Extern types
+            "DIR" | "FILE" | "__locale_struct" => true,
+            _ => false,
+        }
     });
 
     cfg.skip_fn(|f| match f.ident() {
@@ -2146,6 +2367,9 @@ fn test_android(target: &str) {
             // FIXME(android): The field has been changed:
             "sockaddr_vm" => true,
 
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" => true,
+
             _ => false,
         }
     });
@@ -2277,7 +2501,13 @@ fn test_android(target: &str) {
             "SOF_TIMESTAMPING_OPT_RX_FILTER" => true,
 
             // FIXME(android): Requires >= 6.9 kernel headers.
-            "AT_HWCAP3" | "AT_HWCAP4" => true,
+            "AT_HWCAP3" | "AT_HWCAP4" | "RWF_NOAPPEND" => true,
+
+            // FIXME(android): Requires >= 6.11 kernel headers.
+            "RWF_ATOMIC" => true,
+
+            // FIXME(android): Requires >= 6.14 kernel headers.
+            "RWF_DONTCACHE" => true,
 
             _ => false,
         }
@@ -2313,6 +2543,9 @@ fn test_android(target: &str) {
 
             // Added in API level 30, but tests use level 28.
             "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp" => true,
+
+            // Added in API level 33, but tests use level 28.
+            "preadv2" | "pwritev2" => true,
 
             // Added in glibc 2.25.
             "getentropy" => true,
@@ -2406,7 +2639,16 @@ fn test_freebsd(target: &str) {
     assert!(target.contains("freebsd"));
     let mut cfg = ctest_cfg();
 
-    let freebsd_ver = if let Ok(version) = env::var("RUST_LIBC_UNSTABLE_FREEBSD_VERSION") {
+    // FIXME: this can be removed in 1-2 releases
+    println!("cargo:rerun-if-env-changed=RUST_LIBC_UNSTABLE_FREEBSD_VERSION");
+    if env::var("RUST_LIBC_UNSTABLE_FREEBSD_VERSION").is_ok() {
+        println!(
+            "cargo:warning=RUST_LIBC_UNSTABLE_FREEBSD_VERSION has been removed; set \
+            the cfg libc_unstable_freebsd_version via RUSTFLAGS instead"
+        );
+    }
+
+    let freebsd_ver = if let Ok(version) = env::var("CARGO_CFG_LIBC_UNSTABLE_FREEBSD_VERSION") {
         let vers = version.parse().unwrap();
         println!("cargo:warning=setting FreeBSD version to {vers}");
         Some(vers)
@@ -2483,6 +2725,7 @@ fn test_freebsd(target: &str) {
         "netinet/sctp.h",
         "netinet/tcp.h",
         "netinet/udp.h",
+        "netinet6/in6_var.h",
         "poll.h",
         "pthread.h",
         "pthread_np.h",
@@ -2965,6 +3208,9 @@ fn test_freebsd(target: &str) {
             // Those are introduced in FreeBSD 15.
             "xktls_session_onedir" | "xktls_session" if Some(15) > freebsd_ver => true,
 
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" => true,
+
             _ => false,
         }
     });
@@ -3064,6 +3310,7 @@ fn test_freebsd(target: &str) {
             ("if_data", "__ifi_epoch") => true,
             ("if_data", "__ifi_lastchange") => true,
             ("ifreq", "ifr_ifru") => true,
+            ("in6_ifreq", "ifr_ifru") => true,
             ("ifconf", "ifc_ifcu") => true,
 
             // anonymous struct
@@ -3120,6 +3367,8 @@ fn test_freebsd(target: &str) {
 
 fn test_emscripten(target: &str) {
     assert!(target.contains("emscripten"));
+    #[expect(unused_variables)] // remove once we need a version check
+    let emscripten = VERSIONS.emscripten.unwrap();
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None); // FIXME(emscripten): ??
@@ -3268,6 +3517,9 @@ fn test_emscripten(target: &str) {
             // Skip for now to unblock CI.
             "pthread_condattr_t" => true,
             "pthread_mutexattr_t" => true,
+
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "fpos64_t" | "timezone" => true,
 
             // No epoll support
             // https://github.com/emscripten-core/emscripten/issues/5033
@@ -3552,6 +3804,9 @@ fn test_neutrino(target: &str) {
             // union
             "_channel_connect_attr" => true,
 
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" => true,
+
             _ => false,
         }
     });
@@ -3789,35 +4044,41 @@ fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
         && !target.contains("riscv32")
         && pointer_width == "32"
     {
-        let defaultbits = "32".to_string();
-        let (timebits, filebits) = match (
-            env::var("RUST_LIBC_UNSTABLE_GNU_TIME_BITS"),
-            env::var("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS"),
-        ) {
-            (Ok(_), Ok(_)) => panic!("Do not set both RUST_LIBC_UNSTABLE_GNU_TIME_BITS and RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS"),
-            (Err(_), Err(_)) => (defaultbits.clone(), defaultbits.clone()),
-            (Ok(tb), Err(_)) if tb == "64" => (tb.clone(), tb),
-            (Ok(tb), Err(_)) if tb == "32" => (tb, defaultbits.clone()),
-            (Ok(_), Err(_)) => panic!("Invalid value for RUST_LIBC_UNSTABLE_GNU_TIME_BITS, must be 32 or 64"),
-            (Err(_), Ok(fb)) if fb == "32" || fb == "64" => (defaultbits, fb),
-            (Err(_), Ok(_)) => panic!("Invalid value for RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS, must be 32 or 64"),
+        let defaultbits = "32";
+        let mut tb_env = env::var("CARGO_CFG_LIBC_UNSTABLE_GNU_TIME_BITS");
+
+        // FIXME: remove these fallbacks in a few releases
+        if let Ok(old_tb_env) = env::var("RUST_LIBC_UNSTABLE_GNU_TIME_BITS") {
+            println!(
+                "cargo:warning=RUST_LIBC_UNSTABLE_GNU_TIME_BITS will be removed; \
+                set `--cfg=libc_unstable_gnu_time_bits=\"...\"` via RUSTFLAGS instead"
+            );
+            tb_env = tb_env.or(Ok(old_tb_env));
+        }
+
+        if env::var("RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS").is_ok()
+            || env::var("CARGO_CFG_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS").is_ok()
+        {
+            println!(
+                "cargo:warning=glibc file offset can no longer be set independently of \
+                `gnu_time_bits`"
+            );
+        }
+
+        let timebits = match tb_env.as_deref() {
+            Err(_) => defaultbits,
+            Ok(tb) if tb == "64" => tb,
+            Ok(tb) if tb == "32" => tb,
+            Ok(_) => {
+                panic!("Invalid value for libc_unstable_gnu_time_bits. Must be 32, 64, or unset.")
+            }
         };
-        let valid_bits = ["32", "64"];
-        assert!(
-            valid_bits.contains(&filebits.as_str()) && valid_bits.contains(&timebits.as_str()),
-            "Invalid value for RUST_LIBC_UNSTABLE_GNU_TIME_BITS or RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS, must be 32, 64 or unset"
-        );
-        assert!(
-            !(filebits == "32" && timebits == "64"),
-            "RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS must be 64 or unset if RUST_LIBC_UNSTABLE_GNU_TIME_BITS is 64"
-        );
+
         if timebits == "64" {
             cfg.define("_TIME_BITS", Some("64"));
+            cfg.define("_FILE_OFFSET_BITS", Some("64"));
             cfg.cfg("linux_time_bits64", None);
             cfg.cfg("gnu_time_bits64", None);
-        }
-        if filebits == "64" {
-            cfg.define("_FILE_OFFSET_BITS", Some("64"));
             cfg.cfg("gnu_file_offset_bits64", None);
         }
     }
@@ -3840,7 +4101,7 @@ fn test_linux(target: &str) {
 
     // target_env
     let gnu = target.contains("gnu");
-    let musl = target.contains("musl") || target.contains("ohos");
+    let musl = target.contains("musl") || target.contains("ohos") || target.contains("pauthtest");
     let uclibc = target.contains("uclibc");
 
     match (l4re, gnu, musl, uclibc) {
@@ -3860,6 +4121,8 @@ fn test_linux(target: &str) {
     let i686 = target.contains("i686");
     let ppc = target.contains("powerpc");
     let ppc64 = target.contains("powerpc64");
+    let ppc64le = target.contains("powerpc64le");
+    let _ppc64be = target.contains("powerpc64-");
     let ppc32 = ppc && !ppc64;
     let s390x = target.contains("s390x");
     let sparc = target.contains("sparc");
@@ -3877,8 +4140,16 @@ fn test_linux(target: &str) {
     let mips = target.contains("mips");
     let mips64 = target.contains("mips64");
     let mips32 = mips && !mips64;
+    let pauthtest = target.contains("pauthtest");
+    let versions = &*VERSIONS;
+    let kernel = match versions.linux {
+        Some(v) => v,
+        None if l4re => (0, 0),
+        None => panic!("failed to detect kernel version for Linux target {target}"),
+    };
 
-    let musl_v1_2_3 = env::var("RUST_LIBC_UNSTABLE_MUSL_V1_2_3").is_ok();
+    // Force modern musl also for pauthtest.
+    let musl_v1_2_3 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3") || pauthtest;
     if musl_v1_2_3 {
         assert!(musl);
     }
@@ -3897,9 +4168,7 @@ fn test_linux(target: &str) {
             cfg.cfg("musl_redir_time64", None);
         }
     }
-    let uclibc_use_time64 = env::var("CARGO_CFG_LIBC_UNSTABLE_UCLIBC_TIME64")
-        .map(|val| val != "0")
-        .unwrap_or(false);
+    let uclibc_use_time64 = env_flag("CARGO_CFG_LIBC_UNSTABLE_UCLIBC_TIME64");
     if uclibc && uclibc_use_time64 {
         cfg.cfg("linux_time_bits64", None);
     }
@@ -4230,11 +4499,6 @@ fn test_linux(target: &str) {
     cfg.skip_struct(move |struct_| {
         let ty = struct_.ident();
 
-        // FIXME(linux): Requires >= 6.12 kernel headers. CI has old headers
-        if ty == "ptp_sys_offset_extended" {
-            return true;
-        }
-
         // LFS64 types have been removed in musl 1.2.4+
         if musl && (ty.ends_with("64") || ty.ends_with("64_t")) {
             return true;
@@ -4331,14 +4595,15 @@ fn test_linux(target: &str) {
             // kernel so we can drop this and test the type once this new version is used in CI.
             "sched_attr" => true,
 
-            // FIXME(linux): Requires >= 6.9 kernel headers.
-            "epoll_params" => true,
+            // Recent additions
+            "ptp_sys_offset_extended" if kernel < (6, 12) => true,
+            "epoll_params" if old_musl => true,
+            "epoll_params" => kernel < (6, 9),
+            "mnt_ns_info" => kernel < (6, 12),
 
-            // FIXME(linux): Requires >= 6.12 kernel headers.
+            // FIXME(linux): Only requires >= 6.12 kernel headers, but including `uio.h` creates
+            // a conflict with the `iovec` definition.
             "dmabuf_cmsg" | "dmabuf_token" => true,
-
-            // FIXME(linux): Requires >= 6.12 kernel headers.
-            "mnt_ns_info" => true,
 
             // FIXME(musl): Struct has changed for new musl versions
             "tcp_info" if musl => true,
@@ -4353,9 +4618,10 @@ fn test_linux(target: &str) {
             // On 64 bits the size did not change, skip only for 32 bits.
             "ptrace_syscall_info" if pointer_width == 32 => true,
 
+            // not in sys/fanotify.h in uclibc
+            "fanotify_event_info_header" | "fanotify_event_info_fid" if uclibc => true,
+
             "canxl_frame"
-            | "fanotify_event_info_header" // not in sys/fanotify.h in uclibc
-            | "fanotify_event_info_fid"  // not in sys/fanotify.h in uclibc
             | "tls12_crypto_info_sm4_gcm"
             | "tls12_crypto_info_sm4_ccm"
             | "tls12_crypto_info_aria_gcm_128"
@@ -4364,6 +4630,12 @@ fn test_linux(target: &str) {
             {
                 true
             }
+
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "timezone" => true,
+
+            // Many more fields added in the glibc update to go with 6.17
+            "tcp_info" if gnu && versions.glibc.unwrap() < (2, 43) => true,
 
             _ => false,
         }
@@ -4726,8 +4998,8 @@ fn test_linux(target: &str) {
             // FIXME(linux): Not yet implemented on sparc64
             "SYS_clone3" if sparc64 => true,
 
-            // FIXME(linux): Requires >= 6.9 kernel headers.
-            n if (arm || ppc32) && n.starts_with("FUTEX2_") => true,
+            // Requires >= 6.9 kernel headers.
+            n if (arm || ppc32) && n.starts_with("FUTEX2_") => kernel < (6, 9),
 
             // FIXME(linux): Not defined on ARM, gnueabihf, mips, musl, PowerPC, riscv64, s390x, and sparc64.
             "SYS_memfd_secret"
@@ -4739,7 +5011,8 @@ fn test_linux(target: &str) {
             // Skip as this signal codes and trap reasons need newer headers
             "TRAP_PERF" => true,
 
-            // headers conflicts with linux/pidfd.h
+            // FIXME(linux): linux/pidfd.h includes linux/flock.h which conflicts with flock.h,
+            // so pidfd isn't currently tested.
             "PIDFD_NONBLOCK" => true,
             // Linux >= 6.9
             "PIDFD_THREAD"
@@ -4786,14 +5059,10 @@ fn test_linux(target: &str) {
             // DIFF(main): fixed in 1.0 with e9abac9ac2
             "CLONE_CLEAR_SIGHAND" | "CLONE_INTO_CGROUP" => true,
 
-            // kernel 6.9 minimum
-            "RWF_NOAPPEND" => true,
-
-            // kernel 6.11 minimum
-            "RWF_ATOMIC" => true,
-
-            // kernel 6.14 minimum
-            "RWF_DONTCACHE" => true,
+            // Recent additions
+            "RWF_NOAPPEND" => kernel < (6, 9),
+            "RWF_ATOMIC" => kernel < (6, 11),
+            "RWF_DONTCACHE" => kernel < (6, 14),
 
             // musl doesn't use <linux/fanotify.h> in <sys/fanotify.h>
             "FAN_REPORT_PIDFD"
@@ -4811,7 +5080,7 @@ fn test_linux(target: &str) {
             }
 
             // FIXME(linux32): Requires >= 6.6 kernel headers.
-            "XDP_USE_SG" | "XDP_PKT_CONTD" if pointer_width == 32 => true,
+            "XDP_USE_SG" | "XDP_PKT_CONTD" if pointer_width == 32 => kernel < (6, 6),
 
             // FIXME(linux): Missing only on this platform for some reason
             "PR_MDWE_NO_INHERIT" if gnueabihf => true,
@@ -4824,25 +5093,19 @@ fn test_linux(target: &str) {
             | "XDP_TX_METADATA"
                 if musl || pointer_width == 32 =>
             {
-                true
+                musl || kernel < (6, 8)
             }
 
-            // FIXME(linux): Requires >= 6.11 kernel headers.
-            "XDP_UMEM_TX_METADATA_LEN" => true,
-
-            // FIXME(linux): Requires >= 6.11 kernel headers.
+            "XDP_UMEM_TX_METADATA_LEN" => kernel < (6, 11),
             "NS_GET_MNTNS_ID"
             | "NS_GET_PID_FROM_PIDNS"
             | "NS_GET_TGID_FROM_PIDNS"
             | "NS_GET_PID_IN_PIDNS"
-            | "NS_GET_TGID_IN_PIDNS" => true,
-            // FIXME(linux): Requires >= 6.12 kernel headers.
+            | "NS_GET_TGID_IN_PIDNS" => kernel < (6, 11),
             "MNT_NS_INFO_SIZE_VER0" | "NS_MNT_GET_INFO" | "NS_MNT_GET_NEXT" | "NS_MNT_GET_PREV" => {
-                true
+                kernel < (6, 12)
             }
-
-            // FIXME(linux): Requires >= 6.10 kernel headers.
-            "SYS_mseal" => true,
+            "SYS_mseal" => kernel < (6, 10),
 
             // FIXME(linux): seems to not be available all the time (from <include/linux/sched.h>:
             "PF_VCPU" | "PF_IDLE" | "PF_EXITING" | "PF_POSTCOREDUMP" | "PF_IO_WORKER"
@@ -4853,47 +5116,45 @@ fn test_linux(target: &str) {
             | "PF_RANDOMIZE" | "PF_NO_SETAFFINITY" | "PF_MCE_EARLY" | "PF_MEMALLOC_PIN"
             | "PF_BLOCK_TS" | "PF_SUSPEND_TASK" => true,
 
-            // FIXME(linux): Requires >= 6.9 kernel headers.
-            "EPIOCSPARAMS" | "EPIOCGPARAMS" => true,
+            "EPIOCSPARAMS" | "EPIOCGPARAMS" if old_musl => true,
 
-            // FIXME(linux): Requires >= 6.11 kernel headers.
-            "MAP_DROPPABLE" => true,
+            // FIXME(linux): Requires >= 6.6 kernel headers.
+            "SECCOMP_IOCTL_NOTIF_SET_FLAGS" => kernel < (6, 6),
 
-            // FIXME(linux): Requires >= 6.12 kernel headers.
-            "SOF_TIMESTAMPING_OPT_RX_FILTER" => true,
+            "EPIOCSPARAMS" | "EPIOCGPARAMS" => kernel < (6, 9),
+            "MAP_DROPPABLE" => kernel < (6, 11),
+            "SOF_TIMESTAMPING_OPT_RX_FILTER" => kernel < (6, 12),
 
-            // FIXME(linux): Requires >= 6.12 kernel headers.
             "SO_DEVMEM_LINEAR" | "SO_DEVMEM_DMABUF" | "SO_DEVMEM_DONTNEED"
-            | "SCM_DEVMEM_LINEAR" | "SCM_DEVMEM_DMABUF" => true,
+            | "SCM_DEVMEM_LINEAR" | "SCM_DEVMEM_DMABUF" => kernel < (6, 12),
 
-            // FIXME(linux): Requires >= 6.4 kernel headers.
-            "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG"
-            | "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG" => true,
-
-            // FIXME(linux): Requires >= 6.14 kernel headers.
             "SECBIT_EXEC_DENY_INTERACTIVE"
             | "SECBIT_EXEC_DENY_INTERACTIVE_LOCKED"
             | "SECBIT_EXEC_RESTRICT_FILE"
             | "SECBIT_EXEC_RESTRICT_FILE_LOCKED"
-            | "SECURE_ALL_UNPRIVILEGED" => true,
+            | "SECURE_ALL_UNPRIVILEGED" => kernel < (6, 14),
 
-            // FIXME(linux): Value changed in 6.14
-            "SECURE_ALL_BITS" | "SECURE_ALL_LOCKS" => true,
+            // Value changed in 6.14
+            "SECURE_ALL_BITS" | "SECURE_ALL_LOCKS" => kernel < (6, 14),
 
-            // FIXME(linux): Requires >= 6.9 kernel headers.
-            "AT_HWCAP3" | "AT_HWCAP4" => true,
+            // Recent additions
+            "AT_HWCAP3" | "AT_HWCAP4" if old_musl => true,
+            "AT_HWCAP3" | "AT_HWCAP4" => kernel < (6, 9),
+            "PTRACE_SET_SYSCALL_INFO" => kernel < (6, 16),
+            "TLS_INFO_TX_MAX_PAYLOAD_LEN" | "TLS_INFO_MAX" => kernel < (6, 19),
 
-            // Linux 6.14
-            "AT_EXECVE_CHECK" => true,
+            // Changed value recently
+            "SW_MAX" | "SW_CNT" => kernel < (6, 16),
 
-            // FIXME(linux):  Requires >= 6.16 kernel headers.
-            "PTRACE_SET_SYSCALL_INFO" => true,
-
-            // FIXME(linux): Requires >= 6.13 kernel headers.
-            "AT_HANDLE_CONNECTABLE" => true,
-
-            // FIXME(linux): Requires >= 6.12 kernel headers.
-            "AT_HANDLE_MNT_ID_UNIQUE" => true,
+            // Added in kernel versions 6.12..6.14 but we can't include `linux/fcntl.h`
+            // (conflicts), so these need to wait on glibc's redefinition in 2.44-2.43.
+            "AT_HANDLE_CONNECTABLE" | "AT_HANDLE_MNT_ID_UNIQUE" | "AT_EXECVE_CHECK" => {
+                if gnu {
+                    versions.glibc.unwrap() < (2, 43)
+                } else {
+                    true
+                }
+            }
 
             // FIXME(musl): This value is not yet in musl.
             // eabihf targets are tested using an older version of glibc
@@ -5034,6 +5295,10 @@ fn test_linux(target: &str) {
             // FIXME(linux): function pointers changed since Ubuntu 23.10
             "strtol" | "strtoll" | "strtoul" | "strtoull" | "fscanf" | "scanf" | "sscanf" => true,
 
+            // FIXME(ppc): function pointers changed in Ubuntu 26.04 to support IEEE binary128
+            // `long double`. We should update at some point but there is no hurry.
+            "printf" | "fprintf" | "sprintf" | "snprintf" | "syslog" if gnu && ppc64le => true,
+
             _ => false,
         }
     });
@@ -5165,6 +5430,17 @@ fn test_linux(target: &str) {
             ("file_handle", "f_handle") if musl || uclibc => true,
             // FIXME(ctest): ctest does not translate the rust code which computes the padding size
             ("pthread_cond_t", "__padding") if l4re => true,
+            (
+                "statx",
+                "stx_subvol"
+                | "stx_atomic_write_unit_min"
+                | "stx_atomic_write_unit_max"
+                | "stx_atomic_write_segments_max"
+                | "stx_dio_read_offset_align"
+                | "stx_atomic_write_unit_max_opt"
+                | "__statx_pad2"
+                | "__statx_pad3",
+            ) if gnu && versions.glibc.unwrap() < (2, 43) => true,
             _ => false,
         }
     });
@@ -5261,7 +5537,7 @@ fn test_linux(target: &str) {
 // are included (e.g. because including both sets of headers clashes)
 fn test_linux_like_apis(target: &str) {
     let gnu = target.contains("gnu");
-    let musl = target.contains("musl") || target.contains("ohos");
+    let musl = target.contains("musl") || target.contains("ohos") || target.contains("pauthtest");
     let linux = target.contains("linux");
     let wali = target.contains("linux") && target.contains("wasm32");
     let emscripten = target.contains("emscripten");
@@ -5900,6 +6176,9 @@ fn test_aix(target: &str) {
             // header.
             "fileops_t" | "file" => true,
 
+            // Extern types
+            "DIR" | "FILE" | "fpos_t" | "lock_data_instrumented" => true,
+
             _ => false,
         }
     });
@@ -6274,10 +6553,148 @@ fn test_qurt(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
+/// Platform versions for checking expected support. These are extracted from headers so should be
+/// accurate for the target we are building, rather than the host (which `uname` would provide).
+static VERSIONS: LazyLock<Versions> = LazyLock::new(Versions::init_from_cc);
+
+#[derive(Clone, Copy, Debug, Default)]
+struct Versions {
+    linux: Option<(u32, u32)>,
+    glibc: Option<(u32, u32)>,
+    freebsd: Option<(u32, u32)>,
+    openbsd: Option<(u32, u32)>,
+    netbsd: Option<(u32, u32)>,
+    macos: Option<(u32, u32)>,
+    emscripten: Option<(u32, u32)>,
+}
+
+impl Versions {
+    fn init_from_cc() -> Self {
+        let src = r#"
+            #if defined(__linux__) && defined(__has_include)
+            #if __has_include(<linux/version.h>)
+            /* Defines LINUX_VERSION_MAJOR, LINUX_VERSION_PATCHLEVEL (integers) */
+            #include "linux/version.h"
+            #endif
+            #endif
+
+            /* Including a libc header will define __GLIBC__ */
+            #include <stdio.h>
+
+            #ifdef __GLIBC__
+            /* Provides __GLIBC__, __GLIBC_MINOR__ (integers) */
+            #include "gnu/libc-version.h"
+            #endif
+
+            #if defined(__FreeBSD__) \
+                || defined(__NetBSD__) \
+                || defined(__OpenBSD__) \
+                || defined(__APPLE__)
+            /* FreeBSD: __FreeBSD_version (MMmmRxx string, e.g. 1600018)
+             * NetBSD: __NetBSD_Version__ (MMmmrrpp00 string, e.g. 1001000000)
+             * OpenBSD: OpenBSD (release date, e.g. 202510) and OpenBSDM_m (e.g. OpenBSD7_8)
+             * Apple: __MAC_OS_X_VERSION_MAX_ALLOWED __MAC_M_m (e.g. __MAC_26_5)
+             */
+            #include "sys/param.h"
+            #endif
+
+            #ifdef __EMSCRIPTEN__
+            /* Provides __EMSCRIPTEN_MAJOR__, __EMSCRIPTEN_MINOR__ */
+            #include "emscripten/version.h"
+            #endif
+        "#;
+
+        let mut ret = Versions::default();
+
+        let compiler = cc::Build::new().get_compiler();
+
+        if !(compiler.is_like_gnu() || compiler.is_like_clang()) {
+            println!("cargo:warning=unsupported compiler for version detection, skipping");
+            return ret;
+        }
+
+        // `-dM -E` invokes the preprocessor and prints all `#define`s. `cc` automatically
+        // sets target-specific flags.
+        let mut cmd = compiler.to_command();
+        cmd.stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .args(["-dM", "-E", "-"]);
+        let mut child = cmd.spawn().expect("failed to spawn compiler");
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(src.as_bytes())
+            .expect("failed to send stdin");
+        let out = child.wait_with_output().expect("failed to wait on child");
+        let out = String::from_utf8_lossy(&out.stdout);
+
+        // Allow spaces everywhere so we match things like `\n  # define foo bar \n`.
+        let re = Regex::new(r"^\s*#\s*define\s+(\w+)\s+(.*?)\s*$").unwrap();
+        let obsd_re = Regex::new(r"^OpenBSD(\d+)_(\d+)$").unwrap();
+        let mac_re = Regex::new(r"^__MAC_(\d+)_(\d+)").unwrap();
+
+        for line in out.lines() {
+            let Some(caps) = re.captures(line) else {
+                continue;
+            };
+            let name = &caps[1];
+            let value = &caps[2];
+
+            match name {
+                "LINUX_VERSION_MAJOR" => {
+                    ret.linux.get_or_insert_default().0 = value.parse().unwrap()
+                }
+                "LINUX_VERSION_PATCHLEVEL" => {
+                    ret.linux.get_or_insert_default().1 = value.parse().unwrap()
+                }
+                "__GLIBC__" => ret.glibc.get_or_insert_default().0 = value.parse().unwrap(),
+                "__GLIBC_MINOR__" => ret.glibc.get_or_insert_default().1 = value.parse().unwrap(),
+                "__MAC_OS_X_VERSION_MAX_ALLOWED" => {
+                    let caps = mac_re.captures(value).unwrap();
+                    let major: u32 = caps[1].parse().unwrap();
+                    let minor: u32 = caps[2].parse().unwrap();
+                    ret.macos = Some((major, minor));
+                }
+                "__FreeBSD_version" => {
+                    // Format: MmmRxx where M is major (possibly multi-digit), mm is minor, R
+                    // indicates release status, xx is some sequence.
+                    let major: u32 = value[..(value.len() - 5)].parse().unwrap();
+                    let minor: u32 = value[(value.len() - 5)..(value.len() - 3)].parse().unwrap();
+                    ret.freebsd = Some((major, minor));
+                }
+                "__NetBSD_Version__" => {
+                    // Format: MMmmrrpp00 where M is major (possibly multi-digit), mm is minor, r
+                    // and p are patch level.
+                    let major: u32 = value[..(value.len() - 8)].parse().unwrap();
+                    let minor: u32 = value[(value.len() - 8)..(value.len() - 6)].parse().unwrap();
+                    ret.netbsd = Some((major, minor));
+                }
+                x if obsd_re.is_match(x) => {
+                    let caps = obsd_re.captures(name).expect("is_match checked");
+                    let major: u32 = caps[1].parse().unwrap();
+                    let minor: u32 = caps[2].parse().unwrap();
+                    ret.openbsd = Some((major, minor));
+                }
+                "__EMSCRIPTEN_major__" => {
+                    ret.emscripten.get_or_insert_default().0 = value.parse().unwrap()
+                }
+                "__EMSCRIPTEN_minor__" => {
+                    ret.emscripten.get_or_insert_default().1 = value.parse().unwrap()
+                }
+                _ => (),
+            }
+        }
+
+        println!("cargo:warning=detected versions: {ret:?}");
+        ret
+    }
+}
+
 /// Attempt to execute a command and collect its output, If the command fails for whatever
 /// reason, return `None`.
 fn try_command_output(cmd: &str, args: &[&str]) -> Option<String> {
-    let output = std::process::Command::new(cmd).args(args).output().ok()?;
+    let output = Command::new(cmd).args(args).output().ok()?;
 
     if !output.status.success() {
         return None;
@@ -6286,4 +6703,14 @@ fn try_command_output(cmd: &str, args: &[&str]) -> Option<String> {
     let res = String::from_utf8(output.stdout)
         .unwrap_or_else(|e| panic!("command {cmd} returned non-UTF-8 output: {e}"));
     Some(res)
+}
+
+/// Return true if the env is set to a value other than `0`.
+fn env_flag(key: &str) -> bool {
+    match env::var(key) {
+        Ok(x) if x == "0" => false,
+        Err(VarError::NotPresent) => false,
+        Err(VarError::NotUnicode(_)) => panic!("non-unicode var for `{key}`"),
+        Ok(_) => true,
+    }
 }

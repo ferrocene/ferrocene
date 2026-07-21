@@ -41,7 +41,7 @@ pub type statvfs64 = crate::statvfs;
 pub type dirent64 = crate::dirent;
 
 extern_ty! {
-    pub enum fpos64_t {} // FIXME(emscripten): fill this out with a struct
+    pub type fpos64_t; // FIXME(emscripten): fill this out with a struct
 }
 
 s! {
@@ -210,6 +210,11 @@ s! {
         pub cmsg_len: crate::socklen_t,
         pub cmsg_level: c_int,
         pub cmsg_type: c_int,
+    }
+
+    pub struct in6_pktinfo {
+        pub ipi6_addr: crate::in6_addr,
+        pub ipi6_ifindex: c_uint,
     }
 
     pub struct sem_t {
@@ -921,7 +926,7 @@ pub const EHWPOISON: c_int = 155;
 pub const EL2NSYNC: c_int = 156;
 
 pub const SA_NODEFER: c_int = 0x40000000;
-pub const SA_RESETHAND: c_int = 0x80000000;
+pub const SA_RESETHAND: c_int = u32_cast_int(0x80000000);
 pub const SA_RESTART: c_int = 0x10000000;
 pub const SA_NOCLDSTOP: c_int = 0x00000001;
 

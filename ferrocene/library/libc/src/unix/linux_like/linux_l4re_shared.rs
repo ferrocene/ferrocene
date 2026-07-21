@@ -32,14 +32,6 @@ cfg_if! {
 
 pub type iconv_t = *mut c_void;
 
-cfg_if! {
-    if #[cfg(not(target_env = "gnu"))] {
-        extern_ty! {
-            pub enum fpos64_t {} // FIXME(linux): fill this out with a struct
-        }
-    }
-}
-
 s! {
     pub struct glob_t {
         pub gl_pathc: size_t,
@@ -683,6 +675,9 @@ pub const EI_CLASS: usize = 4;
 pub const ELFCLASSNONE: u8 = 0;
 pub const ELFCLASS32: u8 = 1;
 pub const ELFCLASS64: u8 = 2;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const ELFCLASSNUM: usize = 3;
 
 pub const EI_DATA: usize = 5;
@@ -798,6 +793,7 @@ pub const EM_M32R: u16 = 88;
 pub const EM_MN10300: u16 = 89;
 pub const EM_MN10200: u16 = 90;
 pub const EM_PJ: u16 = 91;
+#[cfg(not(target_env = "uclibc"))]
 pub const EM_OPENRISC: u16 = 92;
 #[cfg(target_env = "uclibc")]
 pub const EM_OR1K: u16 = 92;
@@ -812,6 +808,9 @@ pub const EM_ALPHA: u16 = 0x9026;
 // elf.h - Legal values for e_version (version).
 pub const EV_NONE: u32 = 0;
 pub const EV_CURRENT: u32 = 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const EV_NUM: u32 = 2;
 
 // elf.h - Legal values for p_type (segment type).
@@ -875,6 +874,7 @@ pub const AT_EXECFN: c_ulong = 31;
 // defined in arch/<arch>/include/uapi/asm/auxvec.h but has the same value
 // wherever it is defined.
 pub const AT_SYSINFO_EHDR: c_ulong = 33;
+#[cfg(not(target_env = "uclibc"))]
 pub const AT_MINSIGSTKSZ: c_ulong = 51;
 
 pub const GLOB_ERR: c_int = 1 << 0;
@@ -929,7 +929,9 @@ pub const PTHREAD_MUTEX_NORMAL: c_int = 0;
 pub const PTHREAD_MUTEX_RECURSIVE: c_int = 1;
 pub const PTHREAD_MUTEX_ERRORCHECK: c_int = 2;
 pub const PTHREAD_MUTEX_DEFAULT: c_int = PTHREAD_MUTEX_NORMAL;
+#[cfg(not(target_os = "l4re"))]
 pub const PTHREAD_MUTEX_STALLED: c_int = 0;
+#[cfg(not(target_os = "l4re"))]
 pub const PTHREAD_MUTEX_ROBUST: c_int = 1;
 pub const PTHREAD_PRIO_NONE: c_int = 0;
 pub const PTHREAD_PRIO_INHERIT: c_int = 1;
@@ -1125,7 +1127,7 @@ pub const PR_SET_MM_MAP: c_int = 14;
 pub const PR_SET_MM_MAP_SIZE: c_int = 15;
 
 pub const PR_SET_PTRACER: c_int = 0x59616d61;
-pub const PR_SET_PTRACER_ANY: c_ulong = 0xffffffffffffffff;
+pub const PR_SET_PTRACER_ANY: c_ulong = (-1 as c_long) as c_ulong;
 
 pub const PR_SET_CHILD_SUBREAPER: c_int = 36;
 pub const PR_GET_CHILD_SUBREAPER: c_int = 37;
@@ -1160,7 +1162,11 @@ pub const PR_SCHED_CORE_GET: c_int = 0;
 pub const PR_SCHED_CORE_CREATE: c_int = 1;
 pub const PR_SCHED_CORE_SHARE_TO: c_int = 2;
 pub const PR_SCHED_CORE_SHARE_FROM: c_int = 3;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PR_SCHED_CORE_MAX: c_int = 4;
+
 pub const PR_SCHED_CORE_SCOPE_THREAD: c_int = 0;
 pub const PR_SCHED_CORE_SCOPE_THREAD_GROUP: c_int = 1;
 pub const PR_SCHED_CORE_SCOPE_PROCESS_GROUP: c_int = 2;
@@ -1313,6 +1319,9 @@ pub const RT_CLASS_UNSPEC: u8 = 0;
 pub const RT_CLASS_DEFAULT: u8 = 253;
 pub const RT_CLASS_MAIN: u8 = 254;
 pub const RT_CLASS_LOCAL: u8 = 255;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const RT_CLASS_MAX: u8 = 255;
 
 pub const MAX_ADDR_LEN: usize = 7;
@@ -1425,7 +1434,8 @@ pub const NT_LWPSTATUS: c_int = 16;
 pub const NT_LWPSINFO: c_int = 17;
 pub const NT_PRFPXREG: c_int = 20;
 
-pub const MS_NOUSER: c_ulong = 0xffffffff80000000;
+// FIXME(1.0): C uses an unsigned int here.
+pub const MS_NOUSER: c_ulong = 1 << 31;
 
 f! {
     pub fn CMSG_NXTHDR(
@@ -1720,15 +1730,6 @@ extern "C" {
 
     pub fn mprotect(addr: *mut c_void, len: size_t, prot: c_int) -> c_int;
     pub fn __errno_location() -> *mut c_int;
-
-    // Not available now on Android
-    pub fn mremap(
-        addr: *mut c_void,
-        len: size_t,
-        new_len: size_t,
-        flags: c_int,
-        ...
-    ) -> *mut c_void;
 
     #[cfg_attr(gnu_time_bits64, link_name = "__glob64_time64")]
     #[cfg_attr(

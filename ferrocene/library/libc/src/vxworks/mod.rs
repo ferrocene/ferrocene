@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 extern_ty! {
-    pub enum DIR {}
+    pub type DIR;
 }
 
 pub type intmax_t = i64;
@@ -58,7 +58,12 @@ pub type pthread_key_t = c_ulong;
 
 // From b_off_t.h
 pub type off_t = c_longlong;
-pub type off64_t = off_t;
+
+#[deprecated(
+    since = "0.2.187",
+    note = "Kernel mode definitions are unsupported. Use `off_t` instead."
+)]
+pub type off64_t = c_longlong;
 
 // From b_BOOL.h
 pub type BOOL = c_int;
@@ -93,7 +98,7 @@ pub type sa_family_t = c_uchar;
 pub type mqd_t = c_int;
 
 extern_ty! {
-    pub enum _Vx_semaphore {}
+    pub type _Vx_semaphore;
 }
 
 impl siginfo_t {
@@ -687,9 +692,9 @@ pub const TIMER_ABSTIME: c_int = 0x1;
 pub const TIMER_RELTIME: c_int = 0x0;
 
 // PTHREAD STUFF
-pub const PTHREAD_INITIALIZED_OBJ: c_int = 0xF70990EF;
+pub const PTHREAD_INITIALIZED_OBJ: c_int = u32_cast_int(0xF70990EF);
 pub const PTHREAD_DESTROYED_OBJ: c_int = -1;
-pub const PTHREAD_VALID_OBJ: c_int = 0xEC542A37;
+pub const PTHREAD_VALID_OBJ: c_int = u32_cast_int(0xEC542A37);
 pub const PTHREAD_INVALID_OBJ: c_int = -1;
 pub const PTHREAD_UNUSED_YET_OBJ: c_int = -1;
 
@@ -702,6 +707,9 @@ pub const PTHREAD_MUTEX_ERRORCHECK: c_int = 1;
 pub const PTHREAD_MUTEX_RECURSIVE: c_int = 2;
 pub const PTHREAD_MUTEX_DEFAULT: c_int = PTHREAD_MUTEX_NORMAL;
 pub const PTHREAD_STACK_MIN: usize = 4096;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const _PTHREAD_SHARED_SEM_NAME_MAX: usize = 30;
 
 //sched.h
@@ -1041,6 +1049,9 @@ pub const AF_SOCKDEV: c_int = 31;
 pub const AF_TIPC: c_int = 33;
 pub const AF_MIPC: c_int = 34;
 pub const AF_MIPC_SAFE: c_int = 35;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const AF_MAX: c_int = 39;
 
 // termios.h
@@ -1168,10 +1179,13 @@ pub const FIODISKCHANGE: c_int = 13;
 pub const FIOCANCEL: c_int = 14;
 pub const FIOSQUEEZE: c_int = 15;
 pub const FIOGETNAME: c_int = 18;
-pub const FIONBIO: c_int = 0x90040010;
+pub const FIONBIO: c_int = u32_cast_int(0x90040010);
 
 // limits.h
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PATH_MAX: c_int = _PARM_PATH_MAX;
+
 pub const _POSIX_PATH_MAX: c_int = 256;
 
 // Some poll stuff
@@ -1315,7 +1329,12 @@ pub const AT_REMOVEDIR: c_int = 0x200;
 pub const AT_SYMLINK_FOLLOW: c_int = 0x400;
 
 // vxParams.h definitions
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const _PARM_NAME_MAX: c_int = 255;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const _PARM_PATH_MAX: c_int = 1024;
 
 // WAIT STUFF
@@ -1341,7 +1360,7 @@ pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
 };
 
 const PTHREAD_CONDATTR_INITIALIZER: pthread_condattr_t = pthread_condattr_t {
-    condAttrStatus: 0xf70990ef,
+    condAttrStatus: u32_cast_int(0xf70990ef),
     condAttrPshared: 1,
     condAttrClockId: CLOCK_REALTIME,
 };
@@ -1429,12 +1448,12 @@ pub const MS_INVALIDATE: c_int = 0x0004;
 pub const MAP_FAILED: *mut c_void = !0 as *mut c_void;
 
 // sys/ttycom.h
-pub const TIOCGWINSZ: c_int = 0x1740087468;
+pub const TIOCGWINSZ: i64 = 0x1740087468;
 pub const TIOCSWINSZ: c_int = -0x7ff78b99;
 
 extern_ty! {
-    pub enum FILE {}
-    pub enum fpos_t {} // FIXME(vxworks): fill this out with a struct
+    pub type FILE;
+    pub type fpos_t; // FIXME(vxworks): fill this out with a struct
 }
 
 f! {
@@ -2414,14 +2433,7 @@ safe_f! {
     }
 }
 
-pub fn pread(_fd: c_int, _buf: *mut c_void, _count: size_t, _offset: off64_t) -> ssize_t {
-    -1
-}
-
-pub fn pwrite(_fd: c_int, _buf: *const c_void, _count: size_t, _offset: off64_t) -> ssize_t {
-    -1
-}
-pub fn posix_memalign(memptr: *mut *mut c_void, align: size_t, size: size_t) -> c_int {
+pub unsafe fn posix_memalign(memptr: *mut *mut c_void, align: size_t, size: size_t) -> c_int {
     // check to see if align is a power of 2 and if align is a multiple
     //  of sizeof(void *)
     if (align & align - 1 != 0) || (align as usize % size_of::<size_t>() != 0) {

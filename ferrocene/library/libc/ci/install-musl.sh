@@ -8,7 +8,7 @@ set -eux
 arch="$1"
 version="$2"
 old_musl=1.1.24
-new_musl=1.2.5
+new_musl=1.2.6
 
 case "$arch" in
     loongarch64) musl_version="$new_musl" ;;
@@ -30,8 +30,17 @@ musl="musl-${musl_version}"
 # first. See https://github.com/rust-lang/ci-mirrors/blob/main/files/libc.toml.
 curl --retry 5 "https://ci-mirrors.rust-lang.org/libc/${musl}.tar.gz" | tar xzf -
 
-# Configure, build, and install musl:
 cd "$musl"
+
+# Apply patches
+if [ "$musl_version" = "$old_musl" ]; then
+    patch_dir="$(realpath ../ci/musl-patches-1.1.x)"
+    for patchfile in "$patch_dir"/*; do
+        cat "$patchfile" | patch -p1
+    done
+fi
+
+# Configure, build, and install musl:
 case ${1} in
     aarch64)
         musl_arch=aarch64
@@ -80,10 +89,21 @@ case ${1} in
             ./configure --prefix="/musl-${musl_arch}" --enable-wrapper=yes
         make install -j4
         ;;
-    powerpc64*)
+    powerpc64le)
         musl_arch=powerpc64
         kernel_arch=powerpc
-        CC="${1}-linux-gnu-gcc" CFLAGS="-mlong-double-64" \
+        CC=powerpc64le-linux-gnu-gcc CFLAGS="-mlong-double-64" \
+            ./configure --prefix="/musl-${musl_arch}" --enable-wrapper=yes
+        make install -j4
+        ;;
+    powerpc64)
+        musl_arch=powerpc64
+        kernel_arch=powerpc
+        # Ubuntu's powerpc64 cross toolchain is for ELFv1, but we need a
+        # libgcc that's for ELFv2, which we can't trivially get.
+        # Luckily, compiler-builtins provides all the necessary symbols,
+        # so we resort to using that instead
+        CC=powerpc64-linux-gnu-gcc CFLAGS="-mlong-double-64 -mabi=elfv2" LIBCC="/compiler_builtins.rlib" \
             ./configure --prefix="/musl-${musl_arch}" --enable-wrapper=yes
         make install -j4
         ;;
@@ -99,18 +119,20 @@ rm -rf "$musl"
 
 # Download, configure, build, and install musl-sanitized kernel headers.
 
-# Alpine follows stable kernel releases, 3.20 uses Linux 6.6 headers.
-alpine_version=3.20
+# Alpine follows stable kernel releases, 3.24 uses Linux 7.0 headers.
+alpine_version=3.24
 alpine_git=https://git.alpinelinux.org/aports
 
-# This routine piggybacks on: https://git.alpinelinux.org/aports/tree/main/linux-headers?h=3.20-stable
+# This routine piggybacks on: https://git.alpinelinux.org/aports/tree/main/linux-headers?h=3.24-stable
 git clone -n --depth=1 --filter=tree:0 -b "${alpine_version}-stable" "$alpine_git"
 (
     cd aports
     git sparse-checkout set --no-cone main/linux-headers
     git checkout
-
     cd main/linux-headers
+
+    # Create a version of APKBUILD that dumps the variables we're interested
+    # in. This file doesn't retrieve or build anything on its own.
     cp APKBUILD APKBUILD.vars
     cat <<- EOF >> APKBUILD.vars
         echo "\$source" > alpine-source

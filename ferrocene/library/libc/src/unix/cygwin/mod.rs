@@ -29,7 +29,7 @@ pub type suseconds_t = c_long;
 pub type useconds_t = c_ulong;
 
 extern_ty! {
-    pub enum timezone {}
+    pub type timezone;
 }
 
 pub type sigset_t = c_ulong;
@@ -71,7 +71,7 @@ pub type nfds_t = c_uint;
 pub type sem_t = *mut sem;
 
 extern_ty! {
-    pub enum sem {}
+    pub type sem;
 }
 
 pub type tcflag_t = c_uint;
@@ -599,7 +599,7 @@ pub const SA_SIGINFO: c_int = 0x00000002;
 pub const SA_RESTART: c_int = 0x10000000;
 pub const SA_ONSTACK: c_int = 0x20000000;
 pub const SA_NODEFER: c_int = 0x40000000;
-pub const SA_RESETHAND: c_int = 0x80000000;
+pub const SA_RESETHAND: c_int = u32_cast_int(0x80000000);
 pub const MINSIGSTKSZ: size_t = 8192;
 pub const SIGSTKSZ: size_t = 32768;
 pub const SIGHUP: c_int = 1;
@@ -693,8 +693,8 @@ pub const IF_NAMESIZE: size_t = 44;
 pub const IFNAMSIZ: size_t = IF_NAMESIZE;
 
 pub const FIONREAD: c_int = 0x4008667f;
-pub const FIONBIO: c_int = 0x8004667e;
-pub const FIOASYNC: c_int = 0x8008667d;
+pub const FIONBIO: c_int = u32_cast_int(0x8004667e);
+pub const FIOASYNC: c_int = u32_cast_int(0x8008667d);
 pub const FIOCLEX: c_int = 0; // FIXME: does not exist on Cygwin!
 pub const SIOCGIFCONF: c_ulong = 0x80107364;
 pub const SIOCGIFFLAGS: c_ulong = 0x80507365;
@@ -897,8 +897,15 @@ pub const ARG_MAX: c_int = 32000;
 pub const CHILD_MAX: c_int = 256;
 pub const IOV_MAX: c_int = 1024;
 pub const PTHREAD_STACK_MIN: size_t = 65536;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PATH_MAX: c_int = 4096;
+
 pub const PIPE_BUF: usize = 4096;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NGROUPS_MAX: c_int = 1024;
 
 pub const FILENAME_MAX: c_int = 4096;

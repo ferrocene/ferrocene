@@ -4,6 +4,8 @@ use crate::prelude::*;
 use crate::{
     cmsghdr,
     msghdr,
+    _IOW,
+    _IOWR,
 };
 
 cfg_if! {
@@ -40,13 +42,6 @@ pub type idtype_t = c_int;
 pub type loff_t = c_longlong;
 pub type __kernel_loff_t = c_longlong;
 pub type __kernel_pid_t = c_int;
-
-pub type __u8 = c_uchar;
-pub type __u16 = c_ushort;
-pub type __s16 = c_short;
-pub type __u32 = c_uint;
-pub type __s32 = c_int;
-pub type __be16 = __u16;
 
 // linux/elf.h
 
@@ -341,6 +336,34 @@ s! {
         pub flags: crate::__u64,
     }
 
+    pub struct seccomp_notif_sizes {
+        pub seccomp_notif: crate::__u16,
+        pub seccomp_notif_resp: crate::__u16,
+        pub seccomp_data: crate::__u16,
+    }
+
+    pub struct seccomp_notif {
+        pub id: crate::__u64,
+        pub pid: crate::__u32,
+        pub flags: crate::__u32,
+        pub data: seccomp_data,
+    }
+
+    pub struct seccomp_notif_resp {
+        pub id: crate::__u64,
+        pub val: crate::__s64,
+        pub error: crate::__s32,
+        pub flags: crate::__u32,
+    }
+
+    pub struct seccomp_notif_addfd {
+        pub id: crate::__u64,
+        pub flags: crate::__u32,
+        pub srcfd: crate::__u32,
+        pub newfd: crate::__u32,
+        pub newfd_flags: crate::__u32,
+    }
+
     pub struct ptrace_peeksiginfo_args {
         pub off: crate::__u64,
         pub flags: crate::__u32,
@@ -576,6 +599,14 @@ s! {
         __serial: c_uint,
         __value: [c_char; 92],
     }
+
+    // linux/futex.h
+    pub struct futex_waitv {
+        pub val: crate::__u64,
+        pub uaddr: crate::__u64,
+        pub flags: crate::__u32,
+        __reserved: Padding<crate::__u32>,
+    }
 }
 
 s_no_extra_traits! {
@@ -688,6 +719,7 @@ cfg_if! {
 }
 
 pub const MADV_SOFT_OFFLINE: c_int = 101;
+#[allow(overflowing_literals)] // fixed in a future kernel version
 pub const MS_NOUSER: c_ulong = 0xffffffff80000000;
 pub const MS_RMT_MASK: c_ulong = 0x02800051;
 
@@ -1300,7 +1332,7 @@ pub const TCGETS: c_int = 0x5401;
 pub const TCSETS: c_int = 0x5402;
 pub const TCSETSW: c_int = 0x5403;
 pub const TCSETSF: c_int = 0x5404;
-pub const TCGETS2: c_int = 0x802c542a;
+pub const TCGETS2: c_int = u32_cast_int(0x802c542a);
 pub const TCSETS2: c_int = 0x402c542b;
 pub const TCSETSW2: c_int = 0x402c542c;
 pub const TCSETSF2: c_int = 0x402c542d;
@@ -1364,24 +1396,24 @@ pub const AI_DEFAULT: c_int = AI_V4MAPPED_CFG | AI_ADDRCONFIG;
 // linux/kexec.h
 pub const KEXEC_ON_CRASH: c_int = 0x00000001;
 pub const KEXEC_PRESERVE_CONTEXT: c_int = 0x00000002;
-pub const KEXEC_ARCH_MASK: c_int = 0xffff0000;
+pub const KEXEC_ARCH_MASK: c_int = u32_cast_int(0xffff0000);
 pub const KEXEC_FILE_UNLOAD: c_int = 0x00000001;
 pub const KEXEC_FILE_ON_CRASH: c_int = 0x00000002;
 pub const KEXEC_FILE_NO_INITRAMFS: c_int = 0x00000004;
 
-pub const LINUX_REBOOT_MAGIC1: c_int = 0xfee1dead;
+pub const LINUX_REBOOT_MAGIC1: c_int = u32_cast_int(0xfee1dead);
 pub const LINUX_REBOOT_MAGIC2: c_int = 672274793;
 pub const LINUX_REBOOT_MAGIC2A: c_int = 85072278;
 pub const LINUX_REBOOT_MAGIC2B: c_int = 369367448;
 pub const LINUX_REBOOT_MAGIC2C: c_int = 537993216;
 
 pub const LINUX_REBOOT_CMD_RESTART: c_int = 0x01234567;
-pub const LINUX_REBOOT_CMD_HALT: c_int = 0xCDEF0123;
-pub const LINUX_REBOOT_CMD_CAD_ON: c_int = 0x89ABCDEF;
+pub const LINUX_REBOOT_CMD_HALT: c_int = u32_cast_int(0xCDEF0123);
+pub const LINUX_REBOOT_CMD_CAD_ON: c_int = u32_cast_int(0x89ABCDEF);
 pub const LINUX_REBOOT_CMD_CAD_OFF: c_int = 0x00000000;
 pub const LINUX_REBOOT_CMD_POWER_OFF: c_int = 0x4321FEDC;
-pub const LINUX_REBOOT_CMD_RESTART2: c_int = 0xA1B2C3D4;
-pub const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = 0xD000FCE2;
+pub const LINUX_REBOOT_CMD_RESTART2: c_int = u32_cast_int(0xA1B2C3D4);
+pub const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = u32_cast_int(0xD000FCE2);
 pub const LINUX_REBOOT_CMD_KEXEC: c_int = 0x45584543;
 
 pub const REG_BASIC: c_int = 0;
@@ -1607,6 +1639,9 @@ pub const NFNL_SUBSYS_CTNETLINK_TIMEOUT: c_int = 8;
 pub const NFNL_SUBSYS_CTHELPER: c_int = 9;
 pub const NFNL_SUBSYS_NFTABLES: c_int = 10;
 pub const NFNL_SUBSYS_NFT_COMPAT: c_int = 11;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFNL_SUBSYS_COUNT: c_int = 12;
 
 pub const NFNL_MSG_BATCH_BEGIN: c_int = NLMSG_MIN_TYPE;
@@ -1719,6 +1754,9 @@ pub const NFQA_CFG_F_CONNTRACK: c_int = 0x0002;
 pub const NFQA_CFG_F_GSO: c_int = 0x0004;
 pub const NFQA_CFG_F_UID_GID: c_int = 0x0008;
 pub const NFQA_CFG_F_SECCTX: c_int = 0x0010;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFQA_CFG_F_MAX: c_int = 0x0020;
 
 pub const NFQA_SKB_CSUMNOTREADY: c_int = 0x0001;
@@ -1820,6 +1858,14 @@ pub const SECCOMP_USER_NOTIF_FLAG_CONTINUE: c_ulong = 1;
 
 pub const SECCOMP_ADDFD_FLAG_SETFD: c_ulong = 1;
 pub const SECCOMP_ADDFD_FLAG_SEND: c_ulong = 2;
+
+const SECCOMP_IOC_MAGIC: u32 = b'!' as u32;
+
+pub const SECCOMP_IOCTL_NOTIF_RECV: Ioctl = _IOWR::<seccomp_notif>(SECCOMP_IOC_MAGIC, 0);
+pub const SECCOMP_IOCTL_NOTIF_SEND: Ioctl = _IOWR::<seccomp_notif_resp>(SECCOMP_IOC_MAGIC, 1);
+pub const SECCOMP_IOCTL_NOTIF_ID_VALID: Ioctl = _IOW::<u64>(SECCOMP_IOC_MAGIC, 2);
+pub const SECCOMP_IOCTL_NOTIF_ADDFD: Ioctl = _IOW::<seccomp_notif_addfd>(SECCOMP_IOC_MAGIC, 3);
+pub const SECCOMP_IOCTL_NOTIF_SET_FLAGS: Ioctl = _IOW::<u64>(SECCOMP_IOC_MAGIC, 4);
 
 pub const NLA_F_NESTED: c_int = 1 << 15;
 pub const NLA_F_NET_BYTEORDER: c_int = 1 << 14;
@@ -1925,7 +1971,7 @@ pub const NF_MAX_VERDICT: c_int = NF_STOP;
 pub const NF_VERDICT_MASK: c_int = 0x000000ff;
 pub const NF_VERDICT_FLAG_QUEUE_BYPASS: c_int = 0x00008000;
 
-pub const NF_VERDICT_QMASK: c_int = 0xffff0000;
+pub const NF_VERDICT_QMASK: c_int = u32_cast_int(0xffff0000);
 pub const NF_VERDICT_QBITS: c_int = 16;
 
 pub const NF_VERDICT_BITS: c_int = 16;
@@ -1975,6 +2021,9 @@ pub const NF_BR_PRI_BRNF: c_int = 0;
 pub const NF_BR_PRI_NAT_DST_OTHER: c_int = 100;
 pub const NF_BR_PRI_FILTER_OTHER: c_int = 200;
 pub const NF_BR_PRI_NAT_SRC: c_int = 300;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_BR_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv4.h
@@ -1999,6 +2048,9 @@ pub const NF_IP_PRI_NAT_SRC: c_int = 100;
 pub const NF_IP_PRI_SELINUX_LAST: c_int = 225;
 pub const NF_IP_PRI_CONNTRACK_HELPER: c_int = 300;
 pub const NF_IP_PRI_CONNTRACK_CONFIRM: c_int = crate::INT_MAX;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_IP_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv6.h
@@ -2022,6 +2074,9 @@ pub const NF_IP6_PRI_SECURITY: c_int = 50;
 pub const NF_IP6_PRI_NAT_SRC: c_int = 100;
 pub const NF_IP6_PRI_SELINUX_LAST: c_int = 225;
 pub const NF_IP6_PRI_CONNTRACK_HELPER: c_int = 300;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_IP6_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv6/ip6_tables.h
@@ -2039,7 +2094,11 @@ pub const NFT_REG_1: c_int = 1;
 pub const NFT_REG_2: c_int = 2;
 pub const NFT_REG_3: c_int = 3;
 pub const NFT_REG_4: c_int = 4;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const __NFT_REG_MAX: c_int = 5;
+
 pub const NFT_REG32_00: c_int = 8;
 pub const NFT_REG32_01: c_int = 9;
 pub const NFT_REG32_02: c_int = 10;
@@ -2088,6 +2147,9 @@ pub const NFT_MSG_NEWOBJ: c_int = 18;
 pub const NFT_MSG_GETOBJ: c_int = 19;
 pub const NFT_MSG_DELOBJ: c_int = 20;
 pub const NFT_MSG_GETOBJ_RESET: c_int = 21;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFT_MSG_MAX: c_int = 25;
 
 pub const NFT_SET_ANONYMOUS: c_int = 0x1;
@@ -2219,31 +2281,77 @@ pub const NFT_NG_INCREMENTAL: c_int = 0;
 pub const NFT_NG_RANDOM: c_int = 1;
 
 // linux/input.h
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const FF_MAX: crate::__u16 = 0x7f;
+
 pub const FF_CNT: usize = FF_MAX as usize + 1;
 
 // linux/input-event-codes.h
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const INPUT_PROP_MAX: crate::__u16 = 0x1f;
+
 pub const INPUT_PROP_CNT: usize = INPUT_PROP_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const EV_MAX: crate::__u16 = 0x1f;
+
 pub const EV_CNT: usize = EV_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SYN_MAX: crate::__u16 = 0xf;
+
 pub const SYN_CNT: usize = SYN_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KEY_MAX: crate::__u16 = 0x2ff;
+
 pub const KEY_CNT: usize = KEY_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const REL_MAX: crate::__u16 = 0x0f;
+
 pub const REL_CNT: usize = REL_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const ABS_MAX: crate::__u16 = 0x3f;
+
 pub const ABS_CNT: usize = ABS_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SW_MAX: crate::__u16 = 0x0f;
+
 pub const SW_CNT: usize = SW_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const MSC_MAX: crate::__u16 = 0x07;
+
 pub const MSC_CNT: usize = MSC_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const LED_MAX: crate::__u16 = 0x0f;
+
 pub const LED_CNT: usize = LED_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const REP_MAX: crate::__u16 = 0x01;
+
 pub const REP_CNT: usize = REP_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SND_MAX: crate::__u16 = 0x07;
+
 pub const SND_CNT: usize = SND_MAX as usize + 1;
 
 // linux/uinput.h
@@ -2809,7 +2917,7 @@ pub const PR_SET_MM_EXE_FILE: c_int = 13;
 pub const PR_SET_MM_MAP: c_int = 14;
 pub const PR_SET_MM_MAP_SIZE: c_int = 15;
 pub const PR_SET_PTRACER: c_int = 0x59616d61;
-pub const PR_SET_PTRACER_ANY: c_ulong = 0xffffffffffffffff;
+pub const PR_SET_PTRACER_ANY: c_ulong = (-1 as c_long) as c_ulong;
 pub const PR_SET_CHILD_SUBREAPER: c_int = 36;
 pub const PR_GET_CHILD_SUBREAPER: c_int = 37;
 pub const PR_SET_NO_NEW_PRIVS: c_int = 38;
@@ -2874,7 +2982,11 @@ pub const PR_SCHED_CORE_GET: c_int = 0;
 pub const PR_SCHED_CORE_CREATE: c_int = 1;
 pub const PR_SCHED_CORE_SHARE_TO: c_int = 2;
 pub const PR_SCHED_CORE_SHARE_FROM: c_int = 3;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PR_SCHED_CORE_MAX: c_int = 4;
+
 pub const PR_SCHED_CORE_SCOPE_THREAD: c_int = 0;
 pub const PR_SCHED_CORE_SCOPE_THREAD_GROUP: c_int = 1;
 pub const PR_SCHED_CORE_SCOPE_PROCESS_GROUP: c_int = 2;
@@ -3176,7 +3288,11 @@ pub const KERN_S390_USER_DEBUG_LOGGING: c_int = 51;
 pub const KERN_CORE_USES_PID: c_int = 52;
 pub const KERN_TAINTED: c_int = 53;
 pub const KERN_CADPID: c_int = 54;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KERN_PIDMAX: c_int = 55;
+
 pub const KERN_CORE_PATTERN: c_int = 56;
 pub const KERN_PANIC_ON_OOPS: c_int = 57;
 pub const KERN_HPPA_PWRSW: c_int = 58;
@@ -3184,7 +3300,11 @@ pub const KERN_HPPA_UNALIGNED: c_int = 59;
 pub const KERN_PRINTK_RATELIMIT: c_int = 60;
 pub const KERN_PRINTK_RATELIMIT_BURST: c_int = 61;
 pub const KERN_PTY: c_int = 62;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KERN_NGROUPS_MAX: c_int = 63;
+
 pub const KERN_SPARC_SCONS_PWROFF: c_int = 64;
 pub const KERN_HZ_TIMER: c_int = 65;
 pub const KERN_UNKNOWN_NMI_PANIC: c_int = 66;
@@ -3275,7 +3395,7 @@ pub const PF_NO_SETAFFINITY: c_int = 0x04000000;
 pub const PF_MCE_EARLY: c_int = 0x08000000;
 pub const PF_MEMALLOC_PIN: c_int = 0x10000000;
 
-pub const PF_SUSPEND_TASK: c_int = 0x80000000;
+pub const PF_SUSPEND_TASK: c_int = u32_cast_int(0x80000000);
 
 pub const KLOG_CLOSE: c_int = 0;
 pub const KLOG_OPEN: c_int = 1;
@@ -3322,6 +3442,16 @@ pub const AT_MINSIGSTKSZ: c_ulong = 51;
 // siginfo.h
 pub const SI_DETHREAD: c_int = -7;
 pub const TRAP_PERF: c_int = 6;
+
+// Flags for preadv2/pwritev2
+pub const RWF_HIPRI: c_int = 0x00000001;
+pub const RWF_DSYNC: c_int = 0x00000002;
+pub const RWF_SYNC: c_int = 0x00000004;
+pub const RWF_NOWAIT: c_int = 0x00000008;
+pub const RWF_APPEND: c_int = 0x00000010;
+pub const RWF_NOAPPEND: c_int = 0x00000020;
+pub const RWF_ATOMIC: c_int = 0x00000040;
+pub const RWF_DONTCACHE: c_int = 0x00000080;
 
 // Most `*_SUPER_MAGIC` constants are defined at the `linux_like` level; the
 // following are only available on newer Linux versions than the versions
@@ -3797,6 +3927,20 @@ extern "C" {
         newpath: *const c_char,
         flags: c_uint,
     ) -> c_int;
+    pub fn preadv2(
+        fd: c_int,
+        iov: *const crate::iovec,
+        iovcnt: c_int,
+        offset: off_t,
+        flags: c_int,
+    ) -> ssize_t;
+    pub fn pwritev2(
+        fd: c_int,
+        iov: *const crate::iovec,
+        iovcnt: c_int,
+        offset: off_t,
+        flags: c_int,
+    ) -> ssize_t;
 }
 
 cfg_if! {

@@ -46,7 +46,7 @@ e! {
 }
 
 extern_ty! {
-    pub enum _cpuset {}
+    pub type _cpuset;
 }
 
 cfg_if! {
@@ -969,7 +969,7 @@ pub const TCP_CONGCTL: c_int = 0x20;
 pub const SOCK_CONN_DGRAM: c_int = 6;
 pub const SOCK_DCCP: c_int = SOCK_CONN_DGRAM;
 pub const SOCK_NOSIGPIPE: c_int = 0x40000000;
-pub const SOCK_FLAGS_MASK: c_int = 0xf0000000;
+pub const SOCK_FLAGS_MASK: c_int = u32_cast_int(0xf0000000);
 
 pub const SO_SNDTIMEO: c_int = 0x100b;
 pub const SO_RCVTIMEO: c_int = 0x100c;
@@ -1276,7 +1276,7 @@ pub const MNT_NOATIME: c_int = 0x04000000;
 pub const MNT_AUTOMOUNTED: c_int = 0x10000000;
 pub const MNT_SYMPERM: c_int = 0x20000000;
 pub const MNT_NODEVMTIME: c_int = 0x40000000;
-pub const MNT_SOFTDEP: c_int = 0x80000000;
+pub const MNT_SOFTDEP: c_int = u32_cast_int(0x80000000);
 pub const MNT_POSIX1EACLS: c_int = 0x00000800;
 pub const MNT_ACLS: c_int = MNT_POSIX1EACLS;
 pub const MNT_WAIT: c_int = 1;
@@ -1478,7 +1478,7 @@ pub const CTLFLAG_ALIAS: c_int = 0x00010000;
 pub const CTLFLAG_MMAP: c_int = 0x00020000;
 pub const CTLFLAG_OWNDESC: c_int = 0x00040000;
 pub const CTLFLAG_UNSIGNED: c_int = 0x00080000;
-pub const SYSCTL_VERS_MASK: c_int = 0xff000000;
+pub const SYSCTL_VERS_MASK: c_int = u32_cast_int(0xff000000);
 pub const SYSCTL_VERS_0: c_int = 0x00000000;
 pub const SYSCTL_VERS_1: c_int = 0x01000000;
 pub const SYSCTL_VERSION: c_int = SYSCTL_VERS_1;
@@ -1716,6 +1716,8 @@ pub const KVME_FLAG_PAGEABLE: c_int = 0x000000008;
 pub const KVME_FLAG_GROWS_UP: c_int = 0x000000010;
 pub const KVME_FLAG_GROWS_DOWN: c_int = 0x000000020;
 
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NGROUPS_MAX: c_int = 16;
 
 pub const KI_NGROUPS: c_int = 16;
@@ -1792,6 +1794,9 @@ pub const RTM_CHGADDR: c_int = 0x18;
 pub const RTA_TAG: c_int = 0x100;
 
 pub const RTAX_TAG: c_int = 8;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const RTAX_MAX: c_int = 9;
 
 // For eventfd
@@ -2245,6 +2250,7 @@ extern "C" {
         ntargets: size_t,
         hint: *const c_void,
     ) -> c_int;
+    #[link_name = "__getmntinfo13"]
     pub fn getmntinfo(mntbufp: *mut *mut crate::statvfs, flags: c_int) -> c_int;
     pub fn getvfsstat(buf: *mut crate::statvfs, bufsize: size_t, flags: c_int) -> c_int;
 

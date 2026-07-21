@@ -1,4 +1,23 @@
+//! Definitions for QNX Software Development Platform
+//!
+//! This module applies to:
+//!
+//! * `aarch64-unknown-nto-qnx700`
+//! * `aarch64-unknown-nto-qnx710`
+//! * `aarch64-unknown-nto-qnx710_iosock`
+//! * `aarch64-unknown-qnx`
+//! * `i686-pc-nto-qnx700`
+//! * `x86_64-pc-nto-qnx710`
+//! * `x86_64-pc-nto-qnx710_iosock`
+//! * `x86_64-pc-qnx`
+//!
+//! There are sub-modules for the target architecture, and sub-modules for the
+//! kind of networking library used. QNX SDP 7.0 uses `io-pkt`, QNX SDP 8.0
+//! uses `io-sock`, and QNX SDP 7.1 comes with both (so you can pick).
+
 use crate::prelude::*;
+
+// QNX definitions of common UNIX things
 
 pub type clock_t = u32;
 
@@ -73,7 +92,7 @@ pub type sem_t = sync_t;
 pub type nl_item = c_int;
 
 extern_ty! {
-    pub enum timezone {}
+    pub type timezone;
 }
 
 s! {
@@ -109,33 +128,10 @@ s! {
         pub imr_interface: in_addr,
     }
 
-    #[cfg_attr(any(target_env = "nto71", target_env = "nto70"), repr(packed))]
-    pub struct in_addr {
-        pub s_addr: crate::in_addr_t,
-    }
-
     pub struct sockaddr {
         pub sa_len: u8,
         pub sa_family: sa_family_t,
         pub sa_data: [c_char; 14],
-    }
-
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct sockaddr_in {
-        pub sin_len: u8,
-        pub sin_family: sa_family_t,
-        pub sin_port: crate::in_port_t,
-        pub sin_addr: crate::in_addr,
-        pub sin_zero: [i8; 8],
-    }
-
-    #[cfg(target_env = "nto71_iosock")]
-    pub struct sockaddr_in {
-        pub sin_len: u8,
-        pub sin_family: sa_family_t,
-        pub sin_port: crate::in_port_t,
-        pub sin_addr: crate::in_addr,
-        pub sin_zero: [c_char; 8],
     }
 
     pub struct sockaddr_in6 {
@@ -239,13 +235,6 @@ s! {
         _Reserved: Padding<[*mut c_char; 8]>,
     }
 
-    // Does not exist in io-sock
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct in_pktinfo {
-        pub ipi_addr: crate::in_addr,
-        pub ipi_ifindex: c_uint,
-    }
-
     pub struct ifaddrs {
         pub ifa_next: *mut ifaddrs,
         pub ifa_name: *mut c_char,
@@ -260,27 +249,6 @@ s! {
         pub arp_pa: crate::sockaddr,
         pub arp_ha: crate::sockaddr,
         pub arp_flags: c_int,
-    }
-
-    #[cfg_attr(any(target_env = "nto71", target_env = "nto70"), repr(packed))]
-    pub struct arphdr {
-        pub ar_hrd: u16,
-        pub ar_pro: u16,
-        pub ar_hln: u8,
-        pub ar_pln: u8,
-        pub ar_op: u16,
-    }
-
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct mmsghdr {
-        pub msg_hdr: crate::msghdr,
-        pub msg_len: c_uint,
-    }
-
-    #[cfg(target_env = "nto71_iosock")]
-    pub struct mmsghdr {
-        pub msg_hdr: crate::msghdr,
-        pub msg_len: ssize_t,
     }
 
     #[repr(align(8))]
@@ -610,20 +578,6 @@ s! {
         pub bf_insns: *mut crate::bpf_insn,
     }
 
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct bpf_stat {
-        pub bs_recv: u64,
-        pub bs_drop: u64,
-        pub bs_capt: u64,
-        bs_padding: Padding<[u64; 13]>,
-    }
-
-    #[cfg(target_env = "nto71_iosock")]
-    pub struct bpf_stat {
-        pub bs_recv: c_uint,
-        pub bs_drop: c_uint,
-    }
-
     pub struct bpf_version {
         pub bv_major: c_ushort,
         pub bv_minor: c_ushort,
@@ -646,14 +600,6 @@ s! {
     pub struct bpf_dltlist {
         pub bfl_len: c_uint,
         pub bfl_list: *mut c_uint,
-    }
-
-    // Does not exist in io-sock
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct unpcbid {
-        pub unp_pid: crate::pid_t,
-        pub unp_euid: crate::uid_t,
-        pub unp_egid: crate::gid_t,
     }
 
     pub struct dl_phdr_info {
@@ -720,30 +666,6 @@ s! {
         pub mq_sendwait: c_long,
         pub mq_recvwait: c_long,
     }
-
-    #[cfg(not(target_env = "nto71_iosock"))]
-    pub struct sockaddr_dl {
-        pub sdl_len: c_uchar,
-        pub sdl_family: crate::sa_family_t,
-        pub sdl_index: u16,
-        pub sdl_type: c_uchar,
-        pub sdl_nlen: c_uchar,
-        pub sdl_alen: c_uchar,
-        pub sdl_slen: c_uchar,
-        pub sdl_data: [c_char; 12],
-    }
-
-    #[cfg(target_env = "nto71_iosock")]
-    pub struct sockaddr_dl {
-        pub sdl_len: c_uchar,
-        pub sdl_family: c_uchar,
-        pub sdl_index: c_ushort,
-        pub sdl_type: c_uchar,
-        pub sdl_nlen: c_uchar,
-        pub sdl_alen: c_uchar,
-        pub sdl_slen: c_uchar,
-        pub sdl_data: [c_char; 46],
-    }
 }
 
 s_no_extra_traits! {
@@ -803,10 +725,10 @@ s_no_extra_traits! {
     // get native f128 support.
     //
     // The definition was taken from the definition of the _Maxalignt struct in the QNX SDK.
-    // However, on QNX7, there is a different definition of std::max_align_t (the C++ version of
+    // However, on QNX SDP 7, there is a different definition of std::max_align_t (the C++ version of
     // this type). In practice, this doesn't make a difference for the _alignment_ properties of the
     // type - however, it changes the size, so using in in any other form than the zero-sized array
-    // form would be bogus and it would potentially change the size of the data type. On QNX8, this
+    // form would be bogus and it would potentially change the size of the data type. On QNX SDP 8, this
     // got fixed and both C and C++ are using the same definition.
     pub struct max_align_t {
         _ll: crate::c_longlong,
@@ -894,6 +816,7 @@ pub const MS_SYNC: c_int = 2;
 pub const SCM_RIGHTS: c_int = 0x01;
 pub const SCM_TIMESTAMP: c_int = 0x02;
 
+<<<<<<< HEAD
 // QNX Network Stack Versioning:
 //
 // The `if` block targets the legacy `io-pkt` stack.
@@ -1020,6 +943,8 @@ cfg_if! {
     }
 }
 
+=======
+>>>>>>> ee051902acd7ee674e1916e6b12297da3975b351
 pub const MAP_TYPE: c_int = 0x3;
 
 pub const IFF_UP: c_int = 0x00000001;
@@ -1154,6 +1079,8 @@ pub const LOCK_UN: c_int = 0x8;
 pub const SS_ONSTACK: c_int = 1;
 pub const SS_DISABLE: c_int = 2;
 
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PATH_MAX: c_int = 1024;
 
 pub const UIO_MAXIOV: c_int = 1024;
@@ -2341,14 +2268,39 @@ pub const TIOCSTOP: c_int = 29807;
 pub const TIOCSWINSZ: c_int = -2146929561;
 
 pub const USER_CS_PATH: c_int = 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_BC_BASE_MAX: c_int = 2;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_BC_DIM_MAX: c_int = 3;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_BC_SCALE_MAX: c_int = 4;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_BC_STRING_MAX: c_int = 5;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_COLL_WEIGHTS_MAX: c_int = 6;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_EXPR_NEST_MAX: c_int = 7;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_LINE_MAX: c_int = 8;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const USER_RE_DUP_MAX: c_int = 9;
+
 pub const USER_POSIX2_VERSION: c_int = 10;
 pub const USER_POSIX2_C_BIND: c_int = 11;
 pub const USER_POSIX2_C_DEV: c_int = 12;
@@ -2397,12 +2349,20 @@ pub const PTHREAD_PROCESS_SHARED: c_int = 0x01;
 
 pub const PTHREAD_KEYS_MAX: usize = 128;
 
+<<<<<<< HEAD
 #[cfg(not(any(target_env = "nto71", target_os = "qnx")))]
+=======
+#[cfg(not(any(target_env = "nto71", target_env = "nto71_iosock", target_os = "qnx")))]
+>>>>>>> ee051902acd7ee674e1916e6b12297da3975b351
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x80000000,
     __owner: 0xffffffff,
 };
+<<<<<<< HEAD
 #[cfg(target_env = "nto71")]
+=======
+#[cfg(any(target_env = "nto71", target_env = "nto71_iosock"))]
+>>>>>>> ee051902acd7ee674e1916e6b12297da3975b351
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x82000000,
     __owner: 0,
@@ -2569,42 +2529,6 @@ safe_f! {
 
     pub const fn minor(dev: crate::dev_t) -> c_uint {
         (dev as c_uint) & 0x3ff
-    }
-}
-
-cfg_if! {
-    if #[cfg(not(target_env = "nto71_iosock"))] {
-        extern "C" {
-            pub fn sendmmsg(
-                sockfd: c_int,
-                msgvec: *mut crate::mmsghdr,
-                vlen: c_uint,
-                flags: c_uint,
-            ) -> c_int;
-            pub fn recvmmsg(
-                sockfd: c_int,
-                msgvec: *mut crate::mmsghdr,
-                vlen: c_uint,
-                flags: c_uint,
-                timeout: *mut crate::timespec,
-            ) -> c_int;
-        }
-    } else {
-        extern "C" {
-            pub fn sendmmsg(
-                sockfd: c_int,
-                msgvec: *mut crate::mmsghdr,
-                vlen: size_t,
-                flags: c_int,
-            ) -> ssize_t;
-            pub fn recvmmsg(
-                sockfd: c_int,
-                msgvec: *mut crate::mmsghdr,
-                vlen: size_t,
-                flags: c_int,
-                timeout: *const crate::timespec,
-            ) -> ssize_t;
-        }
     }
 }
 
@@ -3209,17 +3133,26 @@ impl siginfo_t {
     }
 }
 
+// Things that are QNX specific
+
+mod neutrino;
+pub use self::neutrino::*;
+
+// Things that are architecture specific
+
+mod arch;
+pub use self::arch::*;
+
+// Things that are network-stack specific
+
 cfg_if! {
-    if #[cfg(target_arch = "x86_64")] {
-        mod x86_64;
-        pub use self::x86_64::*;
-    } else if #[cfg(target_arch = "aarch64")] {
-        mod aarch64;
-        pub use self::aarch64::*;
+    if #[cfg(any(target_env = "nto70", target_env = "nto71"))] {
+        mod io_pkt;
+        pub use self::io_pkt::*;
+    } else if #[cfg(any(target_env = "nto71_iosock", target_os = "qnx"))] {
+        mod io_sock;
+        pub use self::io_sock::*;
     } else {
         panic!("Unsupported arch");
     }
 }
-
-mod neutrino;
-pub use self::neutrino::*;

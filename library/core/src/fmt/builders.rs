@@ -72,6 +72,7 @@ impl<F> fmt::Debug for DebugOnce<F>
 where
     F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
 {
+    #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0.take() {
             Some(value_fmt) => value_fmt(f),

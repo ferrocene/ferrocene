@@ -673,6 +673,7 @@ impl<T: Default> Cell<T> {
     /// ```
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
+    #[ferrocene::prevalidated]
     pub const fn take(&self) -> T
     where
         T: [const] Default,

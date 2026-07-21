@@ -9,6 +9,7 @@
 
 fn unvalidated() {}
 //~^ NOTE unvalidated
+//~^^ NOTE unvalidated
 
 struct Unvalidated;
 impl Drop for Unvalidated {
@@ -44,8 +45,11 @@ pub fn reachable() { //~ NOTE validated
 }
 
 #[ferrocene::prevalidated] //~ NOTE marked
+//~^ NOTE marked
 fn unreachable() { //~ NOTE is validated
+    //~^ NOTE is validated
     #[warn(ferrocene::unvalidated)] //~ NOTE lint level
     unvalidated();
     //~^ WARN calls
+    //~^^ WARN calls
 }

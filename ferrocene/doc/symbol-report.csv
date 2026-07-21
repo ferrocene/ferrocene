@@ -6332,55 +6332,6 @@ core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for 
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u32>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u64>::try_from
 core::convert::num::ptr_try_from_impls::<impl core::convert::TryFrom<usize> for u8>::try_from
-core::core_arch::x86::__m128::as_f32x4
-core::core_arch::x86::__m128bh::as_i16x8
-core::core_arch::x86::__m128bh::as_i32x4
-core::core_arch::x86::__m128bh::as_u16x8
-core::core_arch::x86::__m128bh::as_u32x4
-core::core_arch::x86::__m128d::as_f64x2
-core::core_arch::x86::__m128h::as_f16x8
-core::core_arch::x86::__m128i::as_i16x8
-core::core_arch::x86::__m128i::as_i32x4
-core::core_arch::x86::__m128i::as_i64x2
-core::core_arch::x86::__m128i::as_i8x16
-core::core_arch::x86::__m128i::as_u16x8
-core::core_arch::x86::__m128i::as_u32x4
-core::core_arch::x86::__m128i::as_u64x2
-core::core_arch::x86::__m128i::as_u8x16
-core::core_arch::x86::__m256::as_f32x8
-core::core_arch::x86::__m256bh::as_i16x16
-core::core_arch::x86::__m256bh::as_i32x8
-core::core_arch::x86::__m256bh::as_u16x16
-core::core_arch::x86::__m256bh::as_u32x8
-core::core_arch::x86::__m256d::as_f64x4
-core::core_arch::x86::__m256h::as_f16x16
-core::core_arch::x86::__m256i::as_i16x16
-core::core_arch::x86::__m256i::as_i32x8
-core::core_arch::x86::__m256i::as_i64x4
-core::core_arch::x86::__m256i::as_i8x32
-core::core_arch::x86::__m256i::as_u16x16
-core::core_arch::x86::__m256i::as_u32x8
-core::core_arch::x86::__m256i::as_u64x4
-core::core_arch::x86::__m256i::as_u8x32
-core::core_arch::x86::__m512::as_f32x16
-core::core_arch::x86::__m512bh::as_i16x32
-core::core_arch::x86::__m512bh::as_i32x16
-core::core_arch::x86::__m512bh::as_u16x32
-core::core_arch::x86::__m512bh::as_u32x16
-core::core_arch::x86::__m512d::as_f64x8
-core::core_arch::x86::__m512h::as_f16x32
-core::core_arch::x86::__m512i::as_i16x32
-core::core_arch::x86::__m512i::as_i32x16
-core::core_arch::x86::__m512i::as_i64x8
-core::core_arch::x86::__m512i::as_i8x64
-core::core_arch::x86::__m512i::as_u16x32
-core::core_arch::x86::__m512i::as_u32x16
-core::core_arch::x86::__m512i::as_u64x8
-core::core_arch::x86::__m512i::as_u8x64
-core::core_arch::x86::sse2::_mm_loadu_si128
-core::core_arch::x86::sse2::_mm_movemask_epi8
-core::core_arch::x86::sse2::_mm_or_si128
-core::core_arch::x86::sse2::_mm_undefined_si128
 core::escape::EscapeIterInner::<N, ESCAPING>::advance_by
 core::escape::EscapeIterInner::<N, ESCAPING>::ascii
 core::escape::EscapeIterInner::<N, ESCAPING>::backslash

@@ -497,7 +497,11 @@ impl Step for GenerateBuildMetadata {
             );
         }
 
-        let channel = crate::ferrocene::ferrocene_channel(builder, ferrocene_version);
+        let channel = crate::ferrocene::ferrocene_release_channel(
+            &*builder.config.channel,
+            ferrocene_channel,
+            ferrocene_version,
+        );
 
         // Whenever the contents of this JSON file change, even just adding new fields,
         // make sure to increase the metadata version number and update publish-release

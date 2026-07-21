@@ -76,8 +76,12 @@ pub(crate) fn download_from_local_filesystem(path: &str, dest: &Path, help_on_er
     }
 }
 
-fn ferrocene_channel(builder: &Builder<'_>, ferrocene_version: &str) -> String {
-    match (&*builder.config.channel, &*builder.config.ferrocene_raw_channel) {
+pub(crate) fn ferrocene_release_channel(
+    upstream_channel: &str,
+    ferrocene_channel: &str,
+    ferrocene_version: &str,
+) -> String {
+    match (upstream_channel, ferrocene_channel) {
         ("nightly" | "dev", "rolling") => "nightly".to_owned(),
         ("beta", "rolling") => "pre-rolling".to_owned(),
         ("stable", "rolling") => "rolling".to_owned(),

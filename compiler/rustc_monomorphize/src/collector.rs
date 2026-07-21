@@ -1684,7 +1684,8 @@ impl<'v> RootCollector<'_, 'v> {
                             )
                         }
                 }
-                // Ferrocene addition
+                // Ferrocene addition: mark all non-generic functions as annotated, even if they're private.
+                // This catches errors sooner when `cargo build`-ing a library.
                 MonoItemCollectionStrategy::Validated => {
                     // Explicit match is intentional, please update this if you add new fields.
                     matches!(self.tcx.codegen_fn_attrs(def_id).validated, Some(Validated {}))

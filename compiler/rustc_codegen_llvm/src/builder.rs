@@ -26,7 +26,7 @@ use rustc_sanitizers::{cfi, kcfi};
 use rustc_session::config::OptLevel;
 use rustc_span::Span;
 use rustc_target::callconv::{FnAbi, PassMode};
-use rustc_target::spec::{Arch, HasTargetSpec, LlvmAbi, SanitizerSet, Target};
+use rustc_target::spec::{Arch, HasTargetSpec, SanitizerSet, Target};
 use smallvec::SmallVec;
 use tracing::{debug, instrument};
 
@@ -770,7 +770,7 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         let val = if let Some(_) = place.val.llextra {
             // FIXME: Merge with the `else` below?
             OperandValue::Ref(place.val)
-        } else if place.layout.is_llvm_immediate() {
+        } else if place.layout.backend_repr.is_scalar_or_simd() {
             let mut const_llval = None;
             let llty = place.layout.llvm_type(self);
             if let Some(global) = llvm::LLVMIsAGlobalVariable(place.val.llval) {
@@ -2039,7 +2039,7 @@ impl<'a, 'll, 'tcx> Builder<'a, 'll, 'tcx> {
         llfn: &'ll Value,
         fn_abi: Option<&FnAbi<'tcx, Ty<'tcx>>>,
     ) -> Option<llvm::OperandBundleBox<'ll>> {
-        if self.sess().target.llvm_abiname != LlvmAbi::Pauthtest {
+        if self.sess().pointer_authentication_functions().is_none() {
             return None;
         }
         // Pointer authentication support is currently limited to extern "C" calls; filter out other

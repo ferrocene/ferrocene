@@ -1,3 +1,5 @@
+use std::assert_matches;
+
 use itertools::Itertools as _;
 use rustc_abi::{self as abi, BackendRepr, FIRST_VARIANT};
 use rustc_index::IndexVec;
@@ -137,7 +139,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             ) => {
                 // The destination necessarily contains a wide pointer, so if
                 // it's a scalar pair, it's a wide pointer or newtype thereof.
-                if bx.cx().is_backend_scalar_pair(dest.layout) {
+                if let BackendRepr::ScalarPair { .. } = dest.layout.backend_repr {
                     // Into-coerce of a thin pointer to a wide pointer -- just
                     // use the operand path.
                     let temp = self.codegen_rvalue_operand(bx, rvalue);
@@ -499,7 +501,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
                 let val = match *kind {
                     mir::CastKind::PointerExposeProvenance => {
-                        assert!(bx.cx().is_backend_immediate(cast));
+                        assert!(cast.backend_repr.is_scalar_or_simd());
                         let llptr = operand.immediate();
                         let llcast_ty = bx.cx().immediate_backend_type(cast);
                         let lladdr = bx.ptrtoint(llptr, llcast_ty);
@@ -518,7 +520,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                                 OperandValue::Immediate(
                                     bx.get_fn_addr(
                                         instance,
-                                        Some(PacMetadata::default()),
+                                        bx.sess().pointer_authentication_functions(),
                                     ),
                                 )
                             }
@@ -537,7 +539,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                                 OperandValue::Immediate(
                                     bx.cx().get_fn_addr(
                                         instance,
-                                        Some(PacMetadata::default()),
+                                        bx.sess().pointer_authentication_functions(),
                                     ),
                                 )
                             }
@@ -549,7 +551,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         operand.val
                     }
                     mir::CastKind::PointerCoercion(PointerCoercion::Unsize, _) => {
-                        assert!(bx.cx().is_backend_scalar_pair(cast));
+                        assert_matches!(cast.backend_repr, BackendRepr::ScalarPair { .. });
                         let (lldata, llextra) = operand.val.pointer_parts();
                         let (lldata, llextra) =
                             base::unsize_ptr(bx, lldata, operand.layout.ty, cast.ty, llextra);
@@ -561,9 +563,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     ) => {
                         bug!("{kind:?} is for borrowck, and should never appear in codegen");
                     }
-                    mir::CastKind::PtrToPtr if bx.cx().is_backend_scalar_pair(operand.layout) => {
+                    mir::CastKind::PtrToPtr if let BackendRepr::ScalarPair { .. } = operand.layout.backend_repr => {
                         if let OperandValue::Pair(data_ptr, meta) = operand.val {
-                            if bx.cx().is_backend_scalar_pair(cast) {
+                            if let BackendRepr::ScalarPair { .. } = cast.layout.backend_repr {
                                 OperandValue::Pair(data_ptr, meta)
                             } else {
                                 // Cast of wide-ptr to thin-ptr is an extraction of data-ptr.
@@ -590,7 +592,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         };
                         let from_backend_ty = bx.cx().immediate_backend_type(operand.layout);
 
-                        assert!(bx.cx().is_backend_immediate(cast));
+                        assert!(cast.backend_repr.is_scalar_or_simd());
                         let to_backend_ty = bx.cx().immediate_backend_type(cast);
                         if operand.layout.is_uninhabited() {
                             let val = OperandValue::Immediate(bx.cx().const_poison(to_backend_ty));
@@ -732,7 +734,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     }
                 };
                 assert!(
-                    val.is_expected_variant_for_type(self.cx, layout),
+                    val.is_expected_variant_for_type(layout),
                     "Made wrong variant {val:?} for type {layout:?}",
                 );
                 OperandRef { val, layout, move_annotation: None }
@@ -759,7 +761,8 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         def: ty::InstanceKind::Shim(ty::ShimKind::ThreadLocal(def_id)),
                         args: ty::GenericArgs::empty(),
                     };
-                    let fn_ptr = bx.get_fn_addr(instance, Some(PacMetadata::default()));
+                    let fn_ptr =
+                        bx.get_fn_addr(instance, bx.sess().pointer_authentication_functions());
                     let fn_abi = bx.fn_abi_of_instance(instance, ty::List::empty());
                     let fn_ty = bx.fn_decl_backend_type(fn_abi);
                     let fn_attrs = if bx.tcx().def_kind(instance.def_id()).has_codegen_attrs() {

@@ -75,7 +75,12 @@ pub struct MaybeDangling<P: ?Sized>(P);
 
 impl<P: ?Sized> MaybeDangling<P> {
     /// Wraps a value in a `MaybeDangling`, allowing it to dangle.
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 470556c8c1c
+=======
+    #[rustc_no_writable]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn new(x: P) -> Self
     where
         P: Sized,

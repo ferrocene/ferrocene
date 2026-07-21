@@ -19,6 +19,7 @@ use rustc_middle::util::Providers;
 use rustc_serialize::Decoder;
 use rustc_session::StableCrateId;
 use rustc_session::cstore::{CrateStore, ExternCrate};
+use rustc_span::def_id::ModId;
 use rustc_span::hygiene::ExpnId;
 use rustc_span::{Span, Symbol, kw};
 
@@ -191,6 +192,13 @@ impl IntoArgs for DefId {
     }
 }
 
+impl IntoArgs for ModId {
+    type Other = ();
+    fn into_args(self) -> (DefId, ()) {
+        (self.to_def_id(), ())
+    }
+}
+
 impl IntoArgs for CrateNum {
     type Other = ();
     fn into_args(self) -> (DefId, ()) {
@@ -228,7 +236,7 @@ provide! { tcx, def_id, other, cdata,
     explicit_super_predicates_of => { table_defaulted_array }
     explicit_implied_predicates_of => { table_defaulted_array }
     type_of => { table }
-    type_alias_is_lazy => { table_direct }
+    type_alias_is_checked => { table_direct }
     variances_of => { table }
     fn_sig => { table }
     codegen_fn_attrs => { table }
@@ -391,6 +399,7 @@ provide! { tcx, def_id, other, cdata,
     intrinsic_raw => { cdata.get_intrinsic(tcx, def_id.index) }
     defined_lang_items => { cdata.get_lang_items(tcx) }
     diagnostic_items => { cdata.get_diagnostic_items(tcx) }
+    canonical_symbols => { cdata.get_canonical_symbols(tcx) }
     missing_lang_items => { cdata.get_missing_lang_items(tcx) }
 
     missing_extern_crate_item => {

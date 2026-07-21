@@ -167,10 +167,10 @@ where
 
     let mut wfcx = WfCheckingCtxt { ocx, body_def_id, param_env };
 
-    // As of now, bounds are only checked on lazy type aliases, they're ignored for most type
+    // As of now, bounds are only enforced on checked type aliases, they're ignored for most type
     // aliases. So, only check for false global bounds if we're not ignoring bounds altogether.
     let ignore_bounds =
-        tcx.def_kind(body_def_id) == DefKind::TyAlias && !tcx.type_alias_is_lazy(body_def_id);
+        tcx.def_kind(body_def_id) == DefKind::TyAlias && !tcx.type_alias_is_checked(body_def_id);
 
     if !ignore_bounds && !tcx.features().trivial_bounds() {
         wfcx.check_false_global_bounds()
@@ -1653,16 +1653,6 @@ fn check_fn_or_method<'tcx>(
         let span = tcx.def_span(def_id);
         let has_implicit_self = hir_decl.implicit_self().has_implicit_self();
         let mut inputs = sig.inputs().iter().skip(if has_implicit_self { 1 } else { 0 });
-        // FIXME(splat): support the rest of closure splatting, or replace this code with an error
-        if let Some(mut splatted_arg_index) = sig.splatted() {
-            let mut inputs_count = sig.inputs().len();
-            if has_implicit_self {
-                splatted_arg_index = splatted_arg_index.strict_sub(1);
-                inputs_count = inputs_count.strict_sub(1);
-            }
-            debug!(?splatted_arg_index, ?inputs_count, ?has_implicit_self, ?sig);
-            sig = sig.set_splatted(Some(splatted_arg_index), inputs_count).unwrap();
-        }
         // Check that the argument is a tuple and is sized
         if let Some(ty) = inputs.next() {
             wfcx.register_bound(

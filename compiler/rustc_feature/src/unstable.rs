@@ -456,6 +456,8 @@ declare_features! (
     (unstable, cfg_version, "1.45.0", Some(64796)),
     /// Allows to use the `#[cfi_encoding = ""]` attribute.
     (unstable, cfi_encoding, "1.71.0", Some(89653)),
+    /// Allow to have type alias types for inter-crate use.
+    (incomplete, checked_type_aliases, "CURRENT_RUSTC_VERSION", Some(112792)),
     /// The `clflushopt` target feature on x86.
     (unstable, clflushopt_target_feature, "1.98.0", Some(157096)),
     /// Allows `for<...>` on closures and coroutines.
@@ -520,6 +522,8 @@ declare_features! (
     (unstable, diagnostic_on_unknown, "1.96.0", Some(152900)),
     /// Allows macros to customize macro argument matcher diagnostics.
     (unstable, diagnostic_on_unmatched_args, "1.97.0", Some(155642)),
+    // Used by macros to not show their bodies in error messages. No-op with `-Z macro-backtrace`.
+    (unstable, diagnostic_opaque, "CURRENT_RUSTC_VERSION", Some(158813)),
     /// Allows `#[doc(cfg(...))]`.
     (unstable, doc_cfg, "1.21.0", Some(43781)),
     /// Allows `#[doc(masked)]`.
@@ -607,8 +611,6 @@ declare_features! (
     (unstable, lahfsahf_target_feature, "1.78.0", Some(150251)),
     /// Allows setting the threshold for the `large_assignments` lint.
     (unstable, large_assignments, "1.52.0", Some(83518)),
-    /// Allow to have type alias types for inter-crate use.
-    (incomplete, lazy_type_alias, "1.72.0", Some(112792)),
     /// Allows using `#[link(kind = "link-arg", name = "...")]`
     /// to pass custom arguments to the linker.
     (unstable, link_arg_attribute, "1.76.0", Some(99427)),

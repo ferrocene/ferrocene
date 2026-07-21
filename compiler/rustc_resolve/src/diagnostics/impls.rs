@@ -32,6 +32,7 @@ use rustc_session::lint::builtin::{
     AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
 use rustc_session::utils::was_invoked_from_cargo;
+use rustc_span::def_id::ModId;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::MacroKind;
@@ -68,8 +69,8 @@ pub(crate) type LabelSuggestion = (Ident, bool);
 #[derive(Clone)]
 pub(crate) struct StructCtor {
     pub res: Res,
-    pub vis: Visibility<DefId>,
-    pub field_visibilities: Vec<Visibility<DefId>>,
+    pub vis: Visibility<ModId>,
+    pub field_visibilities: Vec<Visibility<ModId>>,
 }
 
 impl StructCtor {
@@ -334,9 +335,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         self.tcx.dcx()
     }
 
-    pub(crate) fn report_errors(&mut self, krate: &Crate) {
+    pub(crate) fn report_errors(&mut self, krate: &Crate, use_injections: Vec<UseError<'tcx>>) {
         self.report_delayed_vis_resolution_errors();
-        self.report_with_use_injections(krate);
+        self.report_with_use_injections(krate, use_injections);
 
         for &(span_use, span_def) in &self.macro_expanded_macro_export_errors {
             self.lint_buffer.buffer_lint(
@@ -390,9 +391,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
     }
 
-    fn report_with_use_injections(&mut self, krate: &Crate) {
+    fn report_with_use_injections(&mut self, krate: &Crate, use_injections: Vec<UseError<'tcx>>) {
         for UseError { mut err, candidates, node_id, instead, suggestion, path, is_call } in
-            mem::take(&mut self.use_injections)
+            use_injections
         {
             let (span, found_use) = if node_id != DUMMY_NODE_ID {
                 UsePlacementFinder::check(krate, node_id)
@@ -1513,11 +1514,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         suggestions.extend(
                             BUILTIN_ATTRIBUTES
                                 .iter()
-                                // These trace attributes are compiler-generated and have
-                                // deliberately invalid names.
-                                .filter(|attr| {
-                                    !matches!(**attr, sym::cfg_trace | sym::cfg_attr_trace)
-                                })
                                 .map(|attr| TypoSuggestion::typo_from_name(*attr, res)),
                         );
                     }
@@ -1991,7 +1987,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 }
                 return;
             }
-            if Some(parent_nearest) == scope.opt_def_id() {
+            if Some(parent_nearest.to_def_id()) == scope.opt_def_id() {
                 err.subdiagnostic(MacroDefinedLater { span: unused_ident.span });
                 err.subdiagnostic(MacroSuggMovePosition { span: ident.span, ident });
                 return;

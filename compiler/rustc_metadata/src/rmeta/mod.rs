@@ -269,6 +269,7 @@ pub(crate) struct CrateRoot {
     lang_items_missing: LazyArray<LangItem>,
     stripped_cfg_items: LazyArray<StrippedCfgItem<DefIndex>>,
     diagnostic_items: LazyArray<(Symbol, DefIndex)>,
+    canonical_symbols: LazyArray<(Symbol, DefIndex)>,
     native_libraries: LazyArray<NativeLib>,
     foreign_modules: LazyArray<ForeignModule>,
     traits: LazyArray<DefIndex>,
@@ -385,7 +386,7 @@ define_tables! {
 - defaulted:
     intrinsic: Table<DefIndex, Option<LazyValue<ty::IntrinsicDef>>>,
     is_macro_rules: Table<DefIndex, bool>,
-    type_alias_is_lazy: Table<DefIndex, bool>,
+    type_alias_is_checked: Table<DefIndex, bool>,
     attr_flags: Table<DefIndex, AttrFlags>,
     // The u64 is the crate-local part of the DefPathHash. All hashes in this crate have the same
     // StableCrateId, so we omit encoding those into the table.

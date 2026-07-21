@@ -21,7 +21,7 @@ use rustc_hir::attrs::{
     OptimizeAttr, ReprAttr,
 };
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::LocalModDefId;
+use rustc_hir::def_id::LocalModId;
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{
     self as hir, Attribute, CRATE_HIR_ID, Constness, FnSig, ForeignItem, GenericParam,
@@ -78,12 +78,6 @@ fn target_from_impl_item<'tcx>(tcx: TyCtxt<'tcx>, impl_item: &hir::ImplItem<'_>)
     }
 }
 
-#[derive(Clone, Copy)]
-enum ItemLike<'tcx> {
-    Item(&'tcx Item<'tcx>),
-    ForeignItem,
-}
-
 #[derive(Copy, Clone)]
 pub(crate) enum ProcMacroKind {
     FunctionLike,
@@ -120,7 +114,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         hir_id: HirId,
         span: Span,
         target: Target,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
     ) {
         let attrs = self.tcx.hir_attrs(hir_id);
         for attr in attrs {
@@ -176,7 +170,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         hir_id: HirId,
         span: Span,
         target: Target,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
         attrs: &[Attribute],
         attr: &AttributeKind,
     ) {
@@ -296,6 +290,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::NoStd { .. } => (),
             AttributeKind::OnUnknown { .. } => (),
             AttributeKind::OnUnmatchedArgs { .. } => (),
+            AttributeKind::Opaque => (),
             AttributeKind::Optimize(..) => (),
             AttributeKind::PanicRuntime => (),
             AttributeKind::PatchableFunctionEntry { .. } => (),
@@ -319,6 +314,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::RustcAutodiff(..) => (),
             AttributeKind::RustcBodyStability { .. } => (),
             AttributeKind::RustcBuiltinMacro { .. } => (),
+            AttributeKind::RustcCanonicalSymbol => (),
             AttributeKind::RustcCaptureAnalysis => (),
             AttributeKind::RustcCguTestAttr(..) => (),
             AttributeKind::RustcClean(..) => (),
@@ -562,7 +558,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         attr_span: Span,
         hir_id: HirId,
         target: Target,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
         directive: Option<&Directive>,
     ) {
         // We only check the non-constness here. A diagnostic for use
@@ -593,21 +589,18 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     }
                 });
             }
-            match item.unwrap() {
-                ItemLike::Item(it) => match it.expect_impl().constness {
-                    Constness::Const { .. } => {
-                        let item_span = self.tcx.hir_span(hir_id);
-                        self.tcx.emit_node_span_lint(
-                            MISPLACED_DIAGNOSTIC_ATTRIBUTES,
-                            hir_id,
-                            attr_span,
-                            DiagnosticOnConstOnlyForNonConstTraitImpls { item_span },
-                        );
-                        return;
-                    }
-                    Constness::NotConst => return,
-                },
-                ItemLike::ForeignItem => {}
+            match item.unwrap().expect_impl().constness {
+                Constness::Const { .. } => {
+                    let item_span = self.tcx.hir_span(hir_id);
+                    self.tcx.emit_node_span_lint(
+                        MISPLACED_DIAGNOSTIC_ATTRIBUTES,
+                        hir_id,
+                        attr_span,
+                        DiagnosticOnConstOnlyForNonConstTraitImpls { item_span },
+                    );
+                    return;
+                }
+                Constness::NotConst => return,
             }
         }
     }
@@ -817,14 +810,14 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         attr_span: Span,
         span: Span,
         target: Target,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
     ) {
         match target {
             Target::Struct => {
-                if let Some(ItemLike::Item(hir::Item {
+                if let hir::Item {
                     kind: hir::ItemKind::Struct(_, _, hir::VariantData::Struct { fields, .. }),
                     ..
-                })) = item
+                } = item.unwrap()
                     && !fields.is_empty()
                     && fields.iter().any(|f| f.default.is_some())
                 {
@@ -1167,14 +1160,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     /// Checks if `#[rustc_legacy_const_generics]` is applied to a function and has a valid argument.
     fn check_rustc_legacy_const_generics(
         &self,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
         attr_span: Span,
         index_list: &ThinVec<(usize, Span)>,
     ) {
-        let Some(ItemLike::Item(Item {
-            kind: ItemKind::Fn { sig: FnSig { decl, .. }, generics, .. },
-            ..
-        })) = item
+        let Some(Item { kind: ItemKind::Fn { sig: FnSig { decl, .. }, generics, .. }, .. }) = item
         else {
             // No error here, since it's already given by the parser
             return;
@@ -1218,7 +1208,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         attrs: &[Attribute],
         span: Span,
         target: Target,
-        item: Option<ItemLike<'_>>,
+        item: Option<&'tcx Item<'tcx>>,
         hir_id: HirId,
     ) {
         // Extract the names of all repr hints, e.g., [foo, bar, align] for:
@@ -1288,11 +1278,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         // Warn on repr(u8, u16), repr(C, simd), and c-like-enum-repr(C, u8)
         if (int_reprs > 1)
             || (is_simd && is_c)
-            || (int_reprs == 1
-                && is_c
-                && item.is_some_and(|item| {
-                    if let ItemLike::Item(item) = item { is_c_like_enum(item) } else { false }
-                }))
+            || (int_reprs == 1 && is_c && item.is_some_and(is_c_like_enum))
         {
             self.tcx.emit_node_span_lint(
                 CONFLICTING_REPR_HINTS,
@@ -1688,7 +1674,7 @@ impl<'tcx> Visitor<'tcx> for CheckAttrVisitor<'tcx> {
         }
 
         let target = Target::from_item(item);
-        self.check_attributes(item.hir_id(), item.span, target, Some(ItemLike::Item(item)));
+        self.check_attributes(item.hir_id(), item.span, target, Some(item));
         intravisit::walk_item(self, item)
     }
 
@@ -1726,7 +1712,7 @@ impl<'tcx> Visitor<'tcx> for CheckAttrVisitor<'tcx> {
 
     fn visit_foreign_item(&mut self, f_item: &'tcx ForeignItem<'tcx>) {
         let target = Target::from_foreign_item(f_item);
-        self.check_attributes(f_item.hir_id(), f_item.span, target, Some(ItemLike::ForeignItem));
+        self.check_attributes(f_item.hir_id(), f_item.span, target, None);
         intravisit::walk_foreign_item(self, f_item)
     }
 
@@ -1800,7 +1786,7 @@ fn check_non_exported_macro_for_invalid_attrs(tcx: TyCtxt<'_>, item: &Item<'_>) 
     }
 }
 
-fn check_mod_attrs(tcx: TyCtxt<'_>, module_def_id: LocalModDefId) {
+fn check_mod_attrs(tcx: TyCtxt<'_>, module_def_id: LocalModId) {
     let check_attr_visitor = &mut CheckAttrVisitor { tcx, abort: Cell::new(false) };
     tcx.hir_visit_item_likes_in_module(module_def_id, check_attr_visitor);
     if module_def_id.to_local_def_id().is_top_level_module() {

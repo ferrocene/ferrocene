@@ -53,7 +53,7 @@ use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::TaggedRef;
 use rustc_data_structures::unord::ExtendUnord;
 use rustc_errors::codes::*;
-use rustc_errors::{DiagArgFromDisplay, DiagCtxtHandle};
+use rustc_errors::{DiagArgFromDisplay, DiagCtxtHandle, ErrorGuaranteed};
 use rustc_hir::def::{DefKind, LifetimeRes, Namespace, PartialRes, PerNS, Res};
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId, LocalDefIdMap};
 use rustc_hir::definitions::PerParentDisambiguatorState;
@@ -350,17 +350,6 @@ impl<'tcx> ResolverAstLowering<'tcx> {
             RustcLegacyConstGenerics{fn_indexes,..} => fn_indexes
         )
         .map(|fn_indexes| fn_indexes.iter().map(|(num, _)| *num).collect())
-    }
-
-    /// Obtain the list of lifetimes parameters to add to an item.
-    ///
-    /// Extra lifetime parameters should only be added in places that can appear
-    /// as a `binder` in `LifetimeRes`.
-    ///
-    /// The extra lifetimes that appear from the parenthesized `Fn`-trait desugaring
-    /// should appear at the enclosing `PolyTraitRef`.
-    fn extra_lifetime_params(&self, id: NodeId) -> &[(Ident, NodeId, MissingLifetimeKind)] {
-        self.extra_lifetime_params_map.get(&id).map_or(&[], |v| &v[..])
     }
 }
 
@@ -1129,7 +1118,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     ) -> &'hir [hir::GenericParam<'hir>] {
         // Start by creating params for extra lifetimes params, as this creates the definitions
         // that may be referred to by the AST inside `generic_params`.
-        let extra_lifetimes = self.resolver.extra_lifetime_params(binder);
+        let extra_lifetimes = self.owner.extra_lifetime_params(binder);
         debug!(?extra_lifetimes);
         let extra_lifetimes: Vec<_> = extra_lifetimes
             .iter()
@@ -1760,18 +1749,30 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let fields = self.arena.alloc_slice(fields);
                 hir::TyKind::View(ty, fields)
             }
-            TyKind::DirectConstArg(_) => {
-                let e = self
-                    .tcx
-                    .dcx()
-                    .struct_span_err(t.span, "expected type, found `direct_const_arg!()` constant")
-                    .emit();
+            TyKind::DirectConstArg(expr) => {
+                let e = self.emit_bad_direct_const_arg(t.span, expr, "type");
                 hir::TyKind::Err(e)
             }
             TyKind::Dummy => panic!("`TyKind::Dummy` should never be lowered"),
         };
 
         hir::Ty { kind, span: self.lower_span(t.span), hir_id: self.lower_node_id(t.id) }
+    }
+
+    pub(crate) fn emit_bad_direct_const_arg(
+        &mut self,
+        span: Span,
+        expr: &Expr,
+        expected: &'static str,
+    ) -> ErrorGuaranteed {
+        let msg = format!("expected {expected}, found `direct_const_arg!()` constant");
+        if expr::WillCreateDefIdsVisitor.visit_expr(expr).is_break() {
+            // FIXME(mgca): make this non-fatal once we have a better way to handle
+            // nested items in invalid `direct_const_arg!()` arguments.
+            self.dcx().struct_span_fatal(span, msg).emit()
+        } else {
+            self.dcx().struct_span_err(span, msg).emit()
+        }
     }
 
     fn lower_ty_direct_lifetime(

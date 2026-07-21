@@ -4,7 +4,7 @@
 FROM ubuntu:20.04 as base
 
 RUN apt update && apt install -y git
-RUN git clone https://github.com/richfelker/musl-cross-make
+RUN git clone https://github.com/ferrocene/musl-cross-make.git
 WORKDIR musl-cross-make
 RUN git checkout fd6be58297ee21fcba89216ccd0d4aca1e3f1c5c # v0.9.11
 

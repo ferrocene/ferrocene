@@ -71,11 +71,6 @@ pub fn instantiation_reachable() {
     uninstantiated_generic(Validated); // ok
 }
 
-// Currently *not* checked.
-// Nadrierel says it should be possible to lift this restriction by not running the
-// `SimplifyCfg-initial` MIR passes, if that's something we want. I think we would also have to
-// modify our RootCollector to use the Eager collection strategy.
-// But right now we just ban our customers from having dead code, lol.
 #[ferrocene::prevalidated] //~ NOTE marked
 fn instantiation_unreachable() { //~ NOTE is validated
     uninstantiated_generic(Unvalidated); // ok

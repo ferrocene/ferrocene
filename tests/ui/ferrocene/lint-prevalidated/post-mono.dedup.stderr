@@ -8,7 +8,7 @@ LL |     x.clone();
    |     ^^^^^^^^^
    |
 note: `instantiation_unreachable` is validated
-  --> $DIR/post-mono.rs:80:4
+  --> $DIR/post-mono.rs:75:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
@@ -32,7 +32,7 @@ LL |     let mut y = fn_type();
    |                 ^^^^^^^^^
    |
 note: generic function `uninstantiated_generic` instantiated by `instantiation_unreachable`, which is called from a validated entrypoint
-  --> $DIR/post-mono.rs:81:5
+  --> $DIR/post-mono.rs:76:5
    |
 LL |     uninstantiated_generic(Unvalidated); // ok
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

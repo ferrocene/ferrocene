@@ -1,9 +1,15 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-FROM --platform=$TARGETPLATFORM ubuntu:20.04
+FROM --platform=$TARGETPLATFORM amazonlinux:2
 
-RUN apt update && apt install -y clang make libssl-dev
+RUN yum -y install git make wget xz gcc gcc-c++ gcc10 gcc10-c++ tar patch bzip2 file openssl11-devel zlib-devel 
+
+# Select gcc10 as the compiler
+ENV CC="gcc10-cc"
+ENV CXX="gcc10-c++"
+ENV AR="gcc10-ar"
+ENV LD="gcc10-ld"
 
 COPY cmake-source.tar.gz /cmake-source.tar.gz
 RUN mkdir /cmake

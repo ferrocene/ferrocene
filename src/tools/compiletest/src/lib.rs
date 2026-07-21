@@ -29,14 +29,8 @@ use core::panic;
 use std::collections::HashSet;
 use std::fmt::Write;
 use std::io::{self, ErrorKind};
-<<<<<<< ferrocene/main
-use std::sync::mpsc::Sender;
-use std::sync::{Arc, OnceLock};
-||||||| 470556c8c1c
-use std::sync::{Arc, OnceLock};
-=======
 use std::sync::Arc;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use std::sync::mpsc::Sender;
 use std::time::SystemTime;
 use std::{env, fs, vec};
 
@@ -350,16 +344,8 @@ fn find_tests_in_dir(
         && let Some(("assembly" | "codegen", backend)) = last.split_once('-')
         && let Some(Utf8Component::Normal(parent)) = components.next()
         && parent == "tests"
-<<<<<<< ferrocene/main
-        && let Ok(backend) = CodegenBackend::try_from(backend)
-        && backend != config.default_codegen_backend
-||||||| 470556c8c1c
-        && let Ok(backend) = CodegenBackend::try_from(backend)
-        && backend != cx.config.default_codegen_backend
-=======
         && let Ok(backend) = backend.parse::<CodegenBackend>()
-        && backend != cx.config.default_codegen_backend
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+        && backend != config.default_codegen_backend
     {
         // We ignore asm tests which don't match the current codegen backend.
         warning!(

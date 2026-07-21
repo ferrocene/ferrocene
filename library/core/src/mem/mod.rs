@@ -187,12 +187,8 @@ pub mod type_info;
 #[rustc_const_stable(feature = "const_forget", since = "1.46.0")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_diagnostic_item = "mem_forget"]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-||||||| 470556c8c1c
-=======
 #[rustc_no_writable]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#[ferrocene::prevalidated]
 pub const fn forget<T>(t: T) {
     let _ = ManuallyDrop::new(t);
 }

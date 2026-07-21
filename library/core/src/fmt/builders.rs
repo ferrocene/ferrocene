@@ -498,20 +498,8 @@ struct DebugInner<'a, 'b: 'a> {
 }
 
 impl<'a, 'b: 'a> DebugInner<'a, 'b> {
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn entry_with<F>(&mut self, entry_fmt: F)
-    where
-        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
-    {
-||||||| 470556c8c1c
-    fn entry_with<F>(&mut self, entry_fmt: F)
-    where
-        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
-    {
-=======
     fn entry(&mut self, entry: &dyn fmt::Debug) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.result = self.result.and_then(|_| {
             if self.is_pretty() {
                 if !self.has_fields {
@@ -533,10 +521,7 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
         self.has_fields = true;
     }
 
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-||||||| 470556c8c1c
-=======
     fn entry_with<F>(&mut self, entry_fmt: F)
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -544,7 +529,7 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
         self.entry(&DebugOnce(Cell::new(Some(entry_fmt))));
     }
 
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     fn is_pretty(&self) -> bool {
         self.fmt.alternate()
     }
@@ -1054,35 +1039,6 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     #[stable(feature = "debug_map_key_value", since = "1.42.0")]
     #[ferrocene::prevalidated]
     pub fn key(&mut self, key: &dyn fmt::Debug) -> &mut Self {
-<<<<<<< ferrocene/main
-        self.key_with(|f| key.fmt(f))
-    }
-
-    /// Adds the key part of a new entry to the map output.
-    ///
-    /// This method is equivalent to [`DebugMap::key`], but formats the
-    /// key using a provided closure rather than by calling [`Debug::fmt`].
-    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
-    #[ferrocene::prevalidated]
-    pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
-    where
-        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
-    {
-||||||| 470556c8c1c
-        self.key_with(|f| key.fmt(f))
-    }
-
-    /// Adds the key part of a new entry to the map output.
-    ///
-    /// This method is equivalent to [`DebugMap::key`], but formats the
-    /// key using a provided closure rather than by calling [`Debug::fmt`].
-    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
-    pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
-    where
-        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
-    {
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.result = self.result.and_then(|_| {
             assert!(
                 !self.has_key,
@@ -1119,6 +1075,7 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// This method is equivalent to [`DebugMap::key`], but formats the
     /// key using a provided closure rather than by calling [`Debug::fmt`].
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    #[ferrocene::prevalidated]
     pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,

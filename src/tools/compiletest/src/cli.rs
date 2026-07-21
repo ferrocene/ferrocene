@@ -5,11 +5,6 @@ use std::env;
 use std::io::IsTerminal;
 use std::sync::{Arc, OnceLock};
 
-<<<<<<< ferrocene/main
-use crate::{early_config_check, ferrocene_annotations, parse_config, run_tests};
-||||||| 470556c8c1c
-use crate::{early_config_check, parse_config, run_tests};
-=======
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
 
@@ -17,8 +12,7 @@ use crate::common::{
     CodegenBackend, CompareMode, Config, Debugger, ForcePassMode, TestMode, TestSuite,
 };
 use crate::edition::Edition;
-use crate::{debuggers, directives, early_config_check, run_tests};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::{debuggers, directives, early_config_check, ferrocene_annotations, run_tests};
 
 pub fn main() {
     tracing_subscriber::fmt::init();

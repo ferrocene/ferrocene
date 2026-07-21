@@ -937,29 +937,8 @@ pub(crate) fn make_test_description(
                     return;
                 }
 
-<<<<<<< ferrocene/main
-        // Ferrocene addition
-        decision!(ignore_qemu(config, ln));
-
-        if config.target == "wasm32-unknown-unknown"
-            && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
-        {
-            decision!(IgnoreDecision::Ignore {
-                reason: "ignored on WASM as the run results cannot be checked there".into(),
-            });
-        }
-||||||| 470556c8c1c
-        if config.target == "wasm32-unknown-unknown"
-            && config.parse_name_directive(ln, directives::CHECK_RUN_RESULTS)
-        {
-            decision!(IgnoreDecision::Ignore {
-                reason: "ignored on WASM as the run results cannot be checked there".into(),
-            });
-        }
-=======
                 // Parse `aux-*` directives, for use by up-to-date checks.
                 parse_and_update_aux(config, ln, aux_props);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
                 macro_rules! decision {
                     ($e:expr) => {
@@ -976,6 +955,9 @@ pub(crate) fn make_test_description(
                         }
                     };
                 }
+
+                // Ferrocene addition
+                decision!(ignore_qemu(config, ln));
 
                 decision!(cfg::handle_ignore(&cache.cfg_conditions, ln));
                 decision!(cfg::handle_only(&cache.cfg_conditions, ln));

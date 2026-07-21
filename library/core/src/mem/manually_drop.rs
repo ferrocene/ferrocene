@@ -179,12 +179,8 @@ impl<T> ManuallyDrop<T> {
     #[stable(feature = "manually_drop", since = "1.20.0")]
     #[rustc_const_stable(feature = "const_manually_drop", since = "1.32.0")]
     #[inline(always)]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 470556c8c1c
-=======
     #[rustc_no_writable]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     pub const fn new(value: T) -> ManuallyDrop<T> {
         ManuallyDrop { value: MaybeDangling::new(value) }
     }

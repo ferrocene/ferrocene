@@ -836,7 +836,6 @@ fn doc_std(
         cargo.rustdocflag(arg);
     }
 
-<<<<<<< ferrocene/main
     // ferrocene addition: need to duplicate this logic from `compile::std_cargo` to prevent
     // a compiler error when generating docs for libstd
     if target.contains("facade") {
@@ -850,15 +849,9 @@ fn doc_std(
         }
     }
 
-    // Ferrocene addition
-    if builder.config.library_docs_private_items {
-||||||| 470556c8c1c
-    if builder.config.library_docs_private_items {
-=======
     // This is needed for cargo-semver-checks and potentially other downstream tools that consume
     // the JSON data.
     if format == DocumentationFormat::Json || builder.config.library_docs_private_items {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         cargo.rustdocflag("--document-private-items").rustdocflag("--document-hidden-items");
     }
 

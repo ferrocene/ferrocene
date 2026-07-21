@@ -3024,14 +3024,8 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_binary_search", issue = "159532")]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
-||||||| 470556c8c1c
-    pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
-=======
     pub const fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     where
         F: [const] FnMut(&'a T) -> Ordering + [const] Destruct,
     {
@@ -3133,14 +3127,8 @@ impl<T> [T] {
     #[rustc_const_unstable(feature = "const_binary_search", issue = "159532")]
     #[stable(feature = "slice_binary_search_by_key", since = "1.10.0")]
     #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
-||||||| 470556c8c1c
-    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
-=======
     pub const fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     where
         F: [const] FnMut(&'a T) -> B + [const] Destruct,
         B: [const] Ord + [const] Destruct,

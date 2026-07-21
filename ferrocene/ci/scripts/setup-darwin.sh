@@ -4,6 +4,7 @@
 set -xeuo pipefail
 
 # On Mac, XCode's LLVM cannot build for WASM.
+brew update
 brew install cmake ninja zstd llvm tidy-html5
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation.

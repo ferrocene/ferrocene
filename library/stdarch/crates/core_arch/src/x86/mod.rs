@@ -519,6 +519,7 @@ pub use self::test::*;
 macro_rules! as_transmute {
     ($from:ty => $as_from:ident, $($as_to:ident -> $to:ident),* $(,)?) => {
         impl $from {$(
+            #[ferrocene::prevalidated]
             #[inline]
             pub(crate) const fn $as_to(self) -> crate::core_arch::simd::$to {
                 unsafe { transmute(self) }

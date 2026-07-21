@@ -572,6 +572,7 @@ const fn is_ascii(s: &[u8]) -> bool {
 #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
 const SSE2_CHUNK_SIZE: usize = 64;
 
+#[ferrocene::prevalidated]
 #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
 #[inline]
 fn is_ascii_sse2(bytes: &[u8]) -> bool {

@@ -37,6 +37,7 @@ const impl<T: [const] Eq> Eq for [T] {}
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 const impl<T: [const] Ord> Ord for [T] {
+    #[ferrocene::prevalidated]
     fn cmp(&self, other: &[T]) -> Ordering {
         SliceOrd::compare(self, other)
     }
@@ -212,6 +213,7 @@ const impl<A: [const] PartialOrd> SliceChain for A {
     }
 }
 
+#[ferrocene::prevalidated]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[inline]
 const fn chaining_impl<'l, 'r, A: PartialOrd, B, C>(
@@ -286,6 +288,7 @@ const trait SliceOrd: Sized {
 
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 const impl<A: [const] Ord> SliceOrd for A {
+    #[ferrocene::prevalidated]
     default fn compare(left: &[Self], right: &[Self]) -> Ordering {
         let elem_chain = const |a, b| match Ord::cmp(a, b) {
             Ordering::Equal => ControlFlow::Continue(()),

@@ -886,6 +886,7 @@ pub const fn _mm_andnot_si128(a: __m128i, b: __m128i) -> __m128i {
 /// `b`.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_or_si128)
+#[ferrocene::prevalidated]
 #[inline]
 #[target_feature(enable = "sse2")]
 #[cfg_attr(test, assert_instr(orps))]
@@ -1331,6 +1332,7 @@ pub const unsafe fn _mm_load_si128(mem_addr: *const __m128i) -> __m128i {
 /// `mem_addr` does not need to be aligned on any particular boundary.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_loadu_si128)
+#[ferrocene::prevalidated]
 #[inline]
 #[target_feature(enable = "sse2")]
 #[cfg_attr(test, assert_instr(movups))]
@@ -1609,6 +1611,7 @@ pub const fn _mm_insert_epi16<const IMM8: i32>(a: __m128i, i: i32) -> __m128i {
 /// Returns a mask of the most significant bit of each element in `a`.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_movemask_epi8)
+#[ferrocene::prevalidated]
 #[inline]
 #[target_feature(enable = "sse2")]
 #[cfg_attr(test, assert_instr(pmovmskb))]
@@ -3201,6 +3204,7 @@ pub const fn _mm_undefined_pd() -> __m128d {
 /// In practice, this is typically equivalent to [`mem::zeroed`].
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_undefined_si128)
+#[ferrocene::prevalidated]
 #[inline]
 #[target_feature(enable = "sse2")]
 #[stable(feature = "simd_x86", since = "1.27.0")]

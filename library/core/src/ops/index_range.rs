@@ -236,6 +236,7 @@ impl DoubleEndedIterator for IndexRange {
 }
 
 impl ExactSizeIterator for IndexRange {
+    #[ferrocene::prevalidated]
     #[inline]
     fn len(&self) -> usize {
         self.len()

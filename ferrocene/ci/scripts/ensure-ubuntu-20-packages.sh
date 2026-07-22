@@ -29,7 +29,7 @@ while read -r LINE || [ -n "${LINE}" ]; do
     package=$(echo "${LINE}" | cut -f 2 -d " ")
     # we know that the host arch of the package is always the first occurence, the
     # target arch is optional and only occurs for the musl-cross package
-    host_arch=$(echo $LINE | awk '{ match($0, /-(aarch64|x86_64)/, arr); print arr[1]}')
+    host_arch=$(echo $LINE | awk '{ match($0, /(aarch64|x86_64)/); print substr($0, RSTART, RLENGTH);}')
 
     if [ "$host" = "$host_arch" ]; then
         echo "Downloading package ${package}"

@@ -22,17 +22,17 @@ musl-cross: musl.dockerfile prepare
 		set -xe ; \
 		id=$$(docker create musl-tarballs) ; \
 		docker cp $$id:/musl-cross-make/musl-cross-make-aarch64-$(musl-cross-target-version).tar.xz \
-			../../output/musl-cross-make-$(host-arch)-aarch64-$(musl-cross-target-version)-$(commit).tar.xz ; \
+			../../output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz ; \
 		docker cp $$id:/musl-cross-make/musl-cross-make-x86_64-$(musl-cross-target-version).tar.xz \
-			../../output/musl-cross-make-$(host-arch)-x86_64-$(musl-cross-target-version)-$(commit).tar.xz ; \
+			../../output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
 upload-musl-cross: musl-cross
-	aws s3 cp output/musl-cross-make-$(host-arch)-aarch64-$(musl-cross-target-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-artifacts/manual/musl-cross-make/binaries/musl-cross-make-$(host-arch)-aarch64-$(musl-cross-target-version)-$(commit).tar.xz
-	aws s3 cp output/musl-cross-make-$(host-arch)-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-artifacts/manual/musl-cross-make/binaries/musl-cross-make-$(host-arch)-x86_64-$(musl-cross-target-version)-$(commit).tar.xz
+	aws s3 cp output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz
+	aws s3 cp output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz
 
 .ONESHELL:
 python: python.dockerfile prepare
@@ -49,8 +49,8 @@ python: python.dockerfile prepare
 	}
 
 upload-python: python
-        aws s3 cp output/python-$(host-arch)-$(python-version)-$(commit).tar.xz \
-			s3://ferrocene-ci-artifacts/manual/python/binaries/python-$(host-arch)-$(python-version)-$(commit).tar.xz
+        aws s3 cp output/python-$(python-version)-$(host-arch)-$(commit).tar.xz \
+			s3://ferrocene-ci-mirrors/manual/binaries/python-$(python-version)-$(host-arch)-$(commit).tar.xz
 
 .ONESHELL:
 gdb: gdb.dockerfile prepare
@@ -62,13 +62,13 @@ gdb: gdb.dockerfile prepare
 		set -xe ; \
 		id=$$(docker create gdb:v$(gdb-version)) ; \
 		docker cp $$id:/gdb/gdb-binaries.tar.xz \
-			../../output/gdb-$(host-arch)-$(gdb-version)-$(commit).tar.xz ; \
+			../../output/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
 upload-gdb: gdb
-	aws s3 cp output/gdb-$(host-arch)-$(gdb-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-artifacts/manual/gdb/binaries/gdb-$(host-arch)-$(gdb-version)-$(commit).tar.xz
+	aws s3 cp output/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
 .ONESHELL:
 cmake: cmake.dockerfile prepare
@@ -80,13 +80,13 @@ cmake: cmake.dockerfile prepare
 		set -xe ; \
 		id=$$(docker create cmake:v$(cmake-version)) ; \
 		docker cp $$id:/cmake/cmake-binaries.tar.xz \
-			../../output/cmake-$(host-arch)-$(cmake-version)-$(commit).tar.xz ; \
+			../../output/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
 upload-cmake: cmake
-	aws s3 cp output/cmake-$(host-arch)-$(cmake-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-artifacts/manual/cmake/binaries/cmake-$(host-arch)-$(cmake-version)-$(commit).tar.xz
+	aws s3 cp output/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz
 
 make-all: musl-cross python gdb cmake
 upload-all: upload-musl-cross upload-python upload-gdb upload-cmake

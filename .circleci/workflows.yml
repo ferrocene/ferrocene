@@ -123,7 +123,7 @@ parameters:
 
 orbs:
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
+  ferrocene: ferrocene/ferrocene-common@dev:docker_build-docker_arguments # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -952,6 +952,7 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
+        - equal: [<< pipeline.git.branch >>, carmen/ubuntu-24-qemu]
     jobs:
       - ferrocene/build_docker:
           name: build-docker--ubuntu-20--x86_64

@@ -22,7 +22,7 @@ parameters:
     default: true
 
 orbs:
-  ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
+  ferrocene: ferrocene/ferrocene-common@dev:docker_build-docker_arguments # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
   continuation: circleci/continuation@0.2.0
 
 jobs:
@@ -61,4 +61,5 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
         - equal: [<< pipeline.trigger_source >>, "api"]
+        - equal: [<< pipeline.git.branch >>, carmen/ubuntu-24-qemu]
     jobs: [setup]

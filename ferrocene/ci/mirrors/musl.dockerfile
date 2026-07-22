@@ -56,5 +56,8 @@ FROM ubuntu:20.04 AS tarballs
 ARG TARGETPLATFORM
 ARG TARGETVERSION=v0.9.11
 
+RUN mkdir /musl-cross-make
+WORKDIR  /musl-cross-make
+
 COPY --from=aarch64 /musl-cross-make/musl-cross-make-aarch64-${TARGETVERSION}.tar.xz .
 COPY --from=x86_64 /musl-cross-make/musl-cross-make-x86_64-${TARGETVERSION}.tar.xz .

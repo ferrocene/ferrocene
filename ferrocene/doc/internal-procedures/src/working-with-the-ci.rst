@@ -138,7 +138,7 @@ the following shebang:
 
 .. code-block:: python
 
-   #!/usr/bin/env -S uv run
+   #!/home/ci/.local/bin/uv run
 
 This will instruct the OS to invoke the script using ``uv``, which will make
 sure the correct Python version is used. It's also possible to use ``uv``'s

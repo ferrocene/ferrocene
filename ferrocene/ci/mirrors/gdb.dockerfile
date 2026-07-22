@@ -3,7 +3,23 @@
 
 FROM --platform=$TARGETPLATFORM amazonlinux:2
 
-RUN yum -y install git make wget xz gcc gcc-c++ gcc10 gcc10-c++ tar patch bzip2 file openssl11-devel pkg-config zlib-devel python3
+RUN yum -y install \
+        git \
+        make \
+        wget \
+        gcc gcc-c++ \
+        gcc10 gcc10-c++ \
+        tar \
+        bzip2 \
+        xz \
+        patch \
+        file \
+        openssl11-devel \
+        pkg-config \
+        zlib-devel \
+        python3 \
+        python3-devel \
+        gmp-devel
 
 # Select gcc10 as the compiler
 ENV CC="gcc10-cc"

@@ -9,7 +9,7 @@ commit != git rev-parse HEAD | cut -c 1-8
 host-arch != uname -m
 
 prepare:
-	mkdir output
+	mkdir -p output
 
 .ONESHELL:
 musl-cross: musl.dockerfile prepare

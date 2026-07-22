@@ -1041,6 +1041,40 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
+  alias-docker:
+    description: Specialized version of build-docker-* for running on main and tagging the image as such
+    docker:
+      - image: cimg/base:current
+    parameters:
+      image:
+        description: The image that needs to be built
+        type: string
+      src:
+        description: The tag of the image that needs to be aliased
+        type: string
+      alias:
+        description: The tag of the alias to push
+        type: string
+      resource_class:
+        description: Resource class of the runner
+        type: string
+    resource_class: << parameters.resource_class >>
+    steps:
+      - aws-cli/install:
+          version: << pipeline.parameters.awscli-version >>
+          override_installed: true
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: alias << parameters.image >> from << parameters.src >> to << parameters.alias >>
+          environment:
+            ECR_REPOSITORY: ci-docker-images
+            ECR_REGION: us-east-1
+          command: ferrocene/ci/scripts/alias-docker-image-tag.sh '<< parameters.image >>' '<< parameters.src >>' '<< parameters.alias >>'
+
   build-docker-aarch64:
     description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
     docker:
@@ -1631,6 +1665,55 @@ workflows:
             value: << pipeline.git.branch >>
     jobs:
       - skip
+
+  tag-images:
+    when:
+      equal: [<< pipeline.git.branch >>, main]
+    jobs:
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-20--x86_64
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+
+      - alias-docker:
+          name: alias-docker-x86_64-ubuntu-20
+          requires:
+            - build-docker--ubuntu-20--x86_64
+          resource_class: large # 4-core
+          image: ubuntu-20
+          src: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          alias: x86_64-ubuntu-20
+
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24--x86_64
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
+      - alias-docker:
+          name: alias-docker-x86_64-ubuntu-24
+          requires:
+            - build-docker--ubuntu-24--x86_64
+          resource_class: large # 4-core
+          image: ubuntu-24
+          src: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          alias: x86_64-ubuntu-24
+
+      - build-docker-aarch64:
+          name: build-docker--ubuntu-20--aarch64
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20 >>
+
+      - alias-docker:
+          name: alias-docker-aarch64-ubuntu-20
+          requires:
+            - build-docker--ubuntu-20--aarch64
+          resource_class: arm.medium # 2-core
+          image: ubuntu-20
+          src: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          alias: aarch64-ubuntu-20
 
 commands:
   ferrocene-job-build:

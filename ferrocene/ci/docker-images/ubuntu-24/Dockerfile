@@ -7,11 +7,15 @@
 # From the root of this repository, build with
 # `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
 
+FROM --platform=$TARGETPLATFORM harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:11.0.1 AS qemu
+
 FROM --platform=$TARGETPLATFORM ubuntu:24.04
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
+
+COPY --from=qemu / /opt/qemu-ferrocene/11.0.1/
 
 RUN <<-EOF
     set -xe

@@ -5,3 +5,5 @@
 fn main() {}
 
 //~? ERROR invalid character '-' in crate name
+
+// ferrocene-annotations: um_rustc_crate_name

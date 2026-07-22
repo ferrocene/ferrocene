@@ -44,13 +44,13 @@ python: python.dockerfile prepare
 		set -xe ; \
 		id=$$(docker create python:v$(python-version)) ; \
 		docker cp $$id:/python/python-binaries.tar.xz \
-			../../output/python-$(host-arch)-$(python-version)-$(commit).tar.xz ; \
+			../../output/python-$(python-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
 upload-python: python
         aws s3 cp --no-overwrite output/python-$(python-version)-$(host-arch)-$(commit).tar.xz \
-			s3://ferrocene-ci-mirrors/manual/binaries/python-$(python-version)-$(host-arch)-$(commit).tar.xz
+			s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-$(host-arch)-$(commit).tar.xz
 
 .ONESHELL:
 gdb: gdb.dockerfile prepare
@@ -90,6 +90,21 @@ upload-cmake: cmake
 
 make-all: musl-cross python gdb cmake
 upload-all: upload-musl-cross upload-python upload-gdb upload-cmake
+
+.ONESHELL:
+update-hashes:
+	mkdir -p hashes
+	aws c3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
+	aws c3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-aarch64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-aarch64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-aarch64-$(commit).tar.xz hashes/
+	aws c3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
+	aws c3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-x86_64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-x86_64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-x86_64-$(commit).tar.xz hashes/
+	cd hashes; sha256sum *tar.xz > hashes.txt
 
 clean-build:
 	rm -rf build/

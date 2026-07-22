@@ -189,7 +189,7 @@ RUN <<-EOF
         host_platform=aarch64
     fi
 
-    while IFS='' read -r LINE || [ -n "${LINE}" ]; do
+    for LINE in $(cat /mirrors/hashes.txt | tr -s " " | cut -f 2 -d " "); do
         package_file=$(echo "${LINE}" | cut -f 2)
         # we know that the host arch of the package is always the first occurence, the
         # target arch is optional and only occurs for the musl-cross package
@@ -201,7 +201,7 @@ RUN <<-EOF
         else
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
-    done < /mirrors/hashes.txt
+    done
 EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration

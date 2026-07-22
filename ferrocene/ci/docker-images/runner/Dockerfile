@@ -70,6 +70,7 @@ RUN <<-EOF
 
     # Install required packages
     apt-install \
+        awk \
         gpg \
         gpg-agent \
         git \
@@ -238,18 +239,21 @@ RUN <<-EOF
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         host_platform=aarch64
     fi
-    for tarball in \
-        musl-cross-make-${host_platform}-to-aarch64 \
-        musl-cross-make-${host_platform}-to-x86_64 \
-        cmake-3.21.1-${host_platform} \
-        python-3.12.3-${host_platform} \
-        gdb-12.1-${host_platform}
-    do
-        filename=mirrors/${tarball}.tar.xz
-        echo "extracting $tarball"
-        tar -C /usr/local -xf "$filename"
-        rm "$filename"
-    done
+
+    while read -r LINE || [ -n "${LINE}" ]; do
+        hash=$(echo "${LINE}" | cut -f 1 -d " ")
+        package=$(echo "${LINE}" | cut -f 2 -d " ")
+        # we know that the host arch of the package is always the first occurence, the
+        # target arch is optional and only occurs for the musl-cross package
+        host_arch=$(echo $LINE | awk '{ match($0, /-(aarch64|x86_64)/, arr); print arr[1]}')
+
+        if [ "$host_platform" = "$host_arch" ]; then
+            echo "Installing package ${package}"
+            tar -C /usr/local -xf "mirrors/$package"
+        else
+            echo "Skipping package ${package}, wrong host arch (${host_arch})"
+        fi
+    done < /mirrors/hashes.txt
 EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration

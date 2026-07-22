@@ -33,7 +33,7 @@ RUN <<-EOF
 
     # Install required packages
     apt-install \
-        awk \
+        mawk \
         gpg \
         gpg-agent \
         git \

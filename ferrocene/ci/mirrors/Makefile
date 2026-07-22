@@ -93,4 +93,9 @@ upload-all: upload-musl-cross upload-python upload-gdb upload-cmake
 
 clean-build:
 	rm -rf build/
+
+clean-output:
+	rm -rf output/
+
+clean-all: clean-build clean-output
 #   docker image rm musl-tarballs

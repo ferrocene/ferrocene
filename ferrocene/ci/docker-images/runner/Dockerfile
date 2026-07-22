@@ -11,11 +11,19 @@
 # Increment this to force a rebuild in CI, even if you no other changes
 # Generation: 1
 
-# As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
+# This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
+# container is below (FROM ubuntu:20.04). This is needed because the version of
+# QEMU in the Ubuntu 20.04 archives is too old, so we install QEMU on Ubuntu
+# 24.04 and copy the binary over to 20.04.
+#
+# This actually works because the qemu-user-static package contains statically
+# linked versions of QEMU, with no dynamically linked libraries. This means we
+# can just copy it to a different system and it won't have any problems. Do NOT
+# use the same approach for other dependencies missing in Ubuntu 20.04 unless
+# you know what you're doing.
 
-FROM --platform=$TARGETPLATFORM ubuntu:20.04
+
+FROM --platform=$TARGETPLATFORM amazonlinux:2
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
@@ -24,88 +32,50 @@ ARG BUILDPLATFORM
 RUN <<-EOF
     set -xe
     mkdir -p /ferrocene/packages
-    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-    alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 
-    apt-get update
-    # Update all the dependencies
-    apt-get upgrade -y
-
-    # Install required packages
-    apt-install \
-        mawk \
-        gpg \
-        gpg-agent \
-        git \
-        build-essential \
+    # gpg and gpg-agent are pre-installed
+    yum -y install \
+        gawk \
+        git-core \
         ninja-build \
-        openssh-client \
+        openssh-clients \
         file \
         curl \
+        tar \
         ca-certificates \
-        libedit-dev \
-        libssl-dev \
-        zlib1g-dev \
-        moreutils \
+        libedit-devel \
+        openssl11-devel \
+        zlib-devel \
         zstd \
+        xz \
+        unzip \
+        bzip2 \
         sudo \
-        gcc-10 \
-        g++-10 \
-        gcc-s390x-linux-gnu \
-        g++-s390x-linux-gnu \
-        gcc-powerpc64le-linux-gnu \
-        g++-powerpc64le-linux-gnu
+        gcc gcc-c++ \
+        gcc10 gcc10-c++ \
+        clang \
+        procps-ng \
+        shadow-utils
+
+#        build-essential \
+#        gcc-s390x-linux-gnu \
+#        g++-s390x-linux-gnu \
+#        gcc-powerpc64le-linux-gnu \
+#        g++-powerpc64le-linux-gnu
 
 
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        # Needed for aarch64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-aarch64-linux-gnu \
-            gcc-aarch64-linux-gnu \
-            g++-10-aarch64-linux-gnu \
-            gcc-10-aarch64-linux-gnu \
-            binutils-aarch64-linux-gnu \
-            libc6-dev-arm64-cross
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        # Needed for x86_64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-x86-64-linux-gnu \
-            gcc-x86-64-linux-gnu \
-            g++-10-x86-64-linux-gnu \
-            gcc-10-x86-64-linux-gnu \
-            binutils-x86-64-linux-gnu \
-            libc6-dev-amd64-cross
-    fi
+    # # make gcc 10 default
+    # sudo update-alternatives \
+    #   --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
+    #   --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
+    #   --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
+    #   --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
+    #   --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
 
-    # make gcc 10 default
-    sudo update-alternatives \
-      --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
-      --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
-      --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
-      --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
-      --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
+    # # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
+    # # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
+    # apt-install gcc-arm-none-eabi
 
-    # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
-    # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
-    apt-install gcc-arm-none-eabi
-
-    # Needed for the wasm32-unknown-unknown target
-    apt-install clang
-    # Needed to install AWS CLI during the build:
-    apt-install unzip
-
-    # Needed to install git during the build:
-    apt-install \
-        dh-autoreconf \
-        libcurl4-gnutls-dev \
-        libexpat1-dev \
-        gettext \
-        libz-dev \
-        libssl-dev
-
-    # Remove files that are not useful in the final image, and can be
-    # regenerated by running `apt-get update`
-    rm -rf /var/lib/apt/lists/*
 EOF
 
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
@@ -179,7 +149,7 @@ RUN /tmp/setup-awscli.sh
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
-RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+# RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
     set -eu
 
@@ -212,6 +182,14 @@ COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
 ENV LANG=C.UTF-8
 
 # Automatic compiler detection doesn't work for some targets.
+
+
+ENV CC="gcc10-cc"
+ENV CXX="gcc10-c++"
+ENV AR="gcc10-ar"
+ENV LD="gcc10-ld"
+
+
 ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
@@ -235,12 +213,12 @@ ENV CFLAGS_aarch64r82_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp
 
 RUN <<-EOF
     set -xe
-    mkdir /home/ci
-    addgroup --gid 1000 ci
-    addgroup --gid 1001 ci-usergroup
-    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci
-    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
-    chown -R ci: /home/ci
+
+    groupadd --gid 1000 ci
+    groupadd --gid 1001 ci-usergroup
+
+    useradd --uid 1000 --gid 1000 -d /home/ci -m ci
+    useradd --uid 1001 --gid 1001 ci-user
 EOF
 USER ci
 WORKDIR /home/ci

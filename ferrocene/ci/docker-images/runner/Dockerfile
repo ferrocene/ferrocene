@@ -240,18 +240,17 @@ RUN <<-EOF
         host_platform=aarch64
     fi
 
-    while read -r LINE || [ -n "${LINE}" ]; do
-        hash=$(echo "${LINE}" | cut -f 1 -d " ")
-        package=$(echo "${LINE}" | cut -f 2 -d " ")
+    while IFS='' read -r LINE || [ -n "${LINE}" ]; do
+        package_file=$(echo "${LINE}" | cut -f 2)
         # we know that the host arch of the package is always the first occurence, the
         # target arch is optional and only occurs for the musl-cross package
-        host_arch=$(echo $LINE | awk '{ match($0, /(aarch64|x86_64)/); print substr($0, RSTART, RLENGTH);}' )
+        host_arch=$(echo $package_file | awk '{ match($0, /(aarch64|x86_64)/); print substr($0, RSTART, RLENGTH);}' )
 
         if [ "$host_platform" = "$host_arch" ]; then
-            echo "Installing package ${package}"
-            tar -C /usr/local -xf "mirrors/$package"
+            echo "Installing package ${package_file}"
+            tar -C /usr/local -xf "mirrors/$package_file"
         else
-            echo "Skipping package ${package}, wrong host arch (${host_arch})"
+            echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
     done < /mirrors/hashes.txt
 EOF

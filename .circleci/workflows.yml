@@ -968,6 +968,9 @@ workflows:
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
+          docker_arguments: |
+            --build-arg
+            QEMUVERSION=<< pipeline.parameters.qemu-version >>
 
       - ferrocene/build_docker:
           name: build-docker--ubuntu-20--aarch64

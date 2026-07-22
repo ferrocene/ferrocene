@@ -7,7 +7,9 @@
 # From the root of this repository, build with
 # `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
 
-FROM --platform=$TARGETPLATFORM harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:11.0.1 AS qemu
+ARG QEMUVERSION
+
+FROM --platform=$TARGETPLATFORM harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:$QEMUVERSION AS qemu
 
 FROM --platform=$TARGETPLATFORM ubuntu:24.04
 
@@ -15,7 +17,7 @@ FROM --platform=$TARGETPLATFORM ubuntu:24.04
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-COPY --from=qemu / /opt/qemu-ferrocene/11.0.1/
+COPY --from=qemu / /opt/qemu-ferrocene/$QEMUVERSION/
 
 RUN <<-EOF
     set -xe

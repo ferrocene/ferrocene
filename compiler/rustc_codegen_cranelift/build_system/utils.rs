@@ -23,8 +23,8 @@ impl Compiler {
         match self.triple.as_str() {
             "aarch64-unknown-linux-gnu" => {
                 // We are cross-compiling for aarch64. Use the correct linker and run tests in qemu.
-                self.rustflags.push("-Clinker=aarch64-linux-gnu-gcc".to_owned());
-                self.rustdocflags.push("-Clinker=aarch64-linux-gnu-gcc".to_owned());
+                // self.rustflags.push("-Clinker=aarch64-linux-gnu-gcc".to_owned());
+                // self.rustdocflags.push("-Clinker=aarch64-linux-gnu-gcc".to_owned());
                 self.runner = vec![
                     "qemu-aarch64".to_owned(),
                     "-L".to_owned(),

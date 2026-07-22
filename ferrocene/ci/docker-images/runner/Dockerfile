@@ -51,11 +51,13 @@ RUN <<-EOF
         unzip \
         bzip2 \
         sudo \
-        gcc gcc-c++ \
+        binutils \
         gcc10 gcc10-c++ \
-        clang \
         procps-ng \
         shadow-utils
+
+        # llvm
+        # gcc gcc-c++ \
 
 #        build-essential \
 #        gcc-s390x-linux-gnu \
@@ -65,10 +67,14 @@ RUN <<-EOF
 
 
     # # make gcc 10 default
-    # sudo update-alternatives \
-    #   --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
-    #   --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
-    #   --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
+    sudo update-alternatives \
+      --install /usr/bin/gcc gcc /usr/bin/gcc10-gcc 100 \
+      --slave /usr/bin/cc cc /usr/bin/gcc10-cc \
+      --slave /usr/bin/g++ g++ /usr/bin/gcc10-c++ \
+      --slave /usr/bin/c++ c++ /usr/bin/gcc10-c++ \
+      --slave /usr/bin/gcov gcov /usr/bin/gcc10-gcov \
+      --slave /usr/bin/ld.bfd ld.bfd /usr/bin/gcc10-ld.bfd \
+      --slave /usr/bin/ld ld /usr/bin/gcc10-ld.bfd
     #   --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
     #   --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
 
@@ -78,6 +84,31 @@ RUN <<-EOF
 
 EOF
 
+# RUN ln -s /usr/bin/gcc10-gcc /usr/bin/gcc
+# RUN ln -s /usr/bin/gcc10-cc /usr/bin/cc
+# RUN ln -s /usr/bin/gcc10-ld.bfd /usr/bin/ld
+# RUN ln -s /usr/bin/gcc10-ar /usr/bin/ar
+# RUN ln -s /usr/bin/gcc10-c++ /usr/bin/g++
+# RUN ln -s /usr/bin/gcc10-c++ /usr/bin/c++
+# RUN ln -s /usr/bin/gcc10-readelf /usr/bin/readelf
+# RUN ln -s /usr/bin/gcc10-strings /usr/bin/strings
+# RUN ln -s /usr/bin/gcc10-strip /usr/bin/strip
+# RUN ln -s /usr/bin/gcc10-size /usr/bin/size
+
+# RUN <<-EOF
+#     set -xe
+#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+#         curl -LO https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-Linux-X64.tar.xz
+#         tar -C /usr/ --strip-components=1 -xf LLVM-22.1.8-Linux-X64.tar.xz
+#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+#         curl -LO  https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-Linux-ARM64.tar.xz
+#         tar -C /usr/ --strip-components=1 -xf LLVM-22.1.8-Linux-ARM64.tar.xz
+#     else
+#         echo "Unsupported platform"
+#         exit 1
+#     fi
+# EOF
+
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
 # are too old to be useful (they don't know about the `z` ISA flag).
 #
@@ -85,27 +116,28 @@ EOF
 #
 # These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
 # image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
-RUN <<-EOF
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        mkdir /opt/riscv-toolchain
-        PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
-        SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
-        curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
-        echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
-        tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
-        rm /tmp/riscv-toolchain.tar.gz
-        /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+# RUN <<-EOF
+#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+#         mkdir /opt/riscv-toolchain
+#         PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
+#         SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
+#         curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
+#         echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
+#         tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
+#         rm /tmp/riscv-toolchain.tar.gz
+#         /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
 
-        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-EOF
-ENV PATH "/opt/riscv-toolchain/bin:$PATH"
+#         echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
+#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+#         echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
+#     else
+#         echo "Unsupported platform"
+#         exit 1
+#     fi
+# EOF
+# ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 
+ENV PATH "/opt/riscv-toolchain/ubuntu2004-20240407/bin:$PATH"
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
@@ -114,29 +146,31 @@ ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 #
 # If you are reading this comment because you need to upgrade past NodeJS 16,
 # you will unfortunately need to change this to build NodeJS from source.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x64"
-        SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="arm64"
-        SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    mkdir /opt/nodejs
-    PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
-    curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
-    echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
-    tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
-    rm /tmp/nodejs.tar.xz
-    /opt/nodejs/bin/node --version
+# RUN <<-EOF
+#     set -xe
+#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+#         ARCH="x64"
+#         SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
+#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+#         ARCH="arm64"
+#         SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
+#     else
+#         echo "Unsupported platform"
+#         exit 1
+#     fi
+#     mkdir /opt/nodejs
+#     PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
+#     curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
+#     echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
+#     tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
+#     rm /tmp/nodejs.tar.xz
+#     /opt/nodejs/bin/node --version
 
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-EOF
-ENV PATH "/opt/nodejs/bin:$PATH"
+#     echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
+# EOF
+# ENV PATH "/opt/nodejs/bin:$PATH"
+
+ENV PATH "/opt/nodejs/16.20.2/bin:$PATH"
 
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 20.04 archive is too old and doesn't support
@@ -185,16 +219,12 @@ ENV LANG=C.UTF-8
 # Automatic compiler detection doesn't work for some targets.
 
 
-ENV CC="gcc10-cc"
-ENV CXX="gcc10-c++"
-ENV AR="gcc10-ar"
-ENV LD="gcc10-ld"
-
-
-ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
-ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-g++
+ENV CFLAGS="-fuse-ld=bfd"
+ENV CXXFLAGS="-fuse-ld=bfd"
+# ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
+# ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
+# ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
+# ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx

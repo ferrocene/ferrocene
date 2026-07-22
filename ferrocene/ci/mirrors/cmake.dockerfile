@@ -15,4 +15,4 @@ RUN tar --strip-components=1 -C /cmake -xzf /cmake-source.tar.gz
 RUN ./configure --prefix=/cmake-install
 RUN make -j$(nproc)
 RUN make install
-RUN tar -C /cmake-install -cJf cmake.tar.xz .
+RUN tar -C /cmake-install -cJf cmake-binaries.tar.xz .

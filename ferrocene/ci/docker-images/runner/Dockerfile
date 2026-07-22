@@ -21,38 +21,9 @@
 # can just copy it to a different system and it won't have any problems. Do NOT
 # use the same approach for other dependencies missing in Ubuntu 20.04 unless
 # you know what you're doing.
-FROM --platform=$TARGETPLATFORM ubuntu:24.04 AS noble
 
-# As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
 
-# There is a mirror of the depended on QEMU version in `ferrocene-ci-mirrors` if it ever disappears.
-# See https://launchpad.net/ubuntu/noble/amd64/qemu-user-static and https://launchpad.net/ubuntu/noble/arm64/qemu-user-static
-COPY ferrocene/ci/docker-images/runner/qemu-version /tmp/qemu-version
-RUN <<-EOF
-    set -xe
-    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
-    apt update
-    apt install curl -y
-
-    QEMU_VERSION=$(cat /tmp/qemu-version | cut -d ":" -f 2)
-    echo "QEMU $QEMU_VERSION"
-    rm /tmp/qemu-version
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834172758/qemu-user-static_${QEMU_VERSION}_amd64.deb
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834165403/qemu-user-static_${QEMU_VERSION}_arm64.deb
-    fi
-    apt install /tmp/qemu.deb -y
-    rm /tmp/qemu.deb
-
-    mkdir -p /ferrocene/packages
-    dpkg -l qemu-user-static >> /ferrocene/packages/ubuntu-24.04
-EOF
-
-FROM --platform=$TARGETPLATFORM ubuntu:20.04
+FROM --platform=$TARGETPLATFORM amazonlinux:2
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
@@ -61,91 +32,50 @@ ARG BUILDPLATFORM
 RUN <<-EOF
     set -xe
     mkdir -p /ferrocene/packages
-    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-    alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 
-    apt-get update
-    # Update all the dependencies
-    apt-get upgrade -y
-
-    # Install required packages
-    apt-install \
-        mawk \
-        gpg \
-        gpg-agent \
-        git \
-        build-essential \
+    # gpg and gpg-agent are pre-installed
+    yum -y install \
+        gawk \
+        git-core \
         ninja-build \
-        openssh-client \
+        openssh-clients \
         file \
         curl \
+        tar \
         ca-certificates \
-        libedit-dev \
-        libssl-dev \
-        zlib1g-dev \
-        moreutils \
+        libedit-devel \
+        openssl11-devel \
+        zlib-devel \
         zstd \
+        xz \
+        unzip \
+        bzip2 \
         sudo \
-        gcc-10 \
-        g++-10 \
-        gcc-s390x-linux-gnu \
-        g++-s390x-linux-gnu \
-        gcc-powerpc64le-linux-gnu \
-        g++-powerpc64le-linux-gnu
+        gcc gcc-c++ \
+        gcc10 gcc10-c++ \
+        clang \
+        procps-ng \
+        shadow-utils
 
-    # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
-    # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
-    apt-install binfmt-support
+#        build-essential \
+#        gcc-s390x-linux-gnu \
+#        g++-s390x-linux-gnu \
+#        gcc-powerpc64le-linux-gnu \
+#        g++-powerpc64le-linux-gnu
 
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        # Needed for aarch64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-aarch64-linux-gnu \
-            gcc-aarch64-linux-gnu \
-            g++-10-aarch64-linux-gnu \
-            gcc-10-aarch64-linux-gnu \
-            binutils-aarch64-linux-gnu \
-            libc6-dev-arm64-cross
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        # Needed for x86_64-unknown-linux-gnu cross-compilation
-        apt-install \
-            g++-x86-64-linux-gnu \
-            gcc-x86-64-linux-gnu \
-            g++-10-x86-64-linux-gnu \
-            gcc-10-x86-64-linux-gnu \
-            binutils-x86-64-linux-gnu \
-            libc6-dev-amd64-cross
-    fi
 
-    # make gcc 10 default
-    sudo update-alternatives \
-      --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
-      --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
-      --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
-      --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
-      --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
+    # # make gcc 10 default
+    # sudo update-alternatives \
+    #   --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
+    #   --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
+    #   --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
+    #   --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
+    #   --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
 
-    # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
-    # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
-    apt-install gcc-arm-none-eabi
+    # # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
+    # # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
+    # apt-install gcc-arm-none-eabi
 
-    # Needed for the wasm32-unknown-unknown target
-    apt-install clang
-    # Needed to install AWS CLI during the build:
-    apt-install unzip
-
-    # Needed to install git during the build:
-    apt-install \
-        dh-autoreconf \
-        libcurl4-gnutls-dev \
-        libexpat1-dev \
-        gettext \
-        libz-dev \
-        libssl-dev
-
-    # Remove files that are not useful in the final image, and can be
-    # regenerated by running `apt-get update`
-    rm -rf /var/lib/apt/lists/*
 EOF
 
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
@@ -176,16 +106,6 @@ RUN <<-EOF
 EOF
 ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 
-# Grab the newer QEMU from Ubuntu 24.04
-# This requires the binfmt-support package, which is normally a dependency of
-# qemu-user-static.
-COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
-COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-COPY --from=noble /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
-COPY --from=noble /usr/libexec/qemu-binfmt/arm-binfmt-P /usr/libexec/qemu-binfmt/arm-binfmt-P
-# This was removed in 24.04 and is a copy of the 22.04 file.
-COPY ferrocene/ci/docker-images/runner/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
-COPY ferrocene/ci/docker-images/runner/binfmt-qemu-arm /usr/share/binfmts/qemu-arm
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
@@ -230,7 +150,7 @@ RUN /tmp/setup-awscli.sh
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
-RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+# RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
     set -eu
 
@@ -263,6 +183,14 @@ COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
 ENV LANG=C.UTF-8
 
 # Automatic compiler detection doesn't work for some targets.
+
+
+ENV CC="gcc10-cc"
+ENV CXX="gcc10-c++"
+ENV AR="gcc10-ar"
+ENV LD="gcc10-ld"
+
+
 ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
@@ -284,21 +212,14 @@ ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 ENV CFLAGS_aarch64v8r_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 ENV CFLAGS_aarch64r82_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 
-COPY --from=noble /ferrocene/packages/ubuntu-24.04 /ferrocene/packages/ubuntu-24.04
 RUN <<-EOF
     set -xe
-    dpkg -l >> /ferrocene/packages/ubuntu-20.04
-EOF
 
+    groupadd --gid 1000 ci
+    groupadd --gid 1001 ci-usergroup
 
-RUN <<-EOF
-    set -xe
-    mkdir /home/ci
-    addgroup --gid 1000 ci
-    addgroup --gid 1001 ci-usergroup
-    adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci
-    adduser --uid 1001 --gid 1001 --gecos "" --disabled-password ci-user
-    chown -R ci: /home/ci
+    useradd --uid 1000 --gid 1000 -d /home/ci -m ci
+    useradd --uid 1001 --gid 1001 ci-user
 EOF
 USER ci
 WORKDIR /home/ci

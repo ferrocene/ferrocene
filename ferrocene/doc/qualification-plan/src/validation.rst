@@ -110,10 +110,10 @@ channel. As indicated in :doc:`release`, there are no stability or
 functionality guarantees in the other release channels as they are not
 production environments.
 
-To validate a release, the release manager must first publish the release on
-the ``dev`` environment (as described :ref:`in the internal procedures
-<internal-procedures:publish-stable>`), and once published there they must
-manually verify that:
+This section assumes that you have already
+:ref:`published a stable release <internal-procedures:publish-stable>` to the ``dev`` environment.
+
+Verify that:
 
 * All the expected files are present in the release.
 
@@ -122,5 +122,3 @@ manually verify that:
 * The :ref:`documentation-validation` has been performed.
 
 If any of the checks are not satisfactory, the release must be delayed until resolved.
-
-Once all checks are passed, the safety manager digitally signs the release and the release can be published in the production environment.

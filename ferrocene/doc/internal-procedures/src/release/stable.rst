@@ -7,6 +7,12 @@ Stable release process
 This page details the steps required to publish a new stable release of
 Ferrocene, from branching off a rolling branch to publishing point releases.
 
+This is a *reference*, not a *checklist*.
+It is only vaguely ordered.
+For a canonical ordering, see :ref:`release-checklist`.
+
+.. _determine-baseline:
+
 Determine the baseline Rust version
 -----------------------------------
 
@@ -50,6 +56,8 @@ as the release's version number.
 For any following point release, keep the same year and month as the previous
 release, and increment the previous point release number.
 
+.. _branch-beta:
+
 Branching from rolling into beta
 --------------------------------
 
@@ -65,6 +73,8 @@ the latest commit on that branch into the ``beta-${major_version}`` channel
 every night. You can continue landing changes into the branch until you
 are ready to release it as a stable release.
 
+.. _add-known-problems:
+
 Add version to Known Problems
 -----------------------------
 
@@ -75,6 +85,8 @@ the instructions in ``README.rst``.
 Validate that the locally built site now has the version, and that known problems are tracked for it.
 Make a pull request, ensure it gets merged, then validate the new version shows up on the
 `Known Problems page <https://problems.ferrocene.dev/>`_.
+
+.. _release-note-bump:
 
 Version Bump Release Notes
 --------------------------
@@ -100,16 +112,8 @@ Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch w
    release.
 
 
-Precautionary validation
-------------------------
+.. _semantic-diff:
 
-Perform :ref:`qualification-plan:release-validation` on the ``release/1.NN`` branch before signing.
-
-Signing
--------
-
-Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
-:ref:`documentation signatures <internal-procedures:signing-all-documents>`.
 Semantic diff
 -------------
 
@@ -174,28 +178,30 @@ The reviewer of this change has to check the following:
 
 2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``.
 
-.. _publish-stable:
+.. _promote-stable:
 
-Publishing a stable release
----------------------------
+Promoting beta to stable
+------------------------
 
 To publish a stable release, you need to first open a PR targeting the
 ``release/1.NN`` branch, changing the contents of ``ferrocene/ci/channel`` to
 ``stable``.
 
-Once the PR is merged, you need to grab the commit hash of the merge commit,
-:ref:`start a manual release <manual-release>` on the ``dev`` environment, and
-perform the :ref:`qualification-plan:release-validation`.
+Once the PR is merged, you need to grab the commit hash of the merge commit and
+:ref:`start a manual release <manual-release>` on the ``dev`` environment.
 
-Once the release validation succeeded, :ref:`start a manual release
-<manual-release>` on the ``prod`` environment. The release will require
-approval from the release managers.
+.. _prepare-patch-release:
 
-Finally, you need to send another PR targeting the ``release/1.NN`` branch,
+Prepare for patch releases
+--------------------------
+
+Once you've released to ``prod``, you need to send another PR targeting the ``release/1.NN`` branch,
 changing ``ferrocene/ci/channel`` back to ``beta`` and incrementing the point
 release version in ``ferrocene/version`` by 1. Note that you will need to
 remove digital signatures, because they will be invalidated by the version
 change. The CI also ensures that the signatures remain valid.
+
+.. _remove-upcoming:
 
 Remove upcoming notes in the ``main`` branch
 --------------------------------------------
@@ -207,6 +213,8 @@ After publishing the stable release, send a PR to the ``main`` branch to:
 
 * Remove all mentions of ``:upcoming:`YY.MM``` in the documentation, where
   ``YY.MM`` is the current version number.
+
+.. _forward-ports:
 
 Identify any forward ports
 --------------------------

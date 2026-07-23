@@ -104,18 +104,13 @@ environment:
 
 * *None so far.*
 
-The following releases are currently published on a schedule in the **prod**
-environment:
+The following releases are currently published in the **prod**
+environment every day at 3:15 AM UTC:
 
-* Everyday at 00:00 UTC, the tip of the ``main`` branch is released on the
-  nightly channel.
-* Everyday at 00:00 UTC, the tip of the branch with the Rust channel of
-  ``beta`` is released on the pre-rolling channel.
-* Everyday at 00:00 UTC, the tip of the most recent branch with the Rust
-  channel of ``stable`` is released on the rolling channel.
-* Everyday at 00:00 UTC, the tip of every branch with the Ferrocene channel of
-  ``beta`` is released on the beta-${version} channel.
-
+* the tip of the ``main`` branch is released on the nightly channel.
+* the tip of the branch with the Rust channel of ``beta`` is released on the pre-rolling channel.
+* the tip of the most recent branch with the Rust channel of ``stable`` is released on the rolling channel.
+* the tip of every branch with the Ferrocene channel of ``beta`` is released on the beta-${version} channel.
 
 Manually-started Releases
 -------------------------

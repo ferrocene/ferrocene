@@ -77,9 +77,12 @@ pub(crate) fn sign(
 
     let filename =
         output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
-    let cached_path = Path::new("build/host/signature-diffs").join(filename);
-    let (_, tmp_path) = saved_tarfile.keep()?;
+    let dst_dir = Path::new("build/host/signature-diffs");
+    let cached_path = dst_dir.join(filename);
+    let (_, tmp_path) = saved_tarfile.keep().context(format!("failed to move tarfile to {output_dir:?}"))?;
+
     std::fs::rename(tmp_path, cached_path)?;
+    std::fs::create_dir_all(dst_dir).context(format!("failed to create {dst_dir:?}"))?;
 
     Ok(())
 }

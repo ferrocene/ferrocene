@@ -34,10 +34,7 @@ the release is manual, meaning all the rest of steps are fully automated.
 To manually start a release, go to the `release workflow page`_ and click the
 "Run workflow" button. You need to input the git reference you want to release
 (it can be a branch name, a short commit hash, or a full commit hash), and the
-environment to release in. Note that anyone can publish a release in the
-``dev`` environment, while approval from a :ref:`release manager
-<qualification-plan:organization:Release Managers>` is required for the
-``prod`` environment.
+environment to release in.
 
 .. note::
 

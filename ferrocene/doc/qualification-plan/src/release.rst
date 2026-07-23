@@ -115,14 +115,8 @@ environment every day at 3:15 AM UTC:
 Manually-started Releases
 -------------------------
 
-The Ferrocene release tooling also allows Ferrocene developers to manually
-initiate the release process to prepare releases that are not currently
-scheduled, to restart a scheduled release that failed, or for testing (only for
-**dev** environment).
-
-If the release targets the **prod** environment, an approval from a Release
-Manager is required. A :ref:`release manager <organization:Release Managers>`
-needs to approve the release in the GitHub UI before the release can proceed.
+If a manual release targets the **prod** environment, an approval from a
+:ref:`release manager <organization:Release Managers>` is needed.
 
 For more detail, see :doc:`the internal procedures <internal-procedures:release/publish>`.
 

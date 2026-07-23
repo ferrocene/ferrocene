@@ -1263,6 +1263,9 @@ pub enum AttributeKind {
         directive: Option<Box<Directive>>,
     },
 
+    /// Represents `#[diagnostic::opaque]`.
+    Opaque,
+
     /// Represents `#[optimize(size|speed)]`
     Optimize(OptimizeAttr, Span),
 
@@ -1369,6 +1372,10 @@ pub enum AttributeKind {
         builtin_name: Option<Symbol>,
         helper_attrs: ThinVec<Symbol>,
     },
+
+    /// Represents `#[rustc_canonical_symbol]`
+    RustcCanonicalSymbol,
+
     /// Represents `#[rustc_capture_analysis]`
     RustcCaptureAnalysis,
 

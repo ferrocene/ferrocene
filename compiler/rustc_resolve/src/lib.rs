@@ -58,7 +58,7 @@ use rustc_hir::def::{
 };
 use rustc_hir::def_id::{CRATE_DEF_ID, CrateNum, DefId, LOCAL_CRATE, LocalDefId, LocalDefIdMap};
 use rustc_hir::definitions::{PerParentDisambiguatorState, PerParentDisambiguatorsMap};
-use rustc_hir::{MissingLifetimeKind, PrimTy, TraitCandidate, find_attr};
+use rustc_hir::{PrimTy, TraitCandidate, find_attr};
 use rustc_index::bit_set::DenseBitSet;
 use rustc_metadata::creader::CStore;
 use rustc_middle::metadata::{AmbigModChild, ModChild, Reexport};
@@ -71,6 +71,7 @@ use rustc_middle::ty::{
 use rustc_middle::{bug, span_bug};
 use rustc_session::config::CrateType;
 use rustc_session::lint::builtin::PRIVATE_MACRO_USE;
+use rustc_span::def_id::{LocalModId, ModId};
 use rustc_span::hygiene::{ExpnId, LocalExpnId, MacroKind, SyntaxContext, Transparency};
 use rustc_span::{DUMMY_SP, Ident, Span, Symbol, kw, sym};
 use smallvec::{SmallVec, smallvec};
@@ -706,7 +707,7 @@ impl<'ra> ModuleData<'ra> {
         expansion: ExpnId,
         span: Span,
         no_implicit_prelude: bool,
-        vis: Visibility<DefId>,
+        vis: Visibility<ModId>,
         arenas: &'ra ResolverArenas<'ra>,
     ) -> Self {
         let is_foreign = !kind.is_local();
@@ -805,17 +806,32 @@ impl<'ra> Module<'ra> {
         let mut traits = self.traits.borrow_mut(resolver.as_ref());
         if traits.is_none() {
             let mut collected_traits = Vec::new();
-            self.for_each_child(resolver, |r, ident, _, ns, binding| {
+            self.for_each_child(resolver, |r, ident, _, ns, mut decl| {
                 if ns != TypeNS {
                     return;
                 }
-                if let Res::Def(DefKind::Trait | DefKind::TraitAlias, def_id) = binding.res() {
-                    collected_traits.push((
-                        ident.name,
-                        binding,
-                        r.as_ref().get_module(def_id),
-                        binding.is_ambiguity_recursive(),
-                    ));
+
+                let ambiguous = decl.is_ambiguity_recursive();
+                let mut try_record_trait = |decl: Decl<'ra>| {
+                    if let Res::Def(DefKind::Trait | DefKind::TraitAlias, def_id) = decl.res() {
+                        collected_traits.push((
+                            ident.name,
+                            decl,
+                            r.as_ref().get_module(def_id),
+                            ambiguous,
+                        ));
+                        true
+                    } else {
+                        false
+                    }
+                };
+                // Try to record at least one trait if the decl is ambiguous, such that we can
+                // report the `ambiguous_glob_imported_traits` lint. Otherwise we would report an
+                // error that the trait is not found.
+                while !try_record_trait(decl)
+                    && let Some((_, ambig_decl)) = decl.descent_to_ambiguity()
+                {
+                    decl = ambig_decl;
                 }
             });
             *traits = Some(collected_traits.into_boxed_slice());
@@ -840,11 +856,11 @@ impl<'ra> Module<'ra> {
         }
     }
 
-    /// The [`DefId`] of the nearest `mod` item ancestor (which may be this module).
+    /// The [`ModId`] of the nearest `mod` item ancestor (which may be this module).
     /// This may be the crate root.
-    fn nearest_parent_mod(self) -> DefId {
+    fn nearest_parent_mod(self) -> ModId {
         match self.kind {
-            ModuleKind::Def(DefKind::Mod, def_id, _, _) => def_id,
+            ModuleKind::Def(DefKind::Mod, def_id, _, _) => ModId::new_unchecked(def_id),
             _ => self.parent.expect("non-root module without parent").nearest_parent_mod(),
         }
     }
@@ -894,7 +910,7 @@ impl<'ra> LocalModule<'ra> {
     fn new(
         parent: Option<LocalModule<'ra>>,
         kind: ModuleKind,
-        vis: Visibility<DefId>,
+        vis: Visibility<ModId>,
         expn_id: ExpnId,
         span: Span,
         no_implicit_prelude: bool,
@@ -916,7 +932,7 @@ impl<'ra> ExternModule<'ra> {
     fn new(
         parent: Option<ExternModule<'ra>>,
         kind: ModuleKind,
-        vis: Visibility<DefId>,
+        vis: Visibility<ModId>,
         expn_id: ExpnId,
         span: Span,
         no_implicit_prelude: bool,
@@ -980,7 +996,7 @@ struct DeclData<'ra> {
     ambiguity: CmCell<Option<(Decl<'ra>, bool /*warning*/)>>,
     expansion: LocalExpnId,
     span: Span,
-    initial_vis: Visibility<DefId>,
+    initial_vis: Visibility<ModId>,
     /// If the declaration refers to an ambiguous glob set, then this is the most visible
     /// declaration from the set, if its visibility is different from `initial_vis`.
     ambiguity_vis_max: CmCell<Option<Decl<'ra>>>,
@@ -1099,12 +1115,12 @@ struct AmbiguityError<'ra> {
 }
 
 impl<'ra> DeclData<'ra> {
-    fn vis(&self) -> Visibility<DefId> {
+    fn vis(&self) -> Visibility<ModId> {
         // Select the maximum visibility if there are multiple ambiguous glob imports.
         self.ambiguity_vis_max.get().map(|d| d.vis()).unwrap_or_else(|| self.initial_vis)
     }
 
-    fn min_vis(&self) -> Visibility<DefId> {
+    fn min_vis(&self) -> Visibility<ModId> {
         // Select the minimum visibility if there are multiple ambiguous glob imports.
         self.ambiguity_vis_min.get().map(|d| d.vis()).unwrap_or_else(|| self.initial_vis)
     }
@@ -1335,8 +1351,6 @@ pub struct Resolver<'ra, 'tcx> {
     partial_res_map: NodeMap<PartialRes> = Default::default(),
     /// An import will be inserted into this map if it has been used.
     import_use_map: FxHashMap<Import<'ra>, Used> = default::fx_hash_map(),
-    /// Lifetime parameters that lowering will have to introduce.
-    extra_lifetime_params_map: NodeMap<Vec<(Ident, NodeId, MissingLifetimeKind)>> = Default::default(),
 
     /// `CrateNum` resolutions of `extern crate` items.
     extern_crate_map: UnordMap<LocalDefId, CrateNum> = Default::default(),
@@ -1381,8 +1395,6 @@ pub struct Resolver<'ra, 'tcx> {
     /// Ambiguity errors are delayed for deduplication.
     ambiguity_errors: Vec<AmbiguityError<'ra>> = Vec::new(),
     issue_145575_hack_applied: bool = false,
-    /// `use` injections are delayed for better placement and deduplication.
-    use_injections: Vec<UseError<'tcx>> = Vec::new(),
     /// Visibility path resolution failures are delayed until all modules are collected.
     delayed_vis_resolution_errors: Vec<DelayedVisResolutionError<'ra>> = Vec::new(),
     /// Crate-local macro expanded `macro_export` referred to by a module-relative path.
@@ -1490,8 +1502,8 @@ pub struct Resolver<'ra, 'tcx> {
     effective_visibilities: EffectiveVisibilities,
     macro_reachable_adts: FxIndexMap<LocalDefId, FxIndexSet<LocalDefId>>,
 
-    doc_link_resolutions: FxIndexMap<LocalDefId, DocLinkResMap>,
-    doc_link_traits_in_scope: FxIndexMap<LocalDefId, Vec<DefId>>,
+    doc_link_resolutions: FxIndexMap<LocalModId, DocLinkResMap>,
+    doc_link_traits_in_scope: FxIndexMap<LocalModId, Vec<DefId>>,
     all_macro_rules: UnordSet<Symbol> = Default::default(),
 
     /// Invocation ids of all glob delegations.
@@ -1539,7 +1551,7 @@ impl<'ra> ResolverArenas<'ra> {
     fn new_def_decl(
         &'ra self,
         res: Res,
-        vis: Visibility<DefId>,
+        vis: Visibility<ModId>,
         span: Span,
         expansion: LocalExpnId,
         parent_module: Option<Module<'ra>>,
@@ -1924,7 +1936,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn feed_visibility(&mut self, feed: TyCtxtFeed<'tcx, LocalDefId>, vis: Visibility) {
-        feed.visibility(vis.to_def_id());
+        feed.visibility(vis.to_mod_id());
         self.visibilities_for_hashing.push((feed.def_id(), vis));
     }
 
@@ -1974,7 +1986,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         };
         let ast_lowering = ty::ResolverAstLowering {
             partial_res_map: self.partial_res_map,
-            extra_lifetime_params_map: self.extra_lifetime_params_map,
             next_node_id: self.next_node_id,
             owners: self.owners,
             lint_buffer: Steal::new(self.lint_buffer),
@@ -2051,11 +2062,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             self.tcx
                 .sess
                 .time("finalize_macro_resolutions", || self.finalize_macro_resolutions(krate));
-            let use_items =
+            let (use_items, use_injections) =
                 self.tcx.sess.time("late_resolve_crate", || self.late_resolve_crate(krate));
             self.tcx.sess.time("resolve_main", || self.resolve_main());
             self.tcx.sess.time("resolve_check_unused", || self.check_unused(use_items));
-            self.tcx.sess.time("resolve_report_errors", || self.report_errors(krate));
+            self.tcx
+                .sess
+                .time("resolve_report_errors", || self.report_errors(krate, use_injections));
             self.tcx
                 .sess
                 .time("resolve_postprocess", || self.cstore_mut().postprocess(self.tcx, krate));
@@ -2359,10 +2372,10 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     fn resolve_self(&self, ctxt: &mut SyntaxContext, module: Module<'ra>) -> Module<'ra> {
-        let mut module = self.expect_module(module.nearest_parent_mod());
+        let mut module = self.expect_module(module.nearest_parent_mod().to_def_id());
         while module.span.ctxt().normalize_to_macros_2_0() != *ctxt {
             let parent = module.parent.unwrap_or_else(|| self.expn_def_scope(ctxt.remove_mark()));
-            module = self.expect_module(parent.nearest_parent_mod());
+            module = self.expect_module(parent.nearest_parent_mod().to_def_id());
         }
         module
     }
@@ -2749,7 +2762,7 @@ enum Stage {
 #[derive(Copy, Clone, Debug)]
 struct ImportSummary {
     vis: Visibility,
-    nearest_parent_mod: LocalDefId,
+    nearest_parent_mod: LocalModId,
     is_single: bool,
     priv_macro_use: bool,
     span: Span,

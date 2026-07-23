@@ -63,8 +63,9 @@ use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::{ErrorGuaranteed, catch_fatal_errors};
 use rustc_hir as hir;
 use rustc_hir::attrs::{EiiDecl, EiiImpl, StrippedCfgItem};
+use rustc_hir::canonical_symbols::CanonicalSymbols;
 use rustc_hir::def::{DefKind, DocLinkResMap};
-use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdSet, LocalModDefId};
+use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdSet, LocalModId};
 use rustc_hir::lang_items::{LangItem, LanguageItems};
 use rustc_hir::{ItemLocalId, PreciseCapturingArgKind};
 use rustc_index::IndexVec;
@@ -76,7 +77,7 @@ use rustc_session::cstore::{
     CrateDepKind, CrateSource, ExternCrate, ForeignModule, LinkagePreference, NativeLib,
 };
 use rustc_session::lint::StableLintExpectationId;
-use rustc_span::def_id::LOCAL_CRATE;
+use rustc_span::def_id::{LOCAL_CRATE, ModId};
 use rustc_span::{DUMMY_SP, LocalExpnId, Span, Spanned, Symbol};
 use rustc_target::spec::PanicStrategy;
 
@@ -236,7 +237,7 @@ rustc_queries! {
     ///
     /// This can be conveniently accessed by `tcx.hir_visit_item_likes_in_module`.
     /// Avoid calling this query directly.
-    query hir_module_items(key: LocalModDefId) -> &'tcx rustc_middle::hir::ModuleItems {
+    query hir_module_items(key: LocalModId) -> &'tcx rustc_middle::hir::ModuleItems {
         arena_cache
         desc { "getting HIR module items in `{}`", tcx.def_path_str(key) }
         cache_on_disk
@@ -332,12 +333,12 @@ rustc_queries! {
         }
     }
 
-    /// Returns whether the type alias given by `DefId` is lazy.
+    /// Returns whether the type alias given by `DefId` is checked.
     ///
     /// I.e., if the type alias expands / ought to expand to a [free] [alias type]
     /// instead of the underlying aliased type.
     ///
-    /// Relevant for features `lazy_type_alias` and `type_alias_impl_trait`.
+    /// Relevant for features `checked_type_aliases` and `type_alias_impl_trait`.
     ///
     /// # Panics
     ///
@@ -345,9 +346,9 @@ rustc_queries! {
     ///
     /// [free]: rustc_middle::ty::Free
     /// [alias type]: rustc_middle::ty::AliasTy
-    query type_alias_is_lazy(key: DefId) -> bool {
+    query type_alias_is_checked(key: DefId) -> bool {
         desc {
-            "computing whether the type alias `{path}` is lazy",
+            "computing whether the type alias `{path}` is checked",
             path = tcx.def_path_str(key),
         }
         separate_provide_extern
@@ -1156,7 +1157,7 @@ rustc_queries! {
     }
 
     /// Performs lint checking for the module.
-    query lint_mod(key: LocalModDefId) {
+    query lint_mod(key: LocalModId) {
         desc { "linting {}", describe_as_module(key, tcx) }
     }
 
@@ -1165,16 +1166,16 @@ rustc_queries! {
     }
 
     /// Checks the attributes in the module.
-    query check_mod_attrs(key: LocalModDefId) {
+    query check_mod_attrs(key: LocalModId) {
         desc { "checking attributes in {}", describe_as_module(key, tcx) }
     }
 
     /// Checks for uses of unstable APIs in the module.
-    query check_mod_unstable_api_usage(key: LocalModDefId) {
+    query check_mod_unstable_api_usage(key: LocalModId) {
         desc { "checking for unstable API usage in {}", describe_as_module(key, tcx) }
     }
 
-    query check_mod_privacy(key: LocalModDefId) {
+    query check_mod_privacy(key: LocalModId) {
         desc { "checking privacy in {}", describe_as_module(key.to_local_def_id(), tcx) }
     }
 
@@ -1189,7 +1190,7 @@ rustc_queries! {
         desc { "finding live symbols in crate" }
     }
 
-    query check_mod_deathness(key: LocalModDefId) {
+    query check_mod_deathness(key: LocalModId) {
         desc { "checking deathness of variables in {}", describe_as_module(key, tcx) }
     }
 
@@ -1380,7 +1381,7 @@ rustc_queries! {
         eval_always
         desc { "checking effective visibilities" }
     }
-    query check_private_in_public(module_def_id: LocalModDefId) {
+    query check_private_in_public(module_def_id: LocalModId) {
         desc {
             "checking for private elements in public interfaces for {}",
             describe_as_module(module_def_id, tcx)
@@ -2164,7 +2165,7 @@ rustc_queries! {
     /// ```
     ///
     /// In here, if you call `visibility` on `T`, it'll panic.
-    query visibility(def_id: DefId) -> ty::Visibility<DefId> {
+    query visibility(def_id: DefId) -> ty::Visibility<ModId> {
         desc { "computing visibility of `{}`", tcx.def_path_str(def_id) }
         separate_provide_extern
         feedable
@@ -2177,6 +2178,11 @@ rustc_queries! {
     /// Do not call this query directly: invoke `Ty::inhabited_predicate` instead.
     query inhabited_predicate_type(key: Ty<'tcx>) -> ty::inhabitedness::InhabitedPredicate<'tcx> {
         desc { "computing the uninhabited predicate of `{}`", key }
+    }
+
+    /// Do not call this query directly: invoke `Ty::is_opsem_inhabited` instead.
+    query is_opsem_inhabited_raw(env: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>) -> bool {
+        desc { "computing whether `{}` is inhabited on the opsem level", env.value }
     }
 
     query crate_dep_kind(_: CrateNum) -> CrateDepKind {
@@ -2257,6 +2263,13 @@ rustc_queries! {
         desc { "calculating the diagnostic items map" }
     }
 
+    /// Returns all the canonical symbols defined in all crates.
+    query all_canonical_symbols(_: ()) -> &'tcx CanonicalSymbols {
+        arena_cache
+        eval_always
+        desc { "calculating the canonical symbols map" }
+    }
+
     /// Returns the lang items defined in another crate by loading it from metadata.
     query defined_lang_items(_: CrateNum) -> &'tcx [(DefId, LangItem)] {
         desc { "calculating the lang items defined in a crate" }
@@ -2267,6 +2280,13 @@ rustc_queries! {
     query diagnostic_items(_: CrateNum) -> &'tcx rustc_hir::diagnostic_items::DiagnosticItems {
         arena_cache
         desc { "calculating the diagnostic items map in a crate" }
+        separate_provide_extern
+    }
+
+    /// Returns the canonical symbols defined in a crate.
+    query canonical_symbols(_: CrateNum) -> &'tcx CanonicalSymbols {
+        arena_cache
+        desc { "calculating the canonical symbols map in a crate" }
         separate_provide_extern
     }
 
@@ -2541,7 +2561,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, Ty<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{}`", goal.canonical.value.value.value }
+        desc { "normalizing `{}`", goal.canonical.value.value.value.skip_normalization() }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2551,7 +2571,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::Clause<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value.skip_normalization() }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2561,7 +2581,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::PolyFnSig<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value.skip_normalization() }
     }
 
     /// Do not call this query directly: part of the `Normalize` type-op
@@ -2571,7 +2591,7 @@ rustc_queries! {
         &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ty::FnSig<'tcx>>>,
         NoSolution,
     > {
-        desc { "normalizing `{:?}`", goal.canonical.value.value.value }
+        desc { "normalizing `{:?}`", goal.canonical.value.value.value.skip_normalization() }
     }
 
     query instantiate_and_check_impossible_predicates(key: (DefId, GenericArgsRef<'tcx>)) -> bool {
@@ -2692,13 +2712,13 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query doc_link_resolutions(def_id: DefId) -> &'tcx DocLinkResMap {
+    query doc_link_resolutions(def_id: ModId) -> &'tcx DocLinkResMap {
         eval_always
         desc { "resolutions for documentation links for a module" }
         separate_provide_extern
     }
 
-    query doc_link_traits_in_scope(def_id: DefId) -> &'tcx [DefId] {
+    query doc_link_traits_in_scope(def_id: ModId) -> &'tcx [DefId] {
         eval_always
         desc { "traits in scope for documentation links for a module" }
         separate_provide_extern

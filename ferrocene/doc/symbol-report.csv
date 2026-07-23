@@ -1605,6 +1605,7 @@
 <core::fmt::Sign as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Sign as core::cmp::PartialEq>::eq
 <core::fmt::Sign as core::fmt::Debug>::fmt
+<core::fmt::builders::DebugOnce<F> as core::fmt::Debug>::fmt
 <core::fmt::builders::FromFn<F> as core::fmt::Debug>::fmt
 <core::fmt::builders::FromFn<F> as core::fmt::Display>::fmt
 <core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char
@@ -5749,6 +5750,7 @@ core::cell::Cell::<T>::get
 core::cell::Cell::<T>::new
 core::cell::Cell::<T>::replace
 core::cell::Cell::<T>::set
+core::cell::Cell::<T>::take
 core::cell::RefCell::<T>::borrow
 core::cell::RefCell::<T>::borrow_mut
 core::cell::RefCell::<T>::new
@@ -6462,6 +6464,7 @@ core::fmt::PostPadding::new
 core::fmt::PostPadding::write
 core::fmt::Write::write_char
 core::fmt::Write::write_fmt
+core::fmt::builders::DebugInner::<'a, 'b>::entry
 core::fmt::builders::DebugInner::<'a, 'b>::entry_with
 core::fmt::builders::DebugInner::<'a, 'b>::is_pretty
 core::fmt::builders::DebugList::<'a, 'b>::entries
@@ -6736,6 +6739,8 @@ core::intrinsics::contract_check_ensures::compiletime
 core::intrinsics::contract_check_ensures::runtime
 core::intrinsics::contract_check_requires::compiletime
 core::intrinsics::contract_check_requires::runtime
+core::intrinsics::copysignf32
+core::intrinsics::copysignf64
 core::intrinsics::disjoint_bitor
 core::intrinsics::fallback::wide_mul_u128
 core::intrinsics::fallback::wide_mul_u128::from_low_high

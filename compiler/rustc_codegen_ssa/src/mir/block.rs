@@ -26,7 +26,7 @@ use super::place::{PlaceRef, PlaceValue};
 use super::{CachedLlbb, FunctionCx, LocalRef};
 use crate::base::{self, is_call_from_compiler_builtins_to_upstream_monomorphization};
 use crate::common::{self, IntPredicate};
-use crate::errors::CompilerBuiltinsCannotCall;
+use crate::diagnostics::CompilerBuiltinsCannotCall;
 use crate::mir::IntrinsicResult;
 use crate::traits::*;
 use crate::{MemFlags, meth};
@@ -686,7 +686,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             }
             _ => (
                 false,
-                bx.get_fn_addr(drop_fn, Some(PacMetadata::default())),
+                bx.get_fn_addr(drop_fn, bx.sess().pointer_authentication_functions()),
                 bx.fn_abi_of_instance(drop_fn, ty::List::empty()),
                 drop_fn,
             ),
@@ -1102,7 +1102,13 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         )
                         .unwrap();
 
-                        (None, Some(bx.get_fn_addr(instance, Some(PacMetadata::default()))))
+                        (
+                            None,
+                            Some(bx.get_fn_addr(
+                                instance,
+                                bx.sess().pointer_authentication_functions(),
+                            )),
+                        )
                     }
                     _ => (Some(instance), None),
                 }
@@ -1415,7 +1421,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         }
 
         let fn_ptr = match (instance, llfn) {
-            (Some(instance), None) => bx.get_fn_addr(instance, Some(PacMetadata::default())),
+            (Some(instance), None) => {
+                bx.get_fn_addr(instance, bx.sess().pointer_authentication_functions())
+            }
             (_, Some(llfn)) => llfn,
             _ => span_bug!(fn_span, "no instance or llfn for call"),
         };

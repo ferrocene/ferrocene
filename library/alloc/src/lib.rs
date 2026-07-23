@@ -97,6 +97,7 @@
 #![feature(ascii_char)]
 #![feature(async_fn_traits)]
 #![feature(async_iterator)]
+#![feature(borrowed_buf_init)]
 #![feature(bstr)]
 #![feature(bstr_internals)]
 #![feature(can_vector)]
@@ -123,10 +124,12 @@
 #![feature(core_io)]
 #![feature(core_io_borrowed_buf)]
 #![feature(core_io_internals)]
+#![feature(cursor_split)]
 #![feature(deprecated_suggestion)]
 #![feature(deref_pure_trait)]
 #![feature(diagnostic_on_move)]
 #![feature(dispatch_from_dyn)]
+#![feature(drop_guard)]
 #![feature(ergonomic_clones)]
 #![feature(error_generic_member_access)]
 #![feature(exact_size_is_empty)]
@@ -142,6 +145,7 @@
 #![feature(inplace_iteration)]
 #![feature(io_const_error)]
 #![feature(io_const_error_internals)]
+#![feature(io_slice_as_bytes)]
 #![feature(iter_advance_by)]
 #![feature(iter_next_chunk)]
 #![feature(layout_for_ptr)]
@@ -149,6 +153,7 @@
 #![feature(likely_unlikely)]
 #![feature(local_waker)]
 #![feature(maybe_uninit_array_assume_init)]
+#![feature(maybe_uninit_fill)]
 #![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(panic_internals)]
 #![feature(pattern)]
@@ -221,6 +226,7 @@
 //
 // Rustdoc features:
 #![feature(doc_cfg)]
+#![feature(doc_notable_trait)]
 // Technically, this is a bug in rustdoc: rustdoc sees the documentation on `#[lang = slice_alloc]`
 // blocks is for `&[T]`, which also has documentation using this feature in `core`, and gets mad
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs

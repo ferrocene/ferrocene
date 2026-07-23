@@ -28,7 +28,7 @@ use rustc_abi::{
     Align, FieldIdx, Integer, IntegerType, ReprFlags, ReprOptions, ScalableElt, VariantIdx,
 };
 use rustc_ast::node_id::NodeMap;
-use rustc_ast::{self as ast};
+use rustc_ast::{self as ast, NodeId};
 pub use rustc_ast_ir::{Movability, Mutability, try_visit};
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
@@ -50,6 +50,7 @@ use rustc_macros::{
 use rustc_serialize::{Decodable, Encodable};
 use rustc_session::config::OptLevel;
 pub use rustc_session::lint::RegisteredTools;
+use rustc_span::def_id::{LocalModId, ModId};
 use rustc_span::hygiene::MacroKind;
 use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol};
 use rustc_target::callconv::FnAbi;
@@ -199,8 +200,8 @@ pub struct ResolverGlobalCtxt {
     /// Mapping from ident span to path span for paths that don't exist as written, but that
     /// exist under `std`. For example, wrote `str::from_utf8` instead of `std::str::from_utf8`.
     pub confused_type_with_std_module: FxIndexMap<Span, Span>,
-    pub doc_link_resolutions: FxIndexMap<LocalDefId, DocLinkResMap>,
-    pub doc_link_traits_in_scope: FxIndexMap<LocalDefId, Vec<DefId>>,
+    pub doc_link_resolutions: FxIndexMap<LocalModId, DocLinkResMap>,
+    pub doc_link_traits_in_scope: FxIndexMap<LocalModId, Vec<DefId>>,
     pub all_macro_rules: UnordSet<Symbol>,
     pub stripped_cfg_items: Vec<StrippedCfgItem>,
     // Information about delegations which is used when handling recursive delegations
@@ -223,6 +224,8 @@ pub struct PerOwnerResolverData<'tcx> {
 
     /// Resolution for import nodes, which have multiple resolutions in different namespaces.
     pub import_res: hir::def::PerNS<Option<Res<ast::NodeId>>> = Default::default(),
+    /// Lifetime parameters that lowering will have to introduce.
+    pub extra_lifetime_params_map: NodeMap<Vec<(Ident, ast::NodeId, MissingLifetimeKind)>> = Default::default(),
 
     /// The id of the owner
     pub id: ast::NodeId,
@@ -244,6 +247,17 @@ impl<'tcx> PerOwnerResolverData<'tcx> {
     pub fn get_lifetime_res(&self, id: ast::NodeId) -> Option<LifetimeRes> {
         self.lifetimes_res_map.get(&id).copied()
     }
+
+    /// Obtain the list of lifetimes parameters to add to an item.
+    ///
+    /// Extra lifetime parameters should only be added in places that can appear
+    /// as a `binder` in `LifetimeRes`.
+    ///
+    /// The extra lifetimes that appear from the parenthesized `Fn`-trait desugaring
+    /// should appear at the enclosing `PolyTraitRef`.
+    pub fn extra_lifetime_params(&self, id: NodeId) -> &[(Ident, NodeId, MissingLifetimeKind)] {
+        self.extra_lifetime_params_map.get(&id).map_or(&[], |v| &v[..])
+    }
 }
 
 /// Resolutions that should only be used for lowering.
@@ -252,8 +266,6 @@ impl<'tcx> PerOwnerResolverData<'tcx> {
 pub struct ResolverAstLowering<'tcx> {
     /// Resolutions for nodes that have a single resolution.
     pub partial_res_map: NodeMap<hir::def::PartialRes>,
-    /// Lifetime parameters that lowering will have to introduce.
-    pub extra_lifetime_params_map: NodeMap<Vec<(Ident, ast::NodeId, MissingLifetimeKind)>>,
 
     pub next_node_id: ast::NodeId,
 
@@ -311,7 +323,7 @@ impl Asyncness {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy, Hash, Encodable, BlobDecodable, StableHash)]
-pub enum Visibility<Id = LocalDefId> {
+pub enum Visibility<Id = LocalModId> {
     /// Visible everywhere (including in other crates).
     Public,
     /// Visible only in the given crate-local module.
@@ -324,7 +336,7 @@ impl Visibility {
             ty::Visibility::Restricted(restricted_id) => {
                 if restricted_id.is_top_level_module() {
                     "pub(crate)".to_string()
-                } else if restricted_id == tcx.parent_module_from_def_id(def_id).to_local_def_id() {
+                } else if restricted_id == tcx.parent_module_from_def_id(def_id) {
                     "pub(self)".to_string()
                 } else {
                     format!(
@@ -403,9 +415,13 @@ impl TyCtxt<'_> {
         }
     }
 
-    pub fn is_descendant_of(self, descendant: DefId, ancestor: DefId) -> bool {
+    pub fn is_descendant_of(
+        self,
+        descendant: impl Into<DefId>,
+        ancestor: impl Into<DefId>,
+    ) -> bool {
         matches!(
-            self.def_id_partial_cmp(descendant, ancestor),
+            self.def_id_partial_cmp(descendant.into(), ancestor.into()),
             Some(Ordering::Less | Ordering::Equal)
         )
     }
@@ -424,17 +440,19 @@ impl<Id> Visibility<Id> {
     }
 }
 
-impl<Id: Into<DefId>> Visibility<Id> {
-    pub fn to_def_id(self) -> Visibility<DefId> {
-        self.map_id(Into::into)
+impl Visibility<LocalModId> {
+    pub fn to_mod_id(self) -> Visibility<ModId> {
+        self.map_id(LocalModId::to_mod_id)
     }
+}
 
+impl<Id: Into<DefId>> Visibility<Id> {
     /// Returns `true` if an item with this visibility is accessible from the given module.
     pub fn is_accessible_from(self, module: impl Into<DefId>, tcx: TyCtxt<'_>) -> bool {
         match self {
             // Public items are visible everywhere.
             Visibility::Public => true,
-            Visibility::Restricted(id) => tcx.is_descendant_of(module.into(), id.into()),
+            Visibility::Restricted(id) => tcx.is_descendant_of(module, id),
         }
     }
 
@@ -473,7 +491,7 @@ impl<Id: Into<DefId> + Debug + Copy> Visibility<Id> {
     }
 }
 
-impl Visibility<DefId> {
+impl Visibility<ModId> {
     pub fn expect_local(self) -> Visibility {
         self.map_id(|id| id.expect_local())
     }
@@ -482,7 +500,7 @@ impl Visibility<DefId> {
     pub fn is_visible_locally(self) -> bool {
         match self {
             Visibility::Public => true,
-            Visibility::Restricted(def_id) => def_id.is_local(),
+            Visibility::Restricted(mod_id) => mod_id.is_local(),
         }
     }
 }
@@ -1464,7 +1482,7 @@ pub enum VariantDiscr {
 pub struct FieldDef {
     pub did: DefId,
     pub name: Symbol,
-    pub vis: Visibility<DefId>,
+    pub vis: Visibility<ModId>,
     pub safety: hir::Safety,
     pub value: Option<DefId>,
 }
@@ -2160,12 +2178,12 @@ impl<'tcx> TyCtxt<'tcx> {
         mut ident: Ident,
         scope: DefId,
         item_id: LocalDefId,
-    ) -> (Ident, DefId) {
+    ) -> (Ident, ModId) {
         let scope = ident
             .span
             .normalize_to_macros_2_0_and_adjust(self.expn_that_defined(scope))
             .and_then(|actual_expansion| actual_expansion.expn_data().parent_module)
-            .unwrap_or_else(|| self.parent_module_from_def_id(item_id).to_def_id());
+            .unwrap_or_else(|| self.parent_module_from_def_id(item_id).to_mod_id());
         (ident, scope)
     }
 

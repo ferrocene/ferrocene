@@ -110,13 +110,33 @@ Signing
 
 Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
 :ref:`documentation signatures <internal-procedures:signing-all-documents>`.
+Semantic diff
+-------------
+
+To avoid unnecessary work for the safety assessor and safety manager,
+create a high-level overview of what has changed since the last release.
+This should include at least:
+
+* Changes to ``ferrocene/doc``
+* Changes to the symbol report
+* Anything mentioned in the release notes
+
+.. note::
+
+   You can see a list of doc changes since the last release like so:
+
+.. code-block::
+
+    git diff release/1.95 release/1.97 --ignore-all-space --ignore-blank-lines 'ferrocene/doc' ':!*/signature.toml'
+
+.. _deliver-docs:
 
 Delivering the documentation package
 ------------------------------------
 
 Wait for the nightly beta, or manually cut a beta release onto production. Over email,
 send the assessor direct links to the ``ferrocene-docs`` and ``ferrocene-docs-signatures``
-packages, as well as a *semantic diff* of what changed since the last release.
+packages, as well as the semantic diff.
 
 .. _release-technical-reports:
 

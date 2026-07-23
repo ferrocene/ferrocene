@@ -48,6 +48,7 @@ based on software engineering best practices.
 
    release/index
    release/stable
+   release/publish
    release/during-outages
 
 .. toctree::

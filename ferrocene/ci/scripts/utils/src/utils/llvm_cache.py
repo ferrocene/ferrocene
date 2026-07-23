@@ -4,6 +4,7 @@
 import hashlib
 import subprocess
 import urllib.parse
+from utils import docker_images
 
 
 CACHE_BUCKET = "ferrocene-ci-caches"
@@ -24,6 +25,7 @@ def get_llvm_cache_hash():
     from scratch every time.
     """
     m = hashlib.sha256()
+    m.update(str.encode(docker_images.calculate_hash()))
 
     files = [
         "ferrocene/ci/scripts/llvm_cache.py",  # __file__ is an absolute path

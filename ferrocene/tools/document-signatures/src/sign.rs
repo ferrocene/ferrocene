@@ -7,7 +7,7 @@ use std::process::Command;
 use anyhow::{Context, Error, Result};
 use tempfile::NamedTempFile;
 
-use crate::{Env, write};
+use crate::Env;
 use crate::config::Config;
 use crate::cosign_bundle::RawCosignBundle;
 use crate::pinned::Pinned;

@@ -59,10 +59,12 @@ const unsafe impl FloatPrimitive for f16 {
     type UInt = u16;
     const SIGN_MASK: Self::UInt = f16::SIGN_MASK;
     #[inline]
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::UInt {
         f16::to_bits(self)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_bits(bits: Self::UInt) -> Self {
         f16::from_bits(bits)
     }
@@ -73,10 +75,12 @@ const unsafe impl FloatPrimitive for f32 {
     type UInt = u32;
     const SIGN_MASK: Self::UInt = f32::SIGN_MASK;
     #[inline]
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::UInt {
         f32::to_bits(self)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_bits(bits: Self::UInt) -> Self {
         f32::from_bits(bits)
     }
@@ -87,10 +91,12 @@ const unsafe impl FloatPrimitive for f64 {
     type UInt = u64;
     const SIGN_MASK: Self::UInt = f64::SIGN_MASK;
     #[inline]
+    #[ferrocene::prevalidated]
     fn to_bits(self) -> Self::UInt {
         f64::to_bits(self)
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_bits(bits: Self::UInt) -> Self {
         f64::from_bits(bits)
     }

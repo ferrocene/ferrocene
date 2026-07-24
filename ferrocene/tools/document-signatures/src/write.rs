@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-FileCopyrightText: The Ferrocene Developers
+
 use std::{io::{BufWriter, ErrorKind, Seek as _, Write as _}, path::Path};
 
 use anyhow::{Context as _, Result};

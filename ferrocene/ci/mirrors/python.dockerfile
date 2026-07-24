@@ -8,6 +8,9 @@ RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
   -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
 RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
 
+# OpenSSL 11 is only available via epel
+RUN yum -y install epel-release
+
 RUN yum -y install \
     git \
     make \
@@ -18,6 +21,7 @@ RUN yum -y install \
     patch \
     bzip2 \
     file \
+    openssl11 \
     openssl11-devel \
     zlib-devel
 

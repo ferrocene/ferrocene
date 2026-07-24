@@ -7,7 +7,7 @@ use std::process::Command;
 use anyhow::{Context, Error, Result};
 use tempfile::NamedTempFile;
 
-use crate::Env;
+use crate::{Env, write};
 use crate::config::Config;
 use crate::cosign_bundle::RawCosignBundle;
 use crate::pinned::Pinned;
@@ -88,11 +88,8 @@ fn persist_tarfile(saved_tarfile: NamedTempFile, output_dir: &Path) -> Result<()
         output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
     let dst_dir = Path::new("build/host/signature-diffs");
     let cached_path = dst_dir.join(filename);
-    let (_, tmp_path) = saved_tarfile.keep().context(format!("failed to move tarfile to {output_dir:?}"))?;
 
-    std::fs::create_dir_all(dst_dir).context(format!("failed to create {dst_dir:?}"))?;
-    std::fs::rename(&tmp_path, &cached_path).context(format!("failed to rename {tmp_path:?} -> {cached_path:?}"))?;
-
+    write::persist_atomic(saved_tarfile, &cached_path)?;
     Ok(())
 }
 

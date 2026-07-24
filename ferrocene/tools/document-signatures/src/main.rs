@@ -7,6 +7,7 @@ mod pinned;
 mod sign;
 mod signature_files;
 mod verify;
+mod write;
 
 use std::env::VarError;
 use std::path::PathBuf;

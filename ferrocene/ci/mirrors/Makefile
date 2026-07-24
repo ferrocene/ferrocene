@@ -17,10 +17,10 @@ musl-cross: musl.dockerfile prepare
 	cd build/musl-cross
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz musl-cross-make.tar.xz
 	tar xf musl-cross-make.tar.xz
-	docker build -t musl-tarballs --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f ../../musl.dockerfile .
+	docker build -t musl-tarballs:$(musl-cross-target-version) --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f ../../musl.dockerfile .
 	{ \
 		set -xe ; \
-		id=$$(docker create musl-tarballs) ; \
+		id=$$(docker create musl-tarballs:$(musl-cross-target-version) ) ; \
 		docker cp $$id:/musl-cross-make/musl-cross-make-aarch64-$(musl-cross-target-version).tar.xz \
 			../../output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz ; \
 		docker cp $$id:/musl-cross-make/musl-cross-make-x86_64-$(musl-cross-target-version).tar.xz \
@@ -112,5 +112,10 @@ clean-build:
 clean-output:
 	rm -rf output/
 
-clean-all: clean-build clean-output
-#   docker image rm musl-tarballs
+clean-docker:
+	docker image rm musl-tarballs:$(musl-cross-target-version)
+	docker image rm cmake:v$(cmake-version)
+	docker image rm gdb:v$(gdb-version)
+	docker image rm python:v$(python-version)
+
+clean-all: clean-build clean-output clean-docker

@@ -5,12 +5,34 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use anyhow::{Context, Error};
+use anyhow::{Context, Error, Result};
 
 use crate::Env;
 use crate::config::Config;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
+
+fn report_bad_signature(output_dir: &Path, existing: &Pinned, expected: &Pinned, files: &SignatureFiles) -> Result<()> {
+    eprintln!("Signature incorrect: {}", output_dir.display());
+    if existing.document_id != expected.document_id {
+        eprintln!("existing document id: {}", existing.document_id);
+        eprintln!("expected document id: {}", expected.document_id);
+    }
+    if existing.tarball_sha256 != expected.tarball_sha256 {
+        eprintln!("existing tarball sha256: {}", existing.tarball_sha256);
+        eprintln!("expected tarball sha256: {}", expected.tarball_sha256);
+    }
+
+    // Print a diff that explains why this broke.
+    if let Some(expected_tarfile) = files.on_disk_as_tempfile("stable-archive.tar.gz")? {
+        let diff_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diff.py");
+        Command::new(diff_path).arg("local").arg(output_dir.file_name().unwrap()).arg(expected_tarfile.path()).status()?;
+    } else {
+        eprintln!("no tarball was uploaded for this signature, cannot generate a diff");
+    }
+
+    Ok(())
+}
 
 pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<(), Error> {
     let signature_files = SignatureFiles::load(source_dir, env).context(format!("failed to load signature for {source_dir:?}"))?;
@@ -23,20 +45,9 @@ pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<
         let (expected, _) = Pinned::generate(env, output_dir).context("failed to generate pinned tarball")?;
 
         if existing != expected {
-            eprintln!("Signature incorrect: {}", output_dir.display());
-            if existing.document_id != expected.document_id {
-                eprintln!("existing document id: {}", existing.document_id);
-                eprintln!("expected document id: {}", expected.document_id);
+            if let Err(e) = report_bad_signature(output_dir, &existing, &expected, &signature_files) {
+                eprintln!("failed to generate diff: {e:#}");
             }
-            if existing.tarball_sha256 != expected.tarball_sha256 {
-                eprintln!("existing tarball sha256: {}", existing.tarball_sha256);
-                eprintln!("expected tarball sha256: {}", expected.tarball_sha256);
-            }
-
-            // Print a diff that explains why this broke.
-            let diff_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diff.py");
-            Command::new(diff_path).arg("local").arg(output_dir.file_name().unwrap()).status()?;
-
             anyhow::bail!("pinned documentation file outdated");
         } else {
             eprintln!("Signature correct: {}", output_dir.display());

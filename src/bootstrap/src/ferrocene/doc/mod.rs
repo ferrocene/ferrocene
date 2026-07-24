@@ -738,18 +738,21 @@ sphinx_books! [
         name: "qnx7-manual",
         src: "ferrocene/doc/qnx7-manual",
         dest: "targets/qnx7-manual",
+        require_test_outcomes: true,
     },
     {
         ty: QNX8Manual,
         name: "qnx8-manual",
         src: "ferrocene/doc/qnx8-manual",
         dest: "targets/qnx8-manual",
+        require_test_outcomes: true,
     },
     {
         ty: RHIVOSManual,
         name: "rhivos-manual",
         src: "ferrocene/doc/rhivos-manual",
         dest: "targets/rhivos-manual",
+        require_test_outcomes: true,
     },
 ];
 

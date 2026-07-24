@@ -167,3 +167,6 @@ expression: test --skip=tests
 [Test] test::TestFloatParse
     targets: [x86_64-unknown-linux-gnu]
     - Set({test::src/tools/test-float-parse})
+[Test] test::FerroceneCrateLibc
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({test::ferrocene/library/libc})

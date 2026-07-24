@@ -1010,6 +1010,8 @@ impl<'a> Builder<'a> {
                 test::RunMakeCargo,
                 test::BuildStd,
                 test::IntrinsicTest,
+                // Ferrocene addition
+                test::FerroceneCrateLibc,
             ),
             Kind::Miri => describe!(test::Crate),
             Kind::Bench => describe!(test::Crate, test::CrateLibrustc, test::CrateRustdoc),

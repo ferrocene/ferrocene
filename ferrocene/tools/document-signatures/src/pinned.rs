@@ -63,7 +63,7 @@ impl Pinned {
         eprintln!("running: {tar_cmd:?}");
         let status = tar_cmd.status()?;
         if !status.success() {
-            anyhow::bail!("failed to invoke tar to create content tarball");
+            anyhow::bail!("failed to create {}", saved_tarfile.path().display(),);
         }
 
         let mut hasher = Sha256::new();

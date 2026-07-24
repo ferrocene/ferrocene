@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::{Context, Error, bail};
-use tempfile::{NamedTempFile, tempfile};
+use tempfile::NamedTempFile;
 use uuid::Uuid;
 
 use crate::{Env, TOML_HEADER_COMMENTS};
@@ -28,7 +28,7 @@ impl<'env> SignatureFiles<'env> {
         let signature_toml_path = document.join("signature").join("signature.toml");
 
         let signature_toml = if signature_toml_path.exists() {
-            toml::from_slice(&std::fs::read(&signature_toml_path)?)?
+            toml::from_slice(&std::fs::read(&signature_toml_path).context("failed to read signature/signature.toml")?).context("invalid toml")?
         } else {
             Signature { files: BTreeMap::new() }
         };

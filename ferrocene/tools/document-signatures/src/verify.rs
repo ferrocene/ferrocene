@@ -13,14 +13,14 @@ use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 
 pub(crate) fn verify(source_dir: &Path, output_dir: &Path, env: &Env) -> Result<(), Error> {
-    let signature_files = SignatureFiles::load(source_dir, env)?;
+    let signature_files = SignatureFiles::load(source_dir, env).context(format!("failed to load signature for {source_dir:?}"))?;
 
     let pinned_toml = if let Some(mut file) = signature_files.on_disk_as_tempfile("pinned.toml")? {
         let mut contents = Vec::new();
         file.read_to_end(&mut contents)?;
 
         let existing: Pinned = toml::from_slice(&contents)?;
-        let (expected, _) = Pinned::generate(env, output_dir)?;
+        let (expected, _) = Pinned::generate(env, output_dir).context("failed to generate pinned tarball")?;
 
         if existing != expected {
             eprintln!("Signature incorrect: {}", output_dir.display());

@@ -24,6 +24,7 @@ use crate::utils::helpers::{git, t};
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
     const DEST: &'static str;
+    const REQUIRES_TEST_OUTCOMES: bool;
 }
 
 fn copy_breadcrumbs_assets(builder: &Builder<'_>, dest: &Path) {
@@ -538,6 +539,7 @@ macro_rules! sphinx_books {
             impl IsSphinxBook for $ty {
                 const SOURCE: &'static str = $src;
                 const DEST: &'static str = $dest;
+                const REQUIRES_TEST_OUTCOMES: bool = false $(|| $require_test_outcomes)*;
             }
         )*
 

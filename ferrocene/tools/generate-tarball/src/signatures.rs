@@ -7,8 +7,11 @@ use std::fs::File;
 #[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::{Error, anyhow};
+use aws_config::retry::RetryConfig;
+use aws_config::timeout::TimeoutConfig;
 use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
 use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
 use criticaltrust::signatures::SignedPayload;
@@ -28,7 +31,14 @@ pub(crate) fn sign_manifest_with_aws_kms(
     key_arn: &str,
 ) -> Result<(), Error> {
     let tokio = Runtime::new()?;
-    let aws_config = tokio.block_on(aws_config::load_from_env());
+    let aws_config = tokio.block_on(
+        aws_config::from_env()
+            .retry_config(RetryConfig::adaptive())
+            .timeout_config(
+                TimeoutConfig::builder().connect_timeout(Duration::from_secs(10)).build(),
+            )
+            .load(),
+    );
     let kms_client = aws_sdk_kms::Client::new(&aws_config);
 
     let key = AwsKmsKeyPair::new(key_arn, tokio.handle().clone(), kms_client, KeyRole::Packages)?;

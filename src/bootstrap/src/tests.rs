@@ -1,6 +1,6 @@
 // This entire file is a Ferrocene addition
 use crate::Build;
-use crate::utils::tests::{ConfigBuilder, TestCtx};
+use crate::utils::tests::TestCtx;
 
 #[test]
 fn test_ferrocene_version_string() {

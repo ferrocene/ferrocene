@@ -713,7 +713,7 @@ fn test_pr_ci_changed_in_pr() {
 #[test]
 fn test_auto_ci_unchanged_anywhere_select_parent() {
     git_test(|ctx| {
-        let sha = ctx.create_upstream_merge(&["a"]);
+        ctx.create_upstream_merge(&["a"]);
         let latest = ctx.create_upstream_merge(&["b"]);
         let src = ctx.check_modifications(&["c"], CiEnv::GitHubActions);
         assert_eq!(src, PathFreshness::LastModifiedUpstream { upstream: latest });
@@ -723,7 +723,7 @@ fn test_auto_ci_unchanged_anywhere_select_parent() {
 #[test]
 fn test_auto_ci_changed_in_pr() {
     git_test(|ctx| {
-        let sha = ctx.create_upstream_merge(&["a"]);
+        ctx.create_upstream_merge(&["a"]);
         let latest = ctx.create_upstream_merge(&["b", "c"]);
         let src = ctx.check_modifications(&["c", "d"], CiEnv::GitHubActions);
         assert_eq!(src, PathFreshness::LastModifiedUpstream { upstream: latest });

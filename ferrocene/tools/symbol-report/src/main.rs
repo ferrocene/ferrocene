@@ -178,9 +178,13 @@ fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
 
 /// Filter out functions that are marked prevalidated for internal use only
 fn should_filter_out(qualified_name: &str) -> bool {
-    const FILTER_LIST: &[&str] = &["<core::ferrocene_test::", "core::ferrocene_test::"];
+    const FILTER_LIST: &[&str] = &["core::ferrocene_test", "core::core_arch"];
 
-    FILTER_LIST.iter().any(|filter| qualified_name.starts_with(filter))
+    FILTER_LIST
+        .iter()
+        // Some symbols start with `<`, some without
+        .flat_map(|s| [s.to_string(), format!("<{s}")])
+        .any(|filter| qualified_name.starts_with(&filter))
 }
 
 fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usize, usize) {

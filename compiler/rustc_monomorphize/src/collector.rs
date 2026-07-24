@@ -1672,32 +1672,27 @@ impl<'v> RootCollector<'_, 'v> {
     }
 
     fn is_root(&self, def_id: LocalDefId) -> bool {
-        // Ferrocene addition: reuse same strategy as Lazy collector
-        // closure so that we don't slow down incremental by calling queries we don't use
-        let is_reachable_lazy = || {
-            self.entry_fn.and_then(|(id, _)| id.as_local()) == Some(def_id)
-                || self.tcx.is_reachable_non_generic(def_id)
-                || {
-                    let flags = self.tcx.codegen_fn_attrs(def_id).flags;
-                    flags.intersects(
-                        CodegenFnAttrFlags::RUSTC_STD_INTERNAL_SYMBOL
-                            | CodegenFnAttrFlags::EXTERNALLY_IMPLEMENTABLE_ITEM,
-                    )
-                }
-        };
-
         !self.tcx.generics_of(def_id).requires_monomorphization(self.tcx)
             && match self.strategy {
                 MonoItemCollectionStrategy::Eager => {
                     !matches!(self.tcx.codegen_fn_attrs(def_id).inline, InlineAttr::Force { .. })
                 }
-                MonoItemCollectionStrategy::Lazy => is_reachable_lazy(),
-                // Ferrocene addition
+                MonoItemCollectionStrategy::Lazy => {
+                    self.entry_fn.and_then(|(id, _)| id.as_local()) == Some(def_id)
+                        || self.tcx.is_reachable_non_generic(def_id)
+                        || {
+                            let flags = self.tcx.codegen_fn_attrs(def_id).flags;
+                            flags.intersects(
+                                CodegenFnAttrFlags::RUSTC_STD_INTERNAL_SYMBOL
+                                    | CodegenFnAttrFlags::EXTERNALLY_IMPLEMENTABLE_ITEM,
+                            )
+                        }
+                }
+                // Ferrocene addition: mark all non-generic functions as annotated, even if they're private.
+                // This catches errors sooner when `cargo build`-ing a library.
                 MonoItemCollectionStrategy::Validated => {
-                    let entrypoint = is_reachable_lazy();
                     // Explicit match is intentional, please update this if you add new fields.
-                    entrypoint
-                        && matches!(self.tcx.codegen_fn_attrs(def_id).validated, Some(Validated {}))
+                    matches!(self.tcx.codegen_fn_attrs(def_id).validated, Some(Validated {}))
                 }
             }
     }

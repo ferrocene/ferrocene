@@ -7,15 +7,15 @@ LL |     fn clone(&self) -> Self { Unvalidated }
 LL |     x.clone();
    |     ^^^^^^^^^
    |
-note: `instantiation_reachable` is validated
-  --> $DIR/post-mono.rs:69:8
+note: `instantiation_unreachable` is validated
+  --> $DIR/post-mono.rs:75:4
    |
 LL | #[ferrocene::prevalidated]
    | -------------------------- marked as validated here
-LL | pub fn instantiation_reachable() {
-   |        ^^^^^^^^^^^^^^^^^^^^^^^
-LL |     uninstantiated_generic(Unvalidated);
-   |     ----------------------------------- generic function `uninstantiated_generic` instantiated by `instantiation_reachable`
+LL | fn instantiation_unreachable() {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+LL |     uninstantiated_generic(Unvalidated); // ok
+   |     ----------------------------------- generic function `uninstantiated_generic` instantiated by `instantiation_unreachable`
 note: the lint level is defined here
   --> $DIR/post-mono.rs:1:9
    |
@@ -31,10 +31,10 @@ LL |     fn default() -> Self { Unvalidated }
 LL |     let mut y = fn_type();
    |                 ^^^^^^^^^
    |
-note: generic function `uninstantiated_generic` instantiated by `instantiation_reachable`, which is called from a validated entrypoint
-  --> $DIR/post-mono.rs:70:5
+note: generic function `uninstantiated_generic` instantiated by `instantiation_unreachable`, which is called from a validated entrypoint
+  --> $DIR/post-mono.rs:76:5
    |
-LL |     uninstantiated_generic(Unvalidated);
+LL |     uninstantiated_generic(Unvalidated); // ok
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: validated function possibly calls an unvalidated method

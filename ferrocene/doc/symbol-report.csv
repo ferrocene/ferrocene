@@ -3,6 +3,7 @@
 <&'b str as core::str::pattern::Pattern>::into_searcher
 <&'b str as core::str::pattern::Pattern>::is_prefix_of
 <&'b str as core::str::pattern::Pattern>::is_suffix_of
+<&'b str as core::str::pattern::Pattern>::strip_suffix_of
 <&T as core::borrow::Borrow<T>>::borrow
 <&T as core::convert::AsRef<U>>::as_ref
 <&T as core::fmt::Binary>::fmt
@@ -1398,6 +1399,7 @@
 <*mut T as core::fmt::Pointer>::fmt
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
+<A as core::slice::cmp::SliceOrd>::compare
 <A as core::slice::cmp::SlicePartialEq<B>>::equal_same_length
 <A as core::slice::cmp::SlicePartialEq<B>>::equal_same_length
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
@@ -1455,6 +1457,7 @@
 <char as core::str::pattern::Pattern>::into_searcher
 <char as core::str::pattern::Pattern>::is_prefix_of
 <char as core::str::pattern::Pattern>::is_suffix_of
+<char as core::str::pattern::Pattern>::strip_suffix_of
 <core::alloc::layout::Layout as core::clone::Clone>::clone
 <core::alloc::layout::Layout as core::cmp::Eq>::assert_fields_are_eq
 <core::alloc::layout::Layout as core::cmp::PartialEq>::eq
@@ -3354,6 +3357,7 @@
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::rfold
 <core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold
+<core::ops::index_range::IndexRange as core::iter::traits::exact_size::ExactSizeIterator>::len
 <core::ops::index_range::IndexRange as core::iter::traits::iterator::Iterator>::advance_by
 <core::ops::index_range::IndexRange as core::iter::traits::iterator::Iterator>::fold
 <core::ops::index_range::IndexRange as core::iter::traits::iterator::Iterator>::next
@@ -6347,6 +6351,7 @@ core::escape::verbatim
 core::f128::<impl f128>::clamp::do_panic
 core::f128::<impl f128>::clamp::do_panic::compiletime
 core::f128::<impl f128>::clamp::do_panic::runtime
+core::f128::<impl f128>::to_bits
 core::f16::<impl f16>::abs
 core::f16::<impl f16>::clamp::do_panic
 core::f16::<impl f16>::clamp::do_panic::compiletime
@@ -6503,6 +6508,7 @@ core::fmt::builders::debug_set_new
 core::fmt::builders::debug_struct_new
 core::fmt::builders::debug_tuple_new
 core::fmt::builders::from_fn
+core::fmt::float::<impl core::fmt::Debug for f128>::fmt
 core::fmt::float::<impl core::fmt::Debug for f16>::fmt
 core::fmt::float::<impl core::fmt::Debug for f32>::fmt
 core::fmt::float::<impl core::fmt::Debug for f64>::fmt
@@ -8344,7 +8350,10 @@ core::slice::ascii::is_ascii
 core::slice::ascii::is_ascii::compiletime
 core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii_simple
+core::slice::ascii::is_ascii_sse2
+core::slice::cmp::<impl core::cmp::Ord for [T]>::cmp
 core::slice::cmp::<impl core::cmp::PartialEq<[U]> for [T]>::eq
+core::slice::cmp::chaining_impl
 core::slice::copy_from_slice_impl
 core::slice::copy_from_slice_impl::len_mismatch_fail
 core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic

@@ -634,6 +634,7 @@ impl Pattern for char {
         self.encode_utf8(&mut [0u8; 4]).is_suffix_of(haystack)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where
@@ -1063,6 +1064,7 @@ impl<'b> Pattern for &'b str {
     }
 
     /// Removes the pattern from the back of haystack, if it matches.
+    #[ferrocene::prevalidated]
     #[inline]
     fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>
     where

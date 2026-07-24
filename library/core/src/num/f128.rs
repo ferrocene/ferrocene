@@ -1046,6 +1046,7 @@ impl f128 {
     /// assert_eq!((12.5f128).to_bits(), 0x40029000000000000000000000000000);
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "f128", issue = "116909")]
     #[must_use = "this returns the result of the operation, without modifying the original"]

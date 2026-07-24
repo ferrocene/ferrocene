@@ -1,6 +1,6 @@
 [package]
 name = "libc"
-version = "0.2.186"
+version = "0.2.189"
 keywords = ["libc", "ffi", "bindings", "operating", "system"]
 categories = ["external-ffi-bindings", "no-std", "os"]
 exclude = ["/ci/*", "/.github/*", "/triagebot.toml", "cherry-pick-stable.sh"]
@@ -39,6 +39,7 @@ targets = [
     "loongarch64-unknown-linux-musl",
     "powerpc-unknown-linux-gnu",
     "powerpc64-unknown-linux-gnu",
+    "powerpc64-unknown-linux-musl",
     "powerpc64le-unknown-linux-gnu",
     "powerpc64le-unknown-linux-musl",
     "riscv64gc-unknown-linux-gnu",
@@ -127,7 +128,6 @@ targets = [
     "powerpc64-ibm-aix",
     "powerpc64-unknown-freebsd",
     "powerpc64-unknown-linux-gnu",
-    "powerpc64-unknown-linux-musl",
     "powerpc64-wrs-vxworks",
     "riscv32-wrs-vxworks",
     "riscv32gc-unknown-linux-musl",
@@ -202,10 +202,7 @@ ptr_as_ptr = "warn"
 unnecessary_semicolon = "warn"
 
 # FIXME(clippy): these should be fixed if possible
-expl_impl_clone_on_copy = "allow"
-uninlined_format_args = "allow"
 unnecessary_cast = "allow"  # some casts like `as usize` are only needed for some targets
-used_underscore_binding = "allow"
 
 [lints]
 workspace = true

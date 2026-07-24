@@ -36,15 +36,19 @@ run() {
         "ci/"
     )
 
+    # FIXME(ci): we could probably build both versions in the same dockerfile
+    # and test them both in `ci/run.sh` more similar to what we do with glibc,
+    # rather than needing two separate jobs.
     if [[ "$run_target" = *"musl"* ]]; then
-        if [ -n "${RUST_LIBC_UNSTABLE_MUSL_V1_2_3:-}" ]; then
+        if [ -n "${TEST_MUSL_V1_2_3:-}" ]; then
+            export RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_musl_v1_2_3"
             build_args+=("--build-arg=MUSL_VERSION=new")
         else
             build_args+=("--build-arg=MUSL_VERSION=old")
         fi
     fi
 
-    if [ -n "${TEST_UCLIBC_TIME64:-}" ]; then 
+    if [ -n "${TEST_UCLIBC_TIME64:-}" ]; then
         build_args+=("--build-arg=TEST_UCLIBC_TIME64=1")
         export RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_uclibc_time64"
     fi
@@ -53,23 +57,42 @@ run() {
     docker build "${build_args[@]}"
 
     mkdir -p target
-    if [ -w /dev/kvm ]; then
-        kvm="--volume /dev/kvm:/dev/kvm"
+
+    extra_args=()
+    if [ -n "${TEST_CUTTLEFISH:-}" ]; then
+        # Cuttlefish-based Android targets boot their virtual device inside
+        # the container (see cuttlefish-entrypoint.sh in the target's docker
+        # dir): pass the virtualization device nodes and let the entrypoint
+        # create its tap networking. It starts as root and drops to an
+        # unprivileged user matching HOST_UID for the device and the tests.
+        # Same flags as upstream's containerized Cuttlefish CI.
+        extra_args+=(
+            --device /dev/kvm
+            --device /dev/net/tun
+            --device /dev/vhost-net
+            --device /dev/vhost-vsock
+            --cap-add NET_ADMIN
+            --security-opt seccomp=unconfined
+            --env CUTTLEFISH_BUILD
+            --env CUTTLEFISH_TARGET
+            --env HOST_UID="$(id -u)"
+        )
     else
-        kvm=""
+        extra_args+=(--user "$(id -u)":"$(id -g)")
+        if [ -w /dev/kvm ]; then
+            extra_args+=(--volume /dev/kvm:/dev/kvm)
+        fi
     fi
 
     docker run \
         --rm \
-        --user "$(id -u)":"$(id -g)" \
+        --env LIBC_BUILD_VERBOSE \
+        "${extra_args[@]}" \
         --env LIBC_CI \
         --env LIBC_CI_ZBUILD_STD \
         --env RUSTFLAGS \
         --env RUSTDOCFLAGS \
         --env RUST_BACKTRACE \
-        --env RUST_LIBC_UNSTABLE_GNU_FILE_OFFSET_BITS \
-        --env RUST_LIBC_UNSTABLE_GNU_TIME_BITS \
-        --env RUST_LIBC_UNSTABLE_MUSL_V1_2_3 \
         --env CARGO_TERM_COLOR \
         --env CARGO_TERM_VERBOSE \
         --env CARGO_HOME=/cargo \
@@ -78,7 +101,6 @@ run() {
         --volume "$(rustc --print sysroot)":/rust:ro,Z \
         --volume "$PWD":/checkout:ro,Z \
         --volume "$PWD"/target:/checkout/target \
-        $kvm \
         --init \
         --workdir /checkout \
         "libc-$target" \

@@ -2969,6 +2969,11 @@ SECCOMP_FILTER_FLAG_TSYNC_ESRCH
 SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV
 SECCOMP_GET_ACTION_AVAIL
 SECCOMP_GET_NOTIF_SIZES
+SECCOMP_IOCTL_NOTIF_ADDFD
+SECCOMP_IOCTL_NOTIF_ID_VALID
+SECCOMP_IOCTL_NOTIF_RECV
+SECCOMP_IOCTL_NOTIF_SEND
+SECCOMP_IOCTL_NOTIF_SET_FLAGS
 SECCOMP_MODE_DISABLED
 SECCOMP_MODE_FILTER
 SECCOMP_MODE_STRICT
@@ -3662,9 +3667,11 @@ TLS_CONF_HW_RECORD
 TLS_CONF_SW
 TLS_GET_RECORD_TYPE
 TLS_INFO_CIPHER
+TLS_INFO_MAX
 TLS_INFO_RXCONF
 TLS_INFO_RX_NO_PAD
 TLS_INFO_TXCONF
+TLS_INFO_TX_MAX_PAYLOAD_LEN
 TLS_INFO_UNSPEC
 TLS_INFO_VERSION
 TLS_INFO_ZC_RO_TX
@@ -4071,6 +4078,7 @@ dup3
 duplocale
 endgrent
 endmntent
+endnetent
 endpwent
 endservent
 endspent
@@ -4150,6 +4158,9 @@ getifaddrs
 getline
 getmntent
 getnameinfo
+getnetbyaddr
+getnetbyname
+getnetent
 getopt_long
 getpriority
 getpwent
@@ -4176,6 +4187,7 @@ id_t
 idtype_t
 if_freenameindex
 if_nameindex
+ifaddrmsg
 ifaddrs
 ifconf
 ifinfomsg
@@ -4279,6 +4291,7 @@ msgsnd
 msqid_ds
 name_t
 name_to_handle_at
+netent
 newlocale
 nice
 nl_item
@@ -4426,6 +4439,7 @@ remap_file_pages
 removexattr
 rlim64_t
 rlimit64
+rtattr
 rtentry
 sbrk
 sched_get_priority_max
@@ -4469,6 +4483,7 @@ setgrent
 setgroups
 sethostname
 setmntent
+setnetent
 setns
 setpriority
 setpwent

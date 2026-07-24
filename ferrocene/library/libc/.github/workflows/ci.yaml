@@ -10,6 +10,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   CARGO_TERM_VERBOSE: true
+  LIBC_BUILD_VERBOSE: true
   LIBC_CI: 1
   RUSTDOCFLAGS: -Dwarnings
   RUSTFLAGS: -Dwarnings
@@ -81,7 +82,7 @@ jobs:
         run: ./ci/install-rust.sh
 
       - name: Install semver-checks
-        uses: taiki-e/install-action@9e1e5806d4a4822de933115878265be9aaa786d9 # v2.82.2
+        uses: taiki-e/install-action@a6b2e2dcd845ddd7f509ce4f3ed3d922b80cc5d9 # v2.84.0
         if: matrix.toolchain == 'stable'
         with:
           tool: cargo-semver-checks
@@ -102,8 +103,16 @@ jobs:
       - name: Execute build check
         run: |
           set -eux
-          # Remove `-Dwarnings` at the MSRV since lints may be different
-          [ "${{ matrix.toolchain }}" = "1.65.0" ] && export RUSTFLAGS=""
+          if [ "${{ matrix.toolchain }}" = "1.65.0" ]; then
+              # * Remove `-Dwarnings` at the MSRV since lints may be different
+              # * Allow `improper_ctypes` since pointers to ZSTs got the warning prior
+              #   to 1.72.
+              # * Enable `unknown_lints` since we have some config not known at this
+              #   version.
+              # FIXME(msrv): update this list when possible.
+              export RUSTFLAGS="-Aimproper_ctypes -Aunknown_lints"
+          fi
+
           python3 ci/verify-build.py \
             --toolchain "$TOOLCHAIN" \
             ${BASELINE_CRATE_DIR:+"--baseline-crate-dir" "$BASELINE_CRATE_DIR"} \
@@ -181,50 +190,55 @@ jobs:
       max-parallel: 16
       matrix:
         include:
-          # FIXME(sparc): this takes much longer to run than any other job, put
-          # it first to make sure it gets a head start.
-          - target: sparc64-unknown-linux-gnu
           - target: aarch64-linux-android
           - target: aarch64-unknown-linux-musl
           - target: aarch64-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           - target: arm-linux-androideabi
           - target: arm-unknown-linux-gnueabihf
           - target: arm-unknown-linux-musleabihf
           - target: arm-unknown-linux-musleabihf
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           # FIXME(#4297): Disabled due to spurious failue
           # - target: i686-linux-android
           - target: i686-unknown-linux-musl
           - target: i686-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           - target: loongarch64-unknown-linux-gnu
           - target: loongarch64-unknown-linux-musl
           - target: loongarch64-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           - target: powerpc64-unknown-linux-gnu
+          - target: powerpc64-unknown-linux-musl
+          - target: powerpc64-unknown-linux-musl
+            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            artifact-tag: new-musl
           - target: powerpc64le-unknown-linux-gnu
           - target: powerpc64le-unknown-linux-musl
           - target: powerpc64le-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           - target: riscv64gc-unknown-linux-gnu
           - target: s390x-unknown-linux-gnu
+          - target: sparc64-unknown-linux-gnu
           - target: wasm32-unknown-emscripten
           - target: wasm32-wasip1
           - target: wasm32-wasip2
           - target: x86_64-apple-darwin
             os: macos-26-intel
           - target: x86_64-linux-android
+            env: { TEST_CUTTLEFISH: 1 }
+            # Keep in sync with the Android build pinned in ci/cuttlefish-setup.sh
+            artifact-tag: android17
           # FIXME: Exec format error (os error 8)
           # - target: x86_64-unknown-linux-gnux32
           - target: x86_64-unknown-linux-musl
           - target: x86_64-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2_3: 1 }
             artifact-tag: new-musl
           # FIXME: It seems some items in `src/unix/mod.rs` aren't defined on redox actually.
           # - target: x86_64-unknown-redox
@@ -286,70 +300,63 @@ jobs:
             target: x86_64-unknown-freebsd
           - target: x86_64-pc-solaris
           - target: x86_64-unknown-netbsd
+          - target: x86_64-unknown-illumos
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Test on FreeBSD
-        uses: vmactions/freebsd-vm@b84ab5559b5a1bb4b8ee2737d2506a16e1737636 # v1.4.8
+        uses: vmactions/freebsd-vm@77ed28d336d03fe19a3f4f7266c1d2c4714dd79d # v1.5.2
         if: contains(matrix.target, 'freebsd')
         with:
           release: ${{ matrix.release }}
+          envs: CARGO_TERM_COLOR CARGO_TERM_VERBOSE RUSTDOCFLAGS RUSTFLAGS RUST_BACKTRACE
           usesh: true
           copyback: false
-          prepare: |
-            set -ex
-            pkg install -y libnghttp2 curl
-            curl https://sh.rustup.rs -sSf --output rustup.sh
-            sh rustup.sh -y --default-toolchain nightly --profile=minimal
-            . "$HOME/.cargo/env"
-            rustup target add ${{ matrix.target }}
+          prepare: ./ci/bsd-prepare.sh ${{ matrix.target }}
           run: |
             set -ex
             . "$HOME/.cargo/env"
             LIBC_CI=1 ./ci/run.sh ${{ matrix.target }}
             ./ci/run.sh ${{ matrix.target }}
 
-      - name: test on Solaris
-        uses: vmactions/solaris-vm@d30dd6c228c8661ade859e36ead7660b9a62efcc # v1.3.7
+      - name: Test on Solaris
+        uses: vmactions/solaris-vm@315163f088b66e55bbcc45928bd224d4973b2312 # v1.3.8
         if: contains(matrix.target, 'solaris')
         with:
           release: "11.4-gcc"
+          envs: CARGO_TERM_COLOR CARGO_TERM_VERBOSE RUSTDOCFLAGS RUSTFLAGS RUST_BACKTRACE
           usesh: true
           mem: 4096
           copyback: false
-          prepare: |
-            set -ex
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
-              --profile minimal --default-toolchain nightly -y
-            uname -a
-          run: |
-            set -ex
-            . "$HOME/.cargo/env"
-            which rustc
-            rustc -Vv
-            ./ci/run.sh ${{ matrix.target }}
+          prepare: ./ci/bsd-prepare.sh ${{ matrix.target }}
+          run: ./ci/bsd-run.sh ${{ matrix.target }}
 
       - name: Test on NetBSD
-        uses: vmactions/netbsd-vm@99816dccf75edf233ed6cd00a159e3a5b85ea373 # v1.4.0
+        uses: vmactions/netbsd-vm@0c26a4c4a5e234038862a4a53a00c905b8a107c9 # v1.4.2
         if: contains(matrix.target, 'netbsd')
         with:
           release: "10.1"
+          envs: CARGO_TERM_COLOR CARGO_TERM_VERBOSE RUSTDOCFLAGS RUSTFLAGS RUST_BACKTRACE
           usesh: true
           mem: 4096
           copyback: false
-          prepare: |
-            set -ex
-            /usr/sbin/pkg_add curl
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
-              --profile minimal --default-toolchain nightly -y
-          run: |
-            set -ex
-            . "$HOME/.cargo/env"
-            which rustc
-            rustc -Vv
-            ./ci/run.sh ${{ matrix.target }}
+          prepare: ./ci/bsd-prepare.sh ${{ matrix.target }}
+          run: ./ci/bsd-run.sh ${{ matrix.target }}
+
+      - name: Test on illumos
+        uses: vmactions/omnios-vm@027e3ec08fed6fb740ab5f300c2605f9de02997a # v1.3.4
+        if: contains(matrix.target, 'illumos')
+        with:
+          # Use the latest LTS
+          release: "r151054-build"
+          envs: CARGO_TERM_COLOR CARGO_TERM_VERBOSE RUSTDOCFLAGS RUSTFLAGS RUST_BACKTRACE
+          usesh: true
+          mem: 4096
+          copyback: false
+          prepare: ./ci/bsd-prepare.sh ${{ matrix.target }}
+          run: ./ci/bsd-run.sh ${{ matrix.target }}
 
   docs:
     name: Ensure docs build

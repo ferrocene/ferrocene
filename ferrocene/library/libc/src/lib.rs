@@ -147,28 +147,15 @@
 // Make it a bit easier to build without Cargo
 #![crate_name = "libc"]
 #![crate_type = "rlib"]
-<<<<<<< HEAD
+// Ferrocene specific
 #![allow(
-    elided_lifetimes_in_paths, // Ferrocene specific
-    hidden_glob_reexports, // Ferrocene specific
-    ambiguous_glob_reexports, // Ferrocene specific
-    unsafe_op_in_unsafe_fn, // Ferrocene specific
-    missing_abi, // Ferrocene specific
-    useless_deprecated, // Ferrocene specific
-    renamed_and_removed_lints, // Keep this order.
-    unknown_lints, // Keep this order.
-    nonstandard_style,
-    overflowing_literals,
-    unused_macros,
-    unused_macro_rules,
+    elided_lifetimes_in_paths,
+    hidden_glob_reexports,
+    ambiguous_glob_reexports,
+    unsafe_op_in_unsafe_fn,
+    missing_abi,
+    useless_deprecated,
 )]
-#![warn(
-    missing_copy_implementations,
-    missing_debug_implementations,
-    safe_packed_borrows
-)]
-// Prepare for a future upgrade
-=======
 // Pretty much all C API doesn't match Rust conventions.
 #![allow(nonstandard_style)]
 // Not all macros and all patterns are used on all targets.
@@ -180,7 +167,6 @@
 // Downgrade deny to a warning.
 #![warn(overflowing_literals)]
 // Prepare for a future upgrade.
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
 #![warn(rust_2024_compatibility)]
 // Things missing for 2024 that are blocked on MSRV or breakage.
 #![allow(missing_unsafe_on_extern)]

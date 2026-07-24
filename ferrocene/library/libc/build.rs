@@ -46,11 +46,7 @@ const CHECK_CFG_EXTRA: &[(&str, &[&str])] = &[
     (
         "target_os",
         &[
-<<<<<<< HEAD
-            "switch", "aix", "ohos", "hurd", "rtems", "visionos", "nuttx", "cygwin", "qnx", "qurt",
-=======
             "switch", "aix", "ohos", "hurd", "rtems", "visionos", "nuttx", "cygwin", "qurt", "qnx",
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
         ],
     ),
     (

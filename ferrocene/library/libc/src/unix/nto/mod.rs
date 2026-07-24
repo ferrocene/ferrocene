@@ -816,135 +816,6 @@ pub const MS_SYNC: c_int = 2;
 pub const SCM_RIGHTS: c_int = 0x01;
 pub const SCM_TIMESTAMP: c_int = 0x02;
 
-<<<<<<< HEAD
-// QNX Network Stack Versioning:
-//
-// The `if` block targets the legacy `io-pkt` stack.
-// - target_env = "nto70": QNX SDP 7.0
-// - target_env = "nto71": Standard QNX SDP 7.1 (default legacy stack)
-//
-// The `else` block targets the modern `io-sock` stack.
-// - target_env = "nto71_iosock": QNX SDP 7.1 with the optional net stack
-// - target_os = "qnx": QNX SDP 8.0
-cfg_if! {
-    if #[cfg(any(target_env = "nto70", target_env = "nto71"))] {
-        pub const SCM_CREDS: c_int = 0x04;
-        pub const IFF_NOTRAILERS: c_int = 0x00000020;
-        pub const AF_INET6: c_int = 24;
-        pub const AF_BLUETOOTH: c_int = 31;
-        pub const pseudo_AF_KEY: c_int = 29;
-        pub const MSG_NOSIGNAL: c_int = 0x0800;
-        pub const MSG_WAITFORONE: c_int = 0x2000;
-        pub const IP_IPSEC_POLICY_COMPAT: c_int = 22;
-        pub const IP_PKTINFO: c_int = 25;
-        pub const IPPROTO_DIVERT: c_int = 259;
-        pub const IPV6_IPSEC_POLICY_COMPAT: c_int = 28;
-        pub const TCP_KEEPALIVE: c_int = 0x04;
-        pub const ARPHRD_ARCNET: u16 = 7;
-        pub const SO_BINDTODEVICE: c_int = 0x0800;
-        pub const EAI_NODATA: c_int = 7;
-        pub const IPTOS_ECN_NOT_ECT: u8 = 0x00;
-        pub const RTF_BROADCAST: u32 = 0x80000;
-        pub const UDP_ENCAP: c_int = 100;
-        pub const HW_IOSTATS: c_int = 9;
-        pub const HW_MACHINE_ARCH: c_int = 10;
-        pub const HW_ALIGNBYTES: c_int = 11;
-        pub const HW_CNMAGIC: c_int = 12;
-        pub const HW_PHYSMEM64: c_int = 13;
-        pub const HW_USERMEM64: c_int = 14;
-        pub const HW_IOSTATNAMES: c_int = 15;
-        pub const HW_MAXID: c_int = 15;
-        pub const CTL_UNSPEC: c_int = 0;
-        pub const CTL_QNX: c_int = 9;
-        pub const CTL_PROC: c_int = 10;
-        pub const CTL_VENDOR: c_int = 11;
-        pub const CTL_EMUL: c_int = 12;
-        pub const CTL_SECURITY: c_int = 13;
-        pub const CTL_MAXID: c_int = 14;
-        pub const AF_ARP: c_int = 28;
-        pub const AF_IEEE80211: c_int = 32;
-        pub const AF_NATM: c_int = 27;
-        pub const AF_NS: c_int = 6;
-        pub const BIOCGDLTLIST: c_int = -1072676233;
-        pub const BIOCGETIF: c_int = 1083196011;
-        pub const BIOCGSEESENT: c_int = 1074020984;
-        pub const BIOCGSTATS: c_int = 1082147439;
-        pub const BIOCSDLT: c_int = -2147204490;
-        pub const BIOCSETIF: c_int = -2138029460;
-        pub const BIOCSSEESENT: c_int = -2147204487;
-        pub const FIONSPACE: c_int = 1074030200;
-        pub const FIONWRITE: c_int = 1074030201;
-        pub const IFF_ACCEPTRTADV: c_int = 0x40000000;
-        pub const IFF_IP6FORWARDING: c_int = 0x20000000;
-        pub const IFF_SHIM: c_int = 0x80000000;
-        pub const KERN_ARND: c_int = 81;
-        pub const KERN_IOV_MAX: c_int = 38;
-        pub const KERN_LOGSIGEXIT: c_int = 46;
-        pub const KERN_MAXID: c_int = 83;
-        pub const KERN_PROC_ARGS: c_int = 48;
-        pub const KERN_PROC_ENV: c_int = 3;
-        pub const KERN_PROC_GID: c_int = 7;
-        pub const KERN_PROC_RGID: c_int = 8;
-        pub const LOCAL_CONNWAIT: c_int = 0x0002;
-        pub const LOCAL_CREDS: c_int = 0x0001;
-        pub const LOCAL_PEEREID: c_int = 0x0003;
-        pub const MSG_NOTIFICATION: c_int = 0x0400;
-        pub const NET_RT_IFLIST: c_int = 4;
-        pub const NI_NUMERICSCOPE: c_int = 0x00000040;
-        pub const PF_ARP: c_int = 28;
-        pub const PF_NATM: c_int = 27;
-        pub const pseudo_AF_HDRCMPLT: c_int = 30;
-        pub const SIOCGIFADDR: c_int = -1064277727;
-        pub const SO_FIB: c_int = 0x100a;
-        pub const SO_TXPRIO: c_int = 0x100b;
-        pub const SO_SETFIB: c_int = 0x100a;
-        pub const SO_VLANPRIO: c_int = 0x100c;
-        pub const USER_ATEXIT_MAX: c_int = 21;
-        pub const USER_MAXID: c_int = 22;
-        pub const SO_OVERFLOWED: c_int = 0x1009;
-    } else {
-        pub const SCM_CREDS: c_int = 0x03;
-        pub const AF_INET6: c_int = 28;
-        pub const AF_BLUETOOTH: c_int = 36;
-        pub const pseudo_AF_KEY: c_int = 27;
-        pub const MSG_NOSIGNAL: c_int = 0x20000;
-        pub const MSG_WAITFORONE: c_int = 0x00080000;
-        pub const IPPROTO_DIVERT: c_int = 258;
-        pub const RTF_BROADCAST: u32 = 0x400000;
-        pub const UDP_ENCAP: c_int = 1;
-        pub const HW_MACHINE_ARCH: c_int = 11;
-        pub const AF_ARP: c_int = 35;
-        pub const AF_IEEE80211: c_int = 37;
-        pub const AF_NATM: c_int = 29;
-        pub const BIOCGDLTLIST: c_ulong = 0xffffffffc0104279;
-        pub const BIOCGETIF: c_int = 0x4020426b;
-        pub const BIOCGSEESENT: c_int = 0x40044276;
-        pub const BIOCGSTATS: c_int = 0x4008426f;
-        pub const BIOCSDLT: c_int = 0x80044278;
-        pub const BIOCSETIF: c_int = 0x8020426c;
-        pub const BIOCSSEESENT: c_int = 0x80044277;
-        pub const KERN_ARND: c_int = 37;
-        pub const KERN_IOV_MAX: c_int = 35;
-        pub const KERN_LOGSIGEXIT: c_int = 34;
-        pub const KERN_PROC_ARGS: c_int = 7;
-        pub const KERN_PROC_ENV: c_int = 35;
-        pub const KERN_PROC_GID: c_int = 11;
-        pub const KERN_PROC_RGID: c_int = 10;
-        pub const LOCAL_CONNWAIT: c_int = 4;
-        pub const LOCAL_CREDS: c_int = 2;
-        pub const MSG_NOTIFICATION: c_int = 0x00002000;
-        pub const NET_RT_IFLIST: c_int = 3;
-        pub const NI_NUMERICSCOPE: c_int = 0x00000020;
-        pub const PF_ARP: c_int = AF_ARP;
-        pub const PF_NATM: c_int = AF_NATM;
-        pub const pseudo_AF_HDRCMPLT: c_int = 31;
-        pub const SIOCGIFADDR: c_int = 0xc0206921;
-        pub const SO_SETFIB: c_int = 0x1014;
-    }
-}
-
-=======
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
 pub const MAP_TYPE: c_int = 0x3;
 
 pub const IFF_UP: c_int = 0x00000001;
@@ -2349,20 +2220,12 @@ pub const PTHREAD_PROCESS_SHARED: c_int = 0x01;
 
 pub const PTHREAD_KEYS_MAX: usize = 128;
 
-<<<<<<< HEAD
-#[cfg(not(any(target_env = "nto71", target_os = "qnx")))]
-=======
 #[cfg(not(any(target_env = "nto71", target_env = "nto71_iosock", target_os = "qnx")))]
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x80000000,
     __owner: 0xffffffff,
 };
-<<<<<<< HEAD
-#[cfg(target_env = "nto71")]
-=======
 #[cfg(any(target_env = "nto71", target_env = "nto71_iosock"))]
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
 pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
     __u: 0x82000000,
     __owner: 0,

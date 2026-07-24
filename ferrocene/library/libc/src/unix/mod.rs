@@ -240,12 +240,7 @@ pub const SIG_ERR: sighandler_t = !0 as sighandler_t;
 
 cfg_if! {
     if #[cfg(all(
-<<<<<<< HEAD
-        not(target_os = "nto"),
-        not(target_os = "qnx"),
-=======
         not(any(target_os = "nto", target_os = "qnx")),
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
         not(target_os = "aix"),
         not(target_os = "espidf")
     ))] {
@@ -266,15 +261,11 @@ cfg_if! {
 }
 
 cfg_if! {
-<<<<<<< HEAD
-    if #[cfg(not(any(target_os = "nto", target_os = "qnx", target_os = "l4re")))] {
-=======
     if #[cfg(not(any(
         target_os = "nto",
         target_os = "qnx",
         target_os = "l4re"
     )))] {
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
         pub const USRQUOTA: c_int = 0;
         pub const GRPQUOTA: c_int = 1;
     }
@@ -2355,14 +2346,7 @@ cfg_if! {
 }
 
 cfg_if! {
-<<<<<<< HEAD
-    if #[cfg(any(
-        target_os = "aix",
-        target_os = "qnx",
-    ))] {
-=======
     if #[cfg(any(target_os = "aix", target_os = "qnx",))] {
->>>>>>> ef0906e20828777175f65caa7e681a0ce33c559a
         extern "C" {
             pub fn cfsetspeed(termios: *mut crate::termios, speed: crate::speed_t) -> c_int;
         }

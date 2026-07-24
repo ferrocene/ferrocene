@@ -78,8 +78,8 @@ pub(crate) fn sign(
         generate_and_load_cosign_bundle(&signature_files, env, &config).context("failed to generate cosign bundle")?
     };
 
-    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents).context("failed to persist cosign bundle")?;
     persist_tarfile(saved_tarfile, output_dir).context("failed to save stable archive")?;
+    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents).context("failed to persist cosign bundle")?;
     Ok(())
 }
 

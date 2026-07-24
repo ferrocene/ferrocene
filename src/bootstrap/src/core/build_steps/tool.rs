@@ -476,9 +476,9 @@ macro_rules! bootstrap_tool {
 
 bootstrap_tool!(
     // Ferrocene-specific
-    FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
-    FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
-    FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
+    FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix", submodules = FERROCENE_SUBMODULES;
+    FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures", submodules = FERROCENE_SUBMODULES;
+    FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball", submodules = FERROCENE_SUBMODULES;
 
     // This is marked as an external tool because it includes dependencies
     // from submodules. Trying to keep the lints in sync between all the repos
@@ -513,6 +513,9 @@ bootstrap_tool!(
 /// These are the submodules that are required for rustbook to work due to
 /// depending on mdbook plugins.
 pub static SUBMODULES_FOR_RUSTBOOK: &[&str] = &["src/doc/book", "src/doc/reference"];
+
+// Ferrocene addition
+const FERROCENE_SUBMODULES: &[&str] = &["ferrocene/tools/flip-link"];
 
 /// The [rustc-perf](https://github.com/rust-lang/rustc-perf) benchmark suite, which is added
 /// as a submodule at `src/tools/rustc-perf`.

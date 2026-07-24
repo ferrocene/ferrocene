@@ -233,7 +233,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg(format!(
                 "-Dqemu_version={}",
                 fs::read_to_string(
-                    &builder.src.join("ferrocene/ci/docker-images/ubuntu-20/qemu-version")
+                    &builder.src.join("ferrocene/ci/docker-images/runner/qemu-version")
                 )
                 .unwrap()
                 .trim()

@@ -122,6 +122,11 @@ impl<'env> SignatureFiles<'env> {
         Ok(())
     }
 
+    // Delete all file signatures.
+    pub(crate) fn clear(&mut self) {
+        self.signature_toml.files.clear();
+    }
+
     fn persist(&self) -> Result<(), Error> {
         write::write_atomic(&self.signature_toml_path, |output| {
             output.write_all(TOML_HEADER_COMMENTS.as_bytes())?;

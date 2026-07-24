@@ -14,6 +14,8 @@ use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 
 fn regenerate_pinned(signature_files: &mut SignatureFiles<'_>, pinned: Pinned) -> Result<()> {
+    signature_files.clear();
+
     let mut contents = Vec::new();
     contents.extend_from_slice(pinned.toml_comments()?.as_bytes());
     contents.extend_from_slice(toml::to_string_pretty(&pinned)?.as_bytes());

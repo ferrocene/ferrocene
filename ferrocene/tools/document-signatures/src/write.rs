@@ -16,11 +16,13 @@ where F: FnOnce(&mut BufWriter<NamedTempFile>) -> Result<()> {
     Ok(())
 }
 
+#[expect(unused)]
 pub(crate) fn persist_atomic(src: NamedTempFile, dst: &Path) -> Result<()> {
     let src_path = src.path().to_path_buf();
     persist_inner(src, dst).context(format!("failed to rename {src_path:?} -> {dst:?}"))
 }
 
+#[expect(unused)]
 fn persist_inner(src: NamedTempFile, dst: &Path) -> Result<()> {
     let parent = dst.parent().unwrap();
     std::fs::create_dir_all(parent)?;
@@ -35,6 +37,7 @@ fn persist_inner(src: NamedTempFile, dst: &Path) -> Result<()> {
     Ok(())
 }
 
+#[expect(unused)]
 fn copy_atomic(mut src: NamedTempFile, dst: &Path) -> Result<()> {
     src.rewind()?;
     write_atomic(dst, |output| {

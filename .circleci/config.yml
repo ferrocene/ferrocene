@@ -22,60 +22,22 @@ parameters:
     default: true
 
 orbs:
-  aws-cli: circleci/aws-cli@4.0
+  ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
   continuation: circleci/continuation@0.2.0
 
 jobs:
   setup:
     docker:
-      - image: cimg/python:3.12
+    # We can't use our own mechanism to install aws-cli in our preferred version here because
+    # this is the workflow that reads our preferred version and calculates that paramter. So
+    # We use cimg/aws which comes with a somewhat recent version of aws-cli
+      - image: cimg/aws:2026.07
     resource_class: ferrocene/k8s-arm64-small # 1-core
     steps:
-      - aws-cli/install
-
-      - run:
-          name: Prepare environment for AWS authentication
-          command: |
-            # Load the JWT token into a file
-            touch /tmp/awsjwt
-            chmod 0600 /tmp/awsjwt
-            echo "${CIRCLE_OIDC_TOKEN_V2}" > /tmp/awsjwt
-
-            set_env() {
-              echo "export $1=\"$2\"" >> "${BASH_ENV}"
-            }
-
-            # Set environment variables to authenticate with OIDC
-            set_env AWS_WEB_IDENTITY_TOKEN_FILE /tmp/awsjwt
-            set_env AWS_ROLE_SESSION_NAME circleci
-            set_env AWS_DEFAULT_REGION eu-central-1
-
-            # Avoid reaching out to the EC2 metadata server, which just
-            # timeouts outside of EC2.
-            set_env AWS_EC2_METADATA_DISABLED true
-
-            # Some versions of AWS CLI fail if `less` is not installed, so
-            # disable pager support to suppress the error.
-            set_env AWS_PAGER ""
-
-      - run:
-          name: Authenticate with AWS
-          command: aws sts get-caller-identity
-
-      - run:
-          name: Checkout the source code
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com &>> ~/.ssh/known_hosts
-
-            git init .
-            git remote add origin "${CIRCLE_REPOSITORY_URL}"
-            git fetch --depth=1 origin "${CIRCLE_SHA1}"
-            git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
-
-      - run:
-          name: Setup uv
-          command: ferrocene/ci/scripts/setup-uv.sh
+      - ferrocene/aws_oidc_auth
+      - ferrocene/git_shallow_clone:
+          depth: 1
+      - ferrocene/setup_uv
 
       - run:
           name: Calculate the parameters for the workflow

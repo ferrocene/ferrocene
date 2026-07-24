@@ -5332,7 +5332,7 @@ within the :t:`capturing expression`, as follows:
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      :t:`By immutable reference capture`.
+      :t:`By immutable reference capture` (lowest precedence).
 
    #. :dp:`fls_wmxsd0i2yemf`
       :t:`By unique immutable reference capture` mode, if the
@@ -5342,11 +5342,76 @@ within the :t:`capturing expression`, as follows:
       :t:`By mutable reference capture` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
-      :t:`By value capture`.
+      :t:`By value capture` (highest precedence).
 
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of
 the :t:`capture target`.
+
+.. _fls_G64vdcIyB2Is:
+
+Capture precision
+~~~~~~~~~~~~~~~~~
+
+:dp:`fls_j9WyKVyOLFon`
+A :dt:`place projection` is an :t:`array` :t:`index expression`, an automatic :t:`dereference`, an explicit :t:`dereference`, a :t:`field access expression`, a :t:`pattern destructuring` applied to a :t:`variable`, or a :t:`slice` :t:`index expression`.
+
+:dp:`fls_rdDT7jsaOMbs`
+A :dt:`capture path` is a sequence starting with a :t:`capture target` from the :t:`capturing environment` followed by zero or more :t:`[place projection]s` from that :t:`capture target`.
+
+:dp:`fls_TbfUxVf8PKPs`
+A :t:`closure expression` :t:`[borrow]s` or :t:`moves <by move>` the :t:`capture path`, as follows:
+
+- :dp:`fls_4TESOxGpEY2h`
+  When a :t:`capture path` and an ancestor :t:`capture path` are both :t:`captured <capturing>`, the ancestor :t:`capture path` is :t:`captured` with the highest :t:`capture mode` among the two :t:`[capture path]s`, recursively, for all such pairs of :t:`[capture path]s`.
+
+- :dp:`fls_eNkZWskzznW6`
+  The :t:`capture path` is truncated at the rightmost :t:`dereference` in the :t:`capture path` if the :t:`dereference` is applied to a :t:`shared reference`.
+
+:dp:`fls_Vt9C9mKxHOwo`
+A :t:`place` is :t:`captured` by :t:`immutable borrow` if its :t:`discriminant` is read by :t:`pattern matching`.
+
+:dp:`fls_v8IFXHJnXhez`
+A :t:`place` is not :t:`captured` when an :t:`underscore pattern` is used to bind it.
+
+:dp:`fls_gujpU7p5n9Zx`
+A :t:`place` is not :t:`captured` by using a :t:`rest pattern` when :t:`destructuring <pattern destructuring>` :t:`[struct]s`, :t:`[tuple]s`, and :t:`[enum]s` with a single :t:`enum variant`.
+
+:dp:`fls_t8tFLUg8O83Q`
+A :t:`field` is not :t:`captured` by being matched against a :t:`rest pattern`.
+
+:dp:`fls_RaONmCLH2KGM`
+An :t:`array` or :t:`slice` is :t:`captured` whole.
+
+:dp:`fls_Fs12dmznjsMf`
+Matching against an :t:`enum variant` of an :t:`enum` with more than one :t:`enum variant` :t:`captures <capturing>` the :t:`place` by :t:`immutable borrow`.
+
+:dp:`fls_7EXHdE2eOVek`
+Matching against an :t:`enum variant` of an :t:`enum` with one :t:`enum variant` does not :t:`capture <capturing>` the :t:`place`, unless the :t:`enum` is subject to :t:`attribute` ``non_exhaustive``, in which case the :t:`place` is captured by :t:`immutable borrow`.
+
+:dp:`fls_iLH8X2U4ADHb`
+Matching against a :t:`range pattern` :t:`captures <capturing>` the :t:`place` by :t:`immutable borrow`.
+
+:dp:`fls_HMJUXHrvOmPl`
+Matching a :t:`slice` against a :t:`slice pattern`, other than one with only a single :t:`rest pattern`, :t:`captures <capturing>` the :t:`slice` by :t:`immutable borrow`.
+
+:dp:`fls_Gj1znNpthHY6`
+Matching an :t:`array` against a :t:`slice pattern` does not :t:`capture <capturing>` the :t:`place`.
+
+:dp:`fls_IFyJvb6mlFU4`
+A :t:`closure expression` subject to keyword ``move`` :t:`captures <capturing>` the prefix of a :t:`capture path` that runs up to, but not including, the first :t:`dereference` of a :t:`reference`.
+
+:dp:`fls_7NEEJgKSpQQ8`
+A :t:`closure expression` :t:`captures <capturing>` the prefix of a :t:`capture path` that runs up to, but not including, the first :t:`dereference` of a :t:`raw pointer`.
+
+:dp:`fls_kYFd3p06pWWV`
+A :t:`closure expression` :t:`captures <capturing>` the prefix of a :t:`capture path` of a :t:`union` that runs up to the :t:`union` itself.
+
+:dp:`fls_fATMTNUOHsfb`
+A :t:`closure expression` :t:`captures <capturing>` the prefix of the :t:`capture path` that runs up to, but not including, the first :t:`field access expression` into a :t:`struct` that uses the :t:`attribute` :c:`repr` with modifier ``packed``, in unaligned :t:`[field]s` in a :t:`struct`.
+
+:dp:`fls_fITor3jpmgrl`
+Taking the address of an unaligned :t:`field` :t:`captures <capturing>` the entire :t:`struct`.
 
 .. _fls_ZfIBiJMf8qE1:
 

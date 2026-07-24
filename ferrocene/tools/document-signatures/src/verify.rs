@@ -12,7 +12,7 @@ use crate::config::Config;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 
-fn report_bad_signature(output_dir: &Path, existing: &Pinned, expected: &Pinned, files: &SignatureFiles) -> Result<()> {
+fn report_bad_signature(output_dir: &Path, existing: &Pinned, expected: &Pinned, files: &SignatureFiles<'_>) -> Result<()> {
     eprintln!("Signature incorrect: {}", output_dir.display());
     if existing.document_id != expected.document_id {
         eprintln!("existing document id: {}", existing.document_id);

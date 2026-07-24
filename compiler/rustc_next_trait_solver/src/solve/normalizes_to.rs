@@ -8,7 +8,7 @@ use rustc_type_ir::solve::{
     RerunNonErased, RerunReason, RerunResultExt,
 };
 use rustc_type_ir::{
-    self as ty, FieldInfo, Interner, NormalizesTo, PredicateKind, Unnormalized, Upcast as _,
+    self as ty, FieldInfo, Interner, NormalizesTo, PredicateKind, Region, Unnormalized, Upcast as _,
 };
 use tracing::instrument;
 
@@ -348,6 +348,7 @@ where
                             | ty::TypingMode::PostTypeckUntilBorrowck { .. }
                             | ty::TypingMode::PostBorrowck { .. }
                             | ty::TypingMode::PostAnalysis
+                            | ty::TypingMode::Reflection
                             | ty::TypingMode::Codegen => {
                                 ecx.instantiate_normalizes_to_as_rigid(goal)?;
                                 return ecx.evaluate_added_goals_and_make_canonical_response(
@@ -1075,6 +1076,13 @@ where
             ecx.instantiate_normalizes_to_term(goal, ty.into())?;
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         })
+    }
+
+    fn consider_builtin_try_as_dyn_candidate(
+        _ecx: &mut EvalCtxt<'_, D>,
+        _goal: Goal<I, Self>,
+    ) -> Result<Candidate<I>, NoSolutionOrRerunNonErased> {
+        unreachable!("try_as_dyn helper trait doesn't have assoc types")
     }
 }
 

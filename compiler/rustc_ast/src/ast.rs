@@ -3413,6 +3413,29 @@ pub struct Attribute {
     /// Denotes if the attribute decorates the following construct (outer)
     /// or the construct this attribute is contained within (inner).
     pub style: AttrStyle,
+
+    /// The carets in the examples below show the spans for various cases.
+    /// ```text
+    /// #[foo]                  - A vanilla parsed attribute.
+    /// ^^^^^^                  - Its span covers it all.
+    ///
+    /// /** abc */  /// xyz     - A parsed doc comment.
+    /// ^^^^^^^^^^  ^^^^^^^     - Its span covers the text and comment marker(s).
+    ///                         - The same span is also used if the doc comment is desugared (into
+    ///                           a new normal `#[doc = r"..."]` attribute) by
+    ///                           `desugar_doc_comments` before being passed to a macro (which
+    ///                           is done so that `#[$m:meta]` will match).
+    ///
+    /// #[cfg_attr(pred, foo)]  - A parsed `cfg_attr` attribute.
+    /// ^^^^^^^^^^^^^^^^^^^^^^  - Its span covers it all.
+    ///                  ^^^    - Span of the new replacement attribute (equivalent to `#[foo]`)
+    ///                           created by `cfg_attr` expansion (if `pred` is true).
+    /// ^^^^^^^^^^^^^^^^^^^^^^  - Span of the synthetic `CfgAttrTrace` attribute created by
+    ///                           `cfg_attr` expansion. (`CfgTrace` is derived from `#[cfg(..)]` and
+    ///                           handled similarly.)
+    /// ```
+    /// Finally, for compiler-generated attributes the span is whatever the construction site
+    /// chooses. Usually `DUMMY_SP` or some relevant span from the source code.
     pub span: Span,
 }
 
@@ -3589,6 +3612,11 @@ pub struct ImplRestriction {
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
 pub struct MutRestriction {
     pub kind: RestrictionKind,
+    /// Note: this span is currently thrown away
+    /// for [RestrictionKind::Unrestricted] when constructing [FieldDef],
+    /// to keep its size small. This is not a problem at the moment,
+    /// because this span is unused, but we will need to refactor
+    /// [FieldDef] and [FieldDefExtras] to restore it when we need it.
     pub span: Span,
 }
 
@@ -3607,15 +3635,39 @@ pub struct FieldDef {
     pub id: NodeId,
     pub span: Span,
     pub vis: Visibility,
-    pub mut_restriction: MutRestriction,
-    pub safety: Safety,
+    pub extras: Option<Box<FieldDefExtras>>,
     pub ident: Option<Ident>,
 
     pub ty: Box<Ty>,
-    pub default: Option<AnonConst>,
     pub is_placeholder: bool,
 }
 
+/// Some properties from [FieldDef] are rarely used,
+/// so we outline them to make FieldDef smaller.
+/// At the time of writing, these are all related to unstable features.
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct FieldDefExtras {
+    pub safety: Safety,
+    pub mut_restriction: MutRestriction,
+    pub default: Option<AnonConst>,
+}
+
+impl FieldDef {
+    pub fn mut_restriction(&self) -> &MutRestriction {
+        static DEFAULT: MutRestriction =
+            MutRestriction { kind: RestrictionKind::Unrestricted, span: DUMMY_SP };
+
+        self.extras.as_ref().map_or(&DEFAULT, |extras| &extras.mut_restriction)
+    }
+
+    pub fn default_value(&self) -> Option<&AnonConst> {
+        self.extras.as_ref().and_then(|e| e.default.as_ref())
+    }
+
+    pub fn safety(&self) -> Safety {
+        self.extras.as_ref().map_or(Safety::Default, |extras| extras.safety)
+    }
+}
 /// Was parsing recovery performed?
 #[derive(Copy, Clone, Debug, Encodable, Decodable, StableHash, Walkable)]
 pub enum Recovered {
@@ -3987,44 +4039,16 @@ pub struct ConstItem {
     pub ident: Ident,
     pub generics: Generics,
     pub ty: Box<Ty>,
-    pub rhs_kind: ConstItemRhsKind,
+    pub body: Option<Box<Expr>>,
+    #[visitable(ignore)]
+    pub kind: ConstItemKind,
     pub define_opaque: Option<ThinVec<(NodeId, Path)>>,
 }
 
-#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
-pub enum ConstItemRhsKind {
-    Body { rhs: Option<Box<Expr>> },
-    TypeConst { rhs: Option<AnonConst> },
-}
-
-impl ConstItemRhsKind {
-    pub fn new_body(rhs: Box<Expr>) -> Self {
-        Self::Body { rhs: Some(rhs) }
-    }
-
-    pub fn span(&self) -> Option<Span> {
-        Some(self.expr()?.span)
-    }
-
-    pub fn expr(&self) -> Option<&Expr> {
-        match self {
-            Self::Body { rhs: Some(body) } => Some(&body),
-            Self::TypeConst { rhs: Some(anon) } => Some(&anon.value),
-            _ => None,
-        }
-    }
-
-    pub fn has_expr(&self) -> bool {
-        match self {
-            Self::Body { rhs: Some(_) } => true,
-            Self::TypeConst { rhs: Some(_) } => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_type_const(&self) -> bool {
-        matches!(self, &Self::TypeConst { .. })
-    }
+#[derive(Clone, Copy, Encodable, Decodable, Debug, PartialEq, Eq)]
+pub enum ConstItemKind {
+    Body,
+    TypeConst,
 }
 
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
@@ -4388,6 +4412,7 @@ mod size_asserts {
     static_assert_size!(Block, 24);
     static_assert_size!(Expr, 64);
     static_assert_size!(ExprKind, 32);
+    static_assert_size!(FieldDef, 80);
     static_assert_size!(Fn, 192);
     static_assert_size!(FnDecl, 24);
     static_assert_size!(FnHeader, 76);

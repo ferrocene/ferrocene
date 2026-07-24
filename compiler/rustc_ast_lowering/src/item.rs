@@ -270,7 +270,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ident,
                 generics,
                 ty,
-                rhs_kind,
+                body,
+                kind,
                 define_opaque,
             }) => {
                 let ident = self.lower_ident(*ident);
@@ -282,7 +283,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ty,
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
-                        let rhs = this.lower_const_item_rhs(rhs_kind, span);
+                        let rhs = this.lower_const_item_rhs(body, *kind, span);
                         (ty, rhs)
                     },
                 );
@@ -893,13 +894,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 None => Ident::new(sym::integer(index), self.lower_span(f.span)),
             },
             vis_span: self.lower_span(f.vis.span),
-            mut_restriction: self.lower_mut_restriction(&f.mut_restriction),
+            mut_restriction: self.lower_mut_restriction(f.mut_restriction()),
             default: f
-                .default
-                .as_ref()
+                .default_value()
                 .map(|v| self.lower_anon_const_to_anon_const(v, v.value.span)),
             ty,
-            safety: self.lower_safety(f.safety, hir::Safety::Safe),
+            safety: self.lower_safety(f.safety(), hir::Safety::Safe),
         }
     }
 
@@ -918,7 +918,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ident,
                 generics,
                 ty,
-                rhs_kind,
+                body,
+                kind,
                 define_opaque,
                 ..
             }) => {
@@ -931,8 +932,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
                         // Trait associated consts don't need an expression/body.
-                        let rhs = if rhs_kind.has_expr() {
-                            Some(this.lower_const_item_rhs(rhs_kind, i.span))
+                        let rhs = if body.is_some() {
+                            Some(this.lower_const_item_rhs(body, *kind, i.span))
                         } else {
                             None
                         };
@@ -941,7 +942,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 );
 
                 if define_opaque.is_some() {
-                    if rhs_kind.has_expr() {
+                    if body.is_some() {
                         self.lower_define_opaque(hir_id, &define_opaque);
                     } else {
                         self.dcx().span_err(
@@ -951,7 +952,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     }
                 }
 
-                (*ident, generics, kind, rhs_kind.has_expr())
+                (*ident, generics, kind, body.is_some())
             }
             AssocItemKind::Fn(Fn { sig, ident, generics, body: None, define_opaque, .. }) => {
                 // FIXME(contracts): Deny contract here since it won't apply to
@@ -1180,7 +1181,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ident,
                 generics,
                 ty,
-                rhs_kind,
+                body,
+                kind,
                 define_opaque,
                 ..
             }) => (
@@ -1194,7 +1196,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ImplTraitContext::Disallowed(ImplTraitPosition::ConstTy),
                         );
                         this.lower_define_opaque(hir_id, &define_opaque);
-                        let rhs = this.lower_const_item_rhs(rhs_kind, i.span);
+                        let rhs = this.lower_const_item_rhs(body, *kind, i.span);
                         hir::ImplItemKind::Const(ty, rhs)
                     },
                 ),

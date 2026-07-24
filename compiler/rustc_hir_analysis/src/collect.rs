@@ -32,8 +32,8 @@ use rustc_infer::traits::{DynCompatibilityViolation, ObligationCause};
 use rustc_middle::query::Providers;
 use rustc_middle::ty::util::{Discr, IntTypeExt};
 use rustc_middle::ty::{
-    self, AdtKind, Const, IsSuggestable, Ty, TyCtxt, TypeVisitableExt, TypingMode, Unnormalized,
-    fold_regions,
+    self, AdtKind, Const, IsSuggestable, RegionExt, Ty, TyCtxt, TypeVisitableExt, TypingMode,
+    Unnormalized, fold_regions,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::{DUMMY_SP, Ident, Span, Symbol, kw, sym};
@@ -85,6 +85,7 @@ pub(crate) fn provide(providers: &mut Providers) {
         adt_def,
         fn_sig,
         impl_trait_header,
+        impl_is_fully_generic_for_reflection,
         coroutine_kind,
         coroutine_for_closure,
         opaque_ty_origin,
@@ -1393,6 +1394,11 @@ pub fn suggest_impl_trait<'tcx>(
         }
     }
     None
+}
+
+fn impl_is_fully_generic_for_reflection(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
+    tcx.impl_trait_header(def_id).is_fully_generic_for_reflection()
+        && tcx.explicit_predicates_of(def_id).is_fully_generic_for_reflection()
 }
 
 fn impl_trait_header(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::ImplTraitHeader<'_> {

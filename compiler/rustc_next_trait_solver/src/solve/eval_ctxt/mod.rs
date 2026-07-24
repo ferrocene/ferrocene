@@ -16,7 +16,7 @@ use rustc_type_ir::solve::{
 };
 use rustc_type_ir::{
     self as ty, CanonicalVarValues, ClauseKind, InferCtxtLike, Interner, MayBeErased,
-    OpaqueTypeKey, PredicateKind, TypeFoldable, TypeSuperVisitable, TypeVisitable,
+    OpaqueTypeKey, PredicateKind, Region, TypeFoldable, TypeSuperVisitable, TypeVisitable,
     TypeVisitableExt, TypeVisitor, TypingMode,
 };
 use tracing::{Level, debug, instrument, trace, warn};
@@ -566,28 +566,34 @@ where
         .entered();
 
         let (result, orig_values, canonical_goal, succeeded_in_erased) = 'retry_canonicalize: {
-            let skip_erased_attempt = if typing_mode.is_coherence() {
-                true
-            } else {
-                let mut skip = false;
-                if opaque_types.iter().any(|(_, ty)| ty.is_ty_var())
-                    && let PredicateKind::Clause(ClauseKind::Trait(..)) =
+            let skip_erased_attempt = match typing_mode {
+                TypingMode::Reflection | TypingMode::Coherence => true,
+                TypingMode::Typeck { .. }
+                | TypingMode::PostTypeckUntilBorrowck { .. }
+                | TypingMode::PostBorrowck { .. }
+                | TypingMode::Codegen
+                | TypingMode::PostAnalysis
+                | TypingMode::ErasedNotCoherence(_) => {
+                    let mut skip = false;
+                    if opaque_types.iter().any(|(_, ty)| ty.is_ty_var())
+                        && let PredicateKind::Clause(ClauseKind::Trait(..)) =
+                            goal.predicate.kind().skip_binder()
+                    {
+                        skip = true;
+                    }
+
+                    if let PredicateKind::Clause(ClauseKind::Trait(tr)) =
                         goal.predicate.kind().skip_binder()
-                {
-                    skip = true;
-                }
+                        && tr.self_ty().has_coroutines()
+                        && self.cx().trait_is_auto(tr.trait_ref.def_id)
+                    {
+                        // FIXME(#155443): this doesn't make a difference now, but with eager normalization
+                        // it likely will.
+                        // skip_erased_attempt = true;
+                    }
 
-                if let PredicateKind::Clause(ClauseKind::Trait(tr)) =
-                    goal.predicate.kind().skip_binder()
-                    && tr.self_ty().has_coroutines()
-                    && self.cx().trait_is_auto(tr.trait_ref.def_id)
-                {
-                    // FIXME(#155443): this doesn't make a difference now, but with eager normalization
-                    // it likely will.
-                    // skip_erased_attempt = true;
+                    skip
                 }
-
-                skip
             };
 
             if skip_erased_attempt {
@@ -926,7 +932,7 @@ where
         Ok(())
     }
 
-    pub(super) fn next_region_var(&mut self) -> I::Region {
+    pub(super) fn next_region_var(&mut self) -> Region<I> {
         let region = self.delegate.next_region_infer();
         self.inspect.add_var_value(region);
         region
@@ -1191,7 +1197,7 @@ where
         self.delegate.shallow_resolve(ty)
     }
 
-    pub(super) fn eager_resolve_region(&self, r: I::Region) -> I::Region {
+    pub(super) fn eager_resolve_region(&self, r: Region<I>) -> Region<I> {
         if let ty::ReVar(vid) = r.kind() {
             self.delegate.opportunistic_resolve_lt_var(vid)
         } else {
@@ -1211,14 +1217,14 @@ where
         self.delegate.register_solver_region_constraint(c);
     }
 
-    pub(super) fn register_ty_outlives(&self, ty: I::Ty, lt: I::Region) {
+    pub(super) fn register_ty_outlives(&self, ty: I::Ty, lt: Region<I>) {
         self.delegate.register_ty_outlives(ty, lt, self.origin_span);
     }
 
     pub(super) fn register_region_outlives(
         &self,
-        a: I::Region,
-        b: I::Region,
+        a: Region<I>,
+        b: Region<I>,
         vis: VisibleForLeakCheck,
     ) {
         // `'a: 'b` ==> `'b <= 'a`
@@ -1649,9 +1655,10 @@ fn should_rerun_after_erased_canonicalization<I: Interner>(
         // =============================
         (RerunCondition::Always, _) => RerunDecision::Yes,
         // =============================
-        (RerunCondition::OpaqueInStorage(..), TypingMode::PostAnalysis | TypingMode::Codegen) => {
-            RerunDecision::Yes
-        }
+        (
+            RerunCondition::OpaqueInStorage(..),
+            TypingMode::PostAnalysis | TypingMode::Codegen | TypingMode::Reflection,
+        ) => RerunDecision::Yes,
         (
             RerunCondition::OpaqueInStorage(defids),
             TypingMode::PostBorrowck { defined_opaque_types: opaques }
@@ -1667,12 +1674,13 @@ fn should_rerun_after_erased_canonicalization<I: Interner>(
             TypingMode::PostBorrowck { .. }
             | TypingMode::PostAnalysis
             | TypingMode::Codegen
+            | TypingMode::Reflection
             | TypingMode::PostTypeckUntilBorrowck { .. },
         ) => RerunDecision::No,
         // =============================
         (
             RerunCondition::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(_),
-            TypingMode::PostAnalysis | TypingMode::Codegen,
+            TypingMode::PostAnalysis | TypingMode::Codegen | TypingMode::Reflection,
         ) => RerunDecision::Yes,
         (
             RerunCondition::OpaqueInStorageOrAnyOpaqueHasInferAsHidden(defids),

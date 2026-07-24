@@ -18,7 +18,7 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::git;
 use crate::{Compiler, FileType, t};
 
@@ -1026,9 +1026,10 @@ fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
 /// [None] if there is no entry for the requested `submodule_path`.
 fn get_submodule_version(
     submodule_path: &str,
-    exec_ctx: impl AsRef<ExecutionContext>,
+    builder: &Builder<'_>,
 ) -> Option<String> {
-    let submodule_status = git(None).args(["submodule", "status"]).run_capture(exec_ctx).stdout();
+    builder.require_submodule(submodule_path, None);
+    let submodule_status = git(None).args(["submodule", "status"]).run_capture(builder).stdout();
     submodule_status.lines().find_map(|line| parse_submodule_line(line, submodule_path))
 }
 

@@ -7,7 +7,7 @@ pub(crate) mod flip_link;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::sign::error_when_signatures_are_ignored;
+use crate::ferrocene::sign::validate_config;
 use crate::utils::exec::BootstrapCommand;
 use crate::{Kind, Mode};
 
@@ -114,7 +114,7 @@ impl Step for CheckDocumentSignatures {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        error_when_signatures_are_ignored(builder, "check document signatures");
+        validate_config(builder, true, "check document signatures");
 
         builder.info("Checking document signatures");
         crate::ferrocene::sign::for_each_signable_document(

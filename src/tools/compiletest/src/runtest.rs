@@ -1302,7 +1302,8 @@ impl<'test> TestCx<'test> {
         let aux_dir = self.aux_output_dir();
         self.build_all_auxiliary(&aux_dir, &mut rustc);
         if self.props.ferrocene_execute_in_temp {
-            let current_dir = output_base_dir(self.config, self.testpaths, self.safe_revision());
+            let current_dir =
+                output_base_dir(self.config, self.testpaths, &self.variant_with_safe_revision());
             rustc.current_dir(current_dir);
         }
 

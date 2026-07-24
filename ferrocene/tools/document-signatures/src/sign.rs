@@ -4,7 +4,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::{Context, Error};
+use anyhow::{Context, Error, Result};
 use tempfile::NamedTempFile;
 
 use crate::Env;
@@ -13,17 +13,26 @@ use crate::cosign_bundle::RawCosignBundle;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 
+fn regenerate_pinned(signature_files: &mut SignatureFiles<'_>, pinned: Pinned) -> Result<()> {
+    let mut contents = Vec::new();
+    contents.extend_from_slice(pinned.toml_comments()?.as_bytes());
+    contents.extend_from_slice(toml::to_string_pretty(&pinned)?.as_bytes());
+
+    signature_files.write("pinned.toml", &contents)?;
+    Ok(())
+}
+
 pub(crate) fn sign(
     source_dir: &Path,
     output_dir: &Path,
     force: bool,
     env: &Env,
 ) -> Result<(), Error> {
-    let config = Config::load(source_dir)?;
-    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir)?;
-    let mut signature_files = SignatureFiles::load(source_dir, env)?;
+    let config = Config::load(source_dir).context(format!("failed to load config from {source_dir:?}"))?;
+    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir).context(format!("failed to generate pinned tarball to {output_dir:?}"))?;
+    let mut signature_files = SignatureFiles::load(source_dir, env).context(format!("failed to load signature files from {source_dir:?}"))?;
 
-    let regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml")? {
+    let should_regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml").context(format!("pinned.toml was not present in {source_dir:?}/signatures.toml"))? {
         // The raw contents of pinned.toml are not reproducible, since they intentionally contain
         // random data. If we were to always regenerate the pinned.toml file, old signatures would
         // invalidate as the random data would change. Instead, we only regenerate pinned.toml if
@@ -45,7 +54,7 @@ pub(crate) fn sign(
         .roles
         .keys()
         .all(|role| signature_files.file_exists(&format!("{role}.cosign-bundle")));
-    if !force && !regenerate_pinned && all_signatures_present {
+    if !force && !should_regenerate_pinned && all_signatures_present {
         eprintln!();
         eprintln!("The current version of this document has been signed already by all parties.");
         eprintln!("The existing signatures will be reused!");
@@ -54,12 +63,8 @@ pub(crate) fn sign(
         return Ok(());
     }
 
-    if regenerate_pinned {
-        let mut contents = Vec::new();
-        contents.extend_from_slice(pinned.toml_comments()?.as_bytes());
-        contents.extend_from_slice(toml::to_string_pretty(&pinned)?.as_bytes());
-
-        signature_files.write("pinned.toml", &contents)?;
+    if should_regenerate_pinned {
+        regenerate_pinned(&mut signature_files, pinned).context("failed to regenerate pinned.toml")?;
     }
 
     let (role_name, contents) = if env.allow_dev_signing {
@@ -70,19 +75,23 @@ pub(crate) fn sign(
         let contents = b"todo";
         (role_name.to_owned(), Vec::from(contents))
     } else {
-        generate_and_load_cosign_bundle(&signature_files, env, &config)?
+        generate_and_load_cosign_bundle(&signature_files, env, &config).context("failed to generate cosign bundle")?
     };
 
-    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents)?;
+    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents).context("failed to persist cosign bundle")?;
+    persist_tarfile(saved_tarfile, output_dir).context("failed to save stable archive")?;
+    Ok(())
+}
 
+fn persist_tarfile(saved_tarfile: NamedTempFile, output_dir: &Path) -> Result<()> {
     let filename =
         output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
     let dst_dir = Path::new("build/host/signature-diffs");
     let cached_path = dst_dir.join(filename);
     let (_, tmp_path) = saved_tarfile.keep().context(format!("failed to move tarfile to {output_dir:?}"))?;
 
-    std::fs::rename(tmp_path, cached_path)?;
     std::fs::create_dir_all(dst_dir).context(format!("failed to create {dst_dir:?}"))?;
+    std::fs::rename(&tmp_path, &cached_path).context(format!("failed to rename {tmp_path:?} -> {cached_path:?}"))?;
 
     Ok(())
 }

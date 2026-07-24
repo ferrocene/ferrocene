@@ -99,7 +99,7 @@ impl Pinned {
 
     fn generate_random_data(&self, into: &mut String) -> Result<(), Error> {
         let mut random_data = [0; 64];
-        getrandom::getrandom(&mut random_data)?;
+        getrandom::getrandom(&mut random_data).context("failed to generate random data (?)")?;
         base64::engine::general_purpose::STANDARD_NO_PAD.encode_string(&random_data, into);
         Ok(())
     }

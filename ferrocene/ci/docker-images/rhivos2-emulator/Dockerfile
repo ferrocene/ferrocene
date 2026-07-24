@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# `docker build --tag rhivos-2.0-test-server --file ferrocene/ci/docker-images/rhivos-2.0-test-server/Dockerfile .`
+# `docker build --tag rhivos2-emulator --file ferrocene/ci/docker-images/rhivos2-emulator/Dockerfile .`
 FROM --platform=$TARGETPLATFORM 886866542769.dkr.ecr.us-east-1.amazonaws.com/ci-docker-images:rhivos-2.0-19-04-2026
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope

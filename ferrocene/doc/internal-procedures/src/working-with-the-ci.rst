@@ -111,8 +111,8 @@ If you want to build a local docker image and use that for running the workflow,
 
 .. code-block:: sh
 
-   docker build --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile . --tag ferrocene-images/ci:ubuntu-20-main
-   act --pull=false --platform ubuntu-24.04=localhost/ferrocene-images/ci:ubuntu-20-main # ...
+   docker build --file ferrocene/ci/docker-images/runner/Dockerfile . --tag ferrocene-images/ci:runner-main
+   act --pull=false --platform ubuntu-24.04=localhost/ferrocene-images/ci:runner-main # ...
 
 The remaining sections of this document are about reproducing the *configuration* of CI using a local build.
 
@@ -196,12 +196,12 @@ Using the CI Docker images
 Docker images used in CI can be found in ``ferrocene/ci/docker-images``. Each
 image documents how to build it at the top of the ``Dockerfile``.
 
-To build the most common image, ``ubuntu-20``:
+To build the most common image, ``runenr``:
 
 .. code-block:: bash
 
    cd $FERROCENE_REPO
-   docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .
+   docker build --tag runner --file ferrocene/ci/docker-images/runner/Dockerfile .
 
 
 Reproducing CI jobs
@@ -212,7 +212,7 @@ Most CI jobs are formatted similar to this:
 .. code-block:: YAML
 
   x86_64-linux-dist-targets:
-    executor: docker-ubuntu-20
+    executor: docker-runner
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -239,7 +239,7 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
 
    docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
-      ubuntu-20 bash
+      runner bash
 
 Inside the container, run ``./x clean`` then run the lines of the ``SCRIPT``
 of the job:
@@ -261,7 +261,7 @@ directory for ``/ferrocene/build``:
    docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       --mount "type=bind,src=$(pwd)/container-build,dst=/ferrocene/build" \
-      ubuntu-20 bash
+      runner bash
 
 Note that you will need to create the `container-build` directory in the host
 system beforehand.
@@ -280,7 +280,7 @@ you can authenticate in the container, run:
    docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       --mount "type=bind,src=$HOME/.aws,dst=/home/ci/.aws" \
-      ubuntu-20 bash
+      runner bash
 
 Remember that any directories mounted with the `bind` type must exist in the
 host system beforehand.

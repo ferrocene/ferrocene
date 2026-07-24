@@ -213,10 +213,10 @@ def find_sphinx_books(path: Path, *, root=None) -> Generator[Path, None, None]:
 ### Local diffs
 
 
-def diff_local_tarball(document_name: str):
+def diff_local_tarball(document_name: str, local_tarball=None):
     # Signed docs
     dir = Path("build/host/signature-diffs")
-    tarball = dir / (document_name + "-stable-archive.tar.gz")
+    tarball = local_tarball or dir / (document_name + "-stable-archive.tar.gz")
     extracted_dir = dir / document_name
     extracted_dir.mkdir(parents=True, exist_ok=True)
     subprocess.run(["tar", "-xf", tarball, "-C", extracted_dir], check=True)
@@ -261,6 +261,7 @@ if __name__ == "__main__":
 
     local = subcommands.add_parser("local")
     local.add_argument("document_name")
+    local.add_argument("local_tarball", nargs='?')
     local.set_defaults(func=diff_local_tarball)
 
     bors = subcommands.add_parser("bors")
@@ -269,6 +270,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if args.cmd == "local":
-        diff_local_tarball(args.document_name)
+        diff_local_tarball(args.document_name, args.local_tarball)
     else:
         diff_bors_artifact(args.pr_number)

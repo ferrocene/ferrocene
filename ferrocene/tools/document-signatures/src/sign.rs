@@ -80,18 +80,9 @@ pub(crate) fn sign(
         generate_and_load_cosign_bundle(&signature_files, env, &config).context("failed to generate cosign bundle")?
     };
 
-    persist_tarfile(saved_tarfile, output_dir).context("failed to save stable archive")?;
+    let tarfile_contents = std::fs::read(&saved_tarfile)?;
+    signature_files.write("stable-archive.tar.gz", &tarfile_contents)?;
     signature_files.write(&format!("{role_name}.cosign-bundle"), &contents).context("failed to persist cosign bundle")?;
-    Ok(())
-}
-
-fn persist_tarfile(saved_tarfile: NamedTempFile, output_dir: &Path) -> Result<()> {
-    let filename =
-        output_dir.file_name().unwrap().to_str().unwrap().to_owned() + "-stable-archive.tar.gz";
-    let dst_dir = Path::new("build/host/signature-diffs");
-    let cached_path = dst_dir.join(filename);
-
-    write::persist_atomic(saved_tarfile, &cached_path)?;
     Ok(())
 }
 

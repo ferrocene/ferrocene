@@ -1590,14 +1590,8 @@ pub const fn can_not_overflow<T>(radix: u32, is_signed_ty: bool, digits: &[u8]) 
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[cold]
 #[track_caller]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-const fn from_ascii_radix_panic(radix: u32) -> ! {
-||||||| 87e5904f5eb
-const fn from_ascii_radix_panic(radix: u32) -> ! {
-=======
 const fn from_ascii_bytes_radix_panic(radix: u32) -> ! {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     const_panic!(
         "from_ascii_bytes_radix: radix must lie in the range `[2, 36]`",
         "from_ascii_bytes_radix: radix must lie in the range `[2, 36]` - found {radix}",
@@ -1782,12 +1776,7 @@ macro_rules! from_str_int_impl {
             #[unstable(feature = "int_from_ascii", issue = "134821")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
             #[inline]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
-||||||| 87e5904f5eb
-            pub const fn from_ascii_radix(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
-=======
             pub const fn from_ascii_bytes_radix<T>(src: T, radix: u32) -> Result<$int_ty, ParseIntError>
             where
                 T: [const] AsRef<[u8]> + [const] crate::marker::Destruct
@@ -1796,8 +1785,8 @@ macro_rules! from_str_int_impl {
             }
 
             #[inline]
+            #[ferrocene::prevalidated]
             pub(super) const fn from_ascii_bytes_radix_impl(src: &[u8], radix: u32) -> Result<$int_ty, ParseIntError> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 use self::IntErrorKind::*;
                 use self::ParseIntError as PIE;
 

@@ -477,14 +477,8 @@ macro_rules! spec_int_ranges {
 
         impl SpecRangeSetup<$ctor<$t>> for $ctor<$t> {
             #[inline]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            fn setup(mut r: Range<$t>, step: usize) -> Range<$t> {
-||||||| 87e5904f5eb
-            fn setup(mut r: Range<$t>, step: usize) -> Range<$t> {
-=======
             fn setup(mut r: $ctor<$t>, step: usize) -> $ctor<$t> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 let inner_len = r.size_hint().0;
                 // If step exceeds $t::MAX, then the count will be at most 1 and
                 // thus always fit into $t.

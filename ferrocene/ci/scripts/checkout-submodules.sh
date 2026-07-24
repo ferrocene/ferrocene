@@ -14,9 +14,17 @@ current_branch=$(git symbolic-ref --short --quiet HEAD || echo "main")
 # Spawn all `git submodule update`s in parallel and then wait for all of them
 # to complete. This intentionally doesn't use the `-j` flag, as that flag
 # apparently still clones the individual submodules in serial.
+# In order to fail this script if any of the `git submodule update` commands
+# fail, we store each pid in `pids` and `wait` each pid. if `wait` is called
+# with exactly one pid, it will return the exit status of that pid
+pids=()
 for submodule in ${submodules}; do
     # Don't break if the default remote has a name other than `origin`.
     # See the comment in bootstrap::config::update_submodule.
     git -c "branch.${current_branch}.remote=origin" submodule update --depth 1 "${submodule}" &
+    pids+=($!)
 done
-wait
+
+for pid in "${pids[@]}"; do
+    wait "$pid"
+done

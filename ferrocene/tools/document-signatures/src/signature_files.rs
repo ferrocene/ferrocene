@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::{Context, Error, bail};
-use tempfile::NamedTempFile;
+use tempfile::{NamedTempFile, tempfile};
 use uuid::Uuid;
 
 use crate::{Env, TOML_HEADER_COMMENTS};
@@ -127,9 +127,11 @@ impl<'env> SignatureFiles<'env> {
             std::fs::create_dir_all(parent)?;
         }
 
-        let mut output = BufWriter::new(File::create(&self.signature_toml_path)?);
+        let mut output = BufWriter::new(NamedTempFile::new()?);
         output.write_all(TOML_HEADER_COMMENTS.as_bytes())?;
         output.write_all(&toml::to_vec(&self.signature_toml)?)?;
+        output.flush()?;
+        std::fs::rename(output.into_inner()?.path(), &self.signature_toml_path)?;
 
         Ok(())
     }

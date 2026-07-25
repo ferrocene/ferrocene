@@ -8,10 +8,10 @@ RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
 
 RUN yum -y install \
     wget curl \
-    xz bzip2 gzip \
+    xz bzip2 gzip unzip \
     binutils \
     tar \
-    make \
+    make patch \
     file which \
     glibc-devel
 

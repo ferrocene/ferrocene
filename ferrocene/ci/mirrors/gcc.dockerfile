@@ -5,9 +5,10 @@ RUN yum -y install \
     flex bison
 
 COPY gcc-11.tar.xz /gcc-11.tar.xz
-RUN mkdir -p /opt/local/gcc
-RUN tar -xf /gcc-11.tar.xz -C /opt/local/gcc --strip-components=3
-ENV PATH=/opt/local/gcc/bin:$PATH
+RUN mkdir -p /opt/local/gcc-11
+
+RUN tar -xf /gcc-11.tar.xz -C /opt/local/gcc-11 --strip-components=3
+ENV PATH=/opt/local/gcc-11/bin:$PATH
 
 COPY gcc-with-dependencies.tar.xz /gcc-with-dependencies.tar.xz
 RUN mkdir -p /gcc-source

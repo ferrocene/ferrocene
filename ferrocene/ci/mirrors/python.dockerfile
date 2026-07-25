@@ -1,26 +1,12 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
-
-# CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
-RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
-  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
-RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
+FROM centos7-builder AS base
 
 # OpenSSL 11 is only available via epel
 RUN yum -y install epel-release
 
 RUN yum -y install \
-    git \
-    make \
-    gcc gcc-c++ binutils \
-    wget \
-    xz \
-    tar \
-    patch \
-    bzip2 \
-    file \
     openssl11 \
     openssl11-devel \
     zlib-devel

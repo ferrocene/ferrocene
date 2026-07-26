@@ -150,29 +150,10 @@ upload-gdb: gdb
 	aws s3 cp --no-overwrite output/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
-download-cmake-src:
-	mkdir -p build/cmake
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/cmake/cmake-$(cmake-version).tar.gz build/cmake/cmake-source.tar.gz
-	
-.ONESHELL:
-cmake: download-cmake-src cmake.dockerfile builder-image prepare
-	cd build/cmake
-	docker build -t cmake:v$(cmake-version) -f ../../cmake.dockerfile .
-	{ \
-		set -xe ; \
-		id=$$(docker create cmake:v$(cmake-version)) ; \
-		docker cp $$id:/cmake/cmake-binaries.tar.xz \
-			../../output/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz ; \
-		docker rm $$id ; \
-	}
 
-upload-cmake: cmake
-	aws s3 cp --no-overwrite output/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz
-
-download-all-src: download-musl-cross-src download-python-src download-gdb-src download-cmake-src dewnload-openssl-src download-gcc-11-src download-gcc-src
-build-all: musl-cross python gdb cmake openssl gcc-11 gcc
-upload-all: upload-musl-cross upload-python upload-gdb upload-cmake upload-openssl upload-gcc-11 upload-gcc
+download-all-src: download-musl-cross-src download-python-src download-gdb-src dewnload-openssl-src download-gcc-11-src download-gcc-src
+build-all: musl-cross python gdb openssl gcc-11 gcc
+upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc-11 upload-gcc
 
 .ONESHELL:
 update-hashes:

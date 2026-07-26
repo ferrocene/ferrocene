@@ -4,3 +4,10 @@ COPY gcc.tar.xz /gcc.tar.xz
 RUN mkdir -p /opt/local/gcc
 RUN tar -xf /gcc.tar.xz -C /opt/local/gcc --strip-components=3
 ENV PATH=/opt/local/gcc/bin:$PATH
+
+COPY openssl.tar.xz /openssl.tar.xz
+RUN tar -xf /openssl.tar.xz -C /usr/local
+
+# add /usr/local/lib to ld's path
+RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
+RUN ldconfig

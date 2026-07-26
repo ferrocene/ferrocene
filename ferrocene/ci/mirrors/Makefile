@@ -177,7 +177,6 @@ upload-all: upload-musl-cross upload-python upload-gdb upload-cmake upload-opens
 .ONESHELL:
 update-hashes:
 	mkdir -p hashes
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes

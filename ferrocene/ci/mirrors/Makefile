@@ -4,6 +4,7 @@
 musl-cross-target-version=v0.9.11
 gcc-11-version=11.5.0
 gcc-version=16.1.0
+openssl-version=3.5.7
 python-version=3.12.3
 gdb-version=12.1
 cmake-version=3.21.1
@@ -16,13 +17,15 @@ prepare: base-image
 base-image:
 	docker build --tag centos7-base --file base.dockerfile .
 
+download-gcc-11-src:
+	mkdir -p build/gcc-11
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-11-version)-with-dependencies.tar.xz build/gcc-11/gcc-11-with-dependencies.tar.xz
+
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
 .ONESHELL:
-gcc-11: prepare
+gcc-11: prepare download-gcc-11-src
 	set -xe
-	mkdir -p build/gcc-11
 	cd build/gcc-11
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-11-version)-with-dependencies.tar.xz gcc-11-with-dependencies.tar.xz
 	docker build --tag gcc-11:$(gcc-11-version) --file ../../gcc-11.dockerfile .
 	{ \
 		id=$$(docker create gcc-11:$(gcc-11-version)) ; \
@@ -35,13 +38,15 @@ upload-gcc-11: gcc-11
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz
 
-.ONESHELL:
-gcc: gcc-11
-	set -xe
+download-gcc-src:
 	mkdir -p build/gcc
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
+	
+.ONESHELL:
+gcc: download-gcc-src gcc-11
+	set -xe
 	cd build/gcc
 	cp ../../output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz gcc-11.tar.xz
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz gcc-with-dependencies.tar.xz
 	docker build --tag gcc:$(gcc-version) --file ../../gcc.dockerfile .
 	{ \
 		id=$$(docker create gcc:$(gcc-version)) ; \
@@ -54,19 +59,39 @@ upload-gcc: gcc
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
 
+dewnload-openssl-src:
+	mkdir -p build/openssl
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/openssl/openssl-$(openssl-version).tar.gz build/openssl/openssl.tar.gz
+
 .ONESHELL:
-builder-image: gcc
+openssl: dewnload-openssl-src gcc
+	set -xe
+	cd build/openssl
+	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
+	docker build --tag openssl:$(openssl-version) --file ../../openssl.dockerfile .
+	{ \
+		id=$$(docker create openssl:$(openssl-version)) ; \
+		docker cp $$id://openssl-build/openssl-binaries.tar.xz \
+			../../output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz ; \
+		docker rm $$id ; \
+	}
+
+.ONESHELL:
+builder-image: builder.dockerfile gcc openssl
 	set -xe
 	mkdir -p build/builder
 	cd build/builder
 	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
+	cp ../../output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz openssl.tar.xz
 	docker build --tag centos7-builder --file ../../builder.dockerfile .
 
-.ONESHELL:
-musl-cross: musl.dockerfile builder-image prepare
+download-musl-cross-src:
 	mkdir -p build/musl-cross
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz build/musl-cross/musl-cross-make.tar.xz
+	
+.ONESHELL:
+musl-cross: download-musl-cross-src musl.dockerfile builder-image prepare
 	cd build/musl-cross
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz musl-cross-make.tar.xz
 	docker build -t musl-tarballs:$(musl-cross-target-version) --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f ../../musl.dockerfile .
 	{ \
 		set -xe ; \
@@ -84,11 +109,13 @@ upload-musl-cross: musl-cross
 	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz
 
-.ONESHELL:
-python: python.dockerfile builder-image prepare
+download-python-src:
 	mkdir -p build/python
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/python/Python-$(python-version).tar.xz build/python/python-source.tar.xz
+
+.ONESHELL:
+python: download-python-src python.dockerfile builder-image prepare
 	cd build/python
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/python/Python-$(python-version).tar.xz python-source.tar.xz
 	docker build -t python:v$(python-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../python.dockerfile .
 	{ \
 		set -xe ; \
@@ -102,12 +129,14 @@ upload-python: python
 	aws s3 cp --no-overwrite output/python-$(python-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-$(host-arch)-$(commit).tar.xz
 
-.ONESHELL:
-gdb: gdb.dockerfile builder-image python prepare
+download-gdb-src:
 	mkdir -p build/gdb
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/gdb/gdb_$(gdb-version).orig.tar.xz build/gdb/gdb-source.tar.xz
+
+.ONESHELL:
+gdb: download-gdb-src gdb.dockerfile builder-image python prepare
 	cd build/gdb
 	cp ../../output/python-$(python-version)-$(host-arch)-$(commit).tar.xz python.tar.xz
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/gdb/gdb_$(gdb-version).orig.tar.xz gdb-source.tar.xz
 	docker build -t gdb:v$(gdb-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../gdb.dockerfile .
 	{ \
 		set -xe ; \
@@ -121,11 +150,13 @@ upload-gdb: gdb
 	aws s3 cp --no-overwrite output/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
-.ONESHELL:
-cmake: cmake.dockerfile builder-image prepare
+download-cmake-src:
 	mkdir -p build/cmake
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/cmake/cmake-$(cmake-version).tar.gz build/cmake/cmake-source.tar.gz
+	
+.ONESHELL:
+cmake: download-cmake-src cmake.dockerfile builder-image prepare
 	cd build/cmake
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/cmake/cmake-$(cmake-version).tar.gz cmake-source.tar.gz
 	docker build -t cmake:v$(cmake-version) -f ../../cmake.dockerfile .
 	{ \
 		set -xe ; \
@@ -139,8 +170,9 @@ upload-cmake: cmake
 	aws s3 cp --no-overwrite output/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-$(host-arch)-$(commit).tar.xz
 
-make-all: musl-cross python gdb cmake gcc-11 gcc
-upload-all: upload-musl-cross upload-python upload-gdb upload-cmake gcc-11 gcc
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-cmake-src dewnload-openssl-src download-gcc-11-src download-gcc-src
+build-all: musl-cross python gdb cmake openssl gcc-11 gcc
+upload-all: upload-musl-cross upload-python upload-gdb upload-cmake upload-openssl upload-gcc-11 upload-gcc
 
 .ONESHELL:
 update-hashes:

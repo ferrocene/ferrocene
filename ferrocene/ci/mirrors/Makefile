@@ -60,7 +60,7 @@ builder-image: gcc
 	mkdir -p build/builder
 	cd build/builder
 	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
-	docker build --tag centos7-builder --file builder.dockerfile .
+	docker build --tag centos7-builder --file ../../builder.dockerfile .
 
 .ONESHELL:
 musl-cross: musl.dockerfile builder-image prepare
@@ -89,7 +89,7 @@ python: python.dockerfile builder-image prepare
 	mkdir -p build/python
 	cd build/python
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/python/Python-$(python-version).tar.xz python-source.tar.xz
-	docker build -t python:v$(python-version) -f ../../python.dockerfile .
+	docker build -t python:v$(python-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../python.dockerfile .
 	{ \
 		set -xe ; \
 		id=$$(docker create python:v$(python-version)) ; \
@@ -103,12 +103,12 @@ upload-python: python
 		s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-$(host-arch)-$(commit).tar.xz
 
 .ONESHELL:
-gdb: gdb.dockerfile builder python-image prepare
+gdb: gdb.dockerfile builder-image python prepare
 	mkdir -p build/gdb
 	cd build/gdb
 	cp ../../output/python-$(python-version)-$(host-arch)-$(commit).tar.xz python.tar.xz
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gdb/gdb_$(gdb-version).orig.tar.xz gdb-source.tar.xz
-	docker build -t gdb:v$(gdb-version) -f ../../gdb.dockerfile .
+	docker build -t gdb:v$(gdb-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../gdb.dockerfile .
 	{ \
 		set -xe ; \
 		id=$$(docker create gdb:v$(gdb-version)) ; \
@@ -175,4 +175,4 @@ clean-docker:
 	docker image rm gdb:v$(gdb-version)
 	docker image rm python:v$(python-version)
 
-clean-all: clean-build clean-output clean-docker
+clean-all: clean-build clean-output

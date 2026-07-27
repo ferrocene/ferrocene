@@ -40,16 +40,16 @@ upload-arm-eabi-none: repack-arm-eabi-none
 
 
 download-arm-aarch64-none-toolchain:
-	mkdir -p build/arm-eabi-none
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-eabi-none/arm-gnu-toolchain.tar.xz
+	mkdir -p build/arm-aarch64-none
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-aarch64-none/arm-gnu-toolchain.tar.xz
 
 .ONESHELL:
-repack-arm-aarch64-none: download-arm-eabi-none-toolchain
+repack-arm-aarch64-none: download-arm-aarch64-none-toolchain
 	set -xe
-	cd build/arm-eabi-none
-	docker build --tag arm-eabi-none:$(arm-gnu-toolchain) --file ../../repack-arm-toolchain.dockerfile .
+	cd build/arm-aarch64-none
+	docker build --tag arm-aarch64-none:$(arm-gnu-toolchain) --file ../../repack-arm-toolchain.dockerfile .
 	{ \
-		id=$$(docker create arm-eabi-none:$(arm-gnu-toolchain)) ; \
+		id=$$(docker create arm-aarch64-none:$(arm-gnu-toolchain)) ; \
 		docker cp $$id://repacked/arm-gnu-toolchain-repacked.tar.xz  \
 			../../output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz ; \
 		docker rm $$id ; \

@@ -7,7 +7,7 @@ RUN yum -y install \
 COPY gcc-11.tar.xz /gcc-11.tar.xz
 RUN mkdir -p /opt/local/gcc-11
 
-RUN tar -xf /gcc-11.tar.xz -C /opt/local/gcc-11 --strip-components=3
+RUN tar -xf /gcc-11.tar.xz -C /opt/local/gcc-11
 ENV PATH=/opt/local/gcc-11/bin:$PATH
 
 COPY gcc-with-dependencies.tar.xz /gcc-with-dependencies.tar.xz
@@ -34,4 +34,4 @@ EOT
 
 RUN make
 RUN make install-strip
-RUN tar cJf /gcc-build/gcc.tar.xz /opt/local/gcc
+RUN tar cJf /gcc-build/gcc.tar.xz -C /opt/local/gcc --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

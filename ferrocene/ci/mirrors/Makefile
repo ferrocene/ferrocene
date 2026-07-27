@@ -36,7 +36,7 @@ gcc-11: prepare download-gcc-11-src
 
 upload-gcc-11: gcc-11
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz
+		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz
 
 download-gcc-src:
 	mkdir -p build/gcc
@@ -57,7 +57,7 @@ gcc: download-gcc-src gcc-11
 
 upload-gcc: gcc
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
+		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
 
 dewnload-openssl-src:
 	mkdir -p build/openssl

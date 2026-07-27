@@ -22,7 +22,7 @@ download-arm-eabi-none-toolchain:
 	mkdir -p build/arm-eabi-none
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi.tar.xz build/arm-eabi-none/arm-gnu-toolchain.tar.xz
 
-.ONESHELL
+.ONESHELL:
 repack-arm-eabi-none: download-arm-eabi-none-toolchain
 	set -xe
 	cd build/arm-eabi-none
@@ -43,7 +43,7 @@ download-arm-aarch64-none-toolchain:
 	mkdir -p build/arm-eabi-none
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-eabi-none/arm-gnu-toolchain.tar.xz
 
-.ONESHELL
+.ONESHELL:
 repack-arm-aarch64-none: download-arm-eabi-none-toolchain
 	set -xe
 	cd build/arm-eabi-none

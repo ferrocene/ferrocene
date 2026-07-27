@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
     local = subcommands.add_parser("local")
     local.add_argument("document_name")
-    local.add_argument("local_tarball", nargs='?')
+    local.add_argument("local_tarball", nargs="?")
     local.set_defaults(func=diff_local_tarball)
 
     bors = subcommands.add_parser("bors")

@@ -59,12 +59,12 @@ upload-gcc: gcc
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
 
-dewnload-openssl-src:
+download-openssl-src:
 	mkdir -p build/openssl
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/openssl/openssl-$(openssl-version).tar.gz build/openssl/openssl.tar.gz
 
 .ONESHELL:
-openssl: dewnload-openssl-src gcc
+openssl: download-openssl-src gcc
 	set -xe
 	cd build/openssl
 	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
@@ -75,6 +75,11 @@ openssl: dewnload-openssl-src gcc
 			../../output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
+
+upload-openssl: openssl
+	aws s3 cp --no-overwrite output/output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz
+
 
 .ONESHELL:
 builder-image: builder.dockerfile gcc openssl
@@ -164,6 +169,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
 
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
@@ -172,6 +178,8 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-x86_64-$(commit).tar.xz hashes/
 	# cmake is taken from the binary distribution and just manually uploaded, so it's never rebuilt and carries no commit identifier
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-x86_64.tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
+
 	cd hashes; sha256sum *tar.xz > ../hashes.txt
 
 clean-build:

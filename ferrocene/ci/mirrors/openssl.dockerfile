@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
 FROM --platform=$TARGETPLATFORM centos7-base AS build
 
 RUN yum -y install perl-core

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
 FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
 
 # CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.

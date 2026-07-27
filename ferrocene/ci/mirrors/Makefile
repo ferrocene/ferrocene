@@ -198,9 +198,9 @@ upload-gdb: gdb
 		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
 
-download-all-src: download-musl-cross-src download-python-src download-gdb-src download-openssl-src download-gcc-11-src download-gcc-src
-build-all: musl-cross python gdb openssl gcc-11 gcc
-upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc-11 upload-gcc
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-openssl-src download-gcc-11-src download-gcc-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
+build-all: musl-cross python gdb openssl gcc-11 gcc repack-arm-aarch64-none repack-arm-eabi-none
+upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc-11 upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
 
 .ONESHELL:
 update-hashes:

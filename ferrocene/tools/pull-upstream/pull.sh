@@ -342,13 +342,13 @@ then
                 mergiraf solve --keep-backup=false "$file" || true
             done
 
-            # If mergiraf wasn't able to make any progress on the conflict, or if it
-            # encountered an error during the resolution, it will leave the input
-            # file unchanged. Therefore, everything that was changed is good to add.
-            git add .
-
             # Only commit if mergiraf has resolved anything
             if git status --porcelain=v1 | grep "^ M " >/dev/null; then
+                # If mergiraf wasn't able to make any progress on the conflict, or if it
+                # encountered an error during the resolution, it will leave the input
+                # file unchanged. Therefore, everything that was changed is good to add.
+                git add .
+
                 git commit -F- <<EOF
 resolve conflicts using mergiraf
 

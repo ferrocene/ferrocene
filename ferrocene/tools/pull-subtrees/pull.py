@@ -282,6 +282,8 @@ def update_subtree(repo_root, subtree):
             run(
                 [
                     "git",
+                    "-c",
+                    "merge.conflictstyle=diff3",
                     "subtree",
                     "merge",
                     "--prefix",

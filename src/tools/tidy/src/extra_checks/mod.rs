@@ -471,11 +471,20 @@ fn run_ruff(
     let mut cache_dir = outdir.to_owned();
     cache_dir.extend(RUFF_CACHE_PATH);
 
+    // Ferrocene addition
+    let vendored_library_path = root_path.join("ferrocene").join("library");
+
     cfg_args_ruff.extend([
         "--config".as_ref(),
         cfg_path.as_os_str(),
         "--cache-dir".as_ref(),
         cache_dir.as_os_str(),
+        // Ferrocene addition: The vendored crates in `ferrocene/library` may have their own
+        // formatting rules, which differ from the main rust repository's rules.
+        // In particular, libc's python formatting rules are different.
+        // So skip these directories
+        "--exclude".as_ref(),
+        vendored_library_path.as_os_str(),
     ]);
 
     if file_args_ruff.is_empty() {

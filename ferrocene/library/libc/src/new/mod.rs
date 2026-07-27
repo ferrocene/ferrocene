@@ -173,6 +173,8 @@ cfg_if! {
 // Per-OS headers we export
 cfg_if! {
     if #[cfg(target_os = "android")] {
+        use bionic_libc::kernel_uapi::linux;
+        pub use linux::types::*;
         pub use sys::socket::*;
     } else if #[cfg(target_os = "linux")] {
         pub use linux::can::bcm::*;
@@ -180,6 +182,8 @@ cfg_if! {
         pub use linux::can::j1939::*;
         pub use linux::can::netlink::*;
         pub use linux::can::raw::*;
+        pub use linux::futex::*;
+        pub use linux::if_addr::*;
         pub use linux::if_link::*;
         pub use linux::if_packet::*;
         pub use linux::keyctl::*;
@@ -187,14 +191,22 @@ cfg_if! {
         pub use linux::mount::*;
         pub use linux::netlink::*;
         pub use linux::pidfd::*;
+        pub use linux::sctp::*;
+        pub use linux::tls::*;
+        pub use linux::types::*;
         #[cfg(target_env = "gnu")]
         pub use net::route::*;
     } else if #[cfg(target_vendor = "apple")] {
+        pub use net::bpf::*;
+        pub use netinet6::in6_var::*;
         pub use pthread_::introspection::*;
         pub use pthread_::pthread_spis::*;
         pub use pthread_::spawn::*;
         pub use pthread_::stack_np::*;
         pub use signal::*;
+        pub use sys::ioccom::*;
+        pub use sys::sockio::*;
+        pub use sys::ttycom::*;
     } else if #[cfg(target_os = "l4re")] {
         pub use l4re::packet::*;
     } else if #[cfg(target_os = "netbsd")] {
@@ -214,7 +226,11 @@ cfg_if! {
         pub use net::bpf::*;
         pub use net::if_::*;
     } else if #[cfg(target_os = "freebsd")] {
+        pub use net::dlt::*;
+        pub use netinet6::in6_var::*;
         pub use sys::file::*;
+        pub use sys::ioccom::*;
+        pub use sys::socket::*;
     }
 }
 

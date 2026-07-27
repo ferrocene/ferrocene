@@ -32,14 +32,6 @@ cfg_if! {
 
 pub type iconv_t = *mut c_void;
 
-cfg_if! {
-    if #[cfg(not(target_env = "gnu"))] {
-        extern_ty! {
-            pub enum fpos64_t {} // FIXME(linux): fill this out with a struct
-        }
-    }
-}
-
 s! {
     pub struct glob_t {
         pub gl_pathc: size_t,
@@ -683,6 +675,9 @@ pub const EI_CLASS: usize = 4;
 pub const ELFCLASSNONE: u8 = 0;
 pub const ELFCLASS32: u8 = 1;
 pub const ELFCLASS64: u8 = 2;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const ELFCLASSNUM: usize = 3;
 
 pub const EI_DATA: usize = 5;
@@ -798,6 +793,7 @@ pub const EM_M32R: u16 = 88;
 pub const EM_MN10300: u16 = 89;
 pub const EM_MN10200: u16 = 90;
 pub const EM_PJ: u16 = 91;
+#[cfg(not(target_env = "uclibc"))]
 pub const EM_OPENRISC: u16 = 92;
 #[cfg(target_env = "uclibc")]
 pub const EM_OR1K: u16 = 92;
@@ -812,6 +808,9 @@ pub const EM_ALPHA: u16 = 0x9026;
 // elf.h - Legal values for e_version (version).
 pub const EV_NONE: u32 = 0;
 pub const EV_CURRENT: u32 = 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const EV_NUM: u32 = 2;
 
 // elf.h - Legal values for p_type (segment type).
@@ -875,6 +874,7 @@ pub const AT_EXECFN: c_ulong = 31;
 // defined in arch/<arch>/include/uapi/asm/auxvec.h but has the same value
 // wherever it is defined.
 pub const AT_SYSINFO_EHDR: c_ulong = 33;
+#[cfg(not(target_env = "uclibc"))]
 pub const AT_MINSIGSTKSZ: c_ulong = 51;
 
 pub const GLOB_ERR: c_int = 1 << 0;
@@ -929,7 +929,9 @@ pub const PTHREAD_MUTEX_NORMAL: c_int = 0;
 pub const PTHREAD_MUTEX_RECURSIVE: c_int = 1;
 pub const PTHREAD_MUTEX_ERRORCHECK: c_int = 2;
 pub const PTHREAD_MUTEX_DEFAULT: c_int = PTHREAD_MUTEX_NORMAL;
+#[cfg(not(target_os = "l4re"))]
 pub const PTHREAD_MUTEX_STALLED: c_int = 0;
+#[cfg(not(target_os = "l4re"))]
 pub const PTHREAD_MUTEX_ROBUST: c_int = 1;
 pub const PTHREAD_PRIO_NONE: c_int = 0;
 pub const PTHREAD_PRIO_INHERIT: c_int = 1;
@@ -1125,7 +1127,7 @@ pub const PR_SET_MM_MAP: c_int = 14;
 pub const PR_SET_MM_MAP_SIZE: c_int = 15;
 
 pub const PR_SET_PTRACER: c_int = 0x59616d61;
-pub const PR_SET_PTRACER_ANY: c_ulong = 0xffffffffffffffff;
+pub const PR_SET_PTRACER_ANY: c_ulong = (-1 as c_long) as c_ulong;
 
 pub const PR_SET_CHILD_SUBREAPER: c_int = 36;
 pub const PR_GET_CHILD_SUBREAPER: c_int = 37;
@@ -1160,7 +1162,11 @@ pub const PR_SCHED_CORE_GET: c_int = 0;
 pub const PR_SCHED_CORE_CREATE: c_int = 1;
 pub const PR_SCHED_CORE_SHARE_TO: c_int = 2;
 pub const PR_SCHED_CORE_SHARE_FROM: c_int = 3;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const PR_SCHED_CORE_MAX: c_int = 4;
+
 pub const PR_SCHED_CORE_SCOPE_THREAD: c_int = 0;
 pub const PR_SCHED_CORE_SCOPE_THREAD_GROUP: c_int = 1;
 pub const PR_SCHED_CORE_SCOPE_PROCESS_GROUP: c_int = 2;
@@ -1313,6 +1319,9 @@ pub const RT_CLASS_UNSPEC: u8 = 0;
 pub const RT_CLASS_DEFAULT: u8 = 253;
 pub const RT_CLASS_MAIN: u8 = 254;
 pub const RT_CLASS_LOCAL: u8 = 255;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const RT_CLASS_MAX: u8 = 255;
 
 pub const MAX_ADDR_LEN: usize = 7;
@@ -1425,10 +1434,11 @@ pub const NT_LWPSTATUS: c_int = 16;
 pub const NT_LWPSINFO: c_int = 17;
 pub const NT_PRFPXREG: c_int = 20;
 
-pub const MS_NOUSER: c_ulong = 0xffffffff80000000;
+// FIXME(1.0): C uses an unsigned int here.
+pub const MS_NOUSER: c_ulong = 1 << 31;
 
 f! {
-    pub fn CMSG_NXTHDR(
+    pub unsafe fn CMSG_NXTHDR(
         mhdr: *const crate::msghdr,
         cmsg: *const crate::cmsghdr,
     ) -> *mut crate::cmsghdr {
@@ -1464,35 +1474,35 @@ f! {
         }
     }
 
-    pub fn CPU_ALLOC_SIZE(count: c_int) -> size_t {
+    pub unsafe fn CPU_ALLOC_SIZE(count: c_int) -> size_t {
         let _dummy: cpu_set_t = mem::zeroed();
         let size_in_bits = 8 * size_of_val(&_dummy.bits[0]);
         ((count as size_t + size_in_bits - 1) / 8) as size_t
     }
 
-    pub fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
+    pub unsafe fn CPU_ZERO(cpuset: &mut cpu_set_t) -> () {
         cpuset.bits.fill(0);
     }
 
-    pub fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
+    pub unsafe fn CPU_SET(cpu: usize, cpuset: &mut cpu_set_t) -> () {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] |= 1 << offset;
     }
 
-    pub fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
+    pub unsafe fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] &= !(1 << offset);
     }
 
-    pub fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
+    pub unsafe fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         0 != (cpuset.bits[idx] & (1 << offset))
     }
 
-    pub fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
+    pub unsafe fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
         let mut s: u32 = 0;
         let size_of_mask = size_of_val(&cpuset.bits[0]);
         for i in &cpuset.bits[..(size / size_of_mask)] {
@@ -1501,61 +1511,61 @@ f! {
         s as c_int
     }
 
-    pub fn CPU_COUNT(cpuset: &cpu_set_t) -> c_int {
+    pub unsafe fn CPU_COUNT(cpuset: &cpu_set_t) -> c_int {
         CPU_COUNT_S(size_of::<cpu_set_t>(), cpuset)
     }
 
-    pub fn CPU_EQUAL(set1: &cpu_set_t, set2: &cpu_set_t) -> bool {
+    pub unsafe fn CPU_EQUAL(set1: &cpu_set_t, set2: &cpu_set_t) -> bool {
         set1.bits == set2.bits
     }
 
-    pub fn IPTOS_TOS(tos: u8) -> u8 {
+    pub unsafe fn IPTOS_TOS(tos: u8) -> u8 {
         tos & IPTOS_TOS_MASK
     }
 
-    pub fn IPTOS_PREC(tos: u8) -> u8 {
+    pub unsafe fn IPTOS_PREC(tos: u8) -> u8 {
         tos & IPTOS_PREC_MASK
     }
 
-    pub fn RT_TOS(tos: u8) -> u8 {
+    pub unsafe fn RT_TOS(tos: u8) -> u8 {
         tos & crate::IPTOS_TOS_MASK
     }
 
-    pub fn RT_ADDRCLASS(flags: u32) -> u32 {
+    pub unsafe fn RT_ADDRCLASS(flags: u32) -> u32 {
         flags >> 23
     }
 
-    pub fn RT_LOCALADDR(flags: u32) -> bool {
+    pub unsafe fn RT_LOCALADDR(flags: u32) -> bool {
         (flags & RTF_ADDRCLASSMASK) == (RTF_LOCAL | RTF_INTERFACE)
     }
 
-    pub fn ELF32_R_SYM(val: Elf32_Word) -> Elf32_Word {
+    pub unsafe fn ELF32_R_SYM(val: Elf32_Word) -> Elf32_Word {
         val >> 8
     }
 
-    pub fn ELF32_R_TYPE(val: Elf32_Word) -> Elf32_Word {
+    pub unsafe fn ELF32_R_TYPE(val: Elf32_Word) -> Elf32_Word {
         val & 0xff
     }
 
-    pub fn ELF32_R_INFO(sym: Elf32_Word, t: Elf32_Word) -> Elf32_Word {
+    pub unsafe fn ELF32_R_INFO(sym: Elf32_Word, t: Elf32_Word) -> Elf32_Word {
         sym << (8 + t) & 0xff
     }
 
-    pub fn ELF64_R_SYM(val: Elf64_Xword) -> Elf64_Xword {
+    pub unsafe fn ELF64_R_SYM(val: Elf64_Xword) -> Elf64_Xword {
         val >> 32
     }
 
-    pub fn ELF64_R_TYPE(val: Elf64_Xword) -> Elf64_Xword {
+    pub unsafe fn ELF64_R_TYPE(val: Elf64_Xword) -> Elf64_Xword {
         val & 0xffffffff
     }
 
-    pub fn ELF64_R_INFO(sym: Elf64_Xword, t: Elf64_Xword) -> Elf64_Xword {
+    pub unsafe fn ELF64_R_INFO(sym: Elf64_Xword, t: Elf64_Xword) -> Elf64_Xword {
         sym << (32 + t)
     }
 }
 
 safe_f! {
-    pub const fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
+    pub const safe fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
         let major = major as crate::dev_t;
         let minor = minor as crate::dev_t;
         let mut dev = 0;
@@ -1566,14 +1576,14 @@ safe_f! {
         dev
     }
 
-    pub const fn major(dev: crate::dev_t) -> c_uint {
+    pub const safe fn major(dev: crate::dev_t) -> c_uint {
         let mut major = 0;
         major |= (dev & 0x00000000000fff00) >> 8;
         major |= (dev & 0xfffff00000000000) >> 32;
         major as c_uint
     }
 
-    pub const fn minor(dev: crate::dev_t) -> c_uint {
+    pub const safe fn minor(dev: crate::dev_t) -> c_uint {
         let mut minor = 0;
         minor |= (dev & 0x00000000000000ff) >> 0;
         minor |= (dev & 0x00000ffffff00000) >> 12;
@@ -1720,15 +1730,6 @@ extern "C" {
 
     pub fn mprotect(addr: *mut c_void, len: size_t, prot: c_int) -> c_int;
     pub fn __errno_location() -> *mut c_int;
-
-    // Not available now on Android
-    pub fn mremap(
-        addr: *mut c_void,
-        len: size_t,
-        new_len: size_t,
-        flags: c_int,
-        ...
-    ) -> *mut c_void;
 
     #[cfg_attr(gnu_time_bits64, link_name = "__glob64_time64")]
     #[cfg_attr(

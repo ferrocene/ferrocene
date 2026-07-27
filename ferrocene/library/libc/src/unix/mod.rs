@@ -14,6 +14,7 @@ pub type intptr_t = isize;
 pub type uintptr_t = usize;
 pub type ssize_t = isize;
 
+#[cfg(not(target_os = "nuttx"))]
 pub type pid_t = i32;
 pub type in_addr_t = u32;
 pub type in_port_t = u16;
@@ -38,8 +39,12 @@ cfg_if! {
 }
 
 extern_ty! {
-    pub enum DIR {}
+    pub type DIR;
 }
+
+// Deprecated impls: see #5296
+unsafe impl Send for DIR {}
+unsafe impl Sync for DIR {}
 
 #[cfg(not(target_os = "nuttx"))]
 pub type locale_t = *mut c_void;
@@ -235,8 +240,7 @@ pub const SIG_ERR: sighandler_t = !0 as sighandler_t;
 
 cfg_if! {
     if #[cfg(all(
-        not(target_os = "nto"),
-        not(target_os = "qnx"),
+        not(any(target_os = "nto", target_os = "qnx")),
         not(target_os = "aix"),
         not(target_os = "espidf")
     ))] {
@@ -257,7 +261,11 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(not(any(target_os = "nto", target_os = "qnx", target_os = "l4re")))] {
+    if #[cfg(not(any(
+        target_os = "nto",
+        target_os = "qnx",
+        target_os = "l4re"
+    )))] {
         pub const USRQUOTA: c_int = 0;
         pub const GRPQUOTA: c_int = 1;
     }
@@ -378,6 +386,7 @@ cfg_if! {
     if #[cfg(any(
         target_os = "macos",
         target_os = "freebsd",
+        target_os = "dragonfly",
         target_os = "android",
         target_os = "openbsd",
         target_os = "cygwin",
@@ -393,6 +402,7 @@ cfg_if! {
     if #[cfg(any(
         target_os = "macos",
         target_os = "freebsd",
+        target_os = "dragonfly",
         target_os = "android",
         target_os = "openbsd",
         target_os = "netbsd",
@@ -413,6 +423,9 @@ extern "C" {
     pub static in6addr_any: in6_addr;
 }
 
+// FIXME(1.0): We want to remove these directives and instead expect that no-std users add their
+// own link configuration when required, rather than unconditionally linking everything that may
+// possibly be needed.
 cfg_if! {
     if #[cfg(any(
         target_os = "l4re",
@@ -497,7 +510,17 @@ cfg_if! {
         #[link(name = "dl", cfg(not(target_feature = "crt-static")))]
         #[link(name = "c", cfg(not(target_feature = "crt-static")))]
         extern "C" {}
-    } else if #[cfg(any(target_env = "musl", target_env = "ohos"))] {
+    } else if #[cfg(libc_pauthtest)] {
+        #[link(name = "c")]
+        #[link(name = "m")]
+        #[link(name = "rt")]
+        #[link(name = "pthread")]
+        #[link(name = "dl")]
+        extern "C" {}
+    } else if #[cfg(any(
+        all(target_env = "musl", not(libc_pauthtest)),
+        target_env = "ohos"
+    ))] {
         #[cfg_attr(
             feature = "rustc-dep-of-std",
             link(
@@ -590,13 +613,13 @@ cfg_if! {
 cfg_if! {
     if #[cfg(not(all(target_os = "linux", target_env = "gnu")))] {
         extern_ty! {
-            pub enum fpos_t {} // FIXME(unix): fill this out with a struct
+            pub type fpos_t; // FIXME(unix): fill this out with a struct
         }
     }
 }
 
 extern_ty! {
-    pub enum FILE {}
+    pub type FILE;
 }
 
 extern "C" {
@@ -2106,16 +2129,16 @@ extern "C" {
 safe_f! {
     // It seems htonl, etc are macros on macOS. So we have to reimplement them. So let's
     // reimplement them for all UNIX platforms
-    pub const fn htonl(hostlong: u32) -> u32 {
+    pub const safe fn htonl(hostlong: u32) -> u32 {
         u32::to_be(hostlong)
     }
-    pub const fn htons(hostshort: u16) -> u16 {
+    pub const safe fn htons(hostshort: u16) -> u16 {
         u16::to_be(hostshort)
     }
-    pub const fn ntohl(netlong: u32) -> u32 {
+    pub const safe fn ntohl(netlong: u32) -> u32 {
         u32::from_be(netlong)
     }
-    pub const fn ntohs(netshort: u16) -> u16 {
+    pub const safe fn ntohs(netshort: u16) -> u16 {
         u16::from_be(netshort)
     }
 }
@@ -2231,13 +2254,13 @@ cfg_if! {
                 all(target_os = "freebsd", not(any(freebsd11, freebsd10))),
                 link_name = "readdir_r@FBSD_1.5"
             )]
-            #[allow(non_autolinks)] // FIXME(docs): `<>` breaks line length limit.
             /// The 64-bit libc on Solaris and illumos only has readdir_r. If a
             /// 32-bit Solaris or illumos target is ever created, it should use
             /// __posix_readdir_r. See libc(3LIB) on Solaris or illumos:
-            /// https://illumos.org/man/3lib/libc
-            /// https://docs.oracle.com/cd/E36784_01/html/E36873/libc-3lib.html
-            /// https://www.unix.com/man-page/opensolaris/3LIB/libc/
+            ///
+            /// * <https://illumos.org/man/3lib/libc>
+            /// * <https://docs.oracle.com/cd/E36784_01/html/E36873/libc-3lib.html>
+            /// * <https://www.unix.com/man-page/opensolaris/3LIB/libc/>
             #[cfg_attr(gnu_file_offset_bits64, link_name = "readdir64_r")]
             pub fn readdir_r(
                 dirp: *mut crate::DIR,
@@ -2323,10 +2346,7 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(any(
-        target_os = "aix",
-        target_os = "qnx",
-    ))] {
+    if #[cfg(any(target_os = "aix", target_os = "qnx",))] {
         extern "C" {
             pub fn cfsetspeed(termios: *mut crate::termios, speed: crate::speed_t) -> c_int;
         }

@@ -1,4 +1,4 @@
-FROM ubuntu:25.04
+FROM ubuntu:26.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xz-utils
 
 ARG MUSL_VERSION
-COPY install-musl.sh /
-RUN /install-musl.sh x86_64 "$MUSL_VERSION"
+COPY . /ci
+RUN ci/install-musl.sh x86_64 "$MUSL_VERSION"
 
 ENV PATH=$PATH:/musl-x86_64/bin:/rust/bin \
     EXTRA_RUSTFLAGS="-L /musl-x86_64/lib"

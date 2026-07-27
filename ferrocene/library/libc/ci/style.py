@@ -9,7 +9,6 @@ from difflib import unified_diff
 from glob import iglob
 from pathlib import Path
 
-
 FMT_DIRS = ["src", "ci"]
 IGNORE_FILES = [
     # Too much special syntax that we don't want to format
@@ -87,6 +86,14 @@ def fmt_one(fpath: Path, check_only: bool):
     # syntax. Replace it with a dummy name.
     text = re.sub(r"enum #anon\b", r"enum _fmt_anon", text)
 
+    # `extern_ty!` can be formatted as an extern block.
+    text = re.sub(r"extern_ty!", r'extern "extern-ty-macro"', text)
+
+    # Our `f!` macro accepts the `safe` keyword. This isn't standard Rust (outside of
+    # extern blocks) so rustfmt rejects it. We don't use `async` anywhere, though, so it
+    # works as a stand-in.
+    text = re.sub(r"\bsafe\s*fn", r"async fn", text)
+
     # If enum variants are annotated with `pub`, rustfmt erases the visibility. To get
     # around this we first match on all enums to extract their bodies, then look for `pub`
     # visibility indicators. If found, these get stashed in a comment on the preceding
@@ -126,6 +133,8 @@ def fmt_one(fpath: Path, check_only: bool):
     text = re.sub(r"cfg_tmp!\(\[(.*?)\]\)", r"#[cfg(\1)]", text, flags=re.DOTALL)
     text = re.sub(r"enum _fmt_anon", r"enum #anon", text)
     text = re.sub(r"/\* FMT-VIS (.*) END-FMT-VIS \*/\n\s*", r"\1 ", text)
+    text = re.sub(r'extern "extern-ty-macro"', r"extern_ty!", text)
+    text = re.sub(r"async fn", r"safe fn", text)
 
     # And write the formatted file back
     fpath.write_text(text)

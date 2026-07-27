@@ -1,6 +1,12 @@
 //! Linux-specific definitions for linux-like values
 use crate::prelude::*;
 use crate::{
+    __s16,
+    __s32,
+    __u16,
+    __u32,
+    __u64,
+    __u8,
     sock_filter,
     _IO,
     _IOR,
@@ -25,15 +31,6 @@ pub type pthread_once_t = c_int;
 pub type pthread_spinlock_t = c_int;
 pub type __kernel_fsid_t = __c_anonymous__kernel_fsid_t;
 pub type __kernel_clockid_t = c_int;
-
-pub type __u8 = c_uchar;
-pub type __u16 = c_ushort;
-pub type __s16 = c_short;
-pub type __u32 = c_uint;
-pub type __s32 = c_int;
-
-// linux/sctp.h
-pub type sctp_assoc_t = __s32;
 
 pub type eventfd_t = u64;
 
@@ -390,134 +387,6 @@ s! {
         index: c_uint,
         flags: c_uint,
         rsv: [c_uint; 2],
-    }
-
-    // linux/sctp.h
-
-    pub struct sctp_initmsg {
-        pub sinit_num_ostreams: __u16,
-        pub sinit_max_instreams: __u16,
-        pub sinit_max_attempts: __u16,
-        pub sinit_max_init_timeo: __u16,
-    }
-
-    pub struct sctp_sndrcvinfo {
-        pub sinfo_stream: __u16,
-        pub sinfo_ssn: __u16,
-        pub sinfo_flags: __u16,
-        pub sinfo_ppid: __u32,
-        pub sinfo_context: __u32,
-        pub sinfo_timetolive: __u32,
-        pub sinfo_tsn: __u32,
-        pub sinfo_cumtsn: __u32,
-        pub sinfo_assoc_id: crate::sctp_assoc_t,
-    }
-
-    pub struct sctp_sndinfo {
-        pub snd_sid: __u16,
-        pub snd_flags: __u16,
-        pub snd_ppid: __u32,
-        pub snd_context: __u32,
-        pub snd_assoc_id: crate::sctp_assoc_t,
-    }
-
-    pub struct sctp_rcvinfo {
-        pub rcv_sid: __u16,
-        pub rcv_ssn: __u16,
-        pub rcv_flags: __u16,
-        pub rcv_ppid: __u32,
-        pub rcv_tsn: __u32,
-        pub rcv_cumtsn: __u32,
-        pub rcv_context: __u32,
-        pub rcv_assoc_id: crate::sctp_assoc_t,
-    }
-
-    pub struct sctp_nxtinfo {
-        pub nxt_sid: __u16,
-        pub nxt_flags: __u16,
-        pub nxt_ppid: __u32,
-        pub nxt_length: __u32,
-        pub nxt_assoc_id: crate::sctp_assoc_t,
-    }
-
-    pub struct sctp_prinfo {
-        pub pr_policy: __u16,
-        pub pr_value: __u32,
-    }
-
-    pub struct sctp_authinfo {
-        pub auth_keynumber: __u16,
-    }
-
-    // linux/tls.h
-
-    pub struct tls_crypto_info {
-        pub version: __u16,
-        pub cipher_type: __u16,
-    }
-
-    pub struct tls12_crypto_info_aes_gcm_128 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_AES_GCM_128_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_AES_GCM_128_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_AES_GCM_128_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_AES_GCM_128_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_aes_gcm_256 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_AES_GCM_256_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_AES_GCM_256_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_AES_GCM_256_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_AES_GCM_256_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_aes_ccm_128 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_AES_CCM_128_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_AES_CCM_128_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_AES_CCM_128_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_AES_CCM_128_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_chacha20_poly1305 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_CHACHA20_POLY1305_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_CHACHA20_POLY1305_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_CHACHA20_POLY1305_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_CHACHA20_POLY1305_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_sm4_gcm {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_SM4_GCM_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_SM4_GCM_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_SM4_GCM_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_SM4_GCM_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_sm4_ccm {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_SM4_CCM_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_SM4_CCM_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_SM4_CCM_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_SM4_CCM_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_aria_gcm_128 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_ARIA_GCM_128_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_ARIA_GCM_128_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_ARIA_GCM_128_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_ARIA_GCM_128_REC_SEQ_SIZE],
-    }
-
-    pub struct tls12_crypto_info_aria_gcm_256 {
-        pub info: tls_crypto_info,
-        pub iv: [c_uchar; TLS_CIPHER_ARIA_GCM_256_IV_SIZE],
-        pub key: [c_uchar; TLS_CIPHER_ARIA_GCM_256_KEY_SIZE],
-        pub salt: [c_uchar; TLS_CIPHER_ARIA_GCM_256_SALT_SIZE],
-        pub rec_seq: [c_uchar; TLS_CIPHER_ARIA_GCM_256_REC_SEQ_SIZE],
     }
 
     // linux/wireless.h
@@ -967,8 +836,7 @@ s! {
         repr(align(8))
     )]
     pub struct pthread_mutex_t {
-        #[doc(hidden)]
-        size: [c_char; crate::__SIZEOF_PTHREAD_MUTEX_T],
+        pub(crate) size: [c_char; crate::__SIZEOF_PTHREAD_MUTEX_T],
     }
 
     #[cfg_attr(
@@ -1125,6 +993,27 @@ s! {
         pub ifi_index: c_int,
         pub ifi_flags: c_uint,
         pub ifi_change: c_uint,
+    }
+
+    pub struct rtattr {
+        pub rta_len: c_ushort,
+        pub rta_type: c_ushort,
+    }
+
+    // netdb.h
+    pub struct netent {
+        pub n_name: *mut c_char,
+        pub n_aliases: *mut *mut c_char,
+        pub n_addrtype: c_int,
+        pub n_net: u32,
+    }
+}
+
+cfg_if! {
+    if #[cfg(not(target_env = "gnu"))] {
+        extern_ty! {
+            pub type fpos64_t; // FIXME(linux): fill this out with a struct
+        }
     }
 }
 
@@ -1287,31 +1176,6 @@ pub const AT_HANDLE_FID: c_int = 0x200;
 pub const AT_HANDLE_MNT_ID_UNIQUE: c_int = 0x001;
 pub const AT_HANDLE_CONNECTABLE: c_int = 0x002;
 
-// linux/if_addr.h
-pub const IFA_UNSPEC: c_ushort = 0;
-pub const IFA_ADDRESS: c_ushort = 1;
-pub const IFA_LOCAL: c_ushort = 2;
-pub const IFA_LABEL: c_ushort = 3;
-pub const IFA_BROADCAST: c_ushort = 4;
-pub const IFA_ANYCAST: c_ushort = 5;
-pub const IFA_CACHEINFO: c_ushort = 6;
-pub const IFA_MULTICAST: c_ushort = 7;
-pub const IFA_FLAGS: c_ushort = 8;
-
-pub const IFA_F_SECONDARY: u32 = 0x01;
-pub const IFA_F_TEMPORARY: u32 = 0x01;
-pub const IFA_F_NODAD: u32 = 0x02;
-pub const IFA_F_OPTIMISTIC: u32 = 0x04;
-pub const IFA_F_DADFAILED: u32 = 0x08;
-pub const IFA_F_HOMEADDRESS: u32 = 0x10;
-pub const IFA_F_DEPRECATED: u32 = 0x20;
-pub const IFA_F_TENTATIVE: u32 = 0x40;
-pub const IFA_F_PERMANENT: u32 = 0x80;
-pub const IFA_F_MANAGETEMPADDR: u32 = 0x100;
-pub const IFA_F_NOPREFIXROUTE: u32 = 0x200;
-pub const IFA_F_MCAUTOJOIN: u32 = 0x400;
-pub const IFA_F_STABLE_PRIVACY: u32 = 0x800;
-
 // linux/fs.h
 
 // Flags for preadv2/pwritev2
@@ -1338,6 +1202,7 @@ pub const MPOL_F_NUMA_BALANCING: c_int = 1 << 13;
 pub const MPOL_F_RELATIVE_NODES: c_int = 1 << 14;
 pub const MPOL_F_STATIC_NODES: c_int = 1 << 15;
 
+#[cfg(not(target_env = "gnu"))] // defined in `new/glibc`
 pub const PTHREAD_MUTEX_INITIALIZER: crate::pthread_mutex_t = crate::pthread_mutex_t {
     size: [0; crate::__SIZEOF_PTHREAD_MUTEX_T],
 };
@@ -1354,7 +1219,6 @@ pub const RENAME_WHITEOUT: c_uint = 4;
 
 pub const MSG_STAT: c_int = 11 | (crate::IPC_STAT & 0x100);
 pub const MSG_INFO: c_int = 12;
-pub const MSG_NOTIFICATION: c_int = 0x8000;
 
 pub const MSG_NOERROR: c_int = 0o10000;
 pub const MSG_EXCEPT: c_int = 0o20000;
@@ -1463,6 +1327,14 @@ pub const SECCOMP_USER_NOTIF_FLAG_CONTINUE: c_ulong = 1;
 pub const SECCOMP_ADDFD_FLAG_SETFD: c_ulong = 1;
 pub const SECCOMP_ADDFD_FLAG_SEND: c_ulong = 2;
 
+const SECCOMP_IOC_MAGIC: u32 = b'!' as u32;
+
+pub const SECCOMP_IOCTL_NOTIF_RECV: Ioctl = _IOWR::<seccomp_notif>(SECCOMP_IOC_MAGIC, 0);
+pub const SECCOMP_IOCTL_NOTIF_SEND: Ioctl = _IOWR::<seccomp_notif_resp>(SECCOMP_IOC_MAGIC, 1);
+pub const SECCOMP_IOCTL_NOTIF_ID_VALID: Ioctl = _IOW::<u64>(SECCOMP_IOC_MAGIC, 2);
+pub const SECCOMP_IOCTL_NOTIF_ADDFD: Ioctl = _IOW::<seccomp_notif_addfd>(SECCOMP_IOC_MAGIC, 3);
+pub const SECCOMP_IOCTL_NOTIF_SET_FLAGS: Ioctl = _IOW::<u64>(SECCOMP_IOC_MAGIC, 4);
+
 pub const TFD_CLOEXEC: c_int = O_CLOEXEC;
 pub const TFD_NONBLOCK: c_int = O_NONBLOCK;
 pub const TFD_TIMER_ABSTIME: c_int = 1;
@@ -1526,7 +1398,11 @@ pub const SKF_AD_VLAN_TAG_PRESENT: c_int = 48;
 pub const SKF_AD_PAY_OFFSET: c_int = 52;
 pub const SKF_AD_RANDOM: c_int = 56;
 pub const SKF_AD_VLAN_TPID: c_int = 60;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SKF_AD_MAX: c_int = 64;
+
 pub const SKF_NET_OFF: c_int = -0x100000;
 pub const SKF_LL_OFF: c_int = -0x200000;
 pub const BPF_NET_OFF: c_int = SKF_NET_OFF;
@@ -1712,6 +1588,9 @@ pub const NFNL_SUBSYS_CTHELPER: c_int = 9;
 pub const NFNL_SUBSYS_NFTABLES: c_int = 10;
 pub const NFNL_SUBSYS_NFT_COMPAT: c_int = 11;
 pub const NFNL_SUBSYS_HOOK: c_int = 12;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFNL_SUBSYS_COUNT: c_int = 13;
 
 pub const NFNL_MSG_BATCH_BEGIN: c_int = crate::NLMSG_MIN_TYPE;
@@ -1828,6 +1707,9 @@ pub const NFQA_CFG_F_CONNTRACK: c_int = 0x0002;
 pub const NFQA_CFG_F_GSO: c_int = 0x0004;
 pub const NFQA_CFG_F_UID_GID: c_int = 0x0008;
 pub const NFQA_CFG_F_SECCTX: c_int = 0x0010;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFQA_CFG_F_MAX: c_int = 0x0020;
 
 pub const NFQA_SKB_CSUMNOTREADY: c_int = 0x0001;
@@ -1888,7 +1770,7 @@ pub const NF_MAX_VERDICT: c_int = NF_STOP;
 pub const NF_VERDICT_MASK: c_int = 0x000000ff;
 pub const NF_VERDICT_FLAG_QUEUE_BYPASS: c_int = 0x00008000;
 
-pub const NF_VERDICT_QMASK: c_int = 0xffff0000;
+pub const NF_VERDICT_QMASK: c_int = u32_cast_int(0xffff0000);
 pub const NF_VERDICT_QBITS: c_int = 16;
 
 pub const NF_VERDICT_BITS: c_int = 16;
@@ -1939,6 +1821,9 @@ pub const NF_BR_PRI_BRNF: c_int = 0;
 pub const NF_BR_PRI_NAT_DST_OTHER: c_int = 100;
 pub const NF_BR_PRI_FILTER_OTHER: c_int = 200;
 pub const NF_BR_PRI_NAT_SRC: c_int = 300;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_BR_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv4.h
@@ -1963,6 +1848,9 @@ pub const NF_IP_PRI_NAT_SRC: c_int = 100;
 pub const NF_IP_PRI_SELINUX_LAST: c_int = 225;
 pub const NF_IP_PRI_CONNTRACK_HELPER: c_int = 300;
 pub const NF_IP_PRI_CONNTRACK_CONFIRM: c_int = crate::INT_MAX;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_IP_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv6.h
@@ -1986,6 +1874,9 @@ pub const NF_IP6_PRI_SECURITY: c_int = 50;
 pub const NF_IP6_PRI_NAT_SRC: c_int = 100;
 pub const NF_IP6_PRI_SELINUX_LAST: c_int = 225;
 pub const NF_IP6_PRI_CONNTRACK_HELPER: c_int = 300;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NF_IP6_PRI_LAST: c_int = crate::INT_MAX;
 
 // linux/netfilter_ipv6/ip6_tables.h
@@ -2063,9 +1954,15 @@ pub const SIOCGIWENCODEEXT: c_ulong = 0x8B35;
 pub const SIOCSIWPMKSA: c_ulong = 0x8B36;
 
 pub const SIOCIWFIRSTPRIV: c_ulong = 0x8BE0;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SIOCIWLASTPRIV: c_ulong = 0x8BFF;
 
 pub const SIOCIWFIRST: c_ulong = 0x8B00;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SIOCIWLAST: c_ulong = SIOCIWLASTPRIV;
 
 pub const IWEVTXDROP: c_ulong = 0x8C00;
@@ -2631,97 +2528,9 @@ pub const PTP_PF_EXTTS: c_uint = 1;
 pub const PTP_PF_PEROUT: c_uint = 2;
 pub const PTP_PF_PHYSYNC: c_uint = 3;
 
-// linux/tls.h
-pub const TLS_TX: c_int = 1;
-pub const TLS_RX: c_int = 2;
-
-pub const TLS_TX_ZEROCOPY_RO: c_int = 3;
-pub const TLS_RX_EXPECT_NO_PAD: c_int = 4;
-
-pub const TLS_1_2_VERSION_MAJOR: __u8 = 0x3;
-pub const TLS_1_2_VERSION_MINOR: __u8 = 0x3;
-pub const TLS_1_2_VERSION: __u16 =
-    ((TLS_1_2_VERSION_MAJOR as __u16) << 8) | (TLS_1_2_VERSION_MINOR as __u16);
-
-pub const TLS_1_3_VERSION_MAJOR: __u8 = 0x3;
-pub const TLS_1_3_VERSION_MINOR: __u8 = 0x4;
-pub const TLS_1_3_VERSION: __u16 =
-    ((TLS_1_3_VERSION_MAJOR as __u16) << 8) | (TLS_1_3_VERSION_MINOR as __u16);
-
-pub const TLS_CIPHER_AES_GCM_128: __u16 = 51;
-pub const TLS_CIPHER_AES_GCM_128_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_AES_GCM_128_KEY_SIZE: usize = 16;
-pub const TLS_CIPHER_AES_GCM_128_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_AES_GCM_128_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_AES_GCM_128_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_AES_GCM_256: __u16 = 52;
-pub const TLS_CIPHER_AES_GCM_256_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_AES_GCM_256_KEY_SIZE: usize = 32;
-pub const TLS_CIPHER_AES_GCM_256_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_AES_GCM_256_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_AES_GCM_256_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_AES_CCM_128: __u16 = 53;
-pub const TLS_CIPHER_AES_CCM_128_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_AES_CCM_128_KEY_SIZE: usize = 16;
-pub const TLS_CIPHER_AES_CCM_128_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_AES_CCM_128_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_AES_CCM_128_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_CHACHA20_POLY1305: __u16 = 54;
-pub const TLS_CIPHER_CHACHA20_POLY1305_IV_SIZE: usize = 12;
-pub const TLS_CIPHER_CHACHA20_POLY1305_KEY_SIZE: usize = 32;
-pub const TLS_CIPHER_CHACHA20_POLY1305_SALT_SIZE: usize = 0;
-pub const TLS_CIPHER_CHACHA20_POLY1305_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_CHACHA20_POLY1305_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_SM4_GCM: __u16 = 55;
-pub const TLS_CIPHER_SM4_GCM_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_SM4_GCM_KEY_SIZE: usize = 16;
-pub const TLS_CIPHER_SM4_GCM_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_SM4_GCM_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_SM4_GCM_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_SM4_CCM: __u16 = 56;
-pub const TLS_CIPHER_SM4_CCM_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_SM4_CCM_KEY_SIZE: usize = 16;
-pub const TLS_CIPHER_SM4_CCM_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_SM4_CCM_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_SM4_CCM_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_ARIA_GCM_128: __u16 = 57;
-pub const TLS_CIPHER_ARIA_GCM_128_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_ARIA_GCM_128_KEY_SIZE: usize = 16;
-pub const TLS_CIPHER_ARIA_GCM_128_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_ARIA_GCM_128_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_ARIA_GCM_128_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_CIPHER_ARIA_GCM_256: __u16 = 58;
-pub const TLS_CIPHER_ARIA_GCM_256_IV_SIZE: usize = 8;
-pub const TLS_CIPHER_ARIA_GCM_256_KEY_SIZE: usize = 32;
-pub const TLS_CIPHER_ARIA_GCM_256_SALT_SIZE: usize = 4;
-pub const TLS_CIPHER_ARIA_GCM_256_TAG_SIZE: usize = 16;
-pub const TLS_CIPHER_ARIA_GCM_256_REC_SEQ_SIZE: usize = 8;
-
-pub const TLS_SET_RECORD_TYPE: c_int = 1;
-pub const TLS_GET_RECORD_TYPE: c_int = 2;
+// linux/socket.h
 
 pub const SOL_TLS: c_int = 282;
-
-// enum
-pub const TLS_INFO_UNSPEC: c_int = 0x00;
-pub const TLS_INFO_VERSION: c_int = 0x01;
-pub const TLS_INFO_CIPHER: c_int = 0x02;
-pub const TLS_INFO_TXCONF: c_int = 0x03;
-pub const TLS_INFO_RXCONF: c_int = 0x04;
-pub const TLS_INFO_ZC_RO_TX: c_int = 0x05;
-pub const TLS_INFO_RX_NO_PAD: c_int = 0x06;
-
-pub const TLS_CONF_BASE: c_int = 1;
-pub const TLS_CONF_SW: c_int = 2;
-pub const TLS_CONF_HW: c_int = 3;
-pub const TLS_CONF_HW_RECORD: c_int = 4;
 
 // linux/if_alg.h
 pub const ALG_SET_KEY: c_int = 1;
@@ -2875,7 +2684,11 @@ pub const NFT_REG_1: c_int = 1;
 pub const NFT_REG_2: c_int = 2;
 pub const NFT_REG_3: c_int = 3;
 pub const NFT_REG_4: c_int = 4;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const __NFT_REG_MAX: c_int = 5;
+
 pub const NFT_REG32_00: c_int = 8;
 pub const NFT_REG32_01: c_int = 9;
 pub const NFT_REG32_02: c_int = 10;
@@ -2929,6 +2742,8 @@ cfg_if! {
     }
 }
 
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const NFT_MSG_MAX: c_int = 34;
 
 pub const NFT_SET_ANONYMOUS: c_int = 0x1;
@@ -3059,6 +2874,8 @@ pub const NFT_NG_INCREMENTAL: c_int = 0;
 pub const NFT_NG_RANDOM: c_int = 1;
 
 // linux/input.h
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const FF_MAX: __u16 = 0x7f;
 pub const FF_CNT: usize = FF_MAX as usize + 1;
 
@@ -3070,26 +2887,60 @@ pub const INPUT_PROP_SEMI_MT: __u16 = 0x03;
 pub const INPUT_PROP_TOPBUTTONPAD: __u16 = 0x04;
 pub const INPUT_PROP_POINTING_STICK: __u16 = 0x05;
 pub const INPUT_PROP_ACCELEROMETER: __u16 = 0x06;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const INPUT_PROP_MAX: __u16 = 0x1f;
+
 pub const INPUT_PROP_CNT: usize = INPUT_PROP_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const EV_MAX: __u16 = 0x1f;
 pub const EV_CNT: usize = EV_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SYN_MAX: __u16 = 0xf;
 pub const SYN_CNT: usize = SYN_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KEY_MAX: __u16 = 0x2ff;
 pub const KEY_CNT: usize = KEY_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const REL_MAX: __u16 = 0x0f;
 pub const REL_CNT: usize = REL_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const ABS_MAX: __u16 = 0x3f;
 pub const ABS_CNT: usize = ABS_MAX as usize + 1;
-pub const SW_MAX: __u16 = 0x10;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
+pub const SW_MAX: __u16 = 0x11;
 pub const SW_CNT: usize = SW_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const MSC_MAX: __u16 = 0x07;
 pub const MSC_CNT: usize = MSC_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const LED_MAX: __u16 = 0x0f;
 pub const LED_CNT: usize = LED_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const REP_MAX: __u16 = 0x01;
 pub const REP_CNT: usize = REP_MAX as usize + 1;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const SND_MAX: __u16 = 0x07;
 pub const SND_CNT: usize = SND_MAX as usize + 1;
 
@@ -3189,83 +3040,28 @@ pub const FAN_NOFD: c_int = -1;
 pub const FAN_NOPIDFD: c_int = FAN_NOFD;
 pub const FAN_EPIDFD: c_int = -2;
 
-// linux/futex.h
-pub const FUTEX_WAIT: c_int = 0;
-pub const FUTEX_WAKE: c_int = 1;
-pub const FUTEX_FD: c_int = 2;
-pub const FUTEX_REQUEUE: c_int = 3;
-pub const FUTEX_CMP_REQUEUE: c_int = 4;
-pub const FUTEX_WAKE_OP: c_int = 5;
-pub const FUTEX_LOCK_PI: c_int = 6;
-pub const FUTEX_UNLOCK_PI: c_int = 7;
-pub const FUTEX_TRYLOCK_PI: c_int = 8;
-pub const FUTEX_WAIT_BITSET: c_int = 9;
-pub const FUTEX_WAKE_BITSET: c_int = 10;
-pub const FUTEX_WAIT_REQUEUE_PI: c_int = 11;
-pub const FUTEX_CMP_REQUEUE_PI: c_int = 12;
-pub const FUTEX_LOCK_PI2: c_int = 13;
-
-pub const FUTEX_PRIVATE_FLAG: c_int = 128;
-pub const FUTEX_CLOCK_REALTIME: c_int = 256;
-pub const FUTEX_CMD_MASK: c_int = !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
-
-pub const FUTEX2_SIZE_U8: c_int = 0x00;
-pub const FUTEX2_SIZE_U16: c_int = 0x01;
-pub const FUTEX2_SIZE_U32: c_int = 0x02;
-pub const FUTEX2_SIZE_U64: c_int = 0x03;
-pub const FUTEX2_NUMA: c_int = 0x04;
-pub const FUTEX2_PRIVATE: c_int = FUTEX_PRIVATE_FLAG;
-pub const FUTEX2_SIZE_MASK: c_int = 0x03;
-pub const FUTEX_32: c_int = FUTEX2_SIZE_U32;
-pub const FUTEX_WAITV_MAX: c_int = 128;
-
-pub const FUTEX_WAITERS: u32 = 0x80000000;
-pub const FUTEX_OWNER_DIED: u32 = 0x40000000;
-pub const FUTEX_TID_MASK: u32 = 0x3fffffff;
-
-pub const FUTEX_BITSET_MATCH_ANY: c_int = 0xffffffff;
-
-pub const FUTEX_OP_SET: c_int = 0;
-pub const FUTEX_OP_ADD: c_int = 1;
-pub const FUTEX_OP_OR: c_int = 2;
-pub const FUTEX_OP_ANDN: c_int = 3;
-pub const FUTEX_OP_XOR: c_int = 4;
-
-pub const FUTEX_OP_OPARG_SHIFT: c_int = 8;
-
-pub const FUTEX_OP_CMP_EQ: c_int = 0;
-pub const FUTEX_OP_CMP_NE: c_int = 1;
-pub const FUTEX_OP_CMP_LT: c_int = 2;
-pub const FUTEX_OP_CMP_LE: c_int = 3;
-pub const FUTEX_OP_CMP_GT: c_int = 4;
-pub const FUTEX_OP_CMP_GE: c_int = 5;
-
-pub fn FUTEX_OP(op: c_int, oparg: c_int, cmp: c_int, cmparg: c_int) -> c_int {
-    ((op & 0xf) << 28) | ((cmp & 0xf) << 24) | ((oparg & 0xfff) << 12) | (cmparg & 0xfff)
-}
-
 // linux/kexec.h
 pub const KEXEC_ON_CRASH: c_int = 0x00000001;
 pub const KEXEC_PRESERVE_CONTEXT: c_int = 0x00000002;
-pub const KEXEC_ARCH_MASK: c_int = 0xffff0000;
+pub const KEXEC_ARCH_MASK: c_int = u32_cast_int(0xffff0000);
 pub const KEXEC_FILE_UNLOAD: c_int = 0x00000001;
 pub const KEXEC_FILE_ON_CRASH: c_int = 0x00000002;
 pub const KEXEC_FILE_NO_INITRAMFS: c_int = 0x00000004;
 
 // linux/reboot.h
-pub const LINUX_REBOOT_MAGIC1: c_int = 0xfee1dead;
+pub const LINUX_REBOOT_MAGIC1: c_int = u32_cast_int(0xfee1dead);
 pub const LINUX_REBOOT_MAGIC2: c_int = 672274793;
 pub const LINUX_REBOOT_MAGIC2A: c_int = 85072278;
 pub const LINUX_REBOOT_MAGIC2B: c_int = 369367448;
 pub const LINUX_REBOOT_MAGIC2C: c_int = 537993216;
 
 pub const LINUX_REBOOT_CMD_RESTART: c_int = 0x01234567;
-pub const LINUX_REBOOT_CMD_HALT: c_int = 0xCDEF0123;
-pub const LINUX_REBOOT_CMD_CAD_ON: c_int = 0x89ABCDEF;
+pub const LINUX_REBOOT_CMD_HALT: c_int = u32_cast_int(0xCDEF0123);
+pub const LINUX_REBOOT_CMD_CAD_ON: c_int = u32_cast_int(0x89ABCDEF);
 pub const LINUX_REBOOT_CMD_CAD_OFF: c_int = 0x00000000;
 pub const LINUX_REBOOT_CMD_POWER_OFF: c_int = 0x4321FEDC;
-pub const LINUX_REBOOT_CMD_RESTART2: c_int = 0xA1B2C3D4;
-pub const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = 0xD000FCE2;
+pub const LINUX_REBOOT_CMD_RESTART2: c_int = u32_cast_int(0xA1B2C3D4);
+pub const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = u32_cast_int(0xD000FCE2);
 pub const LINUX_REBOOT_CMD_KEXEC: c_int = 0x45584543;
 
 // linux/errqueue.h
@@ -3275,82 +3071,6 @@ pub const SO_EE_ORIGIN_ICMP: u8 = 2;
 pub const SO_EE_ORIGIN_ICMP6: u8 = 3;
 pub const SO_EE_ORIGIN_TXSTATUS: u8 = 4;
 pub const SO_EE_ORIGIN_TIMESTAMPING: u8 = SO_EE_ORIGIN_TXSTATUS;
-
-// linux/sctp.h
-pub const SCTP_FUTURE_ASSOC: c_int = 0;
-pub const SCTP_CURRENT_ASSOC: c_int = 1;
-pub const SCTP_ALL_ASSOC: c_int = 2;
-pub const SCTP_RTOINFO: c_int = 0;
-pub const SCTP_ASSOCINFO: c_int = 1;
-pub const SCTP_INITMSG: c_int = 2;
-pub const SCTP_NODELAY: c_int = 3;
-pub const SCTP_AUTOCLOSE: c_int = 4;
-pub const SCTP_SET_PEER_PRIMARY_ADDR: c_int = 5;
-pub const SCTP_PRIMARY_ADDR: c_int = 6;
-pub const SCTP_ADAPTATION_LAYER: c_int = 7;
-pub const SCTP_DISABLE_FRAGMENTS: c_int = 8;
-pub const SCTP_PEER_ADDR_PARAMS: c_int = 9;
-pub const SCTP_DEFAULT_SEND_PARAM: c_int = 10;
-pub const SCTP_EVENTS: c_int = 11;
-pub const SCTP_I_WANT_MAPPED_V4_ADDR: c_int = 12;
-pub const SCTP_MAXSEG: c_int = 13;
-pub const SCTP_STATUS: c_int = 14;
-pub const SCTP_GET_PEER_ADDR_INFO: c_int = 15;
-pub const SCTP_DELAYED_ACK_TIME: c_int = 16;
-pub const SCTP_DELAYED_ACK: c_int = SCTP_DELAYED_ACK_TIME;
-pub const SCTP_DELAYED_SACK: c_int = SCTP_DELAYED_ACK_TIME;
-pub const SCTP_CONTEXT: c_int = 17;
-pub const SCTP_FRAGMENT_INTERLEAVE: c_int = 18;
-pub const SCTP_PARTIAL_DELIVERY_POINT: c_int = 19;
-pub const SCTP_MAX_BURST: c_int = 20;
-pub const SCTP_AUTH_CHUNK: c_int = 21;
-pub const SCTP_HMAC_IDENT: c_int = 22;
-pub const SCTP_AUTH_KEY: c_int = 23;
-pub const SCTP_AUTH_ACTIVE_KEY: c_int = 24;
-pub const SCTP_AUTH_DELETE_KEY: c_int = 25;
-pub const SCTP_PEER_AUTH_CHUNKS: c_int = 26;
-pub const SCTP_LOCAL_AUTH_CHUNKS: c_int = 27;
-pub const SCTP_GET_ASSOC_NUMBER: c_int = 28;
-pub const SCTP_GET_ASSOC_ID_LIST: c_int = 29;
-pub const SCTP_AUTO_ASCONF: c_int = 30;
-pub const SCTP_PEER_ADDR_THLDS: c_int = 31;
-pub const SCTP_RECVRCVINFO: c_int = 32;
-pub const SCTP_RECVNXTINFO: c_int = 33;
-pub const SCTP_DEFAULT_SNDINFO: c_int = 34;
-pub const SCTP_AUTH_DEACTIVATE_KEY: c_int = 35;
-pub const SCTP_REUSE_PORT: c_int = 36;
-pub const SCTP_PEER_ADDR_THLDS_V2: c_int = 37;
-pub const SCTP_PR_SCTP_NONE: c_int = 0x0000;
-pub const SCTP_PR_SCTP_TTL: c_int = 0x0010;
-pub const SCTP_PR_SCTP_RTX: c_int = 0x0020;
-pub const SCTP_PR_SCTP_PRIO: c_int = 0x0030;
-pub const SCTP_PR_SCTP_MAX: c_int = SCTP_PR_SCTP_PRIO;
-pub const SCTP_PR_SCTP_MASK: c_int = 0x0030;
-pub const SCTP_ENABLE_RESET_STREAM_REQ: c_int = 0x01;
-pub const SCTP_ENABLE_RESET_ASSOC_REQ: c_int = 0x02;
-pub const SCTP_ENABLE_CHANGE_ASSOC_REQ: c_int = 0x04;
-pub const SCTP_ENABLE_STRRESET_MASK: c_int = 0x07;
-pub const SCTP_STREAM_RESET_INCOMING: c_int = 0x01;
-pub const SCTP_STREAM_RESET_OUTGOING: c_int = 0x02;
-
-pub const SCTP_INIT: c_int = 0;
-pub const SCTP_SNDRCV: c_int = 1;
-pub const SCTP_SNDINFO: c_int = 2;
-pub const SCTP_RCVINFO: c_int = 3;
-pub const SCTP_NXTINFO: c_int = 4;
-pub const SCTP_PRINFO: c_int = 5;
-pub const SCTP_AUTHINFO: c_int = 6;
-pub const SCTP_DSTADDRV4: c_int = 7;
-pub const SCTP_DSTADDRV6: c_int = 8;
-
-pub const SCTP_UNORDERED: c_int = 1 << 0;
-pub const SCTP_ADDR_OVER: c_int = 1 << 1;
-pub const SCTP_ABORT: c_int = 1 << 2;
-pub const SCTP_SACK_IMMEDIATELY: c_int = 1 << 3;
-pub const SCTP_SENDALL: c_int = 1 << 6;
-pub const SCTP_PR_SCTP_ALL: c_int = 1 << 7;
-pub const SCTP_NOTIFICATION: c_int = MSG_NOTIFICATION;
-pub const SCTP_EOF: c_int = crate::MSG_FIN;
 
 /* DCCP socket options */
 pub const DCCP_SOCKOPT_PACKET_SIZE: c_int = 1;
@@ -3432,7 +3152,11 @@ pub const KERN_S390_USER_DEBUG_LOGGING: c_int = 51;
 pub const KERN_CORE_USES_PID: c_int = 52;
 pub const KERN_TAINTED: c_int = 53;
 pub const KERN_CADPID: c_int = 54;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KERN_PIDMAX: c_int = 55;
+
 pub const KERN_CORE_PATTERN: c_int = 56;
 pub const KERN_PANIC_ON_OOPS: c_int = 57;
 pub const KERN_HPPA_PWRSW: c_int = 58;
@@ -3440,7 +3164,11 @@ pub const KERN_HPPA_UNALIGNED: c_int = 59;
 pub const KERN_PRINTK_RATELIMIT: c_int = 60;
 pub const KERN_PRINTK_RATELIMIT_BURST: c_int = 61;
 pub const KERN_PTY: c_int = 62;
+
+/// Constants may change across releases. See the [usage guidelines](crate#usage-guidelines)
+/// for details.
 pub const KERN_NGROUPS_MAX: c_int = 63;
+
 pub const KERN_SPARC_SCONS_PWROFF: c_int = 64;
 pub const KERN_HZ_TIMER: c_int = 65;
 pub const KERN_UNKNOWN_NMI_PANIC: c_int = 66;
@@ -3567,7 +3295,7 @@ pub const PF_MEMALLOC_PIN: c_int = 0x10000000;
 /// Plug has ts that needs updating.
 pub const PF_BLOCK_TS: c_int = 0x20000000;
 /// This thread called `freeze_processes()` and should not be frozen.
-pub const PF_SUSPEND_TASK: c_int = PF_SUSPEND_TASK_UINT as _;
+pub const PF_SUSPEND_TASK: c_int = u32_cast_int(PF_SUSPEND_TASK_UINT);
 // The used value is the highest possible bit fitting on 32 bits, so directly
 // defining it as a signed integer causes the compiler to report an overflow.
 // Use instead a private intermediary that assuringly has the correct type and
@@ -3608,7 +3336,7 @@ pub const XDP_OPTIONS: c_int = 8;
 pub const XDP_OPTIONS_ZEROCOPY: crate::__u32 = 1 << 0;
 
 pub const XDP_PGOFF_RX_RING: crate::off_t = 0;
-pub const XDP_PGOFF_TX_RING: crate::off_t = 0x80000000;
+pub const XDP_PGOFF_TX_RING: crate::off_t = 0x80000000u32 as crate::off_t;
 pub const XDP_UMEM_PGOFF_FILL_RING: crate::c_ulonglong = 0x100000000;
 pub const XDP_UMEM_PGOFF_COMPLETION_RING: crate::c_ulonglong = 0x180000000;
 
@@ -3639,60 +3367,48 @@ pub const SCHED_FLAG_ALL: c_int = SCHED_FLAG_RESET_ON_FORK
     | SCHED_FLAG_UTIL_CLAMP;
 
 // ioctl_eventpoll: added in Linux 6.9
-pub const EPIOCSPARAMS: Ioctl = 0x40088a01;
-pub const EPIOCGPARAMS: Ioctl = 0x80088a02;
+const EPOLL_IOC_TYPE: u32 = 0x8A;
+pub const EPIOCSPARAMS: Ioctl = _IOW::<epoll_params>(EPOLL_IOC_TYPE, 0x01);
+pub const EPIOCGPARAMS: Ioctl = _IOR::<epoll_params>(EPOLL_IOC_TYPE, 0x02);
 
 // siginfo.h
 pub const SI_DETHREAD: c_int = -7;
 pub const TRAP_PERF: c_int = 6;
 
 f! {
-    pub fn SCTP_PR_INDEX(policy: c_int) -> c_int {
-        policy >> (4 - 1)
-    }
-
-    pub fn SCTP_PR_POLICY(policy: c_int) -> c_int {
-        policy & SCTP_PR_SCTP_MASK
-    }
-
-    pub fn SCTP_PR_SET_POLICY(flags: &mut c_int, policy: c_int) -> () {
-        *flags &= !SCTP_PR_SCTP_MASK;
-        *flags |= policy;
-    }
-
-    pub fn SO_EE_OFFENDER(ee: *const crate::sock_extended_err) -> *mut crate::sockaddr {
+    pub unsafe fn SO_EE_OFFENDER(ee: *const crate::sock_extended_err) -> *mut crate::sockaddr {
         ee.offset(1) as *mut crate::sockaddr
     }
 
-    pub fn BPF_CLASS(code: __u32) -> __u32 {
+    pub unsafe fn BPF_CLASS(code: __u32) -> __u32 {
         code & 0x07
     }
 
-    pub fn BPF_SIZE(code: __u32) -> __u32 {
+    pub unsafe fn BPF_SIZE(code: __u32) -> __u32 {
         code & 0x18
     }
 
-    pub fn BPF_MODE(code: __u32) -> __u32 {
+    pub unsafe fn BPF_MODE(code: __u32) -> __u32 {
         code & 0xe0
     }
 
-    pub fn BPF_OP(code: __u32) -> __u32 {
+    pub unsafe fn BPF_OP(code: __u32) -> __u32 {
         code & 0xf0
     }
 
-    pub fn BPF_SRC(code: __u32) -> __u32 {
+    pub unsafe fn BPF_SRC(code: __u32) -> __u32 {
         code & 0x08
     }
 
-    pub fn BPF_RVAL(code: __u32) -> __u32 {
+    pub unsafe fn BPF_RVAL(code: __u32) -> __u32 {
         code & 0x18
     }
 
-    pub fn BPF_MISCOP(code: __u32) -> __u32 {
+    pub unsafe fn BPF_MISCOP(code: __u32) -> __u32 {
         code & 0xf8
     }
 
-    pub fn BPF_STMT(code: __u16, k: __u32) -> sock_filter {
+    pub unsafe fn BPF_STMT(code: __u16, k: __u32) -> sock_filter {
         sock_filter {
             code,
             jt: 0,
@@ -3701,32 +3417,18 @@ f! {
         }
     }
 
-    pub fn BPF_JUMP(code: __u16, k: __u32, jt: __u8, jf: __u8) -> sock_filter {
+    pub unsafe fn BPF_JUMP(code: __u16, k: __u32, jt: __u8, jf: __u8) -> sock_filter {
         sock_filter { code, jt, jf, k }
     }
 
     #[cfg(target_env = "gnu")]
-    pub fn SUN_LEN(s: crate::sockaddr_un) -> usize {
+    pub unsafe fn SUN_LEN(s: crate::sockaddr_un) -> usize {
         offset_of!(crate::sockaddr_un, sun_path) + crate::strlen(s.sun_path.as_ptr())
     }
 
     #[cfg(target_env = "musl")]
-    pub fn SUN_LEN(s: crate::sockaddr_un) -> usize {
+    pub unsafe fn SUN_LEN(s: crate::sockaddr_un) -> usize {
         2 * crate::strlen(s.sun_path.as_ptr())
-    }
-}
-
-safe_f! {
-    pub const fn SCTP_PR_TTL_ENABLED(policy: c_int) -> bool {
-        policy == SCTP_PR_SCTP_TTL
-    }
-
-    pub const fn SCTP_PR_RTX_ENABLED(policy: c_int) -> bool {
-        policy == SCTP_PR_SCTP_RTX
-    }
-
-    pub const fn SCTP_PR_PRIO_ENABLED(policy: c_int) -> bool {
-        policy == SCTP_PR_SCTP_PRIO
     }
 }
 
@@ -3918,6 +3620,13 @@ extern "C" {
 
     pub fn posix_madvise(addr: *mut c_void, len: size_t, advice: c_int) -> c_int;
 
+    pub fn mremap(
+        addr: *mut c_void,
+        len: size_t,
+        new_len: size_t,
+        flags: c_int,
+        ...
+    ) -> *mut c_void;
     pub fn remap_file_pages(
         addr: *mut c_void,
         size: size_t,
@@ -4103,6 +3812,11 @@ extern "C" {
         flags: c_int,
     ) -> c_int;
     pub fn open_by_handle_at(mount_fd: c_int, handle: *mut file_handle, flags: c_int) -> c_int;
+    pub fn getnetbyname(name: *const c_char) -> *mut netent;
+    pub fn getnetbyaddr(net: u32, type_: c_int) -> *mut netent;
+    pub fn getnetent() -> *mut netent;
+    pub fn setnetent(stayopen: c_int);
+    pub fn endnetent();
 }
 
 // LFS64 extensions

@@ -158,12 +158,14 @@ upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc
 .ONESHELL:
 update-hashes:
 	mkdir -p hashes
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.xz hashes/
+
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-x86_64-$(commit).tar.xz hashes/

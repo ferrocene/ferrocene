@@ -29,4 +29,4 @@ EOT
 
 RUN make
 RUN make install-strip
-RUN tar cJf /gcc-build/gcc.tar.xz /opt/local/gcc
+RUN tar cJf /gcc-build/gcc.tar.xz -C /opt/local/gcc --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

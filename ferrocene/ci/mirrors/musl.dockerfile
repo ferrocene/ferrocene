@@ -8,11 +8,11 @@ FROM centos7-builder AS base
 ARG TARGETVERSION=v0.9.11
 
 RUN yum -y install \
-  git \
-  patch \
-  file
+  git
 
-ADD musl-cross-make/ /musl-cross-make/
+COPY musl-cross-make.tar.xz /musl-cross-make.tar.xz
+RUN mkdir -p /musl-cross-make
+RUN tar -xf /musl-cross-make.tar.xz -C /musl-cross-make --strip-components=1
 WORKDIR /musl-cross-make
 RUN git checkout fd6be58297ee21fcba89216ccd0d4aca1e3f1c5c # v0.9.11
 

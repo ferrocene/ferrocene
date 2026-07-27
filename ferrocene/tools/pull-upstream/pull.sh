@@ -425,7 +425,7 @@ echo "pull-upstream: trying to fix ferrocene/doc/symbol-report.csv"
 if ./x.py test ferrocene/doc/symbol-report.csv --stage 1 --bless --set rust.debug-assertions-std=true; then
     commit_if_modified ferrocene/doc/symbol-report.csv "update symbol report"
 else
-    automation_warning "Couldn't regenerate the symbol report. Please run './x test ferrocene/doc/symbol-report.csv --bless' after fixing the conflicts."
+    automation_warning "Couldn't regenerate the symbol report. Please run \`./x test ferrocene/doc/symbol-report.csv --bless\` after fixing the conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

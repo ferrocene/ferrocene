@@ -156,7 +156,7 @@ upload-gdb: gdb
 		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
 
-download-all-src: download-musl-cross-src download-python-src download-gdb-src dewnload-openssl-src download-gcc-11-src download-gcc-src
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-openssl-src download-gcc-11-src download-gcc-src
 build-all: musl-cross python gdb openssl gcc-11 gcc
 upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc-11 upload-gcc
 

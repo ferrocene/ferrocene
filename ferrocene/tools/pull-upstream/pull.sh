@@ -214,6 +214,10 @@ git checkout "${current_commit}"
 #   remaining, we will want to resolve those using mergiraf -- but it currently
 #   only supports resolving conflicts in the diff3 format, so we set that here.
 #   See https://codeberg.org/mergiraf/mergiraf/issues/593
+#
+#   3-way conflict markers are also useful when manually fixing merge conflicts,
+#   as they make it much easier to see what we had changed vs. the old upstream
+#   and what changed upstream.
 export GIT_COMMITTER_NAME=$(git config --get user.name)
 export GIT_COMMITTER_EMAIL=$(git config --get user.email)
 if ! HOME= XDG_CONFIG_HOME= git -c merge.conflictstyle=diff3 \

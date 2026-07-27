@@ -8,6 +8,7 @@ openssl-version=3.5.7
 python-version=3.12.3
 gdb-version=12.1
 cmake-version=4.4.0
+arm-gnu-toolchain=15.3.rel1
 commit != git rev-parse HEAD | cut -c 1-8
 host-arch != uname -m
 
@@ -16,6 +17,47 @@ prepare: base-image
 
 base-image:
 	docker build --tag centos7-base --file base.dockerfile .
+
+download-arm-eabi-none-toolchain:
+	mkdir -p build/arm-eabi-none
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi.tar.xz build/arm-eabi-none/arm-gnu-toolchain.tar.xz
+
+.ONESHELL
+repack-arm-eabi-none: download-arm-eabi-none-toolchain
+	set -xe
+	cd build/arm-eabi-none
+	docker build --tag arm-eabi-none:$(arm-gnu-toolchain) --file ../../repack-arm-toolchain.dockerfile .
+	{ \
+		id=$$(docker create arm-eabi-none:$(arm-gnu-toolchain)) ; \
+		docker cp $$id://repacked/arm-gnu-toolchain-repacked.tar.xz  \
+			../../output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz ; \
+		docker rm $$id ; \
+	}
+
+upload-arm-eabi-none: repack-arm-eabi-none
+	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz
+
+
+download-arm-aarch64-none-toolchain:
+	mkdir -p build/arm-eabi-none
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-eabi-none/arm-gnu-toolchain.tar.xz
+
+.ONESHELL
+repack-arm-aarch64-none: download-arm-eabi-none-toolchain
+	set -xe
+	cd build/arm-eabi-none
+	docker build --tag arm-eabi-none:$(arm-gnu-toolchain) --file ../../repack-arm-toolchain.dockerfile .
+	{ \
+		id=$$(docker create arm-eabi-none:$(arm-gnu-toolchain)) ; \
+		docker cp $$id://repacked/arm-gnu-toolchain-repacked.tar.xz  \
+			../../output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz ; \
+		docker rm $$id ; \
+	}
+
+upload-arm-aarch64-none: repack-arm-aarch64-none
+	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz
 
 download-gcc-11-src:
 	mkdir -p build/gcc-11

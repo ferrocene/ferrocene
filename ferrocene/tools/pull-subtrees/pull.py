@@ -323,11 +323,31 @@ def update_subtree(repo_root, subtree):
                     with open(path, "w") as modified:
                         modified.write(header + "\n" + data)
 
+            # Save the list of still conflicted files to try to later resolve with
+            # mergiraf. Exclude the deleted files, since mergiraf can't really
+            # resolve them (and because it spams about parse errors caused by
+            # <<<PULL-UPSTREAM>>>) -- but don't bother excluding the files deleted
+            # by us, since those are a rare occurrance.
+            #
+            # The logic here mirrors the awk invocation in ferrocene/tools/pull-upstream/pull.sh
+            files_with_conflicts = []
+            for line in run_capture(["git", "status", "--porcelain=v2"]).splitlines():
+                fields = line.split()
+                if fields[0] == "u" and fields[1] != "UD":
+                    files_with_conflicts.append(fields[-1])
+
             run(["git", "add", "."], cwd=subtree.path)
 
             git_env = os.environ.copy()
             git_env["GIT_EDITOR"] = "true"
             run(["git", "merge", "--continue"], env=git_env)
+
+            if files_with_conflicts != []:
+                print("Trying to resolve conflicts with mergiraf...")
+                fix_merge_script = os.path.join(
+                    repo_root, "ferrocene", "tools", "fix-merge", "fix-merge.sh"
+                )
+                run([fix_merge_script] + files_with_conflicts)
 
         # Mark the update as not being executed (returning None) when no commit
         # was created by the subtree pull. Otherwise the PR automation will try

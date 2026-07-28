@@ -159,6 +159,7 @@ EOF
 
 ENV PATH=/usr/local/cmake-4.4.0-linux-x86_64/bin/:$PATH
 
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkg_config
 RUN <<-EOF
     set -eu
 

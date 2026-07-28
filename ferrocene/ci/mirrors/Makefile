@@ -132,6 +132,14 @@ builder-image: builder.dockerfile gcc openssl
 	cp ../../output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz openssl.tar.xz
 	docker build --tag centos7-builder --file ../../builder.dockerfile .
 
+.ONESHELL:
+builder-python-image: buolder-image builder-python.dockerfile
+	set -xe
+	mkdir -p build/builder-python
+	cd build/builder-python
+	cp ../../output/python-$(python-version)-$(host-arch)-$(commit).tar.xz python.tar.xz
+	docker build --tag centos7-python-builder --build-arg=PYTHON_VERSION=$(python-version)  --file ../../builder-python.dockerfile .
+
 download-musl-cross-src:
 	mkdir -p build/musl-cross
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz build/musl-cross/musl-cross-make.tar.xz
@@ -181,10 +189,9 @@ download-gdb-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gdb/gdb_$(gdb-version).orig.tar.xz build/gdb/gdb-source.tar.xz
 
 .ONESHELL:
-gdb: download-gdb-src gdb.dockerfile builder-image python prepare
+gdb: download-gdb-src gdb.dockerfile builder-python-image prepare
 	cd build/gdb
-	cp ../../output/python-$(python-version)-$(host-arch)-$(commit).tar.xz python.tar.xz
-	docker build -t gdb:v$(gdb-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../gdb.dockerfile .
+	docker build -t gdb:v$(gdb-version)  --build-arg=PYTHON_VERSION=$(python-version)  -f ../../gdb.dockerfile .
 	{ \
 		set -xe ; \
 		id=$$(docker create gdb:v$(gdb-version)) ; \
@@ -237,6 +244,7 @@ clean-output:
 clean-docker:
 	docker image rm centos7-base
 	docker image rm centos7-builder
+	docker image rm centos7-python-builder
 	docker image rm gcc:$(gcc-version)
 	docker image rm gcc-11:$(gcc-11-version)
 	docker image rm musl-tarballs:$(musl-cross-target-version)

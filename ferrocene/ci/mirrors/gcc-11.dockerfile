@@ -26,7 +26,8 @@ RUN <<EOT
         --target=${host_platform}-linux-gnu \
         --prefix=/opt/local/gcc \
         --enable-checking=release \
-        --enable-languages=c,c++
+        --enable-languages=c,c++ \
+        --disable-multilib
 EOT
 
 RUN make

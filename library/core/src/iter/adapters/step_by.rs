@@ -450,10 +450,12 @@ trait AsLegacyRange<T> {
 
 impl<T> AsLegacyRange<T> for Range<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_legacy_range(&self) -> &Range<T> {
         self
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_legacy_range_mut(&mut self) -> &mut Range<T> {
         self
     }
@@ -461,10 +463,12 @@ impl<T> AsLegacyRange<T> for Range<T> {
 
 impl<T> AsLegacyRange<T> for RangeIter<T> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_legacy_range(&self) -> &Range<T> {
         &self.0
     }
     #[inline]
+    #[ferrocene::prevalidated]
     fn as_legacy_range_mut(&mut self) -> &mut Range<T> {
         &mut self.0
     }

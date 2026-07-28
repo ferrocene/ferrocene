@@ -18,13 +18,14 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::git;
 use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
     const DEST: &'static str;
+    const REQUIRES_TEST_OUTCOMES: bool;
 }
 
 fn copy_breadcrumbs_assets(builder: &Builder<'_>, dest: &Path) {
@@ -365,11 +366,12 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         if self.require_test_outcomes {
             if let Some(path) = builder.ensure(TestOutcomesDir) {
                 cmd.env("FERROCENE_TEST_OUTCOMES_DIR", path);
+            } else {
+                // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
+                // to show in the docs.
+                cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
             }
         }
-        // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
-        // to show in the docs.
-        cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
 
         if should_serve && builder.config.cmd.open() {
             cmd.arg("--open-browser");
@@ -554,6 +556,7 @@ macro_rules! sphinx_books {
             impl IsSphinxBook for $ty {
                 const SOURCE: &'static str = $src;
                 const DEST: &'static str = $dest;
+                const REQUIRES_TEST_OUTCOMES: bool = false $(|| $require_test_outcomes)*;
             }
         )*
 
@@ -735,18 +738,21 @@ sphinx_books! [
         name: "qnx7-manual",
         src: "ferrocene/doc/qnx7-manual",
         dest: "targets/qnx7-manual",
+        require_test_outcomes: true,
     },
     {
         ty: QNX8Manual,
         name: "qnx8-manual",
         src: "ferrocene/doc/qnx8-manual",
         dest: "targets/qnx8-manual",
+        require_test_outcomes: true,
     },
     {
         ty: RHIVOSManual,
         name: "rhivos-manual",
         src: "ferrocene/doc/rhivos-manual",
         dest: "targets/rhivos-manual",
+        require_test_outcomes: true,
     },
 ];
 
@@ -1024,9 +1030,10 @@ fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
 /// [None] if there is no entry for the requested `submodule_path`.
 fn get_submodule_version(
     submodule_path: &str,
-    exec_ctx: impl AsRef<ExecutionContext>,
+    builder: &Builder<'_>,
 ) -> Option<String> {
-    let submodule_status = git(None).args(["submodule", "status"]).run_capture(exec_ctx).stdout();
+    builder.require_submodule(submodule_path, None);
+    let submodule_status = git(None).args(["submodule", "status"]).run_capture(builder).stdout();
     submodule_status.lines().find_map(|line| parse_submodule_line(line, submodule_path))
 }
 

@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::builder::Kind;
-use crate::core::config::{self, TargetSelection};
+use crate::core::config::{self, FerroceneTestOutcomes, TargetSelection};
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::utils::exec::BootstrapCommand;
@@ -34,19 +34,13 @@ impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     }
 
     fn run(self, builder: &Builder<'_>) {
-        error_when_signatures_are_ignored(builder, "sign a document");
+        validate_config(builder, S::REQUIRES_TEST_OUTCOMES, "sign a document");
 
         let force_args: &[&str] = match builder.config.cmd {
             Subcommand::Sign { force: true, .. } => &["--force"],
             Subcommand::Sign { force: false, .. } => &[],
             _ => panic!("only the sign command supports signing documents"),
         };
-
-        // Ensure we always have all submodules updated, otherwise the signatures
-        // produced locally may be different than what CI produces.
-        // While this is not strictly required, it has caught us during release and
-        // caused an abundance of stress.
-        builder.require_and_update_all_submodules();
 
         let document = builder.ensure(self.document);
         let mut signing_cmd = document_signatures_cmd::<S>(builder);
@@ -156,7 +150,7 @@ pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(
     cmd
 }
 
-pub(crate) fn error_when_signatures_are_ignored(builder: &Builder<'_>, action: &str) {
+pub(crate) fn validate_config(builder: &Builder<'_>, requires_test_outcomes: bool, action: &str) {
     if let config::FerroceneDocumentSignatures::Disabled =
         &builder.config.ferrocene_document_signatures
     {
@@ -170,5 +164,16 @@ pub(crate) fn error_when_signatures_are_ignored(builder: &Builder<'_>, action: &
         eprintln!("   document-signatures = \"disabled\"");
         eprintln!();
         panic!("document signatures are ignored");
+    }
+
+    if requires_test_outcomes && matches!(builder.config.ferrocene_test_outcomes, FerroceneTestOutcomes::Disabled) {
+        eprintln!("You're trying to {action} when test outcomes are disabled.");
+        eprintln!("The signed documents will NOT be valid.");
+        eprintln!();
+        eprintln!("Configure bootstrap to download them from CI:");
+        eprintln!();
+        eprintln!("    [ferrocene]");
+        eprintln!("    test-outcomes = \"download-ci\"");
+        panic!("document signatures are invalid");
     }
 }

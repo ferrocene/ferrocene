@@ -7,7 +7,7 @@
 
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::{BufWriter, Seek, Write};
+use std::io::{Seek, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -15,7 +15,7 @@ use anyhow::{Context, Error, bail};
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
-use crate::{Env, TOML_HEADER_COMMENTS};
+use crate::{Env, TOML_HEADER_COMMENTS, write};
 
 pub(crate) struct SignatureFiles<'env> {
     signature_toml: Signature,
@@ -28,7 +28,7 @@ impl<'env> SignatureFiles<'env> {
         let signature_toml_path = document.join("signature").join("signature.toml");
 
         let signature_toml = if signature_toml_path.exists() {
-            toml::from_slice(&std::fs::read(&signature_toml_path)?)?
+            toml::from_slice(&std::fs::read(&signature_toml_path).context("failed to read signature/signature.toml")?).context("invalid toml")?
         } else {
             Signature { files: BTreeMap::new() }
         };
@@ -122,16 +122,17 @@ impl<'env> SignatureFiles<'env> {
         Ok(())
     }
 
+    // Delete all file signatures.
+    pub(crate) fn clear(&mut self) {
+        self.signature_toml.files.clear();
+    }
+
     fn persist(&self) -> Result<(), Error> {
-        if let Some(parent) = self.signature_toml_path.parent() {
-            std::fs::create_dir_all(parent)?;
-        }
-
-        let mut output = BufWriter::new(File::create(&self.signature_toml_path)?);
-        output.write_all(TOML_HEADER_COMMENTS.as_bytes())?;
-        output.write_all(&toml::to_vec(&self.signature_toml)?)?;
-
-        Ok(())
+        write::write_atomic(&self.signature_toml_path, |output| {
+            output.write_all(TOML_HEADER_COMMENTS.as_bytes())?;
+            output.write_all(&toml::to_vec(&self.signature_toml)?)?;
+            Ok(())
+        })
     }
 }
 

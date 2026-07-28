@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 FROM --platform=$TARGETPLATFORM centos7-base AS build
+ARG TARGETPLATFORM
 
 COPY gcc.tar.xz /gcc.tar.xz
 RUN mkdir -p /opt/local/gcc
@@ -17,3 +18,18 @@ ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
 RUN ldconfig
+
+RUN <<-EOF
+    set -eu
+
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        host_platform=x86_64
+        curl -Lo ninja-build.zip https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        host_platform=aarch64
+        curl -Lo ninja-build.zip https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux-aarch64.zip
+    fi
+    unzip ninja-build.zip
+    mv ninja /usr/local/bin
+    rm -f ninja-build.zip
+EOF

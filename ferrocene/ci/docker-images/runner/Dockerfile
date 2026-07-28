@@ -40,6 +40,8 @@ RUN mkdir -p /ferrocene/packages
 RUN yum -y install \
     wget curl \
     zstd xz bzip2 gzip unzip \
+    zlib-devel \
+    glibc-devel \
     binutils \
     tar \
     make patch \
@@ -49,8 +51,6 @@ RUN yum -y install \
     openssh-clients \
     ca-certificates \
     libedit-devel \
-    openssl11-devel \
-    zlib-devel \
     sudo \
     binutils \
     procps-ng \
@@ -157,6 +157,21 @@ RUN <<-EOF
     ln -s /usr/local/bin/gcc /usr/local/bin/cc
 EOF
 
+ENV PATH=/usr/local/cmake-4.4.0-linux-x86_64/bin/:$PATH
+
+RUN <<-EOF
+    set -eu
+
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        host_platform=x86_64
+        curl -Lo nina-build.zip https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        host_platform=aarch64
+        curl -Lo nina-build.zip https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux-aarch64.zip
+    fi
+    unzip nina-build.zip
+    mv ninja /usr/local/bin
+EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.

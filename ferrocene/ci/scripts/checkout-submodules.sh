@@ -21,7 +21,7 @@ pids=()
 for submodule in ${submodules}; do
     # Don't break if the default remote has a name other than `origin`.
     # See the comment in bootstrap::config::update_submodule.
-    git -c "branch.${current_branch}.remote=origin" submodule update --depth 1 "${submodule}" &
+    git -c "branch.${current_branch}.remote=origin" submodule update "${submodule}" &
     pids+=($!)
 done
 

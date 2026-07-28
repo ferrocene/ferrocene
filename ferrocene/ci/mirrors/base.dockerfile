@@ -16,7 +16,7 @@ RUN yum -y install \
     tar \
     make patch \
     file which \
-    glibc-devel
+    glibc-devel.x86_64 glibc-devel.i686
 
 
 RUN <<-EOF

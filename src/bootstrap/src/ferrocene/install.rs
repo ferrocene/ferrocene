@@ -15,7 +15,7 @@ use walkdir::WalkDir;
 
 use crate::core::build_steps::dist;
 use crate::core::build_steps::tool::RustcPrivateCompilers;
-use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::{Config, TargetSelection};
 use crate::utils::tarball::GeneratedTarball;
 use crate::{Compiler, Kind};
@@ -123,7 +123,7 @@ macro_rules! install {
             }
         }
 
-        impl Step for $name {
+        impl CommandLineStep for $name {
             type Output = ();
             const IS_HOST: bool = $only_hosts;
             $(const $c: bool = true;)*
@@ -265,7 +265,7 @@ pub struct Src {
     pub stage: u32,
 }
 
-impl Step for Src {
+impl CommandLineStep for Src {
     type Output = ();
     const IS_HOST: bool = true;
 

@@ -3,7 +3,9 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::builder::{Builder, Cargo, RunConfig, ShouldRun, Step, crate_description};
+use crate::builder::{
+    Builder, Cargo, CommandLineStep, RunConfig, ShouldRun, Step, crate_description,
+};
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
 use crate::core::config::flags::FerroceneCoverageFor;
@@ -23,7 +25,7 @@ pub(crate) struct TraceabilityMatrix {
     pub(crate) compiler: Compiler,
 }
 
-impl Step for TraceabilityMatrix {
+impl CommandLineStep for TraceabilityMatrix {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
@@ -126,11 +128,6 @@ impl CertifiedCoreSymbols {
 
 impl Step for CertifiedCoreSymbols {
     type Output = PathBuf;
-    const IS_HOST: bool = true;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         if !builder.config.std_debug_assertions {
@@ -167,16 +164,10 @@ impl Step for CertifiedCoreSymbols {
         let check_stamp =
             build_stamp::libstd_stamp(builder, build_compiler, target).with_prefix("symbol-report");
 
-        let tail_args = if builder.was_invoked_explicitly::<Self>(Kind::Run) {
-            builder.config.free_args.clone()
-        } else {
-            Vec::new()
-        };
-
         run_cargo(
             builder,
             cargo,
-            tail_args,
+            vec![],
             &check_stamp,
             vec![],
             crate::core::build_steps::compile::ArtifactKeepMode::BothRlibAndRmeta,
@@ -196,7 +187,7 @@ pub(crate) struct CoverageReport {
     pub(super) instrumented_binaries: Vec<PathBuf>,
 }
 
-impl Step for CoverageReport {
+impl CommandLineStep for CoverageReport {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 

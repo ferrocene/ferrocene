@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::FileType;
-use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 
@@ -11,7 +11,7 @@ pub(crate) struct AllCoverageReports {
     pub(crate) target: TargetSelection,
 }
 
-impl Step for AllCoverageReports {
+impl CommandLineStep for AllCoverageReports {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

@@ -11,7 +11,7 @@ use std::rc::Rc;
 
 use serde_json::json;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::doc::Rustc;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
@@ -29,7 +29,7 @@ pub(crate) struct Docs {
     pub(crate) target: TargetSelection,
 }
 
-impl Step for Docs {
+impl CommandLineStep for Docs {
     type Output = Vec<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -77,7 +77,7 @@ pub(crate) struct DocsDoctrees {
     target: TargetSelection,
 }
 
-impl Step for DocsDoctrees {
+impl CommandLineStep for DocsDoctrees {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
@@ -108,7 +108,7 @@ impl Step for DocsDoctrees {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct SourceTarball;
 
-impl Step for SourceTarball {
+impl CommandLineStep for SourceTarball {
     type Output = Vec<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -379,7 +379,7 @@ pub(crate) struct SelfTest {
     pub(crate) target: TargetSelection,
 }
 
-impl Step for SelfTest {
+impl CommandLineStep for SelfTest {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
@@ -409,7 +409,7 @@ impl Step for SelfTest {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct TestOutcomes;
 
-impl Step for TestOutcomes {
+impl CommandLineStep for TestOutcomes {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -433,7 +433,7 @@ impl Step for TestOutcomes {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CoverageOutcomes;
 
-impl Step for CoverageOutcomes {
+impl CommandLineStep for CoverageOutcomes {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
@@ -459,7 +459,7 @@ impl Step for CoverageOutcomes {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct GenerateBuildMetadata;
 
-impl Step for GenerateBuildMetadata {
+impl CommandLineStep for GenerateBuildMetadata {
     type Output = ();
     const IS_HOST: bool = true;
 

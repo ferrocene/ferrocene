@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::FileType;
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 
@@ -11,7 +11,7 @@ pub(crate) struct FlipLink {
     pub(crate) target: TargetSelection,
 }
 
-impl Step for FlipLink {
+impl CommandLineStep for FlipLink {
     type Output = GeneratedTarball;
     const IS_HOST: bool = false;
 

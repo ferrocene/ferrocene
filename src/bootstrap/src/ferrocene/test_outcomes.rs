@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::builder::{Builder, Step};
 use crate::core::config::FerroceneTestOutcomes;
 use crate::ferrocene::download_and_extract_ci_outcomes;
 
@@ -12,10 +12,6 @@ pub(super) struct TestOutcomesDir;
 
 impl Step for TestOutcomesDir {
     type Output = Option<PathBuf>;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         match &builder.config.ferrocene_test_outcomes {

@@ -71,7 +71,7 @@ impl CommandLineStep for Docs {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own documentation tarball.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -172,7 +172,7 @@ impl CommandLineStep for RustcDocs {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't ship the compiler documentation.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1246,7 +1246,7 @@ impl CommandLineStep for PlainSourceTarball {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own alternative for it.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1293,7 +1293,7 @@ impl CommandLineStep for PlainSourceTarballGpl {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own alternative for it.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1859,7 +1859,7 @@ impl CommandLineStep for Extended {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't support the extended tarball.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {

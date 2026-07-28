@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
 use crate::core::config::TargetSelection;
@@ -16,7 +16,7 @@ pub(crate) struct FlipLink {
 
 pub(in crate::ferrocene) const PATH: &str = "ferrocene/tools/flip-link";
 
-impl Step for FlipLink {
+impl CommandLineStep for FlipLink {
     type Output = PathBuf;
     const IS_HOST: bool = false;
 

@@ -650,6 +650,12 @@ impl<'a> ShouldRun<'a> {
         self
     }
 
+    // Ferrocene addition: Marker for upstream `CommandLineStep`s which are disabled in Ferrocene
+    pub fn ferrocene_disabled(mut self) -> ShouldRun<'a> {
+        self.paths.insert(PathSet::empty());
+        self
+    }
+
     /// Given a set of requested paths, return the subset which match the Step for this `ShouldRun`,
     /// removing the matches from `paths`.
     ///
@@ -1860,7 +1866,10 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
         // multiple books at the same time.
         self.should_serve_called.fetch_add(1, atomic::Ordering::Relaxed);
 
-        self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
+        // Note(rachel.barker): None of the types this is called for can *ever* be explicitly invoked,
+        // so this is effectively always false
+        //self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
+        false
     }
 
     // Ferrocene addition

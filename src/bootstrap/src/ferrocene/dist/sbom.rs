@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 
 use crate::FileType;
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 
@@ -15,7 +15,7 @@ pub(crate) struct Sbom {
 
 const SBOM_CMD_NAME: &str = "ferrocene-sbom";
 
-impl Step for Sbom {
+impl CommandLineStep for Sbom {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 

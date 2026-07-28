@@ -369,10 +369,6 @@ pub(crate) struct ProfilerBuiltins {
 impl Step for ProfilerBuiltins {
     type Output = PathBuf;
 
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
     // c.f. impl Step for Std
     fn run(self, builder: &Builder<'_>) -> PathBuf {
         let mut cargo = builder::Cargo::new(

@@ -4,7 +4,7 @@
 pub(crate) mod certified_core_symbols;
 pub(crate) mod flip_link;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
@@ -17,7 +17,7 @@ pub(crate) struct TraceabilityMatrixTool {
     host: TargetSelection,
 }
 
-impl Step for TraceabilityMatrixTool {
+impl CommandLineStep for TraceabilityMatrixTool {
     type Output = ();
     const IS_HOST: bool = true;
 
@@ -55,7 +55,7 @@ pub(crate) struct SelfTest {
     target: TargetSelection,
 }
 
-impl Step for SelfTest {
+impl CommandLineStep for SelfTest {
     type Output = ();
     const IS_HOST: bool = true;
 
@@ -95,7 +95,7 @@ pub(crate) struct CheckDocumentSignatures {
     target: TargetSelection,
 }
 
-impl Step for CheckDocumentSignatures {
+impl CommandLineStep for CheckDocumentSignatures {
     type Output = ();
     const IS_HOST: bool = true;
 
@@ -135,7 +135,7 @@ pub(crate) struct GenerateTarball {
     target: TargetSelection,
 }
 
-impl Step for GenerateTarball {
+impl CommandLineStep for GenerateTarball {
     type Output = ();
     const IS_HOST: bool = true;
 
@@ -179,7 +179,7 @@ impl Step for GenerateTarball {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct DiffUpstream {}
-impl Step for DiffUpstream {
+impl CommandLineStep for DiffUpstream {
     type Output = ();
     const IS_HOST: bool = true;
 

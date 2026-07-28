@@ -357,7 +357,7 @@ impl CommandLineStep for Standalone {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Ferrocene has its own documentation index.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -469,7 +469,7 @@ impl CommandLineStep for Releases {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Ferrocene has its own release notes.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {

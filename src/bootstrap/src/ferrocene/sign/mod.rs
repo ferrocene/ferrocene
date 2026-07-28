@@ -10,7 +10,7 @@ pub(crate) mod signature_files;
 
 use std::path::{Path, PathBuf};
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::builder::Kind;
 use crate::core::config::{self, TargetSelection};
@@ -27,11 +27,6 @@ struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
 
 impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     type Output = ();
-    const IS_HOST: bool = true;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) {
         error_when_signatures_are_ignored(builder, "sign a document");
@@ -69,7 +64,7 @@ macro_rules! documents {
                 target: TargetSelection,
             }
 
-            impl Step for $name {
+            impl CommandLineStep for $name {
                 type Output = ();
                 const IS_HOST: bool = true;
 

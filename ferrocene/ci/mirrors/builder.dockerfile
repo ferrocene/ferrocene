@@ -11,6 +11,8 @@ ENV PATH=/opt/local/gcc/bin:$PATH
 COPY openssl.tar.xz /openssl.tar.xz
 RUN tar -xf /openssl.tar.xz -C /usr/local
 
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
+
 # add /usr/local/lib to ld's path
 RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf

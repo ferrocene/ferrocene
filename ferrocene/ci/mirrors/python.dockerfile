@@ -27,5 +27,6 @@ ENV PATH=/opt/python/${PYTHON_VERSION}/bin:$PATH
 RUN pip3 install --upgrade pip
 # python 3.12 no longer comes with bundled setuptools
 RUN pip3 install setuptools
+RUN pip3 install truststore
 RUN echo "Creating $(du -hs .) archive"
 RUN tar -C /opt/python/${PYTHON_VERSION}/ -cJf python-binaries.tar.xz --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

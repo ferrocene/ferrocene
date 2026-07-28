@@ -23,91 +23,38 @@
 # you know what you're doing.
 
 
-FROM --platform=$TARGETPLATFORM amazonlinux:2
+
+FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-RUN <<-EOF
-    set -xe
-    mkdir -p /ferrocene/packages
-
-    # gpg and gpg-agent are pre-installed
-    yum -y install \
-        gawk \
-        git-core \
-        ninja-build \
-        openssh-clients \
-        file \
-        curl \
-        tar \
-        ca-certificates \
-        libedit-devel \
-        openssl11-devel \
-        zlib-devel \
-        zstd \
-        xz \
-        unzip \
-        bzip2 \
-        sudo \
-        binutils \
-        gcc10 gcc10-c++ \
-        procps-ng \
-        shadow-utils
-
-        # llvm
-        # gcc gcc-c++ \
-
-#        build-essential \
-#        gcc-s390x-linux-gnu \
-#        g++-s390x-linux-gnu \
-#        gcc-powerpc64le-linux-gnu \
-#        g++-powerpc64le-linux-gnu
+# CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
+RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
+  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
+RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
 
 
-    # # make gcc 10 default
-    sudo update-alternatives \
-      --install /usr/bin/gcc gcc /usr/bin/gcc10-gcc 100 \
-      --slave /usr/bin/cc cc /usr/bin/gcc10-cc \
-      --slave /usr/bin/g++ g++ /usr/bin/gcc10-c++ \
-      --slave /usr/bin/c++ c++ /usr/bin/gcc10-c++ \
-      --slave /usr/bin/gcov gcov /usr/bin/gcc10-gcov \
-      --slave /usr/bin/ld.bfd ld.bfd /usr/bin/gcc10-ld.bfd \
-      --slave /usr/bin/ld ld /usr/bin/gcc10-ld.bfd
-    #   --slave /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 \
-    #   --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10
-
-    # # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
-    # # no gcc 10 package exists for this, this is an even older gcc than the standard gcc (9.2 vs 9.4)
-    # apt-install gcc-arm-none-eabi
-
-EOF
-
-# RUN ln -s /usr/bin/gcc10-gcc /usr/bin/gcc
-# RUN ln -s /usr/bin/gcc10-cc /usr/bin/cc
-# RUN ln -s /usr/bin/gcc10-ld.bfd /usr/bin/ld
-# RUN ln -s /usr/bin/gcc10-ar /usr/bin/ar
-# RUN ln -s /usr/bin/gcc10-c++ /usr/bin/g++
-# RUN ln -s /usr/bin/gcc10-c++ /usr/bin/c++
-# RUN ln -s /usr/bin/gcc10-readelf /usr/bin/readelf
-# RUN ln -s /usr/bin/gcc10-strings /usr/bin/strings
-# RUN ln -s /usr/bin/gcc10-strip /usr/bin/strip
-# RUN ln -s /usr/bin/gcc10-size /usr/bin/size
-
-# RUN <<-EOF
-#     set -xe
-#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-#         curl -LO https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-Linux-X64.tar.xz
-#         tar -C /usr/ --strip-components=1 -xf LLVM-22.1.8-Linux-X64.tar.xz
-#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-#         curl -LO  https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-Linux-ARM64.tar.xz
-#         tar -C /usr/ --strip-components=1 -xf LLVM-22.1.8-Linux-ARM64.tar.xz
-#     else
-#         echo "Unsupported platform"
-#         exit 1
-#     fi
-# EOF
+RUN mkdir -p /ferrocene/packages
+RUN yum -y install \
+    wget curl \
+    zstd xz bzip2 gzip unzip \
+    binutils \
+    tar \
+    make patch \
+    file which \
+    gawk \
+    git-core \
+    openssh-clients \
+    ca-certificates \
+    libedit-devel \
+    openssl11-devel \
+    zlib-devel \
+    sudo \
+    binutils \
+    procps-ng \
+    shadow-utils
 
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
 # are too old to be useful (they don't know about the `z` ISA flag).
@@ -251,6 +198,7 @@ RUN <<-EOF
     useradd --uid 1000 --gid 1000 -d /home/ci -m ci
     useradd --uid 1001 --gid 1001 ci-user
 EOF
+
 USER ci
 WORKDIR /home/ci
 

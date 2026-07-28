@@ -9,6 +9,7 @@ python-version=3.12.3
 gdb-version=12.1
 cmake-version=4.4.0
 arm-gnu-toolchain=15.3.rel1
+git-version=2.55.0
 commit != git rev-parse HEAD | cut -c 1-8
 host-arch != uname -m
 
@@ -200,14 +201,33 @@ gdb: download-gdb-src gdb.dockerfile builder-python-image prepare
 		docker rm $$id ; \
 	}
 
-upload-gdb: gdb
+upload-gdb:
 	aws s3 cp --no-overwrite output/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-$(host-arch)-$(commit).tar.xz
 
+download-git-src:
+	mkdir -p build/git
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/git/git-$(git-version).tar.xz build/git/git-source.tar.xz
 
-download-all-src: download-musl-cross-src download-python-src download-gdb-src download-openssl-src download-gcc-11-src download-gcc-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
-build-all: musl-cross python gdb openssl gcc-11 gcc repack-arm-aarch64-none repack-arm-eabi-none
-upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc-11 upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
+.ONESHELL:
+git: download-git-src git.dockerfile builder-python-image prepare
+	cd build/git
+	docker build -t git:v$(git-version) -f ../../git.dockerfile .
+	{ \
+		set -xe ; \
+		id=$$(docker create git:v$(git-version)) ; \
+		docker cp $$id:/git/git-binaries.tar.xz \
+			../../output/git-$(git-version)-$(host-arch)-$(commit).tar.xz ; \
+		docker rm $$id ; \
+	}
+
+upload-git:
+	aws s3 cp --no-overwrite output/git-$(git-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/git/git-$(git-version)-$(host-arch)-$(commit).tar.xz
+
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-git-src download-openssl-src download-gcc-11-src download-gcc-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
+build-all: musl-cross python gdb git openssl gcc-11 gcc repack-arm-aarch64-none repack-arm-eabi-none
+upload-all: upload-musl-cross upload-python upload-gdb upload-git upload-openssl upload-gcc-11 upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
 
 .ONESHELL:
 update-hashes:

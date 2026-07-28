@@ -9,6 +9,7 @@ use rustc_index::bit_set::DenseBitSet;
 
 use crate::fold::TypeFoldable;
 use crate::inherent::*;
+use crate::intern::Interned;
 use crate::ir_print::IrPrint;
 use crate::lang_items::{SolverAdtLangItem, SolverProjectionLangItem, SolverTraitLangItem};
 use crate::relate::Relate;
@@ -16,7 +17,10 @@ use crate::solve::{
     AccessedOpaques, CanonicalInput, Certainty, ExternalConstraintsData, QueryResult, inspect,
 };
 use crate::visit::{Flags, TypeVisitable};
-use crate::{self as ty, CanonicalParamEnvCacheEntry, TraitRef, search_graph};
+use crate::{
+    self as ty, BoundRegion, BoundVar, CanonicalParamEnvCacheEntry, DebruijnIndex, Region,
+    RegionKind, TraitRef, search_graph,
+};
 
 #[cfg_attr(feature = "nightly", rustc_diagnostic_item = "type_ir_interner")]
 pub trait Interner:
@@ -180,9 +184,10 @@ pub trait Interner:
     type ScalarInt: Copy + Debug + Hash + Eq;
 
     // Kinds of regions
-    type Region: Region<Self>;
     type EarlyParamRegion: ParamLike;
     type LateParamRegion: Copy + Debug + Hash + Eq;
+
+    type InternedRegionKind: Interned<Self, Value = RegionKind<Self>>;
 
     type RegionAssumptions: Copy
         + Debug
@@ -418,6 +423,8 @@ pub trait Interner:
 
     fn impl_polarity(self, impl_def_id: Self::ImplId) -> ty::ImplPolarity;
 
+    fn is_fully_generic_for_reflection(self, impl_def_id: Self::ImplId) -> bool;
+
     fn trait_is_auto(self, trait_def_id: Self::TraitId) -> bool;
 
     fn trait_is_coinductive(self, trait_def_id: Self::TraitId) -> bool;
@@ -460,9 +467,28 @@ pub trait Interner:
     fn evaluate_root_goal_for_proof_tree_raw(
         self,
         canonical_goal: CanonicalInput<Self>,
+        root_depth: usize,
     ) -> (QueryResult<Self>, Self::Probe);
 
+    fn emit_next_solver_overflow_fcw(self, predicate: Self::Predicate, span: Self::Span);
+
     fn item_name(self, item_index: Self::DefId) -> Self::Symbol;
+
+    fn get_anon_re_bounds_lifetime(self, idx: usize, var_idx: usize) -> Option<Region<Self>>;
+
+    fn get_anon_re_canonical_bounds_lifetime(self, idx: usize) -> Option<Region<Self>>;
+
+    fn get_re_static_lifetime(self) -> Region<Self>;
+
+    fn intern_region(self, region_kind: RegionKind<Self>) -> Region<Self>;
+
+    fn intern_bound_region(
+        self,
+        debruijn: DebruijnIndex,
+        bound_region: BoundRegion<Self>,
+    ) -> Region<Self>;
+
+    fn intern_canonical_bound(self, var: BoundVar) -> Region<Self>;
 }
 
 macro_rules! declare_lift_into {
@@ -489,16 +515,19 @@ declare_lift_into! {
     BoundVarKinds,
     Const,
     DefId,
+    EarlyParamRegion,
+    ErrorGuaranteed,
     FreeConstAliasId,
     FreeTyAliasId,
     GenericArg,
     GenericArgs,
     InherentAssocConstId,
     InherentAssocTyId,
+    InternedRegionKind,
+    LateParamRegion,
     OpaqueTyId,
     ParamEnv,
     PatList,
-    Region,
     RegionAssumptions,
     Symbol,
     Term,
@@ -654,7 +683,7 @@ impl<T, R, E> CollectAndApply<T, R> for Result<T, E> {
 impl<I: Interner> search_graph::Cx for I {
     type Input = CanonicalInput<I>;
     type Result = (QueryResult<I>, AccessedOpaques<I>);
-    type AmbiguityInfo = Certainty;
+    type AmbiguityKind = Certainty;
 
     type DepNodeIndex = I::DepNodeIndex;
     type Tracked<T: Debug + Clone> = I::Tracked<T>;

@@ -6,8 +6,9 @@ use crate; //~ ERROR imports need to be explicitly named
 use *; //~ ERROR cannot glob-import all possible crates
 
 fn main() {
-    let s = ::xcrate; //~ ERROR expected value, found crate `::xcrate`
-                      //~^ NOTE not a value
+    let s = ::xcrate; //~ ERROR cannot find crate `xcrate` in the list of imported crates
+                      //~^ NOTE not found in the list of imported crates
+                      //~| NOTE a crate named `::xcrate` exists in another namespace
 }
 
 // ferrocene-annotations: fls_9i5msiuuyihf

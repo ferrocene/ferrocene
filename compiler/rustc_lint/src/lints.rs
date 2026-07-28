@@ -840,36 +840,25 @@ pub(crate) enum RedefiningRuntimeSymbolsDiag<'tcx> {
         "invalid definition of the runtime `{$symbol_name}` symbol used by the standard library"
     )]
     #[note(
-        "expected `{$expected_fn_sig}`
+        "expected `{$expected_fn_sig}` (for the current target)
     found    `{$found_fn_sig}`"
     )]
     #[help(
         "either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = \"{$symbol_name}\")]`, or `#[link_name = \"{$symbol_name}\"]`"
     )]
-    FnDefInvalid { symbol_name: String, expected_fn_sig: Ty<'tcx>, found_fn_sig: Ty<'tcx> },
+    Invalid { symbol_name: String, expected_fn_sig: Ty<'tcx>, found_fn_sig: Ty<'tcx> },
     #[diag(
         "suspicious definition of the runtime `{$symbol_name}` symbol used by the standard library"
     )]
     #[note(
-        "expected `{$expected_fn_sig}`
+        "expected `{$expected_fn_sig}` (for the current target)
     found    `{$found_fn_sig}`"
     )]
     #[help(
         "either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = \"{$symbol_name}\")]`, or `#[link_name = \"{$symbol_name}\"]`"
     )]
     #[help("allow this lint if the signature is compatible")]
-    FnDefSuspicious { symbol_name: String, expected_fn_sig: Ty<'tcx>, found_fn_sig: Ty<'tcx> },
-    #[diag(
-        "invalid definition of the runtime `{$symbol_name}` symbol used by the standard library"
-    )]
-    #[note(
-        "expected `{$expected_fn_sig}`
-    found    `static {$symbol_name}: {$static_ty}`"
-    )]
-    #[help(
-        "either fix the signature or remove any attributes `#[unsafe(no_mangle)]` or `#[unsafe(export_name = \"{$symbol_name}\")]`"
-    )]
-    Static { symbol_name: String, static_ty: Ty<'tcx>, expected_fn_sig: Ty<'tcx> },
+    Suspicious { symbol_name: String, expected_fn_sig: Ty<'tcx>, found_fn_sig: Ty<'tcx> },
 }
 
 // drop_forget_useless.rs

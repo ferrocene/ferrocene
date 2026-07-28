@@ -1,6 +1,5 @@
 // ignore-tidy-file-filelength
-use std::env::VarError;
-use std::{panic, thread};
+use std::panic;
 
 use build_helper::ci::CiEnv;
 use build_helper::git::GitConfig;
@@ -8,8 +7,6 @@ use build_helper::stage0_parser::parse_stage0_file;
 use llvm::prebuilt_llvm_config;
 
 use super::*;
-use crate::Flags;
-use crate::core::build_steps::doc::DocumentationFormat;
 use crate::core::builder::cli_paths::PATH_REMAP;
 use crate::core::config::Config;
 use crate::utils::cache::ExecutedStep;
@@ -19,7 +16,6 @@ use crate::utils::tests::{ConfigBuilder, TestCtx};
 
 static TEST_TRIPLE_1: &str = "i686-unknown-haiku";
 static TEST_TRIPLE_2: &str = "i686-unknown-hurd-gnu";
-static TEST_TRIPLE_3: &str = "i686-unknown-netbsd";
 
 fn configure(cmd: &str, host: &[&str], target: &[&str]) -> Config {
     configure_with_args(&[cmd], host, target)
@@ -27,10 +23,6 @@ fn configure(cmd: &str, host: &[&str], target: &[&str]) -> Config {
 
 fn configure_with_args(cmd: &[&str], host: &[&str], target: &[&str]) -> Config {
     TestCtx::new().config(cmd[0]).args(&cmd[1..]).hosts(host).targets(target).create_config()
-}
-
-fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
-    v.into_iter().map(|(a, _)| a).collect::<Vec<_>>()
 }
 
 fn run_build(paths: &[PathBuf], config: Config) -> Cache {
@@ -46,28 +38,6 @@ fn check_cli<const N: usize>(paths: [&str; N]) {
         &paths.map(PathBuf::from),
         configure_with_args(&paths, &[TEST_TRIPLE_1], &[TEST_TRIPLE_1]),
     );
-}
-
-macro_rules! std {
-    ($host:ident => $target:ident, stage = $stage:literal) => {
-        compile::Std::new(
-            Compiler::new($stage, TargetSelection::from_user($host)),
-            TargetSelection::from_user($target),
-        )
-    };
-}
-
-macro_rules! doc_std {
-    ($host:ident => $target:ident, stage = $stage:literal) => {{ doc::Std::new($stage, TargetSelection::from_user($target), DocumentationFormat::Html) }};
-}
-
-macro_rules! rustc {
-    ($host:ident => $target:ident, stage = $stage:literal) => {
-        compile::Rustc::new(
-            Compiler::new($stage, TargetSelection::from_user($host)),
-            TargetSelection::from_user($target),
-        )
-    };
 }
 
 #[test]
@@ -256,10 +226,7 @@ fn parse_config_download_rustc_at(path: &Path, download_rustc: &str, ci: bool) -
 }
 
 mod dist {
-    use pretty_assertions::assert_eq;
-
-    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, first, run_build};
-    use crate::Flags;
+    use super::{Config, TEST_TRIPLE_1, TEST_TRIPLE_2};
     use crate::core::builder::tests::host_target;
     use crate::core::builder::*;
 
@@ -372,7 +339,7 @@ fn test_test_coverage() {
         // case is the one that failed.
         println!("Testing case: {cmd:?}");
         let config = configure_with_args(cmd, &[], &[TEST_TRIPLE_1]);
-        let mut cache = run_build(&config.paths.clone(), config);
+        let cache = run_build(&config.paths.clone(), config);
 
         let modes =
             cache.inspect_all_steps_of_type::<test::Coverage, _>(|step, ()| step.mode.as_str());
@@ -537,22 +504,15 @@ fn any_debug() {
 ///
 /// Ferrocene note: many snapshots differ from upstream, which is due to custom bootstrap changes.
 mod snapshot {
-    use std::path::PathBuf;
-
-    use crate::core::build_steps::{compile, dist, doc, test, tool};
-    use crate::core::builder::tests::{
-        RenderConfig, TEST_TRIPLE_1, TEST_TRIPLE_2, TEST_TRIPLE_3, configure, first, host_target,
-        render_steps, run_build,
-    };
-    use crate::core::builder::{Builder, Kind, StepDescription, StepMetadata};
+    use crate::Compiler;
+    use crate::core::build_steps::test;
+    use crate::core::builder::tests::{RenderConfig, TEST_TRIPLE_1, TEST_TRIPLE_2, host_target};
+    use crate::core::builder::{Kind, StepMetadata};
     use crate::core::config::TargetSelection;
     use crate::core::config::toml::target::{
         DefaultLinuxLinkerOverride, with_default_linux_linker_overrides,
     };
-    use crate::utils::cache::Cache;
-    use crate::utils::helpers::get_host_target;
     use crate::utils::tests::{ConfigBuilder, TestCtx};
-    use crate::{Build, Compiler, Config, Flags, Subcommand};
 
     #[test]
     fn build_default() {
@@ -2294,6 +2254,7 @@ mod snapshot {
         [test] compiletest-run-make 1 <host>
         [build] rustc 0 <host> -> cargo 1 <host>
         [test] compiletest-run-make-cargo 1 <host>
+        [test] intrinsic-test <host>
         ");
     }
 
@@ -2477,6 +2438,7 @@ mod snapshot {
         [test] compiletest-run-make 2 <host>
         [build] rustc 1 <host> -> cargo 2 <host>
         [test] compiletest-run-make-cargo 2 <host>
+        [test] intrinsic-test <host>
         ");
     }
 
@@ -2569,7 +2531,6 @@ mod snapshot {
     #[test]
     fn test_library_tests_only_does_not_build_rustdoc() {
         let ctx = TestCtx::new();
-        let host = TargetSelection::from_user(&host_target());
         insta::assert_snapshot!(
             ctx.config("test").args(&["--tests", "library/core"]).render_steps(),
             @r"
@@ -3355,7 +3316,7 @@ impl ExecutedSteps {
 }
 
 fn fuzzy_metadata_eq(executed: &StepMetadata, to_match: &StepMetadata) -> bool {
-    let StepMetadata { name, kind, target, built_by: _, stage: _, metadata } = executed;
+    let StepMetadata { name, kind, target, built_by: _, stage: _, metadata: _ } = executed;
     *name == to_match.name && *kind == to_match.kind && *target == to_match.target
 }
 
@@ -3407,8 +3368,6 @@ fn render_steps(steps: &[ExecutedStep], config: RenderConfig) -> String {
     steps
         .iter()
         .filter_map(|step| {
-            use std::fmt::Write;
-
             let Some(metadata) = &step.metadata else {
                 return None;
             };
@@ -3422,12 +3381,13 @@ fn render_steps(steps: &[ExecutedStep], config: RenderConfig) -> String {
 fn render_metadata(metadata: &StepMetadata, config: &RenderConfig) -> String {
     let mut record = format!("[{}] ", metadata.kind.as_str());
     if let Some(compiler) = metadata.built_by {
-        write!(record, "{} -> ", render_compiler(compiler, config));
+        write!(record, "{} -> ", render_compiler(compiler, config)).unwrap();
     }
     let stage = metadata.get_stage().map(|stage| format!("{stage} ")).unwrap_or_default();
-    write!(record, "{} {stage}<{}>", metadata.name, normalize_target(metadata.target, config));
+    write!(record, "{} {stage}<{}>", metadata.name, normalize_target(metadata.target, config))
+        .unwrap();
     if let Some(metadata) = &metadata.metadata {
-        write!(record, " {metadata}");
+        write!(record, " {metadata}").unwrap();
     }
     record
 }

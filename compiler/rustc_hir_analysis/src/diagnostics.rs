@@ -1,12 +1,12 @@
 //! Errors emitted by `rustc_hir_analysis`.
 
 use rustc_abi::ExternAbi;
+use rustc_data_structures::Limit;
 use rustc_errors::codes::*;
 use rustc_errors::{
     Applicability, Diag, DiagCtxtHandle, DiagSymbolList, Diagnostic, EmissionGuarantee, Level,
     MultiSpan, listify, msg,
 };
-use rustc_hir::limit::Limit;
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_middle::ty::{self, Ty};
 use rustc_span::{Ident, Span, Symbol};
@@ -860,16 +860,6 @@ pub(crate) struct EnumDiscriminantOverflowed {
     pub discr: String,
     pub item_name: Ident,
     pub wrapped_discr: String,
-}
-
-#[derive(Diagnostic)]
-#[diag(
-    "the `#[rustc_paren_sugar]` attribute is a temporary means of controlling which traits can use parenthetical notation"
-)]
-#[help("add `#![feature(unboxed_closures)]` to the crate attributes to use it")]
-pub(crate) struct ParenSugarAttribute {
-    #[primary_span]
-    pub span: Span,
 }
 
 #[derive(Diagnostic)]

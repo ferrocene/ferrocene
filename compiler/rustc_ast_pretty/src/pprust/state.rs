@@ -17,7 +17,7 @@ use rustc_ast::util::comments::{Comment, CommentStyle};
 use rustc_ast::{
     self as ast, AttrArgs, AttrKind, BindingMode, BlockCheckMode, ByRef, DelimArgs, GenericArg,
     GenericBound, InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass,
-    InlineAsmTemplatePiece, PatKind, RangeEnd, RangeSyntax, Safety, SelfKind, Term, attr,
+    InlineAsmTemplatePiece, PatKind, RangeEnd, RangeSyntax, SelfKind, Term, attr,
 };
 use rustc_span::edition::Edition;
 use rustc_span::source_map::SourceMap;
@@ -292,7 +292,6 @@ fn print_crate_inner<'a>(
         let fake_attr = attr::mk_attr_nested_word(
             g,
             ast::AttrStyle::Inner,
-            Safety::Default,
             sym::feature,
             sym::prelude_import,
             DUMMY_SP,
@@ -303,13 +302,7 @@ fn print_crate_inner<'a>(
         // root, so this is not needed, and actually breaks things.
         if edition.is_rust_2015() {
             // `#![no_std]`
-            let fake_attr = attr::mk_attr_word(
-                g,
-                ast::AttrStyle::Inner,
-                Safety::Default,
-                sym::no_std,
-                DUMMY_SP,
-            );
+            let fake_attr = attr::mk_attr_word(g, ast::AttrStyle::Inner, sym::no_std, DUMMY_SP);
             s.print_attribute(&fake_attr);
         }
     }
@@ -672,7 +665,7 @@ pub trait PrintState<'a>: std::ops::Deref<Target = pp::Printer> + std::ops::Dere
     fn print_attribute_inline(&mut self, attr: &ast::Attribute, is_inline: bool) -> bool {
         use ast::SyntheticAttr::*;
         match attr.kind {
-            AttrKind::Synthetic(CfgTrace(_) | CfgAttrTrace) => {
+            AttrKind::Synthetic(CfgTrace(_) | CfgAttrTrace(_)) => {
                 // These are internal synthetic attributes with no syntax, so avoid printing them
                 // to keep the printed code reasonably parse-able.
                 return false;

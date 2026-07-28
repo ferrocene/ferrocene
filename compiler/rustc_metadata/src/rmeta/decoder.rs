@@ -402,11 +402,6 @@ impl<'a> BlobDecodeContext<'a> {
 impl<'a, 'tcx> TyDecoder<'tcx> for MetadataDecodeContext<'a, 'tcx> {
     const CLEAR_CROSS_CRATE: bool = true;
 
-    #[inline]
-    fn interner(&self) -> TyCtxt<'tcx> {
-        self.tcx
-    }
-
     fn cached_ty_for_shorthand<F>(&mut self, shorthand: usize, or_insert_with: F) -> Ty<'tcx>
     where
         F: FnOnce(&mut Self) -> Ty<'tcx>,
@@ -440,6 +435,15 @@ impl<'a, 'tcx> TyDecoder<'tcx> for MetadataDecodeContext<'a, 'tcx> {
     fn decode_alloc_id(&mut self) -> rustc_middle::mir::interpret::AllocId {
         let ads = self.alloc_decoding_session;
         ads.decode_alloc_id(self)
+    }
+}
+
+impl<'a, 'tcx> rustc_middle::ty::InternerDecoder for MetadataDecodeContext<'a, 'tcx> {
+    type Interner = TyCtxt<'tcx>;
+
+    #[inline]
+    fn interner(&self) -> TyCtxt<'tcx> {
+        self.tcx
     }
 }
 
@@ -1428,17 +1432,26 @@ impl CrateMetadata {
             .attributes
             .get(self, id)
             .unwrap_or_else(|| {
-                // Structure and variant constructors don't have any attributes encoded for them,
-                // but we assume that someone passing a constructor ID actually wants to look at
-                // the attributes on the corresponding struct or variant.
                 let def_key = self.def_key(id);
-                assert_eq!(def_key.disambiguated_data.data, DefPathData::Ctor);
-                let parent_id = def_key.parent.expect("no parent for a constructor");
-                self.root
-                    .tables
-                    .attributes
-                    .get(self, parent_id)
-                    .expect("no encoded attributes for a structure or variant")
+                match def_key.disambiguated_data.data {
+                    DefPathData::Ctor => {
+                        // Structure and variant constructors don't have any attributes encoded for them,
+                        // but we assume that someone passing a constructor ID actually wants to look at
+                        // the attributes on the corresponding struct or variant.
+                        assert_eq!(def_key.disambiguated_data.data, DefPathData::Ctor);
+                        let parent_id = def_key.parent.expect("no parent for a constructor");
+                        self.root
+                            .tables
+                            .attributes
+                            .get(self, parent_id)
+                            .expect("no encoded attributes for a structure or variant")
+                    }
+                    DefPathData::SyntheticCoroutineBody => {
+                        // SyntheticCoroutineBodies cannot have attributes
+                        LazyArray::default()
+                    }
+                    _ => panic!("Definition key {def_key:?} of type `{:?}` did not have any attributes stored", def_key.disambiguated_data.data)
+                }
             })
             .decode((self, tcx))
     }

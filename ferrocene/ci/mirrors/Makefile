@@ -39,7 +39,6 @@ upload-arm-eabi-none:
 	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz
 
-
 download-arm-aarch64-none-toolchain:
 	mkdir -p build/arm-aarch64-none
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-aarch64-none/arm-gnu-toolchain.tar.xz
@@ -66,7 +65,7 @@ download-gcc-11-src:
 
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
 .ONESHELL:
-gcc-11: prepare download-gcc-11-src
+gcc-11: prepare
 	set -xe
 	cd build/gcc-11
 	docker build --tag gcc-11:$(gcc-11-version) --file ../../gcc-11.dockerfile .
@@ -86,7 +85,7 @@ download-gcc-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
 	
 .ONESHELL:
-gcc: download-gcc-src gcc-11
+gcc: gcc-11
 	set -xe
 	cd build/gcc
 	cp ../../output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz gcc-11.tar.xz
@@ -98,7 +97,7 @@ gcc: download-gcc-src gcc-11
 		docker rm $$id ; \
 	}
 
-upload-gcc: gcc
+upload-gcc:
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
 
@@ -107,7 +106,7 @@ download-openssl-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/openssl/openssl-$(openssl-version).tar.gz build/openssl/openssl.tar.gz
 
 .ONESHELL:
-openssl: download-openssl-src gcc
+openssl: gcc
 	set -xe
 	cd build/openssl
 	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
@@ -146,7 +145,7 @@ download-musl-cross-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz build/musl-cross/musl-cross-make.tar.xz
 	
 .ONESHELL:
-musl-cross: download-musl-cross-src musl.dockerfile builder-image prepare
+musl-cross: musl.dockerfile builder-image prepare
 	cd build/musl-cross
 	docker build -t musl-tarballs:$(musl-cross-target-version) --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f ../../musl.dockerfile .
 	{ \
@@ -170,7 +169,7 @@ download-python-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/python/Python-$(python-version).tar.xz build/python/python-source.tar.xz
 
 .ONESHELL:
-python: download-python-src python.dockerfile builder-image prepare
+python: python.dockerfile builder-image prepare
 	cd build/python
 	docker build -t python:v$(python-version) --build-arg=PYTHON_VERSION=$(python-version) -f ../../python.dockerfile .
 	{ \
@@ -181,7 +180,7 @@ python: download-python-src python.dockerfile builder-image prepare
 		docker rm $$id ; \
 	}
 
-upload-python: python
+upload-python:
 	aws s3 cp --no-overwrite output/python-$(python-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-$(host-arch)-$(commit).tar.xz
 
@@ -190,7 +189,7 @@ download-gdb-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gdb/gdb_$(gdb-version).orig.tar.xz build/gdb/gdb-source.tar.xz
 
 .ONESHELL:
-gdb: download-gdb-src gdb.dockerfile builder-python-image prepare
+gdb: gdb.dockerfile builder-python-image prepare
 	cd build/gdb
 	docker build -t gdb:v$(gdb-version)  --build-arg=PYTHON_VERSION=$(python-version)  -f ../../gdb.dockerfile .
 	{ \
@@ -210,7 +209,7 @@ download-git-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/git/git-$(git-version).tar.xz build/git/git-source.tar.xz
 
 .ONESHELL:
-git: download-git-src git.dockerfile builder-python-image prepare
+git: git.dockerfile builder-python-image prepare
 	cd build/git
 	docker build -t git:v$(git-version) -f ../../git.dockerfile .
 	{ \

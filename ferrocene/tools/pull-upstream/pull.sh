@@ -346,13 +346,13 @@ then
                 mergiraf solve --keep-backup=false "$file" || true
             done
 
-            # If mergiraf wasn't able to make any progress on the conflict, or if it
-            # encountered an error during the resolution, it will leave the input
-            # file unchanged. Therefore, everything that was changed is good to add.
-            git add .
-
             # Only commit if mergiraf has resolved anything
             if git status --porcelain=v1 | grep "^ M " >/dev/null; then
+                # If mergiraf wasn't able to make any progress on the conflict, or if it
+                # encountered an error during the resolution, it will leave the input
+                # file unchanged. Therefore, everything that was changed is good to add.
+                git add .
+
                 git commit -F- <<EOF
 resolve conflicts using mergiraf
 
@@ -429,7 +429,7 @@ echo "pull-upstream: trying to fix ferrocene/doc/symbol-report.csv"
 if ./x.py test ferrocene/doc/symbol-report.csv --stage 1 --bless --set rust.debug-assertions-std=true; then
     commit_if_modified ferrocene/doc/symbol-report.csv "update symbol report"
 else
-    automation_warning "Couldn't regenerate the symbol report. Please run './x test ferrocene/doc/symbol-report.csv --bless' after fixing the conflicts."
+    automation_warning "Couldn't regenerate the symbol report. Please run \`./x test ferrocene/doc/symbol-report.csv --bless\` after fixing the conflicts."
 fi
 
 git branch -D "${TEMP_BRANCH}"

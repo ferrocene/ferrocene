@@ -34,7 +34,7 @@ repack-arm-eabi-none: download-arm-eabi-none-toolchain
 		docker rm $$id ; \
 	}
 
-upload-arm-eabi-none: repack-arm-eabi-none
+upload-arm-eabi-none:
 	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz
 
@@ -55,7 +55,7 @@ repack-arm-aarch64-none: download-arm-aarch64-none-toolchain
 		docker rm $$id ; \
 	}
 
-upload-arm-aarch64-none: repack-arm-aarch64-none
+upload-arm-aarch64-none:
 	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz
 
@@ -76,7 +76,7 @@ gcc-11: prepare download-gcc-11-src
 		docker rm $$id ; \
 	}
 
-upload-gcc-11: gcc-11
+upload-gcc-11:
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz
 
@@ -118,7 +118,7 @@ openssl: download-openssl-src gcc
 		docker rm $$id ; \
 	}
 
-upload-openssl: openssl
+upload-openssl:
 	aws s3 cp --no-overwrite output/output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz
 
@@ -150,7 +150,7 @@ musl-cross: download-musl-cross-src musl.dockerfile builder-image prepare
 		docker rm $$id ; \
 	}
 
-upload-musl-cross: musl-cross
+upload-musl-cross:
 	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz
 	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
@@ -205,28 +205,28 @@ upload-all: upload-musl-cross upload-python upload-gdb upload-openssl upload-gcc
 .ONESHELL:
 update-hashes:
 	mkdir -p hashes
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-aarch64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-aarch64-$(commit).tar.xz hashes/
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
 
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/output/gcc-$(gcc-version)-x86_64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-x86_64-$(commit).tar.xz hashes/
 	# cmake is taken from the binary distribution and just manually uploaded, so it's never rebuilt and carries no commit identifier
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-x86_64.tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-x86_64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
 
-	cd hashes; sha256sum *tar.xz > ../hashes.txt
+	cd hashes; sha256sum *tar.xz *tar.gz > ../hashes.txt
 
 clean-build:
 	rm -rf build/

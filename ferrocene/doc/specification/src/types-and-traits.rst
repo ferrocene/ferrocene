@@ -120,16 +120,16 @@ Type Classification
     :t:`[Function item type]s`
 
 * :dp:`fls_jrohsv7hx7yw`
-  :t:`[Indirection type]s`
-
-  * :dp:`fls_1kg1mknf4yx7`
-    :t:`[Function pointer type]s`
+  :t:`[Pointer type]s`
 
   * :dp:`fls_bw8zutjcteki`
     :t:`[Raw pointer type]s`
 
   * :dp:`fls_nqezuc9u6wpn`
     :t:`[Reference type]s`
+
+* :dp:`fls_1kg1mknf4yx7`
+  :t:`[Function pointer type]s`
 
 * :dp:`fls_lh52q6f6snfh`
   :t:`[Trait type]s`
@@ -936,18 +936,90 @@ A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the :s
 
 .. _fls_3i4ou0dq64ny:
 
-Indirection Types
------------------
+Pointer Types
+-------------
 
 .. rubric:: Legality Rules
 
 :dp:`fls_3qI8FXMsyk0f`
-A :t:`pointer type` is either a :t:`raw pointer type` or a :t:`reference type`.
+A :t:`pointer type` is a :t:`type` whose :t:`[value]s` refer to memory locations.
+
+.. _fls_ppd1xwve3tr7:
+
+Raw Pointer Types
+~~~~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   RawPointerTypeSpecification ::=
+       $$*$$ ($$const$$ | $$mut$$) TypeSpecificationWithoutBounds
+
+.. rubric:: Legality Rules
+
+:dp:`fls_rpbhr0xukbx9`
+A :t:`raw pointer type` is a :t:`pointer type` without safety and liveness guarantees.
+
+:dp:`fls_8uWfFAsZeRCs`
+An :t:`immutable raw pointer type` is a :t:`raw pointer type` subject to :t:`keyword` ``const``.
+
+:dp:`fls_bYWfGDAQcWfA`
+A :t:`mutable raw pointer type` is a :t:`raw pointer type` subject to :t:`keyword` ``mut``.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   *const i128
+   *mut bool
+
+.. _fls_142vncdktbin:
+
+Reference Types
+~~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   ReferenceTypeSpecification ::=
+       $$&$$ LifetimeIndication? $$mut$$? TypeSpecificationWithoutBounds
+
+.. rubric:: Legality Rules
+
+:dp:`fls_twhq24s8kchh`
+A :t:`reference type` is a :t:`pointer type` with :t:`ownership`.
+
+:dp:`fls_w4NbA7WhZfR2`
+A :t:`shared reference type` is a :t:`reference type` not subject to :t:`keyword` ``mut``.
+
+:dp:`fls_ie0avzljmxfm`
+A :t:`shared reference type` prevents the direct mutation of a referenced :t:`value`.
+
+:dp:`fls_15zdiqsm1q3p`
+A :t:`shared reference type` implements the :std:`core::marker::Copy` :t:`trait`.
+
+:dp:`fls_GUZuiST7ucib`
+A :t:`mutable reference type` is a :t:`reference type` subject to :t:`keyword` ``mut``.
+
+:dp:`fls_vaas9kns4zo6`
+A :t:`mutable reference type` allows the direct mutation of a referenced :t:`value`.
+
+:dp:`fls_n6ffcms5pr0r`
+A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy` :t:`trait`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   &i16
+   &'a mut f32
 
 .. _fls_xztr1kebz8bo:
 
 Function Pointer Types
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 .. rubric:: Syntax
 
@@ -973,16 +1045,13 @@ Function Pointer Types
 .. rubric:: Legality Rules
 
 :dp:`fls_v2wrytr3t04h`
-A :t:`function pointer type` is an :t:`indirection type` that refers to a
-:t:`function`.
+A :t:`function pointer type` is a :t:`type` that refers to a :t:`function`.
 
 :dp:`fls_5dd7icjcl3nt`
-An :t:`unsafe function pointer type` is a function pointer type subject to
-:t:`keyword` ``unsafe``.
+An :t:`unsafe function pointer type` is a function pointer type subject to :t:`keyword` ``unsafe``.
 
 :dp:`fls_B0SMXRqQMS1E`
-A :t:`variadic part` indicates the presence of :t:`C`-like optional
-parameters.
+A :t:`variadic part` indicates the presence of :t:`C`-like optional parameters.
 
 :dp:`fls_hbn1l42xmr3h`
 A :t:`variadic part` can only be used in a :t:`variadic function`.
@@ -999,112 +1068,13 @@ The :t:`return type` of a :t:`function pointer type` is determined as follows:
 .. rubric:: Undefined Behavior
 
 :dp:`fls_52thmi9hnoks`
-It is a :t:`validity invariant` for a :t:`value` of a :t:`function pointer type`
-to be not :c:`null`.
+It is a :t:`validity invariant` for a :t:`value` of a :t:`function pointer type` to be not :c:`null`.
 
 .. rubric:: Examples
 
 .. code-block:: rust
 
    unsafe extern "C" fn (value: i32, ...) -> f64
-
-.. _fls_ppd1xwve3tr7:
-
-Raw Pointer Types
-~~~~~~~~~~~~~~~~~
-
-.. rubric:: Syntax
-
-.. syntax::
-
-   RawPointerTypeSpecification ::=
-       $$*$$ ($$const$$ | $$mut$$) TypeSpecificationWithoutBounds
-
-.. rubric:: Legality Rules
-
-:dp:`fls_rpbhr0xukbx9`
-A :t:`raw pointer type` is an :t:`indirection type` without validity guarantees.
-
-:dp:`fls_bYWfGDAQcWfA`
-A :t:`mutable raw pointer type` is a :t:`raw pointer type` subject to
-:t:`keyword` ``mut``.
-
-:dp:`fls_8uWfFAsZeRCs`
-An :t:`immutable raw pointer type` is a :t:`raw pointer type` subject to
-:t:`keyword` ``const``.
-
-:dp:`fls_c2Guy3fPYaUV`
-A :t:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
-
-:dp:`fls_hrum767l6dte`
-Comparing two :t:`[raw pointer]s` compares the addresses of the :t:`[raw pointer]s`.
-
-:dp:`fls_k6ues2936pjq`
-Comparing a :t:`raw pointer` to a :t:`value` of a :t:`dynamically sized type` compares the data being pointed to.
-
-.. rubric:: Examples
-
-.. code-block:: rust
-
-   *const i128
-   *mut bool
-
-.. _fls_142vncdktbin:
-
-Reference Types
-~~~~~~~~~~~~~~~
-
-.. rubric:: Syntax
-
-.. syntax::
-
-   ReferenceTypeSpecification ::=
-       $$&$$ LifetimeIndication? $$mut$$? TypeSpecificationWithoutBounds
-
-.. rubric:: Legality Rules
-
-:dp:`fls_twhq24s8kchh`
-A :t:`reference type` is an :t:`indirection type` with :t:`ownership`.
-
-:dp:`fls_w4NbA7WhZfR2`
-A :t:`shared reference type` is a :t:`reference type` not subject to
-:t:`keyword` ``mut``.
-
-:dp:`fls_ie0avzljmxfm`
-A :t:`shared reference type` prevents the direct mutation of a referenced
-:t:`value`.
-
-:dp:`fls_15zdiqsm1q3p`
-A :t:`shared reference type` implements the :std:`core::marker::Copy`
-:t:`trait`. Copying a :t:`shared reference` performs a shallow copy.
-
-:dp:`fls_csdjfwczlzfd`
-Releasing a :t:`shared reference` has no effect on the :t:`value` it refers to.
-
-:dp:`fls_GUZuiST7ucib`
-A :t:`mutable reference type` is a :t:`reference type` subject to :t:`keyword`
-``mut``.
-
-:dp:`fls_vaas9kns4zo6`
-A :t:`mutable reference type` allows the direct mutation of a referenced
-:t:`value`.
-
-:dp:`fls_n6ffcms5pr0r`
-A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy`
-:t:`trait`.
-
-.. rubric:: Undefined Behavior
-
-:dp:`fls_ezh8aq6fmdvz`
-It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be
-not :c:`null`.
-
-.. rubric:: Examples
-
-.. code-block:: rust
-
-   &i16
-   &'a mut f32
 
 .. _fls_1ompd93w7c9f:
 
@@ -1405,11 +1375,17 @@ Type Layout
 :dp:`fls_kdbq02iguzgl`
 All :t:`[value]s` have an :t:`alignment` and a :t:`size`.
 
+:dp:`fls_Im7miUSS87xs`
+A :t:`fixed sized type` is a :t:`type` that implements the :std:`core::marker::Sized` :t:`trait`.
+
+:dp:`fls_aQgOFrzAhdsC`
+A :t:`thin pointer type` is a :t:`pointer type` that refers to a :t:`fixed sized type`.
+
 :dp:`fls_26Xgem831Nqg`
-A :dt:`dynamically sized type` is a :t:`type` that does not implement the :std:`core::marker::Sized` :t:`trait`.
+A :t:`dynamically sized type` is a :t:`type` that does not implement the :std:`core::marker::Sized` :t:`trait`.
 
 :dp:`fls_ozYgHEHFTT5c`
-A :dt:`fat pointer type` is an :t:`indirection type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
+A :t:`fat pointer type` is a :t:`pointer type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
 
 :dp:`fls_muxfn9soi47l`
 The :t:`alignment` of a :t:`value` specifies which addresses are valid for
@@ -1483,16 +1459,13 @@ the :t:`size` is zero and the :t:`alignment` is one.
 For a :t:`closure type`, the :t:`layout` is tool-defined.
 
 :dp:`fls_18ke90udyp67`
-For a :t:`thin pointer`, the :t:`size` and :t:`alignment` are those of :t:`type`
-:c:`usize`.
+For a :t:`thin pointer`, the :t:`size` and :t:`alignment` are those of :t:`type` :c:`usize`.
 
 :dp:`fls_nrqG8i3fmpm4`
-For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of
-a :t:`thin pointer`.
+For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of a :t:`thin pointer`.
 
 :dp:`fls_e5hivr6m5s3h`
-For a :t:`fat pointer type`, the :t:`size` and :t:`alignment` are tool-defined, but
-are at least those of a :t:`thin pointer`.
+For a :t:`fat pointer type`, the :t:`size` and :t:`alignment` are tool-defined, but are at least those of a :t:`thin pointer`.
 For a :t:`fat pointer type` whose contained :t:`type` is that of a :t:`slice` or :t:`trait object type` the :t:`size` is that of two times the size of :t:`type` :c:`usize` and the :t:`alignment` is that of :t:`type` :c:`usize`.
 
 :dp:`fls_hlbsjggfxnt2`

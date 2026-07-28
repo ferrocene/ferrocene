@@ -19,6 +19,13 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+FLS maintenance
+---------------
+
+- `[Change]: Remove the term "indirection", and associated derivatives <https://github.com/rust-lang/fls/issues/710>`_
+
+  TODO: Update when things settle.
+
 Language changes in Rust 1.98.0
 -------------------------------
 
@@ -119,7 +126,7 @@ Language changes in Rust 1.95.0
 
   - :t:`let binding`
 
-  Changed existing paragraphs:
+  Changed paragraphs:
 
   - :p:`fls_72JHo343O7jp`
   - :p:`fls_6bwTtGKb7ba7`

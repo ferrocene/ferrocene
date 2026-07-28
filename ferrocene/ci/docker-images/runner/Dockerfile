@@ -154,6 +154,7 @@ RUN <<-EOF
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
     done
+    ln -s /usr/local/bin/gcc /usr/local/bin/cc
 EOF
 
 

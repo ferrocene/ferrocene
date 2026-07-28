@@ -26,10 +26,11 @@ RUN <<EOT
         --target=${host_platform}-linux-gnu \
         --prefix=/opt/local/gcc \
         --enable-checking=release \
-        --enable-languages=c,c++ \
-        --disable-multilib 
+        --enable-languages=c,c++
 EOT
 
 RUN make
 RUN make install-strip
+# ensure that "cc" exists as a symlink
+RUN cd /opt/local/gcc/bin/ && ln -s gcc cc
 RUN tar cJf /gcc-build/gcc.tar.xz -C /opt/local/gcc --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

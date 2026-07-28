@@ -156,6 +156,7 @@ RUN <<-EOF
     done
 EOF
 
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
@@ -166,12 +167,14 @@ ENV LANG=C.UTF-8
 # Automatic compiler detection doesn't work for some targets.
 
 
+ENV CC=gcc
+ENV CXX=g++
 ENV CFLAGS="-fuse-ld=bfd"
 ENV CXXFLAGS="-fuse-ld=bfd"
-# ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
-# ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
-# ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
-# ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-g++
+ENV CC_aarch64_unknown_none=aarch64-none-elf-gcc
+ENV CXX_aarch64_unknown_none=aarch64-none-elf-g++
+ENV CC_aarch64_unknown_ferrocene.facade=aarch64-none-elf-gcc
+ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-none-elf-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx

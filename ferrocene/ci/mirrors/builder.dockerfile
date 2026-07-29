@@ -9,7 +9,6 @@ RUN tar -xf /gcc.tar.xz -C /opt/local/gcc
 ADD binutils.tar.xz /opt/local/
 ADD openssl.tar.xz /usr/local
 
-
 ENV PATH=/opt/local/gcc/bin:/opt/local/bin:$PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 

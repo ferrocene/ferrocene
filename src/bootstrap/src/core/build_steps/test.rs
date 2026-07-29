@@ -1061,7 +1061,7 @@ impl CommandLineStep for IntrinsicTest {
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
-        true
+        false
     }
 
     fn make_run(run: RunConfig<'_>) {

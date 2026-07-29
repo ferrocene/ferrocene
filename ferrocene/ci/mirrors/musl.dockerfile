@@ -33,7 +33,7 @@ ARG TARGETVERSION=v0.9.11
 
 ENV TARGET=aarch64-linux-musl
 
-RUN make
+RUN make -j$(nproc)
 
 RUN make install
 RUN echo "Creating $(du -hs output) archive"
@@ -45,7 +45,7 @@ ARG TARGETVERSION=v0.9.11
 
 ENV TARGET=x86_64-linux-musl
 
-RUN make
+RUN make -j$(nproc)
 
 RUN make install
 RUN echo "Creating $(du -hs output) archive"

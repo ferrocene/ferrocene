@@ -35,7 +35,7 @@ RUN <<EOT
         --enable-languages=c,c++
 EOT
 
-RUN make
+RUN make -j$(nproc)
 RUN make install-strip
 # ensure that "cc" exists as a symlink
 RUN cd /opt/local/gcc/bin/ && ln -s gcc cc

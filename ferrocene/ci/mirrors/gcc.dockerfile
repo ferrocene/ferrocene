@@ -8,11 +8,8 @@ RUN yum -y install \
     binutils \
     flex bison
 
-COPY gcc-11.tar.xz /gcc-11.tar.xz
-RUN mkdir -p /opt/local/gcc-11
-
-RUN tar -xf /gcc-11.tar.xz -C /opt/local/gcc-11
-ENV PATH=/opt/local/gcc-11/bin:$PATH
+ADD bootstrap-gcc.tar.xz /opt/local/bootstrap-gcc
+ENV PATH=/opt/local/bootstrap-gcc/bin:$PATH
 
 COPY gcc-with-dependencies.tar.xz /gcc-with-dependencies.tar.xz
 RUN mkdir -p /gcc-source

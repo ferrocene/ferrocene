@@ -40,27 +40,3 @@ RUN make install-strip
 # ensure that "cc" exists as a symlink
 RUN cd /opt/local/gcc/bin/ && ln -s gcc cc
 RUN tar cJf /gcc-build/gcc.tar.xz -C /opt/local/gcc --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
-
-ENV PATH=/opt/local/gcc/bin:$PATH
-
-COPY /binutils-src.tar.xz /binutils-src.tar.xz
-RUN mkdir -p /binutils-src
-RUN tar -xf /binutils-src.tar.xz -C /binutils-src --strip-components=1
-WORKDIR /binutils-src
-RUN ./configure --prefix=/opt/local/binutils
-RUN make
-RUN make install
-RUN tar cJf /gcc-build/binutils-binaries.tar.xz -C /opt/local/binutils --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
-
-ENV PATH=/opt/local/binutils/bin:$PATH
-
-COPY /coreutils-src.tar.xz /coreutils-src.tar.xz
-RUN mkdir -p /coreutils-src
-RUN tar -xf /coreutils-src.tar.xz -C /coreutils-src --strip-components=1
-WORKDIR /coreutils-src
-# coreutils wants this to configure as root
-ENV FORCE_UNSAFE_CONFIGURE=1
-RUN ./configure ----prefix=/opt/local/coreutils
-RUN make
-RUN make install
-RUN tar cJf /gcc-build/coreutils-binaries.tar.xz -C /opt/local/coreutils --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

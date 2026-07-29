@@ -15,6 +15,23 @@ git-version=2.55.0
 commit != git rev-parse HEAD | cut -c 1-8
 host-arch != uname -m
 
+# if you want the bootstrap gcc from a previous commit set this
+ifdef ${BOOTSTRAP_GCC_FROM}
+bootstrap-gcc-from = ${BOOTSTRAP_GCC_FROM}
+build-bootstrap-gcc = "false"
+else
+bootstrap-gcc-from = $(commit)
+build-bootstrap-gcc = "true"
+endif
+# if you want the gcc build from a previous commit set this
+ifdef ${GCC_FROM}
+gcc-from = ${GCC_FROM}
+build-gcc = "false"
+else
+gcc-from = $(commit)
+build-gcc = "true"
+endif
+
 prepare: base-image
 	mkdir -p output
 
@@ -63,12 +80,15 @@ upload-arm-aarch64-none:
 
 download-gcc-11-src:
 	mkdir -p build/gcc-11
+	ifeq ($(build-bootstrap-gcc),"true")
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-11-version)-with-dependencies.tar.xz build/gcc-11/gcc-11-with-dependencies.tar.xz
+	endif
 
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
 .ONESHELL:
 gcc-11: prepare
 	set -xe
+	ifeq ($(build-bootstrap-gcc),"true")
 	cd build/gcc-11
 	docker build --tag gcc-11:$(gcc-11-version) --file ../../gcc-11.dockerfile .
 	{ \
@@ -77,20 +97,26 @@ gcc-11: prepare
 			../../output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
+	else
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-11-version)-$(host-arch)-$(bootstrap-gcc-from).tar.xz output/
+	endif
 
 upload-gcc-11:
+	ifeq ($(build-bootstrap-gcc),"true")
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz
+	endif
 
 download-gcc-src:
 	mkdir -p build/gcc
+	ifeq ($(build-gcc),"true")
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/binutils/binutils-$(binutils-version).tar.xz build/gcc/binutils-src.tar.xz
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/coreutils/coreutils-$(coreutils-version).tar.xz build/gcc/coreutils-src.tar.xz
+	endif
 	
 .ONESHELL:
 gcc: gcc-11
 	set -xe
+	ifeq ($(build-gcc),"true")
 	cd build/gcc
 	cp ../../output/gcc-$(gcc-11-version)-$(host-arch)-$(commit).tar.xz gcc-11.tar.xz
 	docker build --tag gcc:$(gcc-version) --file ../../gcc.dockerfile .
@@ -98,16 +124,39 @@ gcc: gcc-11
 		id=$$(docker create gcc:$(gcc-version)) ; \
 		docker cp $$id://gcc-build/gcc.tar.xz \
 			../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz ; \
-		docker cp $$id://gcc-build/binutils-binaries.tar.xz \
+		docker rm $$id ; \
+	}
+	else
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz output/
+	endif
+
+upload-gcc:
+	ifeq ($(build-gcc),"true")
+	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
+	endif
+
+
+download-utils-src:
+	mkdir -p build/utils
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/binutils/binutils-$(binutils-version).tar.xz build/utils/binutils-src.tar.xz
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/coreutils/coreutils-$(coreutils-version).tar.xz build/utils/coreutils-src.tar.xz
+	
+.ONESHELL:
+utils: gcc
+	set -xe
+	cd build/utils
+	docker build --tag utils:$(binutils-version)-$(coreutils-version) --file ../../openssl.dockerfile .
+	{ \
+		id=$$(docker create utils:$(binutils-version)-$(coreutils-version)) ; \
+		docker cp $$id://build/binutils-binaries.tar.xz \
 			../../output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz ; \
-		docker cp $$id://gcc-build/coreutils-binaries.tar.xz \
+		docker cp $$id://build/coreutils-binaries.tar.xz \
 			../../output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
-upload-gcc:
-	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
+upload-utils:
 	aws s3 cp --no-overwrite output/output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/binutils/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz
 	aws s3 cp --no-overwrite output/output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz \
@@ -118,10 +167,10 @@ download-openssl-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/openssl/openssl-$(openssl-version).tar.gz build/openssl/openssl.tar.gz
 
 .ONESHELL:
-openssl: gcc
+openssl: gcc utils
 	set -xe
 	cd build/openssl
-	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
+	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz gcc.tar.xz
 	cp ../../output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz binutils.tar.xz
 	docker build --tag openssl:$(openssl-version) --file ../../openssl.dockerfile .
 	{ \
@@ -137,11 +186,11 @@ upload-openssl:
 
 
 .ONESHELL:
-builder-image: builder.dockerfile gcc openssl
+builder-image: builder.dockerfile gcc openssl utils
 	set -xe
 	mkdir -p build/builder
 	cd build/builder
-	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz gcc.tar.xz
+	cp ../../output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz gcc.tar.xz
 	cp ../../output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz binutils.tar.xz
 	cp ../../output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz openssl.tar.xz
 	docker build --tag centos7-builder --file ../../builder.dockerfile .
@@ -238,14 +287,14 @@ upload-git:
 	aws s3 cp --no-overwrite output/git-$(git-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/git/git-$(git-version)-$(host-arch)-$(commit).tar.xz
 
-download-all-src: download-musl-cross-src download-python-src download-gdb-src download-git-src download-openssl-src download-gcc-11-src download-gcc-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
-build-all: musl-cross python gdb git openssl gcc-11 gcc repack-arm-aarch64-none repack-arm-eabi-none
-upload-all: upload-musl-cross upload-python upload-gdb upload-git upload-openssl upload-gcc-11 upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-git-src download-openssl-src download-gcc-11-src download-gcc-src download-utils-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
+build-all: musl-cross python gdb git utils openssl gcc-11 gcc repack-arm-aarch64-none repack-arm-eabi-none
+upload-all: upload-musl-cross upload-python upload-gdb upload-git upload-utils upload-openssl upload-gcc-11 upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
 
 .ONESHELL:
 update-hashes:
 	mkdir -p hashes
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-aarch64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-aarch64-$(gcc-from).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/coreutils/coreutils-$(coreutils-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/binutils/binutils-$(binutils-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes
@@ -257,7 +306,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
 
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-x86_64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-x86_64-$(gcc-from).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/coreutils/coreutils-$(coreutils-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/binutils/binutils-$(binutils-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz hashes

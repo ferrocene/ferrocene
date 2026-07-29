@@ -2054,38 +2054,16 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             let os_str = OsStr::from_bytes(bytes);
             options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
         }
-        all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
-            // Ferrocene addition: `fchmod` with `flags=AT_SYMLINK_NOFOLLOW` does not work on Ubuntu
-            // 20.04; support was added somewhere between this and 24.04
-            // Fall back to open + fchmod to support older distros.
-            use crate::fs::OpenOptions;
-            use crate::fs::Permissions;
-            use crate::os::unix::ffi::OsStrExt;
-            use crate::os::unix::fs::OpenOptionsExt;
 
-            let mut options = OpenOptions::new();
-            options.read(true).custom_flags(libc::O_NOFOLLOW);
-
-            let bytes = p.to_bytes();
-            let os_str = OsStr::from_bytes(bytes);
-
-            match options.open(Path::new(os_str)) {
-                Ok(file) => {
-                    file.set_permissions(Permissions::from_inner(perm))
-                },
-                Err(e) => {
-                    if e.kind() == crate::io::ErrorKind::FilesystemLoop {
-                        // This means the requested file was a symlink
-                        // Remap to Unsupported to match expected behaviour on other platforms
-                        Err(io::Error::from_raw_os_error(libc::ENOTSUP))
-                    } else {
-                        // Return other errors as-is
-                        Err(e)
-                    }
-                }
-            }
+        all(any(target_os = "linux", target_os = "macos", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "dragonfly", target_os = "android"), not(any(target_os = "espidf", target_os = "horizon"))) => {
+            cvt_r(|| unsafe {
+                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
+            })
+            .map(|_| ())
         },
         _ => {
+            // These platforms do not have `AT_SYMLINK_NOFOLLOW` but support fchmodat,
+            // so no flag is set for fchmodat.
             cvt_r(|| unsafe {
                 libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, 0)
             })

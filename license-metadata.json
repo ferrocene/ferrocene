@@ -279,8 +279,8 @@
               {
                 "directories": [],
                 "files": [
-                  "ci/docker-images/ubuntu-20/binfmt-qemu-aarch64",
-                  "ci/docker-images/ubuntu-20/binfmt-qemu-arm"
+                  "ci/docker-images/runner/binfmt-qemu-aarch64",
+                  "ci/docker-images/runner/binfmt-qemu-arm"
                 ],
                 "license": {
                   "copyright": [

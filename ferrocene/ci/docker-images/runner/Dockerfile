@@ -4,7 +4,7 @@
 # From the root of this repository, build with:
 # ```
 # ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
-# docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .
+# docker build --tag runner --file ferrocene/ci/docker-images/runner/Dockerfile .
 # ```
 # You must be authenticated with AWS in order to download its package cache.
 
@@ -29,7 +29,7 @@ ARG BUILDPLATFORM
 
 # There is a mirror of the depended on QEMU version in `ferrocene-ci-mirrors` if it ever disappears.
 # See https://launchpad.net/ubuntu/noble/amd64/qemu-user-static and https://launchpad.net/ubuntu/noble/arm64/qemu-user-static
-COPY ferrocene/ci/docker-images/ubuntu-20/qemu-version /tmp/qemu-version
+COPY ferrocene/ci/docker-images/runner/qemu-version /tmp/qemu-version
 RUN <<-EOF
     set -xe
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
@@ -183,8 +183,8 @@ COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-bi
 COPY --from=noble /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 COPY --from=noble /usr/libexec/qemu-binfmt/arm-binfmt-P /usr/libexec/qemu-binfmt/arm-binfmt-P
 # This was removed in 24.04 and is a copy of the 22.04 file.
-COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
-COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm /usr/share/binfmts/qemu-arm
+COPY ferrocene/ci/docker-images/runner/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ferrocene/ci/docker-images/runner/binfmt-qemu-arm /usr/share/binfmts/qemu-arm
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
@@ -254,7 +254,7 @@ EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
-COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
+COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8

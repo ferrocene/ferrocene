@@ -13,36 +13,15 @@ version: 2.1
 #
 # Parameters with the following prefixes are supported:
 #
-# * `docker-image-tag--`: calculates the appropriate tag for the named image.
+# * `docker-images-hash`: the hash for docker image tags.
 # * `docker-repository-url--`: calculates the URL of an ECR repository
 # * `llvm-rebuild--`: calculates if the llvm cache must be invalidated
 # * `targets--`: calculates the compilation targets to execute the job for
 #
 parameters:
-  docker-image-tag--x86_64--ubuntu-20:
+  docker-images-hash:
     type: string
     default: ""
-  docker-image-tag--aarch64--ubuntu-20:
-    type: string
-    default: ""
-  docker-image-tag--x86_64--ubuntu-24:
-    type: string
-    default: ""
-  docker-image-tag--aarch64--ubuntu-24:
-    type: string
-    default: ""
-  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20:
-    type: boolean
-    default: false
-  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20:
-    type: boolean
-    default: false
-  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24:
-    type: boolean
-    default: false
-  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-24:
-    type: boolean
-    default: false
   docker-repository-url--ci-docker-images:
     type: string
     default: ""
@@ -125,9 +104,9 @@ jobs:
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
   misc-checks:
-    executor: &executor-x86_64-ubuntu-20
+    executor: &executor-x86_64-runner
       name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-small
     environment:
@@ -146,7 +125,7 @@ jobs:
 
   # Generate a SBOM for the Ferrocene repository
   sbom-gen:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -159,7 +138,7 @@ jobs:
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -170,7 +149,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -189,7 +168,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -201,7 +180,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-tools:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -213,7 +192,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -226,7 +205,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -239,7 +218,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -253,7 +232,7 @@ jobs:
           llvm_subset: false
 
   x86_64-linux-generic-test-container:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     parameters:
       job:
         type: string
@@ -275,7 +254,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-traceability-matrix:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-small
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -293,7 +272,7 @@ jobs:
           destination: reports
 
   x86_64-linux-library-coverage:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -310,7 +289,7 @@ jobs:
       - ferrocene/ci
 
   x86_64-linux-llvm:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -331,7 +310,7 @@ jobs:
           command: echo
 
   x86_64-linux-self-test:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -346,7 +325,7 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-linux-self-test-qnx8:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -387,8 +366,8 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
@@ -418,17 +397,17 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
   aarch64-linux-llvm:
-    executor: &executor-aarch64-ubuntu-20
+    executor: &executor-aarch64-runner
       name: ferrocene/docker
-      image_tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
@@ -450,7 +429,7 @@ jobs:
           command: echo
 
   aarch64-linux-build:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -463,7 +442,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -475,7 +454,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-dist-tools:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -487,7 +466,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-generic-test-container:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     parameters:
       job:
         type: string
@@ -506,7 +485,7 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -520,7 +499,7 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   aarch64-linux-library-coverage:
-    executor: *executor-aarch64-ubuntu-20
+    executor: *executor-aarch64-runner
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -536,8 +515,8 @@ jobs:
   aarch64-linux-rhivos2-test-container:
     executor:
       name: ferrocene/facade_testserver
-      test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-      testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
+      test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:rhivos2-emulator--<< pipeline.parameters.stable-workflow-id >>--aarch64
       target:  aarch64-rhivos2-linux-gnu
     parameters:
       tasks:
@@ -868,7 +847,7 @@ jobs:
           command: |
             aws ecr get-login-password --region us-east-1 \
               | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
       - ferrocene/ci:
           wrapper: |
             docker run \
@@ -882,7 +861,7 @@ jobs:
               --privileged \
               --interactive \
               --tty \
-              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >> \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:runner--<< pipeline.parameters.docker-images-hash >>--x86_64 \
 
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
@@ -910,8 +889,8 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
@@ -941,14 +920,14 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
 
   # Misc jobs
   wasm-dist-oxidos:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-medium
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -960,7 +939,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   finish-build:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -1016,7 +995,7 @@ jobs:
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
-    executor: *executor-x86_64-ubuntu-20
+    executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-tiny
     steps:
       - run:
@@ -1038,36 +1017,36 @@ workflows:
         - equal: [<< pipeline.trigger_source >>, "api"]
     jobs:
       - ferrocene/build_docker:
-          name: build-docker--ubuntu-20--x86_64
-          image: ubuntu-20
-          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+          name: build-docker--emulator--x86_64
+          image: emulator
+          tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          rebuild: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
-          name: build-docker--ubuntu-24--x86_64
-          image: ubuntu-24
-          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
-          resource_class: large.gen2
-          awscli_version: << pipeline.parameters.awscli-version >>
-
-      - ferrocene/build_docker:
-          name: build-docker--ubuntu-20--aarch64
-          image: ubuntu-20
-          tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20 >>
+          name: build-docker--runner--aarch64
+          image: runner
+          tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+          rebuild: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
           resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
+          name: build-docker--runner--x86_64
+          image: runner
+          tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          rebuild: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
+          resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
           requires:
-            - build-docker--ubuntu-20--x86_64
+            - build-docker--runner--x86_64
 
       - x86_64-linux-llvm:
           requires:
-            - build-docker--ubuntu-20--x86_64
+            - build-docker--runner--x86_64
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
@@ -1215,7 +1194,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+            - build-docker--emulator--x86_64
 
       - x86_64-qnx8-generic-test-vm:
           name: x86_64-qnx8-test-library-compiletest
@@ -1225,7 +1204,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+            - build-docker--emulator--x86_64
 
       - facade-generic-test:
           name: armv7r-eabihf-test-library-compiletest
@@ -1285,7 +1264,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+            - build-docker--emulator--x86_64
 
       - aarch64-qnx8-generic-test-vm:
           name: aarch64-qnx8-test-library-compiletest
@@ -1295,11 +1274,11 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
-            - build-docker--ubuntu-24--x86_64
+            - build-docker--emulator--x86_64
 
       - aarch64-linux-llvm:
           requires:
-            - build-docker--ubuntu-20--aarch64
+            - build-docker--runner--aarch64
       - aarch64-linux-build:
           requires:
             - aarch64-linux-llvm
@@ -1340,12 +1319,12 @@ workflows:
             - x86_64-linux-dist-targets
             - x86_64-linux-dist
 
-      # RHEL Test Infrastructure
+      # RHIVOS2 Test Infrastructure
       # The image gets built for every job because it needs to contain build results per job
       - ferrocene/build_docker:
-          name: build-docker-rhel-test-server-aarch64
-          image: rhel-10.1-test-server
-          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhel-10.1-test-server
+          name: build-docker--rhivos2-emulator--aarch64
+          image: rhivos2-emulator
+          tag: rhivos2-emulator--<< pipeline.parameters.stable-workflow-id >>--aarch64
           rebuild: true
           resource_class: arm.medium
           awscli_version: << pipeline.parameters.awscli-version >>
@@ -1353,18 +1332,6 @@ workflows:
           requires:
             - aarch64-linux-build
 
-      # RHIVOS2 Test Infrastructure
-      # The image gets built for every job because it needs to contain build results per job
-      - ferrocene/build_docker:
-          name: build-docker-rhivos2-test-server-aarch64
-          image: rhivos-2.0-test-server
-          tag: run-id.<< pipeline.parameters.stable-workflow-id >>.rhivos-2.0-test-server
-          rebuild: true
-          resource_class: arm.medium
-          awscli_version: << pipeline.parameters.awscli-version >>
-          restore_from_job: aarch64-linux-build
-          requires:
-            - aarch64-linux-build
       - aarch64-linux-rhivos2-test-container:
           name: aarch64-linux-rhivos2-test-library-compiletest
           tasks: $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
@@ -1372,7 +1339,7 @@ workflows:
           test-variant: "2021"
           requires:
             - aarch64-linux-build
-            - build-docker-rhivos2-test-server-aarch64
+            - build-docker--rhivos2-emulator--aarch64
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
           requires:
@@ -1422,7 +1389,7 @@ workflows:
 
       - sbom-gen:
           requires:
-            - build-docker--ubuntu-20--x86_64
+            - build-docker--runner--x86_64
 
       - finish-build:
           requires:

@@ -5,7 +5,7 @@
 # Generation: 1
 
 # From the root of this repository, build with
-# `docker build --tag ubuntu-24 --file ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
+# `docker build --tag emulator --file ferrocene/ci/docker-images/emulator/Dockerfile .`
 
 FROM --platform=$TARGETPLATFORM ubuntu:24.04
 

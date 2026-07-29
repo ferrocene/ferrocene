@@ -5,6 +5,7 @@ FROM --platform=$TARGETPLATFORM centos7-base AS build
 ARG TARGETPLATFORM
 
 RUN yum -y install \
+    binutils \
     flex bison \
     gcc gcc-c++
     

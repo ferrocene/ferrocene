@@ -78,15 +78,14 @@ upload-arm-aarch64-none:
 	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz
 
-download-bootstrap-gcc-src:
-	mkdir -p build/bootstrap-gcc
-	ifeq ($(build-bootstrap-gcc),"true")
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(bootstrap-gcc-version)-with-dependencies.tar.xz build/bootstrap-gcc/bootstrap-gcc-with-dependencies.tar.xz
-	endif
 
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
+ifeq ($(build-bootstrap-gcc),"true")
+download-bootstrap-gcc-src:
+	mkdir -p build/bootstrap-gcc
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(bootstrap-gcc-version)-with-dependencies.tar.xz build/bootstrap-gcc/bootstrap-gcc-with-dependencies.tar.xz
+
 bootstrap-gcc: prepare
-	ifeq ($(build-bootstrap-gcc),"true")
 	docker build --tag bootstrap-gcc:$(bootstrap-gcc-version) --file bootstrap-gcc.dockerfile build/bootstrap-gcc
 	{ \
 		id=$$(docker create bootstrap-gcc:$(bootstrap-gcc-version)) ; \
@@ -94,24 +93,28 @@ bootstrap-gcc: prepare
 			output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
-	else
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(bootstrap-gcc-from).tar.xz output/
-	endif
 
 upload-bootstrap-gcc:
-	ifeq ($(build-bootstrap-gcc),"true")
 	aws s3 cp --no-overwrite output/output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz
-	endif
+else
+
+download-bootstrap-gcc-src:
+
+bootstrap-gcc: prepare
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(bootstrap-gcc-from).tar.xz output/
+
+upload-bootstrap-gcc:
+
+endif
+
+ifeq ($(build-gcc),"true")
 
 download-gcc-src:
 	mkdir -p build/gcc
-	ifeq ($(build-gcc),"true")
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
-	endif
 	
 gcc: bootstrap-gcc
-	ifeq ($(build-gcc),"true")
 	cp output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz build/gcc/bootstrap-gcc.tar.xz 
 	docker build --tag gcc:$(gcc-version) --file gcc.dockerfile build/gcc/
 	{ \
@@ -120,16 +123,20 @@ gcc: bootstrap-gcc
 			output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
-	else
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz output/
-	endif
 
 upload-gcc:
-	ifeq ($(build-gcc),"true")
 	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
-	endif
 
+else
+
+download-gcc-src:
+
+gcc:
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz output/
+
+upload-gcc:
+endif
 
 download-utils-src:
 	mkdir -p build/utils

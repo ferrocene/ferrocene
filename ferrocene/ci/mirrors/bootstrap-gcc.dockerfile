@@ -9,9 +9,9 @@ RUN yum -y install \
     flex bison \
     gcc gcc-c++
     
-COPY gcc-11-with-dependencies.tar.xz /gcc-11-with-dependencies.tar.xz
+COPY bootstrap-gcc-with-dependencies.tar.xz /bootstrap-gcc-with-dependencies.tar.xz
 RUN mkdir -p /gcc-source
-RUN tar -xf /gcc-11-with-dependencies.tar.xz -C /gcc-source --strip-components=1
+RUN tar -xf /bootstrap-gcc-with-dependencies.tar.xz -C /gcc-source --strip-components=1
 
 RUN mkdir -p /gcc-build
 WORKDIR /gcc-build

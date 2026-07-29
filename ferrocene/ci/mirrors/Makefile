@@ -119,7 +119,7 @@ gcc: bootstrap-gcc
 	}
 
 upload-gcc:
-	aws s3 cp --no-overwrite output/output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
+	aws s3 cp --no-overwrite output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz
 
 else

@@ -4,14 +4,13 @@
 FROM --platform=$TARGETPLATFORM centos7-base AS build
 ARG TARGETPLATFORM
 
-COPY gcc.tar.xz /gcc.tar.xz
-RUN mkdir -p /opt/local/gcc
+ADD gcc.tar.xz /opt/local/gcc
 RUN tar -xf /gcc.tar.xz -C /opt/local/gcc
-ENV PATH=/opt/local/gcc/bin:$PATH
+ADD binutils.tar.xz /opt/local/
+ADD openssl.tar.xz /usr/local
 
-COPY openssl.tar.xz /openssl.tar.xz
-RUN tar -xf /openssl.tar.xz -C /usr/local
 
+ENV PATH=/opt/local/gcc/bin:/opt/local/bin:$PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
 # add /usr/local/lib to ld's path

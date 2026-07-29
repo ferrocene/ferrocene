@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
+ARG TARGETPLATFORM
 
 # CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
 RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
@@ -16,8 +17,13 @@ RUN yum -y install \
     tar \
     make patch \
     file which \
-    glibc-devel.x86_64 glibc-devel.i686
+    glibc-devel
 
+RUN <<EOT
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        yum -y install glibc-devel.i686
+    fi
+EOT
 
 RUN <<-EOF
     set -xe

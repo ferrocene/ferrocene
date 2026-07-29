@@ -196,7 +196,7 @@ Using the CI Docker images
 Docker images used in CI can be found in ``ferrocene/ci/docker-images``. Each
 image documents how to build it at the top of the ``Dockerfile``.
 
-To build the most common image, ``runenr``:
+To build the most common image, ``runner``:
 
 .. code-block:: bash
 

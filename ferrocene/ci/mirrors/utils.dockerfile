@@ -7,14 +7,6 @@ ARG TARGETPLATFORM
 ADD gcc.tar.xz /opt/local/gcc
 ENV PATH=/opt/local/gcc/bin:$PATH
 
-ADD openssl.tar.xz /usr/local
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
-
-# add /usr/local/lib to ld's path
-RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
-RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
-RUN ldconfig
-
 RUN mkdir -p /build
 
 COPY /binutils-src.tar.xz /binutils-src.tar.xz

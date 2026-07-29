@@ -138,6 +138,7 @@ download-utils-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/coreutils/coreutils-$(coreutils-version).tar.xz build/utils/coreutils-src.tar.xz
 	
 utils: gcc
+	cp output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz build/utils/gcc.tar.xz
 	docker build --tag utils:$(binutils-version)-$(coreutils-version) --file utils.dockerfile build/utils
 	{ \
 		id=$$(docker create utils:$(binutils-version)-$(coreutils-version)) ; \
@@ -181,7 +182,7 @@ builder-image: builder.dockerfile gcc openssl utils
 	cp output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz build/builder/openssl.tar.xz
 	docker build --tag centos7-builder --file builder.dockerfile build/builder
 
-builder-python-image: buolder-image builder-python.dockerfile
+builder-python-image: builder-image builder-python.dockerfile
 	mkdir -p build/builder-python
 	cp output/python-$(python-version)-$(host-arch)-$(commit).tar.xz build/builder-python/python.tar.xz
 	docker build --tag centos7-python-builder --build-arg=PYTHON_VERSION=$(python-version)  --file builder-python.dockerfile build/builder-python

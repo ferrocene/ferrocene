@@ -85,16 +85,13 @@ download-bootstrap-gcc-src:
 	endif
 
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
-.ONESHELL:
 bootstrap-gcc: prepare
-	set -xe
 	ifeq ($(build-bootstrap-gcc),"true")
-	cd build/bootstrap-gcc
-	docker build --tag bootstrap-gcc:$(bootstrap-gcc-version) --file ../../bootstrap-gcc.dockerfile .
+	docker build --tag bootstrap-gcc:$(bootstrap-gcc-version) --file bootstrap-gcc.dockerfile build/bootstrap-gcc
 	{ \
 		id=$$(docker create bootstrap-gcc:$(bootstrap-gcc-version)) ; \
 		docker cp $$id://gcc-build/gcc.tar.xz \
-			../../output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz ; \
+			output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 	else
@@ -113,17 +110,14 @@ download-gcc-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
 	endif
 	
-.ONESHELL:
 gcc: bootstrap-gcc
-	set -xe
 	ifeq ($(build-gcc),"true")
-	cd build/gcc
-	cp ../../output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz bootstrap-gcc.tar.xz
-	docker build --tag gcc:$(gcc-version) --file ../../gcc.dockerfile .
+	cp output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz build/gcc/bootstrap-gcc.tar.xz 
+	docker build --tag gcc:$(gcc-version) --file gcc.dockerfile build/gcc/
 	{ \
 		id=$$(docker create gcc:$(gcc-version)) ; \
 		docker cp $$id://gcc-build/gcc.tar.xz \
-			../../output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz ; \
+			output/gcc-$(gcc-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 	else

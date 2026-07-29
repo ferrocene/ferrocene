@@ -115,7 +115,7 @@ download-gcc-src:
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
 	
 gcc: bootstrap-gcc
-	cp output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(commit).tar.xz build/gcc/bootstrap-gcc.tar.xz 
+	cp output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(bootstrap-gcc-from).tar.xz build/gcc/bootstrap-gcc.tar.xz
 	docker build --tag gcc:$(gcc-version) --file gcc.dockerfile build/gcc/
 	{ \
 		id=$$(docker create gcc:$(gcc-version)) ; \

@@ -16,7 +16,7 @@ commit != git rev-parse HEAD | cut -c 1-8
 host-arch != uname -m
 
 # if you want the bootstrap gcc from a previous commit set this
-ifdef ${BOOTSTRAP_GCC_FROM}
+ifdef BOOTSTRAP_GCC_FROM
 bootstrap-gcc-from = ${BOOTSTRAP_GCC_FROM}
 build-bootstrap-gcc = "false"
 else
@@ -24,7 +24,7 @@ bootstrap-gcc-from = $(commit)
 build-bootstrap-gcc = "true"
 endif
 # if you want the gcc build from a previous commit set this
-ifdef ${GCC_FROM}
+ifdef GCC_FROM
 gcc-from = ${GCC_FROM}
 build-gcc = "false"
 else

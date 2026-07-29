@@ -22,17 +22,16 @@ WORKDIR /gcc-build
 
 RUN <<EOT
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        host_platform=x86_64
+        host_platform=x86_64-unknown
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        host_platform=aarch64
+        host_platform=aarch64-unknown
     fi
     ../gcc-source/configure -v --build=${host_platform}-linux-gnu \
         --host=${host_platform}-linux-gnu \
         --target=${host_platform}-linux-gnu \
         --prefix=/opt/local/gcc \
         --enable-checking=release \
-        --enable-languages=c,c++ \
-        --disable-multilib
+        --enable-languages=c,c++
 EOT
 
 RUN make

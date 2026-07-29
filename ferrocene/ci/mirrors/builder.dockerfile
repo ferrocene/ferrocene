@@ -5,7 +5,6 @@ FROM --platform=$TARGETPLATFORM centos7-base AS build
 ARG TARGETPLATFORM
 
 ADD gcc.tar.xz /opt/local/gcc
-RUN tar -xf /gcc.tar.xz -C /opt/local/gcc
 ADD binutils.tar.xz /opt/local/
 ADD openssl.tar.xz /usr/local
 

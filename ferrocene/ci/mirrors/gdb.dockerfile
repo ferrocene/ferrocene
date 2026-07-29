@@ -40,7 +40,7 @@ index 1d25b3af15a..94e0bc80333 100644
 EOT
 
 RUN ./configure --with-python=/opt/python/${PYTHON_VERSION}/bin/python3 --prefix=/gdb-install
-RUN make
+RUN make -j$(nproc)
 
 RUN make install
 RUN echo "Creating $(du -hs .) archive"

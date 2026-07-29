@@ -22,7 +22,7 @@ RUN mkdir -p /binutils-src
 RUN tar -xf /binutils-src.tar.xz -C /binutils-src --strip-components=1
 WORKDIR /binutils-src
 RUN ./configure --prefix=/opt/local/binutils
-RUN make
+RUN make -j$(nproc)
 RUN make install
 RUN tar cJf /build/binutils-binaries.tar.xz -C /opt/local/binutils --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
 
@@ -35,6 +35,6 @@ WORKDIR /coreutils-src
 # coreutils wants this to configure as root
 ENV FORCE_UNSAFE_CONFIGURE=1
 RUN ./configure --prefix=/opt/local/coreutils
-RUN make
+RUN make -j$(nproc)
 RUN make install
 RUN tar cJf /build/coreutils-binaries.tar.xz -C /opt/local/coreutils --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

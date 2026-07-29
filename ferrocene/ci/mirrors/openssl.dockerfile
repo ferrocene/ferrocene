@@ -7,10 +7,8 @@ RUN yum -y install perl-core
 
 ADD gcc.tar.xz /opt/local/gcc
 ADD binutils.tar.xz /opt/local/
-ADD openssl.tar.xz /usr/local
 
 ENV PATH=/opt/local/gcc/bin:/opt/local/bin:$PATH
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
 COPY openssl.tar.gz /openssl.tar.gz
 RUN mkdir -p /openssl-build

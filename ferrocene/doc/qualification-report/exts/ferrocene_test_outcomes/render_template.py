@@ -41,6 +41,19 @@ class RenderOutcomesTemplate(SphinxDirective):
             else None
         )
 
+        if "FERROCENE_TEST_OUTCOMES_DIR" in os.environ:
+            # if test outcomes were provided then check that all target pages in
+            # the qualification report actually have test outcomes
+            if not (outcomes) or len(outcomes.invocations) == 0:
+                # `raise RuntimeError("blah")` does not print the string to the console (because of
+                # parallel rendering?) so use `print` instead
+                print(
+                    ">>> ERROR: expected test outcomes but found none for target in qualification report:",
+                    self.options["target"],
+                    "<<<",
+                )
+                raise
+
         if outcomes and len(outcomes.invocations):
             host = outcomes.invocations[0].host
             assert all(

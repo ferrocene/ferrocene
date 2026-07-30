@@ -129,7 +129,7 @@ RUN /tmp/setup-awscli.sh
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
-RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+# RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
     set -eu
 

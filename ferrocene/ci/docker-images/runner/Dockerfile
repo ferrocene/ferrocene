@@ -154,7 +154,7 @@ RUN <<-EOF
     done
 EOF
 
-ENV PATH=/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.12.12-linux-aarch64/bin/:$PATH
+ENV PATH=/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
@@ -192,6 +192,8 @@ ENV CC=gcc
 ENV CXX=g++
 ENV CFLAGS="-fuse-ld=bfd"
 ENV CXXFLAGS="-fuse-ld=bfd"
+ENV CC_aarch64_unknown_linux_gnu=aarch64-none-elf-gcc
+ENV CXX_aarch64_unknown_linux_gnu=aarch64-none-elf-g++
 ENV CC_aarch64_unknown_none=aarch64-none-elf-gcc
 ENV CXX_aarch64_unknown_none=aarch64-none-elf-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-none-elf-gcc

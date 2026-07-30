@@ -1061,6 +1061,8 @@ impl CommandLineStep for IntrinsicTest {
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
+        // Ferrocene addition: This test fails in CI with an illegal instruction
+        // error
         false
     }
 

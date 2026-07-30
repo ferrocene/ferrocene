@@ -254,7 +254,7 @@ git: git.dockerfile builder-python-image prepare
 	{ \
 		set -xe ; \
 		id=$$(docker create git:v$(git-version)) ; \
-		docker cp $$id:/git/git-binaries.tar.xz \
+		docker cp $$id:/git-binaries.tar.xz \
 			output/git-$(git-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}

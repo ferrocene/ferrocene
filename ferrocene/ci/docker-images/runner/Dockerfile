@@ -154,12 +154,18 @@ RUN <<-EOF
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
     done
-    ln -s /usr/local/bin/gcc /usr/local/bin/cc
 EOF
 
-ENV PATH=/usr/local/cmake-4.4.0-linux-x86_64/bin/:$PATH
+ENV PATH=/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.12.12-linux-aarch64/bin/:$PATH
 
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkg_config
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
+
+# add /usr/local/lib to ld's path
+RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
+RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
+RUN echo '/usr/local/gcc/lib64/' >> /etc/ld.so.conf.d/modern-gcc.conf
+RUN ldconfig
+
 RUN <<-EOF
     set -eu
 

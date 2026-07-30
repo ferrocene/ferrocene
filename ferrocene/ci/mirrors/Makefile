@@ -276,6 +276,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-aarch64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/git/git-$(git-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
@@ -288,6 +289,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz hashes
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/python/python-$(python-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gdb/gdb-$(gdb-version)-x86_64-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/git/git-$(git-version)-x86_64-$(commit).tar.xz hashes/
 	# cmake is taken from the binary distribution and just manually uploaded, so it's never rebuilt and carries no commit identifier
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-x86_64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-x86_64-$(commit).tar.xz hashes/

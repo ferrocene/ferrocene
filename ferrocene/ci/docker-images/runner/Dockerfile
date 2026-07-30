@@ -47,7 +47,6 @@ RUN yum -y install \
     make patch \
     file which \
     gawk \
-    git-core \
     openssh-clients \
     ca-certificates \
     libedit-devel \

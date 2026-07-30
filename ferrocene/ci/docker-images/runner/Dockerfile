@@ -119,10 +119,9 @@ ENV PATH "/opt/riscv-toolchain/ubuntu2004-20240407/bin:$PATH"
 ENV PATH "/opt/nodejs/16.20.2/bin:$PATH"
 
 # Install AWS CLI from the published binaries, as no source tarball is provided
-# and the version in the Ubuntu 20.04 archive is too old and doesn't support
+# and the version provided by packages is too old and doesn't support
 # `aws ecr get-login-password`.
 # Install AWS CLI from the published binaries, as no source tarball is provided
-# and the version in the Ubuntu 24.04 is a snap.
 COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
 COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
@@ -130,7 +129,7 @@ RUN /tmp/setup-awscli.sh
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
-# RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
     set -eu
 

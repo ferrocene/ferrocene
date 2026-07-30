@@ -773,9 +773,8 @@ impl CommandLineStep for Rustdoc {
         // to build rustdoc.
         //
         let mut extra_features = Vec::new();
-        let allocator = builder.config.allocator(target);
-        if allocator != Allocator::System {
-            extra_features.push(allocator.feature_name().to_string());
+        if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
+            extra_features.push(allocator_feature_name.to_string());
         }
 
         let compilers = RustcPrivateCompilers::from_target_compiler(builder, target_compiler);
@@ -1589,9 +1588,8 @@ tool_rustc_extended!(Clippy {
     stable: true,
     add_bins_to_sysroot: ["clippy-driver"],
     add_features: |builder, target, features| {
-        let allocator = builder.config.allocator(target);
-        if allocator != Allocator::System {
-            features.push(allocator.feature_name().to_string());
+        if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
+            features.push(allocator_feature_name.to_string());
         }
     }
 });
@@ -1601,9 +1599,8 @@ tool_rustc_extended!(Miri {
     stable: false,
     add_bins_to_sysroot: ["miri"],
     add_features: |builder, target, features| {
-        let allocator = builder.config.allocator(target);
-        if allocator != Allocator::System {
-            features.push(allocator.feature_name().to_string());
+        if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
+            features.push(allocator_feature_name.to_string());
         }
     },
     // Always compile also tests when building miri. Otherwise feature unification can cause rebuilds between building and testing miri.

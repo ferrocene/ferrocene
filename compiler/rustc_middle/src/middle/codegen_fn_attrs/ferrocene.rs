@@ -1,5 +1,5 @@
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{
     ForeignItem, ForeignItemKind, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
 };
@@ -51,6 +51,65 @@ impl ValidatedStatus {
     }
 }
 
+fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedStatus> {
+    match tcx.hir_node_by_def_id(local) {
+        // Skip intrinsics, extern functions, and associated functions with no default.
+        // We only have to do this for local DefIds; nothing makes it to post-mono without a body unless
+        // it's an intrinsic.
+        Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
+            // FIXME: ForeignItems should be an exported_constraint
+            | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
+            | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
+                info!("skipping item {local:?}");
+                return Some(ValidatedStatus::Validated { annotation: None, inherited: false, });
+            }
+        Node::ImplItem(..) => {}
+        _ => return None,
+    }
+
+    // Check if this is an associated function from a `derive`.
+    let parent = tcx.parent(local.into());
+    tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
+    #[allow(deprecated)]
+    if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
+        tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
+    }
+
+    let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
+        && tcx.is_automatically_derived(parent);
+
+    if !derived {
+        return None;
+    }
+
+    // Builtin macros are covered under our compiler qualification and considered verified.
+    // We currently don't support proc-macros; assume them to be unverified.
+    if !tcx.is_builtin_derived(parent) {
+        return Some(ValidatedStatus::Unvalidated);
+    }
+
+    let self_ty = tcx.type_of(parent);
+    info!("checking {self_ty:?}");
+    // FIXME: need to try to normalize this type so we handle aliases and associated types
+    let unwrapped_ty = self_ty.skip_binder().peel_refs();
+    match unwrapped_ty.kind() {
+        ty::Adt(adt_def, _) => {
+            let self_id = adt_def.did();
+            info!(
+                "{} is marked #[automatically_derived], checking {}",
+                tcx.def_path_str(local),
+                tcx.def_path_str(self_id)
+            );
+            return Some(item_is_validated(tcx, self_id));
+        }
+        ty::Error(..) => None,
+        _ if unwrapped_ty.is_primitive_ty() => None,
+        // We don't know how to resolve this back to a type.
+        // For now, just assume it's unvalidated.
+        _ => Some(ValidatedStatus::Unvalidated),
+    }
+}
+
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
 ///
 /// This analysis needs to be conservative. If you don't have enough information to determine the
@@ -72,61 +131,10 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         return ValidatedStatus::Validated { annotation: None, inherited: false };
     }
 
-    // Skip intrinsics, extern functions, and associated functions with no default.
-    // We only have to do this for local DefIds; nothing makes it to post-mono without a body unless
-    // it's an intrinsic.
-    if let Some(local) = owner.as_local() {
-        match tcx.hir_node_by_def_id(local) {
-            Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
-                // FIXME: ForeignItems should be an exported_constraint
-                | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
-                | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
-                    info!("skipping item {owner:?}");
-                    return ValidatedStatus::Validated { annotation: None, inherited: false, };
-                }
-            _ => {},
-        }
-
-        // Check if this is an associated function from a `derive`.
-        let parent = tcx.parent(owner);
-        tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
-        #[allow(deprecated)]
-        if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
-            tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
-        }
-
-        let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
-            && tcx.is_automatically_derived(parent);
-        if derived {
-            // Builtin macros are covered under our compiler qualification and considered verified.
-            // We currently don't support proc-macros; assume them to be unverified.
-            if !tcx.is_builtin_derived(parent) {
-                return ValidatedStatus::Unvalidated;
-            }
-
-            let self_ty = tcx.type_of(parent);
-            info!("checking {self_ty:?}");
-            // FIXME: need to try to normalize this type so we handle aliases and associated types
-            let unwrapped_ty = self_ty.skip_binder().peel_refs();
-            match unwrapped_ty.kind() {
-                ty::Adt(adt_def, _) => {
-                    let self_id = adt_def.did();
-                    info!(
-                        "{} is marked #[automatically_derived], checking {}",
-                        tcx.def_path_str(def_id),
-                        tcx.def_path_str(self_id)
-                    );
-                    return item_is_validated(tcx, self_id);
-                }
-                ty::Error(..) => {}
-                _ if unwrapped_ty.is_primitive_ty() => {}
-                // We don't know how to resolve this back to a type.
-                // For now, just assume it's unvalidated.
-                _ => {
-                    return ValidatedStatus::Unvalidated;
-                }
-            }
-        }
+    if let Some(local) = owner.as_local()
+        && let Some(status) = implied_validation(tcx, local)
+    {
+        return status;
     }
 
     if let Some(annotation) = any_parent_is_validated(tcx, owner) {

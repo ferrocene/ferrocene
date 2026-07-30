@@ -1859,17 +1859,14 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
     }
 
     // Ferrocene addition
-    pub(crate) fn should_serve<S: Step>(&self) -> bool {
+    pub(crate) fn should_serve<S: CommandLineStep>(&self) -> bool {
         // We record whether this method was called to see if it was invoked during the dry run. If
         // it wasn't and the --serve flag was passed we error out saying this is unsupported. If it
         // was invoked multiple times we also error out since it's not supported to run it for
         // multiple books at the same time.
         self.should_serve_called.fetch_add(1, atomic::Ordering::Relaxed);
 
-        // Note(rachel.barker): None of the types this is called for can *ever* be explicitly invoked,
-        // so this is effectively always false
-        //self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
-        false
+        self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
     }
 
     // Ferrocene addition

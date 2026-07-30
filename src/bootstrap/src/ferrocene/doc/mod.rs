@@ -108,7 +108,7 @@ struct SphinxBook<P: Step + IsSphinxBook> {
     parent: P,
 }
 
-impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
+impl<P: CommandLineStep + IsSphinxBook> Step for SphinxBook<P> {
     type Output = PathBuf;
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
@@ -364,7 +364,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         cmd.run(builder);
 
         if !should_serve {
-            builder.info(&format!("Doc path: {}", &out.join("index.html").display()));
+            builder.maybe_open_in_browser::<P>(&out.join("index.html"));
         }
 
         out

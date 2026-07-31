@@ -33,7 +33,7 @@ fi
 
 # We do a `git submodule update` ahead of time to ensure the wrong
 # submodule commits are not accidentally added.
-git submodule update
+git submodule update --recursive
 
 # The person handling the conflict should decide what to do if a file
 # has been deleted on either side of the merge, but doing a `git add .`

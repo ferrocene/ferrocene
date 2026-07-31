@@ -298,8 +298,9 @@ def update_subtree(repo_root, subtree):
             # NOTE: this can be wrong if `git subtree` failed for a reason other than merge conflicts.
             # Unfortunately, it gives us no way to detect that other than parsing stderr :/
             # This will hopefully be caught in `run()` when `git merge --continue` fails.
-            err("pull-subtrees: there are unresolved merge conflicts")
-            err("pull-subtrees: comitting with merge conflicts markers in the source")
+            err(
+                "pull-subtrees: There are merge conflicts in this PR. Attempting automatic resolution, but conflict markers may remain"
+            )
 
             fix_merge_script = os.path.join(
                 repo_root, "ferrocene", "tools", "fix-merge", "fix-merge.sh"

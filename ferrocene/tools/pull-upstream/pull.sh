@@ -282,7 +282,7 @@ then
         echo "pull-upstream: resolve the conflicts manually and then run \`git merge --continue\`."
         exit 1
     else
-        automation_warning "There are merge conflicts in this PR. Merge conflict markers have been committed."
+        automation_warning "There are merge conflicts in this PR. Attempting automatic resolution, but conflict markers may remain"
 
         ${LOCAL_REPO_ROOT}/ferrocene/tools/fix-merge/fix-merge.sh ${branch_name}
     fi

@@ -137,3 +137,5 @@ pub mod walk;
 pub mod x_version;
 // Ferrocene addition
 pub mod ferrocene_test_outcomes;
+// Ferrocene addition
+pub mod ferrocene_targets;

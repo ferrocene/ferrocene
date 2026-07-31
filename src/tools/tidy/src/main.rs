@@ -166,6 +166,7 @@ fn main() {
 
         // Ferrocene addition
         check!(ferrocene_test_outcomes, &root_path);
+        check!(ferrocene_targets, &root_path);
     });
 
     let failed_checks = tidy_ctx.into_failed_checks();

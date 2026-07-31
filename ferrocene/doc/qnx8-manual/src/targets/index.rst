@@ -25,17 +25,17 @@ Qualified QNX8 targets
      - Standard library
      - Notes
 
-   * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`aarch64-unknown-qnx`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
-     - ``proc_macro``
+   * - :ref:`aarch64-unknown-qnx`
+     - ``aarch64-unknown-qnx``
+     - Cross-compilation
+     - Full
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
-   * - :target:`x86_64-unknown-linux-gnu`
-     - :target:`x86_64-pc-qnx`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
-     - ``proc_macro``
+   * - :ref:`x86_64-pc-qnx`
+     - ``x86_64-pc-qnx``
+     - Cross-compilation
+     - Full
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
 
 Unsupported targets

@@ -297,7 +297,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 12
+      LLVM_BUILD_PARALLELISM: 16
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
@@ -416,7 +416,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 12
+      LLVM_BUILD_PARALLELISM: 16
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>

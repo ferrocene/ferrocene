@@ -3626,6 +3626,92 @@ impl CommandLineStep for Crate {
     }
 }
 
+// Ferrocene addition
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FerroceneCrateLibc {
+    /// The compiler that will *build* libstd or rustc in test mode.
+    build_compiler: Compiler,
+    target: TargetSelection,
+}
+
+impl CommandLineStep for FerroceneCrateLibc {
+    type Output = ();
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("ferrocene/library/libc")
+    }
+
+    fn is_default_step(_builder: &Builder<'_>) -> bool {
+        true
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        let builder = run.builder;
+        let host = run.build_triple();
+        let build_compiler = builder.compiler(builder.top_stage, host);
+
+        builder.ensure(Self { build_compiler, target: run.target });
+    }
+
+    // based off `<Crate as Step>::run` which we cannot use because we need
+    // custom `--manifest-path`, Cargo profile and test runner arguments
+    fn run(self, builder: &Builder<'_>) {
+        let build_compiler = self.build_compiler;
+        let target = self.target;
+
+        if target.needs_secret_sauce() {
+            eprintln!(
+                "ferrocene.facade targets skip libc tests as they would \
+test the host's libc bindings and not the bare-metal target's which are usually empty"
+            );
+            return;
+        } else if !target.contains("qnx") {
+            eprintln!(
+                "non-QNX targets are currently not tested as that requires using a \
+toolchain with a more recent libc version"
+            );
+            return;
+        }
+
+        // Prepare sysroot
+        // See [field@compile::Std::force_recompile].
+        builder.ensure(Std::new(build_compiler, build_compiler.host).force_recompile(true));
+        let record_failed_tests = builder.ensure(SetupFailedTestsFile);
+
+        // Also prepare a sysroot for the target.
+        if !builder.config.is_host_target(target) {
+            builder.ensure(compile::Std::new(build_compiler, target).force_recompile(true));
+            builder.ensure(RemoteCopyLibs { build_compiler, target });
+        }
+
+        // Build `cargo test` command
+        let mut cargo = builder::Cargo::new(
+            builder,
+            build_compiler,
+            Mode::Std,
+            SourceType::InTree,
+            target,
+            builder.kind,
+        );
+
+        cargo.arg("--manifest-path").arg(builder.src.join("ferrocene/library/libc/Cargo.toml"));
+
+        // `Mode::Std` sets the profile to dist which is a non-standard profile used by
+        // the std facade; use `dev` instead
+        cargo.profile("dev");
+
+        run_cargo_test(
+            cargo,
+            &[],
+            &["libc-test".to_string()],
+            "Ferrocene's libc",
+            target,
+            builder,
+            record_failed_tests,
+        );
+    }
+}
+
 /// Run cargo tests for the rustdoc crate.
 /// Rustdoc is special in various ways, which is why this step is different from `Crate`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

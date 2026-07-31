@@ -431,7 +431,7 @@ impl<'ast> Visit<'ast> for StyleChecker {
 }
 
 impl Parse for ExprCfgIf {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
         input.parse::<Token![if]>()?;
         let cond = input
             .call(syn::Attribute::parse_outer)?

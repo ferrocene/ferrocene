@@ -81,7 +81,7 @@ cd "${LOCAL_REPO_ROOT}"
 #
 # The update-index command ensures diff-index doesn't spuriously fail.
 # https://stackoverflow.com/questions/3878624#comment108071431_3879077
-git submodule update
+git submodule update --recursive
 git update-index --refresh || true
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"

@@ -106,6 +106,7 @@ ifeq ($(build-gcc),"true")
 
 download-gcc-src:
 	mkdir -p build/gcc
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/binutils/binutils-$(binutils-version).tar.xz build/gcc/binutils-src.tar.xz
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/gcc/gcc-$(gcc-version)-with-dependencies.tar.xz build/gcc/gcc-with-dependencies.tar.xz
 	
 gcc: bootstrap-gcc

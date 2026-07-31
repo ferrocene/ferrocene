@@ -39,8 +39,10 @@ cfg_select! {
     ) => {
         mod libunwind;
         pub use libunwind::*;
+        mod types;
     }
     target_family = "wasm" => {
+        mod types;
         mod wasm;
         pub use wasm::*;
     }

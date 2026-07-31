@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use xz2::read::XzDecoder;
 
-use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::builder::{Builder, Step};
 use crate::core::config::FerroceneDocumentSignatures;
 use crate::ferrocene::doc::IsSphinxBook;
 use crate::t;
@@ -29,10 +29,6 @@ impl<B: Step + IsSphinxBook> CacheSignatureFiles<B> {
 
 impl<B: Step + IsSphinxBook> Step for CacheSignatureFiles<B> {
     type Output = PathBuf;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         #[derive(serde_derive::Deserialize)]

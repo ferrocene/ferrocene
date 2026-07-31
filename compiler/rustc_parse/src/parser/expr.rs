@@ -7,7 +7,6 @@ use ast::mut_visit::{self, MutVisitor};
 use ast::token::IdentIsRaw;
 use ast::{CoroutineKind, ForLoopKind, GenBlockKind, MatchKind, Pat, Path, PathSegment, Recovered};
 use rustc_ast::token::{self, Delimiter, InvisibleOrigin, MetaVarKind, Token, TokenKind};
-use rustc_ast::tokenstream::TokenTree;
 use rustc_ast::util::case::Case;
 use rustc_ast::util::classify;
 use rustc_ast::util::parser::{AssocOp, ExprPrecedence, Fixity, prec_let_scrutinee_needs_par};
@@ -1276,13 +1275,12 @@ impl<'a> Parser<'a> {
             None
         };
         let open_paren = self.token.span;
-        let call_depth = self.token_cursor.stack.len();
+        let call_depth = self.token_cursor.depth();
 
         let seq = match self.parse_expr_paren_seq() {
             Ok(args) => Ok(self.mk_expr(lo.to(self.prev_token.span), self.mk_call(fun, args))),
             Err(err)
-                if self.is_expected_raw_ref_mut()
-                    && self.token_cursor.stack.len() == call_depth =>
+                if self.is_expected_raw_ref_mut() && self.token_cursor.depth() == call_depth =>
             {
                 let guar = err.emit();
                 // Preserve the call expression so later passes can still diagnose the callee,
@@ -1382,12 +1380,22 @@ impl<'a> Parser<'a> {
 
     /// Parse an indexing expression `expr[...]`.
     fn parse_expr_index(&mut self, lo: Span, base: Box<Expr>) -> PResult<'a, Box<Expr>> {
-        let prev_span = self.prev_token.span;
+        let prev_token = self.prev_token;
         let open_delim_span = self.token.span;
         self.bump(); // `[`
         let index = self.parse_expr()?;
-        self.suggest_missing_semicolon_before_array(prev_span, open_delim_span)?;
-        self.expect(exp!(CloseBracket))?;
+        self.suggest_missing_semicolon_before_array(prev_token.span, open_delim_span)?;
+        self.expect(exp!(CloseBracket)).map_err(|mut e| {
+            if let TokenKind::Ident(_, _) = prev_token.kind {
+                e.span_suggestion_verbose(
+                    prev_token.span.shrink_to_hi(),
+                    "you might have meant to call a macro",
+                    "!".to_string(),
+                    Applicability::MaybeIncorrect,
+                );
+            }
+            e
+        })?;
         Ok(self.mk_expr(
             lo.to(self.prev_token.span),
             self.mk_index(base, index, open_delim_span.to(self.prev_token.span)),
@@ -1699,7 +1707,12 @@ impl<'a> Parser<'a> {
                 // directly adjacent (i.e. '=<')
                 if maybe_eq_tok == TokenKind::Eq && maybe_eq_tok.span.hi() == lt_span.lo() {
                     let eq_lt = maybe_eq_tok.span.to(lt_span);
-                    err.span_suggestion(eq_lt, "did you mean", "<=", Applicability::Unspecified);
+                    err.span_suggestion_verbose(
+                        eq_lt,
+                        "you might have meant to write a \"less than or equal to\" comparison",
+                        "<=",
+                        Applicability::Unspecified,
+                    );
                 }
                 err
             })?;
@@ -2510,8 +2523,7 @@ impl<'a> Parser<'a> {
         }
 
         if self.token == TokenKind::Semi
-            && let Some(last) = self.token_cursor.stack.last()
-            && let Some(TokenTree::Delimited(_, _, Delimiter::Parenthesis, _)) = last.curr()
+            && let Some((Delimiter::Parenthesis, _)) = self.token_cursor.parent_delim_and_span()
             && self.may_recover()
         {
             // It is likely that the closure body is a block but where the
@@ -2755,7 +2767,7 @@ impl<'a> Parser<'a> {
                             && let maybe_let = self.look_ahead(1, |t| t.clone())
                             && maybe_let.is_keyword(kw::Let)
                         {
-                            err.span_suggestion(
+                            err.span_suggestion_verbose(
                                 self.prev_token.span,
                                 "consider removing this semicolon to parse the `let` as part of the same chain",
                                 "",
@@ -2767,7 +2779,7 @@ impl<'a> Parser<'a> {
                         } else {
                             // Look for usages of '=>' where '>=' might be intended
                             if maybe_fatarrow == token::FatArrow {
-                                err.span_suggestion(
+                                err.span_suggestion_verbose(
                                     maybe_fatarrow.span,
                                     "you might have meant to write a \"greater than or equal to\" comparison",
                                     ">=",
@@ -3329,12 +3341,8 @@ impl<'a> Parser<'a> {
             self.restore_snapshot(pre_pat_snapshot);
             match self.parse_stmt_without_recovery(true, ForceCollect::No, false) {
                 // Consume statements for as long as possible.
-                Ok(Some(stmt)) => {
+                Ok(stmt) => {
                     stmts.push(stmt);
-                }
-                Ok(None) => {
-                    self.restore_snapshot(start_snapshot);
-                    break;
                 }
                 // We couldn't parse either yet another statement missing it's
                 // enclosing block nor the next arm's pattern or closing brace.
@@ -3381,7 +3389,7 @@ impl<'a> Parser<'a> {
                 if let Err(mut err) = this.expect(exp!(FatArrow)) {
                     // We might have a `=>` -> `=` or `->` typo (issue #89396).
                     if is_almost_fat_arrow {
-                        err.span_suggestion(
+                        err.span_suggestion_verbose(
                             this.token.span,
                             "use a fat arrow to start a match arm",
                             "=>",

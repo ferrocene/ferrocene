@@ -3,7 +3,7 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_hir as hir;
 use rustc_infer::infer::region_constraints::{ConstraintKind, RegionConstraintData};
 use rustc_middle::bug;
-use rustc_middle::ty::{self, Region, Ty, fold_regions};
+use rustc_middle::ty::{self, Region, RegionUtilitiesExt, Ty, fold_regions};
 use rustc_span::def_id::DefId;
 use rustc_span::symbol::{Symbol, kw};
 use rustc_trait_selection::traits::auto_trait::{self, RegionTarget};
@@ -113,6 +113,8 @@ fn synthesize_auto_trait_impl<'tcx>(
         auto_trait::AutoTraitResult::NoImpl => return None,
         auto_trait::AutoTraitResult::ExplicitImpl => return None,
     };
+
+    super::inline::record_extern_trait(cx, trait_def_id);
 
     Some(clean::Item {
         inner: Box::new(clean::ItemInner {

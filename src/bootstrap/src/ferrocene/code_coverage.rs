@@ -6,7 +6,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use crate::builder::Builder;
-use crate::core::builder::{Cargo, Kind, ShouldRun, Step};
+use crate::core::builder::{Cargo, Kind, Step};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
@@ -245,10 +245,6 @@ pub(crate) struct CoverageOutcomesDir;
 
 impl Step for CoverageOutcomesDir {
     type Output = Option<PathBuf>;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         match &builder.config.ferrocene_coverage_outcomes {

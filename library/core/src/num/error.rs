@@ -23,7 +23,14 @@ impl TryFromIntError {
 impl fmt::Display for TryFromIntError {
     #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        "out of range integral type conversion attempted".fmt(f)
+        match self.0 {
+            IntErrorKind::Empty | IntErrorKind::InvalidDigit => unreachable!(),
+            IntErrorKind::PosOverflow => "number too large to fit in target type",
+            IntErrorKind::NegOverflow => "number too small to fit in target type",
+            IntErrorKind::Zero => "number would be zero for non-zero type",
+            IntErrorKind::NotAPowerOfTwo => "number is not a power of two",
+        }
+        .fmt(f)
     }
 }
 

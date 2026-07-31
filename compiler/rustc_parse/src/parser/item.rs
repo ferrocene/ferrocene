@@ -324,13 +324,14 @@ impl<'a> Parser<'a> {
             // CONST ITEM
             self.recover_const_mut(const_span);
             self.recover_missing_kw_before_item()?;
-            let (ident, generics, ty, rhs_kind) = self.parse_const_item(false, const_span)?;
+            let (ident, generics, ty, body) = self.parse_const_item(const_span)?;
             ItemKind::Const(Box::new(ConstItem {
                 defaultness: def_(),
                 ident,
                 generics,
                 ty,
-                rhs_kind,
+                body,
+                kind: ConstItemKind::Body,
                 define_opaque: None,
             }))
         } else if let Some(kind) = self.is_reuse_item() {
@@ -345,7 +346,7 @@ impl<'a> Parser<'a> {
                 // TYPE CONST (mgca)
                 self.recover_const_mut(const_span);
                 self.recover_missing_kw_before_item()?;
-                let (ident, generics, ty, rhs_kind) = self.parse_const_item(true, const_span)?;
+                let (ident, generics, ty, body) = self.parse_const_item(const_span)?;
                 // Make sure this is only allowed if the feature gate is enabled.
                 // #![feature(mgca_type_const_syntax)]
                 self.psess.gated_spans.gate(sym::mgca_type_const_syntax, lo.to(const_span));
@@ -354,7 +355,8 @@ impl<'a> Parser<'a> {
                     ident,
                     generics,
                     ty,
-                    rhs_kind,
+                    body,
+                    kind: ConstItemKind::TypeConst,
                     define_opaque: None,
                 }))
             } else {
@@ -601,7 +603,7 @@ impl<'a> Parser<'a> {
                     && let [segment] = path.segments.as_slice()
                     && edit_distance("macro_rules", &segment.ident.to_string(), 2).is_some()
                 {
-                    err.span_suggestion(
+                    err.span_suggestion_verbose(
                         path.span,
                         "perhaps you meant to define a macro",
                         "macro_rules",
@@ -626,13 +628,16 @@ impl<'a> Parser<'a> {
         let mut err = self.dcx().struct_span_err(end.span, msg);
         if end.is_doc_comment() {
             err.span_label(end.span, "this doc comment doesn't document anything");
-        } else if self.token == TokenKind::Semi {
-            err.span_suggestion_verbose(
-                self.token.span,
-                "consider removing this semicolon",
-                "",
-                Applicability::MaybeIncorrect,
-            );
+        } else {
+            err.span_label(end.span, "expected an item after this");
+            if self.token == TokenKind::Semi {
+                err.span_suggestion_verbose(
+                    self.token.span,
+                    "remove the semicolon after the attribute",
+                    "",
+                    Applicability::MaybeIncorrect,
+                );
+            }
         }
         if let [.., penultimate, _] = attrs {
             err.span_label(start.span.to(penultimate.span), "other attributes here");
@@ -962,7 +967,9 @@ impl<'a> Parser<'a> {
             self.recover_vcs_conflict_marker();
             match parse_item(self) {
                 Ok(None) => {
-                    let mut is_unnecessary_semicolon = !items.is_empty()
+                    let mut is_unnecessary_semicolon = (self.token == token::Semi
+                        && self.prev_token == token::Semi)
+                        || !items.is_empty()
                         // When the close delim is `)` in a case like the following, `token.kind`
                         // is expected to be `token::CloseParen`, but the actual `token.kind` is
                         // `token::CloseBrace`. This is because the `token.kind` of the close delim
@@ -1011,7 +1018,7 @@ impl<'a> Parser<'a> {
                             .span_label(self.prev_token.span, "item list ends here");
                     }
                     if is_unnecessary_semicolon {
-                        err.span_suggestion(
+                        err.span_suggestion_verbose(
                             semicolon_span,
                             "consider removing this semicolon",
                             "",
@@ -1262,7 +1269,8 @@ impl<'a> Parser<'a> {
                                 ident,
                                 generics: Generics::default(),
                                 ty,
-                                rhs_kind: ConstItemRhsKind::Body { rhs: expr },
+                                body: expr,
+                                kind: ConstItemKind::Body,
                                 define_opaque,
                             }))
                         }
@@ -1504,7 +1512,7 @@ impl<'a> Parser<'a> {
                 let kind = match ForeignItemKind::try_from(kind) {
                     Ok(kind) => kind,
                     Err(kind) => match kind {
-                        ItemKind::Const(ConstItem { ident, ty, rhs_kind, .. }) => {
+                        ItemKind::Const(ConstItem { ident, ty, body, .. }) => {
                             let const_span = Some(span.with_hi(ident.span.lo()))
                                 .filter(|span| span.can_be_used_for_suggestions());
                             self.dcx().emit_err(diagnostics::ExternItemCannotBeConst {
@@ -1515,13 +1523,7 @@ impl<'a> Parser<'a> {
                                 ident,
                                 ty,
                                 mutability: Mutability::Not,
-                                expr: match rhs_kind {
-                                    ConstItemRhsKind::Body { rhs } => rhs,
-                                    ConstItemRhsKind::TypeConst { rhs: Some(anon) } => {
-                                        Some(anon.value)
-                                    }
-                                    ConstItemRhsKind::TypeConst { rhs: None } => None,
-                                },
+                                expr: body,
                                 safety: Safety::Default,
                                 define_opaque: None,
                                 eii_impls: ThinVec::default(),
@@ -1684,9 +1686,8 @@ impl<'a> Parser<'a> {
     /// ```
     fn parse_const_item(
         &mut self,
-        const_arg: bool,
         const_span: Span,
-    ) -> PResult<'a, (Ident, Generics, Box<Ty>, ConstItemRhsKind)> {
+    ) -> PResult<'a, (Ident, Generics, Box<Ty>, Option<Box<Expr>>)> {
         let ident = self.parse_ident_or_underscore()?;
 
         let mut generics = self.parse_generics()?;
@@ -1713,14 +1714,7 @@ impl<'a> Parser<'a> {
         let before_where_clause =
             if self.may_recover() { self.parse_where_clause()? } else { WhereClause::default() };
 
-        let rhs = match (self.eat(exp!(Eq)), const_arg) {
-            (true, true) => {
-                ConstItemRhsKind::TypeConst { rhs: Some(self.parse_expr_anon_const()?) }
-            }
-            (true, false) => ConstItemRhsKind::Body { rhs: Some(self.parse_expr()?) },
-            (false, true) => ConstItemRhsKind::TypeConst { rhs: None },
-            (false, false) => ConstItemRhsKind::Body { rhs: None },
-        };
+        let rhs = if self.eat(exp!(Eq)) { Some(self.parse_expr()?) } else { None };
 
         let after_where_clause = self.parse_where_clause()?;
 
@@ -1728,18 +1722,18 @@ impl<'a> Parser<'a> {
         // Users may be tempted to write such code if they are still used to the deprecated
         // where-clause location on type aliases and associated types. See also #89122.
         if before_where_clause.has_where_token
-            && let Some(rhs_span) = rhs.span()
+            && let Some(rhs) = &rhs
         {
             self.dcx().emit_err(diagnostics::WhereClauseBeforeConstBody {
                 span: before_where_clause.span,
                 name: ident.span,
-                body: rhs_span,
+                body: rhs.span,
                 sugg: if !after_where_clause.has_where_token {
-                    self.psess.source_map().span_to_snippet(rhs_span).ok().map(|body_s| {
+                    self.psess.source_map().span_to_snippet(rhs.span).ok().map(|body_s| {
                         diagnostics::WhereClauseBeforeConstBodySugg {
                             left: before_where_clause.span.shrink_to_lo(),
                             snippet: body_s,
-                            right: before_where_clause.span.shrink_to_hi().to(rhs_span),
+                            right: before_where_clause.span.shrink_to_hi().to(rhs.span),
                         }
                     })
                 } else {
@@ -1776,7 +1770,7 @@ impl<'a> Parser<'a> {
         generics.where_clause = where_clause;
 
         if let Some(rhs) = self.try_recover_const_missing_semi(&rhs, const_span) {
-            return Ok((ident, generics, ty, ConstItemRhsKind::Body { rhs: Some(rhs) }));
+            return Ok((ident, generics, ty, Some(rhs)));
         }
         self.expect_semi()?;
 
@@ -2175,12 +2169,10 @@ impl<'a> Parser<'a> {
                     FieldDef {
                         span: lo.to(ty.span),
                         vis,
-                        mut_restriction,
-                        safety: Safety::Default,
+                        extras: Self::field_def_extras(Safety::Default, mut_restriction, default),
                         ident: None,
                         id: DUMMY_NODE_ID,
                         ty,
-                        default,
                         attrs,
                         is_placeholder: false,
                     },
@@ -2205,6 +2197,25 @@ impl<'a> Parser<'a> {
             }
             error
         })
+    }
+
+    fn field_def_extras(
+        safety: Safety,
+        mut_restriction: MutRestriction,
+        default: Option<AnonConst>,
+    ) -> Option<Box<FieldDefExtras>> {
+        match (safety, mut_restriction, default) {
+            (
+                Safety::Default,
+                // We are throwing away the mut restriction span here.
+                // see the span field comment for more info
+                MutRestriction { kind: RestrictionKind::Unrestricted, span: _ },
+                None,
+            ) => None,
+            (safety, mut_restriction, default) => {
+                Some(Box::new(FieldDefExtras { safety, mut_restriction, default }))
+            }
+        }
     }
 
     /// Parses an element of a struct declaration.
@@ -2398,11 +2409,9 @@ impl<'a> Parser<'a> {
             span: lo.to(self.prev_token.span),
             ident: Some(name),
             vis,
-            safety,
-            mut_restriction,
+            extras: Self::field_def_extras(safety, mut_restriction, default),
             id: DUMMY_NODE_ID,
             ty,
-            default,
             attrs,
             is_placeholder: false,
         })
@@ -2429,16 +2438,19 @@ impl<'a> Parser<'a> {
                     &inherited_vis,
                     Case::Insensitive,
                 ) {
-                    Ok(_) => {
-                        self.dcx().struct_span_err(
+                    Ok(_) => self
+                        .dcx()
+                        .struct_span_err(
                             lo.to(self.prev_token.span),
                             format!("functions are not allowed in {adt_ty} definitions"),
                         )
                         .with_help(
                             "unlike in C++, Java, and C#, functions are declared in `impl` blocks",
                         )
-                        .with_help("see https://doc.rust-lang.org/book/ch05-03-method-syntax.html for more information")
-                    }
+                        .with_help(
+                            "see https://doc.rust-lang.org/book/ch05-03-method-syntax.html \
+                             for more information",
+                        ),
                     Err(err) => {
                         err.cancel();
                         self.restore_snapshot(snapshot);
@@ -2474,14 +2486,17 @@ impl<'a> Parser<'a> {
                         .map_err(|err| err.cancel())
                     && self.token == TokenKind::Colon
                 {
-                    err.span_suggestion(
+                    err.span_suggestion_verbose(
                         removal_span,
-                        "remove this `let` keyword",
+                        "remove the `let` keyword",
                         String::new(),
                         Applicability::MachineApplicable,
                     );
                     err.note("the `let` keyword is not allowed in `struct` fields");
-                    err.note("see <https://doc.rust-lang.org/book/ch05-01-defining-structs.html> for more information");
+                    err.note(
+                        "see <https://doc.rust-lang.org/book/ch05-01-defining-structs.html> \
+                         for more information",
+                    );
                     err.emit();
                     return Ok(ident);
                 } else {
@@ -2632,7 +2647,7 @@ impl<'a> Parser<'a> {
                     vec![(open, "{".to_string()), (close, '}'.to_string())],
                     Applicability::MaybeIncorrect,
                 );
-                err.span_suggestion(
+                err.span_suggestion_verbose(
                     span.with_neighbor(self.token.span).shrink_to_hi(),
                     "add a semicolon",
                     ';',
@@ -3248,7 +3263,7 @@ impl<'a> Parser<'a> {
                             .span_to_snippet(original_sp)
                             .expect("Span extracted directly from keyword should always work");
 
-                        err.span_suggestion(
+                        err.span_suggestion_verbose(
                             self.token_uninterpolated_span(),
                             format!("`{original_kw}` already used earlier, remove this one"),
                             "",
@@ -3263,7 +3278,7 @@ impl<'a> Parser<'a> {
                             let misplaced_qual_sp = self.token_uninterpolated_span();
                             let misplaced_qual = self.span_to_snippet(misplaced_qual_sp).unwrap();
 
-                            err.span_suggestion(
+                            err.span_suggestion_verbose(
                                     correct_pos_sp.to(misplaced_qual_sp),
                                     format!("`{misplaced_qual}` must come before `{current_qual}`"),
                                     format!("{misplaced_qual} {current_qual}"),
@@ -3287,7 +3302,7 @@ impl<'a> Parser<'a> {
 
                             // There was no explicit visibility
                             if matches!(orig_vis.kind, VisibilityKind::Inherited) {
-                                err.span_suggestion(
+                                err.span_suggestion_verbose(
                                     sp_start.to(self.prev_token.span),
                                     format!("visibility `{vs}` must come before `{snippet}`"),
                                     format!("{vs} {snippet}"),
@@ -3296,7 +3311,7 @@ impl<'a> Parser<'a> {
                             }
                             // There was an explicit visibility
                             else {
-                                err.span_suggestion(
+                                err.span_suggestion_verbose(
                                     current_vis.span,
                                     "there is already a visibility modifier, remove one",
                                     "",
@@ -3698,13 +3713,13 @@ impl<'a> Parser<'a> {
     /// Returns a corrected expression if recovery is successful.
     fn try_recover_const_missing_semi(
         &mut self,
-        rhs: &ConstItemRhsKind,
+        rhs: &Option<Box<Expr>>,
         const_span: Span,
     ) -> Option<Box<Expr>> {
         if self.token == TokenKind::Semi {
             return None;
         }
-        let ConstItemRhsKind::Body { rhs: Some(rhs) } = rhs else {
+        let Some(rhs) = rhs else {
             return None;
         };
         if !self.in_fn_body || !self.may_recover() || rhs.span.from_expansion() {

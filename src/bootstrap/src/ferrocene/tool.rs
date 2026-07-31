@@ -5,7 +5,7 @@ pub(crate) mod flip_link;
 
 use std::path::PathBuf;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::tool::{
     RustcPrivateCompilers, SourceType, ToolArtifactKind, ToolBuild, prepare_tool_cargo,
 };
@@ -34,7 +34,7 @@ impl SelfTest {
     }
 }
 
-impl Step for SelfTest {
+impl CommandLineStep for SelfTest {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
@@ -81,7 +81,7 @@ pub(crate) struct SymbolReport {
 }
 pub(super) const SYMBOL_PATH: &str = "ferrocene/tools/symbol-report";
 
-impl Step for SymbolReport {
+impl CommandLineStep for SymbolReport {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 
@@ -124,7 +124,7 @@ impl Step for SymbolReport {
 pub(crate) struct Blanket {}
 pub(super) const BLANKET_PATH: &str = "ferrocene/tools/blanket";
 
-impl Step for Blanket {
+impl CommandLineStep for Blanket {
     type Output = PathBuf;
     const IS_HOST: bool = true;
 

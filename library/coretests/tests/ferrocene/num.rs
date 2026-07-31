@@ -435,7 +435,7 @@ fn test_parse_int_error_zero_display_fmt() {
 
 // covers `<core::num::error::TryFromIntError as core::fmt::Display>::fmt`
 #[test]
-#[should_panic = "out of range integral type conversion attempted"]
+#[should_panic = "number too large to fit in target type"]
 fn test_try_from_int_error_display_fmt() {
     if let Err(e) = u8::try_from(256u16) {
         panic!("{e}")

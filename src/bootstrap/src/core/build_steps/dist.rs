@@ -29,7 +29,9 @@ use crate::core::build_steps::tool::{
 };
 use crate::core::build_steps::vendor::Vendor;
 use crate::core::build_steps::{compile, llvm};
-use crate::core::builder::{Builder, Kind, RunConfig, ShouldRun, Step, StepMetadata};
+use crate::core::builder::{
+    Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
+};
 use crate::core::config::{GccCiMode, TargetSelection};
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::channel::{self, Info};
@@ -64,12 +66,12 @@ pub struct Docs {
     pub host: TargetSelection,
 }
 
-impl Step for Docs {
+impl CommandLineStep for Docs {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own documentation tarball.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -113,7 +115,7 @@ pub struct JsonDocs {
     target: TargetSelection,
 }
 
-impl Step for JsonDocs {
+impl CommandLineStep for JsonDocs {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -164,13 +166,13 @@ pub struct RustcDocs {
     target: TargetSelection,
 }
 
-impl Step for RustcDocs {
+impl CommandLineStep for RustcDocs {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't ship the compiler documentation.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -417,7 +419,7 @@ pub struct Mingw {
     target: TargetSelection,
 }
 
-impl Step for Mingw {
+impl CommandLineStep for Mingw {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -472,7 +474,7 @@ pub struct Rustc {
     pub target_compiler: Compiler,
 }
 
-impl Step for Rustc {
+impl CommandLineStep for Rustc {
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
@@ -706,10 +708,6 @@ pub struct DebuggerScripts {
 impl Step for DebuggerScripts {
     type Output = ();
 
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
     fn run(self, builder: &Builder<'_>) {
         let target = self.target;
         let sysroot = self.sysroot;
@@ -850,7 +848,7 @@ impl Std {
     }
 }
 
-impl Step for Std {
+impl CommandLineStep for Std {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -916,7 +914,7 @@ impl RustcDev {
     }
 }
 
-impl Step for RustcDev {
+impl CommandLineStep for RustcDev {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -984,7 +982,7 @@ pub struct Analysis {
     target: TargetSelection,
 }
 
-impl Step for Analysis {
+impl CommandLineStep for Analysis {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -1157,7 +1155,7 @@ fn copy_src_dirs(
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Src;
 
-impl Step for Src {
+impl CommandLineStep for Src {
     /// The output path of the src installer tarball
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
@@ -1241,14 +1239,14 @@ impl Step for Src {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct PlainSourceTarball;
 
-impl Step for PlainSourceTarball {
+impl CommandLineStep for PlainSourceTarball {
     /// Produces the location of the tarball generated
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own alternative for it.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1288,14 +1286,14 @@ impl Step for PlainSourceTarball {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct PlainSourceTarballGpl;
 
-impl Step for PlainSourceTarballGpl {
+impl CommandLineStep for PlainSourceTarballGpl {
     /// Produces the location of the tarball generated
     type Output = GeneratedTarball;
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we have our own alternative for it.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1420,7 +1418,7 @@ pub struct Cargo {
     pub target: TargetSelection,
 }
 
-impl Step for Cargo {
+impl CommandLineStep for Cargo {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1481,7 +1479,7 @@ pub struct RustAnalyzer {
     pub target: TargetSelection,
 }
 
-impl Step for RustAnalyzer {
+impl CommandLineStep for RustAnalyzer {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1527,7 +1525,7 @@ pub struct Clippy {
     pub target: TargetSelection,
 }
 
-impl Step for Clippy {
+impl CommandLineStep for Clippy {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1579,7 +1577,7 @@ pub struct Miri {
     pub target: TargetSelection,
 }
 
-impl Step for Miri {
+impl CommandLineStep for Miri {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1630,7 +1628,7 @@ pub struct CraneliftCodegenBackend {
     pub target: TargetSelection,
 }
 
-impl Step for CraneliftCodegenBackend {
+impl CommandLineStep for CraneliftCodegenBackend {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1704,7 +1702,7 @@ pub struct GccCodegenBackend {
     pub target: TargetSelection,
 }
 
-impl Step for GccCodegenBackend {
+impl CommandLineStep for GccCodegenBackend {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1808,7 +1806,7 @@ pub struct Rustfmt {
     pub target: TargetSelection,
 }
 
-impl Step for Rustfmt {
+impl CommandLineStep for Rustfmt {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -1855,13 +1853,13 @@ pub struct Extended {
     target: TargetSelection,
 }
 
-impl Step for Extended {
+impl CommandLineStep for Extended {
     type Output = ();
     const IS_HOST: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         // Disabled by Ferrocene, as we don't support the extended tarball.
-        run.never()
+        run.ferrocene_disabled()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -2626,7 +2624,7 @@ pub struct LlvmTools {
     pub target: TargetSelection,
 }
 
-impl Step for LlvmTools {
+impl CommandLineStep for LlvmTools {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -2732,7 +2730,7 @@ pub struct LlvmBitcodeLinker {
     pub target: TargetSelection,
 }
 
-impl Step for LlvmBitcodeLinker {
+impl CommandLineStep for LlvmBitcodeLinker {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -2781,7 +2779,7 @@ pub struct Enzyme {
     pub target: TargetSelection,
 }
 
-impl Step for Enzyme {
+impl CommandLineStep for Enzyme {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -2835,7 +2833,7 @@ pub struct RustDev {
     pub target: TargetSelection,
 }
 
-impl Step for RustDev {
+impl CommandLineStep for RustDev {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -2943,7 +2941,7 @@ pub struct Bootstrap {
     target: TargetSelection,
 }
 
-impl Step for Bootstrap {
+impl CommandLineStep for Bootstrap {
     type Output = Option<GeneratedTarball>;
 
     const IS_HOST: bool = true;
@@ -2987,7 +2985,7 @@ pub struct BuildManifest {
     target: TargetSelection,
 }
 
-impl Step for BuildManifest {
+impl CommandLineStep for BuildManifest {
     type Output = GeneratedTarball;
 
     const IS_HOST: bool = true;
@@ -3027,7 +3025,7 @@ pub struct ReproducibleArtifacts {
     target: TargetSelection,
 }
 
-impl Step for ReproducibleArtifacts {
+impl CommandLineStep for ReproducibleArtifacts {
     type Output = Option<GeneratedTarball>;
     const IS_HOST: bool = true;
 
@@ -3076,7 +3074,7 @@ pub struct GccDev {
     target: TargetSelection,
 }
 
-impl Step for GccDev {
+impl CommandLineStep for GccDev {
     type Output = GeneratedTarball;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -3111,7 +3109,7 @@ pub struct Gcc {
     target: TargetSelection,
 }
 
-impl Step for Gcc {
+impl CommandLineStep for Gcc {
     type Output = Option<GeneratedTarball>;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

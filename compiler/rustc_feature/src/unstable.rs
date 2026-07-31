@@ -398,6 +398,8 @@ declare_features! (
     (unstable, arbitrary_self_types_pointers, "1.83.0", Some(44874)),
     /// Target features on arm.
     (unstable, arm_target_feature, "1.27.0", Some(150246)),
+    /// Allows using `const` operands with pointer in inline assembly.
+    (unstable, asm_const_ptr, "CURRENT_RUSTC_VERSION", Some(128464)),
     /// Enables experimental inline assembly support for additional architectures.
     (unstable, asm_experimental_arch, "1.58.0", Some(93335)),
     /// Enables experimental register support in inline assembly.
@@ -424,8 +426,6 @@ declare_features! (
     (unstable, avx10_target_feature, "1.88.0", Some(138843)),
     /// Target features on bpf.
     (unstable, bpf_target_feature, "1.54.0", Some(150247)),
-    /// Allows using C-variadics.
-    (unstable, c_variadic, "1.34.0", Some(44930)),
     /// Allows defining c-variadic functions on targets where this feature has not yet
     /// undergone sufficient testing for stabilization.
     (unstable, c_variadic_experimental_arch, "1.97.0", Some(155973)),
@@ -632,6 +632,8 @@ declare_features! (
     (unstable, macro_metavar_expr, "1.61.0", Some(83527)),
     /// Provides a way to concatenate identifiers using metavariable expressions.
     (unstable, macro_metavar_expr_concat, "1.81.0", Some(124225)),
+    /// Allows directly represented generic_const_args without the `direct_const_arg!` macro.
+    (incomplete, macroless_generic_const_args, "CURRENT_RUSTC_VERSION", Some(159006)),
     /// Allows `#[marker]` on certain traits allowing overlapping implementations.
     (unstable, marker_trait_attr, "1.30.0", Some(29864)),
     /// Enable mgca `type const` syntax before expansion.
@@ -877,5 +879,6 @@ pub const INCOMPATIBLE_FEATURES: &[(Symbol, Symbol)] = &[
 /// Some features require one or more other features to be enabled.
 pub const DEPENDENT_FEATURES: &[(Symbol, &[Symbol])] = &[
     (sym::generic_const_args, &[sym::min_generic_const_args]),
+    (sym::macroless_generic_const_args, &[sym::min_generic_const_args]),
     (sym::unsized_const_params, &[sym::adt_const_params]),
 ];

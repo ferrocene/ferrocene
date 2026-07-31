@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::builder::{Builder, Step};
 
 // Latest version and checksums available at: https://github.com/sigstore/cosign/releases
 const COSIGN_VERSION: &str = "2.2.3";
@@ -35,11 +35,6 @@ pub(super) struct CosignBinary;
 
 impl Step for CosignBinary {
     type Output = PathBuf;
-    const IS_HOST: bool = true;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> PathBuf {
         if builder.config.dry_run() {

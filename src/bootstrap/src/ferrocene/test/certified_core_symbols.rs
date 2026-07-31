@@ -6,7 +6,7 @@ use std::path::Path;
 use build_helper::diff::diff_text;
 use build_helper::symbol_report::SymbolReport;
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::run;
 
@@ -15,7 +15,7 @@ const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.csv";
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols;
 
-impl Step for CertifiedCoreSymbols {
+impl CommandLineStep for CertifiedCoreSymbols {
     type Output = ();
     const IS_HOST: bool = true;
 

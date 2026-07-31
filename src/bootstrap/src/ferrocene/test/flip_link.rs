@@ -1,4 +1,4 @@
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::compile::Std;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::test::{SourceType, tool};
@@ -8,7 +8,7 @@ use crate::{Kind, Mode};
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct FlipLink {}
 
-impl Step for FlipLink {
+impl CommandLineStep for FlipLink {
     type Output = ();
     const IS_HOST: bool = true;
 

@@ -58,6 +58,12 @@ doc-stage = 2
 # accordingly.
 description = "by Ferrous Systems"
 
+# Switches the compiler from the system allocator to jemalloc. Jemalloc is more performant compared
+# to the system allocator for the compiler workloads, speeding up the compilation process.
+#
+# If this configuration is missing the system allocator will be used, slowing down the compiler.
+allocator = "jemalloc"
+
 
 
 [llvm]
@@ -153,12 +159,6 @@ lld = true
 # exactly what would be built locally.
 download-rustc = false
 
-# Switches the compiler from the system allocator to jemalloc. Jemalloc is more performant compared
-# to the system allocator for the compiler workloads, speeding up the compilation process.
-#
-# If this configuration is missing the system allocator will be used, slowing down the compiler.
-jemalloc = true
-
 # Set the release channel for this build. Setting this to "auto-detect" will read the channel from
 # the `src/ci/channel` file, to easily allow tools and automations to know and update the current
 # channel.
@@ -191,7 +191,7 @@ x86_64-pc-nto-qnx710.profiler = false
 "thumbv7em-ferrocene.facade-eabihf".profiler = false
 
 # On Windows, Jemalloc is not tested, and manual testing suggests it is not supported.
-x86_64-pc-windows-msvc.jemalloc = false
+x86_64-pc-windows-msvc.allocator = "system"
 
 
 

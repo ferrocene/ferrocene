@@ -19,8 +19,8 @@ use rustc_middle::traits::solve::{CandidateSource, Certainty, Goal};
 use rustc_middle::traits::specialization_graph::OverlapMode;
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{
-    self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
-    Unnormalized,
+    self, RegionUtilitiesExt, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt,
+    TypeVisitor, TypingMode, Unnormalized,
 };
 pub use rustc_next_trait_solver::coherence::*;
 use rustc_next_trait_solver::solve::SolverDelegateEvalExt;
@@ -263,6 +263,7 @@ fn overlap<'tcx>(
         .infer_ctxt()
         .skip_leak_check(skip_leak_check.is_yes())
         .with_next_trait_solver(tcx.next_trait_solver_in_coherence())
+        .enable_next_solver_overflow_fcw(false)
         .build(TypingMode::Coherence);
     let selcx = &mut SelectionContext::new(&infcx);
     if track_ambiguity_causes.is_yes() {
@@ -504,7 +505,11 @@ fn impl_intersection_has_negative_obligation(
 
     // N.B. We need to unify impl headers *with* `TypingMode::Coherence`,
     // even if proving negative predicates doesn't need `TypingMode::Coherence`.
-    let ref infcx = tcx.infer_ctxt().with_next_trait_solver(true).build(TypingMode::Coherence);
+    let ref infcx = tcx
+        .infer_ctxt()
+        .with_next_trait_solver(true)
+        .enable_next_solver_overflow_fcw(false)
+        .build(TypingMode::Coherence);
     let root_universe = infcx.universe();
     assert_eq!(root_universe, ty::UniverseIndex::ROOT);
 

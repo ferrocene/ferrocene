@@ -140,11 +140,13 @@ pr:
   - name: aarch64-gnu-llvm-21-1
     env:
       IMAGE: aarch64-gnu-llvm-21
+      LLVM_VERSION: "21"
       DOCKER_SCRIPT: stage_2_test_set1.sh
     <<: *job-aarch64-linux
   - name: aarch64-gnu-llvm-21-2
     env:
       IMAGE: aarch64-gnu-llvm-21
+      LLVM_VERSION: "21"
       DOCKER_SCRIPT: stage_2_test_set2.sh
     <<: *job-aarch64-linux
   - name: x86_64-gnu-tools
@@ -270,7 +272,10 @@ auto:
   - name: dist-powerpc64le-linux-musl
     <<: *job-linux-4c
 
-  - name: dist-riscv64-linux
+  - name: dist-riscv64-linux-gnu
+    <<: *job-linux-4c
+
+  - name: dist-riscv64-linux-musl
     <<: *job-linux-4c
 
   - name: dist-s390x-linux
@@ -377,11 +382,10 @@ auto:
   - name: x86_64-gnu
     <<: *job-linux-4c
 
-  - name: optional-x86_64-gnu-parallel-frontend
-    # This test can be flaky, so do not cancel CI if it fails, for now.
-    continue_on_error: true
+  - name: x86_64-gnu-parallel-frontend
+    doc_url: https://rustc-dev-guide.rust-lang.org/tests/x86_64-gnu-parallel-frontend.html
     env:
-      DOCKER_SCRIPT: optional-x86_64-gnu-parallel-frontend.sh
+      DOCKER_SCRIPT: x86_64-gnu-parallel-frontend.sh
     <<: *job-linux-4c
 
   # This job ensures commits landing on nightly still pass the full
@@ -414,6 +418,7 @@ auto:
     env:
       RUST_BACKTRACE: 1
       IMAGE: x86_64-gnu-llvm-21
+      LLVM_VERSION: "21"
       DOCKER_SCRIPT: stage_2_test_set2.sh
     <<: *job-linux-4c
 
@@ -422,6 +427,7 @@ auto:
     env:
       RUST_BACKTRACE: 1
       IMAGE: x86_64-gnu-llvm-21
+      LLVM_VERSION: "21"
       DOCKER_SCRIPT: x86_64-gnu-llvm2.sh
     <<: *job-linux-4c
 
@@ -430,6 +436,7 @@ auto:
     env:
       RUST_BACKTRACE: 1
       IMAGE: x86_64-gnu-llvm-21
+      LLVM_VERSION: "21"
       DOCKER_SCRIPT: x86_64-gnu-llvm3.sh
     <<: *job-linux-4c
 
@@ -469,6 +476,11 @@ auto:
   - name: x86_64-gnu-miri
     <<: *job-linux-4c
 
+  - name: optional-x86_64-gnu-autodiff
+    continue_on_error: true
+    doc_url: https://rustc-dev-guide.rust-lang.org/tests/autodiff-ci-job.html
+    <<: *job-linux-4c
+
   ####################
   #  macOS Builders  #
   ####################
@@ -485,7 +497,7 @@ auto:
         --enable-sanitizers
         --enable-profiler
         --disable-docs
-        --set rust.jemalloc
+        --set build.allocator=jemalloc
         --set llvm.link-shared=true
         --set rust.lto=thin
         --set rust.codegen-units=1
@@ -520,7 +532,7 @@ auto:
       RUST_CONFIGURE_ARGS: >-
         --enable-sanitizers
         --enable-profiler
-        --set rust.jemalloc
+        --set build.allocator=jemalloc
         --set target.aarch64-apple-ios-macabi.sanitizers=false
         --set target.x86_64-apple-ios-macabi.sanitizers=false
         --set target.aarch64-apple-tvos.profiler=false
@@ -545,7 +557,7 @@ auto:
         --enable-full-tools
         --enable-sanitizers
         --enable-profiler
-        --set rust.jemalloc
+        --set build.allocator=jemalloc
         --set llvm.link-shared=true
         --set rust.lto=thin
         --set rust.codegen-units=1
@@ -566,7 +578,7 @@ auto:
       RUST_CONFIGURE_ARGS: >-
         --enable-sanitizers
         --enable-profiler
-        --set rust.jemalloc
+        --set build.allocator=jemalloc
       DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
       # Aarch64 tooling only needs to support macOS 11.0 and up as nothing else
       # supports the hardware, so only need to test it there.

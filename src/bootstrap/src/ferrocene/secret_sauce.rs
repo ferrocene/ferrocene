@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 
 use crate::TargetSelection;
-use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::builder::{Builder, Step};
 use crate::core::config::FerroceneSecretSauce;
 
 // After `bors try` on secret sauce repo, append "/try" to the following string.
@@ -20,10 +20,6 @@ pub(crate) struct SecretSauceArtifacts {
 
 impl Step for SecretSauceArtifacts {
     type Output = PathBuf;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         if builder.config.dry_run() {

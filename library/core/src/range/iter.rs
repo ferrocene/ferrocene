@@ -8,7 +8,7 @@ use crate::{intrinsics, mem};
 /// By-value [`Range`] iterator.
 #[stable(feature = "new_range_api", since = "1.96.0")]
 #[derive(Debug, Clone)]
-pub struct RangeIter<A>(legacy::Range<A>);
+pub struct RangeIter<A>(pub(crate) legacy::Range<A>);
 
 impl<A> RangeIter<A> {
     #[unstable(feature = "new_range_remainder", issue = "154458")]
@@ -69,26 +69,31 @@ impl<A: Step> Iterator for RangeIter<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.0.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.0.nth(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<A> {
         self.0.last()
     }
@@ -115,6 +120,7 @@ impl<A: Step> Iterator for RangeIter<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_by(n)
     }
@@ -135,16 +141,19 @@ impl<A: Step> Iterator for RangeIter<A> {
 #[stable(feature = "new_range_api", since = "1.96.0")]
 impl<A: Step> DoubleEndedIterator for RangeIter<A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<A> {
         self.0.next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.0.nth_back(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
         self.0.advance_back_by(n)
     }
@@ -204,26 +213,31 @@ impl<A: Step> Iterator for RangeInclusiveIter<A> {
     type Item = A;
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<A> {
         self.0.next()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn count(self) -> usize {
         self.0.count()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth(&mut self, n: usize) -> Option<A> {
         self.0.nth(n)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn last(self) -> Option<A> {
         self.0.last()
     }
@@ -258,11 +272,13 @@ impl<A: Step> Iterator for RangeInclusiveIter<A> {
 #[stable(feature = "new_range_inclusive_api", since = "1.95.0")]
 impl<A: Step> DoubleEndedIterator for RangeInclusiveIter<A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<A> {
         self.0.next_back()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn nth_back(&mut self, n: usize) -> Option<A> {
         self.0.nth_back(n)
     }

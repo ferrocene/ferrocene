@@ -10,7 +10,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
-use crate::builder::{Builder, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
@@ -66,10 +66,6 @@ struct SphinxVirtualEnv {
 impl Step for SphinxVirtualEnv {
     type Output = VirtualEnv;
 
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let venv = builder.out.join(self.target.triple).join("ferrocene").join("sphinx-venv");
         let uv_project = builder.src.join("ferrocene").join("doc");
@@ -112,16 +108,8 @@ struct SphinxBook<P: Step + IsSphinxBook> {
     parent: P,
 }
 
-impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
+impl<P: CommandLineStep + IsSphinxBook> Step for SphinxBook<P> {
     type Output = PathBuf;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
-    fn is_default_step(_: &Builder<'_>) -> bool {
-        true
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(&format!("Documenting {} ({:?})", self.name, self.mode));
@@ -378,6 +366,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         if !should_serve {
             builder.maybe_open_in_browser::<P>(&out.join("index.html"));
         }
+
         out
     }
 }
@@ -492,7 +481,7 @@ macro_rules! sphinx_books {
                 pub(crate) target: TargetSelection,
             }
 
-            impl Step for $ty {
+            impl CommandLineStep for $ty {
                 type Output = PathBuf;
 
                 fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -560,7 +549,7 @@ macro_rules! sphinx_books {
             pub(crate) target: TargetSelection,
         }
 
-        impl Step for AllSphinxDocuments {
+        impl CommandLineStep for AllSphinxDocuments {
             type Output = ();
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -760,7 +749,7 @@ pub(crate) struct TraceabilityMatrix {
     pub(in crate::ferrocene) compiler: Compiler,
 }
 
-impl Step for TraceabilityMatrix {
+impl CommandLineStep for TraceabilityMatrix {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -789,7 +778,7 @@ pub(crate) struct CopyrightFiles {
     target: TargetSelection,
 }
 
-impl Step for CopyrightFiles {
+impl CommandLineStep for CopyrightFiles {
     type Output = ();
     const IS_HOST: bool = false;
 
@@ -826,7 +815,7 @@ pub(crate) struct CompilerTechnicalReport {
     target: TargetSelection,
 }
 
-impl Step for CompilerTechnicalReport {
+impl CommandLineStep for CompilerTechnicalReport {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -881,7 +870,7 @@ pub(crate) struct CoreTechnicalReport {
     target: TargetSelection,
 }
 
-impl Step for CoreTechnicalReport {
+impl CommandLineStep for CoreTechnicalReport {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -936,7 +925,7 @@ pub(crate) struct Index {
     target: TargetSelection,
 }
 
-impl Step for Index {
+impl CommandLineStep for Index {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

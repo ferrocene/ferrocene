@@ -14,12 +14,9 @@ use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
 use std::{env, fs};
 
-#[cfg(not(test))]
-use crate::builder::Builder;
-use crate::builder::Kind;
-#[cfg(not(test))]
+use crate::builder::{Builder, Kind};
 use crate::core::build_steps::tool;
-use crate::core::config::{CompilerBuiltins, Target};
+use crate::core::config::{CompilerBuiltins, DebuggerPath, Target};
 use crate::utils::exec::command;
 use crate::{Build, Subcommand, t};
 
@@ -51,7 +48,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM
 /// from CI (with`llvm.download-ci-llvm` option).
-#[cfg(not(test))]
 const LIBSTDCXX_MIN_VERSION_THRESHOLD: usize = 8;
 
 impl Finder {
@@ -119,8 +115,11 @@ pub fn check(build: &mut Build) {
     }
 
     // Ensure that a compatible version of libstdc++ is available on the system when using `llvm.download-ci-llvm`.
-    #[cfg(not(test))]
-    if !build.config.dry_run() && !build.host_target.is_msvc() && build.config.llvm_from_ci {
+    if cfg!(not(test))
+        && !build.config.dry_run()
+        && !build.host_target.is_msvc()
+        && build.config.llvm_from_ci
+    {
         let builder = Builder::new(build);
         let libcxx_version = builder.ensure(tool::LibcxxVersionTool { target: build.host_target });
 
@@ -198,12 +197,10 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("yarn"));
 
-    build.config.gdb = build
-        .config
-        .gdb
-        .take()
-        .map(|p| cmd_finder.must_have(p))
-        .or_else(|| cmd_finder.maybe_have("gdb"));
+    build.config.gdb = build.config.gdb.take().map(|p| match p {
+        DebuggerPath::Discover => DebuggerPath::Discover,
+        DebuggerPath::Path(path) => DebuggerPath::Path(cmd_finder.must_have(path)),
+    });
 
     build.config.reuse = build
         .config

@@ -1746,31 +1746,6 @@
 <core::iter::adapters::step_by::StepBy<I> as core::iter::traits::iterator::Iterator>::nth
 <core::iter::adapters::step_by::StepBy<I> as core::iter::traits::iterator::Iterator>::size_hint
 <core::iter::adapters::step_by::StepBy<I> as core::iter::traits::iterator::Iterator>::try_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_next
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_nth
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_size_hint
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_try_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>>>::spec_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>>>::spec_next
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>>>::spec_nth
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>>>::spec_size_hint
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>>>::spec_try_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>>>::spec_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>>>::spec_next
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>>>::spec_nth
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>>>::spec_size_hint
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>>>::spec_try_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>>>::spec_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>>>::spec_next
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>>>::spec_nth
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>>>::spec_size_hint
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>>>::spec_try_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_fold
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_next
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_nth
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_size_hint
-<core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>>>::spec_try_fold
 <core::iter::adapters::take::Take<I> as core::clone::Clone>::clone
 <core::iter::adapters::take::Take<I> as core::fmt::Debug>::fmt
 <core::iter::adapters::take::Take<I> as core::iter::adapters::take::SpecTake>::spec_fold
@@ -3390,6 +3365,8 @@
 <core::ops::range::Range<Idx> as core::default::Default>::default
 <core::ops::range::Range<Idx> as core::fmt::Debug>::fmt
 <core::ops::range::Range<Idx> as core::hash::Hash>::hash
+<core::ops::range::Range<T> as core::iter::adapters::step_by::AsLegacyRange<T>>::as_legacy_range
+<core::ops::range::Range<T> as core::iter::adapters::step_by::AsLegacyRange<T>>::as_legacy_range_mut
 <core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_advance_back_by
 <core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_advance_by
 <core::ops::range::Range<T> as core::iter::range::RangeIteratorImpl>::spec_next
@@ -3399,11 +3376,6 @@
 <core::ops::range::Range<T> as core::ops::range::IntoBounds<T>>::into_bounds
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::end_bound
 <core::ops::range::Range<T> as core::ops::range::RangeBounds<T>>::start_bound
-<core::ops::range::Range<u16> as core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u16>>>::setup
-<core::ops::range::Range<u32> as core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u32>>>::setup
-<core::ops::range::Range<u64> as core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u64>>>::setup
-<core::ops::range::Range<u8> as core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u8>>>::setup
-<core::ops::range::Range<usize> as core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<usize>>>::setup
 <core::ops::range::Range<usize> as core::slice::index::SliceIndex<[T]>>::get
 <core::ops::range::Range<usize> as core::slice::index::SliceIndex<[T]>>::get_mut
 <core::ops::range::Range<usize> as core::slice::index::SliceIndex<[T]>>::get_unchecked
@@ -3543,6 +3515,24 @@
 <core::ptr::non_null::NonNull<T> as core::fmt::Debug>::fmt
 <core::ptr::non_null::NonNull<T> as core::fmt::Pointer>::fmt
 <core::range::Range<T> as core::convert::From<core::ops::range::Range<T>>>::from
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::count
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::last
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::next
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::nth
+<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::size_hint
+<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by
+<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
+<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::advance_by
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::count
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::last
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::next
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::nth
+<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::size_hint
+<core::range::iter::RangeIter<T> as core::iter::adapters::step_by::AsLegacyRange<T>>::as_legacy_range
+<core::range::iter::RangeIter<T> as core::iter::adapters::step_by::AsLegacyRange<T>>::as_legacy_range_mut
 <core::result::Result<T, E> as core::clone::Clone>::clone
 <core::result::Result<T, E> as core::clone::Clone>::clone_from
 <core::result::Result<T, E> as core::cmp::Eq>::assert_fields_are_eq
@@ -3830,6 +3820,8 @@
 <f128 as core::ops::arith::SubAssign>::sub_assign
 <f16 as core::default::Default>::default
 <f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
+<f16 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f16 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
 <f16 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
@@ -3858,6 +3850,8 @@
 <f16 as core::ops::arith::SubAssign>::sub_assign
 <f32 as core::default::Default>::default
 <f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
+<f32 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f32 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
 <f32 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
@@ -3886,6 +3880,8 @@
 <f32 as core::ops::arith::SubAssign>::sub_assign
 <f64 as core::default::Default>::default
 <f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
+<f64 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f64 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
 <f64 as core::num::imp::flt2dec::decoder::DecodableFloat>::min_pos_norm_value
@@ -6748,6 +6744,7 @@ core::intrinsics::contract_check_requires::runtime
 core::intrinsics::copysignf32
 core::intrinsics::copysignf64
 core::intrinsics::disjoint_bitor
+core::intrinsics::fabs
 core::intrinsics::fallback::wide_mul_u128
 core::intrinsics::fallback::wide_mul_u128::from_low_high
 core::intrinsics::fallback::wide_mul_u128::scalar_mul
@@ -6792,6 +6789,66 @@ core::iter::adapters::rev::Rev::<T>::new
 core::iter::adapters::skip::Skip::<I>::new
 core::iter::adapters::step_by::StepBy::<I>::new
 core::iter::adapters::step_by::StepBy::<I>::original_step
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u16>> for core::ops::range::Range<u16>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u32>> for core::ops::range::Range<u32>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u64>> for core::ops::range::Range<u64>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<u8>> for core::ops::range::Range<u8>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::ops::range::Range<usize>> for core::ops::range::Range<usize>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::range::iter::RangeIter<u16>> for core::range::iter::RangeIter<u16>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::range::iter::RangeIter<u32>> for core::range::iter::RangeIter<u32>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::range::iter::RangeIter<u64>> for core::range::iter::RangeIter<u64>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::range::iter::RangeIter<u8>> for core::range::iter::RangeIter<u8>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::SpecRangeSetup<core::range::iter::RangeIter<usize>> for core::range::iter::RangeIter<usize>>::setup
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u32>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u32>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u64>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u64>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u8>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<u8>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<usize>> for core::iter::adapters::step_by::StepBy<core::ops::range::Range<usize>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u16>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u16>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u16>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u16>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u16>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u16>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u16>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u16>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u16>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u16>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u32>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u32>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u32>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u32>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u32>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u32>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u32>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u32>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u32>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u32>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u64>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u64>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u64>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u64>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u64>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u64>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u64>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u64>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u64>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u64>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u8>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u8>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u8>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u8>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u8>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u8>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u8>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u8>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<u8>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<u8>>>::spec_try_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<usize>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<usize>>>::spec_fold
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<usize>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<usize>>>::spec_next
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<usize>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<usize>>>::spec_nth
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<usize>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<usize>>>::spec_size_hint
+core::iter::adapters::step_by::step_by_spec::<impl core::iter::adapters::step_by::StepByImpl<core::range::iter::RangeIter<usize>> for core::iter::adapters::step_by::StepBy<core::range::iter::RangeIter<usize>>>::spec_try_fold
 core::iter::adapters::take::Take::<I>::new
 core::iter::adapters::take_while::TakeWhile::<I, P>::new
 core::iter::adapters::zip::TrustedRandomAccessNoCoerce::size
@@ -6947,7 +7004,8 @@ core::num::<impl i128>::checked_sub
 core::num::<impl i128>::checked_sub_unsigned
 core::num::<impl i128>::count_ones
 core::num::<impl i128>::count_zeros
-core::num::<impl i128>::from_ascii_radix
+core::num::<impl i128>::from_ascii_bytes_radix
+core::num::<impl i128>::from_ascii_bytes_radix_impl
 core::num::<impl i128>::from_le
 core::num::<impl i128>::from_le_bytes
 core::num::<impl i128>::from_ne_bytes
@@ -7009,7 +7067,8 @@ core::num::<impl i16>::checked_sub
 core::num::<impl i16>::checked_sub_unsigned
 core::num::<impl i16>::count_ones
 core::num::<impl i16>::count_zeros
-core::num::<impl i16>::from_ascii_radix
+core::num::<impl i16>::from_ascii_bytes_radix
+core::num::<impl i16>::from_ascii_bytes_radix_impl
 core::num::<impl i16>::from_le
 core::num::<impl i16>::from_le_bytes
 core::num::<impl i16>::from_ne_bytes
@@ -7071,7 +7130,8 @@ core::num::<impl i32>::checked_sub
 core::num::<impl i32>::checked_sub_unsigned
 core::num::<impl i32>::count_ones
 core::num::<impl i32>::count_zeros
-core::num::<impl i32>::from_ascii_radix
+core::num::<impl i32>::from_ascii_bytes_radix
+core::num::<impl i32>::from_ascii_bytes_radix_impl
 core::num::<impl i32>::from_le
 core::num::<impl i32>::from_le_bytes
 core::num::<impl i32>::from_ne_bytes
@@ -7133,7 +7193,8 @@ core::num::<impl i64>::checked_sub
 core::num::<impl i64>::checked_sub_unsigned
 core::num::<impl i64>::count_ones
 core::num::<impl i64>::count_zeros
-core::num::<impl i64>::from_ascii_radix
+core::num::<impl i64>::from_ascii_bytes_radix
+core::num::<impl i64>::from_ascii_bytes_radix_impl
 core::num::<impl i64>::from_le
 core::num::<impl i64>::from_le_bytes
 core::num::<impl i64>::from_ne_bytes
@@ -7195,7 +7256,8 @@ core::num::<impl i8>::checked_sub
 core::num::<impl i8>::checked_sub_unsigned
 core::num::<impl i8>::count_ones
 core::num::<impl i8>::count_zeros
-core::num::<impl i8>::from_ascii_radix
+core::num::<impl i8>::from_ascii_bytes_radix
+core::num::<impl i8>::from_ascii_bytes_radix_impl
 core::num::<impl i8>::from_le
 core::num::<impl i8>::from_le_bytes
 core::num::<impl i8>::from_ne_bytes
@@ -7257,7 +7319,8 @@ core::num::<impl isize>::checked_sub
 core::num::<impl isize>::checked_sub_unsigned
 core::num::<impl isize>::count_ones
 core::num::<impl isize>::count_zeros
-core::num::<impl isize>::from_ascii_radix
+core::num::<impl isize>::from_ascii_bytes_radix
+core::num::<impl isize>::from_ascii_bytes_radix_impl
 core::num::<impl isize>::from_le
 core::num::<impl isize>::from_le_bytes
 core::num::<impl isize>::from_ne_bytes
@@ -7322,7 +7385,8 @@ core::num::<impl u128>::checked_sub
 core::num::<impl u128>::count_ones
 core::num::<impl u128>::count_zeros
 core::num::<impl u128>::div_ceil
-core::num::<impl u128>::from_ascii_radix
+core::num::<impl u128>::from_ascii_bytes_radix
+core::num::<impl u128>::from_ascii_bytes_radix_impl
 core::num::<impl u128>::from_be
 core::num::<impl u128>::from_be_bytes
 core::num::<impl u128>::from_le
@@ -7399,7 +7463,8 @@ core::num::<impl u16>::checked_sub
 core::num::<impl u16>::count_ones
 core::num::<impl u16>::count_zeros
 core::num::<impl u16>::div_ceil
-core::num::<impl u16>::from_ascii_radix
+core::num::<impl u16>::from_ascii_bytes_radix
+core::num::<impl u16>::from_ascii_bytes_radix_impl
 core::num::<impl u16>::from_be
 core::num::<impl u16>::from_be_bytes
 core::num::<impl u16>::from_le
@@ -7477,7 +7542,8 @@ core::num::<impl u32>::checked_sub
 core::num::<impl u32>::count_ones
 core::num::<impl u32>::count_zeros
 core::num::<impl u32>::div_ceil
-core::num::<impl u32>::from_ascii_radix
+core::num::<impl u32>::from_ascii_bytes_radix
+core::num::<impl u32>::from_ascii_bytes_radix_impl
 core::num::<impl u32>::from_be
 core::num::<impl u32>::from_be_bytes
 core::num::<impl u32>::from_le
@@ -7554,7 +7620,8 @@ core::num::<impl u64>::checked_sub
 core::num::<impl u64>::count_ones
 core::num::<impl u64>::count_zeros
 core::num::<impl u64>::div_ceil
-core::num::<impl u64>::from_ascii_radix
+core::num::<impl u64>::from_ascii_bytes_radix
+core::num::<impl u64>::from_ascii_bytes_radix_impl
 core::num::<impl u64>::from_be
 core::num::<impl u64>::from_be_bytes
 core::num::<impl u64>::from_le
@@ -7634,7 +7701,8 @@ core::num::<impl u8>::count_zeros
 core::num::<impl u8>::div_ceil
 core::num::<impl u8>::eq_ignore_ascii_case
 core::num::<impl u8>::escape_ascii
-core::num::<impl u8>::from_ascii_radix
+core::num::<impl u8>::from_ascii_bytes_radix
+core::num::<impl u8>::from_ascii_bytes_radix_impl
 core::num::<impl u8>::from_be
 core::num::<impl u8>::from_be_bytes
 core::num::<impl u8>::from_le
@@ -7718,7 +7786,8 @@ core::num::<impl usize>::checked_sub
 core::num::<impl usize>::count_ones
 core::num::<impl usize>::count_zeros
 core::num::<impl usize>::div_ceil
-core::num::<impl usize>::from_ascii_radix
+core::num::<impl usize>::from_ascii_bytes_radix
+core::num::<impl usize>::from_ascii_bytes_radix_impl
 core::num::<impl usize>::from_be
 core::num::<impl usize>::from_be_bytes
 core::num::<impl usize>::from_le
@@ -7784,10 +7853,10 @@ core::num::<impl usize>::wrapping_shr
 core::num::<impl usize>::wrapping_sub
 core::num::can_not_overflow
 core::num::error::ParseIntError::kind
-core::num::from_ascii_radix_panic
-core::num::from_ascii_radix_panic::do_panic
-core::num::from_ascii_radix_panic::do_panic::compiletime
-core::num::from_ascii_radix_panic::do_panic::runtime
+core::num::from_ascii_bytes_radix_panic
+core::num::from_ascii_bytes_radix_panic::do_panic
+core::num::from_ascii_bytes_radix_panic::do_panic::compiletime
+core::num::from_ascii_bytes_radix_panic::do_panic::runtime
 core::num::imp::bignum::Big32x40::add
 core::num::imp::bignum::Big32x40::digits
 core::num::imp::bignum::Big32x40::div_rem_small

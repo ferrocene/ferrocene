@@ -4,7 +4,7 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
+use crate::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
@@ -60,7 +60,7 @@ pub(crate) struct DistOxidOs {
     target: TargetSelection,
 }
 
-impl Step for DistOxidOs {
+impl CommandLineStep for DistOxidOs {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -122,10 +122,6 @@ impl BuildOxidOS {
 
 impl Step for BuildOxidOS {
     type Output = PathBuf;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let compiler = self.compiler;
@@ -200,10 +196,6 @@ struct SourceCode;
 
 impl Step for SourceCode {
     type Output = PathBuf;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         if builder.config.dry_run() {

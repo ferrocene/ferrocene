@@ -24,17 +24,6 @@ if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
     MAX_MERGES_PER_PR=30
 fi
 
-# Check for MacOS sed, which doesn't support `-i`.
-if [ "$(uname)" = Darwin ]; then
-    if ! gsed --version >/dev/null 2>&1; then
-        echo "Need 'gsed' installed; try 'brew install gnu-sed'"
-        exit 1
-    fi
-    sed=gsed
-else
-    sed=sed
-fi
-
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
 # `sort | uniq` is used because during merges files might show up multiple
@@ -84,7 +73,7 @@ fi
 upstream_branch="$1"
 
 # Move to the root of the repository to avoid the script from misbehaving.
-cd "$(git rev-parse --show-toplevel)"
+cd "${LOCAL_REPO_ROOT}"
 
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
@@ -295,50 +284,7 @@ then
     else
         automation_warning "There are merge conflicts in this PR. Merge conflict markers have been committed."
 
-        # We do a `git submodule update` ahead of time to ensure the wrong
-        # submodule commits are not accidentally added.
-        git submodule update
-
-        # The person handling the conflict should decide what to do if a file
-        # has been deleted on either side of the merge, but doing a `git add .`
-        # would mask the conflict (it would simply revert the deletion).
-        #
-        # To avoid that, we prefix the file with a custom line noting the file
-        # had a delete conflict, and the detect-conflict-markers.py script will
-        # pick it up and block CI until it's resolved either way.
-        handle_deleted_files() {
-            marker="$1"
-            who="$2"
-            for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
-                $sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
-            done
-        }
-        handle_deleted_files DU "in Ferrocene" # DU means "deleted by us"
-        handle_deleted_files UD "upstream"     # UD means "deleted by them"
-
-        # Save the list of still conflicted files to try to later resolve with
-        # mergiraf. Exclude the deleted files, since mergiraf can't really
-        # resolve them (and because it spams about parse errors caused by
-        # <<<PULL-UPSTREAM>>>) -- but don't bother excluding the files deleted
-        # by us, since those are a rare occurrance.
-        #
-        # The awk invocation:
-        # - includes files that are unmerged ("u")
-        # - excludes files that are "deleted by them" ("UD")
-        # - prints the file name (last column of the output of `git status --porcelain=v2`)
-        files=$(git status --porcelain=v2 | awk '$1 == "u" && $2 != "UD" {print $NF}')
-
-        git diff --name-only | xargs $sed -i "s#<<<<<<< HEAD#<<<<<<< ferrocene/${branch_name}#"
-        git add .
-
-        # Setting the editor to `true` prevents the actual editor from being open,
-        # as in this case we don't want to change the default message.
-        GIT_EDITOR="$(which true)" git merge --continue
-
-        # Try resolving conflicted files using mergiraf.
-        if [ -n "$files" ]; then
-            ${LOCAL_REPO_ROOT}/ferrocene/tools/fix-merge/fix-merge.sh $files
-        fi
+        ${LOCAL_REPO_ROOT}/ferrocene/tools/fix-merge/fix-merge.sh ${branch_name}
     fi
 fi
 

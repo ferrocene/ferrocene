@@ -1,24 +1,21 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-FROM --platform=$TARGETPLATFORM centos7-base AS build
+FROM --platform=$TARGETPLATFORM centos7-python-builder AS build
 ARG TARGETPLATFORM
-
-ADD gcc.tar.xz /opt/local/gcc
-ENV PATH=/opt/local/gcc/bin:$PATH
 
 RUN mkdir -p /build
 
-COPY /binutils-src.tar.xz /binutils-src.tar.xz
-RUN mkdir -p /binutils-src
-RUN tar -xf /binutils-src.tar.xz -C /binutils-src --strip-components=1
-WORKDIR /binutils-src
-RUN ./configure --prefix=/opt/local/binutils
-RUN make -j$(nproc)
-RUN make install
-RUN tar cJf /build/binutils-binaries.tar.xz -C /opt/local/binutils --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
-
-ENV PATH=/opt/local/binutils/bin:$PATH
+COPY /zstd-src.tar.gz /zstd-src.tar.gz
+RUN mkdir -p /zstd-src
+RUN tar -xf /zstd-src.tar.gz -C /zstd-src --strip-components=1
+WORKDIR /zstd-src/build/meson
+RUN meson setup -Dbin_programs=true -Dbin_contrib=true builddir
+WORKDIR /zstd-src/build/meson/builddir
+ENV DESTDIR=/opt/local/zstd
+RUN ninja
+RUN ninja install
+RUN tar cJf /build/zstd-binaries.tar.xz -C /opt/local/zstd --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
 
 COPY /coreutils-src.tar.xz /coreutils-src.tar.xz
 RUN mkdir -p /coreutils-src

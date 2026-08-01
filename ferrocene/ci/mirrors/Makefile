@@ -5,6 +5,7 @@ musl-cross-target-version=v0.9.11
 bootstrap-gcc-version=11.5.0
 gcc-version=16.1.0
 coreutils-version=9.11
+zstd-version=1.5.7
 binutils-version=2.47
 openssl-version=3.5.7
 python-version=3.12.3
@@ -141,26 +142,26 @@ endif
 
 download-utils-src:
 	mkdir -p build/utils
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/binutils/binutils-$(binutils-version).tar.xz build/utils/binutils-src.tar.xz
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/coreutils/coreutils-$(coreutils-version).tar.xz build/utils/coreutils-src.tar.xz
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/zstd/zstd-$(zstd-version).tar.gz build/utils/zstd-src.tar.gz
 	
 utils: gcc
 	cp output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz build/utils/gcc.tar.xz
 	docker build --tag utils:$(binutils-version)-$(coreutils-version) --file utils.dockerfile build/utils
 	{ \
 		id=$$(docker create utils:$(binutils-version)-$(coreutils-version)) ; \
-		docker cp $$id://build/binutils-binaries.tar.xz \
-			output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker cp $$id://build/coreutils-binaries.tar.xz \
 			output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz ; \
+		docker cp $$id://build/zstd-binaries.tar.xz \
+			output/zstd-$(zstd-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker rm $$id ; \
 	}
 
 upload-utils:
-	aws s3 cp --no-overwrite output/output/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/binutils/binutils-$(binutils-version)-$(host-arch)-$(commit).tar.xz
-	aws s3 cp --no-overwrite output/output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz \
+	aws s3 cp --no-overwrite output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/coreutils/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz
+	aws s3 cp --no-overwrite output/zstd-$(zstd-version)-$(host-arch)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/zstd/zstd-$(zstd-version)-$(host-arch)-$(commit).tar.xz
 
 download-openssl-src:
 	mkdir -p build/openssl

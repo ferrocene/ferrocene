@@ -148,7 +148,12 @@ RUN <<-EOF
 
         if [ "$host_platform" = "$host_arch" ]; then
             echo "Installing package ${package_file}"
-            tar -C /usr/local -xf "mirrors/$package_file"
+            if [[ $package_name =~ "coreutils" ]];  then
+                echo "Installing coreutils to /usr"
+                tar -C /usr -xf "mirrors/$package_file"
+            else
+                tar -C /usr/local -xf "mirrors/$package_file"
+            fi
         else
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi

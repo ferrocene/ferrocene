@@ -289,6 +289,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/zstd/zstd-$(zstd-version)-aarch64-$(commit).tar.xz hashes/
 
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-x86_64-$(gcc-from).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/coreutils/coreutils-$(coreutils-version)-x86_64-$(commit).tar.xz hashes/
@@ -303,6 +304,7 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
+	aws s3 cp s3://ferrocene-ci-mirrors/manual/zstd/zstd-$(zstd-version)-x86_64-$(commit).tar.xz hashes/
 
 	cd hashes; sha256sum *tar.xz *tar.gz > ../hashes.txt
 

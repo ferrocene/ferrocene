@@ -178,7 +178,7 @@ openssl: gcc utils
 	}
 
 upload-openssl:
-	aws s3 cp --no-overwrite output/output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz \
+	aws s3 cp --no-overwrite output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz
 
 

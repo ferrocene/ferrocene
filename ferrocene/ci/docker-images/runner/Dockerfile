@@ -53,6 +53,7 @@ RUN yum -y install \
     sudo \
     binutils \
     procps-ng \
+    perl-core \
     shadow-utils
 
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04

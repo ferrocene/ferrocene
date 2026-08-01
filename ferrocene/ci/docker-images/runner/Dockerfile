@@ -145,7 +145,7 @@ RUN <<-EOF
 
         if [ "$host_platform" = "$host_arch" ]; then
             echo "Installing package ${package_file}"
-            if [[ $package_name =~ "coreutils" ]];  then
+            if [[ $package_file =~ "coreutils" ]];  then
                 echo "Installing coreutils to /usr"
                 tar -C /usr -xf "mirrors/$package_file"
             else

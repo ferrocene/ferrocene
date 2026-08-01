@@ -3,6 +3,7 @@
 
 FROM --platform=$TARGETPLATFORM centos7-base AS build
 ARG TARGETPLATFORM
+ARG GCC_BUILD_PARALELLISM=4
 
 RUN yum -y install \
     binutils \
@@ -57,7 +58,7 @@ RUN <<EOT
         --enable-languages=c,c++
 EOT
 
-RUN make -j$(nprocs) profiledbootstrap
+RUN make -j${GCC_BUILD_PARALELLISM} profiledbootstrap
 RUN make install-strip
 # ensure that "cc" exists as a symlink
 RUN cd /opt/local/gcc/bin/ && ln -s gcc cc

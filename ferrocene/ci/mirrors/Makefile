@@ -32,6 +32,12 @@ gcc-from = $(commit)
 build-gcc = "true"
 endif
 
+ifdef GCC_BUILD_PARALLELISM
+gcc-build-parallelism = ${GCC_BUILD_PARALLELISM}
+else
+gcc-build-parallelism != nprocs
+endif
+
 prepare: base-image
 	mkdir -p output
 
@@ -111,7 +117,7 @@ download-gcc-src:
 	
 gcc: bootstrap-gcc
 	cp output/gcc-$(bootstrap-gcc-version)-$(host-arch)-$(bootstrap-gcc-from).tar.xz build/gcc/bootstrap-gcc.tar.xz
-	docker build --tag gcc:$(gcc-version) --file gcc.dockerfile build/gcc/
+	docker build --tag gcc:$(gcc-version) --build-arg=GCC_BUILD_PARALELLISM=$(gcc-build-parallelism) --file gcc.dockerfile build/gcc/
 	{ \
 		id=$$(docker create gcc:$(gcc-version)) ; \
 		docker cp $$id://gcc-build/gcc.tar.xz \

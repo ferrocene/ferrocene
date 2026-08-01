@@ -36,7 +36,7 @@ endif
 ifdef GCC_BUILD_PARALLELISM
 gcc-build-parallelism = ${GCC_BUILD_PARALLELISM}
 else
-gcc-build-parallelism != nprocs
+gcc-build-parallelism != nproc
 endif
 
 prepare: base-image

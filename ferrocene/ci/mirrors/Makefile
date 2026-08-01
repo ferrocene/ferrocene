@@ -147,9 +147,9 @@ download-utils-src:
 	
 utils: gcc
 	cp output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz build/utils/gcc.tar.xz
-	docker build --tag utils:$(binutils-version)-$(coreutils-version) --file utils.dockerfile build/utils
+	docker build --tag utils:$(zstd-version)-$(coreutils-version) --file utils.dockerfile build/utils
 	{ \
-		id=$$(docker create utils:$(binutils-version)-$(coreutils-version)) ; \
+		id=$$(docker create utils:$(zstd-version)-$(coreutils-version)) ; \
 		docker cp $$id://build/coreutils-binaries.tar.xz \
 			output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz ; \
 		docker cp $$id://build/zstd-binaries.tar.xz \

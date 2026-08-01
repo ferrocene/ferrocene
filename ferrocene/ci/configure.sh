@@ -130,21 +130,21 @@ add --set target.aarch64-unknown-qnx.ar=ntox86_64-ar
 add --set target.aarch64-unknown-qnx.profiler=false # Build failures were noted if this is enabled.
 
 # these default to `cc` but require cross compilation
-# add --set 'target."aarch64r82-unknown-none".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64r82-unknown-none-softfloat".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64v8r-unknown-none".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64v8r-unknown-none-softfloat".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64r82-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64v8r-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."aarch64-rhivos2-linux-gnu".cc=aarch64-linux-gnu-gcc'
-# add --set 'target."armv7r-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
-# add --set 'target."powerpc64le-unknown-linux-gnu".cc=powerpc64le-linux-gnu-gcc'
-# add --set 'target."powerpc64le-unknown-linux-gnu".cxx=powerpc64le-linux-gnu-g++'
-# add --set 'target."s390x-unknown-linux-gnu".cc=s390x-linux-gnu-gcc'
-# add --set 'target."s390x-unknown-linux-gnu".cxx=s390x-linux-gnu-g++'
-# add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
-# add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."aarch64r82-unknown-none".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64r82-unknown-none-softfloat".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64v8r-unknown-none".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64v8r-unknown-none-softfloat".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64r82-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64v8r-unknown-ferrocene.facade".cc=aarch64-linux-gnu-gcc'
+add --set 'target."aarch64-rhivos2-linux-gnu".cc=aarch64-linux-gnu-gcc'
+add --set 'target."armv7r-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."powerpc64le-unknown-linux-gnu".cc=powerpc64le-linux-gnu-gcc'
+add --set 'target."powerpc64le-unknown-linux-gnu".cxx=powerpc64le-linux-gnu-g++'
+add --set 'target."s390x-unknown-linux-gnu".cc=s390x-linux-gnu-gcc'
+add --set 'target."s390x-unknown-linux-gnu".cxx=s390x-linux-gnu-g++'
+add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 
 # musl toolchains use the architecture, also we need to set the `musl-root`
 add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/

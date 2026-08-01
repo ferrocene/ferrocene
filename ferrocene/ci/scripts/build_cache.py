@@ -1,4 +1,5 @@
-#!/home/ci/.local/bin/uv run# SPDX-License-Identifier: MIT OR Apache-2.0
+#!/usr/bin/env -S uv run
+# SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # Remove/Restore circular symlinks that windows tar cannot handle.

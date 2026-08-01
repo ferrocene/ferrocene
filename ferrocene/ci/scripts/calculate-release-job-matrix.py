@@ -1,4 +1,4 @@
-#!/home/circleci/.local/bin/uv run
+#!/usr/bin/env -S uv run
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
@@ -10,7 +10,7 @@
 # This script is responsible for calculating the list of release jobs we should
 # start, as part of the .github/workflows/release.yml GitHub Actions workflow.
 #
-# The script is meant to be execute d inside of GitHub Actions, and relies on
+# The script is meant to be executed inside of GitHub Actions, and relies on
 # environment variables set by it. There are helpers to run it locally though:
 #
 #     calculate-release-job-matrix.py local-test schedule

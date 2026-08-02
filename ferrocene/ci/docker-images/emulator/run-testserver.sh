@@ -35,5 +35,8 @@ if [[ "" != "$EMULATOR_CPU" ]]; then
     export QEMU_CPU="${EMULATOR_CPU}" # we need to export the variable to make child processes use it
 fi
 
-${EMULATOR} \
-/shared/testserver/remote-test-server -v --bind $TEST_DEVICE_ADDR
+# restart the testserver continously if it fails, but not if it exits gracefully
+while true; do
+    ${EMULATOR} \
+    /shared/testserver/remote-test-server -v --bind $TEST_DEVICE_ADDR  && break;
+done

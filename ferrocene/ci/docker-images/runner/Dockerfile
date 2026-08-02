@@ -42,7 +42,6 @@ RUN yum -y install \
     zstd xz bzip2 gzip unzip \
     zlib-devel \
     glibc-devel \
-    binutils \
     tar \
     make patch \
     file which \

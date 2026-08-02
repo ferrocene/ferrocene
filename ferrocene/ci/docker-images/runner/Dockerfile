@@ -222,14 +222,14 @@ RUN <<-EOF
     set -xe
 
     groupadd --gid 1000 ci
-    groupadd --gid 1001 ci-usergroup
+    groupadd --gid 1002 circleci
 
     useradd --uid 1000 --gid 1000 -d /home/ci -m ci
-    useradd --uid 1001 --gid 1001 ci-user
+    useradd --uid 1001 --gid 1002 -d /home/circleci circleci
 EOF
 
 USER ci
-WORKDIR /home/ci
+WORKDIR /project
 
 # We prefer uv over other solutions, it's in Rust and fast
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"

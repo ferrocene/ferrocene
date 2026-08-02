@@ -487,7 +487,7 @@ mod cold_attribute {}
 /// [`Option::unwrap`], so a failed `unwrap` blames the line that called it rather than a line
 /// inside the standard library.
 ///
-/// ```rust,should_panic
+/// ```rust,should_panic,ignore-ferrocene.facade
 /// #[track_caller]
 /// fn assert_even(n: i32) {
 ///     assert!(n % 2 == 0, "{n} is not even");

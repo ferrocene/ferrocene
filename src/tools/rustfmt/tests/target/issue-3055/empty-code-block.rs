@@ -8,7 +8,7 @@
 /// ```no_run
 /// ```
 ///
-/// ```should_panic
+/// ```should_panic,ignore-ferrocene.facade
 /// ```
 ///
 /// ```compile_fail

@@ -9,7 +9,9 @@ RUN yum -y install \
 #RUN yum install -y autoconf gperf bison flex texinfo help2man libtool \
 #    ncurses-devel python36-devel perl-Thread-Queue git rsync
 
-ADD /crosstool-ng.tar.xz /crosstool-ng
+COPY /crosstool-ng.tar.xz /crosstool-ng.tar.xz
+RUN mkdir -p /crosstool-ng
+RUN tar -xf /crosstool-ng.tar.xz -C /crosstool-ng --strip-components=1
 WORKDIR /crosstool-ng
 RUN ./configure --prefix=/opt/crosstool-ng
 RUN make

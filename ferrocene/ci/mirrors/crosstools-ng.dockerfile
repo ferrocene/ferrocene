@@ -4,6 +4,7 @@ ARG TARGETPLATFORM
 RUN yum -y install \
     flex bison \
     texinfo help2man \
+    libtool \
     ncurses-devel
 
 #RUN yum install -y autoconf gperf bison flex texinfo help2man libtool \

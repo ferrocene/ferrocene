@@ -18,10 +18,10 @@ WORKDIR /gcc-build
 
 RUN <<EOT
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        host_platform=x86_64-unknown
+        host_platform=x86_64
         yum install -y libgcc.i686
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        host_platform=aarch64-unknown
+        host_platform=aarch64
     fi
     ../gcc-source/configure -v --build=${host_platform}-linux-gnu \
         --host=${host_platform}-linux-gnu \

@@ -203,8 +203,6 @@ ENV CC=gcc
 ENV CXX=g++
 ENV CFLAGS="-fuse-ld=bfd"
 ENV CXXFLAGS="-fuse-ld=bfd"
-ENV CC_aarch64_unknown_linux_gnu=aarch64-unknown-linux-gnu-gcc
-ENV CXX_aarch64_unknown_linux_gnu=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc

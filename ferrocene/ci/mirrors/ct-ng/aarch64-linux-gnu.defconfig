@@ -19,3 +19,4 @@ CT_DEBUG_GDB=y
 CT_COMP_TOOLS_MAKE=y
 CT_MAKE_GNUMAKE_SYMLINK=y
 CT_GLIBC_EXTRA_CFLAGS="-Wno-missing-attributes -Wno-array-bounds -Wno-array-parameter -Wno-stringop-overflow -Wno-maybe-uninitialized -Wno-implicit-int"
+CT_OMIT_TARGET_VENDOR=y

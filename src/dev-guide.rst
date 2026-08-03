@@ -102,17 +102,17 @@ Dealing with PR blockers
 Incorrect or incomplete semantics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While working on a PR, a developer may need to modify existing FLS semantics or terminology, only for the developer to discover that these semantics or terms are either incorrect or incomplete.
+While working on a PR, a developer may discover that the PR depends on semantics or terminology that are either incorrect or incomplete in the FLS.
 In such cases, bring up the issue to the FLS team.
 
 Depending on the scope of the required changes, the FLS team may decide to either:
 - Enact the necessary changes in the same PR-in-development, or
-- Approximate the contents of the PR-in-development, and open a GitHub issue to track the update on the semantics or terms.
+- Defer the pre-existing out-of-scope problem only when the PR-in-development remains accurate within its stated scope, and open GitHub issue to track the problem.
 
 Missing semantics
 ~~~~~~~~~~~~~~~~~
 
-While working on a PR, a developer may need to modify existing FLS semantics or use existing terminology, only for the developer to discover that these semantics or terms are missing.
+While working on a PR, a developer may discover that the PR depends on semantics or terminology that the FLS does not yet define.
 This may happen when the Rust Reference or other sources the FLS team may use as reference were changed irrespective of Rust releases.
 In such cases, bring up the issue to the FLS team.
 

@@ -56,14 +56,8 @@ use rustc_hir as hir;
 use rustc_hir::attrs::{AttributeKind, DeprecatedSince, Deprecation, RustcVersion};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdSet};
-<<<<<<< ferrocene/main
-use rustc_hir::{ConstStability, Mutability, RustcVersion, StabilityLevel, StableSince};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
-||||||| 09ee43b2d60
-use rustc_hir::{ConstStability, Mutability, RustcVersion, StabilityLevel, StableSince};
-=======
 use rustc_hir::{ConstStability, Mutability, StabilityLevel, StableSince};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::DUMMY_SP;

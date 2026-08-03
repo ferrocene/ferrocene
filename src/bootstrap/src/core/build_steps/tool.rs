@@ -773,19 +773,11 @@ impl CommandLineStep for Rustdoc {
         // to build rustdoc.
         //
         let mut extra_features = Vec::new();
-<<<<<<< ferrocene/main
-        if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
-            extra_features.push(allocator_feature_name.to_string());
-||||||| 09ee43b2d60
-        if let Some(allocator) = builder.config.override_allocator(target) {
-            extra_features.push(allocator.feature_name().to_string());
-=======
         if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
             extra_features.push(allocator_feature_name.to_string());
         }
         if !builder.config.rust_debug_logging {
             extra_features.push("max_level_info".to_string())
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
 
         let compilers = RustcPrivateCompilers::from_target_compiler(builder, target_compiler);

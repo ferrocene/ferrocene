@@ -35,14 +35,8 @@ test = false
 cc = "=1.2.62"
 cmake = "=0.1.54"
 
-<<<<<<< ferrocene/main
-build_helper = { path = "../build_helper", features = ["metrics"] } # Ferrocene addition: Add metrics flag for symbol-report
-||||||| 09ee43b2d60
-build_helper = { path = "../build_helper" }
-=======
 # tidy-alphabetical-start
-build_helper = { path = "../build_helper" }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+build_helper = { path = "../build_helper", features = ["metrics"] } # Ferrocene addition: Add metrics flag for symbol-report
 clap = { version = "4.4", default-features = false, features = ["std", "usage", "help", "derive", "error-context"] }
 clap_complete = "4.4"
 home = "0.5"

@@ -154,6 +154,15 @@ RUN <<-EOF
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
     done
+
+    # TESTING CHANGE: Our configuration expects the compiler to be named
+    # aarch64-linux-gnu-gcc
+    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        cd /usr/local/bin
+        ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
+        ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
+    fi
+
 EOF
 
 ENV PATH=/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH

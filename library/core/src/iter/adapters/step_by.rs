@@ -268,9 +268,9 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
     default fn spec_nth(&mut self, mut n: usize) -> Option<I::Item> {
         if self.first_take {
             self.first_take = false;
-            let first = self.iter.next();
+            let first = self.iter.next()?;
             if n == 0 {
-                return first;
+                return Some(first);
             }
             n -= 1;
         }
@@ -280,7 +280,7 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
         // n + 1 could overflow
         // thus, if n is usize::MAX, instead of adding one, we call .nth(step)
         if n == usize::MAX {
-            self.iter.nth(step - 1);
+            self.iter.nth(step - 1)?;
         } else {
             n += 1;
         }
@@ -304,7 +304,8 @@ unsafe impl<I: Iterator> StepByImpl<I> for StepBy<I> {
                 n -= div_step;
                 nth_step
             };
-            self.iter.nth(nth - 1);
+
+            self.iter.nth(nth - 1)?;
         }
     }
 

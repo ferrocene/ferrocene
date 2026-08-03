@@ -26,10 +26,9 @@ fn configure_with_args(cmd: &[&str], host: &[&str], target: &[&str]) -> Config {
 }
 
 fn run_build(paths: &[PathBuf], config: Config) -> Cache {
-    let kind = config.cmd.kind();
     let build = Build::new(config);
     let builder = Builder::new(&build);
-    builder.run_step_descriptions(&Builder::get_step_descriptions(kind), paths);
+    builder.run_step_descriptions(&Builder::get_step_descriptions(builder.kind), paths);
     builder.cache
 }
 
@@ -56,7 +55,7 @@ fn test_invalid() {
 #[test]
 fn test_intersection() {
     let set = |paths: &[&str]| {
-        PathSet::Set(paths.into_iter().map(|p| TaskPath { path: p.into(), kind: None }).collect())
+        PathSet::Set(paths.into_iter().map(|p| TaskPath { path: p.into() }).collect())
     };
     let library_set = set(&["library/core", "library/alloc", "library/std"]);
     let mut command_paths = vec![
@@ -64,7 +63,7 @@ fn test_intersection() {
         CLIStepPath::from(PathBuf::from("library/alloc")),
         CLIStepPath::from(PathBuf::from("library/stdarch")),
     ];
-    let subset = library_set.intersection_removing_matches(&mut command_paths, Kind::Build);
+    let subset = library_set.intersection_removing_matches(&mut command_paths);
     assert_eq!(subset, set(&["library/core", "library/alloc"]),);
     assert_eq!(
         command_paths,
@@ -79,7 +78,7 @@ fn test_intersection() {
 #[test]
 fn test_resolve_parent_and_subpaths() {
     let set = |paths: &[&str]| {
-        PathSet::Set(paths.into_iter().map(|p| TaskPath { path: p.into(), kind: None }).collect())
+        PathSet::Set(paths.into_iter().map(|p| TaskPath { path: p.into() }).collect())
     };
 
     let mut command_paths = vec![
@@ -88,7 +87,7 @@ fn test_resolve_parent_and_subpaths() {
     ];
 
     let library_set = set(&["src/tools/miri", "src/tools/miri/cargo-miri"]);
-    library_set.intersection_removing_matches(&mut command_paths, Kind::Build);
+    library_set.intersection_removing_matches(&mut command_paths);
 
     assert_eq!(
         command_paths,
@@ -3328,10 +3327,10 @@ impl ConfigBuilder {
     fn run(self) -> Cache {
         let config = self.create_config();
 
-        let kind = config.cmd.kind();
         let build = Build::new(config);
         let builder = Builder::new(&build);
-        builder.run_step_descriptions(&Builder::get_step_descriptions(kind), &builder.paths);
+        builder
+            .run_step_descriptions(&Builder::get_step_descriptions(builder.kind), &builder.paths);
         builder.cache
     }
 

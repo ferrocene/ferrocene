@@ -4,18 +4,32 @@ expression: setup
 ---
 [Setup] setup::Profile
     targets: [aarch64-unknown-linux-gnu]
+<<<<<<< ferrocene/main
     - Set({setup::compiler})
     - Set({setup::dist})
     - Set({setup::ferrocene-dist})
     - Set({setup::library})
     - Set({setup::none})
     - Set({setup::tools})
+||||||| 09ee43b2d60
+    - Set({setup::compiler})
+    - Set({setup::dist})
+    - Set({setup::library})
+    - Set({setup::none})
+    - Set({setup::tools})
+=======
+    - Set({compiler})
+    - Set({dist})
+    - Set({library})
+    - Set({none})
+    - Set({tools})
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [Setup] setup::Hook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({setup::hook})
+    - Set({hook})
 [Setup] setup::Link
     targets: [aarch64-unknown-linux-gnu]
-    - Set({setup::link})
+    - Set({link})
 [Setup] setup::Editor
     targets: [aarch64-unknown-linux-gnu]
-    - Set({setup::editor})
+    - Set({editor})

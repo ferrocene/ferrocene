@@ -16,6 +16,7 @@ use rustc_span::sym;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::{self, ObligationCtxt};
 
+use crate::check::missing_items_must_implement_one_of_err;
 use crate::diagnostics;
 use crate::hir::def_id::{DefId, LocalDefId};
 
@@ -293,7 +294,7 @@ fn ensure_impl_predicates_are_implied_by_item_defn<'tcx>(
     ocx.eq(&ObligationCause::dummy_with_span(impl_span), adt_env, fresh_adt_ty, impl_adt_ty)
         .expect("equating fully generic trait ref should never fail");
 
-    for (clause, span) in tcx.predicates_of(impl_def_id).instantiate(tcx, fresh_impl_args) {
+    for (clause, span) in tcx.clauses_of(impl_def_id).instantiate(tcx, fresh_impl_args) {
         let normalize_cause = traits::ObligationCause::misc(span, impl_def_id);
         let pred = ocx.normalize(&normalize_cause, adt_env, clause);
         let cause = traits::ObligationCause::new(
@@ -394,11 +395,12 @@ fn check_drop_xor_pin_drop<'tcx>(
     match (drop_span, pin_drop_span) {
         (None, None) => {
             if tcx.features().pin_ergonomics() {
-                return Err(tcx.dcx().emit_err(crate::diagnostics::MissingOneOfTraitItem {
-                    span: tcx.def_span(drop_impl_did),
-                    note: None,
-                    missing_items_msg: "drop`, `pin_drop".to_string(),
-                }));
+                return Err(missing_items_must_implement_one_of_err(
+                    tcx,
+                    drop_impl_did,
+                    [sym::drop, sym::pin_drop].into_iter(),
+                    None,
+                ));
             } else {
                 return Err(tcx
                     .dcx()

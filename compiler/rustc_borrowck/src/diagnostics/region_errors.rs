@@ -15,8 +15,8 @@ use rustc_middle::bug;
 use rustc_middle::hir::place::PlaceBase;
 use rustc_middle::mir::{AnnotationSource, ConstraintCategory, ReturnConstraint};
 use rustc_middle::ty::{
-    self, GenericArgs, Region, RegionUtilitiesExt, RegionVid, Ty, TyCtxt, TypeFoldable,
-    TypeVisitor, fold_regions,
+    self, GenericArgs, Region, RegionExt, RegionVid, Ty, TyCtxt, TypeFoldable, TypeVisitor,
+    fold_regions,
 };
 use rustc_span::{Ident, Span, kw};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -1167,17 +1167,17 @@ impl<'diag, 'tcx> MirBorrowckCtxt<'_, 'diag, 'tcx> {
             }
         });
 
-        let preds = tcx.predicates_of(method_def_id).instantiate(tcx, args);
+        let clauses = tcx.clauses_of(method_def_id).instantiate(tcx, args);
 
         let ocx = ObligationCtxt::new(&self.infcx);
-        ocx.register_obligations(preds.iter().map(|(pred, span)| {
-            trace!(?pred);
+        ocx.register_obligations(clauses.iter().map(|(clause, span)| {
+            trace!(?clause);
             Obligation::misc(
                 tcx,
                 span,
                 self.mir_def_id(),
                 self.infcx.param_env,
-                pred.skip_norm_wip(),
+                clause.skip_norm_wip(),
             )
         }));
 

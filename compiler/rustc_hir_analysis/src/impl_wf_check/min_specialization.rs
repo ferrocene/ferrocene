@@ -72,8 +72,7 @@ use rustc_infer::traits::ObligationCause;
 use rustc_infer::traits::specialization_graph::Node;
 use rustc_middle::ty::trait_def::TraitSpecializationKind;
 use rustc_middle::ty::{
-    self, GenericArg, GenericArgs, GenericArgsRef, RegionUtilitiesExt, TyCtxt, TypeVisitableExt,
-    TypingMode,
+    self, GenericArg, GenericArgs, GenericArgsRef, TyCtxt, TypeVisitableExt, TypingMode,
 };
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
@@ -213,7 +212,7 @@ fn unconstrained_parent_impl_args<'tcx>(
     impl_def_id: DefId,
     impl_args: GenericArgsRef<'tcx>,
 ) -> Vec<GenericArg<'tcx>> {
-    let impl_generic_predicates = tcx.predicates_of(impl_def_id);
+    let impl_generic_clauses = tcx.clauses_of(impl_def_id);
     let mut unconstrained_parameters = FxHashSet::default();
     let mut constrained_params = FxHashSet::default();
     let impl_trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_norm_wip();
@@ -222,7 +221,7 @@ fn unconstrained_parent_impl_args<'tcx>(
     // what we want here. We want only a list of constrained parameters while
     // the functions in `cgp` add the constrained parameters to a list of
     // unconstrained parameters.
-    for (clause, _) in impl_generic_predicates.predicates.iter() {
+    for (clause, _) in impl_generic_clauses.clauses.iter() {
         if let ty::ClauseKind::Projection(proj) = clause.kind().skip_binder() {
             let unbound_trait_ref = proj.projection_term.trait_ref(tcx);
             if unbound_trait_ref == impl_trait_ref {
@@ -327,7 +326,7 @@ fn check_predicates<'tcx>(
 ) -> Result<(), ErrorGuaranteed> {
     let impl1_clauses: Vec<(ty::Clause<'_>, _)> = traits::elaborate(
         tcx,
-        tcx.predicates_of(impl1_def_id)
+        tcx.clauses_of(impl1_def_id)
             .instantiate(tcx, impl1_args)
             .into_iter()
             .map(|(c, s)| (c.skip_norm_wip(), s)),
@@ -341,7 +340,7 @@ fn check_predicates<'tcx>(
     } else {
         traits::elaborate(
             tcx,
-            tcx.predicates_of(impl2_node.def_id())
+            tcx.clauses_of(impl2_node.def_id())
                 .instantiate(tcx, impl2_args)
                 .into_iter()
                 .map(|(c, _s)| c.skip_norm_wip()),

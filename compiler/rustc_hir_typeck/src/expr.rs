@@ -614,7 +614,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         };
 
-        if let ty::FnDef(did, _) = *ty.kind() {
+        if let ty::FnDef(did, args) = *ty.kind() {
             let fn_sig = ty.fn_sig(tcx);
 
             if tcx.is_intrinsic(did, sym::transmute) {
@@ -630,6 +630,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // on concrete types, but the output type may not be known yet (it would only
                 // be known if explicitly specified via turbofish).
                 self.deferred_transmute_checks.borrow_mut().push((*from, to, expr.hir_id));
+            }
+            if tcx.is_intrinsic(did, sym::offload) {
+                let args = args.skip_binder();
+                let f = args.type_at(0);
+                let t = args.type_at(1);
+                let r = args.type_at(2);
+                // Defer offload checks to check generics later once types are fully inferred.
+                self.deferred_offload_checks.borrow_mut().push((f, t, r, expr.hir_id));
             }
             if !tcx.features().unsized_fn_params() {
                 // We want to remove some Sized bounds from std functions,
@@ -3561,8 +3569,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // Register the impl's predicates. One of these predicates
             // must be unsatisfied, or else we wouldn't have gotten here
             // in the first place.
-            let unnormalized_predicates =
-                self.tcx.predicates_of(impl_def_id).instantiate(self.tcx, impl_args);
+            let unnormalized_clauses =
+                self.tcx.clauses_of(impl_def_id).instantiate(self.tcx, impl_args);
             ocx.register_obligations(traits::predicates_for_generics(
                 |idx, span| {
                     cause.clone().derived_cause(
@@ -3574,15 +3582,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             ObligationCauseCode::ImplDerived(Box::new(traits::ImplDerivedCause {
                                 derived,
                                 impl_or_alias_def_id: impl_def_id,
-                                impl_def_predicate_index: Some(idx),
+                                impl_def_clause_index: Some(idx),
                                 span,
                             }))
                         },
                     )
                 },
-                |pred| ocx.normalize(&cause, self.param_env, pred),
+                |clause| ocx.normalize(&cause, self.param_env, clause),
                 self.param_env,
-                unnormalized_predicates,
+                unnormalized_clauses,
             ));
 
             // Normalize the output type, which we can use later on as the

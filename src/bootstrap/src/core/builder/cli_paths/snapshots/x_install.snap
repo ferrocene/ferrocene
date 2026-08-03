@@ -2,9 +2,41 @@
 source: src/bootstrap/src/core/builder/cli_paths/tests.rs
 expression: install
 ---
+<<<<<<< ferrocene/main
 [Install] bootstrap::ferrocene::install::Std
+||||||| 09ee43b2d60
+[Install] install::Docs
     targets: [aarch64-unknown-linux-gnu]
+    - Set({install::src/doc})
+[Install] install::Std
+=======
+[Install] install::Docs
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({src/doc})
+[Install] install::Std
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    targets: [aarch64-unknown-linux-gnu]
+<<<<<<< ferrocene/main
     - Set({install::library/std})
 [Install] bootstrap::ferrocene::install::Rustc
+||||||| 09ee43b2d60
+    - Set({install::library/std})
+[Install] install::Rustc
+=======
+    - Set({library/std})
+[Install] install::Rustc
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     targets: [x86_64-unknown-linux-gnu]
+<<<<<<< ferrocene/main
     - Set({install::compiler/rustc})
+||||||| 09ee43b2d60
+    - Set({install::compiler/rustc})
+[Install] install::LlvmTools
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({install::llvm-tools})
+=======
+    - Set({compiler/rustc})
+[Install] install::LlvmTools
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({llvm-tools})
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

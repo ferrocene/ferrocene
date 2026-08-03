@@ -61,7 +61,24 @@ where
     }
 
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 09ee43b2d60
+=======
+    fn count(mut self) -> usize {
+        if self.n == 0 {
+            return 0;
+        }
+        // Advancing consumes the same elements `next` would have yielded,
+        // while benefiting from the inner iterator's `advance_by` fast path.
+        match self.iter.advance_by(self.n) {
+            Ok(()) => self.n,
+            Err(remaining) => self.n - remaining.get(),
+        }
+    }
+
+    #[inline]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.n == 0 {
             return (0, Some(0));

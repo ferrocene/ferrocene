@@ -782,7 +782,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// This takes the error provided, combines it with the span and any additional spans inside the
     /// error and emits it.
     pub(crate) fn report_error(
-        &mut self,
+        &self,
         span: Span,
         resolution_error: ResolutionError<'ra>,
     ) -> ErrorGuaranteed {
@@ -790,7 +790,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     pub(crate) fn into_struct_error(
-        &mut self,
+        &self,
         span: Span,
         resolution_error: ResolutionError<'ra>,
     ) -> Diag<'_> {
@@ -1459,7 +1459,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     pub(crate) fn add_scope_set_candidates(
-        &mut self,
+        &self,
         suggestions: &mut Vec<TypoSuggestion>,
         scope_set: ScopeSet<'ra>,
         ps: &ParentScope<'ra>,
@@ -1526,10 +1526,10 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     }));
                 }
                 Scope::ExternPreludeFlags => {}
-                Scope::ToolPrelude => {
+                Scope::ToolAttributePrelude => {
                     let res = Res::NonMacroAttr(NonMacroAttrKind::Tool);
                     suggestions.extend(
-                        this.registered_tools
+                        this.registered_attr_tools
                             .iter()
                             .map(|ident| TypoSuggestion::new(ident.name, ident.span, res)),
                     );
@@ -1560,7 +1560,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
     /// Lookup typo candidate in scope for a macro or import.
     fn early_lookup_typo_candidate(
-        &mut self,
+        &self,
         scope_set: ScopeSet<'ra>,
         parent_scope: &ParentScope<'ra>,
         ident: Ident,
@@ -1828,7 +1828,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// N.B., the method does not look into imports, but this is not a problem,
     /// since we report the definitions (thus, the de-aliased imports).
     pub(crate) fn lookup_import_candidates<FilterFn>(
-        &mut self,
+        &self,
         lookup_ident: Ident,
         namespace: Namespace,
         parent_scope: &ParentScope<'ra>,
@@ -1870,24 +1870,22 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 // If so, we have to disambiguate the potential import suggestions by making
                 // the paths *global* (i.e., by prefixing them with `::`).
                 let needs_disambiguation =
-                    self.resolutions(parent_scope.module).borrow().iter().any(
-                        |(key, name_resolution)| {
-                            if key.ns == TypeNS
-                                && key.ident == *ident
-                                && let Some(decl) = name_resolution.borrow().best_decl()
-                            {
-                                match decl.res() {
-                                    // No disambiguation needed if the identically named item we
-                                    // found in scope actually refers to the crate in question.
-                                    Res::Def(_, def_id) => def_id != crate_def_id,
-                                    Res::PrimTy(_) => true,
-                                    _ => false,
-                                }
-                            } else {
-                                false
+                    self.resolutions(parent_scope.module).iter().any(|(key, name_resolution)| {
+                        if key.ns == TypeNS
+                            && key.ident == *ident
+                            && let Some(decl) = name_resolution.borrow().best_decl()
+                        {
+                            match decl.res() {
+                                // No disambiguation needed if the identically named item we
+                                // found in scope actually refers to the crate in question.
+                                Res::Def(_, def_id) => def_id != crate_def_id,
+                                Res::PrimTy(_) => true,
+                                _ => false,
                             }
-                        },
-                    );
+                        } else {
+                            false
+                        }
+                    });
                 let mut crate_path = ThinVec::new();
                 if needs_disambiguation {
                     crate_path.push(ast::PathSegment::path_root(rustc_span::DUMMY_SP));
@@ -3310,7 +3308,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// ```
     #[instrument(level = "debug", skip(self, parent_scope))]
     fn make_missing_self_suggestion(
-        &mut self,
+        &self,
         mut path: Vec<Segment>,
         parent_scope: &ParentScope<'ra>,
     ) -> Option<(Vec<Segment>, Option<String>)> {
@@ -3330,7 +3328,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// ```
     #[instrument(level = "debug", skip(self, parent_scope))]
     fn make_missing_crate_suggestion(
-        &mut self,
+        &self,
         mut path: Vec<Segment>,
         parent_scope: &ParentScope<'ra>,
     ) -> Option<(Vec<Segment>, Option<String>)> {
@@ -3362,7 +3360,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// ```
     #[instrument(level = "debug", skip(self, parent_scope))]
     fn make_missing_super_suggestion(
-        &mut self,
+        &self,
         mut path: Vec<Segment>,
         parent_scope: &ParentScope<'ra>,
     ) -> Option<(Vec<Segment>, Option<String>)> {
@@ -3385,7 +3383,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// name as the first part of path.
     #[instrument(level = "debug", skip(self, parent_scope))]
     fn make_external_crate_suggestion(
-        &mut self,
+        &self,
         mut path: Vec<Segment>,
         parent_scope: &ParentScope<'ra>,
     ) -> Option<(Vec<Segment>, Option<String>)> {
@@ -3667,7 +3665,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     }
 
     /// Gets the `#[diagnostic::on_unknown]` attribute data associated with this `DefId`.
-    fn on_unknown_data(&self, def_id: DefId) -> Option<&Directive> {
+    pub(crate) fn on_unknown_data(&self, def_id: DefId) -> Option<&Directive> {
         match def_id.as_local() {
             Some(local) => Some(self.on_unknown_data.get(&local)?.directive.as_ref()),
             None => find_attr!(self.tcx, def_id, OnUnknown{ directive } => directive)?.as_deref(),
@@ -4214,7 +4212,7 @@ impl OnUnknownData {
     ) -> Option<OnUnknownData> {
         if r.features.diagnostic_on_unknown()
             && let Some(Attribute::Parsed(AttributeKind::OnUnknown { directive, .. })) =
-                AttributeParser::parse_limited(
+                AttributeParser::parse_limited_sym(
                     r.tcx.sess,
                     attrs,
                     &[sym::diagnostic, sym::on_unknown],

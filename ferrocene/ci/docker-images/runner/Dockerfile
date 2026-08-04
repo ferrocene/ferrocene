@@ -41,7 +41,8 @@ RUN yum -y install \
     wget curl \
     zstd xz bzip2 gzip unzip \
     zlib-devel \
-    glibc-devel \
+    glibc-devel glibc-devel.i686 \
+    glibc-static glibc-static.i686 \
     tar \
     make patch \
     file which \

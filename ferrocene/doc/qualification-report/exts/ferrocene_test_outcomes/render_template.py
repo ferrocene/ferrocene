@@ -30,7 +30,9 @@ class RenderOutcomesTemplate(SphinxDirective):
     }
 
     def run(self):
-        tested_target = self.options["tested_target_with_std"]
+        tested_target = self.options.get(
+            "tested_target_with_std", self.options["target"]
+        )
 
         # Can be None if test outcomes were not injected.
         outcomes = (
@@ -77,7 +79,7 @@ class RenderOutcomesTemplate(SphinxDirective):
                 "upcoming": self.options["upcoming"]
                 if "upcoming" in self.options
                 else None,
-                "tested_target_with_std": self.options["tested_target_with_std"],
+                "tested_target_with_std": self.options.get("tested_target_with_std"),
                 "remote_testing": "remote_testing" in self.options,
                 "platform_outcomes": outcomes,
             },

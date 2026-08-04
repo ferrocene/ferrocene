@@ -5,6 +5,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+
 # Ensure we're in the repository root regardless of the current directory.
 cd "$(dirname "$0")/../.."
 

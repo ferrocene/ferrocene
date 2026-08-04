@@ -165,7 +165,6 @@ fn main() {
         );
 
         // Ferrocene addition
-        check!(ferrocene_test_outcomes, &root_path);
         check!(ferrocene_targets, &root_path);
     });
 

@@ -460,7 +460,7 @@ fn check_packages_toml(
     // one way comparisons because Quality Managed and Supported targets are
     // also listed in packages.toml
     {
-        let in_docs = in_docs.hosts;
+        let in_docs = &in_docs.hosts;
         let in_toml = &targets_toml.hosts;
         compare_one_way(
             in_toml,
@@ -470,15 +470,28 @@ fn check_packages_toml(
         );
     }
 
-    // being in `groups.hosts` implies that rust-std is present for that tuple so
-    // a tuple in `groups.hosts` may not appear in `groups.{cross-compilation,qnx}`
-    // hence we use `(target - hosts)` as the reference
+    // being in `groups.hosts` implies that rust-std will be packaged and uploaded for
+    // that tuple so a tuple in `groups.hosts` should not appear in
+    // `groups.{cross-compilation,qnx}`
+    for host in &in_docs.hosts {
+        if in_docs.targets.contains(host) {
+            check.error(format!(
+                "host tuple '{host}' must not appear under \
+[groups.cross-compilation] or [groups.qnx] in ferrocene/packages.toml"
+            ));
+        }
+    }
+
+    // compare one way because Quality Managed and Supported targets are
+    // also listed in packages.toml
     {
         let in_docs = in_docs.targets;
         let in_toml = targets_toml
             .targets
             .keys()
             .cloned()
+            // we just checked above that entries in `groups.hosts` must not
+            // appear in other `groups.*`; that exclusion needs to happen here too
             .filter(|target| !targets_toml.hosts.contains(target))
             .collect();
         compare_one_way(

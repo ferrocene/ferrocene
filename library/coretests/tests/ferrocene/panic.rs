@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 #[test]
 fn panic_location() {
     let loc = core::panic::Location::caller();
@@ -42,4 +44,46 @@ fn test_runtime_const_panic() {
     let mut buf = [0; 1];
 
     let _ = std::char::encode_utf8_raw(code, &mut buf);
+}
+
+// Returns a given stream of responses to write calls
+struct ErrorTriggerWriter<'a> {
+    error_on: &'a str,
+}
+
+impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        if s == self.error_on {
+            Err(std::fmt::Error)
+        } else {
+            Ok(())
+        }
+    }
+}
+
+// Covers <core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt
+#[test]
+fn test_panic_info_fmt_results() {
+    let args = format_args!("hello, world!");
+    let info = core::ferrocene_test::create_panic_info(&args);
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "panicked at "
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "library/core/src/ferrocene_test.rs"
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ":\n"
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "hello, world!"
+    };
+    assert!(write!(writer, "{}", info).is_err());
 }

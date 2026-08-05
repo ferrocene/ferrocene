@@ -1,4 +1,4 @@
-use core::fmt;
+use core::fmt::{self, Write};
 
 // Covers `core::fmt::rt::Argument::<'_>::as_u16`
 #[test]
@@ -541,4 +541,61 @@ fn test_formatter_align() {
     assert_eq!(format!("{Foo:>}"), "right");
     assert_eq!(format!("{Foo:^}"), "center");
     assert_eq!(format!("{Foo}"), "into the void");
+}
+
+
+// Returns a given stream of responses to write calls
+struct ErrorTriggerWriter<'a> {
+    error_on: &'a str,
+}
+
+impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        if s == self.error_on {
+            Err(std::fmt::Error)
+        } else {
+            Ok(())
+        }
+    }
+}
+
+// Covers <core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt
+#[test]
+fn test_panic_info_fmt_results() {
+    let args = format_args!("hello, world!");
+    let info = core::ferrocene_test::create_panic_info(&args);
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "panicked at "
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "library/core/src/ferrocene_test.rs"
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ":\n"
+    };
+    assert!(write!(writer, "{}", info).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "hello, world!"
+    };
+    assert!(write!(writer, "{}", info).is_err());
+}
+
+// Covers <char as core::fmt::Debug>::fmt
+#[test]
+fn test_char_debug_fmt_errors() {
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\'"
+    };
+    assert!(write!(writer, "{:?}", 'c').is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "c"
+    };
+    assert!(write!(writer, "{:?}", 'c').is_err());
 }

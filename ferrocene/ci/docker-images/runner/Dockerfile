@@ -24,7 +24,7 @@
 
 
 
-FROM --platform=$TARGETPLATFORM centos:8 AS base
+FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
@@ -33,7 +33,7 @@ ARG BUILDPLATFORM
 # CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
 RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
   -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
-# RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
+RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
 
 
 RUN mkdir -p /ferrocene/packages
@@ -41,13 +41,15 @@ RUN yum -y install \
     wget curl \
     zstd xz bzip2 gzip unzip \
     zlib-devel \
-    glibc-devel \
+    glibc-devel glibc-devel.i686 \
+    glibc-static glibc-static.i686 \
     tar \
     make patch \
     file which \
     gawk \
     openssh-clients \
     ca-certificates \
+    libedit-devel \
     sudo \
     binutils \
     procps-ng \

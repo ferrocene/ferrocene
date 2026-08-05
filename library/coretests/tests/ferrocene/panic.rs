@@ -65,3 +65,17 @@ fn test_panic_info_fmt_results() {
     };
     assert!(write!(writer, "{}", info).is_err());
 }
+
+// Covers <char as core::fmt::Debug>::fmt
+#[test]
+fn test_char_debug_fmt_errors() {
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\'"
+    };
+    assert!(write!(writer, "{:?}", 'c').is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "c"
+    };
+    assert!(write!(writer, "{:?}", 'c').is_err());
+}

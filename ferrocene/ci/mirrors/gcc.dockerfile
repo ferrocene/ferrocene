@@ -67,6 +67,7 @@ RUN <<EOT
         --prefix=/ferrocene-buildroot \
         --enable-checking=release \
         --enable-languages=c,c++ \
+        --enable-default-pie \
         --disable-gnu-unique-object \
         --enable-cxx-flags='-fno-reorder-blocks-and-partition'
 EOT

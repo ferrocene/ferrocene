@@ -54,16 +54,7 @@ RUN yum -y install \
     binutils \
     procps-ng \
     perl-core \
-    centos-release-scl \
     shadow-utils
-
-# Run this again for the just install SCL repo
-RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
-  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
-RUN sed -i /etc/yum.repos.d/CentOS-SCLo-scl.repo -e's!^# baseurl=http://mirror.centos.org!baseurl=http://vault.centos.org!'
-
-
-RUN yum -y install devtoolset-11
 
 # Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
 # are too old to be useful (they don't know about the `z` ISA flag).

@@ -27,17 +27,17 @@ COPY binutils-src.tar.xz /binutils-src.tar.xz
 RUN mkdir -p /binutils-src
 RUN tar -xf /binutils-src.tar.xz -C /binutils-src --strip-components=1
 WORKDIR /binutils-src
-RUN ./configure --prefix=/opt/local/gcc
+RUN ./configure --prefix=/ferrocene-buildroot
 RUN make -j$(nproc)
 RUN make install
 
 ENV PATH=/opt/local/gcc/bin:$PATH
 
-ENV LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,--sort-common"
-ENV STAGE1_CFLAGS="-mtune=native -O3 -pipe"
-ENV STAGE1_CXXFLAGS="-mtune=native -O3 -pipe"
-ENV BOOT_CFLAGS="-mtune=native -O3 -pipe"
-ENV CFLAGS="-Wno-error=format-truncation -O3 -mtune=native -pipe"
+# ENV LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,--sort-common"
+# ENV STAGE1_CFLAGS="-mtune=native -O3 -pipe"
+# ENV STAGE1_CXXFLAGS="-mtune=native -O3 -pipe"
+# ENV BOOT_CFLAGS="-mtune=native -O3 -pipe"
+# ENV CFLAGS="-Wno-error=format-truncation -O3 -mtune=native -pipe"
 
 RUN mkdir -p /gcc-build
 WORKDIR /gcc-build
@@ -49,17 +49,30 @@ RUN <<EOT
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         host_platform=aarch64
     fi
-    ../gcc-source/configure -v --build=${host_platform}-linux-gnu \
-        --host=${host_platform}-linux-gnu \
-        --target=${host_platform}-linux-gnu \
-        --prefix=/opt/local/gcc \
+
+    # '-fno-reorder-blocks-and-partition' is required to
+    # enable BOLT optimization of the C++ standard library,
+    # which is included in librustc_driver.so
+
+    # ../gcc-source/configure -v --build=${host_platform}-linux-gnu \
+    #     --host=${host_platform}-linux-gnu \
+    #     --target=${host_platform}-linux-gnu \
+    #     --prefix=/ferrocene-buildroot \
+    #     --enable-checking=release \
+    #     --with-build-config='bootstrap-native bootstrap-lto bootstrap-O3' \
+    #     --enable-languages=c,c++ \
+    #     --disable-gnu-unique-object \
+    #     --enable-cxx-flags='-fno-reorder-blocks-and-partition'
+    ../gcc-source/configure -v  \
+        --prefix=/ferrocene-buildroot \
         --enable-checking=release \
-        --with-build-config='bootstrap-native bootstrap-lto bootstrap-O3' \
-        --enable-languages=c,c++
+        --enable-languages=c,c++ \
+        --disable-gnu-unique-object \
+        --enable-cxx-flags='-fno-reorder-blocks-and-partition'
 EOT
 
-RUN make -j${GCC_BUILD_PARALELLISM} profiledbootstrap
+RUN make -j${GCC_BUILD_PARALELLISM}
 RUN make install-strip
 # ensure that "cc" exists as a symlink
-RUN cd /opt/local/gcc/bin/ && ln -s gcc cc
-RUN tar cJf /gcc-build/gcc.tar.xz -C /opt/local/gcc --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
+RUN cd /ferrocene-buildroot && ln -s gcc cc
+RUN tar cJf /gcc-build/gcc.tar.xz -C /ferrocene-buildroot --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

@@ -4,16 +4,16 @@
 FROM --platform=$TARGETPLATFORM centos7-base AS build
 ARG TARGETPLATFORM
 
-ADD gcc.tar.xz /opt/local/gcc
+ADD gcc.tar.xz /ferrocene-buildroot
 ADD openssl.tar.xz /usr/local
 
-ENV PATH=/opt/local/gcc/bin:/opt/local/bin:$PATH
+ENV PATH=/ferrocene-buildroot/bin:/opt/local/bin:$PATH
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
 # add /usr/local/lib to ld's path
 RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
-RUN echo '/opt/local/gcc/lib64/' >> /etc/ld.so.conf.d/modern-gcc.conf
+RUN echo '/ferrocene-builroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
 RUN <<-EOF

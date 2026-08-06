@@ -62,5 +62,7 @@ EOT
 
 RUN make -j$(nproc)
 
+RUN make install
+
 # The ferrocene buildroot contains clang and gcc
 RUN tar cJf /ferrocene-buildroot.tar.xz -C /ferrocene-buildroot --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

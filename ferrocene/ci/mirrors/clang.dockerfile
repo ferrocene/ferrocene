@@ -20,9 +20,7 @@ RUN tar -xf  /llvm-project.src.tar.xz -C /llvm-src --strip-components=1
 RUN mkdir -p /llvm-build
 WORKDIR /llvm-build
 
-ENV GCC_BUILD_TARGET=x86_64-linux-gnu
-ENV GCC_PLUGIN_TARGET=x86_64-linux-gnu
-ENV LLVM_BUILD_TARGETS=X86
+ENV GCC_VERSION=16.1.0
 
 # For whatever reason the default set of include paths for clang is different
 # than that of gcc. As a result we need to manually include our sysroot's
@@ -33,9 +31,13 @@ RUN <<EOT
     set -xe
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        LLVM_BUILD_TARGETS=X86
+        export LLVM_BUILD_TARGETS=X86
+        export GCC_BUILD_TARGET=x86_64-pc-linux-gnu
+        export GCC_PLUGIN_TARGET=x86_64-pc-linux-gnu
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        LLVM_BUILD_TARGETS=Aarch64
+        export GCC_BUILD_TARGET=aarch64-unknown-linux-gnu
+        export GCC_PLUGIN_TARGET=aarch64-unknown-linux-gnu
+        export LLVM_BUILD_TARGETS=Aarch64
     fi
     
     cmake -S ../llvm-src/llvm -B /llvm-build \

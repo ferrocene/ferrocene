@@ -13,7 +13,7 @@ ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 # add /usr/local/lib to ld's path
 RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
-RUN echo '/ferrocene-builroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
+RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
 RUN <<-EOF

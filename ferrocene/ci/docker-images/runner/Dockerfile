@@ -171,6 +171,9 @@ RUN <<-EOF
 
 EOF
 
+# ensure that "cc" exists as a symlink
+RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
+
 ENV PATH=/ferrocene-buildroot/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/

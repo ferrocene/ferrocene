@@ -75,5 +75,5 @@ EOT
 RUN make -j${GCC_BUILD_PARALELLISM}
 RUN make install-strip
 # ensure that "cc" exists as a symlink
-RUN cd /ferrocene-buildroot && ln -s gcc cc
+RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
 RUN tar cJf /gcc-build/gcc.tar.xz -C /ferrocene-buildroot --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

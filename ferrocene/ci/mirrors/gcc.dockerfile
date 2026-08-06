@@ -27,7 +27,7 @@ COPY binutils-src.tar.xz /binutils-src.tar.xz
 RUN mkdir -p /binutils-src
 RUN tar -xf /binutils-src.tar.xz -C /binutils-src --strip-components=1
 WORKDIR /binutils-src
-RUN ./configure --prefix=/ferrocene-buildroot
+RUN ./configure --prefix=/ferrocene-buildroot --enable-gold --enable-plugins --disable-werror
 RUN make -j$(nproc)
 RUN make install
 

@@ -881,3 +881,24 @@ fn test_saturating_mul() {
     assert_eq!(i32::saturating_mul(2 as i32, 4), 8 as i32, "i32",);
     assert_eq!(i8::saturating_mul(2 as i8, 4), 8 as i8, "i8",);
 }
+
+// Cover
+// * core::num::<T>::checked_add_unsigned
+// * core::num::<T>::checked_sub_unsigned
+#[test]
+fn test_check_() {
+    assert_eq!(i128::checked_add_unsigned(i128::MAX, 10), None, "i128 add",);
+    assert_eq!(i128::checked_sub_unsigned(i128::MIN, 10), None, "i128 sub",);
+
+    assert_eq!(i64::checked_add_unsigned(i64::MAX, 10), None, "i64 add",);
+    assert_eq!(i64::checked_sub_unsigned(i64::MIN, 10), None, "i64 sub",);
+
+    assert_eq!(i32::checked_add_unsigned(i32::MAX, 10), None, "i32 add",);
+    assert_eq!(i32::checked_sub_unsigned(i32::MIN, 10), None, "i32 sub",);
+
+    assert_eq!(i16::checked_add_unsigned(i16::MAX, 10), None, "i16 add",);
+    assert_eq!(i16::checked_sub_unsigned(i16::MIN, 10), None, "i16 sub",);
+
+    assert_eq!(i16::checked_add_unsigned(i16::MAX, 10), None, "i16 add",);
+    assert_eq!(i16::checked_sub_unsigned(i16::MIN, 10), None, "i16 sub",);
+}

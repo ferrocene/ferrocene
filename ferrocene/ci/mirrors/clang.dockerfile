@@ -3,6 +3,8 @@
 
 FROM centos7-python-builder AS build
 
+ARG TARGETPLATFORM
+
 RUN mkdir -p /usr/local/
 
 # We need zstd to enable the lto zstd features

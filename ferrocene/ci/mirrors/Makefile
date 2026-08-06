@@ -188,7 +188,7 @@ builder-image: builder.dockerfile gcc openssl utils
 	cp output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz build/builder/openssl.tar.xz
 	docker build --tag centos7-builder --file builder.dockerfile build/builder
 
-builder-python-image: builder-image builder-python.dockerfile
+builder-python-image: builder-image python builder-python.dockerfile
 	mkdir -p build/builder-python
 	cp output/python-$(python-version)-$(host-arch)-$(commit).tar.xz build/builder-python/python.tar.xz
 	docker build --tag centos7-python-builder --build-arg=PYTHON_VERSION=$(python-version)  --file builder-python.dockerfile build/builder-python

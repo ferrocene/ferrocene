@@ -140,6 +140,8 @@ COPY ferrocene/ci/mirrors/ ./mirrors/
 RUN <<-EOF
     set -eu
 
+    mkdir -p /ferrocene-buildroot
+
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         host_platform=x86_64
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
@@ -157,6 +159,9 @@ RUN <<-EOF
             if [[ $package_file =~ "coreutils" ]];  then
                 echo "Installing coreutils to /usr"
                 tar -C /usr -xf "mirrors/$package_file"
+            elif [[ $package_file =~ "ferrocene-buildroot" ]];  then
+                echo "Installing buildroot to /ferrocene-buildroot"
+                tar -C /ferrocene-buildroot -xf "mirrors/$package_file"
             else
                 tar -C /usr/local -xf "mirrors/$package_file"
             fi
@@ -175,15 +180,16 @@ RUN <<-EOF
 
 EOF
 
-ENV PATH=/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
+ENV PATH=/ferrocene-buildroot/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
 # add /usr/local/lib to ld's path
 RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
-RUN echo '/usr/local/lib/' >> /etc/ld.so.conf.d/modern-gcc.conf
-RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/modern-gcc.conf
+RUN echo '/usr/local/lib/' >> /etc/ld.so.conf.d/usr-local.conf
+RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
+RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
 RUN <<-EOF
@@ -210,9 +216,9 @@ ENV LANG=C.UTF-8
 # Automatic compiler detection doesn't work for some targets.
 
 
-ENV CC=gcc
-ENV CXX=g++
-ENV CFLAGS="-fPIE -pie"
+ENV CC=clang
+ENV CXX=clang++
+
 ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc

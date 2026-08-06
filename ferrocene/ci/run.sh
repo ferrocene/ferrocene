@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-source /opt/rh/devtoolset-11/enable
-
 set -euo pipefail
 IFS=$'\n\t'
 

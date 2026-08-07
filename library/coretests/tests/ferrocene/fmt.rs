@@ -837,3 +837,43 @@ fn test_formatter_pad_errors() {
     };
     assert!(write!(writer, "{:>10}", specimen).is_err());
 }
+
+// Cover `core::fmt::Formatter::<'a>::pad_formatted_parts`'s errors
+#[test]
+fn test_formatter_pad_formatted_parts_errors() {
+    let mut options = fmt::FormattingOptions::new();
+
+    // We have to trigger "if usize::from(width) <= len" but width has to be != 0
+    options.width(Some(100));
+    options.sign_aware_zero_pad(true);
+    options.sign(Some(core::fmt::Sign::Plus));
+    options.align(Some(core::fmt::Alignment::Right));
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "+",
+        allow_times: 0,
+    };
+    let mut f = fmt::Formatter::new(&mut writer, options);
+    assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "0",
+        allow_times: 10,
+    };
+    let mut f = fmt::Formatter::new(&mut writer, options);
+    assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ".",
+        allow_times: 0,
+    };
+    let mut f = fmt::Formatter::new(&mut writer, options);
+    assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "456",
+        allow_times: 0,
+    };
+    let mut f = fmt::Formatter::new(&mut writer, options);
+    assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
+}

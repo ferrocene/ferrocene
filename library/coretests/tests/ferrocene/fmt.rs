@@ -557,6 +557,13 @@ impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
             Ok(())
         }
     }
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        if c.to_string() == self.error_on {
+            Err(std::fmt::Error)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 // Covers <core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt
@@ -598,4 +605,42 @@ fn test_char_debug_fmt_errors() {
         error_on: "c"
     };
     assert!(write!(writer, "{:?}", 'c').is_err());
+}
+
+// Covers `<core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_str`
+#[test]
+fn test_pad_adapter_fmt_write_str_errors() {
+    struct DemoStruct {
+        #[allow(dead_code)]
+        demo: &'static str,
+        #[allow(dead_code)]
+        hidden: &'static str,
+    }
+    impl fmt::Debug for DemoStruct {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_struct("DemoStruct")
+               .field("demo", &self.demo)
+               .finish_non_exhaustive() // Show that some other field(s) exist.
+        }
+    }
+    let demo = DemoStruct { demo: "demo1\ndemo2", hidden: "Whoops" };
+    let mut writer = ErrorTriggerWriter {
+        error_on: "    ",
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "demo1"
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "demo2"
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "..\n"
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
 }

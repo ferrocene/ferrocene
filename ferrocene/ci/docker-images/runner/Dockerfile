@@ -213,6 +213,20 @@ ENV LANG=C.UTF-8
 ENV CC=clang
 ENV CXX=clang++
 
+ENV RUST_CONFIGURE_ARGS="--enable-full-tools \
+      --enable-sanitizers \
+      --enable-profiler \
+      --enable-compiler-docs \
+      --set target.x86_64-unknown-linux-gnu.linker=clang \
+      --set target.x86_64-unknown-linux-gnu.ar=/ferrocene-buildroot/bin/llvm-ar \
+      --set target.x86_64-unknown-linux-gnu.ranlib=/ferrocene-buildroot/bin/llvm-ranlib \
+      --set rust.bootstrap-override-lld=true \
+      --set rust.lto=thin \
+      --set rust.codegen-units=1"
+
+
+ENV LD_PRELOAD=/ferrocene-buildroot/lib64/libstdc++.so.6
+
 ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc

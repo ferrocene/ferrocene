@@ -213,10 +213,12 @@ COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-a
 COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
+ADD ferrocene/ci/mirrors/coreutils-9.11-x86_64-8bb34716.tar.xz /usr/
+
 COPY --from=builder /ferrocene-buildroot /ferrocene-buildroot
 COPY --from=builder /usr/local /usr/local
 
-ENV PATH=/ferrocene-buildroot/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
+ENV PATH=/ferrocene-buildroot/bin/:/usr/local/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 

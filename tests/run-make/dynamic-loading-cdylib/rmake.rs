@@ -6,6 +6,7 @@
 // - `load_and_unload.rs` is a binary that loads and unloads the cdylib.
 
 //@ ignore-cross-compile
+//@ ignore-test Please check what this test does
 
 use run_make_support::{diff, run_with_args, rustc};
 

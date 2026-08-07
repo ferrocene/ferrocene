@@ -22,9 +22,7 @@
 # use the same approach for other dependencies missing in Ubuntu 20.04 unless
 # you know what you're doing.
 
-
-
-FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
+FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS builder
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
@@ -40,91 +38,18 @@ RUN mkdir -p /ferrocene/packages
 RUN yum -y install \
     wget curl \
     zstd xz bzip2 gzip unzip \
-    zlib-devel \
-    glibc-devel glibc-devel.i686 \
-    glibc-static glibc-static.i686 \
     tar \
     make patch \
     file which \
     gawk \
     openssh-clients \
     ca-certificates \
-    libedit-devel \
     sudo \
     binutils \
     procps-ng \
     perl-core \
     shadow-utils
 
-# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
-# are too old to be useful (they don't know about the `z` ISA flag).
-#
-# We get x86_64 Linux binaries from https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux
-#
-# These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
-# image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
-RUN <<-EOF
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        mkdir /opt/riscv-toolchain
-        PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
-        SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
-        curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
-        echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
-        tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
-        rm /tmp/riscv-toolchain.tar.gz
-        /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
-
-        echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-EOF
-ENV PATH "/opt/riscv-toolchain/bin:$PATH"
-
-
-# Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
-# old to run the rustdoc-js test suite. Note that we cannot install the most
-# recent NodeJS LTS release, as it's built with a more recent glibc version
-# than the one shipped with Ubuntu 20.04.
-#
-# If you are reading this comment because you need to upgrade past NodeJS 16,
-# you will unfortunately need to change this to build NodeJS from source.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x64"
-        SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="arm64"
-        SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    mkdir /opt/nodejs
-    PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
-    curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
-    echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
-    tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
-    rm /tmp/nodejs.tar.xz
-    /opt/nodejs/bin/node --version
-
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-EOF
-ENV PATH "/opt/nodejs/bin:$PATH"
-
-# Install AWS CLI from the published binaries, as no source tarball is provided
-# and the version provided by packages is too old and doesn't support
-# `aws ecr get-login-password`.
-# Install AWS CLI from the published binaries, as no source tarball is provided
-COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
-COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
-RUN /tmp/setup-awscli.sh
-
-# Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
 # RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
@@ -171,21 +96,6 @@ RUN <<-EOF
 
 EOF
 
-# ensure that "cc" exists as a symlink
-RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
-
-ENV PATH=/ferrocene-buildroot/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
-
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
-
-# add /usr/local/lib to ld's path
-RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
-RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
-RUN echo '/usr/local/lib/' >> /etc/ld.so.conf.d/usr-local.conf
-RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
-RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
-RUN ldconfig
-
 RUN <<-EOF
     set -eu
 
@@ -200,6 +110,124 @@ RUN <<-EOF
     mv ninja /usr/local/bin
 EOF
 
+# ensure that "cc" exists as a symlink
+RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
+
+FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
+
+# As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+# CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
+RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
+  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
+RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
+
+
+RUN mkdir -p /ferrocene/packages
+RUN yum -y install \
+    wget curl \
+    zstd xz bzip2 gzip unzip \
+    zlib-devel \
+    glibc-devel glibc-devel.i686 \
+    glibc-static glibc-static.i686 \
+    tar \
+    make patch \
+    file which \
+    gawk \
+    openssh-clients \
+    ca-certificates \
+    libedit-devel \
+    sudo \
+    binutils \
+    procps-ng \
+    perl-core \
+    shadow-utils
+
+# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
+# are too old to be useful (they don't know about the `z` ISA flag).
+#
+# We get x86_64 Linux binaries from https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux
+#
+# These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
+# image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
+# RUN <<-EOF
+#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+#         mkdir /opt/riscv-toolchain
+#         PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
+#         SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
+#         curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
+#         echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
+#         tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
+#         rm /tmp/riscv-toolchain.tar.gz
+#         /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+
+#         echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
+#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+#         echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
+#     else
+#         echo "Unsupported platform"
+#         exit 1
+#     fi
+# EOF
+ENV PATH "/opt/riscv-toolchain/ubuntu2004-20240407/bin:$PATH"
+
+
+# Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
+# old to run the rustdoc-js test suite. Note that we cannot install the most
+# recent NodeJS LTS release, as it's built with a more recent glibc version
+# than the one shipped with Ubuntu 20.04.
+#
+# If you are reading this comment because you need to upgrade past NodeJS 16,
+# you will unfortunately need to change this to build NodeJS from source.
+# RUN <<-EOF
+#     set -xe
+#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+#         ARCH="x64"
+#         SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
+#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+#         ARCH="arm64"
+#         SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
+#     else
+#         echo "Unsupported platform"
+#         exit 1
+#     fi
+#     mkdir /opt/nodejs
+#     PACKAGE_URL="https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz"
+#     curl -Lo /tmp/nodejs.tar.xz $PACKAGE_URL
+#     echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
+#     tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
+#     rm /tmp/nodejs.tar.xz
+#     /opt/nodejs/bin/node --version
+
+#     echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
+# EOF
+ENV PATH "/opt/nodejs/16.20.2/bin:$PATH"
+
+# Install AWS CLI from the published binaries, as no source tarball is provided
+# and the version provided by packages is too old and doesn't support
+# `aws ecr get-login-password`.
+# Install AWS CLI from the published binaries, as no source tarball is provided
+COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
+RUN /tmp/setup-awscli.sh
+
+COPY --from=builder /ferrocene-buildroot /ferrocene-buildroot
+COPY --from=builder /usr/local /usr/local
+
+ENV PATH=/ferrocene-buildroot/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
+
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
+
+# add /usr/local/lib to ld's path
+RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
+RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
+RUN echo '/usr/local/lib/' >> /etc/ld.so.conf.d/usr-local.conf
+RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
+RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
+RUN ldconfig
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
@@ -213,17 +241,12 @@ ENV LANG=C.UTF-8
 ENV CC=clang
 ENV CXX=clang++
 
-ENV RUST_CONFIGURE_ARGS="--enable-full-tools \
-      --enable-sanitizers \
-      --enable-profiler \
-      --enable-compiler-docs \
-      --set target.x86_64-unknown-linux-gnu.linker=clang \
+ENV RUST_CONFIGURE_ARGS="--set target.x86_64-unknown-linux-gnu.linker=clang \
       --set target.x86_64-unknown-linux-gnu.ar=/ferrocene-buildroot/bin/llvm-ar \
       --set target.x86_64-unknown-linux-gnu.ranlib=/ferrocene-buildroot/bin/llvm-ranlib \
       --set rust.bootstrap-override-lld=true \
       --set rust.lto=thin \
       --set rust.codegen-units=1"
-
 
 ENV LD_PRELOAD=/ferrocene-buildroot/lib64/libstdc++.so.6
 

@@ -644,3 +644,32 @@ fn test_pad_adapter_fmt_write_str_errors() {
     };
     assert!(write!(writer, "{:#?}", demo).is_err());
 }
+
+
+// Covers `<core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char`
+#[test]
+fn test_pad_adapter_fmt_write_char_errors() {
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    struct DemoStruct(char, char);
+    let demo = DemoStruct('x', 'w');
+    let mut writer = ErrorTriggerWriter {
+        error_on: "    ",
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "x"
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "w"
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "    "
+    };
+    assert!(write!(writer, "{:#?}", demo).is_err());
+}

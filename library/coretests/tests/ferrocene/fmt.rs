@@ -813,3 +813,27 @@ fn test_bignum_fmt_errors() {
     };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
+
+// Cover `core::fmt::Formatter::<'a>::pad`'s errors
+#[test]
+fn test_formatter_pad_errors() {
+    let specimen = "hello";
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: " ",
+        allow_times: 4,
+    };
+    assert!(write!(writer, "{:<10}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "hello",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:>10}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: " ",
+        allow_times: 3,
+    };
+    assert!(write!(writer, "{:>10}", specimen).is_err());
+}

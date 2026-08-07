@@ -779,3 +779,37 @@ fn test_range_fmt_errors() {
     };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
+
+// Covers errors in:
+// * <core::num::imp::bignum::Big32x40 as core::fmt::Debug>::fmt
+// * <core::num::imp::bignum::tests::Big8x3 as core::fmt::Debug>::fmt
+#[test]
+fn test_bignum_fmt_errors() {
+    use core::num::imp::bignum::Big32x40;
+    let specimen = Big32x40::from_u64(0xffffffffffffffff);
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "0x",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "ffffffff",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "_",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "ffffffff",
+        allow_times: 1,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+}

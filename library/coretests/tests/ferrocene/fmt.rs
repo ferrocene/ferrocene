@@ -755,3 +755,27 @@ fn test_bytestr_fmt_errors() {
     };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
+
+// Covers `<core::ops::range::Range<Idx> as core::fmt::Debug>::fmt`'s errors
+#[test]
+fn test_range_fmt_errors() {
+    let specimen = 1..10;
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "1",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "..",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "10",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+}

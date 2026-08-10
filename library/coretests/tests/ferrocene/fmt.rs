@@ -965,3 +965,62 @@ fn test_formatter_pad_formatted_parts_errors() {
     let mut f = fmt::Formatter::new(&mut writer, options);
     assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
 }
+
+// Cover `<core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt`'s errors
+#[test]
+fn test_escape_ascii_fmt_errors() {
+    let specimen = b"0\t\r\nabc'\"\\\x9d";
+    let mut escaped = specimen.escape_ascii();
+    escaped.next();
+    escaped.next();
+    escaped.next_back();
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "t",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\'",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\\"",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "abc",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "x",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "9",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{}", escaped).is_err());
+}

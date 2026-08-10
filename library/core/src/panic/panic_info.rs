@@ -74,7 +74,8 @@ impl<'a> PanicInfo<'a> {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::panic;
     ///
     /// panic::set_hook(Box::new(|panic_info| {

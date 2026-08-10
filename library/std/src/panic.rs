@@ -26,7 +26,8 @@ pub type PanicInfo<'a> = PanicHookInfo<'a>;
 ///
 /// # Examples
 ///
-/// ```should_panic,ignore-ferrocene.facade
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// use std::panic;
 ///
 /// panic::set_hook(Box::new(|panic_info| {
@@ -74,7 +75,8 @@ impl<'a> PanicHookInfo<'a> {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::panic;
     ///
     /// panic::set_hook(Box::new(|panic_info| {
@@ -109,7 +111,8 @@ impl<'a> PanicHookInfo<'a> {
     ///
     /// # Example
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// std::panic::set_hook(Box::new(|panic_info| {
     ///     if let Some(s) = panic_info.payload_as_str() {
     ///         println!("panic occurred: {s:?}");
@@ -141,7 +144,8 @@ impl<'a> PanicHookInfo<'a> {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::panic;
     ///
     /// panic::set_hook(Box::new(|panic_info| {
@@ -373,7 +377,8 @@ pub fn catch_unwind<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Result<R> {
 ///
 /// # Examples
 ///
-/// ```should_panic,ignore-ferrocene.facade
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// use std::panic;
 ///
 /// let result = panic::catch_unwind(|| {

@@ -250,7 +250,8 @@ mod spec_extend;
 /// However be careful: if you try to access an index which isn't in the `Vec`,
 /// your software will panic! You cannot do this:
 ///
-/// ```should_panic,ignore-ferrocene.facade
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// let v = vec![0, 2, 4, 6];
 /// println!("{}", v[6]); // it will panic!
 /// ```

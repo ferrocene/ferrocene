@@ -1067,7 +1067,8 @@ impl Duration {
     /// assert_ne!(years, years.mul_f64(1.0));
     /// ```
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// # use std::time::Duration;
     /// // In the extreme, rounding can even overflow `Duration`, which panics.
     /// let _ = Duration::from_secs(u64::MAX).mul_f64(1.0);
@@ -1148,7 +1149,8 @@ impl Duration {
     /// assert_ne!(years, years.div_f64(1.0));
     /// ```
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// # use std::time::Duration;
     /// // In the extreme, rounding can even overflow `Duration`, which panics.
     /// let _ = Duration::from_secs(u64::MAX).div_f64(1.0);

@@ -1676,7 +1676,8 @@ pub const trait Iterator {
     /// Panics if `N` is zero. This check will most probably get changed to a
     /// compile time error before this method gets stabilized.
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// #![feature(iter_map_windows)]
     ///
     /// let iter = std::iter::repeat(0).map_windows(|&[]| ());

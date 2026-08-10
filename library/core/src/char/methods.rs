@@ -284,7 +284,8 @@ impl char {
     ///
     /// Passing a large radix, causing a panic:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// // this panics
     /// let _c = char::from_digit(1, 37);
     /// ```
@@ -332,14 +333,16 @@ impl char {
     ///
     /// Passing a large radix, causing a panic:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// // this panics
     /// '1'.is_digit(37);
     /// ```
     ///
     /// Passing a small radix, causing a panic:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// // this panics
     /// '1'.is_digit(1);
     /// ```
@@ -389,13 +392,15 @@ impl char {
     ///
     /// Passing a large radix, causing a panic:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// // this panics
     /// let _ = '1'.to_digit(37);
     /// ```
     /// Passing a small radix, causing a panic:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// // this panics
     /// let _ = '1'.to_digit(1);
     /// ```
@@ -726,7 +731,8 @@ impl char {
     ///
     /// A buffer that's too small:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// let mut b = [0; 1];
     ///
     /// // this panics
@@ -763,7 +769,8 @@ impl char {
     ///
     /// A buffer that's too small:
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// let mut b = [0; 1];
     ///
     /// // this panics

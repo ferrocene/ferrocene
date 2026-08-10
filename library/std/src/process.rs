@@ -200,7 +200,8 @@ use crate::{fmt, format_args_nl, fs, str};
 ///
 /// # Examples
 ///
-/// ```should_panic,ignore-ferrocene.facade
+#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
 /// use std::process::Command;
 ///
 /// let mut child = Command::new("/bin/cat")
@@ -1120,7 +1121,8 @@ impl Command {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::process::Command;
     /// use std::io::{self, Write};
     /// let output = Command::new("/bin/cat")
@@ -1160,7 +1162,8 @@ impl Command {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::process::Command;
     ///
     /// let status = Command::new("/bin/cat")
@@ -2457,7 +2460,8 @@ impl Child {
     ///
     /// # Examples
     ///
-    /// ```should_panic,ignore-ferrocene.facade
+    #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
+    #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
     /// use std::process::{Command, Stdio};
     ///
     /// let child = Command::new("/bin/cat")

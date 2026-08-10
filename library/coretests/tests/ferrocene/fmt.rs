@@ -1074,3 +1074,20 @@ fn test_duration_fmt_errors() {
     };
     assert!(write!(writer, "{:.1?}", max_round_up_specimen).is_err());
 }
+
+// Cover `<str as core::fmt::Debug>::fmt`'s errors
+#[test]
+fn test_str_fmt_errors() {
+    let specimen = "hello\t";
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\"",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\t",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+}

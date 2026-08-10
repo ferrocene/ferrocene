@@ -1,2 +1,2 @@
-error: Unrecognized option: 'j'
+error: the `-Z unstable-options` flag must also be passed to enable the flag `jobs`
 

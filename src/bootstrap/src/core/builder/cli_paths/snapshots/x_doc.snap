@@ -10,21 +10,7 @@ expression: doc
     - Set({src/tools/unstable-book-gen})
 [Doc] doc::TheBook
     targets: [aarch64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({doc::src/doc/book})
-||||||| 09ee43b2d60
-    - Set({doc::src/doc/book})
-[Doc] doc::Standalone
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc})
-    - Set({doc::standalone})
-=======
     - Set({src/doc/book})
-[Doc] doc::Standalone
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({src/doc})
-    - Set({standalone})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [Doc] doc::Std
     targets: [aarch64-unknown-linux-gnu]
     - Set({library})
@@ -72,71 +58,55 @@ expression: doc
     - Set({src/doc/edition-guide})
 [Doc] doc::StyleGuide
     targets: [aarch64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({doc::src/doc/style-guide})
-[Doc] bootstrap::ferrocene::doc::CopyrightFiles
-||||||| 09ee43b2d60
-    - Set({doc::src/doc/style-guide})
-[Doc] doc::Releases
-=======
     - Set({src/doc/style-guide})
-[Doc] doc::Releases
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+[Doc] bootstrap::ferrocene::doc::CopyrightFiles
     targets: [aarch64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({doc::copyright-files})
+    - Set({copyright-files})
 [Doc] bootstrap::ferrocene::doc::Index
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/index})
+    - Set({ferrocene/doc/index})
 [Doc] bootstrap::ferrocene::doc::Specification
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/specification})
+    - Set({ferrocene/doc/specification})
 [Doc] bootstrap::ferrocene::doc::UserManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/user-manual})
+    - Set({ferrocene/doc/user-manual})
 [Doc] bootstrap::ferrocene::doc::ReleaseNotes
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/release-notes})
+    - Set({ferrocene/doc/release-notes})
 [Doc] bootstrap::ferrocene::doc::QNX7Manual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qnx7-manual})
+    - Set({ferrocene/doc/qnx7-manual})
 [Doc] bootstrap::ferrocene::doc::QNX8Manual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qnx8-manual})
+    - Set({ferrocene/doc/qnx8-manual})
 [Doc] bootstrap::ferrocene::doc::RHIVOSManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/rhivos-manual})
+    - Set({ferrocene/doc/rhivos-manual})
 [Doc] bootstrap::ferrocene::doc::DocumentList
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/document-list})
+    - Set({ferrocene/doc/document-list})
 [Doc] bootstrap::ferrocene::doc::EvaluationPlan
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/evaluation-plan})
+    - Set({ferrocene/doc/evaluation-plan})
 [Doc] bootstrap::ferrocene::doc::EvaluationReport
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/evaluation-report})
+    - Set({ferrocene/doc/evaluation-report})
 [Doc] bootstrap::ferrocene::doc::CoreCertification
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/core-certification})
+    - Set({ferrocene/doc/core-certification})
 [Doc] bootstrap::ferrocene::doc::QualificationPlan
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qualification-plan})
+    - Set({ferrocene/doc/qualification-plan})
 [Doc] bootstrap::ferrocene::doc::QualificationReport
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qualification-report})
+    - Set({ferrocene/doc/qualification-report})
 [Doc] bootstrap::ferrocene::doc::SafetyManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/safety-manual})
+    - Set({ferrocene/doc/safety-manual})
 [Doc] bootstrap::ferrocene::doc::TraceabilityMatrix
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/tools/traceability-matrix})
+    - Set({ferrocene/tools/traceability-matrix})
 [Doc] bootstrap::ferrocene::doc::InternalProcedures
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/internal-procedures})
-||||||| 09ee43b2d60
-    - Set({doc::RELEASES.md})
-    - Set({doc::releases})
-=======
-    - Set({RELEASES.md})
-    - Set({releases})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    - Set({ferrocene/doc/internal-procedures})

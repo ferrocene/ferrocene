@@ -2,16 +2,6 @@
 source: src/bootstrap/src/core/builder/cli_paths/tests.rs
 expression: dist
 ---
-<<<<<<< ferrocene/main
-||||||| 09ee43b2d60
-[Dist] dist::Docs
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::rust-docs})
-=======
-[Dist] dist::Docs
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({rust-docs})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [Dist] dist::JsonDocs
     targets: [aarch64-unknown-linux-gnu]
     - Set({rust-docs-json})
@@ -32,46 +22,22 @@ expression: dist
     - Set({rust-src})
 [Dist] dist::RustDev
     targets: [x86_64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({dist::rust-dev})
-||||||| 09ee43b2d60
-    - Set({dist::rust-dev})
-[Dist] dist::PlainSourceTarball
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rustc-src})
-[Dist] dist::PlainSourceTarballGpl
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rustc-src-gpl})
-=======
     - Set({rust-dev})
-[Dist] dist::PlainSourceTarball
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({rustc-src})
-[Dist] dist::PlainSourceTarballGpl
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({rustc-src-gpl})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [Dist] dist::ReproducibleArtifacts
     targets: [x86_64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({dist::reproducible-artifacts})
+    - Set({reproducible-artifacts})
 [Dist] bootstrap::ferrocene::dist::Docs
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-docs})
+    - Set({ferrocene-docs})
 [Dist] bootstrap::ferrocene::dist::DocsDoctrees
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-docs-doctrees})
+    - Set({ferrocene-docs-doctrees})
 [Dist] bootstrap::ferrocene::dist::flip_link::FlipLink
     targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::flip-link})
+    - Set({flip-link})
 [Dist] bootstrap::ferrocene::dist::SourceTarball
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-src})
+    - Set({ferrocene-src})
 [Dist] bootstrap::ferrocene::dist::SelfTest
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-self-test})
-||||||| 09ee43b2d60
-    - Set({dist::reproducible-artifacts})
-=======
-    - Set({reproducible-artifacts})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    - Set({ferrocene-self-test})

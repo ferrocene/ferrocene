@@ -83,24 +83,8 @@ expression: check compiletest --include-default-paths
     - Set({src/librustdoc, src/tools/rustdoc})
 [Check] check::CraneliftCodegenBackend
     targets: [x86_64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Set({check::cg_clif})
-    - Set({check::rustc_codegen_cranelift})
-||||||| 09ee43b2d60
-    - Set({check::cg_clif})
-    - Set({check::rustc_codegen_cranelift})
-[Check] check::GccCodegenBackend
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({check::cg_gcc})
-    - Set({check::rustc_codegen_gcc})
-=======
     - Set({cg_clif})
     - Set({rustc_codegen_cranelift})
-[Check] check::GccCodegenBackend
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({cg_gcc})
-    - Set({rustc_codegen_gcc})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 [Check] check::Clippy
     targets: [x86_64-unknown-linux-gnu]
     - Set({src/tools/clippy})

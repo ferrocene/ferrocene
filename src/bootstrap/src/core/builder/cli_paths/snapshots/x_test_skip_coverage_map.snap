@@ -4,16 +4,16 @@ expression: test --skip=coverage-map
 ---
 [Test] bootstrap::ferrocene::test::TraceabilityMatrixTool
     targets: [x86_64-unknown-linux-gnu]
-    - Set({test::ferrocene/tools/traceability-matrix})
+    - Set({ferrocene/tools/traceability-matrix})
 [Test] bootstrap::ferrocene::test::SelfTest
     targets: [x86_64-unknown-linux-gnu]
-    - Set({test::ferrocene/tools/self-test})
+    - Set({ferrocene/tools/self-test})
 [Test] bootstrap::ferrocene::test::GenerateTarball
     targets: [x86_64-unknown-linux-gnu]
-    - Set({test::ferrocene/tools/generate-tarball})
+    - Set({ferrocene/tools/generate-tarball})
 [Test] bootstrap::ferrocene::test::DiffUpstream
     targets: [x86_64-unknown-linux-gnu]
-    - Set({test::ferrocene/tools/diff-upstream})
+    - Set({ferrocene/tools/diff-upstream})
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({src/tools/tidy})
@@ -223,19 +223,7 @@ expression: test --skip=coverage-map
     - Suite(tests/run-make)
 [Test] test::RunMakeCargo
     targets: [aarch64-unknown-linux-gnu]
-<<<<<<< ferrocene/main
-    - Suite(test::tests/run-make-cargo)
+    - Suite(tests/run-make-cargo)
 [Test] test::FerroceneCrateLibc
     targets: [aarch64-unknown-linux-gnu]
-    - Set({test::ferrocene/library/libc})
-||||||| 09ee43b2d60
-    - Suite(test::tests/run-make-cargo)
-[Test] test::IntrinsicTest
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({test::library/stdarch/crates/intrinsic-test})
-=======
-    - Suite(tests/run-make-cargo)
-[Test] test::IntrinsicTest
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({intrinsic-test})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    - Set({ferrocene/library/libc})

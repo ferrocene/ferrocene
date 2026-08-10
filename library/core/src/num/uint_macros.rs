@@ -1333,8 +1333,7 @@ macro_rules! uint_impl {
         ///
         /// The following panics because of overflow:
         ///
-        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+        /// ``` should_panic
         #[doc = concat!("let _ = ", stringify!($SelfT), "::MAX.strict_mul(2);")]
         /// ```
         #[stable(feature = "strict_overflow_ops", since = "1.91.0")]

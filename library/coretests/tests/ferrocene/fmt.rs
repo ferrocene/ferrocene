@@ -1024,3 +1024,53 @@ fn test_escape_ascii_fmt_errors() {
     };
     assert!(write!(writer, "{}", escaped).is_err());
 }
+
+// Cover `<core::time::Duration as core::fmt::Debug>::fmt`'s errors
+#[test]
+fn test_duration_fmt_errors() {
+    use std::time::Duration;
+    let specimen = Duration::new(5, 0);
+    let mut writer = ErrorTriggerWriter {
+        error_on: "0",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0<50?}", specimen).is_err()); // L1542
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "+",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:+?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: " ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:^15?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "5",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0<50?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "s",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0<50?}", specimen).is_err());
+
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ".",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:.20?}", specimen).is_err());
+
+    let max_round_up_specimen = Duration::new(u64::MAX, 999_999_999);
+    let mut writer = ErrorTriggerWriter {
+        error_on: "18446744073709551616",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:.1?}", max_round_up_specimen).is_err());
+}

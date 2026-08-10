@@ -189,6 +189,7 @@ impl Config {
 
         let version = self.artifact_version_part(commit);
         download_component(
+            Some(self),
             DownloadContext::from(self),
             &self.out,
             DownloadSource::CI,

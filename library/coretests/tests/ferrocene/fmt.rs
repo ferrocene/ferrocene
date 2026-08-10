@@ -1091,3 +1091,27 @@ fn test_str_fmt_errors() {
     };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
+
+// Cover `<core::str::iter::Chars<'_> as core::fmt::Debug>::fmt`'s errors
+#[test]
+fn test_chars_fmt_errors() {
+    let specimen = "hello".chars();
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "Chars(",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "h",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ")",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+}

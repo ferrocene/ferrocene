@@ -88,11 +88,10 @@ RUN <<-EOF
 
     # TESTING CHANGE: Our configuration expects the compiler to be named
     # aarch64-linux-gnu-gcc
-    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        cd /usr/local/bin
-        ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
-        ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
-    fi
+    cd /usr/local/bin
+    ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
+    ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
+
 
 EOF
 

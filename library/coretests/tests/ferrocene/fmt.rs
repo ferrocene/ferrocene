@@ -849,6 +849,25 @@ fn test_range_to_inclusive_fmt_errors() {
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
+// Covers `<core::ops::range::RangeFrom<Idx> as core::fmt::Debug>::fmt`'s errors
+#[test]
+fn test_range_from_fmt_errors() {
+    let specimen = 10..;
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "10",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "..",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+}
+
 // Covers errors in:
 // * <core::num::imp::bignum::Big32x40 as core::fmt::Debug>::fmt
 // * <core::num::imp::bignum::tests::Big8x3 as core::fmt::Debug>::fmt

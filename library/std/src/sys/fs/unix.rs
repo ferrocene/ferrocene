@@ -2055,10 +2055,35 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
         }
         all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
-            cvt_r(|| unsafe {
-                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
-            })
-            .map(|_| ())
+            // Ferrocene addition: `fchmod` with `flags=AT_SYMLINK_NOFOLLOW` does not work on Ubuntu
+            // 20.04; support was added somewhere between this and 24.04
+            // Fall back to open + fchmod to support older distros.
+            use crate::fs::OpenOptions;
+            use crate::fs::Permissions;
+            use crate::os::unix::ffi::OsStrExt;
+            use crate::os::unix::fs::OpenOptionsExt;
+
+            let mut options = OpenOptions::new();
+            options.read(true).custom_flags(libc::O_NOFOLLOW);
+
+            let bytes = p.to_bytes();
+            let os_str = OsStr::from_bytes(bytes);
+
+            match options.open(Path::new(os_str)) {
+                Ok(file) => {
+                    file.set_permissions(Permissions::from_inner(perm))
+                },
+                Err(e) => {
+                    if e.kind() == crate::io::ErrorKind::FilesystemLoop {
+                        // This means the requested file was a symlink
+                        // Remap to Unsupported to match expected behaviour on other platforms
+                        Err(io::Error::from_raw_os_error(libc::ENOTSUP))
+                    } else {
+                        // Return other errors as-is
+                        Err(e)
+                    }
+                }
+            }
         },
         _ => {
             cvt_r(|| unsafe {

@@ -368,7 +368,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
@@ -399,7 +399,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
@@ -947,6 +947,14 @@ workflows:
           name: build-docker--runner--x86_64
           image: runner
           tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
+          name: build-docker--qnx-runner--x86_64
+          image: runner
+          tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>

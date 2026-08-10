@@ -93,7 +93,7 @@ parameters:
 
 orbs:
   win: circleci/windows@5.0
-  ferrocene: ferrocene/ferrocene-common@26080.3.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.3.0#orb-source
+  ferrocene: ferrocene/ferrocene-common@26080.4.0 # https://circleci.com/developer/orbs/orb/ferrocene/ferrocene-common?version=26080.4.0#orb-source
 
 jobs:
   # Container dedicated to running ad-hoc tests that don't depend on an

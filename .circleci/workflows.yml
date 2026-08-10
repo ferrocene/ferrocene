@@ -201,7 +201,10 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
-    executor: *executor-x86_64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -327,7 +330,10 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-linux-self-test-qnx8:
-    executor: *executor-x86_64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu

@@ -661,14 +661,6 @@ pub const CONFIG_CHANGE_HISTORY: &[ChangeInfo] = &[
         severity: ChangeSeverity::Warning,
         summary: "Obsolete option `build.compiletest-use-stage0-libtest` has no effect and has been removed.",
     },
-<<<<<<< ferrocene/main
-    ChangeInfo {
-        change_id: 160100,
-        severity: ChangeSeverity::Warning,
-        summary: "The `override-allocator` option has been renamed: The global setting is now `build.allocator` and the per-target setting is `target.<target>.allocator`. It can now be set to 'system' to explicitly request the system allocator.",
-    },
-||||||| 09ee43b2d60
-=======
     ChangeInfo {
         change_id: 160142,
         severity: ChangeSeverity::Warning,
@@ -679,5 +671,4 @@ pub const CONFIG_CHANGE_HISTORY: &[ChangeInfo] = &[
         severity: ChangeSeverity::Warning,
         summary: "The `override-allocator` option has been renamed: The global setting is now `build.allocator` and the per-target setting is `target.<target>.allocator`. It can now be set to 'system' to explicitly request the system allocator.",
     },
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 ];

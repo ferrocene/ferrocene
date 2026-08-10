@@ -123,7 +123,15 @@ fn fast_print_path(path: &ast::Path) -> Symbol {
 }
 
 const PREDEFINED_TOOLS: &[Symbol] =
-    &[sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer];
+    // Ferrocene addition: Added sym::ferrocene
+    &[
+        sym::clippy,
+        sym::rustfmt,
+        sym::diagnostic,
+        sym::miri,
+        sym::rust_analyzer,
+        sym::ferrocene,
+    ];
 
 pub(crate) fn registered_attr_tools(tcx: TyCtxt<'_>, (): ()) -> RegisteredTools {
     let (_, pre_configured_attrs) = &*tcx.crate_for_resolver(()).borrow();
@@ -166,51 +174,8 @@ pub fn registered_lint_tools_ast(
             Default::default()
         };
 
-<<<<<<< ferrocene/main
-    if let Some(Attribute::Parsed(AttributeKind::RegisterTool(tools))) =
-        AttributeParser::parse_limited(sess, pre_configured_attrs, &[sym::register_tool])
-    {
-        for tool in tools {
-            if let Some(old_tool) = registered_tools.replace(tool) {
-                dcx.emit_err(diagnostics::ToolWasAlreadyRegistered {
-                    span: tool.span,
-                    tool,
-                    old_ident_span: old_tool.span,
-                });
-            }
-        }
-    }
-
-    // We implicitly add `rustfmt`, `clippy`, `diagnostic`, `miri` and `rust_analyzer` to known
-    // tools, but it's not an error to register them explicitly.
-    let predefined_tools =
-        // Ferrocene addition
-        [sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer, sym::ferrocene];
-    registered_tools.extend(predefined_tools.iter().cloned().map(Ident::with_dummy_span));
-||||||| 09ee43b2d60
-    if let Some(Attribute::Parsed(AttributeKind::RegisterTool(tools))) =
-        AttributeParser::parse_limited(sess, pre_configured_attrs, &[sym::register_tool])
-    {
-        for tool in tools {
-            if let Some(old_tool) = registered_tools.replace(tool) {
-                dcx.emit_err(diagnostics::ToolWasAlreadyRegistered {
-                    span: tool.span,
-                    tool,
-                    old_ident_span: old_tool.span,
-                });
-            }
-        }
-    }
-
-    // We implicitly add `rustfmt`, `clippy`, `diagnostic`, `miri` and `rust_analyzer` to known
-    // tools, but it's not an error to register them explicitly.
-    let predefined_tools =
-        [sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer];
-    registered_tools.extend(predefined_tools.iter().cloned().map(Ident::with_dummy_span));
-=======
     // We implicitly add predefined tools, but it's not an error to register them explicitly.
     registered_tools.extend(PREDEFINED_TOOLS.iter().cloned().map(Ident::with_dummy_span));
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     registered_tools
 }
 

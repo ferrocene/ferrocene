@@ -605,13 +605,8 @@ impl Config {
             exclude: build_exclude,
             compiletest_allow_stage0: build_compiletest_allow_stage0,
             sde: build_sde,
-<<<<<<< ferrocene/main
             allocator: build_allocator,
             uv,
-||||||| 09ee43b2d60
-=======
-            allocator: build_allocator,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         } = toml_build.unwrap_or_default();
 
         let Install {

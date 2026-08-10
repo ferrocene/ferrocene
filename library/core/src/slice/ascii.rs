@@ -119,17 +119,11 @@ impl [u8] {
     ///
     /// The caller must guarantee that the slices are equal in length, and the
     /// slice lengths are greater than or equal to `N` bytes.
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-||||||| 09ee43b2d60
-    #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-=======
     #[cfg(any(
         all(target_arch = "x86_64", target_feature = "sse2"),
         all(target_arch = "aarch64", target_feature = "neon")
     ))]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     #[inline]
     const fn eq_ignore_ascii_case_chunks<const N: usize>(&self, other: &[u8]) -> bool {
         // FIXME(const-hack): The while-loops that follow should be replaced by
@@ -616,20 +610,6 @@ fn is_ascii_sse2(bytes: &[u8]) -> bool {
     rest.iter().all(|b| b.is_ascii())
 }
 
-<<<<<<< ferrocene/main
-/// ASCII test optimized to use the `pmovmskb` instruction on `x86-64`.
-///
-/// Uses explicit SSE2 intrinsics to prevent LLVM from auto-vectorizing with
-/// broken AVX-512 code that extracts mask bits one-by-one.
-#[ferrocene::prevalidated]
-#[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-||||||| 09ee43b2d60
-/// ASCII test optimized to use the `pmovmskb` instruction on `x86-64`.
-///
-/// Uses explicit SSE2 intrinsics to prevent LLVM from auto-vectorizing with
-/// broken AVX-512 code that extracts mask bits one-by-one.
-#[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-=======
 /// Chunk size for NEON vectorized ASCII checking (4x 16-byte loads).
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 const NEON_CHUNK_SIZE: usize = 64;
@@ -687,9 +667,9 @@ fn is_ascii_neon(bytes: &[u8]) -> bool {
     all(target_arch = "x86_64", target_feature = "sse2"),
     all(target_arch = "aarch64", target_feature = "neon")
 ))]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[inline]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
+#[ferrocene::prevalidated]
 const fn is_ascii(bytes: &[u8]) -> bool {
     const USIZE_SIZE: usize = size_of::<usize>();
     const NONASCII_MASK: usize = usize::MAX / 255 * 0x80;
@@ -717,18 +697,14 @@ const fn is_ascii(bytes: &[u8]) -> bool {
                 return remainder.iter().all(|b| b.is_ascii());
             }
 
-<<<<<<< ferrocene/main
-            // Bug in the lint: is_ascii isn't validated, only the expansion of `is_ascii::runtime`
-            #[allow(ferrocene::unvalidated)]
-            is_ascii_sse2(bytes)
-||||||| 09ee43b2d60
-            is_ascii_sse2(bytes)
-=======
             #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
-            { is_ascii_sse2(bytes) }
+            {
+                // Bug in the lint: is_ascii isn't validated, only the expansion of `is_ascii::runtime`
+                #[allow(ferrocene::unvalidated)]
+                is_ascii_sse2(bytes)
+            }
             #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
             { is_ascii_neon(bytes) }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
     )
 }

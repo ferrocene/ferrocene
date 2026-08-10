@@ -764,14 +764,8 @@ impl AtomicBool {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn load(&self, order: Ordering) -> bool {
-||||||| 09ee43b2d60
-    pub fn load(&self, order: Ordering) -> bool {
-=======
     pub const fn load(&self, order: Ordering) -> bool {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // SAFETY: any data races are prevented by atomic intrinsics and the raw
         // pointer passed in is valid because we got it from a reference.
         unsafe { atomic_load(self.v.get().cast::<u8>(), order) != 0 }
@@ -801,14 +795,8 @@ impl AtomicBool {
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn store(&self, val: bool, order: Ordering) {
-||||||| 09ee43b2d60
-    pub fn store(&self, val: bool, order: Ordering) {
-=======
     pub const fn store(&self, val: bool, order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // SAFETY: any data races are prevented by atomic intrinsics and the raw
         // pointer passed in is valid because we got it from a reference.
         unsafe {
@@ -842,14 +830,8 @@ impl AtomicBool {
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn swap(&self, val: bool, order: Ordering) -> bool {
-||||||| 09ee43b2d60
-    pub fn swap(&self, val: bool, order: Ordering) -> bool {
-=======
     pub const fn swap(&self, val: bool, order: Ordering) -> bool {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         if EMULATE_ATOMIC_BOOL {
             #[ferrocene::annotation(
                 "Cannot be covered as this code does not run in any of the platforms for which we track coverage"
@@ -984,14 +966,8 @@ impl AtomicBool {
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn compare_exchange(
-||||||| 09ee43b2d60
-    pub fn compare_exchange(
-=======
     pub const fn compare_exchange(
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         &self,
         current: bool,
         new: bool,
@@ -1163,14 +1139,8 @@ impl AtomicBool {
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn fetch_and(&self, val: bool, order: Ordering) -> bool {
-||||||| 09ee43b2d60
-    pub fn fetch_and(&self, val: bool, order: Ordering) -> bool {
-=======
     pub const fn fetch_and(&self, val: bool, order: Ordering) -> bool {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_and(self.v.get().cast::<u8>(), val as u8, order) != 0 }
     }
@@ -1268,14 +1238,8 @@ impl AtomicBool {
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub fn fetch_or(&self, val: bool, order: Ordering) -> bool {
-||||||| 09ee43b2d60
-    pub fn fetch_or(&self, val: bool, order: Ordering) -> bool {
-=======
     pub const fn fetch_or(&self, val: bool, order: Ordering) -> bool {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_or(self.v.get().cast::<u8>(), val as u8, order) != 0 }
     }
@@ -2809,15 +2773,9 @@ macro_rules! atomic_int {
             /// ```
             #[inline]
             #[$stable_access]
-<<<<<<< ferrocene/main
-            #[ferrocene::prevalidated]
-            pub fn get_mut(&mut self) -> &mut $int_type {
-||||||| 09ee43b2d60
-            pub fn get_mut(&mut self) -> &mut $int_type {
-=======
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+            #[ferrocene::prevalidated]
             pub const fn get_mut(&mut self) -> &mut $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY:
                 // `Atomic<T>` is essentially a transparent wrapper around `T`.
                 unsafe { &mut *self.as_ptr() }
@@ -2985,14 +2943,8 @@ macro_rules! atomic_int {
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn load(&self, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn load(&self, order: Ordering) -> $int_type {
-=======
             pub const fn load(&self, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_load(self.as_ptr(), order) }
             }
@@ -3022,14 +2974,8 @@ macro_rules! atomic_int {
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn store(&self, val: $int_type, order: Ordering) {
-||||||| 09ee43b2d60
-            pub fn store(&self, val: $int_type, order: Ordering) {
-=======
             pub const fn store(&self, val: $int_type, order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_store(self.as_ptr(), val, order); }
             }
@@ -3060,14 +3006,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn swap(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn swap(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn swap(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_swap(self.as_ptr(), val, order) }
             }
@@ -3134,14 +3074,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn compare_and_swap(&self,
-||||||| 09ee43b2d60
-            pub fn compare_and_swap(&self,
-=======
             pub const fn compare_and_swap(&self,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                                     current: $int_type,
                                     new: $int_type,
                                     order: Ordering) -> $int_type {
@@ -3212,14 +3146,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn compare_exchange(&self,
-||||||| 09ee43b2d60
-            pub fn compare_exchange(&self,
-=======
             pub const fn compare_exchange(&self,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                                     current: $int_type,
                                     new: $int_type,
                                     success: Ordering,
@@ -3285,14 +3213,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn compare_exchange_weak(&self,
-||||||| 09ee43b2d60
-            pub fn compare_exchange_weak(&self,
-=======
             pub const fn compare_exchange_weak(&self,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                                          current: $int_type,
                                          new: $int_type,
                                          success: Ordering,
@@ -3331,14 +3253,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_add(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_add(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_add(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_add(self.as_ptr(), val, order) }
             }
@@ -3371,14 +3287,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_sub(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_sub(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_sub(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_sub(self.as_ptr(), val, order) }
             }
@@ -3414,14 +3324,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_and(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_and(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_and(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_and(self.as_ptr(), val, order) }
             }
@@ -3457,14 +3361,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_nand(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_nand(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_nand(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_nand(self.as_ptr(), val, order) }
             }
@@ -3500,14 +3398,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_or(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_or(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_or(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_or(self.as_ptr(), val, order) }
             }
@@ -3543,14 +3435,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_xor(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_xor(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_xor(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_xor(self.as_ptr(), val, order) }
             }
@@ -3757,14 +3643,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_max(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_max(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_max(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { $max_fn(self.as_ptr(), val, order) }
             }
@@ -3814,14 +3694,8 @@ macro_rules! atomic_int {
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             #[rustc_should_not_be_called_on_const_items]
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            pub fn fetch_min(&self, val: $int_type, order: Ordering) -> $int_type {
-||||||| 09ee43b2d60
-            pub fn fetch_min(&self, val: $int_type, order: Ordering) -> $int_type {
-=======
             pub const fn fetch_min(&self, val: $int_type, order: Ordering) -> $int_type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { $min_fn(self.as_ptr(), val, order) }
             }
@@ -4134,14 +4008,8 @@ atomic_int_ptr_sized! {
 
 #[inline]
 #[cfg(target_has_atomic)]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-fn strongest_failure_ordering(order: Ordering) -> Ordering {
-||||||| 09ee43b2d60
-fn strongest_failure_ordering(order: Ordering) -> Ordering {
-=======
 const fn strongest_failure_ordering(order: Ordering) -> Ordering {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     match order {
         Release => Relaxed,
         Relaxed => Relaxed,
@@ -4153,15 +4021,9 @@ const fn strongest_failure_ordering(order: Ordering) -> Ordering {
 
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
-||||||| 09ee43b2d60
-unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_store`.
     unsafe {
         match order {
@@ -4176,15 +4038,9 @@ const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
 
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_load`.
     unsafe {
         match order {
@@ -4200,15 +4056,9 @@ const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_swap`.
     unsafe {
         match order {
@@ -4225,15 +4075,9 @@ const unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T 
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_add<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_add<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_add<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_add`.
     unsafe {
         match order {
@@ -4250,15 +4094,9 @@ const unsafe fn atomic_add<T: Copy, U: Copy>(dst: *mut T, val: U, order: Orderin
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_sub<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_sub<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_sub<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_sub`.
     unsafe {
         match order {
@@ -4277,15 +4115,9 @@ const unsafe fn atomic_sub<T: Copy, U: Copy>(dst: *mut T, val: U, order: Orderin
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[doc(hidden)]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-pub unsafe fn atomic_compare_exchange<T: Copy>(
-||||||| 09ee43b2d60
-pub unsafe fn atomic_compare_exchange<T: Copy>(
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 pub const unsafe fn atomic_compare_exchange<T: Copy>(
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     dst: *mut T,
     old: T,
     new: T,
@@ -4350,15 +4182,9 @@ pub const unsafe fn atomic_compare_exchange<T: Copy>(
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_compare_exchange_weak<T: Copy>(
-||||||| 09ee43b2d60
-unsafe fn atomic_compare_exchange_weak<T: Copy>(
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_compare_exchange_weak<T: Copy>(
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     dst: *mut T,
     old: T,
     new: T,
@@ -4423,15 +4249,9 @@ const unsafe fn atomic_compare_exchange_weak<T: Copy>(
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_and<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_and<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_and<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_and`
     unsafe {
         match order {
@@ -4447,15 +4267,9 @@ const unsafe fn atomic_and<T: Copy, U: Copy>(dst: *mut T, val: U, order: Orderin
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_nand<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_nand<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_nand<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_nand`
     unsafe {
         match order {
@@ -4471,15 +4285,9 @@ const unsafe fn atomic_nand<T: Copy, U: Copy>(dst: *mut T, val: U, order: Orderi
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_or<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_or<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_or<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_or`
     unsafe {
         match order {
@@ -4495,15 +4303,9 @@ const unsafe fn atomic_or<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_xor<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_xor<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_xor<T: Copy, U: Copy>(dst: *mut T, val: U, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_xor`
     unsafe {
         match order {
@@ -4520,15 +4322,9 @@ const unsafe fn atomic_xor<T: Copy, U: Copy>(dst: *mut T, val: U, order: Orderin
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_max`
     unsafe {
         match order {
@@ -4545,15 +4341,9 @@ const unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_min`
     unsafe {
         match order {
@@ -4570,15 +4360,9 @@ const unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_umax`
     unsafe {
         match order {
@@ -4595,15 +4379,9 @@ const unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T 
 #[inline]
 #[cfg(target_has_atomic)]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-||||||| 09ee43b2d60
-unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
-=======
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+#[ferrocene::prevalidated]
 const unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_umin`
     unsafe {
         match order {
@@ -4774,14 +4552,8 @@ const unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T 
 #[rustc_diagnostic_item = "fence"]
 #[doc(alias = "atomic_thread_fence")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-pub fn fence(order: Ordering) {
-||||||| 09ee43b2d60
-pub fn fence(order: Ordering) {
-=======
 pub const fn fence(order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: using an atomic fence is safe.
     unsafe {
         match order {
@@ -4866,14 +4638,8 @@ pub const fn fence(order: Ordering) {
 #[rustc_diagnostic_item = "compiler_fence"]
 #[doc(alias = "atomic_signal_fence")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-pub fn compiler_fence(order: Ordering) {
-||||||| 09ee43b2d60
-pub fn compiler_fence(order: Ordering) {
-=======
 pub const fn compiler_fence(order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: using an atomic fence is safe.
     unsafe {
         match order {

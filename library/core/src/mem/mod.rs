@@ -464,15 +464,9 @@ pub const fn size_of_val<T: ?Sized>(val: &T) -> usize {
 /// ```
 #[inline]
 #[must_use]
-<<<<<<< ferrocene/main
-#[unstable(feature = "layout_for_ptr", issue = "69835")]
-#[ferrocene::prevalidated]
-||||||| 09ee43b2d60
-#[unstable(feature = "layout_for_ptr", issue = "69835")]
-=======
 #[stable(feature = "layout_for_ptr", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_stable(feature = "layout_for_ptr", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#[ferrocene::prevalidated]
 pub const unsafe fn size_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::size_of_val(val) }

@@ -9951,6 +9951,7 @@ pub unsafe fn vld1q_f16(ptr: *const f16) -> float16x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -9962,6 +9963,7 @@ pub unsafe fn vld1_f32(ptr: *const f32) -> float32x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -9973,6 +9975,7 @@ pub unsafe fn vld1q_f32(ptr: *const f32) -> float32x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_f64(ptr: *const f64) -> float64x1_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -9984,6 +9987,7 @@ pub unsafe fn vld1_f64(ptr: *const f64) -> float64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_f64(ptr: *const f64) -> float64x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -9995,6 +9999,7 @@ pub unsafe fn vld1q_f64(ptr: *const f64) -> float64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_s8(ptr: *const i8) -> int8x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10006,6 +10011,7 @@ pub unsafe fn vld1_s8(ptr: *const i8) -> int8x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_s8(ptr: *const i8) -> int8x16_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10017,6 +10023,7 @@ pub unsafe fn vld1q_s8(ptr: *const i8) -> int8x16_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_s16(ptr: *const i16) -> int16x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10028,6 +10035,7 @@ pub unsafe fn vld1_s16(ptr: *const i16) -> int16x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_s16(ptr: *const i16) -> int16x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10039,6 +10047,7 @@ pub unsafe fn vld1q_s16(ptr: *const i16) -> int16x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_s32(ptr: *const i32) -> int32x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10050,6 +10059,7 @@ pub unsafe fn vld1_s32(ptr: *const i32) -> int32x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_s32(ptr: *const i32) -> int32x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10061,6 +10071,7 @@ pub unsafe fn vld1q_s32(ptr: *const i32) -> int32x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_s64(ptr: *const i64) -> int64x1_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10072,6 +10083,7 @@ pub unsafe fn vld1_s64(ptr: *const i64) -> int64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_s64(ptr: *const i64) -> int64x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10083,6 +10095,7 @@ pub unsafe fn vld1q_s64(ptr: *const i64) -> int64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10094,6 +10107,7 @@ pub unsafe fn vld1_u8(ptr: *const u8) -> uint8x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10105,6 +10119,7 @@ pub unsafe fn vld1q_u8(ptr: *const u8) -> uint8x16_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10116,6 +10131,7 @@ pub unsafe fn vld1_u16(ptr: *const u16) -> uint16x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10127,6 +10143,7 @@ pub unsafe fn vld1q_u16(ptr: *const u16) -> uint16x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10138,6 +10155,7 @@ pub unsafe fn vld1_u32(ptr: *const u32) -> uint32x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10149,6 +10167,7 @@ pub unsafe fn vld1q_u32(ptr: *const u32) -> uint32x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_u64(ptr: *const u64) -> uint64x1_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10160,6 +10179,7 @@ pub unsafe fn vld1_u64(ptr: *const u64) -> uint64x1_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10171,6 +10191,7 @@ pub unsafe fn vld1q_u64(ptr: *const u64) -> uint64x2_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10182,6 +10203,7 @@ pub unsafe fn vld1_p8(ptr: *const p8) -> poly8x8_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10193,6 +10215,7 @@ pub unsafe fn vld1q_p8(ptr: *const p8) -> poly8x16_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10204,6 +10227,7 @@ pub unsafe fn vld1_p16(ptr: *const p16) -> poly16x4_t {
 #[target_feature(enable = "neon")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10215,6 +10239,7 @@ pub unsafe fn vld1q_p16(ptr: *const p16) -> poly16x8_t {
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1_p64(ptr: *const p64) -> poly64x1_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -10226,6 +10251,7 @@ pub unsafe fn vld1_p64(ptr: *const p64) -> poly64x1_t {
 #[target_feature(enable = "neon,aes")]
 #[cfg_attr(test, assert_instr(ldr))]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 pub unsafe fn vld1q_p64(ptr: *const p64) -> poly64x2_t {
     crate::ptr::read_unaligned(ptr.cast())
 }
@@ -12364,6 +12390,7 @@ pub fn vmaxvq_s32(a: int32x4_t) -> i32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxv))]
 pub fn vmaxv_u8(a: uint8x8_t) -> u8 {
     unsafe { simd_reduce_max(a) }
@@ -12373,6 +12400,7 @@ pub fn vmaxv_u8(a: uint8x8_t) -> u8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxv))]
 pub fn vmaxvq_u8(a: uint8x16_t) -> u8 {
     unsafe { simd_reduce_max(a) }
@@ -12382,6 +12410,7 @@ pub fn vmaxvq_u8(a: uint8x16_t) -> u8 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxv))]
 pub fn vmaxv_u16(a: uint16x4_t) -> u16 {
     unsafe { simd_reduce_max(a) }
@@ -12391,6 +12420,7 @@ pub fn vmaxv_u16(a: uint16x4_t) -> u16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxv))]
 pub fn vmaxvq_u16(a: uint16x8_t) -> u16 {
     unsafe { simd_reduce_max(a) }
@@ -12400,6 +12430,7 @@ pub fn vmaxvq_u16(a: uint16x8_t) -> u16 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxp))]
 pub fn vmaxv_u32(a: uint32x2_t) -> u32 {
     unsafe { simd_reduce_max(a) }
@@ -12409,6 +12440,7 @@ pub fn vmaxv_u32(a: uint32x2_t) -> u32 {
 #[inline]
 #[target_feature(enable = "neon")]
 #[stable(feature = "neon_intrinsics", since = "1.59.0")]
+#[ferrocene::prevalidated]
 #[cfg_attr(test, assert_instr(umaxv))]
 pub fn vmaxvq_u32(a: uint32x4_t) -> u32 {
     unsafe { simd_reduce_max(a) }

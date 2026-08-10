@@ -621,6 +621,7 @@ const NEON_VECTOR_SIZE: usize = 16;
 
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 #[inline]
+#[ferrocene::prevalidated]
 fn is_ascii_neon(bytes: &[u8]) -> bool {
     use crate::arch::aarch64::{vld1q_u8, vmaxvq_u8, vorrq_u8};
 

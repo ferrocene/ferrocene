@@ -250,8 +250,6 @@ ENV RUST_CONFIGURE_ARGS="--set target.x86_64-unknown-linux-gnu.linker=clang \
       --set rust.lto=thin \
       --set rust.codegen-units=1"
 
-ENV LD_PRELOAD=/ferrocene-buildroot/lib64/libstdc++.so.6
-
 ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc

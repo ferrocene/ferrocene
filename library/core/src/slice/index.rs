@@ -917,8 +917,7 @@ const unsafe impl<T> SliceIndex<[T]> for range::RangeToInclusive<usize> {
 ///
 /// Panics when [`Index::index`] would panic:
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic
 /// #![feature(slice_range)]
 ///
 /// use std::slice;
@@ -926,8 +925,7 @@ const unsafe impl<T> SliceIndex<[T]> for range::RangeToInclusive<usize> {
 /// let _ = slice::range(2..1, ..3);
 /// ```
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic
 /// #![feature(slice_range)]
 ///
 /// use std::slice;
@@ -935,8 +933,7 @@ const unsafe impl<T> SliceIndex<[T]> for range::RangeToInclusive<usize> {
 /// let _ = slice::range(1..4, ..3);
 /// ```
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic
 /// #![feature(slice_range)]
 ///
 /// use std::slice;

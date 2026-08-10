@@ -345,8 +345,7 @@ macro_rules! saturating_impl {
         #[doc = concat!("assert_eq!(Saturating(", stringify!($t), "::MIN), Saturating(", stringify!($t), "::MIN) / Saturating(1));")]
         /// ```
         ///
-        #[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-        #[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+        /// ```should_panic
         /// use std::num::Saturating;
         ///
         #[doc = concat!("let _ = Saturating(0", stringify!($t), ") / Saturating(0);")]

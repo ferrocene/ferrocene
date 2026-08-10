@@ -187,8 +187,7 @@ use crate::ops::ControlFlow;
 /// via the manual implementation from the first example) then the result would
 /// violate transitivity:
 ///
-#[cfg_attr(ferrocene_facade_secretsauce, doc = "```no_run")]
-#[cfg_attr(not(ferrocene_facade_secretsauce), doc = "```should_panic")]
+/// ```should_panic
 /// #[derive(PartialEq)]
 /// enum BookFormat {
 ///     Paperback,

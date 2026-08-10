@@ -31,7 +31,7 @@ RUN <<EOT
     set -xe
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        export LLVM_BUILD_TARGETS=X86
+        export LLVM_BUILD_TARGETS="X86;WebAssembly"
         export GCC_BUILD_TARGET=x86_64-pc-linux-gnu
         export GCC_PLUGIN_TARGET=x86_64-pc-linux-gnu
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then

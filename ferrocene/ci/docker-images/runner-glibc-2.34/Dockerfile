@@ -4,7 +4,7 @@
 # From the root of this repository, build with:
 # ```
 # ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
-# docker build --tag runner-glibc-2.28 --file ferrocene/ci/docker-images/runner-glibc-2.28 /Dockerfile .
+# docker build --tag runner-glibc-2.34 --file ferrocene/ci/docker-images/runner-glibc-2.34x /Dockerfile .
 # ```
 # You must be authenticated with AWS in order to download its package cache.
 
@@ -22,20 +22,14 @@
 # use the same approach for other dependencies missing in Ubuntu 20.04 unless
 # you know what you're doing.
 
-FROM --platform=$TARGETPLATFORM centos:centos8 AS builder
+FROM --platform=$TARGETPLATFORM redhat/ubi9:9.8 AS builder
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-# CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
-RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
-  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
-RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
-
-
 RUN mkdir -p /ferrocene/packages
-RUN yum -y install \
+RUN yum -y --allowerasing install \
     wget curl \
     zstd xz bzip2 gzip unzip \
     tar \
@@ -114,25 +108,19 @@ EOF
 # already have the symlink
 RUN cd /ferrocene-buildroot/bin && ln --force -s gcc cc
 
-FROM --platform=$TARGETPLATFORM centos:centos8 AS base
+FROM --platform=$TARGETPLATFORM redhat/ubi9:9.8 AS base
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-# CentOS 7 EOL is June 30, 2024, but the repos remain in the vault.
-RUN sed -i /etc/yum.repos.d/*.repo -e 's!^mirrorlist!#mirrorlist!' \
-  -e 's!^#baseurl=http://mirror.centos.org/!baseurl=https://vault.centos.org/!'
-RUN sed -i 's/enabled=1/enabled=0/' /etc/yum/pluginconf.d/fastestmirror.conf
-
-
 RUN mkdir -p /ferrocene/packages
-RUN yum -y install \
+RUN yum -y --allowerasing install \
     wget curl \
     zstd xz bzip2 gzip unzip \
     zlib-devel \
-    glibc-devel glibc-devel.i686 \
-    glibc-static glibc-static.i686 \
+    glibc-devel \
+    glibc-static  \
     tar \
     make patch \
     file which \

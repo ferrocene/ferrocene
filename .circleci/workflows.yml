@@ -954,7 +954,7 @@ workflows:
 
       - ferrocene/build_docker:
           name: build-docker--runner--aarch64
-          image: runner-glibc-2.28
+          image: runner-glibc-2.34
           tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: arm.medium

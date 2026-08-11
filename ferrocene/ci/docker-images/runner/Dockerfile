@@ -91,11 +91,9 @@ RUN <<-EOF
 
     # TESTING CHANGE: Our configuration expects the compiler to be named
     # aarch64-linux-gnu-gcc
-    cd /usr/local/bin
+    cd /ferrocene-buildroot/bin
     ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
     ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
-
-
 EOF
 
 RUN <<-EOF

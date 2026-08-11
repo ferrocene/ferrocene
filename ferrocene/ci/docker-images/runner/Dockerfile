@@ -112,8 +112,9 @@ RUN <<-EOF
     mv ninja /usr/local/bin
 EOF
 
-# ensure that "cc" exists as a symlink
-RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
+# ensure that "cc" exists as a symlink, use --force for now as newer buildroots
+# already have the symlink
+RUN cd /ferrocene-buildroot/bin && ln --force -s gcc cc
 
 FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
 

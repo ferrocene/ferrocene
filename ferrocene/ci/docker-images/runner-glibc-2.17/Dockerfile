@@ -4,7 +4,7 @@
 # From the root of this repository, build with:
 # ```
 # ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
-# docker build --tag runner --file ferrocene/ci/docker-images/runner/Dockerfile .
+# docker build --tag runner-glibc-2.17 --file ferrocene/ci/docker-images/runner-glibc-2.17/Dockerfile .
 # ```
 # You must be authenticated with AWS in order to download its package cache.
 
@@ -233,7 +233,7 @@ RUN ldconfig
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
-COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
+COPY ferrocene/ci/docker-images/common/sudoers /etc/sudoers
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8

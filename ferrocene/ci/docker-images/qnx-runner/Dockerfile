@@ -19,19 +19,21 @@ ARG BUILDPLATFORM
 # See ferrocene/ci/mirrors/README.md.
 COPY ferrocene/ci/mirrors/ ./mirrors/
 # RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
+SHELL ["/bin/bash", "-c"]
 RUN <<-EOF
 
     set -xeu
     mkdir -p /ferrocene/packages
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-    alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
 
     apt-get update
     # Update all the dependencies
     apt-get upgrade -y
 
     # Install required packages
-    apt-install \
+    # The alias trick seems to be problematic with using bash as a shell, so
+    # have the apt-get options here directly
+    apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew \
         gpg \
         gpg-agent \
         git \

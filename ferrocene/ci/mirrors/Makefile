@@ -62,24 +62,6 @@ upload-arm-eabi-none:
 	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-arm-none-eabi-repacked-$(commit).tar.xz
 
-download-arm-aarch64-none-toolchain:
-	mkdir -p build/arm-aarch64-none
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/arm-gnu-toolchain/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf.tar.xz build/arm-aarch64-none/arm-gnu-toolchain.tar.xz
-
-repack-arm-aarch64-none: download-arm-aarch64-none-toolchain
-	docker build --tag arm-aarch64-none:$(arm-gnu-toolchain) --file repack-arm-toolchain.dockerfile build/arm-aarch64-none
-	{ \
-		id=$$(docker create arm-aarch64-none:$(arm-gnu-toolchain)) ; \
-		docker cp $$id://repacked/arm-gnu-toolchain-repacked.tar.xz  \
-			output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz ; \
-		docker rm $$id ; \
-	}
-
-upload-arm-aarch64-none:
-	aws s3 cp --no-overwrite output/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-$(host-arch)-aarch64-none-elf-repacked-$(commit).tar.xz
-
-
 # we need a gcc 11 as intermediary step as it's the newest you can build with the gcc in centos 7
 ifeq ($(build-bootstrap-gcc),"true")
 download-bootstrap-gcc-src:
@@ -269,9 +251,9 @@ upload-git:
 	aws s3 cp --no-overwrite output/git-$(git-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/git/git-$(git-version)-$(host-arch)-$(commit).tar.xz
 
-download-all-src: download-musl-cross-src download-python-src download-gdb-src download-git-src download-openssl-src download-bootstrap-gcc-src download-gcc-src download-utils-src download-arm-aarch64-none-toolchain download-arm-eabi-none-toolchain
-build-all: musl-cross python gdb git utils openssl bootstrap-gcc gcc repack-arm-aarch64-none repack-arm-eabi-none
-upload-all: upload-musl-cross upload-python upload-gdb upload-git upload-utils upload-openssl upload-bootstrap-gcc upload-gcc upload-arm-aarch64-none upload-arm-eabi-none
+download-all-src: download-musl-cross-src download-python-src download-gdb-src download-git-src download-openssl-src download-bootstrap-gcc-src download-gcc-src download-utils-src download-arm-eabi-none-toolchain
+build-all: musl-cross python gdb git utils openssl bootstrap-gcc gcc repack-arm-eabi-none
+upload-all: upload-musl-cross upload-python upload-gdb upload-git upload-utils upload-openssl upload-bootstrap-gcc upload-gcc upload-arm-eabi-none
 
 update-hashes:
 	mkdir -p hashes
@@ -285,7 +267,6 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-aarch64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-aarch64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-aarch64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/zstd/zstd-$(zstd-version)-aarch64-$(commit).tar.xz hashes/
 
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/gcc/gcc-$(gcc-version)-x86_64-$(gcc-from).tar.xz hashes/
@@ -299,7 +280,6 @@ update-hashes:
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/cmake/cmake-$(cmake-version)-linux-x86_64.tar.gz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-x86_64-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-arm-none-eabi-repacked-$(commit).tar.xz hashes/
-	aws s3 cp s3://ferrocene-ci-mirrors/manual/arm/arm-gnu-toolchain-$(arm-gnu-toolchain)-x86_64-aarch64-none-elf-repacked-$(commit).tar.xz hashes/
 	aws s3 cp s3://ferrocene-ci-mirrors/manual/zstd/zstd-$(zstd-version)-x86_64-$(commit).tar.xz hashes/
 
 	cd hashes; sha256sum *tar.xz *tar.gz > ../hashes.txt

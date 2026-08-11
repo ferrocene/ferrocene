@@ -37,7 +37,7 @@ RUN <<EOT
         export GCC_BUILD_TARGET=x86_64-pc-linux-gnu
         export GCC_PLUGIN_TARGET=x86_64-pc-linux-gnu
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        export LLVM_BUILD_TARGETS=Aarch64
+        export LLVM_BUILD_TARGETS=AArch64
         export GCC_BUILD_TARGET=aarch64-unknown-linux-gnu
         export GCC_PLUGIN_TARGET=aarch64-unknown-linux-gnu
     fi

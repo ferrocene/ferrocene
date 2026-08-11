@@ -199,12 +199,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 // We don't need to do call adjust_span here since
                 // deref coercions always start with a built-in deref.
                 let call_def_id = deref.method_call(self.tcx);
-                // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
-                let overloaded_callee = Ty::new_fn_def(
-                    self.tcx,
-                    call_def_id,
-                    ty::Binder::dummy(self.tcx.mk_args(&[expr.ty.into()])),
-                );
+                let overloaded_callee = self
+                    .tcx
+                    .type_of(call_def_id)
+                    .instantiate(self.tcx, self.tcx.mk_args(&[expr.ty.into()]))
+                    .skip_norm_wip();
 
                 expr = Expr {
                     temp_scope_id,
@@ -375,7 +374,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
             hir::ExprKind::MethodCall(segment, receiver, args, fn_span) => {
                 if self.typeck_results.is_splatted_call(expr) {
                     // The callee has a splatted tuple argument.
-                    // rewrite `receiver.f(a, u, v)` into `receiver.f(a, #[splat] (u, v))`
+                    // rewrite `receiver.f(a, u, v)` into `receiver.f(a, #[rustc_splat] (u, v))`
                     self.convert_splatted_callee(expr, fn_span, args, Some(receiver))
                 } else {
                     // Rewrite a.b(c) into UFCS form like Trait::b(a, c)
@@ -425,7 +424,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     }
                 } else if self.typeck_results.is_splatted_call(expr) {
                     // The callee has a splatted tuple argument.
-                    // rewrite `f(a, u, v)` into `f(a, #[splat] (u, v))`
+                    // rewrite `f(a, u, v)` into `f(a, #[rustc_splat] (u, v))`
                     self.convert_splatted_callee(expr, fun.span, args, None)
                 } else {
                     // Tuple-like ADTs are represented as ExprKind::Call. We convert them here.
@@ -855,12 +854,10 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 };
                 let mk_call =
                     |thir: &mut Thir<'tcx>, ty: Ty<'tcx>, variant: VariantIdx, field: FieldIdx| {
-                        // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
-                        let fun_ty = Ty::new_fn_def(
-                            tcx,
-                            offset_of_intrinsic,
-                            ty::Binder::dummy([ty::GenericArg::from(ty)]),
-                        );
+                        let fun_ty = tcx
+                            .type_of(offset_of_intrinsic)
+                            .instantiate(tcx, &[ty.into()])
+                            .skip_norm_wip();
                         let fun = thir
                             .exprs
                             .push(mk_expr(ExprKind::ZstLiteral { user_ty: None }, fun_ty));
@@ -1211,12 +1208,10 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 let user_ty = self.user_args_applied_to_res(expr.hir_id, Res::Def(kind, def_id));
                 debug!("method_callee: user_ty={:?}", user_ty);
                 (
-                    // FIXME: instantiate binder correctly (turbofish/fndex)
-                    Ty::new_fn_def(
-                        self.tcx,
-                        def_id,
-                        ty::Binder::dummy(self.typeck_results.node_args(expr.hir_id)),
-                    ),
+                    self.tcx
+                        .type_of(def_id)
+                        .instantiate(self.tcx, self.typeck_results.node_args(expr.hir_id))
+                        .skip_norm_wip(),
                     user_ty,
                 )
             }
@@ -1250,12 +1245,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
 
             Expr {
                 temp_scope_id: expr.hir_id.local_id,
-                // FIXME(156581): actually instantiate the binder correctly (turbofishing/fndef changes)
-                ty: Ty::new_fn_def(
-                    self.tcx,
-                    def_id,
-                    ty::Binder::dummy(self.typeck_results.node_args(expr.hir_id)),
-                ),
+                ty: self
+                    .tcx
+                    .type_of(def_id)
+                    .instantiate(self.tcx, self.typeck_results.node_args(expr.hir_id))
+                    .skip_norm_wip(),
                 span,
                 kind: ExprKind::ZstLiteral { user_ty },
             }
@@ -1288,7 +1282,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
     }
 
     /// The callee has a splatted tuple argument.
-    /// Rewrite a splatted call `receiver.f(a, u, v)` into `receiver.f(a, #[splat] (u, v))`.
+    /// Rewrite a splatted call `receiver.f(a, u, v)` into `receiver.f(a, #[rustc_splat] (u, v))`.
     /// The receiver is optional.
     fn convert_splatted_callee(
         &mut self,
@@ -1304,7 +1298,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
         let tupled_arg_index = usize::from(tupled_arg_index);
         let tupled_args_count = usize::from(tupled_args_count);
 
-        // Splatting an empty tuple is permitted: `a.f() -> Trait::f(a, #[splat] ())`.
+        // Splatting an empty tuple is permitted: `a.f() -> Trait::f(a, #[rustc_splat] ())`.
         // In that case, the tupled arg index is one past the end of the args.
         if tupled_arg_index + tupled_args_count > args.len() {
             span_bug!(

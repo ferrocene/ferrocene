@@ -4,109 +4,109 @@ expression: doc
 ---
 [Doc] doc::UnstableBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/unstable-book})
+    - Set({src/doc/unstable-book})
 [Doc] doc::UnstableBookGen
     targets: [x86_64-unknown-linux-gnu]
-    - Set({doc::src/tools/unstable-book-gen})
+    - Set({src/tools/unstable-book-gen})
 [Doc] doc::TheBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/book})
+    - Set({src/doc/book})
 [Doc] doc::Std
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::library})
-    - Set({doc::library/alloc})
-    - Set({doc::library/compiler-builtins/compiler-builtins})
-    - Set({doc::library/core})
-    - Set({doc::library/panic_abort})
-    - Set({doc::library/panic_unwind})
-    - Set({doc::library/proc_macro})
-    - Set({doc::library/rustc-std-workspace-core})
-    - Set({doc::library/std})
-    - Set({doc::library/std_detect})
-    - Set({doc::library/sysroot})
-    - Set({doc::library/test})
-    - Set({doc::library/unwind})
+    - Set({library})
+    - Set({library/alloc})
+    - Set({library/compiler-builtins/compiler-builtins})
+    - Set({library/core})
+    - Set({library/panic_abort})
+    - Set({library/panic_unwind})
+    - Set({library/proc_macro})
+    - Set({library/rustc-std-workspace-core})
+    - Set({library/std})
+    - Set({library/std_detect})
+    - Set({library/sysroot})
+    - Set({library/test})
+    - Set({library/unwind})
 [Doc] doc::ErrorIndex
     targets: [x86_64-unknown-linux-gnu]
-    - Set({doc::src/tools/error_index_generator})
+    - Set({src/tools/error_index_generator})
 [Doc] doc::Nomicon
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/nomicon})
+    - Set({src/doc/nomicon})
 [Doc] doc::Reference
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/reference})
+    - Set({src/doc/reference})
 [Doc] doc::RustdocBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/rustdoc})
+    - Set({src/doc/rustdoc})
 [Doc] doc::RustByExample
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/rust-by-example})
+    - Set({src/doc/rust-by-example})
 [Doc] doc::RustcBook
     targets: [x86_64-unknown-linux-gnu]
-    - Set({doc::src/doc/rustc})
+    - Set({src/doc/rustc})
 [Doc] doc::CargoBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/tools/cargo/doc/book})
+    - Set({src/tools/cargo/doc/book})
 [Doc] doc::ClippyBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/tools/clippy/book})
+    - Set({src/tools/clippy/book})
 [Doc] doc::EmbeddedBook
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/embedded-book})
+    - Set({src/doc/embedded-book})
 [Doc] doc::EditionGuide
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/edition-guide})
+    - Set({src/doc/edition-guide})
 [Doc] doc::StyleGuide
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::src/doc/style-guide})
+    - Set({src/doc/style-guide})
 [Doc] bootstrap::ferrocene::doc::CopyrightFiles
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::copyright-files})
+    - Set({copyright-files})
 [Doc] bootstrap::ferrocene::doc::Index
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/index})
+    - Set({ferrocene/doc/index})
 [Doc] bootstrap::ferrocene::doc::Specification
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/specification})
+    - Set({ferrocene/doc/specification})
 [Doc] bootstrap::ferrocene::doc::UserManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/user-manual})
+    - Set({ferrocene/doc/user-manual})
 [Doc] bootstrap::ferrocene::doc::ReleaseNotes
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/release-notes})
+    - Set({ferrocene/doc/release-notes})
 [Doc] bootstrap::ferrocene::doc::QNX7Manual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qnx7-manual})
+    - Set({ferrocene/doc/qnx7-manual})
 [Doc] bootstrap::ferrocene::doc::QNX8Manual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qnx8-manual})
+    - Set({ferrocene/doc/qnx8-manual})
 [Doc] bootstrap::ferrocene::doc::RHIVOSManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/rhivos-manual})
+    - Set({ferrocene/doc/rhivos-manual})
 [Doc] bootstrap::ferrocene::doc::DocumentList
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/document-list})
+    - Set({ferrocene/doc/document-list})
 [Doc] bootstrap::ferrocene::doc::EvaluationPlan
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/evaluation-plan})
+    - Set({ferrocene/doc/evaluation-plan})
 [Doc] bootstrap::ferrocene::doc::EvaluationReport
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/evaluation-report})
+    - Set({ferrocene/doc/evaluation-report})
 [Doc] bootstrap::ferrocene::doc::CoreCertification
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/core-certification})
+    - Set({ferrocene/doc/core-certification})
 [Doc] bootstrap::ferrocene::doc::QualificationPlan
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qualification-plan})
+    - Set({ferrocene/doc/qualification-plan})
 [Doc] bootstrap::ferrocene::doc::QualificationReport
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/qualification-report})
+    - Set({ferrocene/doc/qualification-report})
 [Doc] bootstrap::ferrocene::doc::SafetyManual
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/safety-manual})
+    - Set({ferrocene/doc/safety-manual})
 [Doc] bootstrap::ferrocene::doc::TraceabilityMatrix
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/tools/traceability-matrix})
+    - Set({ferrocene/tools/traceability-matrix})
 [Doc] bootstrap::ferrocene::doc::InternalProcedures
     targets: [aarch64-unknown-linux-gnu]
-    - Set({doc::ferrocene/doc/internal-procedures})
+    - Set({ferrocene/doc/internal-procedures})

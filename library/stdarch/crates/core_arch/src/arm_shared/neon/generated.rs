@@ -34588,6 +34588,7 @@ pub fn vornq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
     unsafe { simd_or(a, b) }
 }
@@ -34609,6 +34610,7 @@ pub fn vorr_s8(a: int8x8_t, b: int8x8_t) -> int8x8_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
     unsafe { simd_or(a, b) }
 }
@@ -34630,6 +34632,7 @@ pub fn vorrq_s8(a: int8x16_t, b: int8x16_t) -> int8x16_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_s16(a: int16x4_t, b: int16x4_t) -> int16x4_t {
     unsafe { simd_or(a, b) }
 }
@@ -34651,6 +34654,7 @@ pub fn vorr_s16(a: int16x4_t, b: int16x4_t) -> int16x4_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
     unsafe { simd_or(a, b) }
 }
@@ -34672,6 +34676,7 @@ pub fn vorrq_s16(a: int16x8_t, b: int16x8_t) -> int16x8_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_s32(a: int32x2_t, b: int32x2_t) -> int32x2_t {
     unsafe { simd_or(a, b) }
 }
@@ -34693,6 +34698,7 @@ pub fn vorr_s32(a: int32x2_t, b: int32x2_t) -> int32x2_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
     unsafe { simd_or(a, b) }
 }
@@ -34714,6 +34720,7 @@ pub fn vorrq_s32(a: int32x4_t, b: int32x4_t) -> int32x4_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_s64(a: int64x1_t, b: int64x1_t) -> int64x1_t {
     unsafe { simd_or(a, b) }
 }
@@ -34735,6 +34742,7 @@ pub fn vorr_s64(a: int64x1_t, b: int64x1_t) -> int64x1_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_s64(a: int64x2_t, b: int64x2_t) -> int64x2_t {
     unsafe { simd_or(a, b) }
 }
@@ -34756,6 +34764,7 @@ pub fn vorrq_s64(a: int64x2_t, b: int64x2_t) -> int64x2_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
     unsafe { simd_or(a, b) }
 }
@@ -34777,6 +34786,7 @@ pub fn vorr_u8(a: uint8x8_t, b: uint8x8_t) -> uint8x8_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
     unsafe { simd_or(a, b) }
 }
@@ -34798,6 +34808,7 @@ pub fn vorrq_u8(a: uint8x16_t, b: uint8x16_t) -> uint8x16_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_u16(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
     unsafe { simd_or(a, b) }
 }
@@ -34819,6 +34830,7 @@ pub fn vorr_u16(a: uint16x4_t, b: uint16x4_t) -> uint16x4_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
     unsafe { simd_or(a, b) }
 }
@@ -34840,6 +34852,7 @@ pub fn vorrq_u16(a: uint16x8_t, b: uint16x8_t) -> uint16x8_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_u32(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
     unsafe { simd_or(a, b) }
 }
@@ -34861,6 +34874,7 @@ pub fn vorr_u32(a: uint32x2_t, b: uint32x2_t) -> uint32x2_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
     unsafe { simd_or(a, b) }
 }
@@ -34882,6 +34896,7 @@ pub fn vorrq_u32(a: uint32x4_t, b: uint32x4_t) -> uint32x4_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorr_u64(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
     unsafe { simd_or(a, b) }
 }
@@ -34903,6 +34918,7 @@ pub fn vorr_u64(a: uint64x1_t, b: uint64x1_t) -> uint64x1_t {
     target_arch = "arm",
     unstable(feature = "stdarch_arm_neon_intrinsics", issue = "111800")
 )]
+#[ferrocene::prevalidated]
 pub fn vorrq_u64(a: uint64x2_t, b: uint64x2_t) -> uint64x2_t {
     unsafe { simd_or(a, b) }
 }

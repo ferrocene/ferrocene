@@ -776,6 +776,9 @@ impl CommandLineStep for Rustdoc {
         if let Some(allocator_feature_name) = builder.config.allocator(target).feature_name() {
             extra_features.push(allocator_feature_name.to_string());
         }
+        if !builder.config.rust_debug_logging {
+            extra_features.push("max_level_info".to_string())
+        }
 
         let compilers = RustcPrivateCompilers::from_target_compiler(builder, target_compiler);
         let tool_path = builder

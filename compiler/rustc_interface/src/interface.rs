@@ -15,7 +15,7 @@ use rustc_parse::lexer::StripTokens;
 use rustc_parse::new_parser_from_source_str;
 use rustc_parse::parser::Recovery;
 use rustc_query_impl::print_query_stack;
-use rustc_session::config::{self, Cfg, CheckCfg, ExpectedValues, Input, OutFileName};
+use rustc_session::config::{self, BackendJobs, Cfg, CheckCfg, ExpectedValues, Input, OutFileName};
 use rustc_session::parse::ParseSess;
 use rustc_session::{CompilerIO, EarlyDiagCtxt, Session, lint};
 use rustc_span::source_map::{FileLoader, RealFileLoader, SourceMapInputs};
@@ -377,18 +377,18 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
     config.opts.unstable_opts.no_steal_thir = true;
 
     // Set parallel mode before thread pool creation, which will create `Lock`s.
-    rustc_data_structures::sync::set_dyn_thread_safe_mode(
-        config.opts.unstable_opts.threads.is_some(),
-    );
+    rustc_data_structures::sync::set_dyn_thread_safe_mode(config.opts.jobs.frontend.is_some());
 
     // Initialize jobserver as early as possible.
     let early_dcx = EarlyDiagCtxt::new(config.opts.error_format);
-    jobserver::initialize_checked(|err| {
-        early_dcx
-            .early_struct_warn(err)
-            .with_note("the build environment is likely misconfigured")
-            .emit()
-    });
+    if let Some(limit) =
+        config.opts.jobs.frontend.max(config.opts.jobs.backend.map(BackendJobs::value))
+    {
+        jobserver::initialize(limit.get(), |err| {
+            let note = "the build environment is likely misconfigured";
+            early_dcx.early_struct_warn(err).with_note(note).emit()
+        });
+    }
 
     crate::callbacks::setup_callbacks();
 
@@ -406,7 +406,7 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
     util::run_in_thread_pool_with_globals(
         &early_dcx,
         config.opts.edition,
-        config.opts.unstable_opts.threads.unwrap_or(1),
+        config.opts.jobs,
         &config.extra_symbols,
         SourceMapInputs { file_loader, path_mapping, hash_kind, checksum_hash_kind },
         |current_gcx| {

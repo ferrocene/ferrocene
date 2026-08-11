@@ -183,6 +183,7 @@ where
     }
 
     fn collect_remaining_errors(&mut self, infcx: &InferCtxt<'tcx>) -> Vec<E> {
+        #[allow(clippy::iter_skip_zero)]
         self.obligations
             .pending
             .drain(..)
@@ -194,6 +195,12 @@ where
                     .map(|obligation| NextSolverError::Overflow(obligation)),
             )
             .map(|e| E::from_solver_error(infcx, e))
+            // Skip doesn't implement TrustedLen, so we use it to
+            // avoid Vec::from_iter specialization that seems
+            // to optimize poorly in combination with ThinVec::drain
+            // on this particular sequence.
+            // See https://github.com/rust-lang/rust/pull/160073
+            .skip(0)
             .collect()
     }
 
@@ -202,7 +209,7 @@ where
         let mut errors = Vec::new();
         loop {
             let mut any_changed = false;
-            for (mut obligation, stalled_on) in self.obligations.drain_pending(|_, _| true) {
+            for (mut obligation, stalled_on) in mem::take(&mut self.obligations.pending) {
                 let goal = obligation.as_goal();
                 let delegate = <&SolverDelegate<'tcx>>::from(infcx);
 
@@ -397,4 +404,17 @@ impl<'tcx> FromSolverError<'tcx, NextSolverError<'tcx>> for ScrubbedTraitError<'
             }
         }
     }
+}
+
+// Some types are used a lot. Make sure they don't unintentionally get bigger.
+#[cfg(target_pointer_width = "64")]
+mod size_asserts {
+    use rustc_data_structures::static_assert_size;
+
+    use super::*;
+    // tidy-alphabetical-start
+    // Before #160005 this pair was greater than 128 bytes, which triggered the use of (slow)
+    // `memcpy` for moving elements of `PendingObligations`.
+    static_assert_size!((PredicateObligation<'_>, Option<GoalStalledOn<TyCtxt<'_>>>), 104);
+    // tidy-alphabetical-end
 }

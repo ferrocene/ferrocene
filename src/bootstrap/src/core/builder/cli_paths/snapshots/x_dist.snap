@@ -4,40 +4,40 @@ expression: dist
 ---
 [Dist] dist::JsonDocs
     targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::rust-docs-json})
+    - Set({rust-docs-json})
 [Dist] dist::Mingw
     targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::rust-mingw})
+    - Set({rust-mingw})
 [Dist] dist::Rustc
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rustc})
+    - Set({rustc})
 [Dist] dist::Std
     targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::rust-std})
+    - Set({rust-std})
 [Dist] dist::RustcDev
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rustc-dev})
+    - Set({rustc-dev})
 [Dist] dist::Src
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rust-src})
+    - Set({rust-src})
 [Dist] dist::RustDev
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::rust-dev})
+    - Set({rust-dev})
 [Dist] dist::ReproducibleArtifacts
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::reproducible-artifacts})
+    - Set({reproducible-artifacts})
 [Dist] bootstrap::ferrocene::dist::Docs
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-docs})
+    - Set({ferrocene-docs})
 [Dist] bootstrap::ferrocene::dist::DocsDoctrees
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-docs-doctrees})
+    - Set({ferrocene-docs-doctrees})
 [Dist] bootstrap::ferrocene::dist::flip_link::FlipLink
     targets: [aarch64-unknown-linux-gnu]
-    - Set({dist::flip-link})
+    - Set({flip-link})
 [Dist] bootstrap::ferrocene::dist::SourceTarball
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-src})
+    - Set({ferrocene-src})
 [Dist] bootstrap::ferrocene::dist::SelfTest
     targets: [x86_64-unknown-linux-gnu]
-    - Set({dist::ferrocene-self-test})
+    - Set({ferrocene-self-test})

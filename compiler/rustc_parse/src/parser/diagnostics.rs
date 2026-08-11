@@ -43,9 +43,8 @@ use crate::diagnostics::{
     UseEqInstead, WrapType,
 };
 use crate::exp;
-use crate::parser::FnContext;
 use crate::parser::attr::InnerAttrPolicy;
-use crate::parser::item::IsDotDotDot;
+use crate::parser::{FnContext, IsDotDotDot};
 
 /// Creates a placeholder argument.
 pub(super) fn dummy_arg(ident: Ident, guar: ErrorGuaranteed) -> Param {
@@ -2240,7 +2239,7 @@ impl<'a> Parser<'a> {
         pat: Box<ast::Pat>,
         require_name: bool,
         first_param: bool,
-        fn_parse_mode: &crate::parser::item::FnParseMode,
+        fn_parse_mode: &crate::parser::FnParseMode,
     ) -> Option<Ident> {
         // If we find a pattern followed by an identifier, it could be an (incorrect)
         // C-style parameter declaration.
@@ -2265,7 +2264,7 @@ impl<'a> Parser<'a> {
         {
             let maybe_emit_anon_params_note = |this: &mut Self, err: &mut Diag<'_>| {
                 let ed = this.token.span.with_neighbor(this.prev_token.span).edition();
-                if matches!(fn_parse_mode.context, crate::parser::item::FnContext::Trait)
+                if matches!(fn_parse_mode.context, crate::parser::FnContext::Trait)
                     && (fn_parse_mode.req_name)(ed, IsDotDotDot::No)
                 {
                     err.note("anonymous parameters are removed in the 2018 edition (see RFC 1685)");
@@ -2386,12 +2385,22 @@ impl<'a> Parser<'a> {
     }
 
     #[cold]
-    pub(super) fn recover_arg_parse(&mut self) -> PResult<'a, (Box<ast::Pat>, Box<ast::Ty>)> {
+    pub(super) fn recover_arg_parse(
+        &mut self,
+        context: FnContext,
+    ) -> PResult<'a, (Box<ast::Pat>, Box<ast::Ty>)> {
         let pat = self.parse_pat_no_top_alt(Some(Expected::ArgumentName), None)?;
         self.expect(exp!(Colon))?;
         let ty = self.parse_ty()?;
-
-        self.dcx().emit_err(PatternMethodParamWithoutBody { span: pat.span });
+        self.dcx().emit_err(PatternMethodParamWithoutBody {
+            span: pat.span,
+            target: match context {
+                FnContext::Trait => "methods without bodies",
+                FnContext::FunctionPtrType => "function pointer types",
+                FnContext::Free => unreachable!("This method is not called in free functions, as patterns are always allowed there"),
+                FnContext::Impl => unreachable!("This method is not called in impls, as patterns are always allowed there"),
+            },
+        });
 
         // Pretend the pattern is `_`, to avoid duplicate errors from AST validation.
         let pat = Box::new(Pat { kind: PatKind::Wild, span: pat.span, id: ast::DUMMY_NODE_ID });

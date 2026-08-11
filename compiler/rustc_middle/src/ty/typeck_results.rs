@@ -8,9 +8,9 @@ use rustc_data_structures::unord::{ExtendUnord, UnordItems, UnordSet};
 use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalDefIdMap};
-use rustc_hir::hir_id::OwnerId;
 use rustc_hir::{
     self as hir, BindingMode, ByRef, HirId, ItemLocalId, ItemLocalMap, ItemLocalSet, Mutability,
+    OwnerId,
 };
 use rustc_index::IndexVec;
 use rustc_macros::{Lift, StableHash, TyDecodable, TyEncodable, TypeFoldable, TypeVisitable};
@@ -223,6 +223,9 @@ pub struct TypeckResults<'tcx> {
     /// computation.
     pub transmutes_to_check: Vec<(Ty<'tcx>, Ty<'tcx>, HirId)>,
 
+    /// Stores the types involved in calls to `offload` intrinsic.
+    pub offloads_to_check: Vec<(Ty<'tcx>, Ty<'tcx>, Ty<'tcx>, HirId)>,
+
     /// Container types and field indices of `offset_of!` expressions
     offset_of_data: ItemLocalMap<Vec<(Ty<'tcx>, VariantIdx, FieldIdx)>>,
 }
@@ -256,6 +259,7 @@ impl<'tcx> TypeckResults<'tcx> {
             potentially_region_dependent_goals: Default::default(),
             closure_size_eval: Default::default(),
             transmutes_to_check: Default::default(),
+            offloads_to_check: Default::default(),
             offset_of_data: Default::default(),
         }
     }

@@ -18,6 +18,7 @@ use rustc_index::IndexVec;
 use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk, TypeTrace};
 use rustc_middle::ty::adjustment::AllowTwoPhase;
 use rustc_middle::ty::error::TypeError;
+use rustc_middle::ty::print::with_forced_trimmed_paths;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
 use rustc_session::Session;
@@ -50,7 +51,7 @@ rustc_index::newtype_index! {
     pub(crate) struct GenericIdx {}
 }
 
-/// Outcome of checking arguments that are tupled by "rust-call" or `#[splat]`.
+/// Outcome of checking arguments that are tupled by "rust-call" or `#[rustc_splat]`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 struct TupledArgCheckOutcome<'tcx> {
     /// The error code to emit if the arguments are not compatible.
@@ -238,10 +239,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // any remaining type variables are assigned to new, unrelated variables. This
         // is because the inference guidance here is only speculative.
         // FIXME(splat): do we need to splat arguments before this type inference?
-        let formal_output = self.resolve_vars_with_obligations(formal_output);
         let mut expected_input_tys: Option<Vec<_>> = expectation
             .only_has_type(self)
             .and_then(|expected_output| {
+                let formal_output = self.resolve_vars_with_obligations(formal_output);
                 // FIXME(#149379): This operation results in expected input
                 // types which are potentially not well-formed or for whom the
                 // function where-bounds don't actually hold. This results
@@ -559,7 +560,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    /// Check arguments that are tupled by "rust-call" or `#[splat]`.
+    /// Check arguments that are tupled by "rust-call" or `#[rustc_splat]`.
     fn check_tupled_arguments(
         &self,
         // Span enclosing the call site
@@ -593,10 +594,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // The argument difference can range from -1 to u16::MAX - 1, so we count the number
         // of tupled arguments instead.
         // (An empty argument list becomes a unit tuple in the callee.)
-        // 0: f() -> f(#[splat] _: ())
-        // 1: f(a) -> f(#[splat] _: (A,))
-        // 2: f(a, b) -> f(#[splat] _: (A, B))
-        // The Fn* traits ensure this by construction, and `#[splat]` can only be applied to
+        // 0: f() -> f(#[rustc_splat] _: ())
+        // 1: f(a) -> f(#[rustc_splat] _: (A,))
+        // 2: f(a, b) -> f(#[rustc_splat] _: (A, B))
+        // The Fn* traits ensure this by construction, and `#[rustc_splat]` can only be applied to
         // an actual argument.
         let tupled_args_count = (1 + provided_args.len()).checked_sub(formal_input_tys.len());
         debug!(
@@ -750,7 +751,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         spans,
                         // FIXME(splat): add a new error code before stabilization
                         E0277,
-                        "cannot use splat attribute; the splatted argument type \
+                        "cannot use `rustc_splat` attribute; the splatted argument type \
                         must be a tuple or unit, not a {:?} ({:?})",
                         tuple_type.kind(),
                         self.structurally_resolve_type(
@@ -1636,14 +1637,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         // and point at that.
                         let instantiated = self
                             .tcx
-                            .explicit_predicates_of(self.body_def_id)
+                            .explicit_clauses_of(self.body_def_id)
                             .instantiate_identity(self.tcx);
                         // FIXME(compiler-errors): This could be problematic if something has two
                         // fn-like predicates with different args, but callable types really never
                         // do that, so it's OK.
-                        for (predicate, span) in instantiated {
+                        for (clause, span) in instantiated {
                             if let ty::ClauseKind::Trait(pred) =
-                                predicate.skip_norm_wip().kind().skip_binder()
+                                clause.skip_norm_wip().kind().skip_binder()
                                 && pred.self_ty().peel_refs() == callee_ty
                                 && self.tcx.is_fn_trait(pred.def_id())
                             {
@@ -3489,7 +3490,7 @@ impl<'a, 'tcx> CallCtxt<'a, 'tcx> {
         if ty.is_unit() {
             "()".to_string()
         } else if ty.is_suggestable(self.tcx, false) {
-            format!("/* {ty} */")
+            with_forced_trimmed_paths!(format!("/* {ty} */"))
         } else if let Some(fn_def_id) = self.fn_def_id
             && self.tcx.def_kind(fn_def_id).is_fn_like()
             && let self_implicit =

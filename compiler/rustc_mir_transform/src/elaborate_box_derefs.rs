@@ -8,6 +8,7 @@ use rustc_middle::mir::*;
 use rustc_middle::span_bug;
 use rustc_middle::ty::{self, PatternKind, Ty, TyCtxt};
 
+use crate::PassPolicy;
 use crate::patch::MirPatch;
 
 /// Constructs the types used when accessing a Box's pointer
@@ -71,7 +72,7 @@ impl<'a, 'tcx> MutVisitor<'tcx> for ElaborateBoxDerefVisitor<'a, 'tcx> {
                 location,
                 Place::from(ptr_local),
                 Rvalue::Cast(
-                    CastKind::Transmute,
+                    CastKind::BoxDerefTransmute,
                     Operand::Copy(
                         Place::from(place.local)
                             .project_deeper(&build_projection(unique_ty, nonnull_ty), tcx),
@@ -161,7 +162,8 @@ impl<'tcx> crate::MirPass<'tcx> for ElaborateBoxDerefs {
         }
     }
 
-    fn is_required(&self) -> bool {
-        true
+    fn policy(&self, _sess: &rustc_session::Session) -> PassPolicy {
+        // Implements Box dereference semantics so backends and Miri do not have to handle them.
+        PassPolicy::Required
     }
 }

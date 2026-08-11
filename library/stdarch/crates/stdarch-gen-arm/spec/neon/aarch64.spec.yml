@@ -12765,6 +12765,8 @@ intrinsics:
       - FnCall: [target_feature, ['enable = "{type[2]}"']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [ldr]]}]]
       - *neon-stable
+      # Ferrocene addition
+      - 'ferrocene::prevalidated'
     safety:
       unsafe: [neon]
     types:
@@ -13228,6 +13230,8 @@ intrinsics:
     return_type: "{type[1]}"
     attr:
       - *neon-stable
+      # Ferrocene addition
+      - 'ferrocene::prevalidated'
     assert_instr: ['{type[2]}']
     safety: safe
     types:

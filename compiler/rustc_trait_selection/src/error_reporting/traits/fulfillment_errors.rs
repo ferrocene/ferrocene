@@ -285,27 +285,21 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             || self.tcx.is_diagnostic_item(sym::TryFrom, trait_def_id))
                             && (self.tcx.is_diagnostic_item(sym::From, leaf_trait_def_id)
                                 || self.tcx.is_diagnostic_item(sym::TryFrom, leaf_trait_def_id))
-                        {
-                            let trait_ref = leaf_trait_predicate.skip_binder().trait_ref;
-
-                            if let Some(found_ty) =
+                            && let Some(trait_ref) =
+                                leaf_trait_predicate.no_bound_vars().map(|pred| pred.trait_ref)
+                            && let Some(found_ty) =
                                 trait_ref.args.get(1).and_then(|arg| arg.as_type())
-                            {
-                                let ty = main_trait_predicate.skip_binder().self_ty();
+                            && let Some(ty) =
+                                main_trait_predicate.no_bound_vars().map(|pred| pred.self_ty())
+                            && let Some(cast_ty) =
+                                self.find_explicit_cast_type(obligation.param_env, found_ty, ty)
+                        {
+                            let found_ty_str = self.tcx.short_string(found_ty, &mut long_ty_file);
+                            let cast_ty_str = self.tcx.short_string(cast_ty, &mut long_ty_file);
 
-                                if let Some(cast_ty) =
-                                    self.find_explicit_cast_type(obligation.param_env, found_ty, ty)
-                                {
-                                    let found_ty_str =
-                                        self.tcx.short_string(found_ty, &mut long_ty_file);
-                                    let cast_ty_str =
-                                        self.tcx.short_string(cast_ty, &mut long_ty_file);
-
-                                    err.help(format!(
-                                        "consider casting the `{found_ty_str}` value to `{cast_ty_str}`",
-                                    ));
-                                }
-                            }
+                            err.help(format!(
+                                "consider casting the `{found_ty_str}` value to `{cast_ty_str}`",
+                            ));
                         }
 
                         *err.long_ty_path() = long_ty_file;
@@ -2155,7 +2149,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
                     ocx.register_obligations(
                         self.tcx
-                            .predicates_of(single.impl_def_id)
+                            .clauses_of(single.impl_def_id)
                             .instantiate(self.tcx, impl_args)
                             .into_iter()
                             .map(|(clause, _)| {
@@ -2357,7 +2351,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                                     }
                                     ocx.register_obligations(
                                         self.tcx
-                                            .predicates_of(def_id)
+                                            .clauses_of(def_id)
                                             .instantiate(self.tcx, impl_args)
                                             .into_iter()
                                             .map(|(clause, span)| {
@@ -2373,7 +2367,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                                 })
                             };
                             let failing_obligations =
-                                if !self.tcx.predicates_of(def_id).predicates.is_empty() {
+                                if !self.tcx.clauses_of(def_id).clauses.is_empty() {
                                     self.probe(|_| evaluate_obligations())
                                 } else {
                                     Vec::new()
@@ -2466,10 +2460,42 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 };
                 err.span_help(span, msg);
             } else {
+                // When more than 5 tuples implement the same trait, the output might be very verbose
+                // Instead of displaying each of these, we sort the candidates by arity in ascending
+                // order, then we compute the min and the max arity, ensuring that the arities are
+                // consecutive (by step of one). If these conditions are met, then the output is shown
+                // as a range of tuples [tuple_min_arity:tuple_max_arity]
+                let mut tuple_min_arity = usize::MAX;
+                let mut tuple_max_arity = 0_usize;
+                let mut last_arity = None;
+                let mut all_types_tuples_cont_arity = true;
+                candidates.sort_by(|(c1, _), (c2, _)| {
+                    if let ty::Tuple(tys1) = c1.self_ty().kind()
+                        && let ty::Tuple(tys2) = c2.self_ty().kind()
+                    {
+                        tys1.len().cmp(&tys2.len())
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                });
                 let candidate_names: Vec<String> = candidates
                     .iter()
                     .map(|(c, _)| {
                         if all_traits_equal {
+                            if all_types_tuples_cont_arity
+                                && let ty::Tuple(tys) = c.self_ty().kind()
+                                && last_arity.map_or(1, |a: usize| a.abs_diff(tys.len())) == 1
+                            {
+                                last_arity = Some(tys.len());
+                                if tys.len() > tuple_max_arity {
+                                    tuple_max_arity = tys.len();
+                                }
+                                if tys.len() < tuple_min_arity {
+                                    tuple_min_arity = tys.len();
+                                }
+                            } else {
+                                all_types_tuples_cont_arity = false;
+                            }
                             format!(
                                 "\n  {}",
                                 self.tcx.short_string(c.self_ty(), err.long_ty_path())
@@ -2490,6 +2516,29 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         }
                     })
                     .collect();
+
+                let details = if all_traits_equal && all_types_tuples_cont_arity {
+                    if tuple_min_arity == 0 {
+                        format!("up to tuples of arity {tuple_max_arity}")
+                    } else {
+                        format!(
+                            "for tuples of arity {tuple_min_arity} up to and including {tuple_max_arity}"
+                        )
+                    }
+                } else {
+                    String::new()
+                };
+                let (candidate_names, end) = if all_traits_equal && all_types_tuples_cont_arity {
+                    (
+                        vec![
+                            // (T₁, T₂, …, Tₙ)
+                            format!("\n  (T\u{2081}, T\u{2082}, …, T\u{2099}) {details}"),
+                        ],
+                        1,
+                    )
+                } else {
+                    (candidate_names, end)
+                };
                 let msg = if all_types_equal {
                     format!(
                         "`{}` implements trait `{}`",

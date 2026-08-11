@@ -41,7 +41,7 @@ pub use type_certainty::expr_type_is_certain;
 
 /// Lower a [`hir::Ty`] to a [`rustc_middle::ty::Ty`].
 pub fn ty_from_hir_ty<'tcx>(cx: &LateContext<'tcx>, hir_ty: &hir::Ty<'tcx>) -> Ty<'tcx> {
-    cx.maybe_typeck_results()
+    cx.typeck_results
         .filter(|results| results.hir_owner == hir_ty.hir_id.owner)
         .and_then(|results| results.node_type_opt(hir_ty.hir_id))
         .unwrap_or_else(|| lower_ty(cx.tcx, hir_ty))
@@ -532,7 +532,7 @@ fn is_uninit_value_valid_for_layout<'tcx>(cx: &LateContext<'tcx>, layout: TyAndL
     match layout.layout.backend_repr {
         BackendRepr::Scalar(s) => s.is_uninit_valid(),
         BackendRepr::ScalarPair { a, b, .. } => a.is_uninit_valid() && b.is_uninit_valid(),
-        BackendRepr::SimdVector { element, count } => count == 0 || element.is_uninit_valid(),
+        BackendRepr::SimdVector { element, count: _ } => element.is_uninit_valid(),
         BackendRepr::SimdScalableVector { element, .. } => element.is_uninit_valid(),
         // Here validity is determined by the structural fields instead.
         BackendRepr::Memory { .. } => match &layout.layout.variants {
@@ -616,14 +616,14 @@ fn is_uninit_value_valid_for_ty_fallback<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'t
     }
 }
 
-/// Gets an iterator over all predicates which apply to the given item.
-pub fn all_predicates_of(tcx: TyCtxt<'_>, id: DefId) -> impl Iterator<Item = &(ty::Clause<'_>, Span)> {
+/// Gets an iterator over all clauses which apply to the given item.
+pub fn all_clauses_of(tcx: TyCtxt<'_>, id: DefId) -> impl Iterator<Item = &(ty::Clause<'_>, Span)> {
     let mut next_id = Some(id);
     iter::from_fn(move || {
         next_id.take().map(|id| {
-            let preds = tcx.predicates_of(id);
-            next_id = preds.parent;
-            preds.predicates.iter()
+            let gen_clauses = tcx.clauses_of(id);
+            next_id = gen_clauses.parent;
+            gen_clauses.clauses.iter()
         })
     })
     .flatten()
@@ -719,7 +719,10 @@ pub fn ty_sig<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<ExprFnSig<'t
             Some(ExprFnSig::Closure(decl, subs.as_closure().sig()))
         },
         ty::FnDef(id, subs) => Some(ExprFnSig::Sig(
-            cx.tcx.fn_sig(id).instantiate(cx.tcx, subs.no_bound_vars().unwrap()).skip_norm_wip(),
+            cx.tcx
+                .fn_sig(id)
+                .instantiate(cx.tcx, subs.no_bound_vars().unwrap())
+                .skip_norm_wip(),
             Some(id),
         )),
         ty::Alias(

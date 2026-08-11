@@ -71,6 +71,7 @@ mod opaque_hidden_inferred_bound;
 mod passes;
 mod precedence;
 mod ptr_nulls;
+mod raw_borrows_via_references;
 mod redundant_semicolon;
 mod reference_casting;
 mod runtime_symbols;
@@ -121,6 +122,7 @@ use noop_method_call::*;
 use opaque_hidden_inferred_bound::*;
 use precedence::*;
 use ptr_nulls::*;
+use raw_borrows_via_references::*;
 use redundant_semicolon::*;
 use reference_casting::*;
 use runtime_symbols::*;
@@ -280,6 +282,7 @@ late_lint_methods!(
             InternalEqTraitMethodImpls: InternalEqTraitMethodImpls,
             ImplicitProvenanceCasts: ImplicitProvenanceCasts,
             CVoidReturns: CVoidReturns,
+            RawBorrowsViaReferences: RawBorrowsViaReferences,
         ]
     ]
 );

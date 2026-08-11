@@ -4,7 +4,7 @@ expression: install
 ---
 [Install] bootstrap::ferrocene::install::Std
     targets: [aarch64-unknown-linux-gnu]
-    - Set({install::library/std})
+    - Set({library/std})
 [Install] bootstrap::ferrocene::install::Rustc
     targets: [x86_64-unknown-linux-gnu]
-    - Set({install::compiler/rustc})
+    - Set({compiler/rustc})

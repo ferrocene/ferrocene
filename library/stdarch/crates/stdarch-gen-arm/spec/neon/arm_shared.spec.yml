@@ -161,6 +161,8 @@ intrinsics:
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [orr]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
+      # Ferrocene addition
+      - 'ferrocene::prevalidated'
     safety: safe
     types:
       - int8x8_t

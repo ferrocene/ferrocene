@@ -1,8 +1,6 @@
 83f8fd91d2038a56556e1400390fcfe42f79602940c494f6c6f1cdae7f9e7f40  cmake-3.31.12-linux-aarch64.tar.gz
 0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385c  cmake-3.31.12-linux-x86_64.tar.gz
-4be58490b04a312e8050e2504457b428b071cc49931fa1abf786271ccb9deff9  arm-gnu-toolchain-15.3.rel1-aarch64-aarch64-none-elf-repacked-8bb34716.tar.xz
 ff7340990d7624abb7a1a0849f3c4327f9d01141c430cbc57038dc66f87523c7  arm-gnu-toolchain-15.3.rel1-aarch64-arm-none-eabi-repacked-8bb34716.tar.xz
-2dcb2b6b70720fe4ed89fc1e4cc0b32646deb27ace7f8d44de2139228d396b2f  arm-gnu-toolchain-15.3.rel1-x86_64-aarch64-none-elf-repacked-8bb34716.tar.xz
 f2a6d89c3a85bfedeccc6faa4c5fa4f7d5a098458e7a3f939f145e5f4a07a835  arm-gnu-toolchain-15.3.rel1-x86_64-arm-none-eabi-repacked-8bb34716.tar.xz
 a52b140d679afa7ea2004d28a579ebc367308cfba968d74e568ab4b5b3a4da9f  coreutils-9.11-aarch64-8bb34716.tar.xz
 bde098157516265d59f813e67ce539b0ec94fc82573363d5fd18c0c2833784a1  coreutils-9.11-x86_64-8bb34716.tar.xz

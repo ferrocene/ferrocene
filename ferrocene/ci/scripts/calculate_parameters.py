@@ -123,6 +123,11 @@ ecr = boto3.client("ecr", region_name=ECR_REGION)
 with open(CIRCLECI_CONFIGURATION) as f:
     config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
+full_build: dict[str, bool] = {
+    "x86_64-pc-windows-msvc": os.environ["FULL_BUILD_X86_64_WINDOWS_MSVC"] == "true",
+    "aarch64-apple-darwin": os.environ["FULL_BUILD_AARCH64_DARWIN"] == "true",
+}
+
 
 def calculate_docker_repository_url(repo: str) -> str:
     """
@@ -139,16 +144,23 @@ def calculate_llvm_rebuild(*dummy: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
+    not_found = 0
     for jobname in config["jobs"]:
         target = jobname.removeprefix("llvm--")
-        if jobname is not target:
+        if jobname != target and (
+            target not in full_build or full_build[target] is True
+        ):
             url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
             assert url.scheme == "s3"
             try:
                 s3.head_object(Bucket=url.netloc, Key=url.path.removeprefix("/"))
             except s3.exceptions.ClientError:
-                return True
-    return False
+                print(
+                    f"missing llvm artifact for {target}: {url.geturl()}",
+                    file=sys.stderr,
+                )
+                not_found += 1
+    return not_found > 0
 
 
 def calculate_targets(host_plus_stage: str):

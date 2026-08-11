@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 rm -rf /tmp/awscli /tmp/awscli.zip
 set -xe
+set -o pipefail
 
 mkdir /tmp/awscli && cd /tmp/awscli
 
@@ -59,7 +60,7 @@ VERSION=$(cat /tmp/awscli-version)
 PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-${VERSION}.zip"
 
 curl -Lo awscliv2.sig "${PACKAGE_URL}.sig"
-curl -Lo "awscliv2.zip" $PACKAGE_URL
+curl -Lo "awscliv2.zip" "$PACKAGE_URL"
 gpg --verify awscliv2.sig awscliv2.zip
 
 unzip -q -d /tmp/awscli awscliv2.zip
@@ -68,6 +69,6 @@ unzip -q -d /tmp/awscli awscliv2.zip
 rm -rf /tmp/awscli awscliv2.zip awscliv2.sig
 
 # some of our environments record all downloaded packages here
-if [ test -x "/ferrocene/packages" ]; then
+if [ -x "/ferrocene/packages" ]; then
     echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
 fi

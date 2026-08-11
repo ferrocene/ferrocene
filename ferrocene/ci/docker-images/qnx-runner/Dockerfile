@@ -20,7 +20,31 @@ ARG BUILDPLATFORM
 COPY ferrocene/ci/mirrors/ ./mirrors/
 # RUN cd mirrors && sha256sum --ignore-missing --strict --check hashes.txt
 RUN <<-EOF
-    set -eu
+
+    set -xeu
+    mkdir -p /ferrocene/packages
+    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+    alias apt-install="apt-get install -yq --no-install-recommends --option Dpkg::Options::=--force-confnew"
+
+    apt-get update
+    # Update all the dependencies
+    apt-get upgrade -y
+
+    # Install required packages
+    apt-install \
+        gpg \
+        gpg-agent \
+        git \
+        openssh-client \
+        file \
+        curl \
+        ca-certificates \
+        zlib1g-dev \
+        moreutils \
+        zstd \
+        xz-utils \
+        unzip \
+        sudo
 
     mkdir -p /ferrocene-buildroot
 
@@ -54,11 +78,9 @@ RUN <<-EOF
 
     # TESTING CHANGE: Our configuration expects the compiler to be named
     # aarch64-linux-gnu-gcc
-    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        cd /usr/local/bin
-        ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
-        ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
-    fi
+    cd /usr/local/bin
+    ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc
+    ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++
 
 EOF
 
@@ -111,6 +133,8 @@ RUN <<-EOF
         zlib1g-dev \
         moreutils \
         zstd \
+        xz-utils \
+        unzip \
         sudo \
         gcc-10 \
         g++-10

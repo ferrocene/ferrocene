@@ -245,6 +245,11 @@ def workflow_id(*dummy):
     return os.environ.get("CIRCLE_WORKFLOW_ID")
 
 
+# This needs to be kept in sync with the version in ferrocene/ci/docker-images/common/install-awscli.sh
+def awscli_version(*dummy):
+    return "2.35.11"
+
+
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
         config: dict[str, dict[str, str]] = yaml.safe_load(f)
@@ -256,6 +261,7 @@ def prepare_parameters():
         "llvm-rebuild--": calculate_llvm_rebuild,
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
+        "awscli-version": awscli_version,
     }
 
     parameters: dict[str, str] = {}

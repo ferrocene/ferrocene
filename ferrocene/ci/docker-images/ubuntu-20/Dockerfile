@@ -217,27 +217,8 @@ ENV PATH "/opt/nodejs/bin:$PATH"
 # `aws ecr get-login-password`.
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 24.04 is a snap.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x86_64"
-        SHA="0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="aarch64"
-        SHA="33b1c2a9daab91ae458516e934b1532e2174643aea2ccfa81ab8c5e9d4ed381b"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.12.4.zip"
-    curl -Lo /tmp/awscli.zip $PACKAGE_URL
-    echo "${SHA} /tmp/awscli.zip" | sha256sum -c
-    unzip -q -d /tmp/awscli /tmp/awscli.zip
-    /tmp/awscli/aws/install
-    rm -rf /tmp/awscli /tmp/awscli.zip
-
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-EOF
+COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+RUN /tmp/setup-awscli.sh
 
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.

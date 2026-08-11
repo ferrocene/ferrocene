@@ -27,17 +27,19 @@ ENV GCC_VERSION=16.1.0
 # include path, /ferrocene-buildroot/include, to clang's default include path.
 ENV INC="/ferrocene-buildroot/include:/usr/local/include:/usr/include"
 
+# We build clang for multiple targets on x86 since we do all of our cross
+# building and testing on x86, but we don't need any extra targets on aarch64
 RUN <<EOT
     set -xe
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        export LLVM_BUILD_TARGETS="X86;WebAssembly"
+        export LLVM_BUILD_TARGETS="X86;WebAssembly;ARM"
         export GCC_BUILD_TARGET=x86_64-pc-linux-gnu
         export GCC_PLUGIN_TARGET=x86_64-pc-linux-gnu
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        export LLVM_BUILD_TARGETS=Aarch64
         export GCC_BUILD_TARGET=aarch64-unknown-linux-gnu
         export GCC_PLUGIN_TARGET=aarch64-unknown-linux-gnu
-        export LLVM_BUILD_TARGETS=Aarch64
     fi
     
     cmake -S ../llvm-src/llvm -B /llvm-build \

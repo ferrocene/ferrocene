@@ -57,6 +57,7 @@ RUN <<-EOF
     set -eu
 
     mkdir -p /ferrocene-buildroot
+    mkdir -p /stage/coreutils
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         host_platform=x86_64
@@ -73,8 +74,10 @@ RUN <<-EOF
         if [ "$host_platform" = "$host_arch" ]; then
             echo "Installing package ${package_file}"
             if [[ $package_file =~ "coreutils" ]];  then
-                echo "Installing coreutils to /usr"
-                tar -C /usr -xf "mirrors/$package_file"
+                # We can't later run "ADD" for coreutils since it's arch dependent so we stage it
+                # and copy from the stage
+                echo "Installing coreutils to /stage/coreutils"
+                tar -C /stage/coreutils -xf "mirrors/$package_file"
             elif [[ $package_file =~ "ferrocene-buildroot" ]];  then
                 echo "Installing buildroot to /ferrocene-buildroot"
                 tar -C /ferrocene-buildroot -xf "mirrors/$package_file"
@@ -212,10 +215,10 @@ COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-a
 COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
-ADD ferrocene/ci/mirrors/coreutils-9.11-x86_64-8bb34716.tar.xz /usr/
 
 COPY --from=builder /ferrocene-buildroot /ferrocene-buildroot
 COPY --from=builder /usr/local /usr/local
+COPY --from=builder stage/coreutils/ /usr/
 
 ENV PATH=/ferrocene-buildroot/bin/:/usr/local/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 

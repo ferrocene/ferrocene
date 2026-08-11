@@ -18,6 +18,10 @@
 //@ [kcfi] compile-flags: -C panic=abort -C prefer-dynamic=off
 //@ run-fail-or-crash
 
+// Ferrocene addition: This test requires UBSan, which is not currently
+// built for RHIVOS2
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 use std::hint::black_box;
 use std::mem;
 

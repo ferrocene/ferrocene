@@ -206,13 +206,6 @@ ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 ENV CFLAGS_aarch64v8r_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 ENV CFLAGS_aarch64r82_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 
-COPY --from=noble /ferrocene/packages/ubuntu-24.04 /ferrocene/packages/ubuntu-24.04
-RUN <<-EOF
-    set -xe
-    dpkg -l >> /ferrocene/packages/ubuntu-20.04
-EOF
-
-
 RUN <<-EOF
     set -xe
     mkdir /home/ci

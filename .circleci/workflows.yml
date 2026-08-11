@@ -413,9 +413,9 @@ jobs:
   # aarch64-unknown-linux-gnu jobs
 
   llvm--aarch64-unknown-linux-gnu:
-    executor: &executor-aarch64-runner
+    executor: &executor-aarch64-builder
       name: ferrocene/docker
-      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      image_tag: builder--<< pipeline.parameters.docker-images-hash >>--aarch64
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
@@ -437,7 +437,7 @@ jobs:
           command: echo
 
   aarch64-linux-build:
-    executor: *executor-aarch64-runner
+    executor: *executor-aarch64-builder
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -450,7 +450,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
-    executor: *executor-aarch64-runner
+    executor: *executor-aarch64-builder
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -462,7 +462,10 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-dist-tools:
-    executor: *executor-aarch64-runner
+    executor: &executor-aarch64-runner
+      name: ferrocene/docker
+      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -942,8 +945,16 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
+          name: build-docker--builder--aarch64
+          image: runner-glibc-2.17
+          tag: builder--<< pipeline.parameters.docker-images-hash >>--aarch64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
           name: build-docker--runner--aarch64
-          image: runner
+          image: runner-glibc-2.28
           tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: arm.medium
@@ -951,7 +962,7 @@ workflows:
 
       - ferrocene/build_docker:
           name: build-docker--runner--x86_64
-          image: runner
+          image: runner-glibc-2.17
           tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2

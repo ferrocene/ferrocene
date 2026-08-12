@@ -1115,3 +1115,64 @@ fn test_chars_fmt_errors() {
     };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
+
+// Cover `core::fmt::Formatter::<'a>::pad_integral`'s errors
+#[test]
+fn test_pad_integral_errors() {
+    // Taken from the `pad_integral` doctest
+    use std::fmt;
+    struct Foo { nb: i32 }
+
+    impl fmt::Display for Foo {
+        fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // We need to remove "-" from the number output.
+            let tmp = self.nb.abs().to_string();
+
+            formatter.pad_integral(self.nb >= 0, "Foo ", &tmp)
+        }
+    }
+
+    let specimen = Foo { nb: -5 };
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "0",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0>#8}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "-",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0>#8}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "Foo ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0>#8}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "5",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:0>#8}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "5",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:016}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "0",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:016}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "Foo ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#016}", specimen).is_err());
+}

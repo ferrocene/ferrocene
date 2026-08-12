@@ -206,6 +206,10 @@ RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
 RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
+# Ubuntu and CentOS don't agree on the location of the CA certs and our git
+# inherits the setting from the system it was built on
+RUN git config --system http.sslcainfo /etc/ssl/certs/ca-certificates.crt
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY ferrocene/ci/docker-images/common/sudoers /etc/sudoers

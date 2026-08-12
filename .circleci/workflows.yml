@@ -970,7 +970,7 @@ workflows:
 
       - ferrocene/build_docker:
           name: build-docker--qnx-runner--x86_64
-          image: qnx-runner
+          image: runner-glibc-2.34
           tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2

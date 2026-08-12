@@ -3,7 +3,8 @@ use std::iter;
 use rustc_abi::{BackendRepr, TagEncoding, Variants, WrappingRange};
 use rustc_ast as ast;
 use rustc_hir as hir;
-use rustc_hir::{Expr, ExprKind, HirId, LangItem, find_attr};
+use rustc_hir::attrs::lang_items::LangItem;
+use rustc_hir::{Expr, ExprKind, HirId, find_attr};
 use rustc_middle::bug;
 use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
@@ -14,9 +15,15 @@ use tracing::debug;
 mod improper_ctypes; // these files do the implementation for ImproperCTypesDefinitions,ImproperCTypesDeclarations
 pub(crate) use improper_ctypes::ImproperCTypesLint;
 
+<<<<<<< ferrocene/main
 // Ferrocene addition
 pub(crate) use crate::ferrocene::LintUnvalidated;
 use crate::lints::{
+||||||| 65dd30fb9e8
+use crate::lints::{
+=======
+use crate::diagnostics::{
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
     AmbiguousWidePointerComparisonsAddrSuggestion, AmbiguousWidePointerComparisonsCastSuggestion,
     AmbiguousWidePointerComparisonsExpectSuggestion, AtomicOrderingFence, AtomicOrderingLoad,

@@ -1261,7 +1261,8 @@ impl char {
     ///
     /// Basic usage:
     ///
-    /// ```ignore(private)
+    /// ```
+    /// #![feature(default_ignorable)]
     /// assert!('\u{AD}'.is_default_ignorable()); // SOFT HYPHEN
     /// assert!('\u{115F}'.is_default_ignorable()); // HANGUL CHOSEONG FILLER
     /// assert!('\u{200B}'.is_default_ignorable()); // ZERO WIDTH SPACE
@@ -1272,10 +1273,16 @@ impl char {
     /// assert!(!'\n'.is_default_ignorable());
     /// assert!(!'\0'.is_default_ignorable());
     /// assert!(!'q'.is_default_ignorable());
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 65dd30fb9e8
+=======
+    /// ```
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     #[must_use]
+    #[unstable(feature = "default_ignorable", issue = "160583")]
     #[inline]
-    fn is_default_ignorable(self) -> bool {
+    pub fn is_default_ignorable(self) -> bool {
         self > '\u{AC}' && unicode::Default_Ignorable_Code_Point(self)
     }
 

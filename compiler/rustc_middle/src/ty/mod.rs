@@ -38,10 +38,11 @@ use rustc_data_structures::steal::Steal;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::{Diag, ErrorGuaranteed, LintBuffer};
 use rustc_hir::attrs::StrippedCfgItem;
+use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
 use rustc_hir::definitions::PerParentDisambiguatorState;
-use rustc_hir::{self as hir, LangItem, MissingLifetimeKind, attrs as attr, find_attr};
+use rustc_hir::{self as hir, MissingLifetimeKind, attrs as attr, find_attr};
 use rustc_index::IndexVec;
 use rustc_index::bit_set::BitMatrix;
 use rustc_macros::{
@@ -84,14 +85,14 @@ pub use self::list::{List, ListWithCachedTypeInfo};
 pub use self::opaque_types::OpaqueTypeKey;
 pub use self::pattern::{Pattern, PatternKind};
 pub use self::predicate::{
-    AliasTerm, AliasTermKind, ArgOutlivesPredicate, Clause, ClauseKind, CoercePredicate,
+    AliasTerm, AliasTermKind, ArgOutlivesClause, Clause, ClauseKind, CoercePredicate,
     ExistentialPredicate, ExistentialPredicateStableCmpExt, ExistentialProjection,
-    ExistentialTraitRef, HostEffectPredicate, NormalizesTo, OutlivesPredicate, PolyCoercePredicate,
+    ExistentialTraitRef, HostEffectPredicate, NormalizesTo, OutlivesClause, PolyCoercePredicate,
     PolyExistentialPredicate, PolyExistentialProjection, PolyExistentialTraitRef,
-    PolyProjectionPredicate, PolyRegionOutlivesPredicate, PolySubtypePredicate, PolyTraitPredicate,
-    PolyTraitRef, PolyTypeOutlivesPredicate, Predicate, PredicateKind, ProjectionPredicate,
-    RegionConstraint, RegionEqPredicate, RegionOutlivesPredicate, SubtypePredicate, TraitPredicate,
-    TraitRef, TypeOutlivesPredicate,
+    PolyProjectionPredicate, PolyRegionOutlivesClause, PolySubtypePredicate, PolyTraitPredicate,
+    PolyTraitRef, PolyTypeOutlivesClause, Predicate, PredicateKind, ProjectionPredicate,
+    RegionConstraint, RegionEqPredicate, RegionOutlivesClause, SubtypePredicate, TraitPredicate,
+    TraitRef, TypeOutlivesClause,
 };
 pub use self::region::{
     EarlyParamRegion, LateParamRegion, LateParamRegionKind, Region, RegionExt, RegionKind,
@@ -111,7 +112,7 @@ pub use self::typeck_results::{
     Rust2024IncompatiblePatInfo, SplattedDef, TypeckResults, UserType, UserTypeAnnotationIndex,
     UserTypeKind,
 };
-use crate::error::{OpaqueHiddenTypeMismatch, TypeMismatchReason};
+use crate::diagnostics::{OpaqueHiddenTypeMismatch, TypeMismatchReason};
 use crate::metadata::{AmbigModChild, ModChild};
 use crate::middle::privacy::EffectiveVisibilities;
 use crate::mir::{Body, CoroutineLayout, CoroutineSavedLocal, MirPhase, SourceInfo};
@@ -139,6 +140,7 @@ pub mod pattern;
 pub mod print;
 pub mod relate;
 pub mod significant_drop_order;
+pub mod sty;
 pub mod trait_def;
 pub mod typetree;
 pub mod util;
@@ -163,8 +165,6 @@ mod opaque_types;
 mod predicate;
 mod region;
 mod structural_impls;
-#[expect(hidden_glob_reexports)]
-mod sty;
 mod typeck_results;
 mod visit;
 
@@ -671,11 +671,11 @@ impl<'tcx> rustc_type_ir::Flags for Ty<'tcx> {
 /// `tcx.inferred_outlives_of()` to get the outlives for a *particular*
 /// item.
 #[derive(StableHash, Debug)]
-pub struct CratePredicatesMap<'tcx> {
+pub struct CrateClausesMap<'tcx> {
     /// For each struct with outlive bounds, maps to a vector of the
-    /// predicate of its outlive bounds. If an item has no outlives
+    /// clause of its outlive bounds. If an item has no outlives
     /// bounds, it will have no entry.
-    pub predicates: DefIdMap<&'tcx [(Clause<'tcx>, Span)]>,
+    pub clauses: DefIdMap<&'tcx [(Clause<'tcx>, Span)]>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

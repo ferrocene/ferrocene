@@ -1654,7 +1654,7 @@ pub trait UpperExp: PointeeSized {
 ///
 /// let mut output = String::new();
 /// fmt::write(&mut output, format_args!("Hello {}!", "world"))
-///     .expect("Error occurred while trying to write in String");
+///     .expect("Writing to a `String` should not fail");
 /// assert_eq!(output, "Hello world!");
 /// ```
 ///
@@ -1665,7 +1665,7 @@ pub trait UpperExp: PointeeSized {
 ///
 /// let mut output = String::new();
 /// write!(&mut output, "Hello {}!", "world")
-///     .expect("Error occurred while trying to write in String");
+///     .expect("Writing to a `String` should not fail");
 /// assert_eq!(output, "Hello world!");
 /// ```
 ///

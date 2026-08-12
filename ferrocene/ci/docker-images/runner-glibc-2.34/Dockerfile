@@ -224,7 +224,7 @@ RUN ldconfig
 COPY ferrocene/ci/docker-images/common/sudoers /etc/sudoers
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
-ENV LANG=en_US.utf8
+ENV LANG=C.utf8
 
 # Automatic compiler detection doesn't work for some targets.
 

@@ -104,9 +104,6 @@ RUN <<-EOF
     mv ninja /usr/local/bin
 EOF
 
-# ensure that "cc" exists as a symlink
-RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
-
 FROM --platform=$TARGETPLATFORM ubuntu:20.04 
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope

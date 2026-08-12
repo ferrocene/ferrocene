@@ -49,9 +49,9 @@ RUN ct-ng defconfig
 RUN ct-ng build
 RUN tar cJf /home/ci/ct-ng-powerpc64le-linux-gnu.tar.xz -C /home/ci/x-tools/powerpc64le-linux-gnu --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
 
-FROM build AS risc64-unknown-linux-gnu
+FROM build AS riscv64-unknown-linux-gnu
 
-COPY /risc64-unknown-linux-gnu.defconfig defconfig
+COPY /riscv64-unknown-linux-gnu.defconfig defconfig
 RUN ct-ng defconfig
 RUN ct-ng build
-RUN tar cJf /home/ci/ct-ng-risc64-unknown-linux-gnu.tar.xz -C /home/ci/x-tools/risc64-unknown-linux-gnu --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
+RUN tar cJf /home/ci/ct-ng-riscv64-unknown-linux-gnu.tar.xz -C /home/ci/x-tools/riscv64-unknown-linux-gnu --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

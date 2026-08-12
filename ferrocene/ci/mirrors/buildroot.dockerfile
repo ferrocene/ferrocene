@@ -25,7 +25,7 @@ ENV GCC_VERSION=16.1.0
 # For whatever reason the default set of include paths for clang is different
 # than that of gcc. As a result we need to manually include our sysroot's
 # include path, /ferrocene-buildroot/include, to clang's default include path.
-ENV INC="/ferrocene-buildroot/include:/usr/local/include:/usr/include"
+ENV INC="/ferrocene-buildroot/include:/usr/include/x86_64-linux-gnu/:/usr/local/include:/usr/include"
 
 # We build clang for multiple targets on x86 since we do all of our cross
 # building and testing on x86, but we don't need any extra targets on aarch64

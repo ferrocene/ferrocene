@@ -67,6 +67,8 @@ RUN <<-EOF
 
     # Install required packages
     apt-install \
+        gpg \
+        gpg-agent \
         git \
         build-essential \
         ninja-build \
@@ -218,6 +220,7 @@ ENV PATH "/opt/nodejs/bin:$PATH"
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 24.04 is a snap.
 COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
 # Install pre-built packages for Ubuntu 20.

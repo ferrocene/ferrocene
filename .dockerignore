@@ -7,4 +7,5 @@
 !requirements.txt
 !ferrocene/ci/docker-images
 !ferrocene/ci/mirrors
+!ferrocene/ci/awscli-version
 !**remote-test-server

@@ -20,6 +20,8 @@ RUN <<-EOF
     apt-get upgrade -y
     # Install required packages
     apt-install \
+        gpg \
+        gpg-agent \
         git \
         build-essential \
         ninja-build \
@@ -71,6 +73,7 @@ EOF
 #
 # Using the provided script also ensures that all versions are in sync
 COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
 # Tell programs relying on the system language (like Python) to use UTF-8.

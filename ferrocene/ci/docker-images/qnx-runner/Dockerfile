@@ -50,8 +50,6 @@ RUN <<-EOF
         unzip \
         sudo
 
-    mkdir -p /ferrocene-buildroot
-
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         host_platform=x86_64
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
@@ -72,8 +70,7 @@ RUN <<-EOF
                 echo "Installing coreutils to /stage/coreutils"
                 tar -C /stage/coreutils -xf "mirrors/$package_file"
             elif [[ $package_file =~ "ferrocene-buildroot" ]];  then
-                echo "Installing buildroot to /ferrocene-buildroot"
-                tar -C /ferrocene-buildroot -xf "mirrors/$package_file"
+                echo "Skipping buildroot"
             else
                 tar -C /usr/local -xf "mirrors/$package_file"
             fi
@@ -81,12 +78,6 @@ RUN <<-EOF
             echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
         fi
     done
-
-    # TESTING CHANGE: Our configuration expects the compiler to be named
-    # aarch64-linux-gnu-gcc
-    cd /ferrocene-buildroot/bin
-    ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc && true
-    ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++ && true
 
 EOF
 
@@ -103,9 +94,6 @@ RUN <<-EOF
     unzip nina-build.zip
     mv ninja /usr/local/bin
 EOF
-
-# ensure that "cc" exists as a symlink
-RUN cd /ferrocene-buildroot/bin && ln -s gcc cc
 
 FROM --platform=$TARGETPLATFORM ubuntu:20.04 
 
@@ -191,11 +179,10 @@ COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-a
 COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
 RUN /tmp/setup-awscli.sh
 
-COPY --from=builder /ferrocene-buildroot /ferrocene-buildroot
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder stage/coreutils/ /usr/
 
-ENV PATH=/ferrocene-buildroot/bin/:/usr/local/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
+ENV PATH=/usr/local/bin/:/usr/local/cmake-3.31.12-linux-x86_64/bin/:/usr/local/cmake-3.31.12-linux-aarch64/bin/:$PATH
 
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
 
@@ -204,7 +191,6 @@ RUN echo '/usr/local/lib/' > /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib64' >> /etc/ld.so.conf.d/openssl.conf
 RUN echo '/usr/local/lib/' >> /etc/ld.so.conf.d/usr-local.conf
 RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
-RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
 # Ubuntu and CentOS don't agree on the location of the CA certs and our git

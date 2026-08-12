@@ -258,8 +258,11 @@ ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-g++
+ENV CC_armv7r_none_eabihf=arm-none-eabi-gcc
+ENV CXX_armv7r_none_eabihf=arm-none-eabi-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
+
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
 ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
 ENV CFLAGS_aarch64_unknown_qnx=-Vgcc_ntoaarch64le_cxx

@@ -272,7 +272,6 @@ ENV CC_aarch64_unknown_qnx=qcc
 ENV CFLAGS_x86_64_pc_qnx=-Vgcc_ntox86_64_cxx
 ENV CC_x86_64_pc_qnx=qcc
 
-
 ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
 ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 ENV CPATH_riscv64gc_unknown_linux_gnu=

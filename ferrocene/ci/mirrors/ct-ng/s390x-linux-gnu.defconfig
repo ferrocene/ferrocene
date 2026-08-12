@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
 CT_CONFIG_VERSION="5"
 CT_EXTRA_CFLAGS_FOR_HOST="-fno-char8_t"
 CT_EXTRA_LDFLAGS_FOR_HOST="-fno-char8_t"

@@ -47,7 +47,7 @@ FROM build AS powerpc64le-linux-gnu
 COPY /powerpc64le-linux-gnu.defconfig defconfig
 RUN ct-ng defconfig
 RUN ct-ng build
-RUN tar cJf /home/ci/ct-ng-powerpc64le-linux-gnu.tar.xz -C /home/ci/x-tools/powerpc64le-linux-gnu --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
+RUN tar cJf /home/ci/ct-ng-powerpc64le-unknown-linux-gnu.tar.xz -C /home/ci/x-tools/powerpc64le-unknown-linux-gnu --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .
 
 FROM build AS riscv64-unknown-linux-gnu
 

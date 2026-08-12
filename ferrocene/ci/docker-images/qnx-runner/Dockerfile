@@ -143,7 +143,8 @@ RUN <<-EOF
         unzip \
         sudo \
         gcc-10 \
-        g++-10
+        g++-10 \
+        gcc-multilib
 
     # make gcc 10 default
     sudo update-alternatives \

@@ -5,7 +5,8 @@
 //@ compile-flags: -C opt-level=2
 //@ compile-flags: -g
 //@ ignore-backends: gcc
-//@ ignore-test glibc versions earlier than 2.25 are generally not SSP enabled https://gitlab.com/gnutools/glibc/-/tags/glibc-2.25
+//@ ignore-test glibc versions earlier than 2.25 are generally not SSP enabled
+//              https://gitlab.com/gnutools/glibc/-/tags/glibc-2.25
 
 #![allow(function_casts_as_integer)]
 

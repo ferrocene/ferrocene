@@ -277,6 +277,20 @@
                 "type": "directory"
               },
               {
+                "directories": [],
+                "files": [
+                  "ci/docker-images/runner/binfmt-qemu-aarch64",
+                  "ci/docker-images/runner/binfmt-qemu-arm"
+                ],
+                "license": {
+                  "copyright": [
+                    "Colin Watson"
+                  ],
+                  "spdx": "GPL-3.0-or-later"
+                },
+                "type": "group"
+              },
+              {
                 "license": {
                   "copyright": [
                     "The Ferrocene Authors"

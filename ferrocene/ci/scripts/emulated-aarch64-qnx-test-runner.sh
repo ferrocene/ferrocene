@@ -18,7 +18,7 @@ start_vm() {
     # its `/tmp` is a symlink to `/dev/shmem` which does not support the creation of directories
     # we use a virtual SD card as an alternative to `/tmp` that does support directories
     # (remote-test-server will use `std::env::tmpdir` and place incoming test runner files there)
-    sd_size=2G
+    sd_size=4G
     sd_img="$emulatordir"/sd.raw
 
     rm -f "$sd_img"
@@ -35,6 +35,7 @@ start_vm() {
         --accel tcg,thread=multi \
         -drive file="$sd_img",format=raw,if=sd,size=$sd_size,index=1 \
         -kernel "${emulatordir}/src/images/QNX-IFS" \
+        -smp 2 \
         -m 4G \
         -machine xlnx-zcu102 \
         -net nic,model=cadence_gem \

@@ -246,11 +246,18 @@ mod tests {
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
+            // on glibc >= 2.24 `Command::spawn` uses `posix_spawn` which reports the
+            // execution of an empty binary as a "format exec error", which produces this error variant
             Err(Error::VersionFetchFailed { binary, error })
                 if matches!(error.kind, CommandErrorKind::StartupFailed { .. }) =>
             {
                 assert_eq!(bin, error.path);
                 assert_eq!(vec![OsString::from("-vV")], error.args);
+                assert_eq!("rustc", binary);
+            }
+            // on glibc < 2.24 `Command::spawn` uses `execvp` which reports the execution of an
+            // empty binary as a success with empty stdout, which produces this error variant
+            Err(Error::VersionParseFailed { binary }) => {
                 assert_eq!("rustc", binary);
             }
             Err(err) => panic!("unexpected error: {err}"),

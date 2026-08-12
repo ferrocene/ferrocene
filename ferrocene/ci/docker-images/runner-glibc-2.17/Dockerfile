@@ -280,6 +280,9 @@ ENV CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc
 ENV CXX_x86_64_unknown_linux_musl=x86_64-linux-musl-g++
 ENV CPATH_x86_64_unknown_linux_musl=/usr/local/x86_64-linux-musl/include/
 
+ENV CC_s390x_unknown_linux_gnu=s390x-linux-gnu-gcc
+ENV CXX_s390x_unknown_linux_gnu=s390x-linux-gnu-g++
+
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 # FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+

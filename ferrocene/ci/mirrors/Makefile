@@ -169,7 +169,7 @@ download-openssl-src:
 	mkdir -p build/openssl
 	aws s3 cp s3://ferrocene-ci-artifacts/manual/openssl/openssl-$(openssl-version).tar.gz build/openssl/openssl.tar.gz
 
-openssl: gcc utils
+openssl: gcc
 	cp output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz build/openssl/gcc.tar.xz
 	docker build --tag openssl:$(openssl-version) --file openssl.dockerfile build/openssl
 	{ \
@@ -184,7 +184,7 @@ upload-openssl:
 		s3://ferrocene-ci-mirrors/manual/openssl/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz
 
 
-builder-image: builder.dockerfile gcc openssl utils
+builder-image: builder.dockerfile gcc openssl
 	mkdir -p build/builder
 	cp output/gcc-$(gcc-version)-$(host-arch)-$(gcc-from).tar.xz build/builder/gcc.tar.xz
 	cp output/openssl-$(openssl-version)-$(host-arch)-$(commit).tar.xz build/builder/openssl.tar.xz

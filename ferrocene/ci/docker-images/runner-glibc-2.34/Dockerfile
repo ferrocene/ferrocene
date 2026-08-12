@@ -134,35 +134,6 @@ RUN yum -y --allowerasing install \
     perl-core \
     shadow-utils
 
-# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
-# are too old to be useful (they don't know about the `z` ISA flag).
-#
-# We get x86_64 Linux binaries from https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux
-#
-# These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
-# image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
-# RUN <<-EOF
-#     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-#         mkdir /opt/riscv-toolchain
-#         PACKAGE_URL="https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz"
-#         SHA="ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7"
-#         curl -Lo /tmp/riscv-toolchain.tar.gz $PACKAGE_URL
-#         echo "$SHA /tmp/riscv-toolchain.tar.gz" | sha256sum -c
-#         tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
-#         rm /tmp/riscv-toolchain.tar.gz
-#         /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
-
-#         echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-#     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-#         echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
-#     else
-#         echo "Unsupported platform"
-#         exit 1
-#     fi
-# EOF
-ENV PATH "/opt/riscv-toolchain/ubuntu2004-20240407/bin:$PATH"
-
-
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
 # recent NodeJS LTS release, as it's built with a more recent glibc version

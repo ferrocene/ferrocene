@@ -66,5 +66,18 @@ RUN make -j$(nproc)
 
 RUN make install
 
+RUN <<EOT
+    set -xe
+
+    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        # Our configuration expects the compiler to be named
+        # aarch64-linux-gnu-gcc
+        cd /ferrocene-buildroot/bin
+        ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc && true
+        ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++ && true
+    fi
+
+EOT
+
 # The ferrocene buildroot contains clang and gcc
 RUN tar cJf /ferrocene-buildroot.tar.xz -C /ferrocene-buildroot --checkpoint=10000 --checkpoint-action=echo="#%u: %T" .

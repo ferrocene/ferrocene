@@ -260,6 +260,8 @@ ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-g++
 ENV CC_armv7r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv7r_none_eabihf=arm-none-eabi-g++
+ENV CC_armebv7r_none_eabihf=arm-none-eabi-gcc
+ENV CXX_armebv7r_none_eabihf=arm-none-eabi-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 

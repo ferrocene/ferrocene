@@ -44,6 +44,9 @@ jobs:
           command: |
             ferrocene/ci/scripts/calculate_parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
+          environment:
+            FULL_BUILD_X86_64_WINDOWS_MSVC: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
+            FULL_BUILD_AARCH64_DARWIN: << pipeline.parameters.full-build-aarch64-darwin-host >>
 
       - continuation/continue:
           configuration_path: .circleci/workflows.yml

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
@@ -14,18 +14,26 @@ case $(uname -m) in
 esac
 
 ensure() {
-    prefix=$1
-    tarfile=$2
-    src=s3://ferrocene-ci-mirrors/manual/${prefix}/${tarfile}.tar.xz
-    dst=ferrocene/ci/mirrors/${tarfile}.tar.xz
+    tarfile=$1
+    prefix=$(echo $tarfile | cut -d- -f1)
+    src=s3://ferrocene-ci-mirrors/manual/${prefix}/${tarfile}
+    dst=ferrocene/ci/mirrors/${tarfile}
     if ! [ -e "$dst" ]; then
         echo "copying $src -> $dst"
         aws s3 cp "$src" "$dst"
     fi
 }
 
-for package in cmake-3.21.1 python-3.12.3 gdb-12.1; do
-    ensure "$(echo $package | cut -d- -f1)" "${package}-${host}"
+for LINE in $(cat ferrocene/ci/mirrors/hashes.txt | tr -s " " | cut -f 2 -d " "); do
+    package_file=$(echo "${LINE}" | cut -f 2)
+    # we know that the host arch of the package is always the first occurence, the
+    # target arch is optional and only occurs for the musl-cross package
+    host_arch=$(echo $package_file | awk '{ match($0, /(aarch64|x86_64)/); print substr($0, RSTART, RLENGTH);}')
+
+    if [ "$host" = "$host_arch" ]; then
+        echo "Downloading package ${package_file}"
+        ensure $package_file
+    else
+        echo "Skipping package ${package_file}, wrong host arch (${host_arch})"
+    fi
 done
-ensure musl "musl-cross-make-${host}-to-aarch64"
-ensure musl "musl-cross-make-${host}-to-x86_64"

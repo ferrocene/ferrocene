@@ -7,6 +7,9 @@
 //@ needs-sanitizer-support
 //@ needs-sanitizer-address
 
+// Ferrocene addition: QEMU user mode does not support (most) sanitizers
+//@ ignore-qemu
+
 //@ compile-flags: -C unsafe-allow-abi-mismatch=sanitizer
 
 use run_make_support::{run_fail, rustc};

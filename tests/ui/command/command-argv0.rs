@@ -2,6 +2,10 @@
 
 //@ only-unix (this is a unix-specific test)
 //@ needs-subprocess
+
+// Ferrocene addition: QEMU user space emulation behaves differently with argv0
+//@ ignore-qemu
+
 use std::env;
 use std::os::unix::process::CommandExt;
 use std::process::Command;

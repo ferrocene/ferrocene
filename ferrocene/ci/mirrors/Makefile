@@ -159,6 +159,29 @@ utils: gcc
 		docker rm $$id ; \
 	}
 
+download-musl-cross-src:
+	mkdir -p build/musl-cross
+	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz build/musl-cross/musl-cross-make.tar.xz
+	
+musl-cross: musl.dockerfile builder-image prepare
+	docker build -t musl-tarballs:$(musl-cross-target-version) --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f musl.dockerfile build/musl-cross
+	{ \
+		set -xe ; \
+		id=$$(docker create musl-tarballs:$(musl-cross-target-version) ) ; \
+		docker cp $$id:/musl-cross-make/musl-cross-make-aarch64-$(musl-cross-target-version).tar.xz \
+			output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz ; \
+		docker cp $$id:/musl-cross-make/musl-cross-make-x86_64-$(musl-cross-target-version).tar.xz \
+			output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz ; \
+		docker rm $$id ; \
+	}
+
+upload-musl-cross:
+	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz
+	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
+		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz
+
+
 upload-utils:
 	aws s3 cp --no-overwrite output/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz \
 		s3://ferrocene-ci-mirrors/manual/coreutils/coreutils-$(coreutils-version)-$(host-arch)-$(commit).tar.xz
@@ -194,28 +217,6 @@ builder-python-image: builder-image python builder-python.dockerfile
 	mkdir -p build/builder-python
 	cp output/python-$(python-version)-$(host-arch)-$(commit).tar.xz build/builder-python/python.tar.xz
 	docker build --tag centos7-python-builder --build-arg=PYTHON_VERSION=$(python-version)  --file builder-python.dockerfile build/builder-python
-
-download-musl-cross-src:
-	mkdir -p build/musl-cross
-	aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-$(musl-cross-target-version)-with-source.tar.xz build/musl-cross/musl-cross-make.tar.xz
-	
-musl-cross: musl.dockerfile builder-image prepare
-	docker build -t musl-tarballs:$(musl-cross-target-version) --target tarballs --build-arg TARGETVERSION=$(musl-cross-target-version) -f musl.dockerfile build/musl-cross
-	{ \
-		set -xe ; \
-		id=$$(docker create musl-tarballs:$(musl-cross-target-version) ) ; \
-		docker cp $$id:/musl-cross-make/musl-cross-make-aarch64-$(musl-cross-target-version).tar.xz \
-			output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz ; \
-		docker cp $$id:/musl-cross-make/musl-cross-make-x86_64-$(musl-cross-target-version).tar.xz \
-			output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz ; \
-		docker rm $$id ; \
-	}
-
-upload-musl-cross:
-	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-aarch64-$(musl-cross-target-version)-$(commit).tar.xz
-	aws s3 cp --no-overwrite output/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz \
-		s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-$(host-arch)-to-x86_64-$(musl-cross-target-version)-$(commit).tar.xz
 
 download-python-src:
 	mkdir -p build/python

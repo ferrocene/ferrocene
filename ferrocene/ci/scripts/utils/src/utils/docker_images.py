@@ -36,11 +36,11 @@ def calculate_hash() -> str:
     for file in sorted(all_files):
         with open(file, "rb") as f:
             filename = file.encode("utf-8")
-            hash.update(f"{len(filename)}".encode())
+            hash.update(f"{len(filename)}|".encode())
             hash.update(filename)
 
             contents = f.read()
-            hash.update(f"{len(contents)}".encode())
+            hash.update(f"{len(contents)}|".encode())
             hash.update(contents)
 
     return hash.hexdigest()

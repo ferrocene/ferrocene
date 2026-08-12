@@ -120,6 +120,9 @@ X86_64_WINDOWS_SELF_TEST_TARGETS = (
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
+with open(CIRCLECI_CONFIGURATION) as f:
+    config: dict[str, dict[str, str]] = yaml.safe_load(f)
+
 
 def calculate_docker_repository_url(repo: str) -> str:
     """
@@ -132,18 +135,20 @@ def calculate_docker_repository_url(repo: str) -> str:
     return repos["repositories"][0]["repositoryUri"]
 
 
-def calculate_llvm_rebuild(target: str):
+def calculate_llvm_rebuild(*dummy: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
-    assert url.scheme == "s3"
-
-    try:
-        s3.head_object(Bucket=url.netloc, Key=url.path.removeprefix("/"))
-        return False
-    except s3.exceptions.ClientError:
-        return True
+    for jobname in config["jobs"]:
+        target = jobname.removeprefix("llvm--")
+        if jobname is not target:
+            url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
+            assert url.scheme == "s3"
+            try:
+                s3.head_object(Bucket=url.netloc, Key=url.path.removeprefix("/"))
+            except s3.exceptions.ClientError:
+                return True
+    return False
 
 
 def calculate_targets(host_plus_stage: str):
@@ -210,13 +215,10 @@ def awscli_version(*dummy):
 
 
 def prepare_parameters():
-    with open(CIRCLECI_CONFIGURATION) as f:
-        config: dict[str, dict[str, str]] = yaml.safe_load(f)
-
     replacements: dict[str, Callable[[str], str | bool]] = {
         "docker-images-hash": lambda _: docker_images.calculate_hash(),
         "docker-repository-url--": calculate_docker_repository_url,
-        "llvm-rebuild--": calculate_llvm_rebuild,
+        "llvm-rebuild": calculate_llvm_rebuild,
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
         "awscli-version": awscli_version,

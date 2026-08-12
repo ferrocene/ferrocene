@@ -15,7 +15,7 @@ version: 2.1
 #
 # * `docker-images-hash`: the hash for docker image tags.
 # * `docker-repository-url--`: calculates the URL of an ECR repository
-# * `llvm-rebuild--`: calculates if the llvm cache must be invalidated
+# * `llvm-rebuild`: calculates if the llvm cache must be invalidated
 # * `targets--`: calculates the compilation targets to execute the job for
 #
 parameters:
@@ -25,16 +25,7 @@ parameters:
   docker-repository-url--ci-docker-images:
     type: string
     default: ""
-  llvm-rebuild--x86_64-unknown-linux-gnu:
-    type: boolean
-    default: false
-  llvm-rebuild--aarch64-unknown-linux-gnu:
-    type: boolean
-    default: false
-  llvm-rebuild--aarch64-apple-darwin:
-    type: boolean
-    default: false
-  llvm-rebuild--x86_64-pc-windows-msvc:
+  llvm-rebuild:
     type: boolean
     default: false
   targets--x86_64-unknown-linux-gnu--build:
@@ -288,7 +279,7 @@ jobs:
       #     command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
       - ferrocene/ci
 
-  x86_64-linux-llvm:
+  llvm--x86_64-unknown-linux-gnu:
     executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
     environment:
@@ -300,7 +291,7 @@ jobs:
       LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
+          condition: << pipeline.parameters.llvm-rebuild >>
           steps:
             - ferrocene/aws_oidc_auth
             - ferrocene/checkout
@@ -404,7 +395,7 @@ jobs:
 
   # aarch64-unknown-linux-gnu jobs
 
-  aarch64-linux-llvm:
+  llvm--aarch64-unknown-linux-gnu:
     executor: &executor-aarch64-runner
       name: ferrocene/docker
       image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
@@ -419,7 +410,7 @@ jobs:
       LLVM_BUILD_PARALLELISM: 12
     steps:
       - when:
-          condition: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
+          condition: << pipeline.parameters.llvm-rebuild >>
           steps:
             - ferrocene/aws_oidc_auth
             - ferrocene/checkout
@@ -540,7 +531,7 @@ jobs:
 
   # aarch64-apple-darwin jobs
 
-  aarch64-darwin-llvm:
+  llvm--aarch64-apple-darwin:
     macos:
       xcode: "26.0.1"
     resource_class: m4pro.medium # 6 cores
@@ -556,7 +547,7 @@ jobs:
       - when:
           condition:
             and:
-              - << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+              - << pipeline.parameters.llvm-rebuild >>
               - << pipeline.parameters.full-build-aarch64-darwin-host >>
           steps:
             - ferrocene/checkout
@@ -682,7 +673,7 @@ jobs:
 
   # x86_64-pc-windows-msvc jobs
 
-  x86_64-windows-llvm:
+  llvm--x86_64-pc-windows-msvc:
     executor:
       name: win/server-2022
       # Experimental choise: This makes the job take slightly more than half of the time
@@ -709,7 +700,7 @@ jobs:
       - when:
           condition:
             and:
-              - << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+              - << pipeline.parameters.llvm-rebuild >>
               - << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
           steps:
             - ferrocene/checkout
@@ -1020,7 +1011,7 @@ workflows:
           name: build-docker--emulator--x86_64
           image: emulator
           tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
-          rebuild: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
+          rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
@@ -1028,7 +1019,7 @@ workflows:
           name: build-docker--runner--aarch64
           image: runner
           tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
-          rebuild: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
+          rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: arm.medium
           awscli_version: << pipeline.parameters.awscli-version >>
 
@@ -1036,7 +1027,7 @@ workflows:
           name: build-docker--runner--x86_64
           image: runner
           tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
-          rebuild: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
+          rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
@@ -1044,12 +1035,12 @@ workflows:
           requires:
             - build-docker--runner--x86_64
 
-      - x86_64-linux-llvm:
+      - llvm--x86_64-unknown-linux-gnu:
           requires:
             - build-docker--runner--x86_64
       - x86_64-linux-build:
           requires:
-            - x86_64-linux-llvm
+            - llvm--x86_64-unknown-linux-gnu
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -1276,12 +1267,12 @@ workflows:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
 
-      - aarch64-linux-llvm:
+      - llvm--aarch64-unknown-linux-gnu:
           requires:
             - build-docker--runner--aarch64
       - aarch64-linux-build:
           requires:
-            - aarch64-linux-llvm
+            - llvm--aarch64-unknown-linux-gnu
       - aarch64-linux-dist:
           requires:
             - aarch64-linux-build
@@ -1340,10 +1331,10 @@ workflows:
           requires:
             - aarch64-linux-build
             - build-docker--rhivos2-emulator--aarch64
-      - aarch64-darwin-llvm: {}
+      - llvm--aarch64-apple-darwin: {}
       - aarch64-darwin-build:
           requires:
-            - aarch64-darwin-llvm
+            - llvm--aarch64-apple-darwin
       - aarch64-darwin-dist:
           requires:
             - aarch64-darwin-build
@@ -1374,10 +1365,10 @@ workflows:
             - aarch64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
-      - x86_64-windows-llvm: {}
+      - llvm--x86_64-pc-windows-msvc: {}
       - x86_64-windows-dist:
           requires:
-            - x86_64-windows-llvm
+            - llvm--x86_64-pc-windows-msvc
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist

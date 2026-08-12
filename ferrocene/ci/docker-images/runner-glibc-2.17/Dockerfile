@@ -266,8 +266,19 @@ ENV CFLAGS_aarch64_unknown_qnx=-Vgcc_ntoaarch64le_cxx
 ENV CC_aarch64_unknown_qnx=qcc
 ENV CFLAGS_x86_64_pc_qnx=-Vgcc_ntox86_64_cxx
 ENV CC_x86_64_pc_qnx=qcc
+
+
 ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
 ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
+ENV CPATH_riscv64gc_unknown_linux_gnu=
+
+ENV CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
+ENV CXX_aarch64_unknown_linux_musl=aarch64-linux-musl-g++
+ENV CPATH_aarch64_unknown_linux_musl=/usr/local/aarch64-linux-musl/include/
+
+ENV CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc
+ENV CXX_x86_64_unknown_linux_musl=x86_64-linux-musl-g++
+ENV CPATH_x86_64_unknown_linux_musl=/usr/local/x86_64-linux-musl/include/
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

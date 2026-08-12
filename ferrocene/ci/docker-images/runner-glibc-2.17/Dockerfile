@@ -94,6 +94,10 @@ RUN <<-EOF
     cd /ferrocene-buildroot/bin
     ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc && true
     ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++ && true
+
+    cd /usr/local/bin
+    ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc && true
+    ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++ && true
 EOF
 
 RUN <<-EOF

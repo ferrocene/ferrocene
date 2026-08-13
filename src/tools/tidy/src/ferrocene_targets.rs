@@ -352,7 +352,7 @@ fn check_target_overviews(
 
             // look for this pattern:
             //     * - :ref:`target-tuple-goes-here`
-            //       - (..)
+            //       - `target-tuple-goes-here`
             //       - [Cross-compilation|Host platform]
             //       - [Full|Bare-metal]
             while let Some(line) = lines.next() {
@@ -365,8 +365,16 @@ fn check_target_overviews(
                 let Some(rest) = strip_prefixes(line, &["*", "-", ":ref:", "`"]) else { continue };
                 let Some(tuple) = rest.strip_suffix('`') else { continue };
 
-                // - (..)
-                _ = lines.next();
+                // - ``target-tuple-goes-here``
+                let Some(line) = lines.next() else { continue };
+                let Some(rest) = strip_prefixes(line, &["-", "``"]) else { continue };
+                let Some(second_tuple) = rest.strip_suffix("``") else { continue };
+                if tuple != second_tuple {
+                    check.error(format!(
+                        "tuple in second (tuple) column (`{second_tuple}`) does not match first (target) column (`{tuple}`) in {}",
+                        index_path.display()
+                    ));
+                }
 
                 // - [Cross-compilation|Host platform]
                 let Some(line) = lines.next() else { continue };

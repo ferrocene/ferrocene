@@ -1175,7 +1175,25 @@ fn test_chain_iterator_nth_try() {
     let mut iter = first.iter().chain(second.iter());
     // Exhausts and clears `b`, then consumes 7 from `a`.
     assert_eq!(iter.next_back(), Some(&7));
-    let found = iter.nth(10);
     // After a is exhausted, `b.as_mut()?` is `None`.
+    let found = iter.nth(10);
     assert_eq!(found, None);
+}
+
+// Cover `<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold`'s try branches
+#[test]
+fn test_skip_iterator_try_rfold() {
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
+    let folded = iter.try_rfold(0, |_acc, _x| {
+        None
+    });
+    assert_eq!(folded, None);
+
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
+    let folded = iter.try_rfold(0, |acc, x| Some(acc + *x));
+    assert_eq!(folded, Some(12));
+
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(5);
+    let folded = iter.try_rfold(42, |acc, x| Some(acc + *x));
+    assert_eq!(folded, Some(42));
 }

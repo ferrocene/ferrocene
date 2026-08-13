@@ -1231,3 +1231,19 @@ fn test_range_inclusive_iterator_spec_try_fold() {
 fn test_index_range_iterator_try_rfold() {
     core::ferrocene_test::test_index_range_try_rfold();
 }
+
+// Cover `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold`'s try branches
+#[test]
+fn test_range_inclusive_iterator_spec_try_rfold() {
+    let mut iter = (StepWrapper(0)..=StepWrapper(5)).into_iter();
+
+    // covers `f(accum, n)?`.
+    let folded = iter.try_rfold(StepWrapper(0), |_acc, _x| None);
+    assert_eq!(folded, None);
+
+    // covers `f(accum, self.start.clone())?`.
+    let folded = iter.try_rfold(StepWrapper(0), |acc, x| {
+        if x == StepWrapper(0) { None } else { Some(StepWrapper(acc.0 + x.0)) }
+    });
+    assert_eq!(folded, None);
+}

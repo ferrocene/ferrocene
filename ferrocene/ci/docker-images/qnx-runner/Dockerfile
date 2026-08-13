@@ -246,8 +246,6 @@ ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 ENV CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
 ENV CXX_aarch64_unknown_linux_musl=aarch64-linux-musl-g++
 
-ENV CPATH="/ferrocene-buildroot/include:/usr/local/aarch64-linux-musl/include/:/usr/local/x86_64-linux-musl/include/:/usr/local/include:/usr/include"
-
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 # FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+

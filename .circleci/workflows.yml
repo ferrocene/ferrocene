@@ -477,7 +477,10 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
-    executor: *executor-aarch64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -972,6 +975,14 @@ workflows:
           tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
+          name:  build-docker--qnx-runner--aarch64
+          image: qnx-runner
+          tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: arm.medium
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:

@@ -123,10 +123,30 @@ ecr = boto3.client("ecr", region_name=ECR_REGION)
 with open(CIRCLECI_CONFIGURATION) as f:
     config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
+try:
+    FULL_BUILD_X86_64_WINDOWS_MSVC = os.environ["FULL_BUILD_X86_64_WINDOWS_MSVC"]
+    print(
+        f"-> FULL_BUILD_X86_64_WINDOWS_MSVC={FULL_BUILD_X86_64_WINDOWS_MSVC}",
+        file=sys.stderr,
+    )
+except KeyError:
+    FULL_BUILD_X86_64_WINDOWS_MSVC = "TRUE"
+
+try:
+    FULL_BUILD_AARCH64_DARWIN = os.environ["FULL_BUILD_AARCH64_DARWIN"]
+    print(
+        f"-> FULL_BUILD_AARCH64_DARWIN={FULL_BUILD_AARCH64_DARWIN}",
+        file=sys.stderr,
+    )
+except KeyError:
+    FULL_BUILD_AARCH64_DARWIN = "TRUE"
+
+TRUTHY = ["1", "TRUE", "True", "true", "YES", "Yes", "yes", "Y", "y"]
 full_build: dict[str, bool] = {
-    "x86_64-pc-windows-msvc": os.environ["FULL_BUILD_X86_64_WINDOWS_MSVC"] == "true",
-    "aarch64-apple-darwin": os.environ["FULL_BUILD_AARCH64_DARWIN"] == "true",
+    "x86_64-pc-windows-msvc": FULL_BUILD_X86_64_WINDOWS_MSVC in TRUTHY,
+    "aarch64-apple-darwin": FULL_BUILD_AARCH64_DARWIN in TRUTHY,
 }
+print(f"-> full_build: {full_build}", file = sys.stderr)
 
 
 def calculate_docker_repository_url(repo: str) -> str:

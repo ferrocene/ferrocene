@@ -1176,3 +1176,12 @@ fn test_pad_integral_errors() {
     };
     assert!(write!(writer, "{:#016}", specimen).is_err());
 }
+
+// Cover `core::fmt::FormattingOptions::get_width`'s branches
+#[test]
+fn test_formatting_options_get_width() {
+    let mut options = core::fmt::FormattingOptions::default();
+    assert_eq!(options.get_width(), None);
+    options.width(Some(5));
+    assert_eq!(options.get_width(), Some(5));
+}

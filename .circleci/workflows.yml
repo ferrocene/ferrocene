@@ -807,7 +807,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
@@ -838,7 +838,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"

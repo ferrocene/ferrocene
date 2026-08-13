@@ -75,6 +75,30 @@ fn test_fmt_write_n_128() {
     assert!(buffer.starts_with("My message is that we'll be watching you."));
 }
 
+// Cover `core::fmt::write`'s try branches
+#[test]
+fn test_write_try_branches() {
+    fn how_dare_you() -> &'static str {
+        "How dare you!"
+    }
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "My message is that we'll be watching you. This is all wrong. \
+    I shouldn't be up here. I should be back in school on the other side of the ocean. \
+    Yet you all come to us young people for hope. ",
+        allow_times: 0,
+    };
+
+    let args = format_args!(
+        "My message is that we'll be watching you. This is all wrong. \
+    I shouldn't be up here. I should be back in school on the other side of the ocean. \
+    Yet you all come to us young people for hope. {}",
+        how_dare_you()
+    );
+
+    assert!(fmt::write(&mut writer, args).is_err());
+}
+
 // Covers `core::fmt::Formatter::<'a>::pad_formatted_parts`
 #[test]
 fn test_formatter_pad_formatted_parts() {

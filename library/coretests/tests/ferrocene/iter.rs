@@ -1209,3 +1209,19 @@ fn test_take_while_iterator_next_try() {
     let found = iter.next();
     assert_eq!(found, None);
 }
+
+// Cover `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`'s try branches
+#[test]
+fn test_range_inclusive_iterator_spec_try_fold() {
+    let mut iter = (StepWrapper(0)..=StepWrapper(5)).into_iter();
+
+    // covers `f(accum, n)?`.
+    let folded = iter.try_fold(StepWrapper(0), |_acc, _x| None);
+    assert_eq!(folded, None);
+
+    // covers `f(accum, self.start.clone())?`.
+    let folded = iter.try_fold(StepWrapper(0), |_acc, x| {
+        if x == StepWrapper(5) { None } else { Some(x) }
+    });
+    assert_eq!(folded, None);
+}

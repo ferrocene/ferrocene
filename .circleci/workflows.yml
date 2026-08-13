@@ -201,7 +201,10 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
-    executor: *executor-x86_64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -299,7 +302,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 12
+      LLVM_BUILD_PARALLELISM: 16
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild >>
@@ -327,7 +330,10 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-linux-self-test-qnx8:
-    executor: *executor-x86_64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-amd64-tiny
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -368,7 +374,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
@@ -399,7 +405,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
@@ -407,9 +413,9 @@ jobs:
   # aarch64-unknown-linux-gnu jobs
 
   llvm--aarch64-unknown-linux-gnu:
-    executor: &executor-aarch64-runner
+    executor: &executor-aarch64-builder
       name: ferrocene/docker
-      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      image_tag: builder--<< pipeline.parameters.docker-images-hash >>--aarch64
       registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
@@ -418,7 +424,7 @@ jobs:
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
-      LLVM_BUILD_PARALLELISM: 12
+      LLVM_BUILD_PARALLELISM: 24
     steps:
       - when:
           condition: << pipeline.parameters.llvm-rebuild >>
@@ -431,7 +437,7 @@ jobs:
           command: echo
 
   aarch64-linux-build:
-    executor: *executor-aarch64-runner
+    executor: *executor-aarch64-builder
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -444,7 +450,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   aarch64-linux-dist:
-    executor: *executor-aarch64-runner
+    executor: *executor-aarch64-builder
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -456,7 +462,10 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-dist-tools:
-    executor: *executor-aarch64-runner
+    executor: &executor-aarch64-runner
+      name: ferrocene/docker
+      image_tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -468,7 +477,10 @@ jobs:
           restore-from-job: aarch64-linux-build
 
   aarch64-linux-self-test:
-    executor: *executor-aarch64-runner
+    executor:
+      name: ferrocene/docker
+      image_tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+      registry: << pipeline.parameters.docker-repository-url--ci-docker-images >>
     resource_class: ferrocene/k8s-arm64-small
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
@@ -798,7 +810,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
@@ -829,7 +841,7 @@ jobs:
           source-env-script: false
       - ferrocene-job-test-vm:
           checkout-source: false
-          docker-image-tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
           emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
@@ -936,8 +948,16 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
+          name: build-docker--builder--aarch64
+          image: runner-glibc-2.17
+          tag: builder--<< pipeline.parameters.docker-images-hash >>--aarch64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: arm.medium
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
           name: build-docker--runner--aarch64
-          image: runner
+          image: runner-glibc-2.34
           tag: runner--<< pipeline.parameters.docker-images-hash >>--aarch64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: arm.medium
@@ -945,10 +965,26 @@ workflows:
 
       - ferrocene/build_docker:
           name: build-docker--runner--x86_64
-          image: runner
+          image: runner-glibc-2.17
           tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
           resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
+          name: build-docker--qnx-runner--x86_64
+          image: qnx-runner
+          tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: large.gen2
+          awscli_version: << pipeline.parameters.awscli-version >>
+
+      - ferrocene/build_docker:
+          name:  build-docker--qnx-runner--aarch64
+          image: qnx-runner
+          tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--aarch64
+          rebuild: << pipeline.parameters.llvm-rebuild >>
+          resource_class: arm.medium
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - misc-checks:
@@ -1566,10 +1602,10 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
+                    $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
-                    --workdir /home/ci/project \
-                    --volume $(pwd):/home/ci/project \
+                    --workdir /project \
+                    --volume $(pwd):/project \
                     --volume /tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1588,8 +1624,8 @@ commands:
                   docker run \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-                    --workdir /home/ci/project \
-                    --volume $(pwd):/home/ci/project \
+                    --workdir /project \
+                    --volume $(pwd):/project \
                     --volume /tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1605,8 +1641,8 @@ commands:
             docker run \
               --rm \
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-              --workdir /home/ci/project \
-              --volume $(pwd):/home/ci/project \
+              --workdir /project \
+              --volume $(pwd):/project \
               --volume /tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \

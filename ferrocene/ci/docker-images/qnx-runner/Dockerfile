@@ -88,6 +88,9 @@ RUN <<-EOF
     ln -s aarch64-unknown-linux-gnu-gcc aarch64-linux-gnu-gcc && true
     ln -s aarch64-unknown-linux-gnu-c++ aarch64-linux-gnu-c++ && true
 
+    # Ensure we pick up the system cc by removing the symlink in our buildroot
+    rm -f /ferrocene-buildroot/bin/cc
+
 EOF
 
 RUN <<-EOF
@@ -142,9 +145,21 @@ RUN <<-EOF
         gcc-10 \
         g++-10
 
+
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        apt-install gcc-multilib
+        apt-install \
+            gcc-multilib
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        # Needed for x86_64-unknown-linux-gnu cross-compilation
+        apt-install \
+            g++-x86-64-linux-gnu \
+            gcc-x86-64-linux-gnu \
+            g++-10-x86-64-linux-gnu \
+            gcc-10-x86-64-linux-gnu \
+            binutils-x86-64-linux-gnu \
+            libc6-dev-amd64-cross
     fi
+
 
     # make gcc 10 default
     sudo update-alternatives \

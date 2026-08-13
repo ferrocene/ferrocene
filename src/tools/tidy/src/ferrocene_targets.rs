@@ -1,3 +1,19 @@
+//! # Check for completeness and correctness of qualification docs for qualified targets
+//!
+//! This uses `ferrocene/targets.toml` as the central location that specifies which
+//! targets are qualified and their properties, like whether they are bare metal or
+//! not.
+//!
+//! the tidy check analyzes the following files:
+//!
+//! - compilation target pages in user manuals
+//! - compilation target overviews in user manuals
+//! - qualification scopes in safety manuals
+//! - test results in qualification reports
+//! - `ferrocene/packages.toml` which describes criticalup components
+//! - `doc/src/target-names.toml` which maps target tuples to more
+//!   user friendly target names
+
 use core::fmt;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -103,17 +119,17 @@ fn check_tests_results(
         for report in QUALIFICATION_REPORTS {
             let rustc_dir = doc_dir.join(report).join("src/rustc");
             for entry in fs::read_dir(&rustc_dir).unwrap() {
-                let path = entry.unwrap().path();
-                if path.extension().unwrap_or_default() != "rst" {
+                let test_result_path = entry.unwrap().path();
+                if test_result_path.extension().unwrap_or_default() != "rst" {
                     continue;
                 }
-                let stem = path.file_stem().unwrap();
+                let stem = test_result_path.file_stem().unwrap();
                 if stem == "index" {
                     continue;
                 }
                 let filename = stem.to_string_lossy().into_owned();
 
-                let contents = fs::read_to_string(&path).unwrap();
+                let contents = fs::read_to_string(&test_result_path).unwrap();
                 let mut lines = contents.lines();
 
                 let mut target = None;
@@ -124,14 +140,14 @@ fn check_tests_results(
                         if target.is_some() {
                             check.error(format!(
                                 "duplicate {OPT_TARGET} option in {}",
-                                path.display()
+                                test_result_path.display()
                             ));
                             continue;
                         }
                         if filename != tuple {
                             check.error(format!(
-                                "{OPT_TARGET} does not match filename in {}",
-                                path.display()
+                                "{OPT_TARGET}{tuple} does not match filename in {}",
+                                test_result_path.display()
                             ));
                             continue;
                         }
@@ -143,7 +159,7 @@ fn check_tests_results(
                         if tested_target.is_some() {
                             check.error(format!(
                                 "duplicate {OPT_TESTED_TARGET} option in {}",
-                                path.display()
+                                test_result_path.display()
                             ));
                         }
                         tested_target = Some(tuple);
@@ -153,19 +169,20 @@ fn check_tests_results(
                         if host.is_some() {
                             check.error(format!(
                                 "duplicate {OPT_HOST} option in {}",
-                                path.display()
+                                test_result_path.display()
                             ));
                         }
                         host = Some(tuple);
                     }
                 }
                 let Some(target) = target else {
-                    check.error(format!("{OPT_TARGET} not found in {}", path.display()));
+                    check
+                        .error(format!("{OPT_TARGET} not found in {}", test_result_path.display()));
                     continue;
                 };
 
                 let Some(host) = host else {
-                    check.error(format!("{OPT_HOST} not found in {}", path.display()));
+                    check.error(format!("{OPT_HOST} not found in {}", test_result_path.display()));
                     continue;
                 };
 
@@ -173,7 +190,7 @@ fn check_tests_results(
                 let std = if is_bare_metal { Std::BareMetal } else { Std::Full };
                 let host = host.to_string();
                 assert!(
-                    found.insert(filename, (Properties { std, host }, path)).is_none(),
+                    found.insert(filename, (Properties { std, host }, test_result_path)).is_none(),
                     "target `{target}` is in multiple manuals but this is not currently supported; update this tidy check",
                 );
             }
@@ -236,27 +253,27 @@ fn check_qualification_scopes(
         let doc_dir = ferrocene_dir.join("doc");
         let mut targets = BTreeMap::new();
         for manual in SAFETY_MANUALS {
-            let path = doc_dir.join(manual).join("src/scope.rst");
-            let contents = fs::read_to_string(&path).unwrap();
+            let scope_path = doc_dir.join(manual).join("src/scope.rst");
+            let contents = fs::read_to_string(&scope_path).unwrap();
 
             let mut lines = contents.lines();
 
             // look for this pattern:
-            //     * - :target:`x86_64-unknown-linux-gnu`
-            //       - :target:`aarch64-unknown-none`
+            //     * - :target:`host-tuple-goes-here`
+            //       - :target:`target-tuple-goes-here`
             //       - ``core``
             //       - [``alloc``|``alloc``, ``std``, ``test``]
             //       - [|``proc_macro``]
             //
             // the first tuple is the host and the second is the target
             while let Some(line) = lines.next() {
-                // * - :target:`x86_64-unknown-linux-gnu`
+                // * - :target:`host-tuple-goes-here`
                 let Some(rest) = strip_prefixes(line, &["*", "-", ":target:", "`"]) else {
                     continue;
                 };
                 let Some(host) = rest.strip_suffix('`') else { continue };
 
-                //   - :target:`aarch64-unknown-none`
+                //   - :target:`target-tuple-goes-here`
                 let Some(line) = lines.next() else { continue };
                 let Some(rest) = strip_prefixes(line, &["-", ":target:", "`"]) else { continue };
                 let Some(target) = rest.strip_suffix('`') else { continue };
@@ -297,7 +314,7 @@ fn check_qualification_scopes(
                 };
 
                 let host = host.to_string();
-                targets.insert(target.to_string(), (Properties { host, std }, path.clone()));
+                targets.insert(target.to_string(), (Properties { host, std }, scope_path.clone()));
             }
         }
         targets
@@ -325,16 +342,16 @@ fn check_target_overviews(
             const ANCHOR1: &str = "_qualified-targets:";
             const ANCHOR2: &str = "list-table::";
 
-            let path = doc_dir.join(manual).join("src/targets/index.rst");
-            let contents = fs::read_to_string(&path).unwrap();
+            let index_path = doc_dir.join(manual).join("src/targets/index.rst");
+            let contents = fs::read_to_string(&index_path).unwrap();
 
             let mut lines = contents.lines();
 
-            advance_until_anchor(&path, &mut lines, ANCHOR1);
-            advance_until_anchor(&path, &mut lines, ANCHOR2);
+            advance_until_anchor(&index_path, &mut lines, ANCHOR1);
+            advance_until_anchor(&index_path, &mut lines, ANCHOR2);
 
             // look for this pattern:
-            //     * - :ref:`x86_64-unknown-linux-gnu`
+            //     * - :ref:`target-tuple-goes-here`
             //       - (..)
             //       - [Cross-compilation|Host platform]
             //       - [Full|Bare-metal]
@@ -344,7 +361,7 @@ fn check_target_overviews(
                     break;
                 }
 
-                // * - :ref:`x86_64-unknown-linux-gnu`
+                // * - :ref:`target-tuple-goes-here`
                 let Some(rest) = strip_prefixes(line, &["*", "-", ":ref:", "`"]) else { continue };
                 let Some(tuple) = rest.strip_suffix('`') else { continue };
 
@@ -361,7 +378,7 @@ fn check_target_overviews(
                 if kind != KIND_TARGET && kind != KIND_HOST {
                     check.error(format!(
                         "unexpected 'Kind' column value '{kind}' in {}",
-                        path.display()
+                        index_path.display()
                     ));
                     continue;
                 }
@@ -380,12 +397,12 @@ fn check_target_overviews(
                 } else {
                     check.error(format!(
                         "unexpected 'Standard library' column value '{std}' in {}",
-                        path.display()
+                        index_path.display()
                     ));
                     continue;
                 };
 
-                all.insert(tuple.to_string(), (std, path.clone()));
+                all.insert(tuple.to_string(), (std, index_path.clone()));
             }
         }
 
@@ -439,8 +456,8 @@ fn check_packages_toml(
             targets: BTreeSet<String>,
         }
 
-        let path = ferrocene_dir.join("packages.toml");
-        let contents = fs::read_to_string(&path).unwrap();
+        let packages_path = ferrocene_dir.join("packages.toml");
+        let contents = fs::read_to_string(&packages_path).unwrap();
         let PackagesToml { groups: Groups { hosts, cross_compilation, qnx } } =
             toml::from_str(&contents).unwrap();
 
@@ -449,7 +466,7 @@ fn check_packages_toml(
             assert!(
                 targets.insert(tuple.clone()),
                 "found the same target `{tuple}` in different groups at {}",
-                path.display()
+                packages_path.display()
             );
         }
 
@@ -457,6 +474,7 @@ fn check_packages_toml(
     }
 
     let in_docs = in_docs(ferrocene_dir);
+    // Check host group
     // one way comparisons because Quality Managed and Supported targets are
     // also listed in packages.toml
     {
@@ -482,6 +500,7 @@ fn check_packages_toml(
         }
     }
 
+    // Check target groups (`cross-compilation` and `qnx`)
     // compare one way because Quality Managed and Supported targets are
     // also listed in packages.toml
     {
@@ -537,13 +556,12 @@ fn compare_both_ways<T>(
 ) where
     T: PartialEq + fmt::Debug,
 {
-    for target in in_toml.keys() {
-        if !in_docs.contains_key(target) {
-            check.error(format!(
-                "target `{target}` was specified in ferrocene/targets.toml but it's not present in {location}"
-            ))
-        }
-    }
+    compare_one_way(
+        &in_toml.keys().cloned().collect(),
+        &in_docs.keys().cloned().collect(),
+        location,
+        check,
+    );
 
     for (target, (docs_property, location)) in in_docs {
         if let Some(toml_property) = in_toml.get(target) {

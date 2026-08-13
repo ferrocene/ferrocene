@@ -225,12 +225,12 @@ fn check_target_pages_in_user_manuals(
 ) {
     fn parse(ferrocene_dir: &Path) -> BTreeSet<String> {
         let doc_dir = ferrocene_dir.join("doc");
-        let mut found = BTreeMap::new();
+        let mut found = BTreeSet::new();
         for manual in USER_MANUALS {
             let rustc_dir = doc_dir.join(manual).join("src/targets");
             extend_with_targets_in_dir(&rustc_dir, &mut found)
         }
-        found.into_keys().collect()
+        found
     }
 
     let in_docs = parse(ferrocene_dir);
@@ -616,7 +616,7 @@ fn strip_prefixes<'a>(mut input: &'a str, prefixes: &[&str]) -> Option<&'a str> 
     Some(input.trim())
 }
 
-fn extend_with_targets_in_dir(dir: &Path, map: &mut BTreeMap<String, PathBuf>) {
+fn extend_with_targets_in_dir(dir: &Path, set: &mut BTreeSet<String>) {
     for entry in fs::read_dir(&dir).unwrap() {
         let path = entry.unwrap().path();
         if path.extension().unwrap_or_default() != "rst" {
@@ -628,7 +628,7 @@ fn extend_with_targets_in_dir(dir: &Path, map: &mut BTreeMap<String, PathBuf>) {
         }
         let target = stem.to_string_lossy().into_owned();
         assert!(
-            map.insert(target.clone(), path).is_none(),
+            set.insert(target.clone()),
             "target `{target}` is in multiple manuals but this is not currently supported; update this tidy check",
         );
     }

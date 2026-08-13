@@ -1150,3 +1150,19 @@ fn test_scan_iterator_try_fold() {
     let folded = iter.try_fold(0, |_acc, _x: usize| None);
     assert_eq!(folded, Some(0));
 }
+
+// Covers `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::find`'s try branches
+#[test]
+fn test_chain_iterator_find_try() {
+    let first = [1, 3, 5, 7];
+    let second: [i32; 0] = [];
+    let mut iter = first.iter().chain(second.iter());
+    // Exhausts and clears `b`, then consumes 7 from `a`.
+    assert_eq!(iter.next_back(), Some(&7));
+    let found = iter.find(|x| {
+        println!("Checking {x:?}");
+        *x % 2 == 0
+    });
+    // After a is exhausted, `b.as_mut()?` is `None`.
+    assert_eq!(found, None);
+}

@@ -183,6 +183,13 @@ def calculate_llvm_rebuild(*dummy: str):
     return not_found > 0
 
 
+def calculate_llvm_hash(*dummy: str) -> str:
+    """
+    Calculates the value of the `llvm-hash` parameter
+    """
+    return llvm_cache.get_llvm_cache_hash()
+
+
 def calculate_targets(host_plus_stage: str):
     """
     Calculates the list of targets to pass.
@@ -256,6 +263,7 @@ def prepare_parameters():
         "docker-images-hash": lambda _: docker_images.calculate_hash(),
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild": calculate_llvm_rebuild,
+        "llvm-hash": calculate_llvm_hash,
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
         "awscli-version": awscli_version,

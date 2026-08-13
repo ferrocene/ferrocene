@@ -67,6 +67,7 @@ def arguments():
         description="Report various data about LLVM caches",
     )
     parser.add_argument("-v", "--verbose", action="count", default=0)
+    parser.add_argument("--override-hash", required=False, default=None)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
@@ -110,32 +111,32 @@ def main():
 
     # match added in 3.10
     if args.subcommand == "s3-url":
-        subcommand_s3_url(ferrocene_host)
+        subcommand_s3_url(ferrocene_host, args.override_hash)
     elif args.subcommand == "download":
-        subcommand_download(ferrocene_host, args.url)
+        subcommand_download(ferrocene_host, args.url, args.override_hash)
     elif args.subcommand == "prepare":
-        subcommand_prepare(ferrocene_host, args.url)
+        subcommand_prepare(ferrocene_host, args.url, args.override_hash)
     else:
         print(f"Unknown command {args.subcommand}")
 
 
-def subcommand_download(ferrocene_host, url):
+def subcommand_download(ferrocene_host, url, override_hash: str|None):
     if url is None:
-        url = llvm_cache.get_s3_url(ferrocene_host).geturl()
+        url = llvm_cache.get_s3_url(ferrocene_host, override_hash).geturl()
 
     cache.retrieve(url, ".")
 
 
-def subcommand_prepare(ferrocene_host, url):
+def subcommand_prepare(ferrocene_host, url, override_hash: str|None):
     if url is None:
-        url = llvm_cache.get_s3_url(ferrocene_host).geturl()
+        url = llvm_cache.get_s3_url(ferrocene_host, override_hash).geturl()
 
     tarball = prepare_llvm_build(ferrocene_host)
     cache.store(url, tarball)
 
 
-def subcommand_s3_url(ferrocene_host):
-    s3_url = llvm_cache.get_s3_url(ferrocene_host)
+def subcommand_s3_url(ferrocene_host, override_hash: str|None):
+    s3_url = llvm_cache.get_s3_url(ferrocene_host, override_hash)
     print(s3_url.geturl())
 
 

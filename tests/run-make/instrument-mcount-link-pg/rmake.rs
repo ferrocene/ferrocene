@@ -3,6 +3,7 @@
 //
 //@ only-gnu
 //@ ignore-cross-compile
+//@ ignore-test Relocations not enabled in CentOS 7
 
 use run_make_support::{path, run, rustc};
 

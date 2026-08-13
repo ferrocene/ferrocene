@@ -51,7 +51,7 @@ for repo in . $(git config --file .gitmodules --get-regexp path | awk '{ print $
     #
     # `--` instructs touch to treat all following arguments as files, even if
     # their names start with `-` (and would thus be interpreted as an option).
-    git ls-tree HEAD -rz --name-only | xargs -0 touch -c ${touch_flag} "${last_commit_date}" --
+    git ls-tree HEAD -rz --name-only | xargs -0 -r touch -c ${touch_flag} "${last_commit_date}" --
 done
 
 echo "finished resetting the mtime of all tracked files to ${last_commit_date}"

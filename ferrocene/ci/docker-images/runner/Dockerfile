@@ -9,7 +9,7 @@
 # You must be authenticated with AWS in order to download its package cache.
 
 # Increment this to force a rebuild in CI, even if you no other changes
-# Generation: 1
+# Generation: 2
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM

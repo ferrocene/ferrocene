@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # Increment this to force a rebuild in CI, even if you no other changes
-# Generation: 1
+# Generation: 2
 
 # From the root of this repository, build with
 # `docker build --tag emulator --file ferrocene/ci/docker-images/emulator/Dockerfile .`

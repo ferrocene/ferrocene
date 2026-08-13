@@ -1225,3 +1225,9 @@ fn test_range_inclusive_iterator_spec_try_fold() {
     });
     assert_eq!(folded, None);
 }
+
+// Cover `<core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold`'s try branches
+#[test]
+fn test_index_range_iterator_try_rfold() {
+    core::ferrocene_test::test_index_range_try_rfold();
+}

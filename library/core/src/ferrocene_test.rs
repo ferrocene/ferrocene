@@ -45,6 +45,16 @@ pub fn test_index_range_slice_index_panic_mut() {
     SliceIndex::index_mut(range_none.clone(), slice_mut);
 }
 
+pub fn test_index_range_try_rfold() {
+    let mut iter = IndexRange::zero_to(5);
+
+    let folded = iter.try_rfold(0, |_acc, i| {
+        if i == 3 { None } else { Some(i) }
+    });
+
+    assert_eq!(folded, None);
+}
+
 pub fn test_wrapped_call_once() {
     let wrapped = core::ops::NeverShortCircuit::wrap_mut_1(|c| c + 10);
     assert_eq!(25, wrapped.call_once((15,)).0);

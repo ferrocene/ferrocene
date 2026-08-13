@@ -140,8 +140,11 @@ RUN <<-EOF
         unzip \
         sudo \
         gcc-10 \
-        g++-10 \
-        gcc-multilib
+        g++-10
+
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        apt-install gcc-multilib
+    fi
 
     # make gcc 10 default
     sudo update-alternatives \

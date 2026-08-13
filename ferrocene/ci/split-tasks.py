@@ -165,6 +165,7 @@ JOBS_DEFINITION: JobsDefinition = {
                 "coverage-run-rustdoc",
                 "pretty",
                 "rustdoc",
+                "rustdoc-html",
                 "rustdoc-js",
                 "rustdoc-js-std",
                 "rustdoc-json",

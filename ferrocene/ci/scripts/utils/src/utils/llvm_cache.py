@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+import functools
 import hashlib
 import subprocess
 import urllib.parse
+from utils import docker_images
 
 
 CACHE_BUCKET = "ferrocene-ci-caches"
@@ -17,6 +19,7 @@ def get_s3_url(ferrocene_host):
     return urllib.parse.urlparse(s3_url)
 
 
+@functools.cache
 def get_llvm_cache_hash():
     """
     Calculate a hash of the LLVM source code and all the files that could impact
@@ -24,6 +27,7 @@ def get_llvm_cache_hash():
     from scratch every time.
     """
     m = hashlib.sha256()
+    m.update(str.encode(docker_images.calculate_hash()))
 
     files = [
         "ferrocene/ci/scripts/llvm_cache.py",  # __file__ is an absolute path
@@ -31,17 +35,18 @@ def get_llvm_cache_hash():
         "src/version",
     ]
 
-    ls_files_cmd = ["git", "ls-files", "src/bootstrap", "ferrocene/ci/docker-images"]
+    ls_files_cmd = ["git", "ls-files", "src/bootstrap"]
     ls_files = subprocess.run(ls_files_cmd, check=True, capture_output=True, text=True)
     files += ls_files.stdout.split()
 
     files.sort()
     for file in files:
-        # hashlib.file_digest added in 3.11
-        f = open(file, mode="rb")
-        buf = f.read()
-        shasum = hashlib.sha256(buf)
-        m.update(str.encode(shasum.hexdigest()))
+        filename = file.encode("utf-8")
+        m.update(f"{len(filename)}|{filename}".encode())
+        with open(file, "rb") as f:
+            buf = f.read()
+            m.update(f"{len(buf)}|".encode())
+            m.update(buf)
 
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.

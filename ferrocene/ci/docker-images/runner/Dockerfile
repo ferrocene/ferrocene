@@ -4,50 +4,16 @@
 # From the root of this repository, build with:
 # ```
 # ferrocene/ci/scripts/ensure-ubuntu-20-packages.sh
-# docker build --tag ubuntu-20 --file ferrocene/ci/docker-images/ubuntu-20/Dockerfile .
+# docker build --tag runner --file ferrocene/ci/docker-images/runner/Dockerfile .
 # ```
 # You must be authenticated with AWS in order to download its package cache.
 
-# This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
-# container is below (FROM ubuntu:20.04). This is needed because the version of
-# QEMU in the Ubuntu 20.04 archives is too old, so we install QEMU on Ubuntu
-# 24.04 and copy the binary over to 20.04.
-#
-# This actually works because the qemu-user-static package contains statically
-# linked versions of QEMU, with no dynamically linked libraries. This means we
-# can just copy it to a different system and it won't have any problems. Do NOT
-# use the same approach for other dependencies missing in Ubuntu 20.04 unless
-# you know what you're doing.
-FROM --platform=$TARGETPLATFORM ubuntu:24.04 AS noble
+# Increment this to force a rebuild in CI, even if you no other changes
+# Generation: 2
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-
-# There is a mirror of the depended on QEMU version in `ferrocene-ci-mirrors` if it ever disappears.
-# See https://launchpad.net/ubuntu/noble/amd64/qemu-user-static and https://launchpad.net/ubuntu/noble/arm64/qemu-user-static
-COPY ferrocene/ci/docker-images/ubuntu-20/qemu-version /tmp/qemu-version
-RUN <<-EOF
-    set -xe
-    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
-    apt update
-    apt install curl -y
-
-    QEMU_VERSION=$(cat /tmp/qemu-version | cut -d ":" -f 2)
-    echo "QEMU $QEMU_VERSION"
-    rm /tmp/qemu-version
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834172758/qemu-user-static_${QEMU_VERSION}_amd64.deb
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        curl -Lo /tmp/qemu.deb http://launchpadlibrarian.net/834165403/qemu-user-static_${QEMU_VERSION}_arm64.deb
-    fi
-    apt install /tmp/qemu.deb -y
-    rm /tmp/qemu.deb
-
-    mkdir -p /ferrocene/packages
-    dpkg -l qemu-user-static >> /ferrocene/packages/ubuntu-24.04
-EOF
 
 FROM --platform=$TARGETPLATFORM ubuntu:20.04
 
@@ -67,6 +33,8 @@ RUN <<-EOF
 
     # Install required packages
     apt-install \
+        gpg \
+        gpg-agent \
         git \
         build-essential \
         ninja-build \
@@ -87,9 +55,6 @@ RUN <<-EOF
         gcc-powerpc64le-linux-gnu \
         g++-powerpc64le-linux-gnu
 
-    # Needed to support the QEMU copied over from Ubuntu 24.04 (see above).
-    # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
-    apt-install binfmt-support
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         # Needed for aarch64-unknown-linux-gnu cross-compilation
@@ -170,17 +135,6 @@ RUN <<-EOF
 EOF
 ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 
-# Grab the newer QEMU from Ubuntu 24.04
-# This requires the binfmt-support package, which is normally a dependency of
-# qemu-user-static.
-COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
-COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-COPY --from=noble /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
-COPY --from=noble /usr/libexec/qemu-binfmt/arm-binfmt-P /usr/libexec/qemu-binfmt/arm-binfmt-P
-# This was removed in 24.04 and is a copy of the 22.04 file.
-COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
-COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm /usr/share/binfmts/qemu-arm
-
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
 # recent NodeJS LTS release, as it's built with a more recent glibc version
@@ -217,27 +171,9 @@ ENV PATH "/opt/nodejs/bin:$PATH"
 # `aws ecr get-login-password`.
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 24.04 is a snap.
-RUN <<-EOF
-    set -xe
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        ARCH="x86_64"
-        SHA="0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08"
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-        ARCH="aarch64"
-        SHA="33b1c2a9daab91ae458516e934b1532e2174643aea2ccfa81ab8c5e9d4ed381b"
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-    PACKAGE_URL="https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}-2.12.4.zip"
-    curl -Lo /tmp/awscli.zip $PACKAGE_URL
-    echo "${SHA} /tmp/awscli.zip" | sha256sum -c
-    unzip -q -d /tmp/awscli /tmp/awscli.zip
-    /tmp/awscli/aws/install
-    rm -rf /tmp/awscli /tmp/awscli.zip
-
-    echo "$SHA $PACKAGE_URL" >> /ferrocene/packages/downloads
-EOF
+COPY --chmod=0700 ferrocene/ci/docker-images/common/setup-awscli.sh /tmp/setup-awscli.sh
+COPY --chmod=0600 ferrocene/ci/awscli-version /tmp/awscli-version
+RUN /tmp/setup-awscli.sh
 
 # Install pre-built packages for Ubuntu 20.
 # See ferrocene/ci/mirrors/README.md.
@@ -267,7 +203,7 @@ EOF
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
-COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
+COPY ferrocene/ci/docker-images/runner/sudoers /etc/sudoers
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8
@@ -293,13 +229,6 @@ ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 # FIXME replace 'armv8-a' with 'armv8-r' when GCC version is bumped to 11+
 ENV CFLAGS_aarch64v8r_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
 ENV CFLAGS_aarch64r82_unknown_none_softfloat="-mstrict-align -march=armv8-a+nofp+nosimd"
-
-COPY --from=noble /ferrocene/packages/ubuntu-24.04 /ferrocene/packages/ubuntu-24.04
-RUN <<-EOF
-    set -xe
-    dpkg -l >> /ferrocene/packages/ubuntu-20.04
-EOF
-
 
 RUN <<-EOF
     set -xe

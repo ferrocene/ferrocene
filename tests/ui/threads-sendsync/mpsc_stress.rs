@@ -2,6 +2,9 @@
 //@ compile-flags:--test
 //@ needs-threads
 
+// Ferrocene addition: This segfaults on QEMU 8.2.2, might work on newer versions?
+//@ ignore-qemu
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc::{channel, RecvError, RecvTimeoutError, TryRecvError};
 use std::sync::Arc;

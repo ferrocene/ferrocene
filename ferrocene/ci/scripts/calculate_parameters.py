@@ -16,23 +16,27 @@
 # with an error if it can't calculate the value of one parameter.
 
 import boto3
-import datetime
-import hashlib
 import json
 import os
 import sys
 import urllib.parse
 import yaml
 from typing import Callable
-from utils import llvm_cache
-
+from utils import llvm_cache, docker_images
+from pathlib import Path
 
 # Path of the YAML file to extract the needed parameters from.
 CIRCLECI_CONFIGURATION = ".circleci/workflows.yml"
 
-# Path of the directory containing all the Docker images. When a parameter
-# references a Docker image, it will be looked up in this directory.
-DOCKER_IMAGES_PATH = "ferrocene/ci/docker-images/"
+# Docker image (name, arch) pairs that are used
+# If these images don't exist for the current hash at the right architecture,
+# triggers an LLVM rebuild
+# TODO: would be nice to eliminate this list
+BASE_DOCKER_IMAGES = [
+    ("emulator", "x86_64"),
+    ("runner", "aarch64"),
+    ("runner", "x86_64"),
+]
 
 # AWS regions we rely on.
 S3_REGION = "us-east-1"
@@ -116,52 +120,13 @@ X86_64_WINDOWS_SELF_TEST_TARGETS = (
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
+with open(CIRCLECI_CONFIGURATION) as f:
+    config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
-def calculate_docker_image_tag(platform_plus_image: str):
-    """
-    Calculates the value of parameters starting with `docker-image-tag--`.
-    """
-    platform, image = platform_plus_image.split("--", 1)
-
-    path = os.path.join(DOCKER_IMAGES_PATH, image)
-    if not os.path.exists(os.path.join(path, "Dockerfile")):
-        raise ScriptError(f"unknown Docker image: {image}")
-
-    all_files: list[str] = []
-    for root, _, files in os.walk(path):
-        for file in files:
-            all_files.append(os.path.join(root, file))
-
-    # This is done in two steps to guarantee a stable sorting for the files,
-    # otherwise inconsistencies in the filesystem could result in different
-    # hashes even though the two directories are equal.
-    hash = hashlib.sha256()
-    for file in sorted(all_files):
-        with open(file, "rb") as f:
-            hash.update(file.encode("utf-8"))
-            hash.update(f.read())
-
-    return f"{platform}-{image}-{hash.hexdigest()}"
-
-
-def calculate_docker_image_rebuild(repo_plus_platform_plus_image: str) -> bool:
-    """
-    Calculate the value of parameters starting with `docker-image-rebuild--`
-    """
-    repo, platform, image = repo_plus_platform_plus_image.split("--", 2)
-    try:
-        image = ecr.describe_images(
-            repositoryName=repo,
-            imageIds=[{"imageTag": calculate_docker_image_tag(f"{platform}--{image}")}],
-        )["imageDetails"][0]
-    except ecr.exceptions.ImageNotFoundException:
-        # Image doesn't exist, build it.
-        return True
-
-    # FIXME: .utcnow should be .now(datetime.UTC), but CI is on python 3.9
-    now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
-    delta: datetime.timedelta = now - image["imagePushedAt"]
-    return delta.days >= REBUILD_IMAGES_OLDER_THAN_DAYS
+full_build: dict[str, bool] = {
+    "x86_64-pc-windows-msvc": os.environ["FULL_BUILD_X86_64_WINDOWS_MSVC"] == "true",
+    "aarch64-apple-darwin": os.environ["FULL_BUILD_AARCH64_DARWIN"] == "true",
+}
 
 
 def calculate_docker_repository_url(repo: str) -> str:
@@ -175,18 +140,27 @@ def calculate_docker_repository_url(repo: str) -> str:
     return repos["repositories"][0]["repositoryUri"]
 
 
-def calculate_llvm_rebuild(target: str):
+def calculate_llvm_rebuild(*dummy: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
-    assert url.scheme == "s3"
-
-    try:
-        s3.head_object(Bucket=url.netloc, Key=url.path.removeprefix("/"))
-        return False
-    except s3.exceptions.ClientError:
-        return True
+    not_found = 0
+    for jobname in config["jobs"]:
+        target = jobname.removeprefix("llvm--")
+        if jobname != target and (
+            target not in full_build or full_build[target] is True
+        ):
+            url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
+            assert url.scheme == "s3"
+            try:
+                s3.head_object(Bucket=url.netloc, Key=url.path.removeprefix("/"))
+            except s3.exceptions.ClientError:
+                print(
+                    f"missing llvm artifact for {target}: {url.geturl()}",
+                    file=sys.stderr,
+                )
+                not_found += 1
+    return not_found > 0
 
 
 def calculate_targets(host_plus_stage: str):
@@ -242,23 +216,33 @@ def calculate_targets(host_plus_stage: str):
 
 # We need `*dummy` since below in `prepare_paremeters` calls this with args.
 def workflow_id(*dummy):
-    return os.environ.get("CIRCLE_WORKFLOW_ID")
+    var = os.environ.get("CIRCLE_WORKFLOW_ID")
+    assert var is not None
+    return var
+
+
+# read from ferrocene/ci/awscli-version
+def awscli_version(*dummy):
+    return Path("ferrocene/ci/awscli-version").read_text()
+
+
+# read from ferrocene/ci/qemu-version
+def qemu_version(*dummy):
+    return Path("ferrocene/ci/qemu-version").read_text()
 
 
 def prepare_parameters():
-    with open(CIRCLECI_CONFIGURATION) as f:
-        config: dict[str, dict[str, str]] = yaml.safe_load(f)
-
-    replacements: dict[str, Callable[[str], str]] = {
-        "docker-image-tag--": calculate_docker_image_tag,
-        "docker-image-rebuild--": calculate_docker_image_rebuild,
+    replacements: dict[str, Callable[[str], str | bool]] = {
+        "docker-images-hash": lambda _: docker_images.calculate_hash(),
         "docker-repository-url--": calculate_docker_repository_url,
-        "llvm-rebuild--": calculate_llvm_rebuild,
+        "llvm-rebuild": calculate_llvm_rebuild,
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
+        "awscli-version": awscli_version,
+        "qemu-version": qemu_version,
     }
 
-    parameters: dict[str, str] = {}
+    parameters: dict[str, str | bool] = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
             if parameter.startswith(prefix):

@@ -226,18 +226,6 @@ SPDX-FileCopyrightText = "The Knurling-rs developers"
 SPDX-License-Identifier = "MIT OR Apache-2.0"
 
 [[annotations]]
-path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64"
-precedence = "override"
-SPDX-FileCopyrightText = "Colin Watson"
-SPDX-License-Identifier = "GPL-3.0-or-later"
-
-[[annotations]]
-path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-arm"
-precedence = "override"
-SPDX-FileCopyrightText = "Colin Watson"
-SPDX-License-Identifier = "GPL-3.0-or-later"
-
-[[annotations]]
 path = [
     ".python-version",
     "src/bootstrap/src/ferrocene/**",

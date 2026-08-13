@@ -1197,3 +1197,15 @@ fn test_skip_iterator_try_rfold() {
     let folded = iter.try_rfold(42, |acc, x| Some(acc + *x));
     assert_eq!(folded, Some(42));
 }
+
+// Cover `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::next`'s try branches
+#[test]
+fn test_take_while_iterator_next_try() {
+    let mut iter = [1, 2].iter().take_while(|x| *x < &10);
+    let found = iter.next();
+    assert_eq!(found, Some(&1));
+    let found = iter.next();
+    assert_eq!(found, Some(&2));
+    let found = iter.next();
+    assert_eq!(found, None);
+}

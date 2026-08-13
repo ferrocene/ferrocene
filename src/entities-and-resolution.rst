@@ -301,7 +301,7 @@ If a :t:`path segment` is expressed as either :t:`keyword` ``crate``, :t:`keywor
 If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall either be the first or the last :t:`path segment` of the :t:`path`.
 
 :dp:`fls_oRdi3KXFbJcR`
-If the last :t:`path segment` of a :t:`path` is expressed as :t:`keyword` ``self``, the :t:`entity` brought into :t:`scope` shall be a :t:`module`, an :t:`enum`, or a :t:`trait`.
+If the last :t:`path segment` of a :t:`path` is expressed as :t:`keyword` ``self``, then the :t:`entity` brought into :t:`scope` shall be an :t:`enum`, a :t:`module`, or a :t:`trait`.
 
 :dp:`fls_774uryecc2sx`
 A :t:`path` that starts with a :t:`path segment` that is expressed as

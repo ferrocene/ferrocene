@@ -90,6 +90,56 @@ fn test_formatter_pad_formatted_parts() {
     assert_eq!(buffer, "123.456");
 }
 
+// Cover `core::fmt::Formatter::<'a>::write_formatted_parts`'s try branches
+#[test]
+fn test_formatter_write_formatted_parts_try_branches() {
+    // We avoid digging into `numfmt::Part` by using `{:e}`.
+
+    // Cover `self.buf.write_str(formatted.sign)?;`
+    {
+        let mut writer = ErrorTriggerWriter {
+            error_on: "-",
+            allow_times: 0,
+        };
+        let mut f = fmt::Formatter::new(&mut writer, fmt::FormattingOptions::new());
+        assert!(fmt::Display::fmt(&-1.0_f64, &mut f).is_err());
+    }
+
+    // Cover `self.buf.write_str(ZEROES)?;`
+    {
+        let mut writer = ErrorTriggerWriter {
+            error_on: &"0".repeat(64),
+            allow_times: 0,
+        };
+        let mut options = fmt::FormattingOptions::new();
+        options.precision(Some(65));
+        let mut f = fmt::Formatter::new(&mut writer, options);
+        assert!(fmt::LowerExp::fmt(&1_u64, &mut f).is_err());
+    }
+
+    // Cover `self.buf.write_str(&ZEROES[..nzeroes])?;`
+    {
+        let mut writer = ErrorTriggerWriter {
+            error_on: "0",
+            allow_times: 0,
+        };
+        let mut options = fmt::FormattingOptions::new();
+        options.precision(Some(1));
+        let mut f = fmt::Formatter::new(&mut writer, options);
+        assert!(fmt::LowerExp::fmt(&1_u64, &mut f).is_err());
+    }
+
+    // Cover `write_bytes(self.buf, &s[..len])?;`
+    {
+        let mut writer = ErrorTriggerWriter {
+            error_on: "0",
+            allow_times: 0,
+        };
+        let mut f = fmt::Formatter::new(&mut writer, fmt::FormattingOptions::new());
+        assert!(fmt::LowerExp::fmt(&1.0_f64, &mut f).is_err());
+    }
+}
+
 // Covers `core::fmt::num::<impl u128>::_fmt_inner`
 #[test]
 fn test_u128_fmt_inner() {

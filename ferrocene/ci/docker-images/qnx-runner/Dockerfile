@@ -147,14 +147,8 @@ RUN <<-EOF
 
 
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-        # Needed for aarch64-unknown-linux-gnu cross-compilation
         apt-install \
-            g++-aarch64-linux-gnu \
-            gcc-aarch64-linux-gnu \
-            g++-10-aarch64-linux-gnu \
-            gcc-10-aarch64-linux-gnu \
-            binutils-aarch64-linux-gnu \
-            libc6-dev-arm64-cross
+            gcc-multilib
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
         # Needed for x86_64-unknown-linux-gnu cross-compilation
         apt-install \

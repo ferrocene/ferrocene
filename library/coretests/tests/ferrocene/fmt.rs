@@ -1458,3 +1458,51 @@ fn test_debug_tuple_try_branches() {
 
     assert!(write!(writer, "{:?}", Floop(10)).is_err());
 }
+
+// Cover `core::fmt::builders::DebugStruct::<'a, 'b>::field_with`'s try branches
+#[test]
+fn test_debug_struct_field_with_try_branches() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct Fields {
+        one: u64,
+        two: u64
+    }
+
+    let specimen = Fields { one: 1, two: 2 };
+
+    // self.fmt.write_str(" {\n")?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: " {\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    // writer.write_str(": ")?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: ": ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    // self.fmt.write_str(prefix)?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: " { ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    // self.fmt.write_str(name)?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "one",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    // self.fmt.write_str(": ")?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: ": ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+}

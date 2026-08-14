@@ -1286,3 +1286,30 @@ fn test_debug_set_finish_non_exhaustive_try_branches() {
     };
     assert!(write!(writer, "{:#?}", Foo(vec![1, 2, 3, 4])).is_err());
 }
+
+// Cover `core::fmt::builders::DebugList::<'a, 'b>::finish_non_exhaustive`'s try branches
+#[test]
+fn test_debug_list_finish_non_exhaustive_try_branches() {
+    use std::fmt;
+
+    struct Foo(Vec<i32>);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            // Print at most two elements, abbreviate the rest
+            let mut f = fmt.debug_list();
+            let f = f.entries(self.0.iter().take(2));
+            if self.0.len() > 2 {
+                f.finish_non_exhaustive()
+            } else {
+                f.finish()
+            }
+        }
+    }
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "..\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", Foo(vec![1, 2, 3, 4])).is_err());
+}

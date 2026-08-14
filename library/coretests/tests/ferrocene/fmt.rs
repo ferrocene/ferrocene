@@ -1395,3 +1395,66 @@ fn test_debug_map_finish_non_exhaustive_try_branches() {
     };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
+
+// Covers the try branches of
+// * core::fmt::builders::DebugTuple::<'a, 'b>::finish_non_exhaustive
+// * core::fmt::builders::DebugTuple::<'a, 'b>::finish
+// * core::fmt::builders::DebugTuple::<'a, 'b>::field_with
+#[test]
+fn test_debug_tuple_try_branches() {
+    use std::fmt;
+
+    // From the doctests
+    struct Droop(i32, u64, #[allow(dead_code)] String);
+
+    impl fmt::Debug for Droop {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_tuple("Droop")
+               .field(&self.0)
+               .field(&self.1)
+               .finish_non_exhaustive() // Show that some other field(s) exist.
+        }
+    }
+
+    let specimen = Droop(10, 20, "secret!".to_owned());
+
+    // finish_non_exhaustive: writer.write_str("..\n")?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "..\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    // field_with: self.fmt.write_str("(\n")?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "(\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let multi_specimen = Droop(10, 20, "secret!".to_owned());
+
+    // field_with: self.fmt.write_str(prefix)?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: ", ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", multi_specimen).is_err());
+
+    struct Floop(i32);
+
+    impl fmt::Debug for Floop {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_tuple("")
+                .field(&self.0)
+                .finish()
+        }
+    }
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ",",
+        allow_times: 0,
+    };
+
+    assert!(write!(writer, "{:?}", Floop(10)).is_err());
+}

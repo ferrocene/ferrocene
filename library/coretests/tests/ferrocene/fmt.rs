@@ -1314,11 +1314,15 @@ fn test_debug_list_finish_non_exhaustive_try_branches() {
     assert!(write!(writer, "{:#?}", Foo(vec![1, 2, 3, 4])).is_err());
 }
 
-// Cover `core::fmt::builders::DebugMap::<'a, 'b>::finish_non_exhaustive`'s try branches
+// Cover the try branches of
+// * core::fmt::builders::DebugMap::<'a, 'b>::finish_non_exhaustive
+// * core::fmt::builders::DebugMap::<'a, 'b>::key_with's try branches
+// * core::fmt::builders::DebugMap::<'a, 'b>::value_with's try branches
 #[test]
 fn test_debug_map_finish_non_exhaustive_try_branches() {
     use std::fmt;
 
+    // From the doctests
     struct Foo(Vec<(char, i32)>);
 
     impl fmt::Debug for Foo {
@@ -1334,9 +1338,60 @@ fn test_debug_map_finish_non_exhaustive_try_branches() {
         }
     }
 
+    let specimen = Foo(vec![('a', 1), ('b', 2), ('c', 3), ('d', 4)]);
+
+    // finish_non_exhaustive
     let mut writer = ErrorTriggerWriter {
         error_on: "..\n",
         allow_times: 0,
     };
-    assert!(write!(writer, "{:#?}", Foo(vec![('a', 1), ('b', 2), ('c', 3), ('d', 4)])).is_err());
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "a",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "1",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ", ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ": ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ": ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
+
+    let mut writer = ErrorTriggerWriter {
+        error_on: ",\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", specimen).is_err());
 }

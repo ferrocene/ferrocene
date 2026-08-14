@@ -1506,3 +1506,43 @@ fn test_debug_struct_field_with_try_branches() {
     };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
+
+// Cover `core::fmt::builders::DebugInner::<'a, 'b>::entry_with`'s try branches
+#[test]
+fn test_debug_inner_entry_with_try_branches() {
+    struct Entry;
+
+    impl fmt::Debug for Entry {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.write_str("Entry")
+        }
+    }
+
+    // self.fmt.write_str("\n")?
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", [Entry]).is_err());
+
+    // The entry formatter itself: entry_fmt(&mut writer)?
+    let mut writer = ErrorTriggerWriter {
+        error_on: "Entry",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", [Entry]).is_err());
+
+    // writer.write_str(",\n")?
+    let mut writer = ErrorTriggerWriter {
+        error_on: ",\n",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:#?}", [Entry]).is_err());
+
+    // self.fmt.write_str(", ")?
+    let mut writer = ErrorTriggerWriter {
+        error_on: ", ",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", [Entry, Entry]).is_err());
+}

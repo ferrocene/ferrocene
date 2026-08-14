@@ -4,6 +4,7 @@
 //@ only-x86_64
 //@ only-linux
 //@ ignore-32bit
+//@ ignore-test CentOS 7 cannot support static-pie the glibc lacks support for early relocation
 
 use std::process::Command;
 

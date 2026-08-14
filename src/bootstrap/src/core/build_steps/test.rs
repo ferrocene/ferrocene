@@ -531,7 +531,7 @@ impl Step for RustAnalyzer {
         cargo.arg("--workspace");
         cargo.arg("--exclude=xtask");
 
-        if build_compiler.stage == 0 {
+        if true {
             // This builds a proc macro against the bootstrap libproc_macro, which is not ABI
             // compatible with the ABI proc-macro-srv expects to load.
             cargo.arg("--exclude=proc-macro-srv");

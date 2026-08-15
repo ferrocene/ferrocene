@@ -1692,4 +1692,4 @@ commands:
 executors:
   linux-vm:
     machine:
-      image: default
+      image: ubuntu-2604:current

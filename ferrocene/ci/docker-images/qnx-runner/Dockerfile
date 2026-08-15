@@ -237,6 +237,16 @@ RUN echo '/usr/local/lib64/' >> /etc/ld.so.conf.d/usr-local.conf
 RUN echo '/ferrocene-buildroot/lib64/' >> /etc/ld.so.conf.d/ferrocene-buildroot.conf
 RUN ldconfig
 
+# Ubuntu and CentOS don't agree on the location of the CA certs and our git
+# inherits the setting from the system it was built on
+RUN git config --system http.sslcainfo /etc/ssl/certs/ca-certificates.crt
+
+# To run chroot inside the container we need sudo access. Copy a configuration
+# file allowing all users inside the container to use sudo.
+COPY ferrocene/ci/docker-images/common/sudoers /etc/sudoers
+
+# Tell programs relying on the system language (like Python) to use UTF-8.
+ENV LANG=C.UTF-8
 ENV CC=clang
 ENV CXX=clang++
 
@@ -250,34 +260,38 @@ ENV RUST_CONFIGURE_ARGS="--set target.x86_64-unknown-linux-gnu.linker=clang \
       --set rust.lto=thin \
       --set rust.codegen-units=1"
 
-# Ubuntu and CentOS don't agree on the location of the CA certs and our git
-# inherits the setting from the system it was built on
-RUN git config --system http.sslcainfo /etc/ssl/certs/ca-certificates.crt
-
-# To run chroot inside the container we need sudo access. Copy a configuration
-# file allowing all users inside the container to use sudo.
-COPY ferrocene/ci/docker-images/common/sudoers /etc/sudoers
-
-# Tell programs relying on the system language (like Python) to use UTF-8.
-ENV LANG=C.UTF-8
-
-# Automatic compiler detection doesn't work for some targets.
-ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
-ENV CC_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-gcc
-ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-linux-gnu-g++
+ENV CC_aarch64_unknown_none=aarch64-unknown-linux-gnu-gcc
+ENV CXX_aarch64_unknown_none=aarch64-unknown-linux-gnu-g++
+ENV CC_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-gcc
+ENV CXX_aarch64_unknown_ferrocene.facade=aarch64-unknown-linux-gnu-g++
+ENV CC_armv7r_none_eabihf=arm-none-eabi-gcc
+ENV CXX_armv7r_none_eabihf=arm-none-eabi-g++
+ENV CC_armebv7r_none_eabihf=arm-none-eabi-gcc
+ENV CXX_armebv7r_none_eabihf=arm-none-eabi-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
+
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
 ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
 ENV CFLAGS_aarch64_unknown_qnx=-Vgcc_ntoaarch64le_cxx
 ENV CC_aarch64_unknown_qnx=qcc
 ENV CFLAGS_x86_64_pc_qnx=-Vgcc_ntox86_64_cxx
 ENV CC_x86_64_pc_qnx=qcc
+
 ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
 ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
+ENV CPATH_riscv64gc_unknown_linux_gnu=
+
 ENV CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
 ENV CXX_aarch64_unknown_linux_musl=aarch64-linux-musl-g++
+ENV CPATH_aarch64_unknown_linux_musl=/usr/local/aarch64-linux-musl/include/
+
+ENV CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc
+ENV CXX_x86_64_unknown_linux_musl=x86_64-linux-musl-g++
+ENV CPATH_x86_64_unknown_linux_musl=/usr/local/x86_64-linux-musl/include/
+
+ENV CC_s390x_unknown_linux_gnu=s390x-linux-gnu-gcc
+ENV CXX_s390x_unknown_linux_gnu=s390x-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

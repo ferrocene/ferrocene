@@ -1171,7 +1171,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
+          resource-class: large.gen3 # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1181,7 +1181,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
+          resource-class: large.gen3 # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1273,7 +1273,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
+          resource-class: large.gen3 # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1283,7 +1283,7 @@ workflows:
           tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large # 4-core
+          resource-class: large.gen3 # 4-core
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
@@ -1595,7 +1595,7 @@ commands:
           steps:
             - run:
                 name: Create emulator directory
-                command: mkdir /tmp/emulator
+                command: mkdir -p $HOME/tmp/emulator
 
             - run:
                 name: Prepare emulator
@@ -1606,7 +1606,7 @@ commands:
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     --workdir /project \
                     --volume $(pwd):/project \
-                    --volume /tmp/emulator:/tmp/emulator \
+                    --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
                     --network host \
@@ -1626,7 +1626,7 @@ commands:
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /project \
                     --volume $(pwd):/project \
-                    --volume /tmp/emulator:/tmp/emulator \
+                    --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
                     --network host \
@@ -1643,7 +1643,7 @@ commands:
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /project \
               --volume $(pwd):/project \
-              --volume /tmp/emulator:/tmp/emulator \
+              --volume $HOME/tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \
               --network host \
@@ -1692,4 +1692,4 @@ commands:
 executors:
   linux-vm:
     machine:
-      image: default
+      image: ubuntu-2604:current

@@ -971,6 +971,15 @@ impl CommandLineStep for Index {
         copy_breadcrumbs_assets(builder, &out);
         builder.create_dir(&assets_out);
         builder.cp_link_r(&index_dir.join("index-assets"), &assets_out);
+
+        // Create a placeholder `rustc-docs/index.html`
+        let rustc_docs_path = out.join("rustc-docs/");
+        builder.create_dir(&rustc_docs_path);
+        std::fs::write(
+            rustc_docs_path.join("index.html"),
+            "Placeholder, will be replaced by rustc when calling <code>./x dist ferrocene-docs</code>.",
+        )
+        .expect("failed to write rustc-docs/index.html");
     }
 }
 

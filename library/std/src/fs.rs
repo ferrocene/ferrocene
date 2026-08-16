@@ -3449,10 +3449,9 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 /// # Platform-specific behavior
 ///
 /// This function currently corresponds to the following underlying operations:
-/// * Linux: `fchmodat` with `AT_SYMLINK_NOFOLLOW` with a fallback behavior to use
-/// `open` with `O_NOFOLLOW` followed by behavior denoted in [`fs::set_permissions`] when
-/// the former `fchmodat` call errors with `ENOTSUP`[^1].
-/// * BSD-based platforms, Android: `fchmodat` with `AT_SYMLINK_NOFOLLOW`
+/// * Linux, BSD-based platforms, Android, QNX: `fchmodat` with `AT_SYMLINK_NOFOLLOW`
+/// with a fallback behavior to use `open` with `O_NOFOLLOW` followed by behavior
+/// denoted in [`fs::set_permissions`] when the former `fchmodat` call errors with `ENOTSUP`[^1].
 /// * Other Unix-based platforms with symlinks: `open` with `O_NOFOLLOW` followed by behavior
 ///   denoted in [`fs::set_permissions`].
 /// * Other Unix-based platforms without symlinks: `open` followed by behavior
@@ -3463,7 +3462,7 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 /// Note that, this [may change in the future][changes].
 ///
 /// [^1]: Ubuntu 20.04, for example, makes `fchmodat` with `AT_SYMLINK_NOFOLLOW` return `ENOTSUP`
-/// on both symlinks and non-symlinks
+/// on both symlinks and non-symlinks.
 ///
 /// [changes]: io#platform-specific-behavior
 ///
@@ -3477,10 +3476,8 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 /// * `path` does not exist.
 /// * The user lacks the permission to change attributes of the file.
 ///
-/// Note: On Linux, this will result in an [`Unsupported`] error
-/// if the final element is a symlink. On other Unix-based platforms
-/// with symlinks (non-BSD-based), this will result in a [`FilesystemLoop`]
-/// error.
+/// Note: On Linux and other Unix-based platforms with symlinks (non-BSD-based),
+/// this will result in an [`Unsupported`] error if the final element is a symlink.
 ///
 /// [`Unsupported`]: crate::io::ErrorKind::Unsupported
 /// [`FilesystemLoop`]: crate::io::ErrorKind::FilesystemLoop

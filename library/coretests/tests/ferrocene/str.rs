@@ -300,3 +300,13 @@ fn test_do_count_chars_unlikely() {
 fn test_private_fn_adapters() {
     core::str::ferrocene_test::test_private_fn_adapters();
 }
+
+// Covers `<core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next`'s valid half case
+// From `chunks()` in `library/coretests/tests/str_lossy.rs`
+#[test]
+fn test_utf8_chunks_next_valid() {
+    let mut chunks = b"\xED\x80\x80foo\xED\x9F\xBFbar".utf8_chunks();
+
+    assert_eq!(chunks.next().unwrap().valid(), "\u{D000}foo\u{D7FF}bar");
+    assert_eq!(chunks.next(), None);
+}

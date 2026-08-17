@@ -1546,3 +1546,49 @@ fn test_debug_inner_entry_with_try_branches() {
     };
     assert!(write!(writer, "{:?}", [Entry, Entry]).is_err());
 }
+
+// Covers `<core::str::lossy::Debug<'_> as core::fmt::Debug>::fmt`'s try branches
+#[test]
+fn test_debug_lossy_try_branches() {
+    // f.write_char('"')?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\"",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"hello".utf8_chunks().debug()).is_err());
+
+    // f.write_str(&valid[from..i])?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "abc",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"abc\n".utf8_chunks().debug()).is_err());
+
+    // f.write_char(c)?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"\n".utf8_chunks().debug()).is_err());
+
+    // f.write_str(&valid[from..])?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\x",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"\xFF".utf8_chunks().debug()).is_err());
+
+    // f.write_str(&valid[from..])?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "abc",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"\nabc".utf8_chunks().debug()).is_err());
+
+    // write!(f, "\\x{:02X}", b)?;
+    let mut writer = ErrorTriggerWriter {
+        error_on: "\\x",
+        allow_times: 0,
+    };
+    assert!(write!(writer, "{:?}", b"\xFF".utf8_chunks().debug()).is_err());
+}

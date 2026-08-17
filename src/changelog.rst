@@ -49,10 +49,6 @@ Language changes in Rust 1.95.0
 
   Changed syntax: :s:`MatchArmGuard`
 
-  The FLS models the Rust 2021 syntax accepted by stable :t:`rustc` 1.95.0.
-  It does not add the Rust Reference's attribute position before a guard
-  ``let`` pattern because attributes remain unstable in that position.
-
   New syntax:
 
   - :s:`MatchArmGuardChain`
@@ -195,7 +191,7 @@ Language changes in Rust 1.95.0
   - :t:`well-formed pointer`
 
   Changed glossary entries:
-  
+
   - :t:`pointer type`
   - :t:`raw pointer`
 

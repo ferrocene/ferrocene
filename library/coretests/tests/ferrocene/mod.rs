@@ -1,3 +1,4 @@
+mod alloc;
 mod any;
 mod array;
 mod ascii;

@@ -289,3 +289,14 @@ fn foo() {
 fn test_do_count_chars_unlikely() {
     core::str::test_do_count_chars("", 0);
 }
+
+// Covers:
+// * <core::str::IsAsciiWhitespace as core::ops::function::FnOnce<(&u8,)>>::call_once
+// * <core::str::IsNotEmpty as core::ops::function::FnOnce<(&'a &'b str,)>>::call_once
+// * <core::str::IsWhitespace as core::ops::function::FnOnce<(char,)>>::call_once
+// * <core::str::LinesMap as core::ops::function::FnOnce<(&'a str,)>>::call_once
+// * <core::str::UnsafeBytesToStr as core::ops::function::FnOnce<(&'a [u8],)>>::call_once
+#[test]
+fn test_private_fn_adapters() {
+    core::str::ferrocene_test::test_private_fn_adapters();
+}

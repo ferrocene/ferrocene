@@ -4948,22 +4948,6 @@ move into such a :t:`binding` is performed.
        }
    }
 
-:dp:`fls_8Vrz9SNfjSh7`
-A match arm guard chain consisting of a match arm guard let pattern followed by
-a match arm guard condition operand.
-
-.. code-block:: rust
-
-   fn categorize(input: Option<&str>) -> &'static str {
-       match input {
-           Some(text)
-               if let Ok(number) = text.parse::<i32>()
-                   && number > 9 => "big number",
-           Some(_) => "other text",
-           None => "no text"
-       }
-   }
-
 .. _fls_8l74abhlxzdl:
 
 Return Expressions

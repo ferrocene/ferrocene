@@ -902,3 +902,49 @@ fn test_check_() {
     assert_eq!(i16::checked_add_unsigned(i16::MAX, 10), None, "i16 add",);
     assert_eq!(i16::checked_sub_unsigned(i16::MIN, 10), None, "i16 sub",);
 }
+
+// Cover `core::num::imp::flt2dec::digits_to_exp_str`'s false branches
+#[test]
+fn test_float_exp_single_digit_with_precision() {
+    assert_eq!(format!("{:.1e}", 1.0_f64), "1.0e0");
+    assert_eq!(format!("{:.1e}", 1.2_f64), "1.2e0");
+}
+
+// Covers `core::num::imp::flt2dec::digits_to_exp_str`'s false branch
+#[test]
+fn test_digits_to_exp_str_without_actual_fraction() {
+    use core::mem::MaybeUninit;
+    use core::num::imp::{
+        fmt::Part,
+        flt2dec::{self, Sign},
+    };
+
+    let mut buf = [MaybeUninit::uninit(); 2];
+    let mut parts = [MaybeUninit::uninit(); 6];
+
+    let formatted = flt2dec::to_exact_exp_str(
+        |_decoded, buf, _limit| {
+            buf[0].write(b'1');
+
+            // SAFETY: We initialized buf[0].
+            (unsafe { buf[..1].assume_init_ref() }, 1)
+        },
+        1.0_f64,
+        Sign::Minus,
+        1, // nonzero frac_digits
+        false,
+        &mut buf,
+        &mut parts,
+    );
+
+    assert_eq!(
+        formatted.parts,
+        &[
+            Part::Copy(b"1"),
+            Part::Copy(b"."),
+            Part::Zero(1),
+            Part::Copy(b"e"),
+            Part::Num(0),
+        ],
+    );
+}

@@ -19,6 +19,38 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.97.0
+-------------------------------
+
+- `Consider 'Result<T, Uninhabited>' and 'ControlFlow<Uninhabited, T>' to be equivalent to 'T' for must use lint <https://github.com/rust-lang/rust/pull/148214>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Add allow-by-default 'dead_code_pub_in_binary' lint for unused pub items in binary crates <https://github.com/rust-lang/rust/pull/149509>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Stabilize the 'div32', 'lam-bh', 'lamcas', 'ld-seq-sa' and 'scq' target features <https://github.com/rust-lang/rust/pull/154510>`_
+
+  - The target is outside the scope of the FLS
+
+- `Stabilize 'cfg(target_has_atomic_primitive_alignment)' <https://github.com/rust-lang/rust/pull/155006>`_
+
+  - Configuration options are environment-specific and not exhaustive
+
+- `Allow trailing 'self' in imports in more cases <https://github.com/rust-lang/rust/pull/155137>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_uSajfdSsbxna`
+  - :p:`fls_2bkcn83smy2y`
+  - :p:`fls_ar03D5rxjzy0`
+
+FLS maintenance
+---------------
+
+New paragraph: :p:`fls_oRdi3KXFbJcR`
+
 Language changes in Rust 1.96.0
 -------------------------------
 
@@ -195,7 +227,7 @@ Language changes in Rust 1.95.0
   - :t:`well-formed pointer`
 
   Changed glossary entries:
-  
+
   - :t:`pointer type`
   - :t:`raw pointer`
 

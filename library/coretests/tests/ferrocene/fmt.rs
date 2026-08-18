@@ -1,5 +1,37 @@
 use core::fmt::{self, Write};
 
+
+// Returns a given stream of responses to write calls
+struct ErrorTriggerWriter<'a> {
+    error_on: &'a str,
+    allow_times: usize,
+}
+
+impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        if s == self.error_on && self.allow_times == 0 {
+            println!("Triggered error on str {s:#?}");
+            Err(std::fmt::Error)
+        } else {
+            if s == self.error_on {
+                self.allow_times -= 1;
+            }
+            Ok(())
+        }
+    }
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        if c.to_string() == self.error_on && self.allow_times == 0 {
+            println!("Triggered error on char {c:#?}");
+            Err(std::fmt::Error)
+        } else {
+            if c.to_string() == self.error_on {
+                self.allow_times -= 1;
+            }
+            Ok(())
+        }
+    }
+}
+
 // Covers `core::fmt::rt::Argument::<'_>::as_u16`
 #[test]
 fn test_rt_argument_as_u16_none() {
@@ -615,38 +647,6 @@ fn test_formatter_align() {
     assert_eq!(format!("{Foo:>}"), "right");
     assert_eq!(format!("{Foo:^}"), "center");
     assert_eq!(format!("{Foo}"), "into the void");
-}
-
-
-// Returns a given stream of responses to write calls
-struct ErrorTriggerWriter<'a> {
-    error_on: &'a str,
-    allow_times: usize,
-}
-
-impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
-    fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        if s == self.error_on && self.allow_times == 0 {
-            println!("Blocked str {s:#?}");
-            Err(std::fmt::Error)
-        } else {
-            if s == self.error_on {
-                self.allow_times -= 1;
-            }
-            Ok(())
-        }
-    }
-    fn write_char(&mut self, c: char) -> std::fmt::Result {
-        if c.to_string() == self.error_on && self.allow_times == 0 {
-            println!("Blocked char {c:#?}");
-            Err(std::fmt::Error)
-        } else {
-            if c.to_string() == self.error_on {
-                self.allow_times -= 1;
-            }
-            Ok(())
-        }
-    }
 }
 
 // Covers <core::panic::panic_info::PanicInfo<'_> as core::fmt::Display>::fmt

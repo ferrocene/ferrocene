@@ -22,6 +22,11 @@ use crate::{ascii, mem};
 
 pub mod pattern;
 
+/// Ferrocene addition: Hidden module to test crate-internal functionality
+#[doc(hidden)]
+#[unstable(feature = "ferrocene_test", issue = "none")]
+pub mod ferrocene_test;
+
 mod lossy;
 #[unstable(feature = "str_from_raw_parts", issue = "119206")]
 pub use converts::{from_raw_parts, from_raw_parts_mut};

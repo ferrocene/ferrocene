@@ -396,6 +396,15 @@ fn test_iter_step_by_spec_try_fold() {
     assert_eq!(step_by.nth(2), Some(4),);
 }
 
+// Covers <core::iter::adapters::step_by::StepBy<core::ops::range::Range<u16>> as core::iter::adapters::step_by::StepByImpl<core::ops::range::Range<u16>>>::spec_nth
+#[test]
+fn test_iter_step_by_spec_try_fold_none() {
+    let x = 0_u16..100;
+    let iter = x.into_iter();
+    let mut step_by = iter.step_by(2);
+    assert_eq!(step_by.nth(200), None,);
+}
+
 // Used to test Range bits.
 #[derive(Clone, PartialEq, PartialOrd, Debug)]
 enum Steppable {
@@ -1140,4 +1149,101 @@ fn test_scan_iterator_try_fold() {
         });
     let folded = iter.try_fold(0, |_acc, _x: usize| None);
     assert_eq!(folded, Some(0));
+}
+
+// Cover `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::find`'s try branches
+#[test]
+fn test_chain_iterator_find_try() {
+    let first = [1, 3, 5, 7];
+    let second: [i32; 0] = [];
+    let mut iter = first.iter().chain(second.iter());
+    // Exhausts and clears `b`, then consumes 7 from `a`.
+    assert_eq!(iter.next_back(), Some(&7));
+    let found = iter.find(|x| {
+        println!("Checking {x:?}");
+        *x % 2 == 0
+    });
+    // After a is exhausted, `b.as_mut()?` is `None`.
+    assert_eq!(found, None);
+}
+
+// Cover `<core::iter::adapters::chain::Chain<A, B> as core::iter::traits::iterator::Iterator>::nth`'s try branches
+#[test]
+fn test_chain_iterator_nth_try() {
+    let first = [1, 3, 5, 7];
+    let second: [i32; 0] = [];
+    let mut iter = first.iter().chain(second.iter());
+    // Exhausts and clears `b`, then consumes 7 from `a`.
+    assert_eq!(iter.next_back(), Some(&7));
+    // After a is exhausted, `b.as_mut()?` is `None`.
+    let found = iter.nth(10);
+    assert_eq!(found, None);
+}
+
+// Cover `<core::iter::adapters::skip::Skip<I> as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold`'s try branches
+#[test]
+fn test_skip_iterator_try_rfold() {
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
+    let folded = iter.try_rfold(0, |_acc, _x| {
+        None
+    });
+    assert_eq!(folded, None);
+
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
+    let folded = iter.try_rfold(0, |acc, x| Some(acc + *x));
+    assert_eq!(folded, Some(12));
+
+    let mut iter = [1, 2, 3, 4, 5].iter().skip(5);
+    let folded = iter.try_rfold(42, |acc, x| Some(acc + *x));
+    assert_eq!(folded, Some(42));
+}
+
+// Cover `<core::iter::adapters::take_while::TakeWhile<I, P> as core::iter::traits::iterator::Iterator>::next`'s try branches
+#[test]
+fn test_take_while_iterator_next_try() {
+    let mut iter = [1, 2].iter().take_while(|x| *x < &10);
+    let found = iter.next();
+    assert_eq!(found, Some(&1));
+    let found = iter.next();
+    assert_eq!(found, Some(&2));
+    let found = iter.next();
+    assert_eq!(found, None);
+}
+
+// Cover `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_fold`'s try branches
+#[test]
+fn test_range_inclusive_iterator_spec_try_fold() {
+    let mut iter = (StepWrapper(0)..=StepWrapper(5)).into_iter();
+
+    // covers `f(accum, n)?`.
+    let folded = iter.try_fold(StepWrapper(0), |_acc, _x| None);
+    assert_eq!(folded, None);
+
+    // covers `f(accum, self.start.clone())?`.
+    let folded = iter.try_fold(StepWrapper(0), |_acc, x| {
+        if x == StepWrapper(5) { None } else { Some(x) }
+    });
+    assert_eq!(folded, None);
+}
+
+// Cover `<core::ops::index_range::IndexRange as core::iter::traits::double_ended::DoubleEndedIterator>::try_rfold`'s try branches
+#[test]
+fn test_index_range_iterator_try_rfold() {
+    core::ferrocene_test::test_index_range_try_rfold();
+}
+
+// Cover `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_try_rfold`'s try branches
+#[test]
+fn test_range_inclusive_iterator_spec_try_rfold() {
+    let mut iter = (StepWrapper(0)..=StepWrapper(5)).into_iter();
+
+    // covers `f(accum, n)?`.
+    let folded = iter.try_rfold(StepWrapper(0), |_acc, _x| None);
+    assert_eq!(folded, None);
+
+    // covers `f(accum, self.start.clone())?`.
+    let folded = iter.try_rfold(StepWrapper(0), |acc, x| {
+        if x == StepWrapper(0) { None } else { Some(StepWrapper(acc.0 + x.0)) }
+    });
+    assert_eq!(folded, None);
 }

@@ -27,6 +27,7 @@ use crate::ferrocene::{InstantiateResult, LintState, UnvalidatedImplCause, Use, 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,
     linter: LintState<'tcx>,
+    /// NOTE: may be different from `linter.item`
     owner: OwnerId,
 }
 

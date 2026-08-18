@@ -80,6 +80,7 @@ Quick checks should always include ensuring:
 
 * :ref:`qualification-report:requirements-traceability` is still satisfied
 * :ref:`qualification-report:test-results-overview` shows expected counts
+* :ref:`core-certification:safety-report/code-coverage-overview` shows 100% coverage with "count annotated lines as tested" checked
 * The Specification documents the right version
 * :ref:`release-notes:index`
 

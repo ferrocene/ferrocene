@@ -104,42 +104,21 @@ environment:
 
 * *None so far.*
 
-The following releases are currently published on a schedule in the **prod**
-environment:
+The following releases are currently published in the **prod**
+environment every day at 3:15 AM UTC:
 
-* Everyday at 00:00 UTC, the tip of the ``main`` branch is released on the
-  nightly channel.
-* Everyday at 00:00 UTC, the tip of the branch with the Rust channel of
-  ``beta`` is released on the pre-rolling channel.
-* Everyday at 00:00 UTC, the tip of the most recent branch with the Rust
-  channel of ``stable`` is released on the rolling channel.
-* Everyday at 00:00 UTC, the tip of every branch with the Ferrocene channel of
-  ``beta`` is released on the beta-${version} channel.
-
+* the tip of the ``main`` branch is released on the nightly channel.
+* the tip of the branch with the Rust channel of ``beta`` is released on the pre-rolling channel.
+* the tip of the most recent branch with the Rust channel of ``stable`` is released on the rolling channel.
+* the tip of every branch with the Ferrocene channel of ``beta`` is released on the beta-${version} channel.
 
 Manually-started Releases
 -------------------------
 
-The Ferrocene release tooling also allows Ferrocene developers to manually
-initiate the release process to prepare releases that are not currently
-scheduled, to restart a scheduled release that failed, or for testing (only for
-**dev** environment). Only the initiation of the release process is manual in
-this case; all the other steps are fully automated.
+If a manual release targets the **prod** environment, an approval from a
+:ref:`release manager <organization:Release Managers>` is needed.
 
-To manually start a release, go to
-`this page <https://github.com/ferrocene/ferrocene/actions/workflows/release.yml>`_
-and click the "Run workflow" button.
-You will need to choose which git ref you want to release
-(a branch name, a tag name, a short commit hash, a long commit hash, etc...)
-and which environment in which to run the release.
-You will also be able to tweak how the release is run with the available options.
-Once you click the green "Run workflow" button, a new job will be queued.
-
-If the release targets the **prod** environment, an approval from a Release
-Manager is required. A :ref:`release manager <organization:Release Managers>`
-needs to approve the release in the GitHub UI before the release can proceed.
-Once approved, the release process will start automatically.
-
+For more detail, see :doc:`the internal procedures <internal-procedures:release/publish>`.
 
 Backporting Changes
 -------------------

@@ -1,12 +1,12 @@
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{
     ForeignItem, ForeignItemKind, Item, ItemKind, Node, TraitFn, TraitItem, TraitItemKind,
 };
 use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::{Span, Symbol, sym};
-use tracing::info;
+use tracing::{info, instrument};
 
 #[derive(Clone, TyEncodable, TyDecodable, StableHash, Debug)]
 pub struct Validated {
@@ -16,21 +16,97 @@ pub struct Validated {
 
 const VALIDATED_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
 
+#[derive(Debug)]
 pub enum ValidatedStatus {
-    /// `annotation` is None IFF this is the `main` entrypoint.
     Validated {
+        /// `annotation` is None if this is the `main` entrypoint, or if it was synthesized by
+        /// the compiler.
         annotation: Option<Span>,
+        /// We want to distinguish between items that are *directly* annotated and items that are
+        /// *indirectly* annotated.
+        /// Indirecty annotated items can sometimes have no meaning: macros, `use` statements, etc.
+        /// But we may wish to give them a meaning in the future if they're directly annotated.
+        /// So: only consider indirect annotations for certain kinds of items.
+        inherited: bool,
     },
     Unvalidated,
     WorkaroundDelegationBugs,
 }
 
 impl ValidatedStatus {
-    pub fn validated(self) -> bool {
+    pub fn allowed_in_certified_build(self) -> bool {
         match self {
             ValidatedStatus::Validated { .. } => true,
             ValidatedStatus::WorkaroundDelegationBugs | ValidatedStatus::Unvalidated => false,
         }
+    }
+
+    pub fn needs_test(self) -> bool {
+        match self {
+            ValidatedStatus::Validated { annotation, inherited } => {
+                annotation.is_some() || inherited
+            }
+            _ => false,
+        }
+    }
+}
+
+fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedStatus> {
+    match tcx.hir_node_by_def_id(local) {
+        // Skip intrinsics, extern functions, and associated functions with no default.
+        // We only have to do this for local DefIds; nothing makes it to post-mono without a body unless
+        // it's an intrinsic.
+        Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
+            // FIXME: ForeignItems should be an exported_constraint
+            | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
+            | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
+                info!("skipping item {local:?}");
+                return Some(ValidatedStatus::Validated { annotation: None, inherited: false, });
+            }
+        Node::ImplItem(..) => {}
+        _ => return None,
+    }
+
+    // Check if this is an associated function from a `derive`.
+    let parent = tcx.parent(local.into());
+    tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
+    #[allow(deprecated)]
+    if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
+        tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
+    }
+
+    let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
+        && tcx.is_automatically_derived(parent);
+
+    if !derived {
+        return None;
+    }
+
+    // Builtin macros are covered under our compiler qualification and considered verified.
+    // We currently don't support proc-macros; assume them to be unverified.
+    if !tcx.is_builtin_derived(parent) {
+        return Some(ValidatedStatus::Unvalidated);
+    }
+
+    let self_ty = tcx.type_of(parent);
+    info!("checking {self_ty:?}");
+    // FIXME: need to try to normalize this type so we handle aliases and associated types
+    let unwrapped_ty = self_ty.skip_binder().peel_refs();
+    match unwrapped_ty.kind() {
+        ty::Adt(adt_def, _) => {
+            let self_id = adt_def.did();
+            info!(
+                "{} is marked #[automatically_derived], checking {}",
+                tcx.def_path_str(local),
+                tcx.def_path_str(self_id)
+            );
+            return Some(item_is_validated(tcx, self_id));
+        }
+        ty::Error(..) => None,
+        _ if unwrapped_ty.is_primitive_ty() => None,
+        // We don't know how to resolve this back to a type.
+        // For now, just assume it's unvalidated.
+        _ => Some(ValidatedStatus::Unvalidated),
     }
 }
 
@@ -38,6 +114,7 @@ impl ValidatedStatus {
 ///
 /// This analysis needs to be conservative. If you don't have enough information to determine the
 /// status, assume it's unvalidated.
+#[instrument(skip(tcx), ret)]
 pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.
     let owner = tcx.typeck_root_def_id(def_id);
@@ -51,64 +128,17 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     };
     if synthetic {
         info!("skipping synthetic item {owner:?}");
-        return ValidatedStatus::Validated { annotation: None };
+        return ValidatedStatus::Validated { annotation: None, inherited: false };
     }
 
-    // Skip intrinsics, extern functions, and associated functions with no default.
-    // We only have to do this for local DefIds; nothing makes it to post-mono without a body unless
-    // it's an intrinsic.
-    if let Some(local) = owner.as_local() {
-        match tcx.hir_node_by_def_id(local) {
-            Node::Item(Item { kind: ItemKind::Fn { has_body: false, .. }, .. })
-                // FIXME: ForeignItems should be an exported_constraint
-                | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
-                | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
-                    info!("skipping item {owner:?}");
-                    return ValidatedStatus::Validated { annotation: None };
-                }
-            _ => {},
-        }
+    if let Some(local) = owner.as_local()
+        && let Some(status) = implied_validation(tcx, local)
+    {
+        return status;
+    }
 
-        // Check if this is an associated function from a `derive`.
-        let parent = tcx.parent(owner);
-        tracing::debug!("parent={parent:?}, kind={:?}", tcx.def_kind(parent));
-        #[allow(deprecated)]
-        if matches!(tcx.def_kind(parent), DefKind::Impl { .. }) {
-            tracing::debug!("attrs={:?}", tcx.get_all_attrs(parent));
-        }
-
-        let derived = matches!(tcx.def_kind(parent), DefKind::Impl { .. })
-            && tcx.is_automatically_derived(parent);
-        if derived {
-            // Builtin macros are covered under our compiler qualification and considered verified.
-            // We currently don't support proc-macros; assume them to be unverified.
-            if !tcx.is_builtin_derived(parent) {
-                return ValidatedStatus::Unvalidated;
-            }
-
-            let self_ty = tcx.type_of(parent);
-            info!("checking {self_ty:?}");
-            // FIXME: need to try to normalize this type so we handle aliases and associated types
-            let unwrapped_ty = self_ty.skip_binder().peel_refs();
-            match unwrapped_ty.kind() {
-                ty::Adt(adt_def, _) => {
-                    let self_id = adt_def.did();
-                    info!(
-                        "{} is marked #[automatically_derived], checking {}",
-                        tcx.def_path_str(def_id),
-                        tcx.def_path_str(self_id)
-                    );
-                    return item_is_validated(tcx, self_id);
-                }
-                ty::Error(..) => {}
-                _ if unwrapped_ty.is_primitive_ty() => {}
-                // We don't know how to resolve this back to a type.
-                // For now, just assume it's unvalidated.
-                _ => {
-                    return ValidatedStatus::Unvalidated;
-                }
-            }
-        }
+    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
+        return annotation;
     }
 
     // HACK: `feature(delegation)` is horribly buggy and causes infinite cycles within the query
@@ -120,15 +150,41 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // shim generated by `rustc --test`.
     let main_is_validated = is_main && !tcx.sess.opts.test;
 
-    let annotation = tcx.get_attrs_by_path(owner, VALIDATED_ATTR).next();
-    if annotation.is_some() {
-        ValidatedStatus::Validated { annotation: annotation.map(|attr| attr.span()) }
-    } else if delegation_enabled {
+    if delegation_enabled {
         // Avoid trying to run our lint on items with delegation errors.
         ValidatedStatus::WorkaroundDelegationBugs
     } else if main_is_validated {
-        ValidatedStatus::Validated { annotation: None }
+        ValidatedStatus::Validated { annotation: None, inherited: false }
     } else {
         ValidatedStatus::Unvalidated
+    }
+}
+
+/// Check if this item or any of its parents are validated.
+fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
+    let mut current = item;
+    loop {
+        // Check if it's possible for this item to have attributes.
+        // If not, skip it so `get_attrs` doesn't panic.
+        match tcx.def_kind(current) {
+            DefKind::ForeignMod => {
+                current = tcx.parent(current);
+                continue;
+            }
+            _ => {}
+        }
+        // Check if the current item has an annotation
+        if let Some(attr) = tcx.get_attrs_by_path(current, VALIDATED_ATTR).next() {
+            return Some(ValidatedStatus::Validated {
+                annotation: Some(attr.span()),
+                inherited: current != item,
+            });
+        }
+
+        if current.is_crate_root() {
+            return None;
+        }
+
+        current = tcx.parent(current);
     }
 }

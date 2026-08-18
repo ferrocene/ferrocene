@@ -10,14 +10,20 @@ Ferrocene, from branching off a rolling branch to publishing point releases.
 Determine the baseline Rust version
 -----------------------------------
 
-Each major version of Ferrocene is based off a Rust version, usually the latest
-one available at the point the release was branched off the rolling branches.
-Once the baseline is chosen, it will be possible to upgrade to newer patch
-releases of Rust, but not to new minor or major Rust versions.
+Each major version of Ferrocene is based off a Rust version.
+Choose the Rust version such that the Ferrocene release is the based off the
+latest stable Rust *at the time that docs are sent to the assessor*.
+Consult `Rust Forge <https://forge.rust-lang.org/>`_ for a list of Rust release dates.
 
-The decision of the baseline Rust version for a new Ferrocene major version
-is made within the team. Once chosen, all development work will be done in the
+.. note::
+
+    For example, Ferrocene 26.08 released in August 2028, and sent docs in the last week of July,
+    so it was based off of Rust 1.97 (released July 9), **not** 1.98 (released August 20).
+
+Once a version is chosen, all development work will be done in the
 ``release/1.NN`` branch, where ``NN`` is the minor Rust version number.
+Release branches can upgrade to newer patch releases of Rust, but not to new
+minor or major Rust versions.
 
 Determine the Ferrocene version number
 --------------------------------------
@@ -104,13 +110,33 @@ Signing
 
 Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
 :ref:`documentation signatures <internal-procedures:signing-all-documents>`.
+Semantic diff
+-------------
+
+To avoid unnecessary work for the safety assessor and safety manager,
+create a high-level overview of what has changed since the last release.
+This should include at least:
+
+* Changes to ``ferrocene/doc``
+* Changes to the symbol report
+* Anything mentioned in the release notes
+
+.. note::
+
+   You can see a list of doc changes since the last release like so:
+
+.. code-block::
+
+    git diff release/1.95 release/1.97 --ignore-all-space --ignore-blank-lines 'ferrocene/doc' ':!*/signature.toml'
+
+.. _deliver-docs:
 
 Delivering the documentation package
 ------------------------------------
 
 Wait for the nightly beta, or manually cut a beta release onto production. Over email,
 send the assessor direct links to the ``ferrocene-docs`` and ``ferrocene-docs-signatures``
-packages, as well as a *semantic diff* of what changed since the last release.
+packages, as well as the semantic diff.
 
 .. _release-technical-reports:
 

@@ -1915,6 +1915,13 @@ impl<'a> Formatter<'a> {
             write_prefix(self, sign, prefix)?;
             let post_padding = self.padding(min - width as u16, Alignment::Right)?;
             self.buf.write_str(buf)?;
+            #[ferrocene::annotation(
+                "The error `?` is not reachable, it exists only due to the trait. \
+                Above, `self.padding(...)` is called after the alignment has been set to `Alignment::Right`. \
+                For right alignment, `padding_left` equals `padding`, so a successful call to \
+                `self.padding(...)` returns a `PostPadding` whose `padding` is `padding - padding_left == 0`. \
+                Therefore `post_padding.write(self)` performs no writes and cannot return an error."
+            )]
             post_padding.write(self)?;
             self.options = old_options;
             Ok(())

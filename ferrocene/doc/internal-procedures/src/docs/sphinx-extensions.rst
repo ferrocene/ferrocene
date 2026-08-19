@@ -273,10 +273,9 @@ also accepts multiple options:
 
 * ``host`` (required): the target tuple of the host platform
 * ``target`` (required): the target tuple of the compilation target
-* ``tested_target_with_std`` (required): the target tuple of the target
-  used to run library and compiler tests. For targets that have a standard
-  library this is the same tuple as the compilation targets; for targets
-  without a standard library it will be a facade target
+* ``tested_target_with_std`` (optional): the target tuple of the target
+  used to run library and compiler tests. For targets without a
+  standard library it will be a facade target
 * ``remote_testing`` (optional): whether the tests were executed on CI or on a
   remote machine/emulator; its presence without a value means ``true``, while
   its absence means ``false``

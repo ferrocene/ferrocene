@@ -4,4 +4,3 @@
 .. render-outcomes-template:: templates/tests.jinja2
    :host: aarch64-unknown-linux-gnu
    :target: aarch64-unknown-linux-gnu
-   :tested_target_with_std: aarch64-unknown-linux-gnu

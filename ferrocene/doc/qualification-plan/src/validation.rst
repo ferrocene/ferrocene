@@ -80,7 +80,7 @@ Quick checks should always include ensuring:
 
 * :ref:`qualification-report:requirements-traceability` is still satisfied
 * :ref:`qualification-report:test-results-overview` shows expected counts
-* :ref:`core-certification:safety-report/code-coverage-overview` shows 100% coverage with "count annotated lines as tested" checked
+* :doc:`core-certification:safety-report/code-coverage` shows 100% coverage with "count annotated lines as tested" checked
 * The Specification documents the right version
 * :ref:`release-notes:index`
 
@@ -111,7 +111,7 @@ functionality guarantees in the other release channels as they are not
 production environments.
 
 This section assumes that you have already
-:ref:`published a stable release <internal-procedures:publish-stable>` to the ``dev`` environment.
+:ref:`published a stable release <internal-procedures:manual-release>` to the ``dev`` environment.
 
 Verify that:
 

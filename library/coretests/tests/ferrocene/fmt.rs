@@ -1592,3 +1592,14 @@ fn test_debug_lossy_try_branches() {
     };
     assert!(write!(writer, "{:?}", b"\xFF".utf8_chunks().debug()).is_err());
 }
+
+// Covers `core::fmt::pointer_fmt_inner`'s false branch
+#[test]
+fn test_fmt_pointer() {
+    let p: *const u8 = std::ptr::null();
+
+    let _ = format!("{:#p}", p);
+    // Explicit width skips default-width setup.
+    let formatted = format!("{:#1p}", p);
+    assert!(formatted.starts_with("0x"));
+}

@@ -15,6 +15,7 @@ pub struct Validated {
 }
 
 const VALIDATED_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
+const REQUIRES_VALIDATION_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::requires_validation];
 
 #[derive(Debug)]
 pub enum ValidatedStatus {

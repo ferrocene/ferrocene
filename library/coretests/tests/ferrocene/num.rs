@@ -925,8 +925,6 @@ fn test_digits_to_exp_str_without_actual_fraction() {
     let formatted = flt2dec::to_exact_exp_str(
         |_decoded, buf, _limit| {
             buf[0].write(b'1');
-
-            // SAFETY: We initialized buf[0].
             (unsafe { buf[..1].assume_init_ref() }, 1)
         },
         1.0_f64,

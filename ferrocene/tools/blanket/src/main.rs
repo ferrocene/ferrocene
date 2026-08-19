@@ -259,6 +259,7 @@ fn get_coverage(
     let mut covered = vec![];
 
     for line in source_lines {
+        // Find the code region on this line with the fewest number of hits.
         let lower_hit_bound = func_coverage
             .hits
             .iter()

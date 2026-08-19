@@ -1,0 +1,60 @@
+error: `#[ferrocene::prevalidated]` cannot be applied to a trait method without a default body
+  --> $DIR/requires-validation-placement.rs:9:5
+   |
+LL |     #[ferrocene::prevalidated]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     fn prevalidated_no_body(&self);
+   |        -------------------- this method has no body to validate
+   |
+   = help: use `#[ferrocene::requires_validation]` to require all implementations to be validated
+
+error: `#[ferrocene::requires_validation]` on a trait method with a default body requires `#[ferrocene::prevalidated]` as well
+  --> $DIR/requires-validation-placement.rs:22:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     fn requires_validation_yes_body(&self) {}
+   |        ---------------------------- this default body is not validated, but implementations inherit it
+   |
+   = help: add `#[ferrocene::prevalidated]` to validate the default body
+
+error: `#[ferrocene::requires_validation]` cannot be applied to an associated constant
+  --> $DIR/requires-validation-placement.rs:28:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     const REQUIRES_VALIDATION_ASSOC_CONSTANT: u8;
+   |           ---------------------------------- not a trait method
+   |
+   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
+   = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
+
+error: `#[ferrocene::requires_validation]` cannot be applied to a function
+  --> $DIR/requires-validation-placement.rs:36:1
+   |
+LL | #[ferrocene::requires_validation]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL | fn free() {}
+   |    ---- not a trait method
+   |
+   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
+   = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
+
+error: `#[ferrocene::requires_validation]` cannot be applied to a method
+  --> $DIR/requires-validation-placement.rs:46:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     fn inherent(&self) {}
+   |        -------- not a trait method
+   |
+   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
+   = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
+
+error: aborting due to 5 previous errors
+

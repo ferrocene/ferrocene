@@ -4,4 +4,3 @@
 .. render-outcomes-template:: ../../qualification-report/src/templates/tests.jinja2
    :host: x86_64-unknown-linux-gnu
    :target: x86_64-pc-qnx
-   :tested_target_with_std: x86_64-pc-qnx

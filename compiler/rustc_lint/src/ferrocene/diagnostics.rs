@@ -4,6 +4,7 @@
 use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::has_requires_validation_attribute;
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
@@ -68,6 +69,44 @@ pub(super) fn error_requires_validation_without_prevalidated(
             "add `#[ferrocene::prevalidated]` to validate the default body",
         )
         .emit();
+}
+
+pub(super) fn lint_impl_requires_validation(
+    tcx: TyCtxt<'_>,
+    trait_method_implementation: LocalDefId,
+    trait_method_definition: DefId,
+) {
+    let implementation_id = tcx.local_def_id_to_hir_id(trait_method_implementation);
+    let implementation_span = ident_span(tcx, trait_method_implementation.to_def_id());
+
+    tcx.emit_node_span_lint(
+        UNVALIDATED,
+        implementation_id,
+        implementation_span,
+        rustc_errors::DiagDecorator(|diag| {
+            diag.primary_message(format!(
+                "unvalidated {} implements a trait method that requires validation",
+                tcx.def_descr(trait_method_implementation.to_def_id())
+            ));
+            diag.span_label(implementation_span, "this implementation is unvalidated");
+
+            let mut definition_span =
+                MultiSpan::from_span(ident_span(tcx, trait_method_definition));
+            if let Some(annotation) =
+                has_requires_validation_attribute(tcx, trait_method_definition)
+            {
+                definition_span.push_span_label(annotation, "required to be validated here");
+            }
+            diag.span_note(
+                definition_span,
+                format!(
+                    "all implementations of `{}` must be validated",
+                    tcx.def_path_str(trait_method_definition)
+                ),
+            );
+            diag.help("add `#[ferrocene::prevalidated]` to this implementation");
+        }),
+    );
 }
 
 /// Diagnostics.

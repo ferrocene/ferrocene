@@ -114,7 +114,7 @@ cmd_prepare() {
 /bin/echo=echo' "${buildscript}"
 
     # run remote-test-server instead of console
-    sed -i '326i RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' "${buildscript}"
+    sed -i '326i RUST_TEST_THREADS=4 remote-test-server -v --bind 0.0.0.0:12345 --sequential' "${buildscript}"
 
     # use virtual SD card as TMPDIR
     sed -i '268i export TMPDIR=/mnt/tmp' "${buildscript}"

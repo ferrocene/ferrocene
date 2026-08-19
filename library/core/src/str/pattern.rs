@@ -443,7 +443,7 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
     fn next_match(&mut self) -> Option<(usize, usize)> {
         loop {
             // get the haystack after the last character found
-            let bytes =
+            let bytes = {
                 #[ferrocene::annotation("\
                     `CharSearcher` is only constructed in `impl Pattern for char` in `library/core/src/str/pattern.rs`. \
                     During construction, 0 <= finger <= finger_back = haystack.len. \
@@ -451,7 +451,8 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
                     Thus, there are no possible scenarios where the `?` operator is triggered without violating `CharSearcher` invariants. \
                     An internal test is not possible due to the complexities of `core` and the private fields of the type. \
                 ")]
-                self.haystack.as_bytes().get(self.finger..self.finger_back)?;
+                self.haystack.as_bytes().get(self.finger..self.finger_back)?
+            };
             // the last byte of the utf8 encoded needle
             // SAFETY: we have an invariant that `utf8_size < 5`
             let last_byte = unsafe { *self.utf8_encoded.get_unchecked(self.utf8_size() - 1) };

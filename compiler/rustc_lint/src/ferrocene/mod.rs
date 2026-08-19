@@ -292,9 +292,9 @@ fn check_impl_of_requires_validation(tcx: TyCtxt<'_>, impl_item: LocalDefId) {
     // Get the id of the trait method definition being implemented by `impl_item`,
     // if `impl_item` is an associated function with a body.
     let Some(trait_method_definition) = matches!(tcx.def_kind(impl_item), DefKind::AssocFn)
-        .then(|| tcx.associated_item(impl_item.to_def_id()))
-        // Inherited trait methods will be filtered out by `trait_item_def_id`
-        .and_then(|assoc| assoc.trait_item_def_id())
+        // Inherited trait methods will be filtered out by `trait_item_of`
+        .then(|| tcx.trait_item_of(impl_item.to_def_id()))
+        .flatten()
     else {
         return;
     };
@@ -302,9 +302,14 @@ fn check_impl_of_requires_validation(tcx: TyCtxt<'_>, impl_item: LocalDefId) {
     if has_requires_validation_attribute(tcx, trait_method_definition).is_none() {
         // If the trait method definition has no `requires_validation`
         // attribute, there is nothing to check.
+        return;
     } else if item_is_validated(tcx, impl_item.to_def_id()).validated() {
         // If the trait method implementation is `prevalidated` everything is fine
+        return;
     } else {
+        // If the trait method definition has a `requires_validation` attribute,
+        // but the trait method implementation has no `prevalidated` attribute,
+        // this is a problem! Therefore emit a lint!
         debug!("{impl_item:?} implements {trait_method_definition:?}, which requires validation");
         diagnostics::lint_impl_requires_validation(tcx, impl_item, trait_method_definition);
     }

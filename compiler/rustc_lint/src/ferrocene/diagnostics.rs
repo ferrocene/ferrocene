@@ -38,8 +38,7 @@ pub(super) fn error_requires_validation_not_a_trait_fn(
     def_id: LocalDefId,
     attr_span: Span,
 ) {
-    let descr = tcx.def_descr(def_id.to_def_id());
-    let article = descr.starts_with(['a', 'e', 'i', 'o', 'u']).then_some("an").unwrap_or("a");
+    let (article, descr) = tcx.article_and_description(def_id.to_def_id());
     tcx.dcx()
         .struct_span_err(
             attr_span,

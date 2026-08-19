@@ -2,13 +2,73 @@
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
 use rustc_errors::{Diag, MultiSpan};
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, LangItem};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::{LintState, UNVALIDATED, UnvalidatedImplCause, Use, UseKind};
+
+fn ident_span(tcx: TyCtxt<'_>, def_id: DefId) -> Span {
+    tcx.def_ident_span(def_id).unwrap_or_else(|| tcx.def_span(def_id))
+}
+
+pub(super) fn error_prevalidated_without_body(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            "`#[ferrocene::prevalidated]` cannot be applied to a trait method without a default body",
+        )
+        .with_span_label(ident_span(tcx, def_id.to_def_id()), "this method has no body to validate")
+        .with_help(
+            "use `#[ferrocene::requires_validation]` to require all implementations to be validated",
+        )
+        .emit();
+}
+
+pub(super) fn error_requires_validation_not_a_trait_fn(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    let descr = tcx.def_descr(def_id.to_def_id());
+    let article = descr.starts_with(['a', 'e', 'i', 'o', 'u']).then_some("an").unwrap_or("a");
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!("`#[ferrocene::requires_validation]` cannot be applied to {article} {descr}"),
+        )
+        .with_span_label(ident_span(tcx, def_id.to_def_id()), "not a trait method")
+        .with_note("only trait methods can be marked with `#[ferrocene::requires_validation]`")
+        .with_help("use `#[ferrocene::prevalidated]` to mark this item itself as validated")
+        .emit();
+}
+
+pub(super) fn error_requires_validation_without_prevalidated(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            "`#[ferrocene::requires_validation]` on a trait method with a default body requires `#[ferrocene::prevalidated]` as well",
+        )
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            "this default body is not validated, but implementations inherit it",
+        )
+        .with_help(
+            "add `#[ferrocene::prevalidated]` to validate the default body",
+        )
+        .emit();
+}
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {

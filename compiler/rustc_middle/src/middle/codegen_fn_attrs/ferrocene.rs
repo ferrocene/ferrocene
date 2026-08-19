@@ -22,6 +22,11 @@ pub fn has_validated_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
     tcx.get_attrs_by_path(def_id, VALIDATED_ATTR).next().map(|attr| attr.span())
 }
 
+/// Get the span of the `#[ferrocene::requires_validation]` attribute on `def_id`, if any exists.
+pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
+    tcx.get_attrs_by_path(def_id, REQUIRES_VALIDATION_ATTR).next().map(|attr| attr.span())
+}
+
 pub enum ValidatedStatus {
     /// `annotation` is None IFF this is the `main` entrypoint.
     Validated {

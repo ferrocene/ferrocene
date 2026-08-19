@@ -180,8 +180,10 @@ mod thir;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
-use rustc_hir::{HirId, Item};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
+use rustc_hir::{HirId, Item, TraitFn, TraitItem, TraitItemKind};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
+    ValidatedStatus, has_requires_validation_attribute, has_validated_attribute, item_is_validated,
+};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
@@ -203,7 +205,12 @@ use rustc_middle::{
 
 impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, None);
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
+
+    fn check_trait_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx TraitItem<'tcx>) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, Some(item));
     }
 
     fn check_impl_item_post(
@@ -211,7 +218,65 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
         cx: &LateContext<'tcx>,
         item: &'tcx rustc_hir::ImplItem<'tcx>,
     ) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, None);
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
+}
+
+/// Reject `#[ferrocene::*]` attributes in positions where they have no defined
+/// semantics, or are invalid.
+///
+/// `trait_item` is `Some` only if `def_id` is a trait item.
+/// It is used to check if a method definition has a default body.
+///
+/// Emit hard errors rather than warnings, because a misplaced annotation is
+/// always a mistake.
+///
+/// This is run when the item itself is checked, so the errors do not depend on
+/// the item being called from a prevalidated function.
+fn check_attribute_placement(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    trait_item: Option<&TraitItem<'_>>,
+) {
+    #[derive(Debug, PartialEq)]
+    enum TraitMethod {
+        YesDefaultBody,
+        NoDefaultBody,
+        NoTraitMethod,
+    }
+
+    let trait_method = match trait_item {
+        // Associated function
+        Some(TraitItem { kind: TraitItemKind::Fn(_, body), .. }) => match body {
+            TraitFn::Required(_) => TraitMethod::NoDefaultBody,
+            TraitFn::Provided(_) => TraitMethod::YesDefaultBody,
+        },
+        // Associated constant or type, or not a trait item
+        _ => TraitMethod::NoTraitMethod,
+    };
+    let prevalidated = has_validated_attribute(tcx, def_id.to_def_id());
+    let requires_validation = has_requires_validation_attribute(tcx, def_id.to_def_id());
+
+    match (trait_method, prevalidated, requires_validation) {
+        // `prevalidated` marks a body as validated, so it is meaningless on a
+        // trait method definition without a default body
+        (TraitMethod::NoDefaultBody, Some(span), _) => {
+            diagnostics::error_prevalidated_without_body(tcx, def_id, span)
+        }
+
+        // `requires_validation` must be applied to trait methods only
+        (TraitMethod::NoTraitMethod, _, Some(span)) => {
+            diagnostics::error_requires_validation_not_a_trait_fn(tcx, def_id, span)
+        }
+
+        // If a trait method has a default body and is marked with `requires_validation`,
+        // it also has to be marked as `prevalidated`.
+        (TraitMethod::YesDefaultBody, None, Some(span)) => {
+            diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
+        }
+
+        _ => {}
     }
 }
 

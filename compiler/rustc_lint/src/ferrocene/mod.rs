@@ -241,20 +241,27 @@ fn check_attribute_placement(
     trait_item: Option<&TraitItem<'_>>,
 ) {
     #[derive(Debug, PartialEq)]
-    enum TraitMethod {
-        YesDefaultBody,
-        NoDefaultBody,
-        NoTraitMethod,
+    enum ItemRequiringValidation {
+        AssocConstFnPtr,
+        MethodNoBody,
+        MethodYesBody,
+        /// Item does not require validation
+        None,
     }
 
     let trait_method = match trait_item {
         // Associated function
-        Some(TraitItem { kind: TraitItemKind::Fn(_, body), .. }) => match body {
-            TraitFn::Required(_) => TraitMethod::NoDefaultBody,
-            TraitFn::Provided(_) => TraitMethod::YesDefaultBody,
+        Some(TraitItem { kind, .. }) => match kind {
+            TraitItemKind::Fn(_, body) => match body {
+                TraitFn::Required(_) => ItemRequiringValidation::MethodNoBody,
+                TraitFn::Provided(_) => ItemRequiringValidation::MethodYesBody,
+            },
+            // TODO: handle this case
+            TraitItemKind::Const(_ty, _value) => ItemRequiringValidation::AssocConstFnPtr,
+            TraitItemKind::Type(..) => ItemRequiringValidation::None,
         },
         // Associated constant or type, or not a trait item
-        _ => TraitMethod::NoTraitMethod,
+        None => ItemRequiringValidation::None,
     };
     let prevalidated = has_validated_attribute(tcx, def_id.to_def_id());
     let requires_validation = has_requires_validation_attribute(tcx, def_id.to_def_id());
@@ -262,18 +269,18 @@ fn check_attribute_placement(
     match (trait_method, prevalidated, requires_validation) {
         // `prevalidated` marks a body as validated, so it is meaningless on a
         // trait method definition without a default body
-        (TraitMethod::NoDefaultBody, Some(span), _) => {
+        (ItemRequiringValidation::MethodNoBody, Some(span), _) => {
             diagnostics::error_prevalidated_without_body(tcx, def_id, span)
         }
 
         // `requires_validation` must be applied to trait methods only
-        (TraitMethod::NoTraitMethod, _, Some(span)) => {
+        (ItemRequiringValidation::None, _, Some(span)) => {
             diagnostics::error_requires_validation_not_a_trait_fn(tcx, def_id, span)
         }
 
         // If a trait method has a default body and is marked with `requires_validation`,
         // it also has to be marked as `prevalidated`.
-        (TraitMethod::YesDefaultBody, None, Some(span)) => {
+        (ItemRequiringValidation::MethodYesBody, None, Some(span)) => {
             diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
         }
 

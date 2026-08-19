@@ -20,18 +20,6 @@ LL |     fn requires_validation_yes_body(&self) {}
    |
    = help: add `#[ferrocene::prevalidated]` to validate the default body
 
-error: `#[ferrocene::requires_validation]` cannot be applied to an associated constant
-  --> $DIR/requires-validation-placement.rs:28:5
-   |
-LL |     #[ferrocene::requires_validation]
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-...
-LL |     const REQUIRES_VALIDATION_ASSOC_CONSTANT: u8;
-   |           ---------------------------------- not a trait method
-   |
-   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
-   = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
-
 error: `#[ferrocene::requires_validation]` cannot be applied to a function
   --> $DIR/requires-validation-placement.rs:36:1
    |
@@ -41,7 +29,7 @@ LL | #[ferrocene::requires_validation]
 LL | fn free() {}
    |    ---- not a trait method
    |
-   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
+   = note: only trait methods or associated constants containing a fn pointer can be marked with `#[ferrocene::requires_validation]`
    = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
 
 error: `#[ferrocene::requires_validation]` cannot be applied to a method
@@ -53,7 +41,19 @@ LL |     #[ferrocene::requires_validation]
 LL |     fn inherent(&self) {}
    |        -------- not a trait method
    |
-   = note: only trait methods can be marked with `#[ferrocene::requires_validation]`
+   = note: only trait methods or associated constants containing a fn pointer can be marked with `#[ferrocene::requires_validation]`
+   = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
+
+error: `#[ferrocene::requires_validation]` cannot be applied to an associated constant
+  --> $DIR/requires-validation-placement.rs:53:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     const REQUIRES_VALIDATION_ASSOC_CONSTANT3: u8 = 0;
+   |           ----------------------------------- not a trait method
+   |
+   = note: only trait methods or associated constants containing a fn pointer can be marked with `#[ferrocene::requires_validation]`
    = help: use `#[ferrocene::prevalidated]` to mark this item itself as validated
 
 error: aborting due to 5 previous errors

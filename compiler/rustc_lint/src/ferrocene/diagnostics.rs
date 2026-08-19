@@ -45,7 +45,10 @@ pub(super) fn error_requires_validation_not_a_trait_fn(
             format!("`#[ferrocene::requires_validation]` cannot be applied to {article} {descr}"),
         )
         .with_span_label(ident_span(tcx, def_id.to_def_id()), "not a trait method")
-        .with_note("only trait methods can be marked with `#[ferrocene::requires_validation]`")
+        .with_note(
+            "only trait methods or associated constants containing a fn pointer \
+            can be marked with `#[ferrocene::requires_validation]`",
+        )
         .with_help("use `#[ferrocene::prevalidated]` to mark this item itself as validated")
         .emit();
 }

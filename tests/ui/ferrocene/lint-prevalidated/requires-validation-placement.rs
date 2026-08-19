@@ -26,16 +26,16 @@ trait Trait {
     //~^ NOTE this default body is not validated
 
     #[ferrocene::requires_validation]
-    //~^ ERROR `#[ferrocene::requires_validation]` cannot be applied to an associated constant
-    //~| NOTE only trait methods can be marked
-    //~| HELP use `#[ferrocene::prevalidated]`
     const REQUIRES_VALIDATION_ASSOC_CONSTANT: u8;
-    //~^ NOTE not a trait method
+
+    #[ferrocene::prevalidated]
+    #[ferrocene::requires_validation]
+    const REQUIRES_VALIDATION_ASSOC_CONSTANT2: u8 = 1;
 }
 
 #[ferrocene::requires_validation]
 //~^ ERROR `#[ferrocene::requires_validation]` cannot be applied to a function
-//~| NOTE only trait methods can be marked
+//~| NOTE only trait methods or associated constants containing a fn pointer can be marked
 //~| HELP use `#[ferrocene::prevalidated]`
 fn free() {}
 //~^ NOTE not a trait method
@@ -45,8 +45,15 @@ struct S;
 impl S {
     #[ferrocene::requires_validation]
     //~^ ERROR `#[ferrocene::requires_validation]` cannot be applied to a method
-    //~| NOTE only trait methods can be marked
+    //~| NOTE only trait methods or associated constants containing a fn pointer can be marked
     //~| HELP use `#[ferrocene::prevalidated]`
     fn inherent(&self) {}
     //~^ NOTE not a trait method
+
+    #[ferrocene::requires_validation]
+    //~^ ERROR: `#[ferrocene::requires_validation]` cannot be applied to an associated constant
+    //~| NOTE: only trait methods or associated constants containing a fn pointer can be marked
+    //~| HELP: use `#[ferrocene::prevalidated]`
+    const REQUIRES_VALIDATION_ASSOC_CONSTANT3: u8 = 0;
+    //~^ NOTE: not a trait method
 }

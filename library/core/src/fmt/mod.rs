@@ -1922,6 +1922,9 @@ impl<'a> Formatter<'a> {
                 `self.padding(...)` returns a `PostPadding` whose `padding` is `padding - padding_left == 0`. \
                 Therefore `post_padding.write(self)` performs no writes and cannot return an error."
             )]
+            #[cfg(ferrocene_test)]
+            assert_eq!(post_padding.write(self), Ok(()));
+            #[cfg(not(ferrocene_test)]
             post_padding.write(self)?;
             self.options = old_options;
             Ok(())

@@ -1,7 +1,7 @@
 use core::fmt::{self, Write};
 
 
-// Returns a given stream of responses to write calls
+// Errors when a given input was provided that equals `error_on`.
 struct ErrorTriggerWriter<'a> {
     error_on: &'a str,
     allow_times: usize,
@@ -31,6 +31,40 @@ impl<'a> std::fmt::Write for ErrorTriggerWriter<'a> {
         }
     }
 }
+
+// Errors when an input was provided that ends with the given `error_on`.
+struct ErrorSuffixWriter<'a> {
+    suffix: &'a str,
+    allow_times: usize,
+}
+
+impl<'a> std::fmt::Write for ErrorSuffixWriter<'a> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        if s.ends_with(self.suffix) && self.allow_times == 0 {
+            println!("Triggered error on str {s:#?}");
+            Err(std::fmt::Error)
+        } else {
+            if s.ends_with(self.suffix) {
+                self.allow_times -= 1;
+            }
+            Ok(())
+        }
+    }
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        // The same as `ErrorTriggerWriter`, since it's one character.
+        if c.to_string() == self.suffix && self.allow_times == 0 {
+            println!("Triggered error on char {c:#?}");
+            Err(std::fmt::Error)
+        } else {
+            if c.to_string() == self.suffix {
+                self.allow_times -= 1;
+            }
+            Ok(())
+        }
+    }
+}
+
+
 
 // Covers `core::fmt::rt::Argument::<'_>::as_u16`
 #[test]
@@ -661,8 +695,8 @@ fn test_panic_info_fmt_results() {
     };
     assert!(write!(writer, "{}", info).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "library/core/src/ferrocene_test.rs",
+    let mut writer = ErrorSuffixWriter {
+        suffix: "library/core/src/ferrocene_test.rs",
         allow_times: 0,
     };
     assert!(write!(writer, "{}", info).is_err());

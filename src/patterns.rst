@@ -110,10 +110,6 @@ An :t:`irrefutable pattern` is a :t:`pattern` that always matches any :t:`value`
 A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
 matching a :t:`value` of its :t:`type`
 
-:dp:`fls_mnbyt7jfYAZ9`
-A :t:`pattern` that is not an :t:`irrefutable pattern` is a
-:t:`refutable pattern`.
-
 :dp:`fls_l76ycteulo8e`
 An :t:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
 one :t:`value`.

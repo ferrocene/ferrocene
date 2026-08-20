@@ -259,10 +259,18 @@ fn get_coverage(
     let mut covered = vec![];
 
     for line in source_lines {
+        // Find the code region on this line with the fewest number of hits.
+        let lower_hit_bound = func_coverage
+            .hits
+            .iter()
+            .filter(|(location, _)| location.line_start <= line && location.line_end >= line)
+            .map(|(_, hit_count)| *hit_count)
+            .reduce(usize::min);
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
-        let status = match func_coverage.hits_for_line(line) {
+        let status = match lower_hit_bound {
             None => LineCoverageStatus::Ignored,
+            // At least one of the code regions within this line has no hits
             Some(0) => LineCoverageStatus::Untested,
             Some(_) => LineCoverageStatus::Tested,
         };

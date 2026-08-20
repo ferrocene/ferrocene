@@ -324,3 +324,9 @@ fn test_eq_ignore_ascii_case_chunks() {
     let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESS01";
     assert!(!x.eq_ignore_ascii_case(y));
 }
+
+// Covers `core::slice::<impl [T]>::last_chunk`
+#[test]
+fn last_chunk_none_path() {
+    assert_eq!(None, [10].last_chunk::<2>());
+}

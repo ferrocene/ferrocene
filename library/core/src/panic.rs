@@ -164,9 +164,6 @@ pub macro const_panic {
         #[inline(always)] // inline the wrapper
         #[track_caller]
         #[ferrocene::prevalidated]
-        #[ferrocene::annotation = "Due to a tooling bug, this shows as uncovered.
-            There is no logic to test here: `const_eval_select` is a compiler intrinsic,
-            not part of the certified standard library. `core::panic!` is already extensively tested."]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

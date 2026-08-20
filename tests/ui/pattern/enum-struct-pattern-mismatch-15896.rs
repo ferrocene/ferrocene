@@ -15,3 +15,6 @@ fn main() {
           _) => x,
     };
 }
+
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

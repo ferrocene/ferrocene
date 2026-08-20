@@ -11,3 +11,6 @@ fn make(v: Vec2) {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

@@ -15,3 +15,6 @@ fn main() {
     };
     assert_eq!(x, 2);
 }
+
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

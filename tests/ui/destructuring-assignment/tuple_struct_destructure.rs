@@ -45,3 +45,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_tpwp86mronn2
 // Underscore Expressions
+//
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

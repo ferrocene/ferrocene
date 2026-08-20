@@ -1433,6 +1433,7 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_ref
+<[core::mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice
 <[u8] as core::slice::specialize::SpecFill<u8>>::spec_fill
 <bool as core::default::Default>::default
 <bool as core::fmt::Debug>::fmt
@@ -6649,6 +6650,7 @@ core::fmt::num::imp::<impl usize>::_fmt_inner
 core::fmt::num::imp::<impl usize>::format_into
 core::fmt::num::imp::exp_u64
 core::fmt::num::slice_buffer_to_str
+core::fmt::num::write_quad
 core::fmt::num_buffer::NumBuffer::<T>::new
 core::fmt::pointer_fmt_inner
 core::fmt::rt::Argument::<'_>::as_u16

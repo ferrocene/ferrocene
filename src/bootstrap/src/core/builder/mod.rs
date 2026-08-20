@@ -659,7 +659,7 @@ impl<'a> ShouldRun<'a> {
 
     // Ferrocene addition: Marker for upstream `CommandLineStep`s which are disabled in Ferrocene
     pub fn ferrocene_disabled(mut self) -> ShouldRun<'a> {
-        self.paths.insert(PathSet::empty());
+        self.paths.insert(PathSet::Set(BTreeSet::new()));
         self
     }
 

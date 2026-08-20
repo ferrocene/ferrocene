@@ -2168,14 +2168,8 @@ pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-#[inline]
-||||||| 65dd30fb9e8
-#[inline]
-=======
 #[inline(always)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_volatile", issue = "159094")]
 #[track_caller]
@@ -2281,14 +2275,8 @@ pub const unsafe fn read_volatile<T>(src: *const T) -> T {
 ///     assert_eq!(std::ptr::read_volatile(y), 12);
 /// }
 /// ```
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-#[inline]
-||||||| 65dd30fb9e8
-#[inline]
-=======
 #[inline(always)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[stable(feature = "volatile", since = "1.9.0")]
 #[rustc_const_unstable(feature = "const_volatile", issue = "159094")]
 #[rustc_diagnostic_item = "ptr_write_volatile"]

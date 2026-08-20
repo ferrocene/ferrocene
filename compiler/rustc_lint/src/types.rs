@@ -15,8 +15,6 @@ use tracing::debug;
 mod improper_ctypes; // these files do the implementation for ImproperCTypesDefinitions,ImproperCTypesDeclarations
 pub(crate) use improper_ctypes::ImproperCTypesLint;
 
-// Ferrocene addition
-pub(crate) use crate::ferrocene::LintUnvalidated;
 use crate::diagnostics::{
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
     AmbiguousWidePointerComparisonsAddrSuggestion, AmbiguousWidePointerComparisonsCastSuggestion,
@@ -26,6 +24,8 @@ use crate::diagnostics::{
     UnpredictableFunctionPointerComparisonsSuggestion, UnusedComparisons,
     VariantSizeDifferencesDiag,
 };
+// Ferrocene addition
+pub(crate) use crate::ferrocene::LintUnvalidated;
 use crate::{LateContext, LateLintPass, LintContext};
 
 mod literal;

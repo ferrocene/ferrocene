@@ -2008,10 +2008,9 @@ checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
 [[package]]
 name = "llvm_profparser"
 version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adc5524f1aeb410f0f2a51accea00663055ea786d4d08c82a7c515cd528046f0"
 dependencies = [
  "anyhow",
+ "clap",
  "flate2",
  "indexmap 1.8.2",
  "leb128",
@@ -2021,6 +2020,7 @@ dependencies = [
  "rustc-hash",
  "thiserror 1.0.69",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

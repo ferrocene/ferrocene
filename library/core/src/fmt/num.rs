@@ -840,56 +840,18 @@ impl i128 {
     }
 }
 
-<<<<<<< ferrocene/main
-/// Encodes the 16 least-significant decimals of n into `buf[OFFSET .. OFFSET +
-/// 16 ]`.
-#[ferrocene::prevalidated]
-fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
-    // Consume the least-significant decimals from a working copy.
-    let mut remain = n;
-
-    // Format per four digits from the lookup table.
-    for quad_index in (1..4).rev() {
-        // pull two pairs
-        let quad = remain % 1_00_00;
-        remain /= 1_00_00;
-        let pair1 = (quad / 100) as usize;
-        let pair2 = (quad % 100) as usize;
-        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);
-        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);
-||||||| 65dd30fb9e8
-/// Encodes the 16 least-significant decimals of n into `buf[OFFSET .. OFFSET +
-/// 16 ]`.
-fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
-    // Consume the least-significant decimals from a working copy.
-    let mut remain = n;
-
-    // Format per four digits from the lookup table.
-    for quad_index in (1..4).rev() {
-        // pull two pairs
-        let quad = remain % 1_00_00;
-        remain /= 1_00_00;
-        let pair1 = (quad / 100) as usize;
-        let pair2 = (quad % 100) as usize;
-        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);
-        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);
-=======
 /// Writes `quad` as exactly four digits (for example: `42` becomes `"0042"`).
 ///
 /// # Safety
 ///
 /// `quad` must be below 10_000 and `buf` must contain exactly four bytes.
+#[ferrocene::prevalidated]
 #[inline(always)]
 unsafe fn write_quad(buf: &mut [MaybeUninit<u8>], quad: u64) {
     // SAFETY: These are this function's caller-provided invariants.
     unsafe {
         core::hint::assert_unchecked(quad < 10_000);
         core::hint::assert_unchecked(buf.len() == 4);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 
     let quad = quad as u32;
@@ -913,6 +875,7 @@ unsafe fn write_quad(buf: &mut [MaybeUninit<u8>], quad: u64) {
 /// # Safety
 ///
 /// `n` must be below 1e16, and `buf` must be at least `OFFSET + 16` bytes long.
+#[ferrocene::prevalidated]
 unsafe fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
     // SAFETY: Every caller passes a remainder produced by division by 10^16,
     // and every used `OFFSET` specialization reserves sixteen bytes in `buf`.

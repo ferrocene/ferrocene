@@ -21,6 +21,7 @@ aarch64-unknown-fuchsia
 aarch64-unknown-helenos
 aarch64-unknown-hermit
 aarch64-unknown-illumos
+aarch64-unknown-l4re-uclibc
 aarch64-unknown-linux-gnu
 aarch64-unknown-linux-gnu_ilp32
 aarch64-unknown-linux-musl
@@ -100,7 +101,6 @@ armv7a-none-eabi
 armv7a-none-eabihf
 armv7a-nuttx-eabi
 armv7a-nuttx-eabihf
-armv7a-vex-v5
 armv7k-apple-watchos
 armv7r-ferrocene.facade-eabihf
 armv7r-none-eabi
@@ -254,6 +254,7 @@ thumbv7a-nuttx-eabi
 thumbv7a-nuttx-eabihf
 thumbv7a-pc-windows-msvc
 thumbv7a-uwp-windows-msvc
+thumbv7a-vex-v5
 thumbv7em-ferrocene.facade-eabi
 thumbv7em-ferrocene.facade-eabihf
 thumbv7em-none-eabi

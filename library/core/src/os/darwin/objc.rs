@@ -67,16 +67,10 @@ pub type SEL = *mut objc_selector;
 ///
 /// # Example
 ///
-<<<<<<< ferrocene/main
 // Ferrocene addition: this fails to link. Since it's marked no_run, it doesn't generate coverage
 // anyway. Change it from no_run -> ignore.
-/// ```ignore (fails to link with -C instrument-coverage)
-||||||| 65dd30fb9e8
-/// ```no_run
-=======
-#[cfg_attr(target_os = "macos", doc = "```no_run")]
+#[cfg_attr(target_os = "macos", doc = "```ignore")]
 #[cfg_attr(not(target_os = "macos"), doc = "```ignore (needs macos)")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 /// #![feature(darwin_objc)]
 /// use core::os::darwin::objc;
 ///

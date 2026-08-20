@@ -7,17 +7,29 @@ Stable release process
 This page details the steps required to publish a new stable release of
 Ferrocene, from branching off a rolling branch to publishing point releases.
 
+This is a *reference*, not a *checklist*.
+It is only vaguely ordered.
+For a canonical ordering, see :ref:`release-checklist`.
+
+.. _determine-baseline:
+
 Determine the baseline Rust version
 -----------------------------------
 
-Each major version of Ferrocene is based off a Rust version, usually the latest
-one available at the point the release was branched off the rolling branches.
-Once the baseline is chosen, it will be possible to upgrade to newer patch
-releases of Rust, but not to new minor or major Rust versions.
+Each major version of Ferrocene is based off a Rust version.
+Choose the Rust version such that the Ferrocene release is the based off the
+latest stable Rust *at the time that docs are sent to the assessor*.
+Consult `Rust Forge <https://forge.rust-lang.org/>`_ for a list of Rust release dates.
 
-The decision of the baseline Rust version for a new Ferrocene major version
-is made within the team. Once chosen, all development work will be done in the
+.. note::
+
+    For example, Ferrocene 26.08 released in August 2028, and sent docs in the last week of July,
+    so it was based off of Rust 1.97 (released July 9), **not** 1.98 (released August 20).
+
+Once a version is chosen, all development work will be done in the
 ``release/1.NN`` branch, where ``NN`` is the minor Rust version number.
+Release branches can upgrade to newer patch releases of Rust, but not to new
+minor or major Rust versions.
 
 Determine the Ferrocene version number
 --------------------------------------
@@ -44,6 +56,8 @@ as the release's version number.
 For any following point release, keep the same year and month as the previous
 release, and increment the previous point release number.
 
+.. _branch-beta:
+
 Branching from rolling into beta
 --------------------------------
 
@@ -59,6 +73,8 @@ the latest commit on that branch into the ``beta-${major_version}`` channel
 every night. You can continue landing changes into the branch until you
 are ready to release it as a stable release.
 
+.. _add-known-problems:
+
 Add version to Known Problems
 -----------------------------
 
@@ -69,6 +85,8 @@ the instructions in ``README.rst``.
 Validate that the locally built site now has the version, and that known problems are tracked for it.
 Make a pull request, ensure it gets merged, then validate the new version shows up on the
 `Known Problems page <https://problems.ferrocene.dev/>`_.
+
+.. _release-note-bump:
 
 Version Bump Release Notes
 --------------------------
@@ -94,23 +112,35 @@ Create a new ``ferrocene/doc/release-notes/src/next.rst`` on the `main` branch w
    release.
 
 
-Precautionary validation
-------------------------
+.. _semantic-diff:
 
-Perform :ref:`qualification-plan:release-validation` on the ``release/1.NN`` branch before signing.
+Semantic diff
+-------------
 
-Signing
--------
+To avoid unnecessary work for the safety assessor and safety manager,
+create a high-level overview of what has changed since the last release.
+This should include at least:
 
-Request the :ref:`Safety Manager <qualification-plan:leadership-roles>` to perform the
-:ref:`documentation signatures <internal-procedures:signing-all-documents>`.
+* Changes to ``ferrocene/doc``
+* Changes to the symbol report
+* Anything mentioned in the release notes
+
+.. note::
+
+   You can see a list of doc changes since the last release like so:
+
+.. code-block::
+
+    git diff release/1.95 release/1.97 --ignore-all-space --ignore-blank-lines 'ferrocene/doc' ':!*/signature.toml'
+
+.. _deliver-docs:
 
 Delivering the documentation package
 ------------------------------------
 
 Wait for the nightly beta, or manually cut a beta release onto production. Over email,
 send the assessor direct links to the ``ferrocene-docs`` and ``ferrocene-docs-signatures``
-packages, as well as a *semantic diff* of what changed since the last release.
+packages, as well as the semantic diff.
 
 .. _release-technical-reports:
 
@@ -148,28 +178,30 @@ The reviewer of this change has to check the following:
 
 2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``.
 
-.. _publish-stable:
+.. _promote-stable:
 
-Publishing a stable release
----------------------------
+Promoting beta to stable
+------------------------
 
 To publish a stable release, you need to first open a PR targeting the
 ``release/1.NN`` branch, changing the contents of ``ferrocene/ci/channel`` to
 ``stable``.
 
-Once the PR is merged, you need to grab the commit hash of the merge commit,
-:ref:`start a manual release <manual-release>` on the ``dev`` environment, and
-perform the :ref:`qualification-plan:release-validation`.
+Once the PR is merged, you need to grab the commit hash of the merge commit and
+:ref:`start a manual release <manual-release>` on the ``dev`` environment.
 
-Once the release validation succeeded, :ref:`start a manual release
-<manual-release>` on the ``prod`` environment. The release will require
-approval from the release managers.
+.. _prepare-patch-release:
 
-Finally, you need to send another PR targeting the ``release/1.NN`` branch,
+Prepare for patch releases
+--------------------------
+
+Once you've released to ``prod``, you need to send another PR targeting the ``release/1.NN`` branch,
 changing ``ferrocene/ci/channel`` back to ``beta`` and incrementing the point
 release version in ``ferrocene/version`` by 1. Note that you will need to
 remove digital signatures, because they will be invalidated by the version
 change. The CI also ensures that the signatures remain valid.
+
+.. _remove-upcoming:
 
 Remove upcoming notes in the ``main`` branch
 --------------------------------------------
@@ -181,6 +213,8 @@ After publishing the stable release, send a PR to the ``main`` branch to:
 
 * Remove all mentions of ``:upcoming:`YY.MM``` in the documentation, where
   ``YY.MM`` is the current version number.
+
+.. _forward-ports:
 
 Identify any forward ports
 --------------------------

@@ -57,7 +57,7 @@ A :t:`subpattern` is a :t:`pattern` nested within another pattern.
 :dp:`fls_8xzjb0yzftkd`
 A :t:`pattern` has a :t:`type`, with the exception of the :t:`rest pattern` if
 it is not the inner :t:`pattern` of a :t:`slice pattern` or the :t:`pattern` of
-a possibly nested :t:`identifier pattern` of a :t:`slice pattern`\ ``.``
+a possibly nested :t:`identifier pattern` of a :t:`slice pattern`.
 
 :dp:`fls_cma5t8waon0x`
 The :t:`expected type` of a :t:`pattern` is the :t:`type` the :t:`pattern` is being matched against.

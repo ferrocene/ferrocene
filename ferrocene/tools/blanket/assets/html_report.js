@@ -28,6 +28,7 @@ function main() {
     var annotatedIsTested = false;
 
     function onSearch() {
+        const matcher = new RegExp(currentQuery)
         var numLinesTested = 0;
         var numLinesUntested = 0;
 
@@ -35,10 +36,10 @@ function main() {
             var numFunctions = 0;
             for (details of section.querySelectorAll("details")) {
                 var summary = details.querySelector("summary");
-                if (summary.innerText.search(currentQuery) === -1) {
-                    details.style.display = "none";
+                if (!matcher.test(summary.textContent)) {
+                    details.hidden = true;
                 } else {
-                    details.style = "";
+                    details.hidden = false;
 
                     var testedLines = parseInt(summary.getAttribute("tested-lines"));
                     var untestedLines = parseInt(summary.getAttribute("untested-lines"));

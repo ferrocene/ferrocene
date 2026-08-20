@@ -1072,7 +1072,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
 
@@ -1084,7 +1084,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
 
@@ -1173,7 +1173,7 @@ workflows:
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
 
@@ -1185,7 +1185,7 @@ workflows:
           tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: ferrocene/vm-ubuntu-24-amd64-medium
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
 

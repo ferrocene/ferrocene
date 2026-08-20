@@ -120,14 +120,14 @@ def main():
         print(f"Unknown command {args.subcommand}")
 
 
-def subcommand_download(ferrocene_host, url, override_hash: str|None):
+def subcommand_download(ferrocene_host, url, override_hash: str | None):
     if url is None:
         url = llvm_cache.get_s3_url(ferrocene_host, override_hash).geturl()
 
     cache.retrieve(url, ".")
 
 
-def subcommand_prepare(ferrocene_host, url, override_hash: str|None):
+def subcommand_prepare(ferrocene_host, url, override_hash: str | None):
     if url is None:
         url = llvm_cache.get_s3_url(ferrocene_host, override_hash).geturl()
 
@@ -135,7 +135,7 @@ def subcommand_prepare(ferrocene_host, url, override_hash: str|None):
     cache.store(url, tarball)
 
 
-def subcommand_s3_url(ferrocene_host, override_hash: str|None):
+def subcommand_s3_url(ferrocene_host, override_hash: str | None):
     s3_url = llvm_cache.get_s3_url(ferrocene_host, override_hash)
     print(s3_url.geturl())
 

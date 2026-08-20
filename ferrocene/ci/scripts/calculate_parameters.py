@@ -131,13 +131,23 @@ full_build: dict[str, bool] = {}
 for target, envname in FULL_BUILD_TARGET_ENVS:
     try:
         val = os.environ[envname]
-        print(f"-> {envname}={val}", file = sys.stderr)
+        print(f"-> {envname}={val}", file=sys.stderr)
     except KeyError:
-        print(f"-> {envname} unset, defaulting to '1'", file = sys.stderr)
+        print(f"-> {envname} unset, defaulting to '1'", file=sys.stderr)
         val = "1"
-    full_build[target] = val in ("1", "TRUE", "True", "true", "YES", "Yes", "yes", "Y", "y")
+    full_build[target] = val in (
+        "1",
+        "TRUE",
+        "True",
+        "true",
+        "YES",
+        "Yes",
+        "yes",
+        "Y",
+        "y",
+    )
 
-print(f"-> full_build: {full_build}", file = sys.stderr)
+print(f"-> full_build: {full_build}", file=sys.stderr)
 
 
 def calculate_docker_repository_url(repo: str) -> str:

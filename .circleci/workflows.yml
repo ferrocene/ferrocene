@@ -735,9 +735,6 @@ jobs:
       - ferrocene/checkout
       - ferrocene/aws_oidc_auth
       - ferrocene/setup_uv
-      - setup-qnx-toolchain:
-          source-env-script: false
-          qnx_version: << parameters.qnx_version >>
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
@@ -1498,6 +1495,8 @@ commands:
                     --workdir /project \
                     --volume $(pwd):/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
+                    --volume /opt/qnx/qnx800-141/:/project/qnx800-141/ \
+                    --volume /opt/qnx/qnx710-472/:/project/qnx710-472/ \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user "$(id -u):$(id -g)" \
                     --group-add "$(getent group kvm | cut -d: -f3)" \

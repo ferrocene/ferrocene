@@ -107,8 +107,7 @@ match all possible values of a :t:`type`.
 An :t:`irrefutable pattern` is a :t:`pattern` that always matches any :t:`value` of its :t:`type`.
 
 :dp:`fls_uq7ftuuq1sig`
-A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching a :t:`value` of its :t:`type`
+A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not matching a :t:`value` of its :t:`type`.
 
 :dp:`fls_mnbyt7jfYAZ9`
 A :t:`pattern` that is not an :t:`irrefutable pattern` is a

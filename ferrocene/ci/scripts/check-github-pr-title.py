@@ -5,9 +5,6 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = []
-#
-# [tool.uv.sources]
-# utils = { path = "utils", editable = true }
 # ///
 
 # Check that Github pull request titles start with a reference to a Clickup ticket. Ticket IDs

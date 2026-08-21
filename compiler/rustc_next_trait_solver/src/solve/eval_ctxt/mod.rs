@@ -179,6 +179,11 @@ pub trait SolverDelegateEvalExt: SolverDelegate {
         stalled_on: Option<GoalStalledOn<Self::Interner>>,
     ) -> Result<GoalEvaluation<Self::Interner>, NoSolution>;
 
+    /// Checks whether a stalled goal would remain stalled if re-evaluated, without consuming
+    /// `stalled_on`.
+    fn goal_remains_stalled(&self, stalled_on: &GoalStalledOn<Self::Interner>)
+    -> Option<Certainty>;
+
     /// Checks whether evaluating `goal` may hold while treating not-yet-defined
     /// opaque types as being kind of rigid.
     ///
@@ -260,6 +265,16 @@ where
         }
     }
 
+    fn goal_remains_stalled(
+        &self,
+        stalled_on: &GoalStalledOn<Self::Interner>,
+    ) -> Option<Certainty> {
+        match rerunning_stalled_goal_may_make_progress(self, Some(stalled_on)) {
+            RerunStalled::WontMakeProgress(certainty) => Some(certainty),
+            RerunStalled::MayMakeProgress => None,
+        }
+    }
+
     #[instrument(level = "debug", skip(self), ret)]
     fn root_goal_may_hold_opaque_types_jank(
         &self,
@@ -338,18 +353,6 @@ fn maybe_evaluate_root_goal_with_higher_recursion_limit<D, I>(
         Ok(goal_evaluation) => goal_evaluation.goal.predicate,
     };
 
-    // Some goals no longer overflow after the stalled infers are resolved.
-    // Thus we don't have to rerun eagerly here.
-    let has_stalled_infers = match predicate.kind().skip_binder() {
-        ty::PredicateKind::Clause(ty::ClauseKind::Projection(projection)) => {
-            projection.projection_term.has_non_region_infer()
-        }
-        _ => predicate.has_non_region_infer(),
-    };
-    if has_stalled_infers {
-        return;
-    }
-
     let rerun_result = delegate.commit_if_ok(|| {
         let rerun_result =
             EvalCtxt::enter_root(delegate, delegate.cx().recursion_limit() * 2, span, |ecx| {
@@ -397,19 +400,6 @@ fn maybe_evaluate_root_goal_for_proof_tree_with_higher_recursion_limit<D, I>(
         Ok(_) => {}
     }
 
-    // Some goals no longer overflow after the stalled infers are resolved.
-    // Thus we don't have to rerun eagerly here.
-    let predicate: I::Predicate = goal_evaluation.uncanonicalized_goal.predicate;
-    let has_stalled_infers = match predicate.kind().skip_binder() {
-        ty::PredicateKind::Clause(ty::ClauseKind::Projection(projection)) => {
-            projection.projection_term.has_non_region_infer()
-        }
-        _ => predicate.has_non_region_infer(),
-    };
-    if has_stalled_infers {
-        return;
-    }
-
     let rerun_result = delegate.commit_if_ok(|| {
         let (new_result, new_goal_evaluation) = evaluate_root_goal_for_proof_tree(
             delegate,
@@ -426,6 +416,7 @@ fn maybe_evaluate_root_goal_for_proof_tree_with_higher_recursion_limit<D, I>(
         }
     });
     if let Ok(rerun_result) = rerun_result {
+        let predicate: I::Predicate = goal_evaluation.uncanonicalized_goal.predicate;
         delegate.cx().emit_next_solver_overflow_fcw(predicate, span);
         *initial_result = rerun_result;
     }

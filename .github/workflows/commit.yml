@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout (shallow)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
@@ -116,7 +116,7 @@ jobs:
     if: startsWith(github.head_ref, 'automation/pull-upstream-')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
@@ -135,7 +135,7 @@ jobs:
       - name: Execute the build
         run: ferrocene/ci/run.sh
         env:
-          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-21
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-22
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
             set -e

@@ -1,7 +1,6 @@
 use std::num::NonZero;
 
 use rustc_data_structures::Limit;
-use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::unord::UnordMap;
 use rustc_middle::bug;
 #[expect(unused_imports, reason = "used by doc comments")]
@@ -16,7 +15,7 @@ use rustc_middle::verify_ich::incremental_verify_ich;
 use rustc_serialize::{Decodable, Encodable};
 use rustc_span::def_id::LOCAL_CRATE;
 
-use crate::error::{QueryOverflow, QueryOverflowNote};
+use crate::diagnostics::{QueryOverflow, QueryOverflowNote};
 use crate::execution::{all_inactive, should_verify_loaded_value};
 use crate::job::find_dep_kind_root;
 use crate::query_impl::for_each_query_vtable;
@@ -169,7 +168,7 @@ pub(crate) fn promote_from_disk_inner<'tcx, C: QueryCache>(
         tcx.dep_graph.data().expect("should always be present in incremental mode");
 
     let prof_timer = tcx.prof.incr_cache_loading();
-    let value = ensure_sufficient_stack(|| (query.try_load_from_disk_fn)(tcx, prev_index));
+    let value = (query.try_load_from_disk_fn)(tcx, prev_index);
     prof_timer.finish_with_query_invocation_id(dep_node_index.into());
 
     let Some(value) = value else {
@@ -179,8 +178,7 @@ pub(crate) fn promote_from_disk_inner<'tcx, C: QueryCache>(
 
     // Verify the fingerprints of the same subset of loaded values as
     // `load_from_disk_or_invoke_provider_green` does.
-    let prev_fingerprint = dep_graph_data.prev_value_fingerprint_of(prev_index);
-    if should_verify_loaded_value(tcx, prev_fingerprint) {
+    if should_verify_loaded_value(tcx, dep_graph_data, dep_node.key_fingerprint) {
         incremental_verify_ich(
             tcx,
             dep_graph_data,

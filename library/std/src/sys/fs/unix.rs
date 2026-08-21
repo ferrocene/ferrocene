@@ -450,6 +450,27 @@ pub struct DirEntry {
     name: crate::ffi::CString,
 }
 
+#[cfg(not(any(
+    target_os = "aix",
+    target_os = "android",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "hurd",
+    target_os = "illumos",
+    target_os = "linux",
+    target_os = "nto",
+    target_os = "qnx",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "vita",
+    target_os = "wasi",
+)))]
+pub struct DirEntry {
+    dir: Arc<InnerReadDir>,
+    // The full entry includes a fixed-length `d_name`.
+    entry: dirent64,
+}
+
 // Define a minimal subset of fields we need from `dirent64`, especially since
 // we're not using the immediate `d_name` on these targets. Keeping this as an
 // `entry` field in `DirEntry` helps reduce the `cfg` boilerplate elsewhere.
@@ -479,27 +500,6 @@ struct dirent64_min {
         target_os = "vita",
     )))]
     d_type: u8,
-}
-
-#[cfg(not(any(
-    target_os = "aix",
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "fuchsia",
-    target_os = "hurd",
-    target_os = "illumos",
-    target_os = "linux",
-    target_os = "nto",
-    target_os = "qnx",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "vita",
-    target_os = "wasi",
-)))]
-pub struct DirEntry {
-    dir: Arc<InnerReadDir>,
-    // The full entry includes a fixed-length `d_name`.
-    entry: dirent64,
 }
 
 #[derive(Clone)]
@@ -2036,60 +2036,77 @@ pub fn set_perm(p: &CStr, perm: FilePermissions) -> io::Result<()> {
 }
 
 pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
-    // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
-    // Their filesystems do not have symbolic links, so no special handling is required.
-    cfg_select! {
-        // wasm32-wasip1 targets do not support fchmodat, so we fall down to
-        // open + fchmod
-        target_os = "wasi" => {
-            use crate::fs::OpenOptions;
-            use crate::fs::Permissions;
-            use crate::os::wasi::ffi::OsStrExt;
-            use crate::os::wasi::fs::OpenOptionsExt;
+    #[inline]
+    /// Helper function for fallback open with `O_NOFOLLOW` + `fchmod` behavior
+    fn open_and_set_permissions(p: &CStr, perm: FilePermissions) -> io::Result<()> {
+        use crate::fs::{OpenOptions, Permissions};
 
-            let mut options = OpenOptions::new();
-            options.custom_flags(libc::O_NOFOLLOW);
+        let mut options = OpenOptions::new();
 
-            let bytes = p.to_bytes();
-            let os_str = OsStr::from_bytes(bytes);
-            options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
-        }
-        all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
-            // Ferrocene addition: `fchmod` with `flags=AT_SYMLINK_NOFOLLOW` does not work on Ubuntu
-            // 20.04; support was added somewhere between this and 24.04
-            // Fall back to open + fchmod to support older distros.
-            use crate::fs::OpenOptions;
-            use crate::fs::Permissions;
-            use crate::os::unix::ffi::OsStrExt;
+        // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
+        // Their filesystems do not have symbolic links, so no special handling is required.
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+        {
+            #[cfg(not(target_os = "wasi"))]
             use crate::os::unix::fs::OpenOptionsExt;
-
-            let mut options = OpenOptions::new();
+            #[cfg(target_os = "wasi")]
+            use crate::os::wasi::fs::OpenOptionsExt;
             options.read(true).custom_flags(libc::O_NOFOLLOW);
+        }
 
-            let bytes = p.to_bytes();
-            let os_str = OsStr::from_bytes(bytes);
+        #[cfg(not(target_os = "wasi"))]
+        use crate::os::unix::ffi::OsStrExt;
+        #[cfg(target_os = "wasi")]
+        use crate::os::wasi::ffi::OsStrExt;
 
-            match options.open(Path::new(os_str)) {
-                Ok(file) => {
-                    file.set_permissions(Permissions::from_inner(perm))
-                },
-                Err(e) => {
-                    if e.kind() == crate::io::ErrorKind::FilesystemLoop {
-                        // This means the requested file was a symlink
-                        // Remap to Unsupported to match expected behaviour on other platforms
-                        Err(io::Error::from_raw_os_error(libc::ENOTSUP))
-                    } else {
-                        // Return other errors as-is
-                        Err(e)
+        let os_str = OsStr::from_bytes(p.to_bytes());
+        options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
+    }
+
+    let mut _res: Result<(), core::io::Error> = Err(crate::io::ErrorKind::Unsupported.into());
+
+    // These platforms support `fchmodat`, so utilize this syscall over `open` + `fchmod`
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "android",
+        target_os = "nto",
+        target_os = "qnx",
+    ))]
+    {
+        _res = cvt_r(|| unsafe {
+            libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
+        })
+        .map(|_| ());
+    }
+
+    // If fchmodat fails with `ErrorKind::Unsupported` fallback to using open + fchmod. This is just in case
+    // for older systems like Ubuntu 20.04 where fchmodat fails with EOPNOTSUPP on both regular files and
+    // symlinks when AT_SYMLINK_NOFOLLOW is passed in.
+    match _res {
+        Ok(_) => Ok(()),
+        Err(err) => {
+            if err.kind() == crate::io::ErrorKind::Unsupported {
+                match open_and_set_permissions(p, perm) {
+                    Ok(_) => return Ok(()),
+                    Err(e) => {
+                        if e.kind() == crate::io::ErrorKind::FilesystemLoop {
+                            // When O_NOFOLLOW flag is enabled, if the trailing component of
+                            // a path is a symbolic link, open should fail with ELOOP error.
+                            // For consistency with other Linux distributions, we return
+                            // `ErrorKind::Unsupported`.
+                            return Err(err);
+                        }
+                        return Err(e);
                     }
                 }
             }
-        },
-        _ => {
-            cvt_r(|| unsafe {
-                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, 0)
-            })
-            .map(|_| ())
+
+            Err(err)
         }
     }
 }

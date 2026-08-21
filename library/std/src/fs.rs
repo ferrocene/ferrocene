@@ -3448,21 +3448,25 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 ///
 /// # Platform-specific behavior
 ///
-/// This function currently corresponds to:
-/// * `open` with `O_NOFOLLOW` flag enabled + `fchmod` on WASI
-/// * `fchmodat` function with the flag `AT_SYMLINK_NOFOLLOW` enabled
-///   on Unix platforms
-/// * The flag `FILE_FLAG_OPEN_REPARSE_POINT` is enabled and then the
-///   permissions of the file is set through `SetFileInformationByHandle`
-///   on Windows.
-/// * On all other platforms, the behavior remains the same with
-/// [`fs::set_permissions`].
-///
-/// [`fs::set_permissions`]: crate::fs::set_permissions
+/// This function currently corresponds to the following underlying operations:
+/// * Linux, BSD-based platforms, Android, QNX: `fchmodat` with `AT_SYMLINK_NOFOLLOW`
+/// with a fallback behavior to use `open` with `O_NOFOLLOW` followed by behavior
+/// denoted in [`fs::set_permissions`] when the former `fchmodat` call errors with `ENOTSUP`[^1].
+/// * Other Unix-based platforms with symlinks: `open` with `O_NOFOLLOW` followed by behavior
+///   denoted in [`fs::set_permissions`].
+/// * Other Unix-based platforms without symlinks: `open` followed by behavior
+///   denoted in [`fs::set_permissions`].
+/// * Windows: `CreateFileW` with `FILE_FLAG_OPEN_REPARSE_POINT` followed
+///   by `SetFileInformationByHandle`.
 ///
 /// Note that, this [may change in the future][changes].
 ///
+/// [^1]: Ubuntu 20.04, for example, makes `fchmodat` with `AT_SYMLINK_NOFOLLOW` return `ENOTSUP`
+/// on both symlinks and non-symlinks.
+///
 /// [changes]: io#platform-specific-behavior
+///
+/// [`fs::set_permissions`]: crate::fs::set_permissions
 ///
 /// # Errors
 ///
@@ -3472,12 +3476,11 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 /// * `path` does not exist.
 /// * The user lacks the permission to change attributes of the file.
 ///
-/// Note: On Linux, this will result in a [`Unsupported`] error
-/// if the final element is a symlink. On BSD-based systems, the
-/// behavior can vary from symlink permission bits changing or
-/// there being no effects on symlinks
+/// Note: On Linux and other Unix-based platforms with symlinks (non-BSD-based),
+/// this will result in an [`Unsupported`] error if the final element is a symlink.
 ///
 /// [`Unsupported`]: crate::io::ErrorKind::Unsupported
+/// [`FilesystemLoop`]: crate::io::ErrorKind::FilesystemLoop
 ///
 /// # Examples
 ///
@@ -3488,8 +3491,8 @@ pub fn set_permissions<P: AsRef<Path>>(path: P, perm: Permissions) -> io::Result
 /// fn main() -> std::io::Result<()> {
 ///     let mut perms = fs::symlink_metadata("foo.txt")?.permissions();
 ///     perms.set_readonly(true);
-///     // This should result in an error on certain platforms
-///     // or succeed in modifying the permissions of a symlink
+///     // This should result in an error on certain platforms or
+///     // succeed in modifying the permissions of a symlink
 ///     fs::set_permissions_nofollow("foo.txt", perms)?;
 ///     Ok(())
 /// }

@@ -107,7 +107,7 @@ class AutomatedPR(abc.ABC):
         Handle the creation of the PR, and open an issue if an error occurs.
         """
         self.dry_run = dry_run
-        self.origin = ORIGIN
+        self.origin = os.getenv("FERROCENE_REMOTE", ORIGIN)
 
         self.http = requests.Session()
         self.http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
@@ -116,7 +116,9 @@ class AutomatedPR(abc.ABC):
         self.current_branch = self.cmd_capture(["git", "branch", "--show-current"])
         self.current_hash = self.cmd_capture(["git", "rev-parse", "HEAD"])
 
-        existing_pull = self.__find_open("pulls", self.pr_title(), self.pr_labels())
+        existing_pull = self.__find_open(
+            "pulls", self.__resolved_pr_title(), self.pr_labels()
+        )
         if existing_pull is not None:
             log("An automated PR is already open, a new one won't be created.")
             log(f"==> {existing_pull['html_url']}")
@@ -159,7 +161,7 @@ class AutomatedPR(abc.ABC):
             response = self.http.post(
                 self.__repo_api("pulls"),
                 json={
-                    "title": self.pr_title(),
+                    "title": self.__resolved_pr_title(),
                     "head": branch_name,
                     "base": self.base_branch(),
                     "body": self.pr_body(branch_name),
@@ -287,6 +289,12 @@ class AutomatedPR(abc.ABC):
     #     Internals     #
     #                   #
     #####################
+
+    def __resolved_pr_title(self):
+        if self.base_branch() == "main":
+            return self.pr_title()
+        version = self.base_branch().removeprefix("release/")
+        return f"[{version}] {self.pr_title()}"
 
     def __find_open(self, kind, expected_title, expected_labels):
         """

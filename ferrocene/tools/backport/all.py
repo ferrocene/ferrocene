@@ -195,12 +195,13 @@ if __name__ == "__main__":
     repo = os.environ.get("GITHUB_REPOSITORY") or "ferrocene/ferrocene"
 
     subprocess.run(["git", "update-index", "--refresh"], check=False)
-    args = ["git", "diff-index", "--quiet", "HEAD"]
+    args = ["git", "diff-index", "--ignore-submodules=all", "--quiet", "HEAD"]
     if subprocess.run(args, check=False).returncode != 0:
         exit("error: all.py is not safe to run if you have uncommitted changes")
 
     labels = list_backport_labels(repo)
-    for label in labels:
+    # Iterate in reverse order so we backport to the newest branches soonest
+    for label in reversed(labels):
         print(f"==> backporting PRs with label {label}")
         pr = BackportAllPR(repo, label, f"release/{label.removeprefix('backport:')}")
         pr.create(dry_run=dry_run)

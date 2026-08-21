@@ -18,7 +18,7 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="rust-lang/rust"
 VERSION_FILE="src/version"
-FERROCENE_ORIGIN="origin"
+FERROCENE_REMOTE="${FERROCENE_REMOTE:-origin}"
 
 fetch_upstream_version() {
     branch="$1"
@@ -31,9 +31,18 @@ fetch_upstream_version() {
     fi
 }
 
-find_last_commit_with_version() {
+find_last_commit_with_minor_version() {
     version="$1"
     root="$(git rev-parse --show-toplevel)"
+
+    # See if we are currently on the expected version.
+    # If so, we don't know when the next release branches, so we can't return the *last*
+    # commit with the right minor version.
+    # Instead we just return the current commit.
+    if [[ "$(git show "HEAD:${VERSION_FILE}")" = "${version}."* ]]; then
+        git rev-parse HEAD
+        return
+    fi
 
     # To find the last commit of the version we want to create a branch of, we
     # look for all the commits that changed the `src/version` file and collect
@@ -54,7 +63,7 @@ find_last_commit_with_version() {
         content="$(git show "${previous_commit}:${VERSION_FILE}")"
         # The star after "${version}" matches all trailing content. This is
         # needed to properly match the last patch release of the minor version.
-        if [[ "${content}" = "${version}"* ]]; then
+        if [[ "${content}" = "${version}."* ]]; then
             echo "${previous_commit}"
             return
         fi
@@ -78,18 +87,18 @@ branch_name="release/${minor_version}"
 
 # `grep -Fx` matches the whole line (`-x`) and matches the pattern literally
 # without treating it as a regex (`-F`).
-if git ls-remote "${FERROCENE_ORIGIN}" | awk '{print($2)}' | grep -Fx "refs/heads/${branch_name}" >/dev/null; then
+if git ls-remote "${FERROCENE_REMOTE}" | awk '{print($2)}' | grep -Fx "refs/heads/${branch_name}" >/dev/null; then
     echo "branch ${branch_name} already exists" 1>&2
 
     # Ensure the local branch is present (tracking the upstream branch)
     if ! git rev-parse --quiet --verify "${branch_name}" > /dev/null; then
-        git fetch "${FERROCENE_ORIGIN}"
-        git branch "${branch_name}" "${FERROCENE_ORIGIN}/${branch_name}"
+        git fetch "${FERROCENE_REMOTE}"
+        git branch "${branch_name}" "${FERROCENE_REMOTE}/${branch_name}"
     fi
 else
     echo "branch ${branch_name} does not exist, pushing it" 1>&2
 
-    last_commit="$(find_last_commit_with_version "${minor_version}")"
+    last_commit="$(find_last_commit_with_minor_version "${minor_version}")"
 
     # Create the branch pointing to the commit. If the branch already exists
     # locally delete it beforehand.
@@ -98,7 +107,8 @@ else
     fi
     git branch "${branch_name}" "${last_commit}"
 
-    git push "${FERROCENE_ORIGIN}" "${branch_name}"
+    # `--no-verify` allows testing this script locally even when pre-commiit hooks are set up
+    git push --no-verify "${FERROCENE_REMOTE}" "${branch_name}"
 fi
 
 # Let other parts of the GitHub Actions workflow know what the branch name is.

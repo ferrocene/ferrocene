@@ -212,7 +212,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 /// Used to check whether a `const` or `static` has a function pointer callable at runtime.
 ///
 /// c.f. Ty::contains_closure
-fn contains_unknown_fn<'tcx>(ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
+pub(super) fn contains_unknown_fn<'tcx>(ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
     struct ContainsUnknownFnVisitor;
 
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ContainsUnknownFnVisitor {

@@ -15,3 +15,6 @@ impl no_method_empty_span::Tr for S {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types

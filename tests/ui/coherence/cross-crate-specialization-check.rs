@@ -22,3 +22,6 @@ fn main() {
         let _ = a * b;
     }
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

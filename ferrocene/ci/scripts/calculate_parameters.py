@@ -123,10 +123,31 @@ ecr = boto3.client("ecr", region_name=ECR_REGION)
 with open(CIRCLECI_CONFIGURATION) as f:
     config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
-full_build: dict[str, bool] = {
-    "x86_64-pc-windows-msvc": os.environ["FULL_BUILD_X86_64_WINDOWS_MSVC"] == "true",
-    "aarch64-apple-darwin": os.environ["FULL_BUILD_AARCH64_DARWIN"] == "true",
+FULL_BUILD_TARGET_ENVS = {
+    "x86_64-pc-windows-msvc": "FULL_BUILD_X86_64_WINDOWS_MSVC",
+    "aarch64-apple-darwin": "FULL_BUILD_AARCH64_DARWIN",
 }
+full_build: dict[str, bool] = {}
+for target, envname in FULL_BUILD_TARGET_ENVS:
+    try:
+        val = os.environ[envname]
+        print(f"-> {envname}={val}", file=sys.stderr)
+    except KeyError:
+        print(f"-> {envname} unset, defaulting to '1'", file=sys.stderr)
+        val = "1"
+    full_build[target] = val in (
+        "1",
+        "TRUE",
+        "True",
+        "true",
+        "YES",
+        "Yes",
+        "yes",
+        "Y",
+        "y",
+    )
+
+print(f"-> full_build: {full_build}", file=sys.stderr)
 
 
 def calculate_docker_repository_url(repo: str) -> str:
@@ -161,6 +182,13 @@ def calculate_llvm_rebuild(*dummy: str):
                 )
                 not_found += 1
     return not_found > 0
+
+
+def calculate_llvm_hash(*dummy: str) -> str:
+    """
+    Calculates the value of the `llvm-hash` parameter
+    """
+    return llvm_cache.get_llvm_cache_hash()
 
 
 def calculate_targets(host_plus_stage: str):
@@ -236,6 +264,7 @@ def prepare_parameters():
         "docker-images-hash": lambda _: docker_images.calculate_hash(),
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild": calculate_llvm_rebuild,
+        "llvm-hash": calculate_llvm_hash,
         "targets--": calculate_targets,
         "stable-workflow-id": workflow_id,
         "awscli-version": awscli_version,

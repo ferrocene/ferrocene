@@ -35,9 +35,10 @@ Testing Other Targets
 
 It's often possible to test targets other than your host tuple.
 
-Windows and macOS hosts can test Linux hosts using `Lima <https://lima-vm.io/>`_ (macOS/Linux) or
-`WSL2 <https://learn.microsoft.com/en-us/windows/wsl/install>`_ (Windows). While Lima supports other
-instruction set architectures, WSL2 users must rely on QEMU.
+For MacOS hosts, we use Apple's `container <https://github.com/apple/container>`_ tool, while for
+Windows hosts we use `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/install>`_. With these
+tools we can set up a Linux environment using the same architecture as the host machine, which we
+can then use to run tests for other targets using QEMU.
 
 Additionally, Ferrocene supports testing a number of targets which are not supported by upstream.
 When testing locally, special tools or configuration may be required.
@@ -49,108 +50,197 @@ Lima or WSL2.)
 Host Setup
 ^^^^^^^^^^
 
-Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host.
-On macOS, a tool like Lima or Docker must be used. On Windows, WSL2 must be used.
+Unless otherwise noted, all bare-metal targets are tested via QEMU on a Linux host. On macOS, a
+Linux VM must be set up using a tool like Apple's ``container``. On Windows, WSL2 must be used.
 
 :target-with-tuple:`aarch64-apple-darwin`
 """""""""""""""""""""""""""""""""""""""""
 
-Install Lima, if you don't have it:
-
-.. code-block:: bash
-
-    brew install lima
-
-You can create a guest with the following commands:
-
-.. code-block:: yaml
-
-    mkdir -p ~/lima/shared
-    cat <<EOF | limactl create --name=ferrocene -
-    minimumLimaVersion: "1.0.0"
-    images:
-      - location: "https://cloud-images.ubuntu.com/releases/noble/release-20250805/ubuntu-24.04-server-cloudimg-arm64.img"
-        arch: "aarch64"
-        digest: "sha256:6177a7958f0168e38ca58c13961bdc613d71b9771148add03bc4ad637eb01b8d"
-      - location: "https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-arm64.img"
-        arch: "aarch64"
-    mounts:
-      # Creates a readonly folder in the VM at "~/host" that maps to the host home directory.
-      # Note: "~" cannot be used, because it resolves to the host home path!
-      # See: https://github.com/lima-vm/lima/blob/9e3334fdb5bceef60d23cf429ed9b9f4e76c853f/templates/default.yaml#L36
-      - location: "~"
-        mountPoint: "{{.Home}}/host"
-      # Creates a writeable folder in the VM at "~/shared" that maps to "~/lima/shared" on the host side.
-      # Note: the ending "/" on "mountPoint" prevents the vm "shared" folder from being nested inside the host "shared" folder.
-      - location: "~/lima/shared"
-        mountPoint: "{{.Home}}/shared/"
-        writable: true
-    # Configures ssh forwarding and sets a fix ssh port to connect from the host side.
-    ssh:
-      loadDotSSHPubKeys: true
-      forwardAgent: true
-      localPort: 50123
-    cpus: 8
-    memory: "8GiB"
-    mountTypesUnsupported: ["9p"]
-    EOF
+First, install ``container``, following the instructions on
+`that project's Github page <https://github.com/apple/container>`_. This tool has a similar
+command-line interface to Docker, but with some small differences.
 
 .. Note::
 
-    These commands will create a VM named `ferrocene` and a folder at `~/lima/shared` on the host that is added as a writeable shared mount point to the VM.
-    The entire home directory of the host is also mounted as readonly in the VM at `~/host`.
+    ``container`` layers a Docker-like environment on top of a Linux VM, rather than
+    running on a VM directly. This means that you cannot use ``binfmt-misc`` like you can on
+    bare-metal Linux or on WSL. Instead, you need to build a patched version of QEMU to handle
+    proper inheritance of emulation across processes, which is included in the following steps.
 
-Start the guest:
+Next, you will need to acquire a base image. We have a private repository of images at
+``harbor.infra.ferrous-systems.net`` which are used for CI and so have most of what we need
+pre-installed; here we use the ``ubuntu-24-main`` image from ``ferrocene-images/ci``
+
+Log in to the registry:
 
 .. code-block:: bash
 
-    limactl start ferrocene
+    container registry login --username <email> --password-stdin harbor.infra.ferrous-systems.net
+    # Paste the "CLI secret" for your harbor account. This can be found on the User Profile
+    # page on harbor. Then press Enter then Ctrl-D (both are necessary)
+    # Logging in may take a couple of minutes, but will print "Login succeeded" when it's done
 
-
-Shell into the guest:
+Next, configure and create a container:
 
 .. code-block:: bash
 
-    limactl shell ferrocene
+    container create -t --cpus 10 --memory 16g --name ferrocene-dev \
+        harbor.infra.ferrous-systems.net/ferrocene-images/ci:ubuntu-24-main
 
-You can also point `Visual Studio Code's SSH extension <https://code.visualstudio.com/docs/remote/ssh>`_ at it
-by adding the following configuration to your default ssh host configuration file:
+Adjust the CPU and memory allocations as appropriate to your device, remembering to leave
+some memory free for the host. The above numbers are selected for an M5 Macbook Air,
+which has 24GB of total memory, split as 16GB for the VM + 8GB for the host.
 
-.. code-block::
+If you use 1Password, and want to forward your SSH agent into the container,
+run the following instead:
 
-    Host lima-vm
-      IdentityFile "~/.lima/_config/user"
-      IdentityFile "~/.ssh/id_ed25519"
-      StrictHostKeyChecking no
-      UserKnownHostsFile /dev/null
-      NoHostAuthenticationForLocalhost yes
-      GSSAPIAuthentication no
-      PreferredAuthentications publickey
-      Compression no
-      BatchMode yes
-      IdentitiesOnly yes
-      Ciphers "^aes128-gcm@openssh.com,aes256-gcm@openssh.com"
-      User user
-      ForwardAgent yes
-      Hostname 127.0.0.1
-      Port 50123
+.. code-block:: bash
 
-You may change `User` to your user name and change `lima-vm` to a name that better describes your vm.
-The vm name is displayed in VS Code when trying to connect via ssh.
+    container create -t --cpus 10 --memory 16g --name ferrocene-dev \
+        -v $SSH_AUTH_SOCK:/tmp/ssh-auth.sock \
+        -e SSH_AUTH_SOCK="/tmp/ssh-auth.sock" \
+        harbor.infra.ferrous-systems.net/ferrocene-images/ci:ubuntu-24-main
+
+Note: The ``-t`` argument is extremely important! Without it, the container will immediately exit
+when you run ``container start ferrocene-dev`` later on
+
+Now start the container and install some packages we will need:
+
+.. code-block:: bash
+
+    container start ferrocene-dev
+    container exec -it --uid 0 ferrocene-dev /bin/bash
+    # This will open a root shell in the container. In that shell, run:
+    unminimize # This is a script from Ubuntu which expands the minimal environment used for CI
+               # into a more user-friendly environment for development work
+    apt install sudo less nano libglib2.0-dev flex bison
+    # Then close the root shell
+
+If not using the Ferrocene CI image, you will also need to install the packages listed for
+:target-with-tuple:`x86_64-unknown-linux-gnu` on the :doc:`internal-procedures:setup-local-env`
+page.
+
+Push information we'll need for logging into things:
+
+.. code-block:: bash
+
+    container cp ~/.aws/config ferrocene-dev:/home/ci/.aws/config
+    # If you did not forward the SSH agent above, upload your keys directly:
+    container cp ~/.ssh/id_ed25519 ferrocene-dev:/home/ci/.ssh/id_ed25519
+    container cp ~/.ssh/id_ed25519.pub ferrocene-dev:/home/ci/.ssh/id_ed25519.pub
+
+Now open a normal user shell in the container to finish setup:
+
+.. code-block:: bash
+
+    container exec -it ferrocene-dev /bin/bash
+    # In the shell this opens:
+
+    # First fix the permissions of the files uploaded above
+    sudo chown -R ci:ci ~/.aws
+    # If you used 1Password:
+    sudo chown ci:ci /tmp/ssh-auth.sock
+    sudo chmod 0600 /tmp/ssh-auth.sock
+    # If you uploaded your SSH keys:
+    sudo chown -R ci:ci ~/.ssh
+    chmod 0600 ~/.ssh/id_ed25519
+
+    # Build our patched version of qemu
+    cd ~
+    git clone git@github.com:ferrocene/qemu.git -b ferrocene/release/11.0.1-patched --depth 1
+    mkdir qemu-build
+    cd qemu-build
+    ../qemu/configure --disable-system --prefix=/opt/qemu-ferrocene
+    ninja
+    sudo ninja install
+
+    # Login to AWS
+    aws sso login --profile ferrocene-ci --use-device-code
+
+    # Check out ferrocene
+    cd ~
+    git clone git@github.com:ferrocene/ferrocene.git
+    cd ferrocene
+    ferrocene/ci/scripts/setup-uv.sh
+    git submodule update --init --recursive
+
+    # Set up bootstrap.toml
+    nano bootstrap.toml
+
+    # and check that everything is set up properly
+    ./x test bootstrap
+
+Finally, to run cross-platform tests, the following steps need to be done *per target* inside
+the container:
 
 .. Note::
 
-    Ensure that the port is the same as set when creating the lima vm.
+    These instructions must be used *instead of* the ones in the "Target Procedures" section below
+
+Install the appropriate cross-toolchain. E.g. for x86-64 Linux, run:
+
+.. code-block:: bash
+
+    sudo apt install gcc-x86-64-linux-gnu g++-x86-64-linux-gnu
+
+Then, to run the tests against the desired target, run:
+
+.. code-block:: bash
+
+    ./x build remote-test-server --target x86_64-unknown-linux-gnu
+    QEMU_LD_PREFIX=/usr/x86_64-linux-gnu /opt/qemu-ferrocene/bin/qemu-x86_64 \
+        build/aarch64-unknown-linux-gnu/stage2-tools-bin/remote-test-server -v \
+        --bind 127.0.0.1:12345
+    # This should print "starting test server" and then wait...
+
+    # So open a new shell and run:
+    container exec -it ferrocene-dev /bin/bash
+    cd ferrocene
+    TEST_DEVICE_ADDR=127.0.0.1:12345 ./x test library/core library/alloc \
+        --target x86_64-unknown-linux-gnu
 
 .. Note::
 
-    This configuration is required if 1Password is set to manage your ssh keys, because 1Password functions as the identity agent.
-    Otherwise, the generated ssh config by lima may be used directly as described in `Lima's usage guide <https://lima-vm.io/docs/usage/>`_.
+    The above commands are for the :target-with-tuple:`x86_64-unknown-linux-gnu` target.
+    For other targets, you will need to change ``QEMU_LD_PREFIX``, the qemu executable,
+    and the ``--target`` argument to the commands. The ``/build/aarch64-unknown-linux-gnu``
+    part does *not* change, as this uses the tuple for the VM we are building from
+    (which will always be aarch64 Linux in this section)
 
-    With `ForwardAgent` enabled, removing the ssh settings for `ControlMaster`, `ControlPath` and `ControlPersist` in lima's generated configuration might be necessary,
-    in case you use the configuration directly.
+For targets which do not have an OS (generally with a ``-none`` somewhere in the target tuple)
+the procedure is a little different:
 
-Finally, ensure the guest is configured according to :doc:`internal-procedures:setup-local-env` as well as the :target-with-tuple:`x86_64-unknown-linux-gnu` on this page.
+.. code-block:: bash
+
+    ./x build remote-test-server --target thumbv7em-ferrocene.facade-eabihf # Replace 'none' with 'ferrocene.facade'
+    opt/qemu-ferrocene/bin/qemu-x86_64 \
+        build/aarch64-unknown-linux-gnu/stage2-tools-bin/remote-test-server -v \
+        --bind 127.0.0.1:12345
+    # This should print "starting test server" and then wait...
+
+    # So open a new shell and run:
+    container exec -it ferrocene-dev /bin/bash
+    cd ferrocene
+    TEST_DEVICE_ADDR=127.0.0.1:12345 \
+        RUSTDOCFLAGS="--cfg=ferrocene_facade_secretsauce -Z unstable-options --test-args '--exclude-should-panic'" \
+        ./x test library/core library/alloc \
+        --target thumbv7em-ferrocene.facade-eabihf
+
+.. Note::
+
+    When running a large number of tests, the remote test server seems to return occasional spurious
+    errors. These can be distinguished from real test failures by the error message
+    ``client.read_exact(&mut header) failed with Connection reset by peer (os error 104)``
+
+    Some test failures can cause the remote test server to crash, which causes all future tests
+    to be rejected. This can be detected by seeing tests fail with the error message
+    ``TcpStream::connect(device_address) failed with Connection refused (os error 111)``
+
+.. Note::
+
+    The path to the remote-test-server binary does not depend on the target platform,
+    so you will need to rerun ``./x build remote-test-server --target <target>`` each
+    time you want to switch target
 
 .. Warning::
 
@@ -213,7 +303,7 @@ installed, as well as a few extras:
 
 .. Note::
 
-    These packages must also be installed in the VMs used on MacOS and Windows.
+    These packages must also be installed in the VMs used on Windows.
 
 Target Procedures
 ^^^^^^^^^^^^^^^^^

@@ -28,3 +28,6 @@ fn main() {
         println!("{a}"); //~ ERROR cannot find value `a` in this scope
     }
 }
+
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

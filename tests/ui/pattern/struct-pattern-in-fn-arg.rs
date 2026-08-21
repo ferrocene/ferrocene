@@ -13,3 +13,6 @@ fn foo<T>(Foo{..}: Foo<T>) {
 
 pub fn main() {
 }
+
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

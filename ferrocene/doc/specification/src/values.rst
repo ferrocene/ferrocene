@@ -62,6 +62,39 @@ It is undefined behavior to create an :t:`allocated object` with :t:`memory
 size` ``size`` where ``size`` is greater than the architectures maximum
 :c:`isize` value.
 
+.. _fls_Dqk4eIvxHloY:
+
+Provenance
+----------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_jriT46yWgIR0`
+A :t:`pointer` is a :t:`value` of a :t:`pointer type`.
+
+:dp:`fls_VWUlxTy0QF9d`
+An :t:`original pointer` is a :t:`pointer` created via allocation.
+
+:dp:`fls_kaPNJ7iIHPro`
+A :t:`derived pointer` is a :t:`pointer` obtained by :t:`borrowing`, copying a :t:`pointer`, reading a stored :t:`pointer`, performing :t:`pointer` arithmetic, or :t:`casting` a :t:`pointer`.
+
+:dp:`fls_5MkKtNL9oCsL`
+:t:`Provenance` is an optional property of :t:`[pointer]s` that restricts the memory locations the :t:`pointer` may access, the timespan during which the accesses may occur, and whether the accesses may read from or write to said memory locations.
+
+:dp:`fls_1NJhTBN1D2qv`
+An :t:`original pointer` carries :t:`provenance` over all or part of the :t:`allocated object` it was created from.
+
+:dp:`fls_wnJmQYT7iKQf`
+A :t:`derived pointer` inherits the :t:`provenance` of the :t:`pointer` it was created from, if any.
+
+:dp:`fls_ffh8mAkebORJ`
+A :t:`well-formed pointer` is a :t:`pointer` where either no byte of the :t:`pointer` carries :t:`provenance`, or every byte of the :t:`pointer` is the corresponding byte of a single :t:`pointer` with :t:`provenance`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_c3DaCLQEBpYQ`
+It is undefined behavior to access memory through a :t:`pointer` that does not have :t:`provenance` permitting the access.
+
 .. _fls_ixjc5jaamx84:
 
 Constants
@@ -107,9 +140,8 @@ A :t:`constant` shall have a :t:`constant initializer`, unless it is an
 The :t:`expression` of a :t:`constant initializer` shall be a
 :t:`constant expression`.
 
-:dp:`fls_deuo1pn8cjd6`
-The value of a :t:`constant` is determined by evaluating its
-:t:`constant initializer`.
+:dp:`fls_l1FOH8zt0XRZ`
+If the :t:`value` produced by evaluating a :t:`constant initializer` is or contains a :t:`pointer`, then each such :t:`pointer` shall be a non-dangling :t:`well-formed pointer`.
 
 .. rubric:: Dynamic Semantics
 
@@ -187,6 +219,9 @@ A :t:`static` shall have a :t:`static initializer`, unless it is an
 :dp:`fls_vgidvfwzm4ks`
 The :t:`expression` of a :t:`static initializer` shall be a
 :t:`constant expression`.
+
+:dp:`fls_37oocZVDne5Y`
+If the :t:`value` produced by evaluating a :t:`static initializer` is or contains a :t:`pointer`, then each such :t:`pointer` shall be a non-dangling :t:`well-formed pointer`.
 
 :dp:`fls_8dcldbvu7lav`
 A use of a :t:`static` is a :t:`place expression` referring to the unique

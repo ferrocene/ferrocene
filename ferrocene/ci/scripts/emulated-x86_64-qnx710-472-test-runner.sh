@@ -19,8 +19,10 @@ start_vm() {
     check_ip_address_is_free
 
     qemu-system-x86_64 \
-        -smp 2 \
-        -m 1G \
+        -enable-kvm \
+        -cpu host \
+        -smp 4 \
+        -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device e1000,netdev=net0 \
         -pidfile "${emulatordir}"/qemu.pid \
@@ -75,7 +77,7 @@ lib/libpci.so.2.3|' "${ifsbuild}"
     local startup=output/build/startup.sh
     # UI tests and libstd tests will try to resolve 'localhost'
     echo 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    echo 'RUST_TEST_THREADS=4 remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

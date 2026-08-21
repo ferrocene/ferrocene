@@ -12,3 +12,6 @@ fn main() {
     ::reexport_crate::hello();
     foo::reexport_crate::hello();
 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

@@ -14,3 +14,6 @@ extern crate reachable_private_fn_codegen;
 fn main() {
     reachable_private_fn_codegen::bar(()); // Error won't happen if bar is called from same crate
 }
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

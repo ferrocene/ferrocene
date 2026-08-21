@@ -26,11 +26,18 @@ trait Trait {
     //~^ NOTE this default body is not validated
 
     #[ferrocene::requires_validation]
-    const REQUIRES_VALIDATION_ASSOC_CONSTANT: u8;
+    //~^ ERROR `#[ferrocene::requires_validation]` cannot be applied to an associated constant
+    //~| NOTE only trait methods or associated constants
+    //~| HELP use `#[ferrocene::prevalidated]`
+    const ASSOCIATED_CONST_NO_FN_PTR: u8;
+    //~^ NOTE not a trait method
+
+    #[ferrocene::requires_validation]
+    const ASSOCIATED_CONST_YES_FN_PTR: fn() -> u8 = || 0;
 
     #[ferrocene::prevalidated]
     #[ferrocene::requires_validation]
-    const REQUIRES_VALIDATION_ASSOC_CONSTANT2: u8 = 1;
+    const REQUIRES_VALIDATION_ASSOC_CONSTANT2: fn() -> u8 = || 1;
 }
 
 #[ferrocene::requires_validation]

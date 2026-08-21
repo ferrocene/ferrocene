@@ -242,25 +242,33 @@ fn check_attribute_placement(
 ) {
     #[derive(Debug, PartialEq)]
     enum ItemRequiringValidation {
-        AssocConstFnPtr,
-        MethodNoBody,
-        MethodYesBody,
+        ConstFnPtr,
+        Method {
+            default_body: bool,
+        },
         /// Item does not require validation
         None,
     }
 
     let trait_method = match trait_item {
-        // Associated function
         Some(TraitItem { kind, .. }) => match kind {
+            // Associated function
             TraitItemKind::Fn(_, body) => match body {
-                TraitFn::Required(_) => ItemRequiringValidation::MethodNoBody,
-                TraitFn::Provided(_) => ItemRequiringValidation::MethodYesBody,
+                TraitFn::Required(_) => ItemRequiringValidation::Method { default_body: false },
+                TraitFn::Provided(_) => ItemRequiringValidation::Method { default_body: true },
             },
-            // TODO: handle this case
-            TraitItemKind::Const(_ty, _value) => ItemRequiringValidation::AssocConstFnPtr,
+            // Associated constant
+            TraitItemKind::Const(..) => {
+                let const_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
+                match thir::contains_unknown_fn(const_ty) {
+                    Some(_) => ItemRequiringValidation::ConstFnPtr,
+                    None => ItemRequiringValidation::None,
+                }
+            }
+            // Associated type (unstable)
             TraitItemKind::Type(..) => ItemRequiringValidation::None,
         },
-        // Associated constant or type, or not a trait item
+        // Not a trait item
         None => ItemRequiringValidation::None,
     };
     let prevalidated = has_validated_attribute(tcx, def_id.to_def_id());
@@ -269,7 +277,7 @@ fn check_attribute_placement(
     match (trait_method, prevalidated, requires_validation) {
         // `prevalidated` marks a body as validated, so it is meaningless on a
         // trait method definition without a default body
-        (ItemRequiringValidation::MethodNoBody, Some(span), _) => {
+        (ItemRequiringValidation::Method { default_body: false }, Some(span), _) => {
             diagnostics::error_prevalidated_without_body(tcx, def_id, span)
         }
 
@@ -280,10 +288,17 @@ fn check_attribute_placement(
 
         // If a trait method has a default body and is marked with `requires_validation`,
         // it also has to be marked as `prevalidated`.
-        (ItemRequiringValidation::MethodYesBody, None, Some(span)) => {
+        (ItemRequiringValidation::Method { default_body: true }, None, Some(span)) => {
             diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
         }
 
+        // (ItemRequiringValidation::Const, None, None) => todo!(),
+        // (ItemRequiringValidation::Const, None, Some(_)) => todo!(),
+        // (ItemRequiringValidation::Const, Some(_), None) => todo!(),
+        // (ItemRequiringValidation::Const, Some(_), Some(_)) => todo!(),
+        // (ItemRequiringValidation::Method { has_body }, None, None) => todo!(),
+        // (ItemRequiringValidation::None, None, None) => todo!(),
+        // (ItemRequiringValidation::None, Some(_), None) => todo!(),
         _ => {}
     }
 }

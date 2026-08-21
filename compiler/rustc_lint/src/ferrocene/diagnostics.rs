@@ -39,6 +39,11 @@ pub(super) fn error_requires_validation_not_a_trait_fn(
     attr_span: Span,
 ) {
     let (article, descr) = tcx.article_and_description(def_id.to_def_id());
+    let descr = if descr == "associated constant" {
+        "associated constant containing no function pointer"
+    } else {
+        descr
+    };
     tcx.dcx()
         .struct_span_err(
             attr_span,

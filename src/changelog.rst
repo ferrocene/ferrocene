@@ -19,6 +19,21 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.98.0
+-------------------------------
+
+- `Allow shortening lifetime in CoerceUnsized for &mut <https://github.com/rust-lang/rust/pull/149219>`_
+
+  - The Rust Standard Library is outside the scope of the FLS.
+
+- `Add lint against invalid runtime symbol definitions <https://github.com/rust-lang/rust/pull/155521>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Lint on core::ffi::c_void as a return type <https://github.com/rust-lang/rust/pull/156379>`_
+
+  - Lints are outside the scope of the FLS.
+
 Language changes in Rust 1.97.0
 -------------------------------
 

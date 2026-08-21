@@ -69,7 +69,8 @@ pub type SEL = *mut objc_selector;
 ///
 // Ferrocene addition: this fails to link. Since it's marked no_run, it doesn't generate coverage
 // anyway. Change it from no_run -> ignore.
-/// ```ignore (fails to link with -C instrument-coverage)
+#[cfg_attr(target_os = "macos", doc = "```ignore")]
+#[cfg_attr(not(target_os = "macos"), doc = "```ignore (needs macos)")]
 /// #![feature(darwin_objc)]
 /// use core::os::darwin::objc;
 ///
@@ -95,7 +96,8 @@ pub macro class($classname:expr) {{
 ///
 /// # Examples
 ///
-/// ```no_run
+#[cfg_attr(target_os = "macos", doc = "```no_run")]
+#[cfg_attr(not(target_os = "macos"), doc = "```ignore (needs macos)")]
 /// #![feature(darwin_objc)]
 /// use core::os::darwin::objc;
 ///

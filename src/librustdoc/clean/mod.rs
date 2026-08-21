@@ -39,10 +39,11 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_errors::codes::*;
 use rustc_errors::{FatalError, struct_span_code_err};
 use rustc_hir as hir;
+use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::attrs::{AttributeKind, DocAttribute, DocInline};
 use rustc_hir::def::{CtorKind, DefKind, MacroKinds, Res};
 use rustc_hir::def_id::{DefId, DefIdMap, DefIdSet, LOCAL_CRATE, LocalDefId};
-use rustc_hir::{LangItem, PredicateOrigin, find_attr};
+use rustc_hir::{PredicateOrigin, find_attr};
 use rustc_hir_analysis::{lower_const_arg_for_rustdoc, lower_ty};
 use rustc_middle::metadata::Reexport;
 use rustc_middle::middle::resolve_bound_vars as rbv;
@@ -432,9 +433,9 @@ pub(crate) fn clean_clause<'tcx>(
     let bound_clause = clause.kind();
     match bound_clause.skip_binder() {
         ty::ClauseKind::Trait(pred) => clean_poly_trait_predicate(bound_clause.rebind(pred), cx),
-        ty::ClauseKind::RegionOutlives(pred) => Some(clean_region_outlives_predicate(pred, cx.tcx)),
+        ty::ClauseKind::RegionOutlives(pred) => Some(clean_region_outlives_clause(pred, cx.tcx)),
         ty::ClauseKind::TypeOutlives(pred) => {
-            Some(clean_type_outlives_predicate(bound_clause.rebind(pred), cx))
+            Some(clean_type_outlives_clause(bound_clause.rebind(pred), cx))
         }
         ty::ClauseKind::Projection(pred) => {
             Some(clean_projection_predicate(bound_clause.rebind(pred), cx))
@@ -467,11 +468,11 @@ fn clean_poly_trait_predicate<'tcx>(
     })
 }
 
-fn clean_region_outlives_predicate<'tcx>(
-    pred: ty::RegionOutlivesPredicate<'tcx>,
+fn clean_region_outlives_clause<'tcx>(
+    clause: ty::RegionOutlivesClause<'tcx>,
     tcx: TyCtxt<'tcx>,
 ) -> WherePredicate {
-    let ty::OutlivesPredicate(a, b) = pred;
+    let ty::OutlivesClause(a, b) = clause;
 
     WherePredicate::RegionPredicate {
         lifetime: clean_middle_region(a, tcx).expect("failed to clean lifetime"),
@@ -481,14 +482,14 @@ fn clean_region_outlives_predicate<'tcx>(
     }
 }
 
-fn clean_type_outlives_predicate<'tcx>(
-    pred: ty::Binder<'tcx, ty::TypeOutlivesPredicate<'tcx>>,
+fn clean_type_outlives_clause<'tcx>(
+    clause: ty::Binder<'tcx, ty::TypeOutlivesClause<'tcx>>,
     cx: &mut DocContext<'tcx>,
 ) -> WherePredicate {
-    let ty::OutlivesPredicate(ty, lt) = pred.skip_binder();
+    let ty::OutlivesClause(ty, lt) = clause.skip_binder();
 
     WherePredicate::BoundPredicate {
-        ty: clean_middle_ty(pred.rebind(ty), cx, None, None),
+        ty: clean_middle_ty(clause.rebind(ty), cx, None, None),
         bounds: vec![GenericBound::Outlives(
             clean_middle_region(lt, cx.tcx).expect("failed to clean lifetimes"),
         )],
@@ -903,7 +904,7 @@ fn clean_ty_generics_inner<'tcx>(
                     ty::ClauseKind::Trait(pred) if let ty::Param(param) = pred.self_ty().kind() => {
                         Some(param.index)
                     }
-                    ty::ClauseKind::TypeOutlives(ty::OutlivesPredicate(ty, _reg))
+                    ty::ClauseKind::TypeOutlives(ty::OutlivesClause(ty, _reg))
                         if let ty::Param(param) = ty.kind() =>
                     {
                         Some(param.index)
@@ -2401,7 +2402,7 @@ fn clean_middle_opaque_bounds<'tcx>(
             let bound_predicate = bound.kind();
             let trait_ref = match bound_predicate.skip_binder() {
                 ty::ClauseKind::Trait(tr) => bound_predicate.rebind(tr.trait_ref),
-                ty::ClauseKind::TypeOutlives(ty::OutlivesPredicate(_ty, reg)) => {
+                ty::ClauseKind::TypeOutlives(ty::OutlivesClause(_ty, reg)) => {
                     return clean_middle_region(reg, cx.tcx).map(GenericBound::Outlives);
                 }
                 _ => return None,

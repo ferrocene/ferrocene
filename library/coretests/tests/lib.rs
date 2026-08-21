@@ -100,6 +100,7 @@
 #![feature(portable_simd)]
 #![feature(ptr_alignment_type)]
 #![feature(ptr_metadata)]
+#![feature(raw_os_error_ty)]
 #![feature(rustc_attrs)]
 #![feature(signed_bigint_helpers)]
 #![feature(slice_from_ptr_range)]

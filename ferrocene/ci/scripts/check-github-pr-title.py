@@ -39,7 +39,8 @@ if __name__ == "__main__":
 
     if not is_valid_pr_title(pr_title):
         print(
-            "Error: Pull request title does not start with a valid Clickup ticket reference",
+            "Error: Pull request title does not start with a valid Clickup ticket reference.\n"
+            "Clickup URLs have the form 'https://app.clickup.com/t/[team]/[ticket-reference]'",
             file=sys.stderr,
         )
         sys.exit(1)

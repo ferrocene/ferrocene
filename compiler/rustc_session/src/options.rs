@@ -850,8 +850,7 @@ mod desc {
     pub(crate) const parse_coverage_options: &str = "`block` | `branch` | `condition`";
     pub(crate) const parse_codegen_retag_options: &str =
         "either no value or a comma-separated list of settings: `no-precise-im`, `no-precise-pin`";
-    pub(crate) const parse_instrument_mcount: &str =
-        "either a boolean (`yes`, `no`, `on`, `off`, etc), or `fentry` on supported targets.";
+    pub(crate) const parse_instrument_mcount: &str = "either a boolean (`yes`, `no`, `on`, `off`, etc), or `fentry`, `fentry-record`, `fentry-nop-record` on supported targets";
     pub(crate) const parse_instrument_xray: &str = "either a boolean (`yes`, `no`, `on`, `off`, etc), or a comma separated list of settings: `always` or `never` (mutually exclusive), `ignore-loops`, `instruction-threshold=N`, `skip-entry`, `skip-exit`";
     pub(crate) const parse_unpretty: &str = "`string` or `string=string`";
     pub(crate) const parse_treat_err_as_bug: &str = "either no value or a non-negative number";
@@ -892,7 +891,8 @@ mod desc {
         components: `crto`, `libc`, `unwind`, `linker`, `sanitizers`, `mingw`";
     pub(crate) const parse_linker_features: &str =
         "a list of enabled (`+` prefix) and disabled (`-` prefix) features: `lld`";
-    pub(crate) const parse_polonius: &str = "either no value or `legacy` (the default), or `next`";
+    pub(crate) const parse_polonius: &str =
+        "either no value or one of `legacy` (the default), `off`, or `next`";
     pub(crate) const parse_annotate_moves: &str =
         "either a boolean (`yes`, `no`, `on`, `off`, etc.), or a size limit in bytes";
     pub(crate) const parse_stack_protector: &str =
@@ -984,6 +984,10 @@ pub mod parse {
             }
             Some("next") => {
                 *slot = Polonius::Next;
+                true
+            }
+            Some("off") | Some("no") => {
+                *slot = Polonius::Off;
                 true
             }
             _ => false,
@@ -1648,15 +1652,33 @@ pub mod parse {
 
     pub(crate) fn parse_instrument_mcount(slot: &mut InstrumentMcount, v: Option<&str>) -> bool {
         let mut use_mcount = false;
+        let mut opts = InstrumentMcountOpts::default();
         if parse_bool(&mut use_mcount, v) {
-            *slot = if use_mcount { InstrumentMcount::Mcount } else { InstrumentMcount::Disabled };
-            true
-        } else if let Some("fentry") = v {
-            *slot = InstrumentMcount::Fentry;
-            true
-        } else {
-            false
+            *slot = if use_mcount {
+                InstrumentMcount::Mcount(opts)
+            } else {
+                InstrumentMcount::Disabled
+            };
+            return true;
         }
+        match v {
+            Some("fentry") => {
+                *slot = InstrumentMcount::Fentry(opts);
+            }
+            Some("fentry-record") => {
+                opts.record = true;
+                *slot = InstrumentMcount::Fentry(opts);
+            }
+            Some("fentry-nop-record") => {
+                opts.record = true;
+                opts.no_call = true;
+                *slot = InstrumentMcount::Fentry(opts);
+            }
+            _ => {
+                return false;
+            }
+        }
+        true
     }
 
     pub(crate) fn parse_instrument_xray(
@@ -2341,7 +2363,8 @@ options! {
     assume_incomplete_release: bool = (false, parse_bool, [TRACKED],
         "make cfg(version) treat the current version as incomplete (default: no)"),
     assumptions_on_binders: bool = (false, parse_bool, [TRACKED],
-        "allow deducing higher-ranked outlives assumptions from all binders (`for<'a>`)"),
+        "allow deducing higher-ranked outlives assumptions from all binders (`for<'a>`); \
+         implies `-Znext-solver=globally`"),
     autodiff: Vec<crate::config::AutoDiff> = (Vec::new(), parse_autodiff, [TRACKED],
         "a list of autodiff flags to enable
         Mandatory setting:
@@ -2582,6 +2605,10 @@ options! {
         "a list of module flags to pass to LLVM (space separated)"),
     llvm_plugins: Vec<String> = (Vec::new(), parse_list, [TRACKED],
         "a list LLVM plugins to enable (space separated)"),
+    llvm_target_feature: String = (String::new(), parse_target_feature, [TRACKED] { TARGET_MODIFIER: LlvmTargetFeature },
+        "enable/disable LLVM-level target features. \
+        This feature is unsafe and can cause ABI issues and compiler crashes, \
+        because LLVM does not support all target feature combinations."),
     llvm_time_trace: bool = (false, parse_bool, [UNTRACKED],
         "generate JSON tracing data file from LLVM data (default: no)"),
     llvm_writable: bool = (false, parse_bool, [TRACKED],

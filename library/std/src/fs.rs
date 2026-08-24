@@ -37,6 +37,7 @@
         target_env = "sgx",
         target_os = "xous",
         target_os = "trusty",
+        target_os = "l4re",
     ))
 ))]
 mod tests;
@@ -442,7 +443,6 @@ pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
 /// # Examples
 ///
 /// ```no_run
-/// #![feature(fs_set_times)]
 /// use std::fs::{self, FileTimes};
 /// use std::time::SystemTime;
 ///
@@ -455,7 +455,7 @@ pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
 ///     Ok(())
 /// }
 /// ```
-#[unstable(feature = "fs_set_times", issue = "147455")]
+#[stable(feature = "fs_set_times", since = "CURRENT_RUSTC_VERSION")]
 #[doc(alias = "utimens")]
 #[doc(alias = "utimes")]
 #[doc(alias = "utime")]
@@ -483,7 +483,6 @@ pub fn set_times<P: AsRef<Path>>(path: P, times: FileTimes) -> io::Result<()> {
 /// # Examples
 ///
 /// ```no_run
-/// #![feature(fs_set_times)]
 /// use std::fs::{self, FileTimes};
 /// use std::time::SystemTime;
 ///
@@ -496,7 +495,7 @@ pub fn set_times<P: AsRef<Path>>(path: P, times: FileTimes) -> io::Result<()> {
 ///     Ok(())
 /// }
 /// ```
-#[unstable(feature = "fs_set_times", issue = "147455")]
+#[stable(feature = "fs_set_times", since = "CURRENT_RUSTC_VERSION")]
 #[doc(alias = "utimensat")]
 #[doc(alias = "lutimens")]
 #[doc(alias = "lutimes")]

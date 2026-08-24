@@ -263,6 +263,8 @@ pub(crate) enum UnusedNote {
     LinkerMessagesBinaryCrateOnly,
     #[note("the `dead_code_pub_in_binary` lint has no effect in library crates")]
     NoEffectDeadCodePubInBinary,
+    #[note("`#[path]` is unused on this inline module")]
+    PathOnInlineModule,
 }
 
 #[derive(Diagnostic)]
@@ -1109,14 +1111,6 @@ pub(crate) struct MustImplementNotFunctionNote {}
 pub(crate) struct FunctionNotFoundInTrait {
     #[primary_span]
     pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("functions names are duplicated")]
-#[note("all `#[rustc_must_implement_one_of]` arguments must be unique")]
-pub(crate) struct FunctionNamesDuplicated {
-    #[primary_span]
-    pub spans: Vec<Span>,
 }
 
 #[derive(Diagnostic)]

@@ -30,6 +30,7 @@ cfg_select! {
         target_os = "psp",
         target_os = "xous",
         target_os = "solid_asp3",
+<<<<<<< ferrocene/release/1.99
         all(
             target_family = "unix",
             not(target_os = "espidf"),
@@ -38,6 +39,11 @@ cfg_select! {
             // ferrocene addition
             not(ferrocene_facade_secretsauce),
         ),
+||||||| 65dd30fb9e8
+        all(target_family = "unix", not(target_os = "espidf"), not(target_os = "l4re"), not(target_os = "nuttx")),
+=======
+        all(target_family = "unix", not(target_os = "espidf"), not(target_os = "nuttx")),
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         all(target_vendor = "fortanix", target_env = "sgx"),
     ) => {
         mod gcc;

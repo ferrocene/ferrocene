@@ -32,13 +32,13 @@ if [ -n "$BLESS" ]; then
     if ! ./x test bootstrap; then
         cargo insta review --manifest-path src/bootstrap/Cargo.toml
     fi
-    ./x test ferrocene/doc/symbol-report.csv --bless
+    ./x test ferrocene/doc/symbol-report.csv --set build.profiler=true --set rust.debug-assertions-std=true --bless
 else
     ./x test bootstrap
-    ./x test ferrocene/doc/symbol-report.csv
+    ./x test ferrocene/doc/symbol-report.csv --set build.profiler=true --set rust.debug-assertions-std=true
 fi
 
-./x test --coverage=library library/core library/alloc --tests
+./x test --set build.profiler=true --set rust.debug-assertions-std=true --coverage=library library/core library/alloc --tests
 
 if [ -z "$EXTENDED" ]; then
     exit 0

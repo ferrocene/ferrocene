@@ -128,7 +128,7 @@ FULL_BUILD_TARGET_ENVS = {
     "aarch64-apple-darwin": "FULL_BUILD_AARCH64_DARWIN",
 }
 full_build: dict[str, bool] = {}
-for target, envname in FULL_BUILD_TARGET_ENVS:
+for target, envname in FULL_BUILD_TARGET_ENVS.items():
     try:
         val = os.environ[envname]
         print(f"-> {envname}={val}", file=sys.stderr)

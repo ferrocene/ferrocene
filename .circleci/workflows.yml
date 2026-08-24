@@ -654,9 +654,15 @@ jobs:
   llvm--x86_64-pc-windows-msvc:
     executor:
       name: win/server-2022
+<<<<<<< HEAD
       # Experimental choise: This makes the job take slightly more than half of the time
       # for a 10-15% increase in cost.
       size: xlarge # 16-core
+||||||| parent of fcffcf94a59 (Backport ferrocene/ferrocene#2475)
+      size: large # 8-core
+=======
+      size: xlarge # 16-core
+>>>>>>> fcffcf94a59 (Backport ferrocene/ferrocene#2475)
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc

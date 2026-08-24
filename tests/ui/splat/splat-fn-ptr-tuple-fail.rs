@@ -8,7 +8,7 @@
 //@ normalize-stderr: "note: run with.*\n" -> ""
 
 // Ferrocene addition
-//@ normalize-stderr: "qemu: uncaught target signal 6 (Aborted) - core dumped" -> ""
+//@ ignore-qemu
 
 #![expect(incomplete_features)]
 #![feature(splat)]

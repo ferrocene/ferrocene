@@ -1098,15 +1098,15 @@ impl CommandLineStep for IntrinsicTest {
     }
 
     fn is_default_step(_builder: &Builder<'_>) -> bool {
-        // Ferrocene addition: This test fails in CI with an illegal instruction
-        // error
-        false
+        true
     }
 
     fn make_run(run: RunConfig<'_>) {
         let target = run.target;
         let builder = run.builder;
 
+        // Ferrocene addition: Run directly on the host
+        /*
         let is_explicit =
             builder.config.paths.iter().any(|p| p.to_string_lossy() == "intrinsic-test");
 
@@ -1115,6 +1115,7 @@ impl CommandLineStep for IntrinsicTest {
                 "SDE is required to run intrinsic-test. Please configure `build.sde` in config.toml."
             );
         }
+        */
 
         builder.ensure(IntrinsicTest { host: target });
     }
@@ -1128,20 +1129,8 @@ impl CommandLineStep for IntrinsicTest {
             return;
         }
 
-        let (input_file, skip_file, cflags, sde_runner) = if host.contains("x86_64-unknown-linux") {
-            let Some(sde) = &builder.config.sde else {
-                builder.info("Skipping intrinsic-test because `build.sde` is not configured");
-                return;
-            };
-
-            let cpuid_def =
-                builder.src.join("library/stdarch/ci/docker/x86_64-unknown-linux-gnu/cpuid.def");
-            let sde_runner = format!(
-                "{} -cpuid-in {} -rtm-mode full -tsx --",
-                sde.display(),
-                cpuid_def.display()
-            );
-
+        // Ferrocene addition: Run directly on the host
+        let (input_file, skip_file, cflags) = if host.contains("x86_64-unknown-linux") {
             (
                 builder.src.join("library/stdarch/intrinsics_data/x86-intel.xml"),
                 [
@@ -1151,7 +1140,6 @@ impl CommandLineStep for IntrinsicTest {
                     builder.src.join("library/stdarch/crates/intrinsic-test/missing_x86_gcc.txt"),
                 ],
                 "-I/usr/include/x86_64-linux-gnu/",
-                Some(sde_runner),
             )
         } else if host.contains("aarch64-unknown-linux") {
             (
@@ -1165,7 +1153,6 @@ impl CommandLineStep for IntrinsicTest {
                         .join("library/stdarch/crates/intrinsic-test/missing_aarch64_gcc.txt"),
                 ],
                 "-I/usr/aarch64-linux-gnu/include/",
-                None,
             )
         } else {
             panic!("intrinsic-test only supports aarch64/x86_64 Linux, got {host}");
@@ -1234,9 +1221,12 @@ impl CommandLineStep for IntrinsicTest {
         cargo.env("CFLAGS", cflags);
         cargo.env("RUSTC", rustc);
         cargo.env("RUSTC_BOOTSTRAP", "1");
+        // Ferrocene addition: Run directly on the host
+        /*
         if let Some(runner) = sde_runner {
             cargo.env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER", runner);
         }
+        */
         cargo.run(builder);
     }
 

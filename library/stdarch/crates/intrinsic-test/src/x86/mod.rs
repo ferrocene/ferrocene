@@ -33,42 +33,9 @@ impl SupportedArchitecture for X86 {
     const RUST_PRELUDE: &str = RUST_PRELUDE;
 
     fn c_compiler_flags(&self, _cli_options: &ProcessedCli) -> Vec<&str> {
+        // Ferrocene addition: Only test SSE and SSE2 intrinsics
         vec![
-            "-maes",
-            "-mf16c",
-            "-mfma",
-            "-mavx",
-            "-mavx2",
-            "-mavx512f",
             "-msse2",
-            "-mavx512vl",
-            "-mavx512bw",
-            "-mavx512dq",
-            "-mavx512cd",
-            "-mavx512fp16",
-            "-msha",
-            "-msha512",
-            "-msm3",
-            "-msm4",
-            "-mavxvnni",
-            "-mavxvnniint8",
-            "-mavxneconvert",
-            "-mavxifma",
-            "-mavxvnniint16",
-            "-mavx512bf16",
-            "-mavx512bitalg",
-            "-mavx512ifma",
-            "-mavx512vbmi",
-            "-mavx512vbmi2",
-            "-mavx512vnni",
-            "-mavx512vpopcntdq",
-            "-mavx512vp2intersect",
-            "-mbmi",
-            "-mbmi2",
-            "-mgfni",
-            "-mvaes",
-            "-mvpclmulqdq",
-            "-mlzcnt",
         ]
     }
 
@@ -94,6 +61,8 @@ impl SupportedArchitecture for X86 {
             .filter(|i| !i.arguments.iter().any(|a| a.is_ptr()))
             .filter(|i| !i.arguments.iter().any(|a| a.ty.inner_size() == 128))
             .filter(|i| !cli_options.skip.contains(&i.name))
+            // Ferrocene addition: Only test SSE and SSE2 intrinsics
+            .filter(|i| i.arch_tags == &["SSE"] || i.arch_tags == &["SSE2"])
             .take(sample_size)
             .collect::<Vec<_>>();
 

@@ -11,6 +11,9 @@ use crate::common::{PASSES, PREDICATE_LOCAL, SupportedArchitecture};
 use intrinsic::ArmType;
 use json_parser::get_intrinsics;
 
+// Ferrocene addition
+use std::collections::HashSet;
+
 #[derive(PartialEq)]
 pub struct Arm(Vec<Intrinsic<Arm>>);
 
@@ -41,14 +44,14 @@ impl SupportedArchitecture for Arm {
         // GCC uses an extra `-` in the arch name
         let big_endian = cli_options.target.starts_with("aarch64_be");
         let a32 = cli_options.target.starts_with("armv7");
+        // Ferrocene modification: Only test baseline Neon
         match cli_options.cc_arg_style {
             CcArgStyle::Clang if !a32 && !big_endian => vec![
-                "-march=armv8.6a+crypto+crc+dotprod+fp16+sve2-aes+sve2-sm4+sve2-sha3+sve2-bitperm+\
-                 f32mm+f64mm+sve2p1",
+                "-march=armv8.6a",
             ],
-            CcArgStyle::Clang => vec!["-march=armv8.6a+crypto+crc+dotprod+fp16"],
+            CcArgStyle::Clang => vec!["-march=armv8.6a"],
             // SVE tests aren't run under GCC so there are no target features added for SVE
-            CcArgStyle::Gcc => vec!["-march=armv8.6-a+crypto+crc+dotprod+fp16+sha3+sm4"],
+            CcArgStyle::Gcc => vec!["-march=armv8.6-a"],
         }
     }
 
@@ -64,8 +67,20 @@ impl SupportedArchitecture for Arm {
         let sample_percentage: usize = cli_options.sample_percentage as usize;
         let sample_size = (intrinsics.len() * sample_percentage) / 100;
 
+        // Ferrocene addition
+        let prevalidated_intrinsic_names: HashSet<&str> = [
+            "vld1q_u8", // Not explicitly tested
+            "vmaxvq_u8",
+            "vorrq_u8",
+        ].into_iter().collect();
+
         let intrinsics = intrinsics
             .into_iter()
+
+            // Ferrocene addition: Only test validated intrinsics
+            // This must be kept in sync with `library/stdarch/stdarch-gen-arm/spec/*/*.yml`.
+            .filter(|i| prevalidated_intrinsic_names.contains(&i.name.as_str()))
+
             // Skip intrinsics that don't return a value.
             .filter(|i| i.results.kind() != TypeKind::Void)
             // Skip bfloat intrinsics - not currently supported

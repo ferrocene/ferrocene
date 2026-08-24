@@ -187,6 +187,7 @@ for (id, rust, c) in specializations {{
             c(__c_return_value.as_mut_ptr(){c_args});
             let __c_return_value = __c_return_value.assume_init();
 
+            println!("i = {{}}", i);
             {comparison}
         }}
     }}

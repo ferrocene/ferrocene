@@ -28,6 +28,9 @@ parameters:
   llvm-rebuild:
     type: boolean
     default: false
+  llvm-hash:
+    type: string
+    default: ""
   targets--x86_64-unknown-linux-gnu--build:
     type: string
     default: ""
@@ -139,7 +142,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--build >>
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
         ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
     steps: [ferrocene-job-build]
@@ -282,7 +285,7 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - ferrocene/aws_oidc_auth
@@ -298,7 +301,7 @@ jobs:
     resource_class: ferrocene/k8s-amd64-large
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -420,7 +423,7 @@ jobs:
     resource_class: ferrocene/k8s-arm64-large
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -443,7 +446,7 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
         ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
         ./x build src/tools/remote-test-server --target "aarch64-unknown-linux-gnu,aarch64-rhivos2-linux-gnu" --stage "2"
@@ -499,7 +502,7 @@ jobs:
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         ./x.py test --stage=1 --coverage=library library/core library/alloc --tests
     steps:
       - ferrocene/aws_oidc_auth
@@ -516,7 +519,7 @@ jobs:
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin
-      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to using too much memory, decrease this number.
@@ -545,7 +548,7 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         ./x.py --stage 2 build cargo library src/tools/rustdoc symbol-report
         ./x.py --stage 1 build compiletest coverage-dump src/tools/rustdoc src/tools/run-make-support
     steps:
@@ -662,7 +665,7 @@ jobs:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py prepare
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -713,7 +716,7 @@ jobs:
       # time of windows hosts are faster, then the script `ferrocene/ci/scripts/build_cache.py` will
       # be helpful to build/restore the cache.
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)

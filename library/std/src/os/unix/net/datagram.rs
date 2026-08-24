@@ -796,15 +796,9 @@ impl UnixDatagram {
     ///
     /// # Examples
     ///
-<<<<<<< ferrocene/release/1.99
     // Ferrocene annotation: QNX does not return the same write_timeout as set
-    /// ```ignore-qnx
-||||||| 65dd30fb9e8
-    /// ```
-=======
-    #[cfg_attr(target_family = "unix", doc = "```")]
+    #[cfg_attr(target_family = "unix", doc = "```ignore-qnx")]
     #[cfg_attr(not(target_family = "unix"), doc = "```ignore (needs unix)")]
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     /// use std::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
@@ -825,15 +819,9 @@ impl UnixDatagram {
     ///
     /// # Examples
     ///
-<<<<<<< ferrocene/release/1.99
     // Ferrocene annotation: QNX does not return the same write_timeout as set
-    /// ```ignore-qnx
-||||||| 65dd30fb9e8
-    /// ```
-=======
-    #[cfg_attr(target_family = "unix", doc = "```")]
+    #[cfg_attr(target_family = "unix", doc = "```ignore-qnx")]
     #[cfg_attr(not(target_family = "unix"), doc = "```ignore (needs unix)")]
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     /// use std::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///

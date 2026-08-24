@@ -219,98 +219,7 @@ late_lint_methods!(
     [
         BuiltinCombinedLateLintModPass,
         [
-<<<<<<< ferrocene/release/1.99
-            // Ferrocene addition
-            LintUnvalidated: LintUnvalidated,
-
-            ForLoopsOverFallibles: ForLoopsOverFallibles,
-            DefaultCouldBeDerived: DefaultCouldBeDerived,
-            DerefIntoDynSupertrait: DerefIntoDynSupertrait,
-            DropForgetUseless: DropForgetUseless,
-            ImproperCTypesLint: ImproperCTypesLint,
-            ImproperGpuKernelLint: ImproperGpuKernelLint,
-            InvalidFromUtf8: InvalidFromUtf8,
-            VariantSizeDifferences: VariantSizeDifferences,
-            PathStatements: PathStatements,
-            LetUnderscore: LetUnderscore,
-            InvalidReferenceCasting: InvalidReferenceCasting,
-            ImplicitAutorefs: ImplicitAutorefs,
-            // Depends on referenced function signatures in expressions
-            UnusedResults: UnusedResults,
-            UnitBindings: UnitBindings,
-            NonUpperCaseGlobals: NonUpperCaseGlobals,
-            NonShorthandFieldPatterns: NonShorthandFieldPatterns,
-            UnusedAllocation: UnusedAllocation,
-            // Depends on types used in type definitions
-            MissingCopyImplementations: MissingCopyImplementations,
-            // Depends on referenced function signatures in expressions
-            PtrNullChecks: PtrNullChecks,
-            MutableTransmutes: MutableTransmutes,
-            TypeAliasBounds: TypeAliasBounds,
-            TrivialConstraints: TrivialConstraints,
-            TypeLimits: TypeLimits::new(),
-            NonSnakeCase: NonSnakeCase,
-            InvalidNoMangleItems: InvalidNoMangleItems,
-            // Depends on effective visibilities
-            UnreachablePub: UnreachablePub,
-            ExplicitOutlivesRequirements: ExplicitOutlivesRequirements,
-            InvalidValue: InvalidValue,
-            DerefNullPtr: DerefNullPtr,
-            UnstableFeatures: UnstableFeatures,
-            UngatedAsyncFnTrackCaller: UngatedAsyncFnTrackCaller,
-            ShadowedIntoIter: ShadowedIntoIter,
-            DropTraitConstraints: DropTraitConstraints,
-            DanglingPointers: DanglingPointers,
-            NonPanicFmt: NonPanicFmt,
-            NoopMethodCall: NoopMethodCall,
-            EnumIntrinsicsNonEnums: EnumIntrinsicsNonEnums,
-            InvalidAtomicOrdering: InvalidAtomicOrdering,
-||||||| 65dd30fb9e8
-            ForLoopsOverFallibles: ForLoopsOverFallibles,
-            DefaultCouldBeDerived: DefaultCouldBeDerived,
-            DerefIntoDynSupertrait: DerefIntoDynSupertrait,
-            DropForgetUseless: DropForgetUseless,
-            ImproperCTypesLint: ImproperCTypesLint,
-            ImproperGpuKernelLint: ImproperGpuKernelLint,
-            InvalidFromUtf8: InvalidFromUtf8,
-            VariantSizeDifferences: VariantSizeDifferences,
-            PathStatements: PathStatements,
-            LetUnderscore: LetUnderscore,
-            InvalidReferenceCasting: InvalidReferenceCasting,
-            ImplicitAutorefs: ImplicitAutorefs,
-            // Depends on referenced function signatures in expressions
-            UnusedResults: UnusedResults,
-            UnitBindings: UnitBindings,
-            NonUpperCaseGlobals: NonUpperCaseGlobals,
-            NonShorthandFieldPatterns: NonShorthandFieldPatterns,
-            UnusedAllocation: UnusedAllocation,
-            // Depends on types used in type definitions
-            MissingCopyImplementations: MissingCopyImplementations,
-            // Depends on referenced function signatures in expressions
-            PtrNullChecks: PtrNullChecks,
-            MutableTransmutes: MutableTransmutes,
-            TypeAliasBounds: TypeAliasBounds,
-            TrivialConstraints: TrivialConstraints,
-            TypeLimits: TypeLimits::new(),
-            NonSnakeCase: NonSnakeCase,
-            InvalidNoMangleItems: InvalidNoMangleItems,
-            // Depends on effective visibilities
-            UnreachablePub: UnreachablePub,
-            ExplicitOutlivesRequirements: ExplicitOutlivesRequirements,
-            InvalidValue: InvalidValue,
-            DerefNullPtr: DerefNullPtr,
-            UnstableFeatures: UnstableFeatures,
-            UngatedAsyncFnTrackCaller: UngatedAsyncFnTrackCaller,
-            ShadowedIntoIter: ShadowedIntoIter,
-            DropTraitConstraints: DropTraitConstraints,
-            DanglingPointers: DanglingPointers,
-            NonPanicFmt: NonPanicFmt,
-            NoopMethodCall: NoopMethodCall,
-            EnumIntrinsicsNonEnums: EnumIntrinsicsNonEnums,
-            InvalidAtomicOrdering: InvalidAtomicOrdering,
-=======
             // tidy-alphabetical-start
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
             AsmLabels: AsmLabels,
             AsyncClosureUsage: AsyncClosureUsage,
             AsyncFnInTrait: AsyncFnInTrait,
@@ -339,8 +248,13 @@ late_lint_methods!(
             InvalidNoMangleItems: InvalidNoMangleItems,
             InvalidReferenceCasting: InvalidReferenceCasting,
             InvalidValue: InvalidValue,
+
             LetUnderscore: LetUnderscore,
             LifetimeSyntax: LifetimeSyntax,
+
+            // Ferrocene addition
+            LintUnvalidated: LintUnvalidated,
+
             MapUnitFn: MapUnitFn,
             // Depends on types used in type definitions
             MissingCopyImplementations: MissingCopyImplementations,

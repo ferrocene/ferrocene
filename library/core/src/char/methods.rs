@@ -1273,12 +1273,8 @@ impl char {
     /// assert!(!'\n'.is_default_ignorable());
     /// assert!(!'\0'.is_default_ignorable());
     /// assert!(!'q'.is_default_ignorable());
-<<<<<<< ferrocene/release/1.99
-    #[ferrocene::prevalidated]
-||||||| 65dd30fb9e8
-=======
     /// ```
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+    #[ferrocene::prevalidated]
     #[must_use]
     #[unstable(feature = "default_ignorable", issue = "160583")]
     #[inline]

@@ -1,9 +1,10 @@
 //! ## Recommended reading
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_errors::{Diag, MultiSpan};
+use rustc_hir::HirId;
 use rustc_hir::def_id::DefId;
-use rustc_hir::{HirId, LangItem};
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 

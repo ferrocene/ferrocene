@@ -2,40 +2,7 @@
 //! Bug #158603 regression test
 //@ run-pass
 
-<<<<<<< ferrocene/release/1.99
-//@ failure-status: 101
-
-//@ normalize-stderr: ".*error:.*compiler/([^:]+):\d{1,}:\d{1,}:(.*)" -> "error: compiler/$1:LL:CC:$2"
-//@ normalize-stderr: "thread.*panicked at .*compiler.*" -> ""
-//@ normalize-stderr: "note: rustc.*running on.*" -> "note: rustc {version} running on {platform}"
-//@ normalize-stderr: "note: compiler flags.*\n\n" -> ""
-//@ normalize-stderr: " +\d{1,}: .*\n" -> ""
-//@ normalize-stderr: " + at .*\n" -> ""
-//@ normalize-stderr: ".*omitted \d{1,} frames?.*\n" -> ""
-//@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""
-//@ normalize-stderr: ".*--> .*/splat-fn-ptr-tuple.rs:\d{1,}:\d{1,}.*\n" -> ""
-
-// Ferrocene addition
-//@ normalize-stderr: "appreciate a bug report: .*" -> "appreciate a bug report"
-
-#![allow(incomplete_features)]
-||||||| 65dd30fb9e8
-//@ failure-status: 101
-
-//@ normalize-stderr: ".*error:.*compiler/([^:]+):\d{1,}:\d{1,}:(.*)" -> "error: compiler/$1:LL:CC:$2"
-//@ normalize-stderr: "thread.*panicked at .*compiler.*" -> ""
-//@ normalize-stderr: "note: rustc.*running on.*" -> "note: rustc {version} running on {platform}"
-//@ normalize-stderr: "note: compiler flags.*\n\n" -> ""
-//@ normalize-stderr: " +\d{1,}: .*\n" -> ""
-//@ normalize-stderr: " + at .*\n" -> ""
-//@ normalize-stderr: ".*omitted \d{1,} frames?.*\n" -> ""
-//@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""
-//@ normalize-stderr: ".*--> .*/splat-fn-ptr-tuple.rs:\d{1,}:\d{1,}.*\n" -> ""
-
-#![allow(incomplete_features)]
-=======
 #![expect(incomplete_features)]
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 #![feature(splat)]
 
 fn tuple_args(#[rustc_splat] (a, b): (u32, i8)) -> (u32, i8) {

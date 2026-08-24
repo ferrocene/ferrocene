@@ -1,7 +1,7 @@
 use std::ops::ControlFlow;
 
 use rustc_abi::{FieldIdx, VariantIdx};
-use rustc_hir::LangItem;
+use rustc_attr_ir::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::traits::{
     ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
@@ -444,7 +444,7 @@ impl<'tcx> LintState<'tcx> {
             span
         });
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
-        if !errors.is_empty() {
+        if errors.has_errors() {
             debug!("impl obligations not met for trait upcast: {errors:?}");
             return None;
         }

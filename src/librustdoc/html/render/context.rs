@@ -148,19 +148,8 @@ pub(crate) struct SharedContext<'tcx> {
     /// The [`Cache`] used during rendering.
     pub(crate) cache: Cache,
     pub(crate) call_locations: AllCallLocations,
-<<<<<<< ferrocene/release/1.99
-    /// Controls whether we read / write to cci files in the doc root. Defaults read=true,
-    /// write=true
-    should_merge: ShouldMerge,
-
     // Ferrocene addition
     pub(super) note_validated_api: bool,
-||||||| 65dd30fb9e8
-    /// Controls whether we read / write to cci files in the doc root. Defaults read=true,
-    /// write=true
-    should_merge: ShouldMerge,
-=======
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 }
 
 impl SharedContext<'_> {

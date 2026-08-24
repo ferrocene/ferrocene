@@ -45,7 +45,8 @@ impl RustdocGuiTestProps {
 /// FIXME(#143827): this setup feels very hacky. It so happens that `tests/rustdoc-gui/`
 /// **only** uses `//@ {compile,run}-flags` for now and not any directives that actually rely on
 /// info that is assumed available in a fully populated [`Config`].
-fn incomplete_config_for_rustdoc_gui_test() -> Config {
+// Ferrocene addition: make this `pub(crate)` so we can use it in `sample_config`
+pub(crate) fn incomplete_config_for_rustdoc_gui_test() -> Config {
     // FIXME(#143827): spelling this out intentionally, because this is questionable.
     //
     // For instance, `//@ ignore-stage1` will not work at all.

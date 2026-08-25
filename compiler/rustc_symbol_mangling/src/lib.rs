@@ -243,16 +243,7 @@ fn compute_symbol_name<'tcx>(
     let args = instance.args;
     let def_kind = tcx.def_kind(instance.def_id());
     if let DefKind::Fn | DefKind::AssocFn = def_kind {
-        // Ferrocene addition: The constness check here is to detect intrinsics like `needs_drop::<T>`
-        // which should always resolve to a constant at compile time and so should never reach codegen.
-        // However, when generating core coverage, we see the intrinsic as an unused function and try
-        // to generate dummy coverage data for it, which sets off this assertion.
-        //
-        // Temporarily disable the assertion when generating coverage data to resolve this
-        debug_assert!(
-            tcx.sess.instrument_coverage()
-                || tcx.constness(instance.def_id()) != hir::Constness::Const { always: true }
-        );
+        debug_assert!(tcx.constness(instance.def_id()) != hir::Constness::Const { always: true });
     }
 
     debug!("symbol_name(def_id={:?}, args={:?})", def_id, args);

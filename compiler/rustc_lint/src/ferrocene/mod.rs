@@ -242,7 +242,10 @@ fn check_attribute_placement(
 ) {
     #[derive(Debug, PartialEq)]
     enum ItemRequiringValidation {
-        ConstFnPtr,
+        ConstFnPtr {
+            is_fn_ptr: bool,
+            has_value: bool,
+        },
         Method {
             default_body: bool,
         },
@@ -258,21 +261,27 @@ fn check_attribute_placement(
                 TraitFn::Provided(_) => ItemRequiringValidation::Method { default_body: true },
             },
             // Associated constant
-            TraitItemKind::Const(..) => {
+            TraitItemKind::Const(_ty, const_value) => {
                 let const_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
-                match thir::contains_unknown_fn(const_ty) {
-                    Some(_) => ItemRequiringValidation::ConstFnPtr,
-                    None => ItemRequiringValidation::None,
-                }
+                debug!("Associated const has type `{const_ty:?}`");
+
+                let has_value = const_value.is_some();
+                let is_fn_ptr = thir::contains_unknown_fn(const_ty).is_some();
+
+                ItemRequiringValidation::ConstFnPtr { has_value, is_fn_ptr }
             }
-            // Associated type (unstable)
+            // Associated type (unstable), with a concrete type
             TraitItemKind::Type(_bounds, Some(_assoc_ty)) => {
-                let assoc_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
-                match thir::contains_unknown_fn(assoc_ty) {
-                    Some(_) => ItemRequiringValidation::ConstFnPtr,
-                    None => ItemRequiringValidation::None,
-                }
+                let ty_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
+                debug!("Associated type has type `{ty_ty:?}`");
+
+                let has_value = false;
+                let is_fn_ptr = thir::contains_unknown_fn(ty_ty).is_some();
+
+                ItemRequiringValidation::ConstFnPtr { has_value, is_fn_ptr }
             }
+            // Associated type (unstable), without a concrete type
+            // FIXME: should we check if the bound is any of the fn traits? Fn, FnMut, FnOnce
             TraitItemKind::Type(_bounds, None) => ItemRequiringValidation::None,
         },
         // Not a trait item
@@ -287,26 +296,81 @@ fn check_attribute_placement(
         (ItemRequiringValidation::Method { default_body: false }, Some(span), _) => {
             diagnostics::error_prevalidated_without_body(tcx, def_id, span)
         }
-
-        // `requires_validation` must be applied to trait methods only
-        (ItemRequiringValidation::None, _, Some(span)) => {
-            diagnostics::error_requires_validation_not_a_trait_fn(tcx, def_id, span)
-        }
-
         // If a trait method has a default body and is marked with `requires_validation`,
         // it also has to be marked as `prevalidated`.
         (ItemRequiringValidation::Method { default_body: true }, None, Some(span)) => {
             diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
         }
+        (ItemRequiringValidation::Method { .. }, None, None) => {
+            // ok: method without any attribute
+        }
+        (ItemRequiringValidation::Method { default_body: true }, Some(_), None) => {
+            // ok
+        }
+        (ItemRequiringValidation::Method { default_body: true }, Some(_), Some(_)) => {
+            // ok
+        }
+        (ItemRequiringValidation::Method { default_body: false }, None, Some(_)) => {
+            // ok
+        }
 
-        // (ItemRequiringValidation::Const, None, None) => todo!(),
-        // (ItemRequiringValidation::Const, None, Some(_)) => todo!(),
-        // (ItemRequiringValidation::Const, Some(_), None) => todo!(),
-        // (ItemRequiringValidation::Const, Some(_), Some(_)) => todo!(),
-        // (ItemRequiringValidation::Method { has_body }, None, None) => todo!(),
-        // (ItemRequiringValidation::None, None, None) => todo!(),
-        // (ItemRequiringValidation::None, Some(_), None) => todo!(),
-        _ => {}
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, _, Some(_span)) => {
+            // FIXME(error): const which are not fn ptr cannot be marked requires_validation
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, Some(_span), _) => {
+            // FIXME(error): const which are not fn ptr cannot be marked prevalidated
+            // FIXME: this and the case above could happen simultaneously, change it to be able to emit both together
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, None, None) => { /* ok */ }
+
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true },
+            Some(_),
+            Some(_),
+        ) => {
+            // ok: fn ptr const that has a value, is requires_validation and prevalidated
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false },
+            Some(_),
+            None,
+        ) => {
+            // ok: fn ptr const that has no value, is requires_validation and not prevalidated
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, .. }, None, Some(_span)) => {
+            // FIXME(error): const which is not required_validation cannot be marked prevalidated
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true }, None, None) => {
+            // ok
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true },
+            Some(_),
+            None,
+        ) => {
+            // ok
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false }, None, None) => {
+            // ok
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false },
+            Some(_),
+            Some(_),
+        ) => {
+            // FIXME(error): if no value it cannot be prevalidated
+        }
+
+        // `requires_validation` must be applied to trait methods or fn ptr consts only
+        (ItemRequiringValidation::None, _, Some(span)) => {
+            diagnostics::error_requires_validation_not_a_trait_fn(tcx, def_id, span)
+        }
+        (ItemRequiringValidation::None, Some(_), _) => {
+            // FIXME(error): cannot mark unrelated item with prevalidated
+        }
+        (ItemRequiringValidation::None, None, None) => {
+            // ok: no trait item which has neither attribute
+        }
     }
 }
 

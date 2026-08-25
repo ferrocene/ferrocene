@@ -1,0 +1,55 @@
+error: unvalidated method implements a trait method that requires validation
+  --> $DIR/requires-validation.rs:42:8
+   |
+LL |     fn requires_validation_no_default(&self) -> u8 {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this implementation is unvalidated
+   |
+note: all implementations of `Trait::requires_validation_no_default` must be validated
+  --> $DIR/requires-validation.rs:12:8
+   |
+LL |     #[ferrocene::requires_validation]
+   |     --------------------------------- required to be validated here
+...
+LL |     fn requires_validation_no_default(&self) -> u8;
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: add `#[ferrocene::prevalidated]` to this implementation
+note: the lint level is defined here
+  --> $DIR/requires-validation.rs:5:9
+   |
+LL | #![deny(ferrocene::unvalidated)]
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+
+error: unvalidated method implements a trait method that requires validation
+  --> $DIR/requires-validation.rs:49:8
+   |
+LL |     fn requires_validation_yes_default(&self) -> u8 {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this implementation is unvalidated
+   |
+note: all implementations of `Trait::requires_validation_yes_default` must be validated
+  --> $DIR/requires-validation.rs:19:8
+   |
+LL |     #[ferrocene::requires_validation]
+   |     --------------------------------- required to be validated here
+LL |
+LL |     fn requires_validation_yes_default(&self) -> u8 {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: add `#[ferrocene::prevalidated]` to this implementation
+
+error: unvalidated method implements a trait method that requires validation
+  --> $DIR/requires-validation.rs:61:8
+   |
+LL |     fn requires_validation_no_default(&self) -> u8 {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this implementation is unvalidated
+   |
+note: all implementations of `Trait::requires_validation_no_default` must be validated
+  --> $DIR/requires-validation.rs:12:8
+   |
+LL |     #[ferrocene::requires_validation]
+   |     --------------------------------- required to be validated here
+...
+LL |     fn requires_validation_no_default(&self) -> u8;
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: add `#[ferrocene::prevalidated]` to this implementation
+
+error: aborting due to 3 previous errors
+

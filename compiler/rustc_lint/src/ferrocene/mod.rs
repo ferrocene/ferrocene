@@ -180,8 +180,10 @@ mod thir;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
-use rustc_hir::{HirId, Item};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
+use rustc_hir::{HirId, Item, TraitFn, TraitItem, TraitItemKind};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
+    ValidatedStatus, has_requires_validation_attribute, has_validated_attribute, item_is_validated,
+};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_session::{declare_lint_pass, declare_tool_lint};
@@ -203,7 +205,12 @@ use rustc_middle::{
 
 impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
     fn check_item_post(&mut self, cx: &LateContext<'tcx>, item: &Item<'tcx>) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, None);
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
+
+    fn check_trait_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx TraitItem<'tcx>) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, Some(item));
     }
 
     fn check_impl_item_post(
@@ -211,7 +218,193 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
         cx: &LateContext<'tcx>,
         item: &'tcx rustc_hir::ImplItem<'tcx>,
     ) {
+        check_attribute_placement(cx.tcx, item.owner_id.def_id, None);
+        check_impl_of_requires_validation(cx.tcx, item.owner_id.def_id);
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
+    }
+}
+
+/// Reject `#[ferrocene::*]` attributes in positions where they have no defined
+/// semantics, or are invalid.
+///
+/// `trait_item` is `Some` only if `def_id` is a trait item.
+/// It is used to check if a method definition has a default body.
+///
+/// Emit hard errors rather than warnings, because a misplaced annotation is
+/// always a mistake.
+///
+/// This is run when the item itself is checked, so the errors do not depend on
+/// the item being called from a prevalidated function.
+fn check_attribute_placement(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    trait_item: Option<&TraitItem<'_>>,
+) {
+    #[derive(Debug, PartialEq)]
+    enum ItemRequiringValidation {
+        ConstFnPtr {
+            is_fn_ptr: bool,
+            has_value: bool,
+        },
+        Method {
+            default_body: bool,
+        },
+        /// Item does not require validation
+        None,
+    }
+
+    let trait_method = match trait_item {
+        Some(TraitItem { kind, .. }) => match kind {
+            // Associated function
+            TraitItemKind::Fn(_, body) => match body {
+                TraitFn::Required(_) => ItemRequiringValidation::Method { default_body: false },
+                TraitFn::Provided(_) => ItemRequiringValidation::Method { default_body: true },
+            },
+            // Associated constant
+            TraitItemKind::Const(_ty, const_value) => {
+                let const_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
+                debug!("Associated const has type `{const_ty:?}`");
+
+                let has_value = const_value.is_some();
+                let is_fn_ptr = thir::contains_unknown_fn(const_ty).is_some();
+
+                ItemRequiringValidation::ConstFnPtr { has_value, is_fn_ptr }
+            }
+            // Associated type (unstable), with a concrete type
+            TraitItemKind::Type(_bounds, Some(_assoc_ty)) => {
+                let ty_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
+                debug!("Associated type has type `{ty_ty:?}`");
+
+                let has_value = false;
+                let is_fn_ptr = thir::contains_unknown_fn(ty_ty).is_some();
+
+                ItemRequiringValidation::ConstFnPtr { has_value, is_fn_ptr }
+            }
+            // Associated type (unstable), without a concrete type
+            // FIXME: should we check if the bound is any of the fn traits? Fn, FnMut, FnOnce
+            TraitItemKind::Type(_bounds, None) => ItemRequiringValidation::None,
+        },
+        // Not a trait item
+        None => ItemRequiringValidation::None,
+    };
+    let prevalidated = has_validated_attribute(tcx, def_id.to_def_id());
+    let requires_validation = has_requires_validation_attribute(tcx, def_id.to_def_id());
+
+    match (trait_method, prevalidated, requires_validation) {
+        // `prevalidated` marks a body as validated, so it is meaningless on a
+        // trait method definition without a default body
+        (ItemRequiringValidation::Method { default_body: false }, Some(span), _) => {
+            diagnostics::error_prevalidated_without_body(tcx, def_id, span)
+        }
+        // If a trait method has a default body and is marked with `requires_validation`,
+        // it also has to be marked as `prevalidated`.
+        (ItemRequiringValidation::Method { default_body: true }, None, Some(span)) => {
+            diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
+        }
+        (ItemRequiringValidation::Method { .. }, None, None) => {
+            // ok: method without any attribute
+        }
+        (ItemRequiringValidation::Method { default_body: true }, Some(_), None) => {
+            // ok
+        }
+        (ItemRequiringValidation::Method { default_body: true }, Some(_), Some(_)) => {
+            // ok
+        }
+        (ItemRequiringValidation::Method { default_body: false }, None, Some(_)) => {
+            // ok
+        }
+
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, _, Some(_span)) => {
+            // FIXME(error): const which are not fn ptr cannot be marked requires_validation
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, Some(_span), _) => {
+            // FIXME(error): const which are not fn ptr cannot be marked prevalidated
+            // FIXME: this and the case above could happen simultaneously, change it to be able to emit both together
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: false, .. }, None, None) => { /* ok */ }
+
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true },
+            Some(_),
+            Some(_),
+        ) => {
+            // ok: fn ptr const that has a value, is requires_validation and prevalidated
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false },
+            Some(_),
+            None,
+        ) => {
+            // ok: fn ptr const that has no value, is requires_validation and not prevalidated
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, .. }, None, Some(_span)) => {
+            // FIXME(error): const which is not required_validation cannot be marked prevalidated
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true }, None, None) => {
+            // ok
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: true },
+            Some(_),
+            None,
+        ) => {
+            // ok
+        }
+        (ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false }, None, None) => {
+            // ok
+        }
+        (
+            ItemRequiringValidation::ConstFnPtr { is_fn_ptr: true, has_value: false },
+            Some(_),
+            Some(_),
+        ) => {
+            // FIXME(error): if no value it cannot be prevalidated
+        }
+
+        // `requires_validation` must be applied to trait methods or fn ptr consts only
+        (ItemRequiringValidation::None, _, Some(span)) => {
+            diagnostics::error_requires_validation_not_a_trait_fn(tcx, def_id, span)
+        }
+        (ItemRequiringValidation::None, Some(_), _) => {
+            // FIXME(error): cannot mark unrelated item with prevalidated
+        }
+        (ItemRequiringValidation::None, None, None) => {
+            // ok: no trait item which has neither attribute
+        }
+    }
+}
+
+/// Check that every implementation of a trait method marked with
+/// `requires_validation` is marked with `prevalidated`.
+///
+/// A trait method that inherits the default implementation is not checked by
+/// this. That is okay because `check_attribute_placement` guarantees that a
+/// trait method with a default body that is marked with `requires_validation`
+/// is also marked `prevalidated`.
+fn check_impl_of_requires_validation(tcx: TyCtxt<'_>, impl_item: LocalDefId) {
+    // Get the id of the trait method definition being implemented by `impl_item`,
+    // if `impl_item` is an associated function with a body.
+    let Some(trait_method_definition) = matches!(tcx.def_kind(impl_item), DefKind::AssocFn)
+        // Inherited trait methods will be filtered out by `trait_item_of`
+        .then(|| tcx.trait_item_of(impl_item.to_def_id()))
+        .flatten()
+    else {
+        return;
+    };
+
+    if has_requires_validation_attribute(tcx, trait_method_definition).is_none() {
+        // If the trait method definition has no `requires_validation`
+        // attribute, there is nothing to check.
+        return;
+    } else if item_is_validated(tcx, impl_item.to_def_id()).validated() {
+        // If the trait method implementation is `prevalidated` everything is fine
+        return;
+    } else {
+        // If the trait method definition has a `requires_validation` attribute,
+        // but the trait method implementation has no `prevalidated` attribute,
+        // this is a problem! Therefore emit a lint!
+        debug!("{impl_item:?} implements {trait_method_definition:?}, which requires validation");
+        diagnostics::lint_impl_requires_validation(tcx, impl_item, trait_method_definition);
     }
 }
 

@@ -876,12 +876,7 @@ fn show_validated(cx: &Context<'_>, item: &clean::Item) -> bool {
         ItemId::Auto { .. } => return false,
     };
 
-    // FIXME: maybe allow marking whole modules as validated?
-    if item.is_mod() {
-        return false;
-    }
-
-    item_is_validated(cx.tcx(), def_id).validated()
+    item_is_validated(cx.tcx(), def_id).allowed_in_certified_build()
 }
 
 #[derive(Template)]

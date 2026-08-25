@@ -266,7 +266,14 @@ fn check_attribute_placement(
                 }
             }
             // Associated type (unstable)
-            TraitItemKind::Type(..) => ItemRequiringValidation::None,
+            TraitItemKind::Type(_bounds, Some(_assoc_ty)) => {
+                let assoc_ty = tcx.type_of(def_id.to_def_id()).skip_binder();
+                match thir::contains_unknown_fn(assoc_ty) {
+                    Some(_) => ItemRequiringValidation::ConstFnPtr,
+                    None => ItemRequiringValidation::None,
+                }
+            }
+            TraitItemKind::Type(_bounds, None) => ItemRequiringValidation::None,
         },
         // Not a trait item
         None => ItemRequiringValidation::None,

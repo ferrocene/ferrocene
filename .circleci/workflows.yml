@@ -200,7 +200,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx7: true
+          qnx_version: qnx710-472
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets-qnx8:
@@ -216,7 +216,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          qnx8: true
+          qnx_version: qnx800-141
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
@@ -327,7 +327,8 @@ jobs:
       - ferrocene/git_shallow_clone:
           depth: 1
       - ferrocene/aws_oidc_auth
-      - setup-qnx-toolchain: {}
+      - setup-qnx-toolchain:
+          qnx_version: qnx710-472
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -345,73 +346,11 @@ jobs:
       - ferrocene/git_shallow_clone:
           depth: 1
       - ferrocene/aws_oidc_auth
-      - setup-qnx8-toolchain: {}
+      - setup-qnx-toolchain:
+          qnx_version: qnx800-141
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
-
-  x86_64-qnx-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      tasks:
-        type: string
-      test-variant:
-        type: string
-      resource-class:
-        type: string
-      extra-args:
-        type: string
-        default: ""
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: x86_64-pc-nto-qnx710
-      SCRIPT: |
-        # the IP address of the QNX VMs is configured in ferrocene/ci/scripts/qnx-common.sh
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-    steps:
-      - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx-toolchain:
-          source-env-script: false
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
-          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
-          restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
-
-  x86_64-qnx8-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      tasks:
-        type: string
-      test-variant:
-        type: string
-      resource-class:
-        type: string
-      extra-args:
-        type: string
-        default: ""
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: x86_64-pc-qnx
-      SCRIPT: |
-        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-    steps:
-      - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx8-toolchain:
-          source-env-script: false
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
-          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
-          restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx8-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -733,6 +672,13 @@ jobs:
           command: echo
 
   x86_64-windows-self-test:
+    parameters:
+      qnx_version:
+        description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
+        type: string
+      targets:
+        description: The targets to test (must match qnx version)
+        type: string
     executor:
       name: win/server-2022
       size: medium # 4-core
@@ -740,7 +686,7 @@ jobs:
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
+      FERROCENE_TARGETS: << parameters.targets >>
     steps:
       - when:
           condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
@@ -751,34 +697,8 @@ jobs:
                 awscli_version: << pipeline.parameters.awscli-version >>
                 override_installed: false
                 os: windows
-            - setup-qnx-toolchain: {}
-            - run:
-                name: Download dist artifacts and run the self-test tool
-                command: ferrocene/ci/scripts/run-self-test.sh
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
-
-  x86_64-windows-self-test-qnx8:
-    executor:
-      name: win/server-2022
-      size: medium # 4-core
-      shell: bash.exe -euo pipefail
-    environment:
-      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
-      FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: aarch64-unknown-qnx,x86_64-pc-qnx
-    steps:
-      - when:
-          condition: << pipeline.parameters.full-build-x86_64-pc-windows-msvc-host >>
-          steps:
-            - ferrocene/git_shallow_clone:
-                depth: 1
-            - ferrocene/setup:
-                awscli_version: << pipeline.parameters.awscli-version >>
-                override_installed: false
-                os: windows
-            - setup-qnx8-toolchain: {}
+            - setup-qnx-toolchain:
+                qnx_version: << parameters.qnx_version >>
             - run:
                 name: Download dist artifacts and run the self-test tool
                 command: ferrocene/ci/scripts/run-self-test.sh
@@ -787,7 +707,7 @@ jobs:
           command: echo
 
   # Test VMs
-  aarch64-qnx-generic-test-vm:
+  qnx-generic-test-vm:
     executor: linux-vm
     parameters:
       tasks:
@@ -799,55 +719,31 @@ jobs:
       extra-args:
         type: string
         default: ""
+      qnx_version:
+        description: The QNX version to install (currently supported qnx710-472, qnx800-141)
+        type: string
+      targets:
+        description: "The compilation target (must match qnx_version, supported: x86_64-pc-nto-qnx710, x86_64-pc-qnx)"
+        type: string
+      target_arch:
+        description: "The target architecture (must match target, suppored: aarch64, x86_64)"
+        type: string
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      FERROCENE_TARGETS: << parameters.targets >>
       SCRIPT: |
-        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
+        set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=4 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
     steps:
       - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx-toolchain:
-          source-env-script: false
+      - ferrocene/aws_oidc_auth
+      - ferrocene/setup_uv
       - ferrocene-job-test-vm:
           checkout-source: false
           docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
-
-  aarch64-qnx8-generic-test-vm:
-    executor: linux-vm
-    parameters:
-      tasks:
-        type: string
-      test-variant:
-        type: string
-      resource-class:
-        type: string
-      extra-args:
-        type: string
-        default: ""
-    resource_class: << parameters.resource-class >>
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-qnx
-      SCRIPT: |
-        set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test << parameters.tasks >> --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test-variant >> << parameters.extra-args >>
-    steps:
-      - ferrocene/checkout
-      - ferrocene/setup:
-          awscli_version: << pipeline.parameters.awscli-version >>
-      - setup-qnx8-toolchain:
-          source-env-script: false
-      - ferrocene-job-test-vm:
-          checkout-source: false
-          docker-image-tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
-          run-emulator-docker-image-tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
-          restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx800-141/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx8-test-runner.sh"
+          emulator-script: "set +u; source ./<< parameters.qnx_version >>/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-<< parameters.target_arch >>-<< parameters.qnx_version >>-test-runner.sh"
 
   # Misc jobs
   wasm-dist-oxidos:
@@ -993,13 +889,16 @@ workflows:
       - misc-checks:
           requires:
             - build-docker--runner--x86_64
+            - build-docker--emulator--x86_64
 
       - llvm--x86_64-unknown-linux-gnu:
           requires:
             - build-docker--runner--x86_64
+            - build-docker--emulator--x86_64
       - x86_64-linux-build:
           requires:
             - llvm--x86_64-unknown-linux-gnu
+            - build-docker--emulator--x86_64
       - x86_64-linux-docs:
           requires: &test-outcomes-dependencies
             # Need to depend on all of the test builders to include test
@@ -1100,7 +999,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: aarch64-none-test-target-cpu-library-compiletest
@@ -1116,7 +1014,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
             - aarch64-none-test-library-compiletest
 
       - ferrocene/facade_generic_test:
@@ -1133,7 +1030,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: aarch64v8r-none-test-library-compiletest
@@ -1149,7 +1045,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - wasm-dist-oxidos:
           requires:
@@ -1169,25 +1064,29 @@ workflows:
             - x86_64-linux-dist-targets-qnx8
             - aarch64-linux-dist
 
-      - x86_64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: x86_64-qnx-test-library-compiletest
+          targets: x86_64-pc-nto-qnx710
+          qnx_version: qnx710-472
+          target_arch: x86_64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
-      - x86_64-qnx8-generic-test-vm:
+      - qnx-generic-test-vm:
           name: x86_64-qnx8-test-library-compiletest
+          qnx_version: qnx800-141
+          targets: x86_64-pc-qnx
+          target_arch: x86_64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: armv7r-eabihf-test-library-compiletest
@@ -1203,7 +1102,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-library-compiletest
@@ -1219,7 +1117,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-target-cpu-library-compiletest
@@ -1235,7 +1132,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
             - thumbv7em-eabihf-test-library-compiletest
 
       - ferrocene/facade_generic_test:
@@ -1252,7 +1148,6 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabi-test-target-cpu-library-compiletest
@@ -1268,28 +1163,31 @@ workflows:
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
             - thumbv7em-eabi-test-library-compiletest
 
-      - aarch64-qnx-generic-test-vm:
+      - qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest
+          targets: aarch64-unknown-nto-qnx710
+          qnx_version: qnx710-472
+          target_arch: aarch64
           tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
-      - aarch64-qnx8-generic-test-vm:
+      - qnx-generic-test-vm:
           name: aarch64-qnx8-test-library-compiletest
+          targets: aarch64-unknown-qnx
+          qnx_version: qnx800-141
+          target_arch: aarch64
           tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
-          resource-class: large.gen3 # 4-core
+          resource-class: ferrocene/qnx-testrunner-ubuntu-24
           requires:
             - x86_64-linux-build
-            - build-docker--emulator--x86_64
 
       - llvm--aarch64-unknown-linux-gnu:
           requires:
@@ -1394,10 +1292,15 @@ workflows:
           requires:
             - llvm--x86_64-pc-windows-msvc
       - x86_64-windows-self-test:
+          qnx_version: qnx710-472
+          targets: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets
-      - x86_64-windows-self-test-qnx8:
+      - x86_64-windows-self-test:
+          name: x86_64-windows-self-test-qnx8
+          qnx_version: qnx800-141
+          targets: aarch64-unknown-qnx,x86_64-pc-qnx
           requires:
             - x86_64-windows-dist
             - x86_64-linux-dist-targets-qnx8
@@ -1495,12 +1398,11 @@ commands:
       llvm_subset:
         type: boolean
         default: true
-      qnx7:
-        type: boolean
-        default: false
-      qnx8:
-        type: boolean
-        default: false
+      qnx_version:
+        description: "The QNX version to test (currently supported: qnx710-472, qnx800-141)"
+        type: enum
+        enum: ["qnx710-472", "qnx800-141", ""]
+        default: ""
     steps:
       - ferrocene/checkout:
           llvm_subset: << parameters.llvm_subset >>
@@ -1513,17 +1415,9 @@ commands:
           condition: <<parameters.restore-from-job>>
           steps:
             - ferrocene/restore_from_job:
-                from_job: << parameters.restore-from-job >>
-      - when:
-          condition:
-            equal: [<<parameters.qnx7>>, true]
-          steps:
-            - setup-qnx-toolchain: {}
-      - when:
-          condition:
-            equal: [<<parameters.qnx8>>, true]
-          steps:
-            - setup-qnx8-toolchain: {}
+                from_job: << parameters.restore-from-job>>
+      - setup-qnx-toolchain:
+          qnx_version: << parameters.qnx_version >>
       - ferrocene/ci
 
   ferrocene-job-test-container:
@@ -1571,27 +1465,18 @@ commands:
                 llvm_subset: true
       - ferrocene/setup:
           awscli_version: << pipeline.parameters.awscli-version >>
+          override_installed: false
       - ferrocene/restore_from_job:
-          from_job: << parameters.restore-from-job >>
-      - run:
-          name: Enable IPv6 for Docker
-          command: |
-            sudo mkdir -p /etc/docker
-            cat \<<EOF | sudo tee /etc/docker/daemon.json
-            {
-              "ipv6": true,
-              "fixed-cidr-v6": "2001:db8:1::/64"
-            }
-            EOF
-            sudo service docker restart
+          from_job: << parameters.restore-from-job>>
 
       - run:
           name: Pull the Docker image used for CI
           command: |
-            aws ecr get-login-password --region us-east-1 \
-              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
-            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >>
+            # Use our cluster-local pull-through cache. We don't need to authenticate as the credentials are
+            # injected at VM startup
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >>
+            docker pull harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:<< pipeline.parameters.qemu-version >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1602,27 +1487,35 @@ commands:
 
             - run:
                 name: Prepare emulator
+                environment:
+                  EMULATOR_PATH: /opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >>/bin/
                 command: |
                   docker run \
+                    --device /dev/kvm \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     --workdir /project \
                     --volume $(pwd):/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
+                    --volume /opt/qnx/qnx800-141/:/project/qnx800-141/ \
+                    --volume /opt/qnx/qnx710-472/:/project/qnx710-472/ \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
-                    --user $(id -u):$(id -g) \
+                    --user "$(id -u):$(id -g)" \
+                    --group-add "$(getent group kvm | cut -d: -f3)" \
                     --network host \
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+                    harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >> \
                     ferrocene/ci/run.sh
                     # Actual command set in -e SCRIPT=... above!
 
             - run:
                 name: Execute emulator in the background
                 background: true
+                environment:
+                  EMULATOR_PATH: /opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >>/bin/
                 command: |
                   docker run \
                     --rm \
@@ -1631,12 +1524,14 @@ commands:
                     --volume $(pwd):/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
-                    --user $(id -u):$(id -g) \
+                    --user "$(id -u):$(id -g)" \
+                    --group-add "$(getent group kvm | cut -d: -f3)" \
                     --network host \
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
+                    --mount type=image,source=harbor.infra.ferrous-systems.net/ferrocene-images/qemu-arm-patched:<< pipeline.parameters.qemu-version >>,target=/opt/qemu-ferrocene/<< pipeline.parameters.qemu-version >> \
+                    harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.run-emulator-docker-image-tag >> \
                     bash -c "<< parameters.emulator-script >>"
 
       - ferrocene/ci:
@@ -1648,11 +1543,12 @@ commands:
               --volume $(pwd):/project \
               --volume $HOME/tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
-              --user $(id -u):$(id -g) \
+              --user "$(id -u):$(id -g)" \
+              --group-add "$(getent group kvm | cut -d: -f3)" \
               --network host \
               --interactive \
               --tty \
-              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+              harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:<< parameters.docker-image-tag >> \
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
@@ -1660,37 +1556,28 @@ commands:
       source-env-script:
         type: boolean
         default: true
+      qnx_version:
+        description: "The QNX version to set up (currently supported: qnx710-472, qnx800-141). Empty string for none"
+        type: enum
+        enum: ["qnx710-472", "qnx800-141", ""]
+        default: ""
     steps:
-      - run:
-          name: Fetch QNX710 toolchain
-          # On Windows, the virtualenv detection seems to struggle at times.
-          command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
       - when:
-          condition: << parameters.source-env-script >>
+          condition:
+            not:
+              equal: ["", << parameters.qnx_version >>]
           steps:
             - run:
-                name: Set PATH to include QNX710 tools
-                command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
-
-  setup-qnx8-toolchain:
-    description: Setup QNX8 Toolchain
-    parameters:
-      source-env-script:
-        type: boolean
-        default: true
-    steps:
-      - run:
-          name: Fetch QNX800 toolchain
-          # On Windows, the virtualenv detection seems to struggle at times.
-          command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
-      - when:
-          condition: << parameters.source-env-script >>
-          steps:
-            - run:
-                name: Set PATH to include QNX800 tools
-                command: echo 'source $(pwd)/qnx800-141/qnxsdp-env.sh' >> "$BASH_ENV"
+                name: Fetch << parameters.qnx_version >> toolchain
+                # On Windows, the virtualenv detection seems to struggle at times.
+                command: |
+                  ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/<< parameters.qnx_version >>-deployment.tar.zst .
+            - when:
+                condition: << parameters.source-env-script >>
+                steps:
+                  - run:
+                      name: Set PATH to include << parameters.qnx_version >> tools
+                      command: echo 'source $(pwd)/<< parameters.qnx_version >>/qnxsdp-env.sh' >> "$BASH_ENV"
 
 executors:
   linux-vm:

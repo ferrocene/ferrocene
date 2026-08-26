@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+CT_CONFIG_VERSION="5"
+CT_EXTRA_CFLAGS_FOR_HOST="-fno-char8_t"
+CT_EXTRA_LDFLAGS_FOR_HOST="-fno-char8_t"
+CT_OMIT_TARGET_VENDOR=y
+CT_PARALLEL_JOBS=4
+CT_LOAD="8"
+CT_ARCH_S390=y
+CT_ARCH_64=y
+CT_KERNEL_LINUX=y
+CT_BINUTILS_PLUGINS=y
+CT_CC_LANG_CXX=y
+
+CT_KERNEL_LINUX=y
+CT_LINUX_V_3_10=y
+# Earlier versions are buggy in glibc
+# https://github.com/cross-rs/cross/issues/451
+CT_GLIBC_V_2_20=y

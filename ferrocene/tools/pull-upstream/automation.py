@@ -18,6 +18,9 @@
 # - `GITHUB_TOKEN`: API token with access to the repo contents, issues and RPs
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
 
+# Note: Regardless of the target branch, the automation will always run
+# the version of this script from the `main` branch.
+
 from automations_common import AutomatedPR, AutomationResult
 import generate_pr_body
 import os

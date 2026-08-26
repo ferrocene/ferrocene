@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# Note: Regardless of the target branch, the automation will always run
+# the version of this script from the `main` branch.
+
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -17,6 +20,17 @@ X_HELP=src/etc/xhelp
 DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 
 LOCAL_REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Record where we were before we start checking out new things.
+# This is used to re-checkout the original versions of this script and its dependencies,
+# to avoid ending up in a state where we're running pull.sh from one branch but its
+# dependencies from a different branch.
+#
+# When run via Github Actions, this will always be the tip of the main branch; when
+# run locally for testing purposes, it will be whatever commit you had checked out.
+INITIAL_COMMIT=$(git rev-parse HEAD)
+INITIAL_BRANCH=$(git branch --show-current)
+if [ -z "$INITIAL_BRANCH" ]; then INITIAL_BRANCH=$INITIAL_COMMIT; fi
 
 # Set a default max of merges per PR to 30, if it was not overridden in the
 # environment.
@@ -191,7 +205,25 @@ else
     merge_message="pull new changes from upstream"
 fi
 
+# Switch to the target branch, but keep this script and its dependencies
+# pinned to the versions we started with
 git checkout "${current_commit}"
+
+git checkout "${INITIAL_COMMIT}" -- ferrocene/tools/pull-upstream/ ferrocene/tools/fix-merge/
+
+# Sync submodules to the target branch so that the next step doesn't commit a bunch
+# of unintended submodule changes
+git submodule update --recursive
+
+# Commit the updated scripts into the target branch if they're different
+# Note that `git commit` exits with status code 1 if nothing has changed, and we need to suppress
+# that to stop it breaking the script. This could be done with an `|| true` on the git commit line,
+# but that looks weird and unintuitive, so it's nicer to turn off the `-e` flag for a moment.
+set +e
+git commit --quiet -F- <<EOF
+sync pull-upstream and fix-merge scripts from ${INITIAL_BRANCH}
+EOF
+set -e
 
 # - Unset some env vars to make git ignore user configuration. For example, if
 #   mergiraf is set as the merge driver globally, git would attempt to use it

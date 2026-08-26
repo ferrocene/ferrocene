@@ -763,6 +763,7 @@ macro_rules! uint_impl {
                       without modifying the original"]
         #[inline(always)]
         #[ferrocene::prevalidated]
+        #[ferrocene::annotation("The `as` casts of this line is currently showing uncovered due to a coverage tooling bug.")]
         pub const fn reverse_bits(self) -> Self {
             intrinsics::bitreverse(self as $ActualT) as Self
         }
@@ -3187,6 +3188,7 @@ macro_rules! uint_impl {
             if size_of::<Self>() == 1 {
                 // Trick LLVM into generating the psadbw instruction when SSE2
                 // is available and this function is autovectorized for u8's.
+                #[ferrocene::annotation("The `as` casts of this line is currently showing uncovered due to a coverage tooling bug.")]
                 (self as i32).wrapping_sub(other as i32).unsigned_abs() as Self
             } else {
                 if self < other {

@@ -5,3 +5,6 @@ fn main() {
     let dangling = 16_usize as *const u8;
     //~^ ERROR cast from `usize` to `*const u8` implicitly relies on exposed provenance
 }
+
+// ferrocene-annotations: fls_dqk4eivxhloy
+// Provenance

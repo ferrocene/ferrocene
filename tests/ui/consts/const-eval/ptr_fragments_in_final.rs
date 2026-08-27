@@ -75,3 +75,6 @@ fn fragment_in_padding() -> impl Copy {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_dqk4eivxhloy
+// Provenance

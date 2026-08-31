@@ -477,6 +477,7 @@ macro_rules! spec_int_ranges {
 
             #[inline]
             #[ferrocene::prevalidated]
+            #[ferrocene::annotation("The `as` portion of this line is currently showing uncovered due to a coverage tooling bug.")]
             fn spec_size_hint(&self) -> (usize, Option<usize>) {
                 let remaining = self.iter.end as usize;
                 (remaining, Some(remaining))

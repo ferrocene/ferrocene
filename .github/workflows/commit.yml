@@ -26,6 +26,17 @@ jobs:
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
 
+      - name: Setup uv
+        run: ferrocene/ci/scripts/setup-uv.sh
+
+      - name: Check whether PR title includes a Clickup ticket reference
+        # Passing the PR title as an environment variable instead of an argument prevents
+        # potential command-injection vulnerabilities. For details, see:
+        # https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: ferrocene/ci/scripts/check-github-pr-title.py
+
       - name: Clone only necessary submodules
         run: ferrocene/ci/scripts/checkout-submodules.sh library/backtrace src/doc/reference src/doc/book src/tools/cargo src/tools/rustc-perf
 
@@ -64,14 +75,6 @@ jobs:
 
       - name: Check whether all of our Python scripts use uv
         run: ferrocene/ci/scripts/require-uv-shebang.py
-
-      - name: Check whether PR title includes a Clickup ticket reference
-        # Passing the PR title as an environment variable instead of an argument prevents
-        # potential command-injection vulnerabilities. For details, see:
-        # https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: ferrocene/ci/scripts/check-github-pr-title.py
 
       - name: Check whether git conflict markers are present
         run: ferrocene/ci/scripts/detect-conflict-markers.py

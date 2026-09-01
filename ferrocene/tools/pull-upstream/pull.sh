@@ -97,7 +97,7 @@ if [[ $# -ge 2 ]]; then
 else
     current_commit="$(git rev-parse HEAD)"
     branch_name="$(git branch --show-current)"
-    if [ -n "$branch_name" ]; then branch_name=$current_commit; fi
+    if [ -z "$branch_name" ]; then branch_name=$current_commit; fi
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"

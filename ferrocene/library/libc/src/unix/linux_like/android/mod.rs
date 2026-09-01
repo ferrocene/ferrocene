@@ -610,13 +610,6 @@ s! {
 }
 
 s_no_extra_traits! {
-    /// WARNING: The `PartialEq`, `Eq` and `Hash` implementations of this
-    /// type are unsound and will be removed in the future.
-    #[deprecated(
-        note = "this struct has unsafe trait implementations that will be \
-                removed in the future",
-        since = "0.2.80"
-    )]
     pub struct af_alg_iv {
         pub ivlen: u32,
         pub iv: [c_uchar; 0],
@@ -659,7 +652,7 @@ s_no_extra_traits! {
 
     // linux/if_ether.h
 
-    #[repr(C, packed)]
+    #[repr(packed)]
     pub struct ethhdr {
         pub h_dest: [c_uchar; crate::ETH_ALEN as usize],
         pub h_source: [c_uchar; crate::ETH_ALEN as usize],
@@ -687,34 +680,6 @@ s_no_extra_traits! {
     struct siginfo_f {
         _siginfo_base: [c_int; 3],
         sifields: sifields,
-    }
-}
-
-cfg_if! {
-    if #[cfg(feature = "extra_traits")] {
-        #[allow(deprecated)]
-        impl af_alg_iv {
-            fn as_slice(&self) -> &[u8] {
-                unsafe { ::core::slice::from_raw_parts(self.iv.as_ptr(), self.ivlen as usize) }
-            }
-        }
-
-        #[allow(deprecated)]
-        impl PartialEq for af_alg_iv {
-            fn eq(&self, other: &af_alg_iv) -> bool {
-                *self.as_slice() == *other.as_slice()
-            }
-        }
-
-        #[allow(deprecated)]
-        impl Eq for af_alg_iv {}
-
-        #[allow(deprecated)]
-        impl hash::Hash for af_alg_iv {
-            fn hash<H: hash::Hasher>(&self, state: &mut H) {
-                self.as_slice().hash(state);
-            }
-        }
     }
 }
 
@@ -997,8 +962,6 @@ pub const SIGURG: c_int = 23;
 pub const SIGIO: c_int = 29;
 pub const SIGSYS: c_int = 31;
 pub const SIGSTKFLT: c_int = 16;
-#[deprecated(since = "0.2.55", note = "Use SIGSYS instead")]
-pub const SIGUNUSED: c_int = 31;
 pub const SIGTTIN: c_int = 21;
 pub const SIGTTOU: c_int = 22;
 pub const SIGXCPU: c_int = 24;
@@ -1141,7 +1104,7 @@ pub const SOCK_DCCP: c_int = 6;
 #[deprecated(since = "0.2.70", note = "AF_PACKET must be used instead")]
 pub const SOCK_PACKET: c_int = 10;
 
-pub const IPPROTO_MAX: c_int = 256;
+pub const IPPROTO_MAX: c_int = 263;
 
 pub const SOL_SOCKET: c_int = 1;
 pub const SOL_SCTP: c_int = 132;
@@ -1220,12 +1183,15 @@ pub const SO_DOMAIN: c_int = 39;
 pub const SO_RXQ_OVFL: c_int = 40;
 pub const SO_PEEK_OFF: c_int = 42;
 pub const SO_BUSY_POLL: c_int = 46;
+pub const SO_ATTACH_REUSEPORT_CBPF: c_int = 51;
+pub const SO_ATTACH_REUSEPORT_EBPF: c_int = 52;
 pub const SCM_TIMESTAMPING_OPT_STATS: c_int = 54;
 pub const SCM_TIMESTAMPING_PKTINFO: c_int = 58;
 pub const SO_BINDTOIFINDEX: c_int = 62;
 pub const SO_TIMESTAMP_NEW: c_int = 63;
 pub const SO_TIMESTAMPNS_NEW: c_int = 64;
 pub const SO_TIMESTAMPING_NEW: c_int = 65;
+pub const SO_DETACH_REUSEPORT_BPF: c_int = 68;
 
 // Defined in unix/linux_like/mod.rs
 // pub const SCM_TIMESTAMP: c_int = SO_TIMESTAMP;
@@ -2641,12 +2607,6 @@ pub const SOF_TIMESTAMPING_BIND_PHC: c_uint = 1 << 15;
 pub const SOF_TIMESTAMPING_OPT_ID_TCP: c_uint = 1 << 16;
 pub const SOF_TIMESTAMPING_OPT_RX_FILTER: c_uint = 1 << 17;
 
-#[deprecated(
-    since = "0.2.55",
-    note = "ENOATTR is not available on Android; use ENODATA instead"
-)]
-pub const ENOATTR: c_int = crate::ENODATA;
-
 // linux/if_alg.h
 pub const ALG_SET_KEY: c_int = 1;
 pub const ALG_SET_IV: c_int = 2;
@@ -3489,14 +3449,12 @@ f! {
         let size_in_bits = 8 * size_of_val(&cpuset.__bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.__bits[idx] |= 1 << offset;
-        ()
     }
 
     pub unsafe fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
         let size_in_bits = 8 * size_of_val(&cpuset.__bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.__bits[idx] &= !(1 << offset);
-        ()
     }
 
     pub unsafe fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
@@ -3508,7 +3466,7 @@ f! {
     pub unsafe fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
         let mut s: u32 = 0;
         let size_of_mask = size_of_val(&cpuset.__bits[0]);
-        for i in cpuset.__bits[..(size / size_of_mask)].iter() {
+        for i in &cpuset.__bits[..(size / size_of_mask)] {
             s += i.count_ones();
         }
         s as c_int
@@ -3529,9 +3487,7 @@ f! {
     pub unsafe fn SO_EE_OFFENDER(ee: *const crate::sock_extended_err) -> *mut crate::sockaddr {
         ee.offset(1) as *mut crate::sockaddr
     }
-}
 
-safe_f! {
     pub const safe fn makedev(ma: c_uint, mi: c_uint) -> crate::dev_t {
         let ma = ma as crate::dev_t;
         let mi = mi as crate::dev_t;

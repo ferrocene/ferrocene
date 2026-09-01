@@ -3,7 +3,15 @@ name = "libc"
 version = "0.2.189"
 keywords = ["libc", "ffi", "bindings", "operating", "system"]
 categories = ["external-ffi-bindings", "no-std", "os"]
-exclude = ["/ci/*", "/.github/*", "/triagebot.toml", "cherry-pick-stable.sh"]
+include = [
+    "/src",
+    "/tests",
+    "/examples",
+    "/build.rs",
+    "/CHANGELOG*",
+    "/LICENSE*",
+    "/README*",
+]
 description = "Raw FFI bindings to platform libraries like libc."
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -34,7 +42,6 @@ targets = [
     "arm-unknown-linux-gnueabihf",
     "armv7-unknown-linux-gnueabihf",
     "armv7-unknown-linux-ohos",
-    "i686-pc-windows-gnu",
     "loongarch64-unknown-linux-gnu",
     "loongarch64-unknown-linux-musl",
     "powerpc-unknown-linux-gnu",
@@ -72,6 +79,7 @@ targets = [
     "i586-unknown-linux-gnu",
     "i586-unknown-linux-musl",
     "i686-linux-android",
+    "i686-pc-windows-gnu",
     "i686-unknown-freebsd",
     "i686-unknown-linux-musl",
     "nvptx64-nvidia-cuda",
@@ -128,6 +136,7 @@ targets = [
     "powerpc64-ibm-aix",
     "powerpc64-unknown-freebsd",
     "powerpc64-unknown-linux-gnu",
+    "powerpc64-unknown-linux-gnuelfv2",
     "powerpc64-wrs-vxworks",
     "riscv32-wrs-vxworks",
     "riscv32gc-unknown-linux-musl",

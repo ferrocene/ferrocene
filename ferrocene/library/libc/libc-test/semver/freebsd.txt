@@ -142,6 +142,7 @@ BIOCSSEESENT
 BIOCVERSION
 BOOT_TIME
 BPF_ALIGNMENT
+BPF_WORDALIGN
 BUFSIZ
 BUS_ADRALN
 BUS_ADRERR
@@ -861,6 +862,12 @@ MAXFREQ
 MAXPHASE
 MAXSEC
 MAXTC
+MCAST_BLOCK_SOURCE
+MCAST_JOIN_GROUP
+MCAST_JOIN_SOURCE_GROUP
+MCAST_LEAVE_GROUP
+MCAST_LEAVE_SOURCE_GROUP
+MCAST_UNBLOCK_SOURCE
 MCL_CURRENT
 MCL_FUTURE
 MDMBUF
@@ -2074,6 +2081,8 @@ getutxuser
 glob
 glob_t
 globfree
+group_req
+group_source_req
 hexdump
 humanize_number
 icmp6_ifstat
@@ -2314,6 +2323,8 @@ regfree
 register_t
 regmatch_t
 regoff_t
+rt_metrics
+rt_msghdr
 rtprio
 rtprio_thread
 sallocx

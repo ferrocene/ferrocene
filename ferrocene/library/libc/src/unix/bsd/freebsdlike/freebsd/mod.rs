@@ -280,10 +280,22 @@ s! {
         pub ip6: *mut crate::in6_addr,
     }
 
+    // netinet/in.h: RFC 3678 multicast group membership requests
     pub struct ip_mreq_source {
         pub imr_multiaddr: crate::in_addr,
         pub imr_sourceaddr: crate::in_addr,
         pub imr_interface: crate::in_addr,
+    }
+
+    pub struct group_req {
+        pub gr_interface: u32,
+        pub gr_group: crate::sockaddr_storage,
+    }
+
+    pub struct group_source_req {
+        pub gsr_interface: u32,
+        pub gsr_group: crate::sockaddr_storage,
+        pub gsr_source: crate::sockaddr_storage,
     }
 
     pub struct statvfs {
@@ -2278,12 +2290,6 @@ pub const NOTE_ABSTIME: u32 = 0x00000010;
 
 pub const MADV_PROTECT: c_int = 10;
 
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.72",
-    note = "CTL_UNSPEC is deprecated. Use CTL_SYSCTL instead"
-)]
-pub const CTL_UNSPEC: c_int = 0;
 pub const CTL_SYSCTL: c_int = 0;
 pub const CTL_KERN: c_int = 1;
 pub const CTL_VM: c_int = 2;
@@ -2751,13 +2757,6 @@ pub const IFF_POINTOPOINT: c_int = 0x10;
 pub const IFF_KNOWSEPOCH: c_int = 0x20;
 /// (d) resources allocated
 pub const IFF_RUNNING: c_int = 0x40;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.54",
-    note = "IFF_DRV_RUNNING is deprecated. Use the portable IFF_RUNNING instead"
-)]
-/// (d) resources allocate
-pub const IFF_DRV_RUNNING: c_int = 0x40;
 /// (n) no address resolution protocol
 pub const IFF_NOARP: c_int = 0x80;
 /// (n) receive all packets
@@ -2766,10 +2765,6 @@ pub const IFF_PROMISC: c_int = 0x100;
 pub const IFF_ALLMULTI: c_int = 0x200;
 /// (d) tx hardware queue is full
 pub const IFF_OACTIVE: c_int = 0x400;
-#[doc(hidden)]
-#[deprecated(since = "0.2.54", note = "Use the portable `IFF_OACTIVE` instead")]
-/// (d) tx hardware queue is full
-pub const IFF_DRV_OACTIVE: c_int = 0x400;
 /// (i) can't hear own transmissions
 pub const IFF_SIMPLEX: c_int = 0x800;
 /// per link layer defined bit
@@ -2908,51 +2903,6 @@ pub const IFDR_MSG_SIZE: c_int = 64;
 pub const IFDR_REASON_MSG: c_int = 1;
 pub const IFDR_REASON_VENDOR: c_int = 2;
 
-// sys/net/if_mib.h
-
-/// non-interface-specific
-pub const IFMIB_SYSTEM: c_int = 1;
-/// per-interface data table
-pub const IFMIB_IFDATA: c_int = 2;
-
-/// generic stats for all kinds of ifaces
-pub const IFDATA_GENERAL: c_int = 1;
-/// specific to the type of interface
-pub const IFDATA_LINKSPECIFIC: c_int = 2;
-/// driver name and unit
-pub const IFDATA_DRIVERNAME: c_int = 3;
-
-/// number of interfaces configured
-pub const IFMIB_IFCOUNT: c_int = 1;
-
-/// functions not specific to a type of iface
-pub const NETLINK_GENERIC: c_int = 0;
-
-pub const DOT3COMPLIANCE_STATS: c_int = 1;
-pub const DOT3COMPLIANCE_COLLS: c_int = 2;
-
-pub const dot3ChipSetAMD7990: c_int = 1;
-pub const dot3ChipSetAMD79900: c_int = 2;
-pub const dot3ChipSetAMD79C940: c_int = 3;
-
-pub const dot3ChipSetIntel82586: c_int = 1;
-pub const dot3ChipSetIntel82596: c_int = 2;
-pub const dot3ChipSetIntel82557: c_int = 3;
-
-pub const dot3ChipSetNational8390: c_int = 1;
-pub const dot3ChipSetNationalSonic: c_int = 2;
-
-pub const dot3ChipSetFujitsu86950: c_int = 1;
-
-pub const dot3ChipSetDigitalDC21040: c_int = 1;
-pub const dot3ChipSetDigitalDC21140: c_int = 2;
-pub const dot3ChipSetDigitalDC21041: c_int = 3;
-pub const dot3ChipSetDigitalDC21140A: c_int = 4;
-pub const dot3ChipSetDigitalDC21142: c_int = 5;
-
-pub const dot3ChipSetWesternDigital83C690: c_int = 1;
-pub const dot3ChipSetWesternDigital83C790: c_int = 2;
-
 // sys/netinet/in.h
 // Protocols (RFC 1700)
 // NOTE: These are in addition to the constants defined in src/unix/mod.rs
@@ -3019,12 +2969,6 @@ pub const IPPROTO_BLT: c_int = 30;
 pub const IPPROTO_NSP: c_int = 31;
 /// Merit Internodal
 pub const IPPROTO_INP: c_int = 32;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.72",
-    note = "IPPROTO_SEP is deprecated. Use IPPROTO_DCCP instead"
-)]
-pub const IPPROTO_SEP: c_int = 33;
 /// Datagram Congestion Control Protocol
 pub const IPPROTO_DCCP: c_int = 33;
 /// Third Party Connect
@@ -3197,6 +3141,14 @@ pub const IPPROTO_DONE: c_int = 257;
 pub const IPPROTO_DIVERT: c_int = 258;
 /// SeND pseudo-protocol
 pub const IPPROTO_SEND: c_int = 259;
+
+// RFC 3678 protocol-independent multicast
+pub const MCAST_JOIN_GROUP: c_int = 80;
+pub const MCAST_LEAVE_GROUP: c_int = 81;
+pub const MCAST_JOIN_SOURCE_GROUP: c_int = 82;
+pub const MCAST_LEAVE_SOURCE_GROUP: c_int = 83;
+pub const MCAST_BLOCK_SOURCE: c_int = 84;
+pub const MCAST_UNBLOCK_SOURCE: c_int = 85;
 
 // sys/netinet/TCP.h
 pub const TCP_MD5SIG: c_int = 16;
@@ -4517,19 +4469,19 @@ f! {
     }
 
     pub unsafe fn CPU_SET(cpu: usize, cpuset: &mut cpuset_t) -> () {
-        let bitset_bits = 8 * size_of::<c_long>();
+        let bitset_bits = 8 * size_of_val(&cpuset.__bits[0]);
         let (idx, offset) = (cpu / bitset_bits, cpu % bitset_bits);
         cpuset.__bits[idx] |= 1 << offset;
     }
 
     pub unsafe fn CPU_CLR(cpu: usize, cpuset: &mut cpuset_t) -> () {
-        let bitset_bits = 8 * size_of::<c_long>();
+        let bitset_bits = 8 * size_of_val(&cpuset.__bits[0]);
         let (idx, offset) = (cpu / bitset_bits, cpu % bitset_bits);
         cpuset.__bits[idx] &= !(1 << offset);
     }
 
     pub unsafe fn CPU_ISSET(cpu: usize, cpuset: &cpuset_t) -> bool {
-        let bitset_bits = 8 * size_of::<c_long>();
+        let bitset_bits = 8 * size_of_val(&cpuset.__bits[0]);
         let (idx, offset) = (cpu / bitset_bits, cpu % bitset_bits);
         0 != cpuset.__bits[idx] & (1 << offset)
     }
@@ -4537,9 +4489,8 @@ f! {
     pub unsafe fn CPU_COUNT(cpuset: &cpuset_t) -> c_int {
         let mut s: u32 = 0;
         let cpuset_size = size_of::<cpuset_t>();
-        let bitset_size = size_of::<c_long>();
-
-        for i in cpuset.__bits[..(cpuset_size / bitset_size)].iter() {
+        let bitset_size = size_of_val(&cpuset.__bits[0]);
+        for i in &cpuset.__bits[..(cpuset_size / bitset_size)] {
             s += i.count_ones();
         }
         s as c_int
@@ -4557,9 +4508,7 @@ f! {
     pub unsafe fn PROT_MAX_EXTRACT(x: c_int) -> c_int {
         (x >> 16) & (crate::PROT_READ | crate::PROT_WRITE | crate::PROT_EXEC)
     }
-}
 
-safe_f! {
     pub const safe fn WIFSIGNALED(status: c_int) -> bool {
         (status & 0o177) != 0o177 && (status & 0o177) != 0 && status != 0x13
     }

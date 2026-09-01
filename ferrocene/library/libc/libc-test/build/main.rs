@@ -1,26 +1,15 @@
 #![allow(clippy::match_like_matches_macro)]
 
+mod semver;
+
+use std::env;
 use std::env::VarError;
-use std::fs::File;
-use std::io::{
-    BufRead,
-    BufReader,
-    BufWriter,
-    Write,
-};
-use std::path::{
-    Path,
-    PathBuf,
-};
+use std::io::Write;
 use std::process::{
     Command,
     Stdio,
 };
 use std::sync::LazyLock;
-use std::{
-    env,
-    io,
-};
 
 use regex::Regex;
 
@@ -55,6 +44,9 @@ fn do_cc() {
     }
     if target.contains("android") || (target.contains("linux") && !target.contains("wasm32")) {
         cc::Build::new().file("src/errqueue.c").compile("errqueue");
+    }
+    if target.contains("linux") && !target.contains("android") && !target.contains("wasm32") {
+        cc::Build::new().file("src/nlmsg.c").compile("nlmsg");
     }
     if (target.contains("linux") && !target.contains("wasm32"))
         || target.contains("l4re")
@@ -110,6 +102,7 @@ fn ctest_cfg() -> ctest::TestGenerator {
     cfg
 }
 
+<<<<<<< ferrocene/731dd55a0958fcc39135fe2f07435e77c19dde35:ferrocene/library/libc/libc-test/build.rs
 fn do_semver() {
     let mut out = PathBuf::from(env::var("OUT_DIR").unwrap());
     out.push("semver.rs");
@@ -188,15 +181,93 @@ fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut Path
     path.pop();
 }
 
+||||||| ef0906e2082:ferrocene/library/libc/libc-test/build.rs
+fn do_semver() {
+    let mut out = PathBuf::from(env::var("OUT_DIR").unwrap());
+    out.push("semver.rs");
+    let mut output = BufWriter::new(File::create(&out).unwrap());
+
+    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
+    let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
+    let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+
+    // `libc-test/semver` dir.
+    let mut semver_root = PathBuf::from("semver");
+
+    // NOTE: Windows has the same `family` as `os`, no point in including it
+    // twice.
+    // NOTE: Android doesn't include the unix file (or the Linux file) because
+    // there are some many definitions missing it's actually easier just to
+    // maintain a file for Android.
+    // NOTE: AIX and L4Re do not include the unix file because there are
+    // definitions missing on these systems. It is easier to maintain separate
+    // files for them.
+    if family != os && !matches!(os.as_str(), "android" | "aix" | "l4re") && os != "vxworks" {
+        process_semver_file(&mut output, &mut semver_root, &family);
+    }
+    // We don't do semver for unknown targets.
+    if vendor != "unknown" {
+        process_semver_file(&mut output, &mut semver_root, &vendor);
+    }
+    process_semver_file(&mut output, &mut semver_root, &os);
+    let os_arch = format!("{os}-{arch}");
+    process_semver_file(&mut output, &mut semver_root, &os_arch);
+    if !target_env.is_empty() {
+        let os_env = format!("{os}-{target_env}");
+        process_semver_file(&mut output, &mut semver_root, &os_env);
+
+        let os_env_arch = format!("{os}-{target_env}-{arch}");
+        process_semver_file(&mut output, &mut semver_root, &os_env_arch);
+    }
+}
+
+fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut PathBuf, file: P) {
+    // NOTE: `path` is reused between calls, so always remove the file again.
+    path.push(file);
+    path.set_extension("txt");
+
+    println!("cargo:rerun-if-changed={}", path.display());
+    let input_file = match File::open(&*path) {
+        Ok(file) => file,
+        Err(ref err) if err.kind() == io::ErrorKind::NotFound => {
+            path.pop();
+            return;
+        }
+        Err(err) => panic!("unexpected error opening file: {err}"),
+    };
+    let input = BufReader::new(input_file);
+
+    writeln!(output, "// Source: {}.", path.display()).unwrap();
+    output.write_all(b"use libc::{\n").unwrap();
+    for line in input.lines() {
+        let line = line.unwrap().into_bytes();
+        match line.first() {
+            // Ignore comments and empty lines.
+            Some(b'#') | None => continue,
+            _ => {
+                output.write_all(b"    ").unwrap();
+                output.write_all(&line).unwrap();
+                output.write_all(b",\n").unwrap();
+            }
+        }
+    }
+    output.write_all(b"};\n\n").unwrap();
+    path.pop();
+}
+
+=======
+>>>>>>> 444db4456f3866519b7eacd35a8bb59484bb7bbf:ferrocene/library/libc/libc-test/build/main.rs
 fn main() {
     // Avoid unnecessary re-building.
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=.");
     // Ensure version checking works, even if we don't use it.
     LazyLock::force(&VERSIONS);
 
     do_cc();
     do_ctest();
-    do_semver();
+    semver::do_semver();
 }
 
 macro_rules! headers {
@@ -375,10 +446,6 @@ fn test_apple(target: &str) {
         match constant.ident() {
             // They're declared via `deprecated_mach` and we don't support it anymore.
             x if x.starts_with("VM_FLAGS_") => true,
-            // FIXME(deprecated): These OSX constants are removed in Sierra.
-            // https://developer.apple.com/library/content/releasenotes/General/APIDiffsMacOS10_12/Swift/Darwin.html
-            "KERN_KDENABLE_BG_TRACE" | "KERN_KDDISABLE_BG_TRACE" => true,
-
             // FIXME(deprecated): Removed since 12.0.1 / xnu-8019.41.5. See `ttycom.h` at
             // https://github.com/apple-oss-distributions/xnu/commit/e6231be02a03711ca404e5121a151b24afbff733
             "TIOCREMOTE" => true,
@@ -1545,7 +1612,6 @@ fn test_netbsd(target: &str) {
     cfg.skip_const(move |constant| {
         match constant.ident() {
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
-            "SIGUNUSED" => true,                       // removed in glibc 2.26
 
             // deprecated, obsolete upstream
             "PT_LWPINFO" | "PL_EVENT_NONE" | "PL_EVENT_SIGNAL" | "PL_EVENT_SUSPENDED" => true,
@@ -2039,6 +2105,7 @@ fn which_dragonfly() -> Option<u32> {
 fn test_wasi(target: &str) {
     assert!(target.contains("wasi"));
     let p2 = target.contains("wasip2");
+    let wasi_sdk = VERSIONS.wasi_sdk.unwrap();
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
@@ -2102,6 +2169,15 @@ fn test_wasi(target: &str) {
     // used here to generate a pointer to them in bindings so skip these tests.
     cfg.skip_static(|s| s.ident().starts_with("_CLOCK_"));
 
+    match wasi_sdk.1 {
+        WasiVersion::P1 => {}
+        // This was removed in wasip2 target for wasi-sdk-30+, but it's just a
+        // typedef, so ignore it.
+        _ => {
+            cfg.skip_alias(|s| s.ident() == "__wasi_rights_t");
+        }
+    }
+
     cfg.skip_const(|c| match c.ident() {
         // These constants aren't yet defined in wasi-libc.
         // Exposing them is being tracked by https://github.com/WebAssembly/wasi-libc/issues/531.
@@ -2147,9 +2223,17 @@ fn test_android(target: &str) {
     };
     let x86 = target.contains("i686") || target.contains("x86_64");
     let aarch64 = target.contains("aarch64");
+    // The API level the NDK toolchain targets, which caps the available libc
+    // API surface (see `Versions`). Detection is required, so unwrap and let a
+    // toolchain we can't read fail loudly rather than silently skip every test.
+    let android = VERSIONS.android.unwrap();
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
+
+    // This ensure we avoid the `ioctl` overload for request parameters that use
+    // an unsigned integer instead of a signed integer.
+    cfg.define("BIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD", None);
 
     headers!(
         cfg,
@@ -2342,8 +2426,7 @@ fn test_android(target: &str) {
             "posix_spawn_file_actions_t" => true,
             "posix_spawnattr_t" => true,
 
-            // Added in API level 24
-            "if_nameindex" => true,
+            "if_nameindex" if android < 24 => true,
 
             _ => false,
         }
@@ -2397,14 +2480,8 @@ fn test_android(target: &str) {
             // The `ARPHRD_CAN` is tested in the `linux_if_arp.rs` tests:
             "ARPHRD_CAN" => true,
 
-            // FIXME(deprecated): deprecated: not available in any header
-            // See: https://github.com/rust-lang/libc/issues/1356
-            "ENOATTR" => true,
-
             // FIXME(android): still necessary?
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
-            // FIXME(deprecated): deprecated - removed in glibc 2.26
-            "SIGUNUSED" => true,
 
             // Needs a newer Android SDK for the definition
             "P_PIDFD" => true,
@@ -2458,7 +2535,6 @@ fn test_android(target: &str) {
             | "ALG_SET_DRBG_ENTROPY" => true,
 
             // FIXME(android): Something has been changed on r26b:
-            | "IPPROTO_MAX"
             | "NFNL_SUBSYS_COUNT"
             | "NF_NETDEV_NUMHOOKS"
             | "NFT_MSG_MAX"
@@ -2544,8 +2620,11 @@ fn test_android(target: &str) {
             "reallocarray" => true,
             "__system_property_wait" => true,
 
-            // Added in API level 30, but tests use level 28.
-            "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp" => true,
+            "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp"
+                if android < 30 =>
+            {
+                true
+            }
 
             // Added in API level 33, but tests use level 28.
             "preadv2" | "pwritev2" => true,
@@ -2553,34 +2632,23 @@ fn test_android(target: &str) {
             // Added in glibc 2.25.
             "getentropy" => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "getrandom" => true,
+            "getrandom" | "syncfs" | "aligned_alloc" if android < 28 => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "syncfs" => true,
+            "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" if android < 28 => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" => true,
-            // Added in API level 28, but some tests use level 24.
-            "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked" => true,
+            "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked"
+                if android < 28 =>
+            {
+                true
+            }
 
-            // Added in API level 28, but some tests use level 24.
-            "aligned_alloc" => true,
+            "getgrent" | "setgrent" | "endgrent" | "getpwent" | "setpwent" | "endpwent"
+                if android < 26 =>
+            {
+                true
+            }
 
-            // Added in API level 26, but some tests use level 24.
-            "getgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "setgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "endgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "getpwent" | "setpwent" | "endpwent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "getdomainname" | "setdomainname" => true,
+            "getdomainname" | "setdomainname" if android < 26 => true,
 
             // FIXME(android): bad function pointers:
             "isalnum" | "isalpha" | "iscntrl" | "isdigit" | "isgraph" | "islower" | "isprint"
@@ -2590,10 +2658,21 @@ fn test_android(target: &str) {
             // Added in API level 24
             "if_nameindex" | "if_freenameindex" => true,
 
-            // FIXME(ctest): In our current method of testing, we cast the function to a `void *`,
-            // which is not possible for functions that have been overloaded.
-            "ioctl" => true,
+            _ => false,
+        }
+    });
 
+    cfg.skip_fn_ptrcheck(move |func| {
+        match func {
+            // termios functions are <termios.h> inlines below API 28, so
+            // their C-side address never matches the symbol Rust links.
+            "tcdrain" | "tcflow" | "tcflush" | "tcgetattr" | "tcgetsid" | "tcsendbreak"
+            | "tcsetattr" | "cfgetispeed" | "cfgetospeed" | "cfmakeraw" | "cfsetispeed"
+            | "cfsetospeed" | "cfsetspeed"
+                if android < 28 =>
+            {
+                true
+            }
             _ => false,
         }
     });
@@ -2890,11 +2969,6 @@ fn test_freebsd(target: &str) {
             }
 
             // FIXME(deprecated): These are deprecated - remove in a couple of releases.
-            // These constants were removed in FreeBSD 11 (svn r273250) but will
-            // still be accepted and ignored at runtime.
-            "MAP_RENAME" | "MAP_NORESERVE" => true,
-
-            // FIXME(deprecated): These are deprecated - remove in a couple of releases.
             // These constants were removed in FreeBSD 11 (svn r262489),
             // and they've never had any legitimate use outside of the
             // base system anyway.
@@ -2944,12 +3018,6 @@ fn test_freebsd(target: &str) {
             // This constant was removed in FreeBSD 13 (svn r363622), and never
             // had any legitimate use outside of the base system anyway.
             "CTL_P1003_1B_MAXID" => true,
-
-            // This was renamed in FreeBSD 12.2 and 13 (r352486).
-            "CTL_UNSPEC" | "CTL_SYSCTL" => true,
-
-            // This was renamed in FreeBSD 12.2 and 13 (r350749).
-            "IPPROTO_SEP" | "IPPROTO_DCCP" => true,
 
             // This was changed to 96(0x60) in FreeBSD 13:
             // https://github.com/freebsd/freebsd/
@@ -3547,10 +3615,6 @@ fn test_emscripten(target: &str) {
 
     cfg.skip_const(move |constant| {
         match constant.ident() {
-            // FIXME(deprecated): deprecated - SIGNUNUSED was removed in glibc 2.26
-            // users should use SIGSYS instead
-            "SIGUNUSED" => true,
-
             // FIXME(emscripten): emscripten uses different constants to constructs these
             n if n.contains("__SIZEOF_PTHREAD") => true,
 
@@ -4168,6 +4232,7 @@ fn test_linux(target: &str) {
     let mips64 = target.contains("mips64");
     let mips32 = mips && !mips64;
     let pauthtest = target.contains("pauthtest");
+    let b32 = arm || target.contains("hexagon") || mips32 || ppc32 || x86_32;
     let versions = &*VERSIONS;
     let kernel = match versions.linux {
         Some(v) => v,
@@ -4175,17 +4240,21 @@ fn test_linux(target: &str) {
         None => panic!("failed to detect kernel version for Linux target {target}"),
     };
 
-    // Force modern musl also for pauthtest.
-    let musl_v1_2_3 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3") || pauthtest;
+    let mut musl_v1_2_3 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3");
     if musl_v1_2_3 {
         assert!(musl);
     }
+
+    // Some platforms only exist with recent musl. Keep in sync with libc's build.rs.
+    if musl && (loongarch64 || hexagon || pauthtest/* || ohos */) {
+        musl_v1_2_3 = true;
+    }
+
     let old_musl = musl && !musl_v1_2_3;
 
-    let b32 = arm || target.contains("hexagon") || mips32 || ppc32 || x86_32;
-
     let mut cfg = ctest_cfg();
-    if (musl_v1_2_3 || loongarch64 || hexagon) && musl {
+
+    if musl_v1_2_3 {
         cfg.cfg("musl_v1_2_3", None);
         if b32 {
             cfg.cfg("musl32_time64", None);
@@ -4195,6 +4264,7 @@ fn test_linux(target: &str) {
             cfg.cfg("musl_redir_time64", None);
         }
     }
+
     let uclibc_use_time64 = env_flag("CARGO_CFG_LIBC_UNSTABLE_UCLIBC_TIME64");
     if uclibc && uclibc_use_time64 {
         cfg.cfg("linux_time_bits64", None);
@@ -4538,7 +4608,7 @@ fn test_linux(target: &str) {
 
         // FIXME(rust-lang/rust#43894): pass by value for structs that are not an even 32/64 bits
         // on big-endian systems corrupts the value for unknown reasons.
-        if (sparc64 || ppc || ppc64 || s390x)
+        if (sparc64 || ppc || s390x)
             && (ty == "sockaddr_pkt"
                 || ty == "tpacket_auxdata"
                 || ty == "tpacket_hdr_variant1"
@@ -4582,7 +4652,7 @@ fn test_linux(target: &str) {
 
             // FIXME(ppc): tests fail due to a field type mismatch (`long long unsigned` vs
             // `long unsigned`).
-            "clone_args" if ppc64 => true,
+            "clone_args" if ppc64 && gnu => true,
 
             // Linux >= 6.13 (pidfd_info.exit_code: Linux >= 6.15)
             // Might differ between kernel versions
@@ -4996,14 +5066,6 @@ fn test_linux(target: &str) {
             // because including `linux/if_arp.h` causes some conflicts:
             "ARPHRD_CAN" => true,
 
-            // FIXME(deprecated): deprecated: not available in any header
-            // See: https://github.com/rust-lang/libc/issues/1356
-            "ENOATTR" => true,
-
-            // FIXME(deprecated): SIGUNUSED was removed in glibc 2.26
-            // Users should use SIGSYS instead.
-            "SIGUNUSED" => true,
-
             // FIXME(linux): conflicts with glibc headers and is tested in
             // `linux_termios.rs` below:
             "BOTHER" | "IBSHIFT" | "TCGETS2" | "TCSETS2" | "TCSETSW2" | "TCSETSF2" => true,
@@ -5015,12 +5077,6 @@ fn test_linux(target: &str) {
             // FIXME(linux): It was extended to 4096 since glibc 2.31 (Linux 5.4).
             // We should do so after a while.
             "SOMAXCONN" if gnu => true,
-
-            // deprecated: not available from Linux kernel 5.6:
-            "VMADDR_CID_RESERVED" => true,
-
-            // FIXME(value): IPPROTO_MAX was increased in 5.6 for IPPROTO_MPTCP:
-            "IPPROTO_MAX" => true,
 
             // Requires >= 6.9 kernel headers.
             n if (arm || ppc32) && n.starts_with("FUTEX2_") => kernel < (6, 9),
@@ -5070,7 +5126,7 @@ fn test_linux(target: &str) {
             "PR_SME_VL_LEN_MAX" | "PR_SME_SET_VL_INHERIT" | "PR_SME_SET_VL_ONE_EXEC" if gnu => true,
 
             // FIXME(linux): The below is no longer const in glibc 2.34:
-            // https://github.com/bminor/glibc/commit/5d98a7dae955bafa6740c26eaba9c86060ae0344
+            // https://github.com/sailfishos-mirror/glibc/commit/5d98a7dae955bafa6740c26eaba9c86060ae0344
             "PTHREAD_STACK_MIN" | "SIGSTKSZ" | "MINSIGSTKSZ" if gnu => true,
 
             // value changed
@@ -5141,6 +5197,8 @@ fn test_linux(target: &str) {
             | "PF_BLOCK_TS" | "PF_SUSPEND_TASK" => true,
 
             "EPIOCSPARAMS" | "EPIOCGPARAMS" if old_musl => true,
+            // Changed value
+            "IPPROTO_MAX" if old_musl => true,
 
             // FIXME(linux): Requires >= 6.6 kernel headers.
             "SECCOMP_IOCTL_NOTIF_SET_FLAGS" => kernel < (6, 6),
@@ -5243,6 +5301,8 @@ fn test_linux(target: &str) {
             "posix_spawn_file_actions_addclosefrom_np" if gnu && sparc64 => true,
             // Needs glibc 2.35 or later.
             "posix_spawn_file_actions_addtcsetpgrp_np" if gnu && sparc64 => true,
+            // Needs glibc 2.42 or later.
+            "pthread_gettid_np" if gnu && versions.glibc.unwrap() < (2, 42) => true,
 
             // FIXME(linux): Deprecated since glibc 2.30. Remove fn once upstream does.
             "sysctl" if gnu => true,
@@ -5475,30 +5535,6 @@ fn test_linux(target: &str) {
         // FIXME(union): This is actually a union.
         "fpreg_t" if s390x => true,
 
-        // The test doesn't work on some env:
-        "ipv6_mreq"
-        | "ip_mreq_source"
-        | "sockaddr_in6"
-        | "sockaddr_ll"
-        | "in_pktinfo"
-        | "arpreq"
-        | "arpreq_old"
-        | "sockaddr_un"
-        | "ff_constant_effect"
-        | "ff_ramp_effect"
-        | "ff_condition_effect"
-        | "Elf32_Ehdr"
-        | "Elf32_Chdr"
-        | "ucred"
-        | "in6_pktinfo"
-        | "sockaddr_nl"
-        | "termios"
-        | "nlmsgerr"
-            if sparc64 && gnu =>
-        {
-            true
-        }
-
         // The following types contain Flexible Array Member fields which have unspecified calling
         // convention. The roundtripping tests deliberately pass the structs by value to check "by
         // value" layout consistency, but this would be UB for the these types.
@@ -5508,7 +5544,7 @@ fn test_linux(target: &str) {
         "bcm_msg_head" => true,
 
         // FIXME(linux): the call ABI of max_align_t is incorrect on these platforms:
-        "max_align_t" if i686 || ppc64 => true,
+        "max_align_t" if i686 => true,
 
         _ => false,
     });
@@ -5869,9 +5905,6 @@ fn test_haiku(target: &str) {
 
             "Elf64_Phdr" => true,
 
-            // is an union
-            "cpuid_info" => true,
-
             _ => false,
         }
     });
@@ -5958,11 +5991,9 @@ fn test_haiku(target: &str) {
 
             // these are actually unions, but we cannot represent it well
             ("siginfo_t", "sigval") => true,
-            ("sem_t", "named_sem_id") => true,
             ("sigaction", "sa_sigaction") => true,
             ("sigevent", "sigev_value") => true,
             ("fpu_state", "_fpreg") => true,
-            ("cpu_topology_node_info", "data") => true,
             // these fields have a simplified data definition in libc
             ("fpu_state", "_xmm") => true,
             ("savefpu", "_fp_ymm") => true,
@@ -6368,10 +6399,6 @@ fn test_qurt(target: &str) {
             // These are compatibility stubs in libc, not from QuRT headers
             "stat" | "tm" | "timespec" | "timeval" | "itimerspec" | "dirent" | "DIR"
             | "termios" | "rlimit" | "rusage" | "flock" | "div_t" | "ldiv_t" | "lldiv_t" => true,
-            // sigaction: sa_handler/sa_sigaction are a union in C but separate fields in Rust
-            "sigaction" => true,
-            // sem_t is typedef of anonymous struct in C (no struct tag)
-            "sem_t" => true,
             _ => false,
         }
     });
@@ -6590,6 +6617,17 @@ struct Versions {
     netbsd: Option<(u32, u32)>,
     macos: Option<(u32, u32)>,
     emscripten: Option<(u32, u32)>,
+    wasi_sdk: Option<(u32, WasiVersion)>,
+    /// Android API level (no minor version).
+    android: Option<u32>,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+enum WasiVersion {
+    #[default]
+    P1,
+    P2,
+    P3,
 }
 
 impl Versions {
@@ -6610,6 +6648,13 @@ impl Versions {
             #include "gnu/libc-version.h"
             #endif
 
+            #ifdef __ANDROID__
+            /* The clang driver predefines __ANDROID_MIN_SDK_VERSION__ from the API level
+             * in the target triple; including api-level.h ensures it is defined even on
+             * toolchains that leave it to the header. */
+            #include "android/api-level.h"
+            #endif
+
             #if defined(__FreeBSD__) \
                 || defined(__NetBSD__) \
                 || defined(__OpenBSD__) \
@@ -6625,6 +6670,11 @@ impl Versions {
             #ifdef __EMSCRIPTEN__
             /* Provides __EMSCRIPTEN_MAJOR__, __EMSCRIPTEN_MINOR__ */
             #include "emscripten/version.h"
+            #endif
+
+            #if __has_include(<wasi/version.h>)
+            /* provides __wasi_sdk_major__, __wasi_sdk_version__ */
+            #include <wasi/version.h>
             #endif
         "#;
 
@@ -6674,6 +6724,11 @@ impl Versions {
                 }
                 "__GLIBC__" => ret.glibc.get_or_insert_default().0 = value.parse().unwrap(),
                 "__GLIBC_MINOR__" => ret.glibc.get_or_insert_default().1 = value.parse().unwrap(),
+                // Clang 12+ predefines the target API level here as a plain integer.
+                // Every NDK wrapper we build with carries an API level, so parse it like
+                // the other version macros above and let a missing value fail loudly at
+                // the unwrap in `test_android` rather than silently skipping tests.
+                "__ANDROID_MIN_SDK_VERSION__" => ret.android = Some(value.parse().unwrap()),
                 "__MAC_OS_X_VERSION_MAX_ALLOWED" => {
                     let caps = mac_re.captures(value).unwrap();
                     let major: u32 = caps[1].parse().unwrap();
@@ -6706,6 +6761,12 @@ impl Versions {
                 "__EMSCRIPTEN_minor__" => {
                     ret.emscripten.get_or_insert_default().1 = value.parse().unwrap()
                 }
+                "__wasi_sdk_major__" => {
+                    ret.wasi_sdk.get_or_insert_default().0 = value.parse().unwrap()
+                }
+                "__wasip1__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P1,
+                "__wasip2__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P2,
+                "__wasip3__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P3,
                 _ => (),
             }
         }

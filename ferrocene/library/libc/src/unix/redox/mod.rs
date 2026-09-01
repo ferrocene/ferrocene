@@ -36,7 +36,6 @@ extern_ty! {
 }
 
 s! {
-    #[repr(C)]
     pub struct utsname {
         pub sysname: [c_char; UTSLENGTH],
         pub nodename: [c_char; UTSLENGTH],
@@ -251,57 +250,47 @@ s! {
         pub gid: gid_t,
     }
 
-    #[cfg_attr(target_pointer_width = "32", repr(C, align(4)))]
-    #[cfg_attr(target_pointer_width = "64", repr(C, align(8)))]
+    #[cfg_attr(target_pointer_width = "32", repr(align(4)))]
+    #[cfg_attr(target_pointer_width = "64", repr(align(8)))]
     pub struct pthread_attr_t {
         bytes: [u8; _PTHREAD_ATTR_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_barrier_t {
         bytes: [u8; _PTHREAD_BARRIER_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_barrierattr_t {
         bytes: [u8; _PTHREAD_BARRIERATTR_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_mutex_t {
         bytes: [u8; _PTHREAD_MUTEX_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_rwlock_t {
         bytes: [u8; _PTHREAD_RWLOCK_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_mutexattr_t {
         bytes: [u8; _PTHREAD_MUTEXATTR_SIZE],
     }
-    #[repr(C)]
     #[repr(align(1))]
     pub struct pthread_rwlockattr_t {
         bytes: [u8; _PTHREAD_RWLOCKATTR_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_cond_t {
         bytes: [u8; _PTHREAD_COND_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_condattr_t {
         bytes: [u8; _PTHREAD_CONDATTR_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_once_t {
         bytes: [u8; _PTHREAD_ONCE_SIZE],
     }
-    #[repr(C)]
     #[repr(align(4))]
     pub struct pthread_spinlock_t {
         bytes: [u8; _PTHREAD_SPINLOCK_SIZE],
@@ -778,6 +767,10 @@ pub const MS_ASYNC: c_int = 0x0001;
 pub const MS_INVALIDATE: c_int = 0x0002;
 pub const MS_SYNC: c_int = 0x0004;
 
+// sys/random.h
+pub const GRND_NONBLOCK: c_uint = 1;
+pub const GRND_RANDOM: c_uint = 2;
+
 // sys/resource.h
 pub const RLIM_INFINITY: rlim_t = !0;
 pub const RLIM_SAVED_CUR: rlim_t = RLIM_INFINITY;
@@ -1145,9 +1138,7 @@ f! {
     pub unsafe fn FD_ZERO(set: *mut fd_set) -> () {
         (*set).fds_bits.fill(0);
     }
-}
 
-safe_f! {
     pub const safe fn WIFSTOPPED(status: c_int) -> bool {
         (status & 0xff) == 0x7f
     }
@@ -1388,6 +1379,9 @@ extern "C" {
     pub fn mprotect(addr: *mut c_void, len: size_t, prot: c_int) -> c_int;
     pub fn shm_open(name: *const c_char, oflag: c_int, mode: mode_t) -> c_int;
     pub fn shm_unlink(name: *const c_char) -> c_int;
+
+    // sys/random.h
+    pub fn getrandom(buf: *mut c_void, buflen: size_t, flags: c_uint) -> ssize_t;
 
     // sys/resource.h
     pub fn getpriority(which: c_int, who: crate::id_t) -> c_int;

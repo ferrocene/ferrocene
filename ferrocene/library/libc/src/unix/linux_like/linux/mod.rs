@@ -18,6 +18,7 @@ pub type dev_t = u64;
 pub type socklen_t = u32;
 pub type mode_t = u32;
 pub type ino64_t = u64;
+// FIXME(1.0,deprecate): lfs binding to be removed
 pub type off64_t = i64;
 pub type blkcnt64_t = i64;
 pub type rlim64_t = u64;
@@ -1012,6 +1013,7 @@ s! {
 cfg_if! {
     if #[cfg(not(target_env = "gnu"))] {
         extern_ty! {
+            // FIXME(1.0,deprecate): lfs binding to be removed
             pub type fpos64_t; // FIXME(linux): fill this out with a struct
         }
     }
@@ -1043,13 +1045,6 @@ cfg_if! {
 }
 
 s_no_extra_traits! {
-    /// WARNING: The `PartialEq`, `Eq` and `Hash` implementations of this
-    /// type are unsound and will be removed in the future.
-    #[deprecated(
-        note = "this struct has unsafe trait implementations that will be \
-                removed in the future",
-        since = "0.2.80"
-    )]
     pub struct af_alg_iv {
         pub ivlen: u32,
         pub iv: [c_uchar; 0],
@@ -1126,34 +1121,6 @@ s_no_extra_traits! {
     pub union __c_anonymous_xsk_tx_metadata_union {
         pub request: xsk_tx_metadata_request,
         pub completion: xsk_tx_metadata_completion,
-    }
-}
-
-cfg_if! {
-    if #[cfg(feature = "extra_traits")] {
-        #[allow(deprecated)]
-        impl af_alg_iv {
-            fn as_slice(&self) -> &[u8] {
-                unsafe { ::core::slice::from_raw_parts(self.iv.as_ptr(), self.ivlen as usize) }
-            }
-        }
-
-        #[allow(deprecated)]
-        impl PartialEq for af_alg_iv {
-            fn eq(&self, other: &af_alg_iv) -> bool {
-                *self.as_slice() == *other.as_slice()
-            }
-        }
-
-        #[allow(deprecated)]
-        impl Eq for af_alg_iv {}
-
-        #[allow(deprecated)]
-        impl hash::Hash for af_alg_iv {
-            fn hash<H: hash::Hasher>(&self, state: &mut H) {
-                self.as_slice().hash(state);
-            }
-        }
     }
 }
 
@@ -1346,12 +1313,6 @@ pub const FALLOC_FL_COLLAPSE_RANGE: c_int = 0x08;
 pub const FALLOC_FL_ZERO_RANGE: c_int = 0x10;
 pub const FALLOC_FL_INSERT_RANGE: c_int = 0x20;
 pub const FALLOC_FL_UNSHARE_RANGE: c_int = 0x40;
-
-#[deprecated(
-    since = "0.2.55",
-    note = "ENOATTR is not available on Linux; use ENODATA instead"
-)]
-pub const ENOATTR: c_int = crate::ENODATA;
 
 pub const SO_ORIGINAL_DST: c_int = 80;
 
@@ -2564,12 +2525,6 @@ pub const MAP_DROPPABLE: c_int = 0x8;
 // uapi/linux/vm_sockets.h
 pub const VMADDR_CID_ANY: c_uint = 0xFFFFFFFF;
 pub const VMADDR_CID_HYPERVISOR: c_uint = 0;
-#[deprecated(
-    since = "0.2.74",
-    note = "VMADDR_CID_RESERVED is removed since Linux v5.6 and \
-            replaced with VMADDR_CID_LOCAL"
-)]
-pub const VMADDR_CID_RESERVED: c_uint = 1;
 pub const VMADDR_CID_LOCAL: c_uint = 1;
 pub const VMADDR_CID_HOST: c_uint = 2;
 pub const VMADDR_PORT_ANY: c_uint = 0xFFFFFFFF;
@@ -3528,7 +3483,10 @@ extern "C" {
     pub fn fallocate(fd: c_int, mode: c_int, offset: off_t, len: off_t) -> c_int;
     #[cfg_attr(gnu_file_offset_bits64, link_name = "posix_fallocate64")]
     pub fn posix_fallocate(fd: c_int, offset: off_t, len: off_t) -> c_int;
+    #[cfg(not(any(target_env = "musl", target_env = "ohos")))]
     pub fn readahead(fd: c_int, offset: off64_t, count: size_t) -> ssize_t;
+    #[cfg(any(target_env = "musl", target_env = "ohos"))]
+    pub fn readahead(fd: c_int, offset: off_t, count: size_t) -> ssize_t;
     pub fn getxattr(
         path: *const c_char,
         name: *const c_char,
@@ -3616,7 +3574,10 @@ extern "C" {
 
     // Not available now on Android
     pub fn mkfifoat(dirfd: c_int, pathname: *const c_char, mode: mode_t) -> c_int;
+    #[cfg(not(any(target_env = "musl", target_env = "ohos")))]
     pub fn sync_file_range(fd: c_int, offset: off64_t, nbytes: off64_t, flags: c_uint) -> c_int;
+    #[cfg(any(target_env = "musl", target_env = "ohos"))]
+    pub fn sync_file_range(fd: c_int, offset: off_t, nbytes: off_t, flags: c_uint) -> c_int;
 
     pub fn posix_madvise(addr: *mut c_void, len: size_t, advice: c_int) -> c_int;
 

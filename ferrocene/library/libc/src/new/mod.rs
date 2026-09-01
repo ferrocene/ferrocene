@@ -198,6 +198,7 @@ cfg_if! {
         pub use net::route::*;
     } else if #[cfg(target_vendor = "apple")] {
         pub use net::bpf::*;
+        pub use netinet::tcp::*;
         pub use netinet6::in6_var::*;
         pub use pthread_::introspection::*;
         pub use pthread_::pthread_spis::*;
@@ -227,6 +228,9 @@ cfg_if! {
         pub use net::if_::*;
     } else if #[cfg(target_os = "freebsd")] {
         pub use net::dlt::*;
+        // FIXME(1.0,remove): these bindings should be left in a public submodule.
+        pub use net::if_mib::*;
+        pub use net::route::*;
         pub use netinet6::in6_var::*;
         pub use sys::file::*;
         pub use sys::ioccom::*;

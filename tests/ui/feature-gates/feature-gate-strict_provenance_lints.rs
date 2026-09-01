@@ -19,3 +19,6 @@ fn main() {
     let x: u8 = 37;
     let _addr: usize = &x as *const u8 as usize;
 }
+
+// ferrocene-annotations: fls_dqk4eivxhloy
+// Provenance

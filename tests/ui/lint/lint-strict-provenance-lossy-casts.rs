@@ -16,3 +16,6 @@ fn main() {
     let ptr_addr_32bit = ptr as u32;
     //~^ ERROR cast from `*const u8` to `u32` implicitly exposes pointer provenance
 }
+
+// ferrocene-annotations: fls_dqk4eivxhloy
+// Provenance

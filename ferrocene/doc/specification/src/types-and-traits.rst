@@ -939,6 +939,11 @@ A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the :s
 Indirection Types
 -----------------
 
+.. rubric:: Legality Rules
+
+:dp:`fls_3qI8FXMsyk0f`
+A :t:`pointer type` is either a :t:`raw pointer type` or a :t:`reference type`.
+
 .. _fls_xztr1kebz8bo:
 
 Function Pointer Types
@@ -1028,13 +1033,14 @@ A :t:`mutable raw pointer type` is a :t:`raw pointer type` subject to
 An :t:`immutable raw pointer type` is a :t:`raw pointer type` subject to
 :t:`keyword` ``const``.
 
+:dp:`fls_c2Guy3fPYaUV`
+A :t:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
+
 :dp:`fls_hrum767l6dte`
-Comparing two :t:`[value]s` of :t:`[raw pointer type]s` compares the addresses
-of the :t:`[value]s`.
+Comparing two :t:`[raw pointer]s` compares the addresses of the :t:`[raw pointer]s`.
 
 :dp:`fls_k6ues2936pjq`
-Comparing a :t:`value` of a :t:`raw pointer type` to a :t:`value` of a
-:t:`dynamically sized type` compares the data being pointed to.
+Comparing a :t:`raw pointer` to a :t:`value` of a :t:`dynamically sized type` compares the data being pointed to.
 
 .. rubric:: Examples
 

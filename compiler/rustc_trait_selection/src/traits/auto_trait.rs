@@ -168,7 +168,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
         let ocx = ObligationCtxt::new(&infcx);
         ocx.register_bound(ObligationCause::dummy(), full_env, ty, trait_did);
         let errors = ocx.evaluate_obligations_error_on_ambiguity();
-        if !errors.is_empty() {
+        if !errors.no_errors() {
             panic!("Unable to fulfill trait {trait_did:?} for '{ty:?}': {errors:?}");
         }
 
@@ -245,7 +245,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
         let ocx = ObligationCtxt::new(&infcx);
         ocx.register_bound(ObligationCause::dummy(), orig_env, fresh_ty, trait_did);
         let errors = ocx.try_evaluate_obligations();
-        if !errors.is_empty() {
+        if !errors.no_errors() {
             return AutoTraitResult::NegativeImpl;
         }
 
@@ -844,7 +844,7 @@ impl<'tcx> AutoTraitFinder<'tcx> {
                                 &dummy_cause,
                             );
                         }
-                        (Some(ty::OutlivesPredicate(t_a, r_b)), _) => {
+                        (Some(ty::OutlivesClause(t_a, r_b)), _) => {
                             selcx.infcx.register_type_outlives_constraint(t_a, r_b, &dummy_cause);
                         }
                         _ => {}

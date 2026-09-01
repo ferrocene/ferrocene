@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ aux-build:issue-41652-b.rs
 
 extern crate issue_41652_b;

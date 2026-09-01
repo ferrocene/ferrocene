@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 
 use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+use rustc_data_structures::fx::FxHashMap;
 use rustc_feature::AttributeStability;
-use rustc_hir::LangItem;
+use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::attrs::{
     BorrowckGraphvizFormatKind, CguFields, CguKind, DivergingBlockBehavior,
     DivergingFallbackBehavior, RustcCleanAttribute, RustcCleanQueries, RustcMirKind,
@@ -13,9 +14,9 @@ use rustc_span::Symbol;
 use super::prelude::*;
 use super::util::parse_single_integer;
 use crate::diagnostics;
-use crate::diagnostics::UnknownExternLangItem;
-use crate::session_diagnostics::{
-    AttributeRequiresOpt, CguFieldsMissing, RustcScalableVectorCountOutOfRange, UnknownLangItem,
+use crate::diagnostics::{
+    AttributeRequiresOpt, CguFieldsMissing, RustcScalableVectorCountOutOfRange,
+    UnknownExternLangItem, UnknownLangItem,
 };
 
 pub(crate) struct RustcMainParser;
@@ -70,6 +71,18 @@ impl SingleAttributeParser for RustcMustImplementOneOfParser {
         }
         if errored {
             return None;
+        }
+
+        if cx.target == Target::Trait {
+            // Check for duplicates
+            let mut seen: FxHashMap<Symbol, Span> = FxHashMap::default();
+            for ident in &fn_names {
+                if let Some(dup) = seen.insert(ident.name, ident.span) {
+                    cx.emit_err(diagnostics::FunctionNamesDuplicated {
+                        spans: vec![dup, ident.span],
+                    });
+                }
+            }
         }
 
         Some(AttributeKind::RustcMustImplementOneOf { attr_span: cx.attr_span, fn_names })

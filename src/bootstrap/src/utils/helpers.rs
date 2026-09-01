@@ -227,9 +227,16 @@ pub fn use_host_linker(target: TargetSelection) -> bool {
         || target.contains("fortanix")
         || target.contains("fuchsia")
         || target.contains("bpf")
+<<<<<<< ferrocene/main
         // ferrocene addition: use the default linker (LLD) not the config.toml `cc` override
         || target.contains("ferrocene.facade")
         || target.contains("switch"))
+||||||| 65dd30fb9e8
+        || target.contains("switch"))
+=======
+        || target.contains("switch")
+        || target.contains("l4re"))
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 pub fn target_supports_cranelift_backend(target: TargetSelection) -> bool {

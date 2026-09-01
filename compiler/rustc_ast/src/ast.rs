@@ -26,7 +26,6 @@ pub use UnsafeSource::*;
 pub use rustc_ast_ir::{FloatTy, IntTy, Movability, Mutability, Pinnedness, UintTy};
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::stable_hash::{StableHash, StableHashCtxt, StableHasher};
-use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::tagged_ptr::Tag;
 use rustc_macros::{Decodable, Encodable, StableHash, Walkable};
 pub use rustc_span::AttrId;
@@ -2447,7 +2446,7 @@ pub struct Ty {
 
 impl Clone for Ty {
     fn clone(&self) -> Self {
-        ensure_sufficient_stack(|| Self { id: self.id, kind: self.kind.clone(), span: self.span })
+        Self { id: self.id, kind: self.kind.clone(), span: self.span }
     }
 }
 
@@ -3981,7 +3980,7 @@ pub struct Fn {
     /// This function is an implementation of an externally implementable item (EII).
     /// This means, there was an EII declared somewhere and this function is the
     /// implementation that should be run when the declaration is called.
-    pub eii_impls: ThinVec<EiiImpl>,
+    pub eii_impl: Option<Box<EiiImpl>>,
 }
 
 impl Fn {
@@ -4073,9 +4072,7 @@ pub struct StaticItem {
     /// This static is an implementation of an externally implementable item (EII).
     /// This means, there was an EII declared somewhere and this static is the
     /// implementation that should be used for the declaration.
-    ///
-    /// For statics, there may be at most one `EiiImpl`, but this is a `ThinVec` to make usages of this field nicer.
-    pub eii_impls: ThinVec<EiiImpl>,
+    pub eii_impl: Option<Box<EiiImpl>>,
 }
 
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]

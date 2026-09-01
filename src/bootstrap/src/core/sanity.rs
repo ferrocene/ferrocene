@@ -44,6 +44,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
+    "aarch64-unknown-l4re-uclibc",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

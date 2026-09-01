@@ -275,6 +275,7 @@ s! {
         pub val: c_int,
     }
 
+    // FIXME(1.0,deprecate): lfs binding to be removed
     pub struct rlimit64 {
         pub rlim_cur: crate::rlim64_t,
         pub rlim_max: crate::rlim64_t,
@@ -297,6 +298,7 @@ s! {
         pub d_name: [c_char; 256],
     }
 
+    // FIXME(1.0,deprecate): lfs binding to be removed
     pub struct dirent64 {
         pub d_ino: crate::ino64_t,
         pub d_off: crate::off64_t,
@@ -946,13 +948,7 @@ pub const __SIZEOF_PTHREAD_COND_T: usize = 48;
 // netinet/in.h
 // NOTE: These are in addition to the constants defined in src/unix/mod.rs
 
-#[deprecated(
-    since = "0.2.80",
-    note = "This value was increased in the newer kernel \
-            and we'll change this following upstream in the future release. \
-            See #1896 for more info."
-)]
-pub const IPPROTO_MAX: c_int = 256;
+pub const IPPROTO_MAX: c_int = 263;
 
 // System V IPC
 pub const IPC_PRIVATE: crate::key_t = 0;
@@ -1562,9 +1558,7 @@ f! {
     pub unsafe fn ELF64_R_INFO(sym: Elf64_Xword, t: Elf64_Xword) -> Elf64_Xword {
         sym << (32 + t)
     }
-}
 
-safe_f! {
     pub const safe fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
         let major = major as crate::dev_t;
         let minor = minor as crate::dev_t;
@@ -1913,12 +1907,22 @@ extern "C" {
         longindex: *mut c_int,
     ) -> c_int;
 
-    #[cfg(not(target_env = "uclibc"))]
+    #[cfg(not(any(target_env = "uclibc", target_env = "musl", target_env = "ohos")))]
     pub fn copy_file_range(
         fd_in: c_int,
         off_in: *mut crate::off64_t,
         fd_out: c_int,
         off_out: *mut crate::off64_t,
+        len: size_t,
+        flags: c_uint,
+    ) -> ssize_t;
+
+    #[cfg(any(target_env = "musl", target_env = "ohos"))]
+    pub fn copy_file_range(
+        fd_in: c_int,
+        off_in: *mut crate::off_t,
+        fd_out: c_int,
+        off_out: *mut crate::off_t,
         len: size_t,
         flags: c_uint,
     ) -> ssize_t;

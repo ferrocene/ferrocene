@@ -15,15 +15,9 @@ use tracing::debug;
 mod improper_ctypes; // these files do the implementation for ImproperCTypesDefinitions,ImproperCTypesDeclarations
 pub(crate) use improper_ctypes::ImproperCTypesLint;
 
-<<<<<<< ferrocene/main
 // Ferrocene addition
 pub(crate) use crate::ferrocene::LintUnvalidated;
-use crate::lints::{
-||||||| 65dd30fb9e8
-use crate::lints::{
-=======
 use crate::diagnostics::{
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
     AmbiguousWidePointerComparisonsAddrSuggestion, AmbiguousWidePointerComparisonsCastSuggestion,
     AmbiguousWidePointerComparisonsExpectSuggestion, AtomicOrderingFence, AtomicOrderingLoad,

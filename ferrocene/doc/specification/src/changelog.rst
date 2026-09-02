@@ -19,6 +19,53 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.98.0
+-------------------------------
+
+- `Allow shortening lifetime in CoerceUnsized for &mut <https://github.com/rust-lang/rust/pull/149219>`_
+
+  - The Rust Standard Library is outside the scope of the FLS.
+
+- `Add lint against invalid runtime symbol definitions <https://github.com/rust-lang/rust/pull/155521>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Lint on core::ffi::c_void as a return type <https://github.com/rust-lang/rust/pull/156379>`_
+
+  - Lints are outside the scope of the FLS.
+
+Language changes in Rust 1.97.0
+-------------------------------
+
+- `Consider 'Result<T, Uninhabited>' and 'ControlFlow<Uninhabited, T>' to be equivalent to 'T' for must use lint <https://github.com/rust-lang/rust/pull/148214>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Add allow-by-default 'dead_code_pub_in_binary' lint for unused pub items in binary crates <https://github.com/rust-lang/rust/pull/149509>`_
+
+  - Lints are outside the scope of the FLS.
+
+- `Stabilize the 'div32', 'lam-bh', 'lamcas', 'ld-seq-sa' and 'scq' target features <https://github.com/rust-lang/rust/pull/154510>`_
+
+  - The target is outside the scope of the FLS
+
+- `Stabilize 'cfg(target_has_atomic_primitive_alignment)' <https://github.com/rust-lang/rust/pull/155006>`_
+
+  - Configuration options are environment-specific and not exhaustive
+
+- `Allow trailing 'self' in imports in more cases <https://github.com/rust-lang/rust/pull/155137>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_uSajfdSsbxna`
+  - :p:`fls_2bkcn83smy2y`
+  - :p:`fls_ar03D5rxjzy0`
+
+FLS maintenance
+---------------
+
+New paragraph: :p:`fls_oRdi3KXFbJcR`
+
 Language changes in Rust 1.96.0
 -------------------------------
 
@@ -48,10 +95,6 @@ Language changes in Rust 1.95.0
 - `Stabilize if let guards on match arms <https://github.com/rust-lang/rust/pull/141295>`_
 
   Changed syntax: :s:`MatchArmGuard`
-
-  The FLS models the Rust 2021 syntax accepted by stable :t:`rustc` 1.95.0.
-  It does not add the Rust Reference's attribute position before a guard
-  ``let`` pattern because attributes remain unstable in that position.
 
   New syntax:
 
@@ -130,7 +173,6 @@ Language changes in Rust 1.95.0
   - :p:`fls_Gc5RpT8nYvQm`
   - :p:`fls_Nw2KxL7qVmRs`
   - :p:`fls_Rh9TsD4vQpLm`
-  - :p:`fls_8Vrz9SNfjSh7`
   - :p:`fls_X4y3QltM208J`
   - :p:`fls_vQ3tHg9XmDkF`
   - :p:`fls_Td7McP9rQxVn`
@@ -195,7 +237,7 @@ Language changes in Rust 1.95.0
   - :t:`well-formed pointer`
 
   Changed glossary entries:
-  
+
   - :t:`pointer type`
   - :t:`raw pointer`
 

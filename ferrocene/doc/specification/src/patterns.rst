@@ -57,7 +57,7 @@ A :t:`subpattern` is a :t:`pattern` nested within another pattern.
 :dp:`fls_8xzjb0yzftkd`
 A :t:`pattern` has a :t:`type`, with the exception of the :t:`rest pattern` if
 it is not the inner :t:`pattern` of a :t:`slice pattern` or the :t:`pattern` of
-a possibly nested :t:`identifier pattern` of a :t:`slice pattern`\ ``.``
+a possibly nested :t:`identifier pattern` of a :t:`slice pattern`.
 
 :dp:`fls_cma5t8waon0x`
 The :t:`expected type` of a :t:`pattern` is the :t:`type` the :t:`pattern` is being matched against.
@@ -107,12 +107,7 @@ match all possible values of a :t:`type`.
 An :t:`irrefutable pattern` is a :t:`pattern` that always matches any :t:`value` of its :t:`type`.
 
 :dp:`fls_uq7ftuuq1sig`
-A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching a :t:`value` of its :t:`type`
-
-:dp:`fls_mnbyt7jfYAZ9`
-A :t:`pattern` that is not an :t:`irrefutable pattern` is a
-:t:`refutable pattern`.
+A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not matching a :t:`value` of its :t:`type`.
 
 :dp:`fls_l76ycteulo8e`
 An :t:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most

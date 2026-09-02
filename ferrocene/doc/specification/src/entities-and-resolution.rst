@@ -298,7 +298,10 @@ A :t:`path` is subject to :t:`path resolution`.
 If a :t:`path segment` is expressed as either :t:`keyword` ``crate``, :t:`keyword` ``$crate``, or :t:`keyword` ``Self``, then the :t:`path segment` shall be the first :t:`path segment` of a :t:`path`.
 
 :dp:`fls_uSajfdSsbxna`
-If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall be either the first :t:`path segment` of a :t:`path`, or the last :t:`path segment` of a :t:`simple import` that appears in a :t:`nesting import`.
+If a :t:`path segment` is expressed as :t:`keyword` ``self``, then the :t:`path segment` shall either be the first or the last :t:`path segment` of the :t:`path`.
+
+:dp:`fls_oRdi3KXFbJcR`
+If the last :t:`path segment` of a :t:`path` is expressed as :t:`keyword` ``self``, then the :t:`entity` brought into :t:`scope` shall be an :t:`enum`, a :t:`module`, or a :t:`trait`.
 
 :dp:`fls_774uryecc2sx`
 A :t:`path` that starts with a :t:`path segment` that is expressed as
@@ -1049,7 +1052,7 @@ An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
    the current :t:`use import`.
 
 :dp:`fls_2bkcn83smy2y`
-A :dt:`simple import` is a :t:`use import` that brings into :t:`scope` an :t:`entity` selected by its :t:`simple import path`, or by its :t:`import path prefix` when its :t:`simple path` ends in :t:`keyword` ``self`` and the :t:`simple path` appears in a :t:`nesting import`.
+A :dt:`simple import` is a :t:`use import` that brings into :t:`scope` an :t:`entity` selected by its :t:`simple import path`, or by its :t:`import path prefix` when its :t:`simple path` ends in :t:`keyword` ``self``.
 
 :dp:`fls_v3a6y2ze44v2`
 A :t:`glob import` is a :t:`use import` that brings all :t:`entities <entity>`
@@ -1083,7 +1086,7 @@ A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
   If the :t:`simple import` appears in a :t:`nesting import` and the last :t:`path segment` of its :t:`simple path` is expressed as :t:`keyword` ``self``, then the :t:`simple import` brings the :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves to into :t:`scope`.
 
 * :dp:`fls_ar03D5rxjzy0`
-  If the :t:`simple path` is expressed as :t:`keyword` ``self``, then the :t:`simple import` brings the containing :t:`module` into :t:`scope`.
+  If the :t:`simple path` is expressed as :t:`keyword` ``self``, then the :t:`simple import` brings the :t:`entity` that its :t:`import path prefix` resolves to into :t:`scope`.
 
 * :dp:`fls_ce73bg0BqV1X`
   Otherwise bring all :t:`entities <entity>` that the :t:`simple import path`

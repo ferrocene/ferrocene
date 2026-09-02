@@ -37,7 +37,11 @@ cfg_select! {
 use netc as c;
 
 const MAX_SEND_LEN: usize =
-    if cfg!(target_vendor = "apple") { c_int::MAX as usize } else { <wrlen_t>::MAX as usize };
+    if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
+        c_int::MAX as usize
+    } else {
+        <wrlen_t>::MAX as usize
+    };
 
 cfg_select! {
     any(

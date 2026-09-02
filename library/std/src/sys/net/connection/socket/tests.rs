@@ -20,9 +20,13 @@ fn no_lookup_host_duplicates() {
 
 // #115325: on Apple, `send` rejects a length > `c_int::MAX` with `EINVAL`, so
 // the clamp must not regress to the unbounded `wrlen_t::MAX`.
+//
+// On QNX, reads/writes larger than INT_MAX bytes return an incorrect count of
+// bytes written, as if the length is cast to a C int and back to a `usize`.
+// So similarly, we need to ensure each individual send is limited to `c_int::MAX`.
 #[test]
 fn max_send_len_within_platform_limit() {
-    if cfg!(target_vendor = "apple") {
+    if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
         assert_eq!(MAX_SEND_LEN, c_int::MAX as usize);
     } else {
         assert_eq!(MAX_SEND_LEN, <wrlen_t>::MAX as usize);

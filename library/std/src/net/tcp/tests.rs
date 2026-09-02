@@ -959,6 +959,10 @@ fn connect_timeout_valid() {
 
 // #115325: writing a buffer larger than `c_int::MAX` bytes used to fail on
 // macOS with `EINVAL`; `write_all` should now transfer it via short sends.
+//
+// On QNX, reads/writes larger than INT_MAX bytes return an incorrect count of
+// bytes written, as if the length is cast to a C int and back to a `usize`.
+// So similarly, we need to transfer data via short sends.
 #[test]
 #[cfg(all(target_pointer_width = "64", unix))]
 fn write_buffer_larger_than_c_int_max() {

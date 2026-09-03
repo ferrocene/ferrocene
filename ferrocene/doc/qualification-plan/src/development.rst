@@ -22,22 +22,39 @@ There are four requirements for merging any change into the ``main`` and
 
 1. All changes must be proposed through a PR on the Ferrocene GitHub repository.
 
-2. At least one independent Ferrocene Reviewer must have approved the latest
+2. Each PR must be linked to a Clickup ticket which can record further
+   (internal) information and discussion about the proposed changes. The PR
+   title must begin with a reference to the corresponding Clickup ticket, eg.
+   ``[869ee6ypb] Fix bug in ...``.
+
+   The ticket reference is the final part of a Clickup URL, eg.
+   ``https://app.clickup.com/t/.../869ee6ypb -> [869ee6ypb]``.
+   Ferrocene team members can see the corresponding ticket using the short link
+   ``https://app.clickup.com/t/<reference>``, e.g.
+   ``https://app.clickup.com/t/869ee6ypb``
+
+   This requirement is waived for PRs initiated by automated processes, such as
+   merges from the upstream Rust repository, as these are part of ongoing
+   processes, so it doesn't make sense to link them to a single ticket.
+   Instead, automated processes should use consistent PR titles which clearly
+   indicate which process created them.
+
+3. At least one independent Ferrocene Reviewer must have approved the latest
    revision of the PR, and there must be no requests for changes.
    Positive reviews for older revisions do not count. The following screenshot
    shows PR approval:
 
    .. figure:: figures/pr-approval-msg.png
 
-3. The full set of tests run by CI must pass on the merge commit between the PR
+4. The full set of tests run by CI must pass on the merge commit between the PR
    and the base branch. The merge commit must be the one being fast-forwarded on
    the base branch. Testing a merge commit and then merging into the base branch
    with a different merge commit (for example if other changes were merged in
    the meantime) does not count.
 
-4. All changes deemed major must have an approved ticket, and must adhere to the
-   proposed solution outlined in the ticket. See :ref:`dev-phase-design` for more
-   information about tickets.
+5. All changes deemed major must be proposed through a Clickup ticket first,
+   must have their proposed solution approved, and must adhere to the approved
+   solution. See :ref:`dev-phase-design` for more information about tickets.
 
 An independent Ferrocene Reviewer is any Ferrocene developer who has not
 committed code as part of the change being reviewed.
@@ -105,17 +122,23 @@ Development Phases
 Dev Phase 1: Development Ticket Approval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+To ensure that work can be properly tracked, all proposed changes (except for
+those initiated by automated processes) must have a Clickup ticket which
+tracks the status of the work as well as any relevant internal information and
+discussion.
+
 To ensure adequate quality, changes that are deemed *major* by the authors or
 reviewers need to have a development ticket written and approved, before
-development can begin.
+development can begin. For minor changes, these steps can happen concurrently.
 
 Whether a change is deemed major is at the discretion of the Ferrocene
 developers and reviewers assigned to the task. Still, any member of the
-Ferrocene team can ask for a change to be deemed major (and thus require a
-ticket), even if the developers and reviewers decided it was minor.
+Ferrocene team can ask for a change to be deemed major (and thus require an
+approved ticket), even if the developers and reviewers decided it was minor.
 
 Tickets must be created in the project management tool under the respective
-project board, they must be appropriately scoped, and they must detail acceptance criteria.
+project board, they must be appropriately scoped, and (for major changes)
+they must detail acceptance criteria.
 
 The ticket shall detail which parts of Ferrocene are expected to be impacted.
 That could be for example rustc, the core library, the qualification documentation etc.

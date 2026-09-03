@@ -1156,6 +1156,11 @@ A :dt:`derive macro` is a :t:`procedural macro` that consumes a stream of
 :t:`[token]s` and produces a stream of tokens, and is invoked via attribute
 :c:`derive`.
 
+derived pointer
+^^^^^^^^^^^^^^^
+
+A :dt:`derived pointer` is a :t:`pointer` obtained by :t:`borrowing`, copying a :t:`pointer`, reading a stored :t:`pointer`, performing :t:`pointer` arithmetic, or :t:`casting` a :t:`pointer`.
+
 destruction
 ^^^^^^^^^^^
 
@@ -3186,13 +3191,17 @@ opt-out trait bound
 An :dt:`opt-out trait bound` is a :t:`trait bound` with :s:`Punctuation` ``?``
 that nullifies an implicitly added :t:`trait bound`.
 
-
 or-pattern
 ^^^^^^^^^^
 
 An :dt:`or-pattern` is a :t:`pattern` that matches on one of two or more :t:`[pattern-without-alternation]s` and or-s them using character 0x7C (vertical line, i.e. ``|``).
 
 See :s:`Pattern`.
+
+original pointer
+^^^^^^^^^^^^^^^^
+
+An :dt:`original pointer` is a :t:`pointer` created via allocation.
 
 outer attribute
 ^^^^^^^^^^^^^^^
@@ -3411,7 +3420,7 @@ A :dt:`pointer` is a :t:`value` of a :t:`pointer type`.
 pointer type
 ^^^^^^^^^^^^
 
-A :dt:`pointer type` is a :t:`type` whose values indicate memory locations.
+A :dt:`pointer type` is either a :t:`raw pointer type` or a :t:`reference type`.
 
 positional register argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3475,6 +3484,11 @@ program entry point
 
 A :dt:`program entry point` is a :t:`function` that is invoked at the start of
 a Rust program.
+
+provenance
+^^^^^^^^^^
+
+:dt:`Provenance` is an optional property of :t:`[pointer]s` that restricts the memory locations the :t:`pointer` may access, the timespan during which the accesses may occur, and whether the accesses may read from or write to said memory locations.
 
 public visibility
 ^^^^^^^^^^^^^^^^^
@@ -3659,7 +3673,7 @@ See :s:`RawCStringLiteral`.
 raw pointer
 ^^^^^^^^^^^
 
-A :dt:`raw pointer` is a pointer of a :t:`raw pointer type`.
+A :dt:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
 
 raw pointer type
 ^^^^^^^^^^^^^^^^
@@ -5185,6 +5199,11 @@ A :dt:`weak keyword` is a :t:`keyword` whose special meaning depends on the
 context.
 
 See :s:`WeakKeyword`.
+
+well-formed pointer
+^^^^^^^^^^^^^^^^^^^
+
+A :dt:`well-formed pointer` is a :t:`pointer` where either no byte of the :t:`pointer` carries :t:`provenance`, or every byte of the :t:`pointer` is the corresponding byte of a single :t:`pointer` with :t:`provenance`.
 
 where clause
 ^^^^^^^^^^^^

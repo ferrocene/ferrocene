@@ -59,3 +59,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_wqazkzle0ix9
 // Method Resolution
+//
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

@@ -31,3 +31,6 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_asj8rgccvkoe
 // Struct Pattern Matching
+//
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

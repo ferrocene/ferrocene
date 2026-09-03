@@ -23,7 +23,7 @@ An :t:`unsafe operation` is an operation that may result in
 The :t:`[unsafe operation]s` are:
 
 * :dp:`fls_jd1inwz7ulyw`
-  Dereferencing a :t:`value` of a :t:`raw pointer type`.
+  Dereferencing a :t:`raw pointer`.
 
 * :dp:`fls_3ra8s1v1vbek`
   Reading or writing an :t:`external static`.

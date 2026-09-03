@@ -19,6 +19,29 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.96.0
+-------------------------------
+
+- `Allow passing expr metavariable to cfg <https://github.com/rust-lang/rust/pull/146961>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Always coerce never types in tuple expressions <https://github.com/rust-lang/rust/pull/147834>`_
+
+  - Bug fix in the compiler. The FLS already reflects the correct semantics.
+
+- `Avoid incorrect inference guidance of function arguments in rare cases <https://github.com/rust-lang/rust/pull/150316>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
+- `Support s390x vector registers in inline assembly <https://github.com/rust-lang/rust/pull/154184>`_
+
+  - The target is outside the scope of the FLS.
+
+- `Allow using constants of type ManuallyDrop as patterns (fixing a regression introduced in 1.94.0) <https://github.com/rust-lang/rust/pull/154891>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
 Language changes in Rust 1.95.0
 -------------------------------
 
@@ -49,7 +72,7 @@ Language changes in Rust 1.95.0
   - :t:`match arm guard operand`
   - :t:`match arm guard scrutinee`
 
-  Updated glossary entries:
+  Changed glossary entries:
 
   - :t:`let binding`
 
@@ -163,23 +186,95 @@ Language changes in Rust 1.95.0
   - The target is outside the scope of the FLS.
 
 - `const-eval: be more consistent in the behavior of padding during typed copies <https://github.com/rust-lang/rust/pull/148967>`_
+
+  New glossary entries:
+
+  - :t:`derived pointer`
+  - :t:`original pointer`
+  - :t:`provenance`
+  - :t:`well-formed pointer`
+
+  Changed glossary entries:
+  
+  - :t:`pointer type`
+  - :t:`raw pointer`
+
+  New paragraphs:
+
+  - :p:`fls_3qI8FXMsyk0f`
+  - :p:`fls_c2Guy3fPYaUV`
+  - :p:`fls_jriT46yWgIR0`
+  - :p:`fls_VWUlxTy0QF9d`
+  - :p:`fls_kaPNJ7iIHPro`
+  - :p:`fls_5MkKtNL9oCsL`
+  - :p:`fls_1NJhTBN1D2qv`
+  - :p:`fls_wnJmQYT7iKQf`
+  - :p:`fls_ffh8mAkebORJ`
+  - :p:`fls_c3DaCLQEBpYQ`
+  - :p:`fls_l1FOH8zt0XRZ`
+  - :p:`fls_37oocZVDne5Y`
+
+  Changed paragraphs:
+
+  - :p:`fls_hrum767l6dte`
+  - :p:`fls_k6ues2936pjq`
+  - :p:`fls_jd1inwz7ulyw`
+
+  Removed paragraphs:
+
+  - :p:`fls_deuo1pn8cjd6`
+
+  New section: :ref:`fls_Dqk4eIvxHloY`
+
 - `Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted <https://github.com/rust-lang/rust/pull/150557>`_
 
   - This implementation-specifc behavior is outside the scope of the FLS.
 
 - `Make operational semantics of pattern matching independent of crate and module <https://github.com/rust-lang/rust/pull/150681>`_
 
-FLS fixes/improvements
-----------------------
+  Previous behavior was not documented,
+  and a new paragraph was added to include the new behavior: :p:`fls_7EXHdE2eOVek`.
 
-- Changed paragraph: :p:`fls_1941wid94hlg`
+FLS maintenance
+---------------
+
+- Replace the term "simple path prefix" with "common path prefix", to improve clarity.
+
+- Changed paragraphs:
+
+  - :p:`fls_33hfay24hx8u`
+  - :p:`fls_uqy5w9uc8gla`
+  - :p:`fls_1941wid94hlg`
+
+- New section: :ref:`fls_buRbhu22Gfdu`
 
 - New paragraphs:
 
   - :p:`fls_CSuxTkwR96j9`
   - :p:`fls_LV94x3HlpBWk`
-
-- Replace the term "simple path prefix" with "common path prefix", to improve clarity.
+  - :p:`fls_rdDT7jsaOMbs`
+  - :p:`fls_j9WyKVyOLFon`
+  - :p:`fls_TbfUxVf8PKPs`
+  - :p:`fls_4TESOxGpEY2h`
+  - :p:`fls_eNkZWskzznW6`
+  - :p:`fls_v8IFXHJnXhez`
+  - :p:`fls_gujpU7p5n9Zx`
+  - :p:`fls_t8tFLUg8O83Q`
+  - :p:`fls_RaONmCLH2KGM`
+  - :p:`fls_Vt9C9mKxHOwo`
+  - :p:`fls_Fs12dmznjsMf`
+  - :p:`fls_iLH8X2U4ADHb`
+  - :p:`fls_HMJUXHrvOmPl`
+  - :p:`fls_Gj1znNpthHY6`
+  - :p:`fls_IFyJvb6mlFU4`
+  - :p:`fls_7NEEJgKSpQQ8`
+  - :p:`fls_kYFd3p06pWWV`
+  - :p:`fls_fATMTNUOHsfb`
+  - :p:`fls_fITor3jpmgrl`
+  - :p:`fls_UfvoShNTxVD2`
+  - :p:`fls_wAMHIDvLG0LM`
+  - :p:`fls_YuQxJCjneaW5`
+  - :p:`fls_nrTZ4mn6IJCl`
 
 Language changes in Rust 1.94.0
 -------------------------------

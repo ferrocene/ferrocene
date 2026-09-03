@@ -27,3 +27,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_qfsfnql1t7m
 // Wildcard Patterns
+//
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

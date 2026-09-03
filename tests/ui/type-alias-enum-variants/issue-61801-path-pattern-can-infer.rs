@@ -31,3 +31,5 @@ fn main() {}
 // Path Patterns
 // ferrocene-annotations: fls_lv7w7aalpwm5
 // Type Inference
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

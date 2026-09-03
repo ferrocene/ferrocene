@@ -57,7 +57,7 @@ A :t:`subpattern` is a :t:`pattern` nested within another pattern.
 :dp:`fls_8xzjb0yzftkd`
 A :t:`pattern` has a :t:`type`, with the exception of the :t:`rest pattern` if
 it is not the inner :t:`pattern` of a :t:`slice pattern` or the :t:`pattern` of
-a possibly nested :t:`identifier pattern` of a :t:`slice pattern`\ ``.``
+a possibly nested :t:`identifier pattern` of a :t:`slice pattern`.
 
 :dp:`fls_cma5t8waon0x`
 The :t:`expected type` of a :t:`pattern` is the :t:`type` the :t:`pattern` is being matched against.
@@ -107,12 +107,7 @@ match all possible values of a :t:`type`.
 An :t:`irrefutable pattern` is a :t:`pattern` that always matches any :t:`value` of its :t:`type`.
 
 :dp:`fls_uq7ftuuq1sig`
-A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching a :t:`value` of its :t:`type`
-
-:dp:`fls_mnbyt7jfYAZ9`
-A :t:`pattern` that is not an :t:`irrefutable pattern` is a
-:t:`refutable pattern`.
+A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not matching a :t:`value` of its :t:`type`.
 
 :dp:`fls_l76ycteulo8e`
 An :t:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
@@ -137,6 +132,23 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 .. code-block:: rust
 
    if let core::option::Option::Some(y) = value {
+
+.. _fls_buRbhu22Gfdu:
+
+Pattern Destructuring
+---------------------
+
+:dp:`fls_UfvoShNTxVD2`
+:dt:`Pattern destructuring` is where :t:`[value]s` of :t:`[enum]s`, :t:`[struct]s`, and :t:`[tuple]s` are broken into :t:`[enum variant]s`, :t:`[struct field]s`, and :t:`[tuple field]s`, respectively.
+
+:dp:`fls_YuQxJCjneaW5`
+In a pattern whose :t:`subject expression` is an :t:`enum type`, an :t:`underscore pattern` matches a single :t:`enum variant`, and a :t:`rest pattern` matches the remaining variants.
+
+:dp:`fls_wAMHIDvLG0LM`
+In a pattern whose :t:`subject expression` is a :t:`struct type`, an :t:`underscore pattern` matches a single :t:`struct field`, and a :t:`rest pattern` matches the remaining fields.
+
+:dp:`fls_nrTZ4mn6IJCl`
+In a pattern whose :t:`subject expression` is a :t:`tuple type`, an :t:`underscore pattern` matches a single :t:`tuple field`, and a :t:`rest pattern` matches the remaining fields.
 
 .. _fls_7bxv8lybxm18:
 

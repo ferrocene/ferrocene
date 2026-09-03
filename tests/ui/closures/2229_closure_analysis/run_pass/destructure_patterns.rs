@@ -120,3 +120,6 @@ fn main() {
 
 // ferrocene-annotations: fls_rce8bb7nz2jy
 // Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_burbhu22gfdu
+// Pattern Destructuring

@@ -1,5 +1,6 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
+use std::collections::BTreeMap;
 use std::fmt;
 use std::path::PathBuf;
 
@@ -80,6 +81,14 @@ struct LineCoverage {
     lines: Vec<(usize, LineCoverageStatus)>,
 }
 
+#[derive(Debug, Clone)]
+struct ColumnRange {
+    start_col: usize,
+    /// `None` means the region continues past the end of this line.
+    end_col: Option<usize>,
+    tested: bool,
+}
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 enum FunctionCoverageStatus {
     FullyTested,
@@ -151,6 +160,8 @@ struct FunctionCoverage {
     source_name: String,
     relative_path: PathBuf,
     lines: LineCoverage,
+    // filled in only for partially covered lines
+    regions: BTreeMap<usize, Vec<ColumnRange>>,
     status: FunctionCoverageStatus,
     annotated: Annotated,
 }
@@ -160,10 +171,11 @@ impl FunctionCoverage {
         source_name: String,
         filename: PathBuf,
         lines: LineCoverage,
+        regions: BTreeMap<usize, Vec<ColumnRange>>,
         annotated: Annotated,
     ) -> Self {
         let status = FunctionCoverageStatus::new(&lines);
-        Self { source_name, relative_path: filename, lines, status, annotated }
+        Self { source_name, relative_path: filename, lines, regions, status, annotated }
     }
 }
 
@@ -237,7 +249,6 @@ fn get_coverage(
     };
 
     let source_lines = start_line..=end_line;
-    let source_name = source_name;
 
     // we didn't get any hits from the tool, so we don't know which lines shouldn't be
     // considered. report them all as considered and missing coverage.
@@ -253,25 +264,60 @@ fn get_coverage(
         // All lines require annotations as we didn't get any hits from the tool.
         let annotated = get_annotation_status(annotations, &mut no_coverage.lines);
 
-        return Ok(FunctionCoverage::new(source_name, filename, no_coverage, annotated));
+        return Ok(FunctionCoverage::new(
+            source_name,
+            filename,
+            no_coverage,
+            BTreeMap::new(),
+            annotated,
+        ));
     };
 
     let mut covered = vec![];
+    let mut regions = BTreeMap::new();
 
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
-        let status = match func_coverage.hits_for_line(line) {
-            None => LineCoverageStatus::Ignored,
-            Some(0) => LineCoverageStatus::Untested,
-            Some(_) => LineCoverageStatus::Tested,
+        let line_regions = column_ranges_for_line(func_coverage, line);
+        let status = if line_regions.is_empty() {
+            LineCoverageStatus::Ignored
+        } else if line_regions.iter().all(|range| range.tested) {
+            LineCoverageStatus::Tested
+        } else {
+            LineCoverageStatus::Untested
         };
+        // untested line has tested regions
+        if status == LineCoverageStatus::Untested && line_regions.iter().any(|range| range.tested) {
+            regions.insert(line, line_regions);
+        }
         covered.push((line, status));
     }
 
     let annotated = get_annotation_status(annotations, &mut covered);
 
-    Ok(FunctionCoverage::new(source_name, filename, LineCoverage { lines: covered }, annotated))
+    Ok(FunctionCoverage::new(
+        source_name,
+        filename,
+        LineCoverage { lines: covered },
+        regions,
+        annotated,
+    ))
+}
+
+fn column_ranges_for_line(func_coverage: &CoverageResult, line: usize) -> Vec<ColumnRange> {
+    let mut ranges: Vec<ColumnRange> = func_coverage
+        .hits
+        .iter()
+        .filter(|(loc, _)| loc.line_start <= line && loc.line_end >= line)
+        .map(|(loc, &count)| {
+            let start_col = if loc.line_start == line { loc.column_start } else { 1 };
+            let end_col = if loc.line_end == line { Some(loc.column_end) } else { None };
+            ColumnRange { start_col, end_col, tested: count > 0 }
+        })
+        .collect();
+    ranges.sort_by_key(|range| range.start_col);
+    ranges
 }
 
 impl ShowCommand {

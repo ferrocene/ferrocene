@@ -132,7 +132,7 @@ Pointers
 
 .. rubric:: Legality Rules
 
-:dp:`fls_f3TcmFrVoNis`
+:dp:`fls_jriT46yWgIR0`
 A :t:`pointer` is a :t:`value` of a :t:`pointer type`.
 
 :dp:`fls_8RBNIR0E6pnI`

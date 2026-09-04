@@ -12,6 +12,7 @@
 
 mod dwarf;
 
+#[rustfmt::skip]
 #[cfg(not(any(test, doctest)))]
 cfg_select! {
     any(target_env = "msvc", target_family = "wasm", target_os = "motor") => {
@@ -30,14 +31,8 @@ cfg_select! {
         target_os = "psp",
         target_os = "xous",
         target_os = "solid_asp3",
-        all(
-            target_family = "unix",
-            not(target_os = "espidf"),
-            not(target_os = "l4re"),
-            not(target_os = "nuttx"),
-            // ferrocene addition
-            not(ferrocene_facade_secretsauce),
-        ),
+        // ferrocene addition: secretsauce
+        all(target_family = "unix", not(target_os = "espidf"), not(target_os = "nuttx"), not(ferrocene_facade_secretsauce)),
         all(target_vendor = "fortanix", target_env = "sgx"),
     ) => {
         mod gcc;

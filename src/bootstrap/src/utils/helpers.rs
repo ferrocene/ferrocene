@@ -229,7 +229,8 @@ pub fn use_host_linker(target: TargetSelection) -> bool {
         || target.contains("bpf")
         // ferrocene addition: use the default linker (LLD) not the config.toml `cc` override
         || target.contains("ferrocene.facade")
-        || target.contains("switch"))
+        || target.contains("switch")
+        || target.contains("l4re"))
 }
 
 pub fn target_supports_cranelift_backend(target: TargetSelection) -> bool {

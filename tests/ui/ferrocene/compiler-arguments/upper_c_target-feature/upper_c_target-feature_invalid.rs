@@ -1,6 +1,6 @@
 //@ build-pass
 //@ compile-flags: -Ctarget-feature=invalid
-//~? WARN unknown feature specified
+//~? WARN ignoring feature with missing prefix
 
 // Each feature should be prefixed with a + to enable it or - to disable it.
 // Not having + or - prefix is considered invalid, but the build still passes.

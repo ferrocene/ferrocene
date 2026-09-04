@@ -95,7 +95,8 @@ pub macro class($classname:expr) {{
 ///
 /// # Examples
 ///
-/// ```no_run
+#[cfg_attr(target_os = "macos", doc = "```no_run")]
+#[cfg_attr(not(target_os = "macos"), doc = "```ignore (needs macos)")]
 /// #![feature(darwin_objc)]
 /// use core::os::darwin::objc;
 ///

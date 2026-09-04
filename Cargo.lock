@@ -672,7 +672,6 @@ dependencies = [
  "clippy_utils",
  "color-print",
  "declare_clippy_lint",
- "filetime",
  "itertools",
  "pulldown-cmark",
  "regex",
@@ -680,8 +679,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "termize",
- "toml 0.9.8",
+ "toml 1.1.0+spec-1.1.0",
  "ui_test",
  "walkdir",
 ]
@@ -690,10 +688,10 @@ dependencies = [
 name = "clippy_config"
 version = "0.1.99"
 dependencies = [
+ "arrayvec",
  "clippy_utils",
  "itertools",
- "serde",
- "toml 0.7.8",
+ "toml 1.1.0+spec-1.1.0",
  "walkdir",
 ]
 
@@ -720,15 +718,15 @@ dependencies = [
  "clippy_utils",
  "declare_clippy_lint",
  "itertools",
+ "memchr",
  "quine-mc_cluskey",
  "regex-syntax",
  "semver",
  "serde",
- "toml 0.9.8",
+ "toml 1.1.0+spec-1.1.0",
  "unicode-normalization",
  "unicode-script",
  "url",
- "walkdir",
 ]
 
 [[package]]
@@ -739,7 +737,6 @@ dependencies = [
  "clippy_utils",
  "itertools",
  "regex",
- "rustc-semver",
 ]
 
 [[package]]
@@ -749,7 +746,6 @@ dependencies = [
  "arrayvec",
  "itertools",
  "rustc_apfloat",
- "serde",
 ]
 
 [[package]]
@@ -1332,9 +1328,9 @@ checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
 name = "ena"
-version = "0.14.3"
+version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d248bdd43ce613d87415282f69b9bb99d947d290b10962dd6c56233312c2ad5"
+checksum = "eabffdaee24bd1bf95c5ef7cec31260444317e72ea56c4c91750e8b7ee58d5f1"
 dependencies = [
  "log",
 ]
@@ -3584,12 +3580,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustc-semver"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be1bdc7edf596692617627bbfeaba522131b18e06ca4df2b6b689e3c5d5ce84"
-
-[[package]]
 name = "rustc-stable-hash"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3719,6 +3709,24 @@ dependencies = [
  "rustc_lexer",
  "rustc_span",
  "thin-vec",
+]
+
+[[package]]
+name = "rustc_attr_ir"
+version = "0.0.0"
+dependencies = [
+ "rustc_abi",
+ "rustc_ast",
+ "rustc_ast_pretty",
+ "rustc_data_structures",
+ "rustc_error_messages",
+ "rustc_macros",
+ "rustc_serialize",
+ "rustc_span",
+ "rustc_target",
+ "smallvec",
+ "thin-vec",
+ "tracing",
 ]
 
 [[package]]
@@ -3933,7 +3941,6 @@ dependencies = [
  "rustc_serialize",
  "rustc_thread_pool",
  "smallvec",
- "stacker",
  "tempfile",
  "thin-vec",
  "tracing",
@@ -3965,6 +3972,7 @@ dependencies = [
  "rustc_errors",
  "rustc_expand",
  "rustc_feature",
+ "rustc_hir",
  "rustc_hir_analysis",
  "rustc_hir_pretty",
  "rustc_index",
@@ -4097,7 +4105,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
- "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_error_messages",
  "rustc_errors",
@@ -4109,8 +4117,6 @@ dependencies = [
  "rustc_serialize",
  "rustc_span",
  "rustc_target",
- "smallvec",
- "thin-vec",
  "tracing",
 ]
 
@@ -4308,6 +4314,7 @@ dependencies = [
  "rustc_apfloat",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4425,7 +4432,6 @@ dependencies = [
  "rustc_graphviz",
  "rustc_hashes",
  "rustc_hir",
- "rustc_hir_pretty",
  "rustc_index",
  "rustc_lint_defs",
  "rustc_macros",
@@ -4606,7 +4612,6 @@ dependencies = [
  "rustc_abi",
  "rustc_apfloat",
  "rustc_arena",
- "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
  "rustc_index",
@@ -4632,7 +4637,7 @@ dependencies = [
  "rustc_middle",
  "rustc_session",
  "rustc_span",
- "rustc_ty_utils",
+ "rustc_ty_walk",
  "tracing",
 ]
 
@@ -4919,6 +4924,17 @@ dependencies = [
  "rustc_span",
  "rustc_target",
  "rustc_trait_selection",
+ "rustc_ty_walk",
+ "tracing",
+]
+
+[[package]]
+name = "rustc_ty_walk"
+version = "0.0.0"
+dependencies = [
+ "rustc_hir",
+ "rustc_middle",
+ "rustc_span",
  "tracing",
 ]
 
@@ -5996,9 +6012,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-tree"
-version = "0.3.1"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b56c62d2c80033cb36fae448730a2f2ef99410fe3ecbffc916681a32f6807dbe"
+checksum = "ac87aa03b6a4d5a7e4810d1a80c19601dbe0f8a837e9177f23af721c7ba7beec"
 dependencies = [
  "nu-ansi-term",
  "tracing-core",

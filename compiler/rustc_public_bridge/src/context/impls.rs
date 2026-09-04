@@ -5,8 +5,9 @@
 use std::iter;
 
 use rustc_abi::{Endian, Layout, ReprOptions};
+use rustc_hir::Attribute;
+use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::DefKind;
-use rustc_hir::{Attribute, LangItem};
 use rustc_middle::mir::interpret::{AllocId, ConstAllocation, ErrorHandled, GlobalAlloc, Scalar};
 use rustc_middle::mir::{BinOp, Body, Const as MirConst, ConstValue, UnOp};
 use rustc_middle::ty::layout::{FnAbiOf, LayoutOf};
@@ -49,6 +50,16 @@ impl<'tcx, B: Bridge> AllocRangeHelpers<'tcx> for CompilerCtxt<'tcx, B> {
         size: rustc_abi::Size,
     ) -> mir::interpret::AllocRange {
         rustc_middle::mir::interpret::alloc_range(offset, size)
+    }
+}
+
+impl<'tcx, B: Bridge> rustc_hir_pretty::PpAnn for CompilerCtxt<'tcx, B> {
+    fn nested(&self, state: &mut rustc_hir_pretty::State<'_>, nested: rustc_hir_pretty::Nested) {
+        rustc_hir_pretty::PpAnn::nested(
+            &(&self.tcx as &dyn rustc_hir::intravisit::HirTyCtxt<'_>),
+            state,
+            nested,
+        )
     }
 }
 
@@ -295,7 +306,7 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
             .get_attrs_by_path(def_id, &attr_name)
             .filter_map(|attribute| {
                 if let Attribute::Unparsed(u) = attribute {
-                    let attr_str = rustc_hir_pretty::attribute_to_string(&self.tcx, attribute);
+                    let attr_str = rustc_hir_pretty::attribute_to_string(self, attribute);
                     Some((attr_str, u.span))
                 } else {
                     None
@@ -314,7 +325,7 @@ impl<'tcx, B: Bridge> CompilerCtxt<'tcx, B> {
         attrs_iter
             .filter_map(|attribute| {
                 if let Attribute::Unparsed(u) = attribute {
-                    let attr_str = rustc_hir_pretty::attribute_to_string(&self.tcx, attribute);
+                    let attr_str = rustc_hir_pretty::attribute_to_string(self, attribute);
                     Some((attr_str, u.span))
                 } else {
                     None

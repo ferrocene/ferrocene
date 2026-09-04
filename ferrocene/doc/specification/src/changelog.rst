@@ -24,7 +24,84 @@ FLS maintenance
 
 - `[Change]: Remove the term "indirection", and associated derivatives <https://github.com/rust-lang/fls/issues/710>`_
 
-  TODO: Update when things settle.
+  Changed glossary entries:
+
+  - :t:`dangling`
+  - :t:`fat pointer type`
+  - :t:`function pointer type`
+  - :t:`pointer type`
+  - :t:`raw pointer type`
+  - :t:`reference type`
+  - :t:`thin pointer type`
+
+  Removed glossary entries:
+
+  - indirection type
+
+  Changed paragraphs:
+
+  - :p:`fls_jrohsv7hx7yw`
+  - :p:`fls_3qI8FXMsyk0f`
+  - :p:`fls_rpbhr0xukbx9`
+  - :p:`fls_8uWfFAsZeRCs`
+  - :p:`fls_twhq24s8kchh`
+  - :p:`fls_w4NbA7WhZfR2`
+  - :p:`fls_ie0avzljmxfm`
+  - :p:`fls_15zdiqsm1q3p`
+  - :p:`fls_GUZuiST7ucib`
+  - :p:`fls_vaas9kns4zo6`
+  - :p:`fls_n6ffcms5pr0r`
+  - :p:`fls_26Xgem831Nqg`
+  - :p:`fls_ozYgHEHFTT5c`
+  - :p:`fls_18ke90udyp67`
+  - :p:`fls_nrqG8i3fmpm4`
+  - :p:`fls_e5hivr6m5s3h`
+
+  Moved paragraphs:
+
+  - :p:`fls_1kg1mknf4yx7`
+  - :p:`fls_v2wrytr3t04h`
+  - :p:`fls_5dd7icjcl3nt`
+  - :p:`fls_B0SMXRqQMS1E`
+  - :p:`fls_hbn1l42xmr3h`
+  - :p:`fls_g1iYVw7upBnH`
+  - :p:`fls_8gpvNJfVlyaD`
+  - :p:`fls_KcI6yK0P8Onn`
+  - :p:`fls_52thmi9hnoks`
+  - :p:`fls_bYWfGDAQcWfA`
+  - :p:`fls_c2Guy3fPYaUV`
+  - :p:`fls_hrum767l6dte`
+  - :p:`fls_k6ues2936pjq`
+  - :p:`fls_csdjfwczlzfd`
+  - :p:`fls_ezh8aq6fmdvz`
+  - :p:`fls_jriT46yWgIR0`
+  - :p:`fls_VWUlxTy0QF9d`
+  - :p:`fls_kaPNJ7iIHPro`
+  - :p:`fls_5MkKtNL9oCsL`
+  - :p:`fls_1NJhTBN1D2qv`
+  - :p:`fls_wnJmQYT7iKQf`
+  - :p:`fls_ffh8mAkebORJ`
+  - :p:`fls_c3DaCLQEBpYQ`
+
+  New paragraphs:
+
+  - :p:`fls_Im7miUSS87xs`
+  - :p:`fls_aQgOFrzAhdsC`
+
+  Changed sections:
+
+  - :ref:`fls_3i4ou0dq64ny`
+
+  Moved sections:
+
+  - :ref:`fls_xztr1kebz8bo`
+  - :ref:`fls_Dqk4eIvxHloY`
+
+  New sections:
+
+  - :ref:`fls_xOuhiItK1hK0`
+  - :ref:`fls_qPWQnNXH52R3`
+  - :ref:`fls_phgP8YIwpXpi`
 
 Language changes in Rust 1.98.0
 -------------------------------

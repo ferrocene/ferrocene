@@ -59,6 +59,8 @@ KEEP_LLVM_BINARIES = [
     "llvm-tblgen",
     # Needed to strip debug info in aarch64-darwin
     "llvm-install-name-tool",
+    # Needed by rust-objcopy to strip debug data on aarch64-darwin
+    "llvm-extract-bundle-entry",
 ]
 
 

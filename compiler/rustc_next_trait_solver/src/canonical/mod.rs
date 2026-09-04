@@ -294,6 +294,7 @@ where
         relate_args_invariantly(self, a_args, b_args)?;
         Ok(a_ty)
     }
+
     fn relate_with_variance<T: Relate<I>>(
         &mut self,
         _variance: ty::Variance,
@@ -480,7 +481,7 @@ fn register_region_constraints<D, I>(
 {
     for (constraint, vis) in constraints {
         match constraint {
-            ty::RegionConstraint::Outlives(ty::OutlivesPredicate(lhs, rhs)) => match lhs.kind() {
+            ty::RegionConstraint::Outlives(ty::OutlivesClause(lhs, rhs)) => match lhs.kind() {
                 ty::GenericArgKind::Lifetime(lhs) => delegate.sub_regions(rhs, lhs, vis, span),
                 ty::GenericArgKind::Type(lhs) => delegate.register_ty_outlives(lhs, rhs, span),
                 ty::GenericArgKind::Const(_) => panic!("const outlives: {lhs:?}: {rhs:?}"),

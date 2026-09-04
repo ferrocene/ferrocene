@@ -1174,6 +1174,7 @@ impl<T> [MaybeUninit<T>] {
     /// ```
     ///
     /// [`write_clone_of_slice`]: slice::write_clone_of_slice
+    #[ferrocene::prevalidated]
     #[stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
     #[rustc_const_stable(feature = "maybe_uninit_write_slice", since = "1.93.0")]
     pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]

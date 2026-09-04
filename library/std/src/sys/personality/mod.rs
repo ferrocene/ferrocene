@@ -33,7 +33,6 @@ cfg_select! {
         all(
             target_family = "unix",
             not(target_os = "espidf"),
-            not(target_os = "l4re"),
             not(target_os = "nuttx"),
             // ferrocene addition
             not(ferrocene_facade_secretsauce),

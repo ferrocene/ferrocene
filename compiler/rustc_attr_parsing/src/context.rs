@@ -66,13 +66,13 @@ use crate::attributes::traits::*;
 use crate::attributes::transparency::*;
 use crate::attributes::unroll::*;
 use crate::attributes::{AttributeParser as _, AttributeSafety, Combine, Single, WithoutArgs};
+use crate::diagnostics::{
+    AttributeParseError, AttributeParseErrorReason, AttributeParseErrorSuggestions,
+    ParsedDescription, UnusedDuplicate,
+};
 use crate::parser::{
     ArgParser, MetaItemListParser, MetaItemOrLitParser, MetaItemParser, NameValueParser,
     RefPathParser,
-};
-use crate::session_diagnostics::{
-    AttributeParseError, AttributeParseErrorReason, AttributeParseErrorSuggestions,
-    ParsedDescription, UnusedDuplicate,
 };
 use crate::target_checking::AllowedTargets;
 use crate::{AttributeParser, AttributeTemplate, EmitAttribute};
@@ -295,6 +295,7 @@ attribute_parsers!(
         Single<WithoutArgs<RustcAllocatorParser>>,
         Single<WithoutArgs<RustcAllocatorZeroedParser>>,
         Single<WithoutArgs<RustcAllowIncoherentImplParser>>,
+        Single<WithoutArgs<RustcAllowLifetimeDependentSpecializationParser>>,
         Single<WithoutArgs<RustcAsPtrParser>>,
         Single<WithoutArgs<RustcCanonicalSymbolParser>>,
         Single<WithoutArgs<RustcCaptureAnalysisParser>>,
@@ -355,7 +356,6 @@ attribute_parsers!(
         Single<WithoutArgs<RustcStrictCoherenceParser>>,
         Single<WithoutArgs<RustcTestEntrypointMarkerParser>>,
         Single<WithoutArgs<RustcTrivialFieldReadsParser>>,
-        Single<WithoutArgs<RustcUnsafeSpecializationMarkerParser>>,
         Single<WithoutArgs<SplatParser>>,
         Single<WithoutArgs<ThreadLocalParser>>,
         Single<WithoutArgs<TrackCallerParser>>,

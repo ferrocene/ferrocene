@@ -20,7 +20,6 @@ use rustc_attr_parsing::{
 };
 use rustc_data_structures::Limit;
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
-use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::PResult;
 use rustc_feature::Features;
 use rustc_hir::Target;
@@ -804,7 +803,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                                 None,
                             )
                         }
-                        // When a function has EII implementations attached (via `eii_impls`),
+                        // When a function has EII implementations attached (via `eii_impl`),
                         // use fake tokens so the pretty-printer re-emits the EII attribute
                         // (e.g. `#[hello]`) in the token stream. Without this, the EII
                         // attribute is lost during the token roundtrip performed by
@@ -812,7 +811,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                         // breaking the EII link on the resulting re-parsed item.
                         Annotatable::Item(item_inner)
                             if matches!(&item_inner.kind,
-                                ItemKind::Fn(f) if !f.eii_impls.is_empty()) =>
+                                ItemKind::Fn(f) if f.eii_impl.is_some()) =>
                         {
                             rustc_parse::fake_token_stream_for_item(
                                 &self.cx.sess.psess,
@@ -858,6 +857,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                         Err(guar) => return ExpandResult::Ready(fragment_kind.dummy(span, guar)),
                     }
                 } else if let SyntaxExtensionKind::LegacyAttr(expander) = ext {
+                    self.gate_proc_macro_attr_item(span, &item);
                     // `LegacyAttr` is only used for builtin attribute macros, which have their
                     // safety checked by `check_builtin_meta_item`, so we don't need to check
                     // `unsafety` here.
@@ -1045,7 +1045,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             self.cx.sess,
             sym::proc_macro_hygiene,
             span,
-            format!("custom attributes cannot be applied to {kind}"),
+            format!("macro attributes on {kind} are unstable"),
         )
         .emit();
     }
@@ -2573,7 +2573,7 @@ impl<'a, 'b> MutVisitor for InvocationCollector<'a, 'b> {
         if let Some(attr) = node.attrs.first() {
             self.cfg().maybe_emit_expr_attr_err(attr);
         }
-        ensure_sufficient_stack(|| self.visit_node(node))
+        self.visit_node(node)
     }
 
     fn visit_method_receiver_expr(&mut self, node: &mut ast::Expr) {

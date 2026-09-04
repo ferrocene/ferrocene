@@ -4,12 +4,129 @@
 use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::HirId;
 use rustc_hir::attrs::LangItem;
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{DefId, LocalDefId};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 
 use crate::ferrocene::post_mono::InstantiationSite;
 use crate::ferrocene::{LintState, UNVALIDATED, UnvalidatedImplCause, Use, UseKind};
+
+const ATTR_REQ: &str = "`#[ferrocene::requires_validation]`";
+const ATTR_VAL: &str = "`#[ferrocene::prevalidated]`";
+
+fn ident_span(tcx: TyCtxt<'_>, def_id: DefId) -> Span {
+    tcx.def_ident_span(def_id).unwrap_or_else(|| tcx.def_span(def_id))
+}
+
+pub(super) fn error_prevalidated_without_body(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!("{ATTR_VAL} cannot be applied to a trait method without a default body"),
+        )
+        .with_span_label(ident_span(tcx, def_id.to_def_id()), "this method has no body to validate")
+        .with_help(format!(
+            "use {ATTR_REQ} instead to require all implementations of this method to be validated"
+        ))
+        .emit();
+}
+
+pub(super) fn error_requires_validation_wrong_item(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    let (article, descr) = tcx.article_and_description(def_id.to_def_id());
+    tcx.dcx()
+        .struct_span_err(attr_span, format!("{ATTR_REQ} cannot be applied to {article} {descr}"))
+        .with_note(format!("{ATTR_REQ} can only be applied to trait methods or fn ptr consts"))
+        .emit();
+}
+
+pub(super) fn error_requires_validation_without_prevalidated(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!("{ATTR_REQ} on a trait method with a default body requires {ATTR_VAL} as well"),
+        )
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            "this default body is not validated, but implementations inherit it",
+        )
+        .with_help(format!("add {ATTR_VAL} to validate the default body"))
+        .emit();
+}
+
+pub(super) fn error_const_prevalidated_no_requires(
+    tcx: TyCtxt<'_>,
+    def_id: LocalDefId,
+    attr_span: Span,
+) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!("fn ptr const marked {ATTR_VAL} must be marked {ATTR_REQ} as well"),
+        )
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            format!("this const is marked {ATTR_VAL}, but not {ATTR_REQ}"),
+        )
+        .with_help(format!("add {ATTR_REQ} to require all consts to be validated"))
+        .emit();
+}
+
+pub(super) fn error_const_no_value(tcx: TyCtxt<'_>, def_id: LocalDefId, attr_span: Span) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!("fn ptr const without a value cannot be marked {ATTR_VAL}"),
+        )
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            format!("this const is marked {ATTR_VAL}, but has no value"),
+        )
+        .with_help(format!(
+            "remove {ATTR_VAL}. {ATTR_REQ} still requires all consts \
+            defined by implementors of this trait to be validated"
+        ))
+        .emit();
+}
+
+pub(super) fn error_const_no_fn_ptr(tcx: TyCtxt<'_>, def_id: LocalDefId, attr_span: Span) {
+    tcx.dcx()
+        .struct_span_err(
+            attr_span,
+            format!(
+                "associated constants that are no function pointer cannot be marked {ATTR_VAL}"
+            ),
+        )
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            format!("this const is marked {ATTR_VAL}, but is no function pointer"),
+        )
+        .with_help(format!("remove {ATTR_VAL}"))
+        .emit();
+}
+
+pub(super) fn error_prevalidated_wrong_item(tcx: TyCtxt<'_>, def_id: LocalDefId, attr_span: Span) {
+    tcx.dcx()
+        .struct_span_err(attr_span, "{ATTR_VAL} can only be applied to trait items")
+        .with_span_label(
+            ident_span(tcx, def_id.to_def_id()),
+            format!("this const is marked {ATTR_VAL}, but has is no function pointer"),
+        )
+        .with_help(format!("remove {ATTR_VAL}"))
+        .emit();
+}
 
 /// Diagnostics.
 impl<'tcx> LintState<'tcx> {

@@ -161,8 +161,9 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     }
 }
 
-/// Check if this item or any of its parents are validated.
-fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
+/// Check if this item, or any of its parents, is marked with
+/// `#[ferrocene::prevaidated]`.
+pub fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
     let mut current = item;
     loop {
         // Check if it's possible for this item to have attributes.
@@ -188,4 +189,9 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
 
         current = tcx.parent(current);
     }
+}
+
+/// Check if this item is marked with `#[ferrocene::requires_validation]`.
+pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
+    tcx.get_attrs_by_path(def_id, REQUIRES_VALIDATION_ATTR).next().map(|attr| attr.span())
 }

@@ -16,7 +16,12 @@ X_HELP=src/etc/xhelp
 # https://github.com/ferrocene/ferrocene/blob/d3f1e45/src/bootstrap/src/ferrocene/dist.rs#L119-L125
 DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 
-LOCAL_REPO_ROOT=$(git rev-parse --show-toplevel)
+# During this script we maintain two copies of the Ferrocene repository:
+# 1) The one we start in. We are running *this script* and its dependencies from that directory,
+#    so we can't change branch or do anything which might mess with the script files without
+#    risking hard-to-understand breakages.
+# 2) A second worktree which we create to perform the merge in
+SCRIPTDIR_ROOT=$(git rev-parse --show-toplevel)
 
 # Set a default max of merges per PR to 30, if it was not overridden in the
 # environment.
@@ -73,7 +78,7 @@ fi
 upstream_branch="$1"
 
 # Move to the root of the repository to avoid the script from misbehaving.
-cd "${LOCAL_REPO_ROOT}"
+cd "${SCRIPTDIR_ROOT}"
 
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
@@ -97,7 +102,7 @@ if [[ $# -ge 2 ]]; then
 else
     current_commit="$(git rev-parse HEAD)"
     branch_name="$(git branch --show-current)"
-    if [ -n "$branch_name" ]; then branch_name=$current_commit; fi
+    if [ -z "$branch_name" ]; then branch_name=$current_commit; fi
 fi
 if [[ $# -ge 3 ]]; then
     upstream_commit="$3"
@@ -133,7 +138,11 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
         # return any difference between the two refs, resulting in an empty
         # ${upstream_commit}. To prevent the rest of the script from misbehaving,
         # we revert the commit back to FETCH_HEAD.
-        upstream_commit="FETCH_HEAD"
+        #
+        # Note: Later on we will switch to a separate worktree, which has its own FETCH_HEAD.
+        # So we can't literally set upstream_commit="FETCH_HEAD" here, we have to resolve it to a
+        # definite commit.
+        upstream_commit="${fetch_head}"
     elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
         partial_pull=yes
 
@@ -141,40 +150,21 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
     fi
 fi
 
-# Upstream is slowly trying to migrate away from submodules in favor of subtrees. Whenever they do
-# that, in the same PR they remove the submodule and then create the subtree.
-#
-# This causes problems whenever the branch containing the subtree is checked out in a working
-# directory containing the submodule. Submodules "hide" from git's view the files they contain, and
-# when they are removed they stop hiding those, resulting in those files being untracked.
-#
-# When git tries to add the subtree files in the working directory, it will see the submodule files
-# as untracked, and exit with an error to avoid having to overwrite the files, crashing the script.
-#
-# To avoid the problem, this snippet below `rm -rf`s every directory that is a submodule in the
-# current branch but is not a submodule upstream. This correctly solves the problem whenever
-# upstream converts a submodule to a subtree. It also has the side effect of removing the local
-# contents of the submodules added in Ferrocene (not the submodules themselves), but that doesn't
-# cause any problem (the Ferrocene submodules are then re-fetched later).
-get_submodules() {
-    ref="$1"
-    git config --file <(git show "${ref}:.gitmodules") --get-regexp path | awk '{print($2)}'
-}
-new_submodules="$(get_submodules "${upstream_commit}")"
-for submodule in $(get_submodules "${current_commit}"); do
-    if ! grep --quiet "^${submodule}\$" <(echo "${new_submodules}"); then
-        echo "submodule ${submodule} is not present upstream, removing its contents"
-        rm -rf "${submodule}"
-    fi
-done
+# Set up the workdir
+# Note that a fresh worktree will not have any of its submodules initialized.
+# See https://stackoverflow.com/a/687052 for why we use `trap` here
+WORKDIR_ROOT=$(mktemp -d -t upstream-pull-workdir)
+git worktree add -b "${TEMP_BRANCH}" "${WORKDIR_ROOT}" "${upstream_commit}"
+trap "cd \"${SCRIPTDIR_ROOT}\" && git worktree remove --force \"${WORKDIR_ROOT}\" && git branch -D \"${TEMP_BRANCH}\"" EXIT
 
-git checkout -b "${TEMP_BRANCH}" "${upstream_commit}"
+# Operate on the workdir for the rest of the script
+cd ${WORKDIR_ROOT}
 
 # Delete all the files excluded from the pull. Those files are marked with the
 # `ferrocene-avoid-pulling-from-upstream` in `.gitattributes`.
 git checkout "${current_commit}" -- .gitattributes
 excluded_files | xargs git rm --quiet
-git checkout FETCH_HEAD -- .gitattributes
+git checkout "${upstream_commit}" -- .gitattributes
 
 git commit --quiet -F- <<EOF
 remove excluded files from upstream
@@ -284,7 +274,8 @@ then
     else
         automation_warning "There are merge conflicts in this PR. Attempting automatic resolution, but conflict markers may remain"
 
-        ${LOCAL_REPO_ROOT}/ferrocene/tools/fix-merge/fix-merge.sh ${branch_name}
+        # Run the fix-merge script from the *original* repository, which is still on the `main` branch
+        ${SCRIPTDIR_ROOT}/ferrocene/tools/fix-merge/fix-merge.sh ${branch_name}
     fi
 fi
 
@@ -357,10 +348,43 @@ else
     automation_warning "Couldn't regenerate the symbol report. Please run \`./x test ferrocene/doc/symbol-report.csv --bless\` after fixing the conflicts."
 fi
 
-git branch -D "${TEMP_BRANCH}"
-
 echo
 echo "You can generate the PR body manually by running:"
 echo
 echo "    ferrocene/tools/pull-upstream/generate_pr_body.py origin <base-branch> <current-branch>"
 echo
+
+# If successful, check out the merge result in the original directory before we finish this script
+# and destroy the worktree
+RESULT_COMMIT=$(git rev-parse HEAD)
+cd "${SCRIPTDIR_ROOT}"
+
+# Upstream is slowly trying to migrate away from submodules in favor of subtrees. Whenever they do
+# that, in the same PR they remove the submodule and then create the subtree.
+#
+# This causes problems whenever the branch containing the subtree is checked out in a working
+# directory containing the submodule. Submodules "hide" from git's view the files they contain, and
+# when they are removed they stop hiding those, resulting in those files being untracked.
+#
+# When git tries to add the subtree files in the working directory, it will see the submodule files
+# as untracked, and exit with an error to avoid having to overwrite the files, crashing the script.
+#
+# To avoid the problem, *before* checking out the final merge commit, we `rm -rf` every directory
+# that is a submodule in the current branch but is not a submodule upstream. This correctly solves
+# the problem whenever upstream converts a submodule to a subtree. It also has the side effect of
+# removing the local contents of the submodules added in Ferrocene (not the submodules themselves),
+# but that doesn't cause any problem (the Ferrocene submodules are then re-fetched later).
+get_submodules() {
+    ref="$1"
+    git config --file <(git show "${ref}:.gitmodules") --get-regexp path | awk '{print($2)}'
+}
+new_submodules="$(get_submodules "${upstream_commit}")"
+for submodule in $(get_submodules "${current_commit}"); do
+    if ! grep --quiet "^${submodule}\$" <(echo "${new_submodules}"); then
+        echo "submodule ${submodule} is not present upstream, removing its contents"
+        rm -rf "${submodule}"
+    fi
+done
+
+git checkout "${RESULT_COMMIT}"
+git submodule update --recursive

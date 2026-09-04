@@ -22,7 +22,7 @@ with the change that has been applied due to it.
 FLS maintenance
 ---------------
 
-- `Remove the term "indirection", and associated derivatives <https://github.com/rust-lang/fls/issues/710>`_
+- Remove the term "indirection", and associated derivatives
 
   Changed glossary entries:
 

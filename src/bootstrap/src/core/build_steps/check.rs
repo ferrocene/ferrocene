@@ -16,11 +16,18 @@ use crate::core::builder::{
     self, Alias, Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
     crate_description,
 };
+<<<<<<< ferrocene/release/1.99
 use crate::core::config::TargetSelection;
 // Ferrocene addition
 use crate::ferrocene::tool::SymbolReport;
+||||||| 8a2fbe3ea88
+use crate::core::config::TargetSelection;
+=======
+use crate::core::config::{Subcommand, TargetSelection};
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 use crate::utils::build_stamp::{self, BuildStamp};
-use crate::{CodegenBackendKind, Compiler, Mode, Subcommand, t};
+use crate::utils::helpers::t;
+use crate::{CodegenBackendKind, Compiler, Mode};
 
 /// Allows individual check-step instances to keep track of whether they
 /// represent `cargo check` or `cargo fix`, independently of [`Builder::kind`].
@@ -859,6 +866,7 @@ tool_check_step!(Miri {
     enable_features: ["check_only"],
 });
 tool_check_step!(CargoMiri { path: "src/tools/miri/cargo-miri", mode: Mode::ToolRustcPrivate });
+tool_check_step!(Priroda { path: "src/tools/miri/priroda", mode: Mode::ToolRustcPrivate });
 tool_check_step!(Rustfmt { path: "src/tools/rustfmt", mode: Mode::ToolRustcPrivate });
 tool_check_step!(RustAnalyzer {
     path: "src/tools/rust-analyzer",

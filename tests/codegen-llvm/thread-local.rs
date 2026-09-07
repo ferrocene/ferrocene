@@ -6,7 +6,12 @@
 //@ ignore-android does not use #[thread_local]
 //@ ignore-nto does not use #[thread_local]
 //@ ignore-qnx does not use #[thread_local]
+<<<<<<< ferrocene/release/1.99
 //@ ignore-ferrocene.facade no support for thread locals
+||||||| 8a2fbe3ea88
+=======
+//@ ignore-ohos does not use #[thread_local]
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 
 #![crate_type = "lib"]
 

@@ -158,7 +158,12 @@ impl str {
     #[rustc_no_implicit_autorefs]
     #[must_use]
     #[inline]
+<<<<<<< ferrocene/release/1.99
     #[ferrocene::prevalidated]
+||||||| 8a2fbe3ea88
+=======
+    #[allow(clippy::needless_as_bytes)]
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     pub const fn len(&self) -> usize {
         self.as_bytes().len()
     }

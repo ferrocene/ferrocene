@@ -13,12 +13,13 @@
 //! and the `bootstrap.toml` file—merging them, applying defaults, and performing
 //! cross-component validation. The main `parse_inner` function and its supporting
 //! helpers reside here, transforming raw `Toml` data into the structured `Config` type.
+
 use std::cell::Cell;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf, absolute};
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::{cmp, env, fs};
 
 use build_helper::ci::CiEnv;
@@ -27,11 +28,13 @@ use serde::Deserialize;
 #[cfg(feature = "tracing")]
 use tracing::{instrument, span};
 
+use crate::CodegenBackendKind;
 use crate::core::build_steps::llvm;
 use crate::core::build_steps::llvm::LLVM_INVALIDATION_PATHS;
 use crate::core::build_steps::test::failed_tests::collect_previously_failed_tests;
 pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags, Warnings};
+use crate::core::config::macros::check_ci_llvm;
 use crate::core::config::target_selection::TargetSelectionList;
 use crate::core::config::toml::TomlConfig;
 use crate::core::config::toml::build::{Build, Tool};
@@ -51,17 +54,12 @@ use crate::core::config::toml::target::{
 use crate::core::config::{
     Allocator, CompilerBuiltins, CompressDebuginfo, DebuggerPath, DebuginfoLevel, DryRun,
     GccCiMode, LlvmLibunwind, Merge, ReplaceOpt, RustcLto, SplitDebuginfo, StringOrBool,
-    threads_from_config,
+    TargetSelection, threads_from_config,
 };
-use crate::core::download::{
-    DownloadContext, download_beta_toolchain, is_download_ci_available, maybe_download_rustfmt,
-};
-use crate::utils::channel;
+use crate::core::download::{DownloadContext, download_beta_toolchain, is_download_ci_available};
+use crate::utils::channel::{self, GitInfo};
 use crate::utils::exec::{ExecutionContext, command};
-use crate::utils::helpers::{exe, fail, get_host_target};
-use crate::{
-    CodegenBackendKind, GitInfo, OnceLock, TargetSelection, check_ci_llvm, exit, helpers, t,
-};
+use crate::utils::helpers::{self, exe, fail, get_host_target, t};
 
 /// Each path in this list is considered "allowed" in the `download-rustc="if-unchanged"` logic.
 /// This means they can be modified and changes to these paths should never trigger a compiler build
@@ -241,6 +239,8 @@ pub struct Config {
     pub rustdoc_pgo: PgoConfig,
     pub cargo_pgo: PgoConfig,
 
+    pub stdlib_semver_baseline: Option<String>,
+
     pub llvm_libunwind_default: Option<LlvmLibunwind>,
     pub enable_bolt_settings: bool,
 
@@ -311,7 +311,11 @@ pub struct Config {
     pub initial_rustdoc: PathBuf,
     pub initial_cargo_clippy: Option<PathBuf>,
     pub initial_sysroot: PathBuf,
-    pub initial_rustfmt: Option<PathBuf>,
+
+    /// Externally configured `rustfmt` binary for formatting in-tree source code.
+    /// If you want to use rustfmt for formatting, use the `InternalRustfmt` step, instead of
+    /// accessing this directly.
+    pub external_rustfmt: Option<PathBuf>,
 
     /// The paths to work with. For example: with `./x check foo bar` we get
     /// `paths=["foo", "bar"]`.
@@ -340,6 +344,7 @@ pub struct Config {
     pub skip_std_check_if_no_download_rustc: bool,
 
     pub exec_ctx: ExecutionContext,
+<<<<<<< ferrocene/release/1.99
 
     // Ferrocene-specific configuration
     pub uv: Option<PathBuf>,
@@ -405,6 +410,11 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
+||||||| 8a2fbe3ea88
+=======
+
+    pub wasm_proc_macros: bool,
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 }
 
 impl Config {
@@ -678,6 +688,8 @@ impl Config {
             std_features: rust_std_features,
             break_on_ice: rust_break_on_ice,
             rustflags: rust_rustflags,
+            stdlib_semver_baseline: rust_stdlib_semver_baseline,
+            wasm_proc_macros,
         } = toml_rust.unwrap_or_default();
 
         let Llvm {
@@ -1144,7 +1156,7 @@ impl Config {
             llvm_assertions,
         );
         let is_host_system_llvm =
-            is_system_llvm(&target_config, llvm_from_ci, host_target, host_target);
+            target_config.get(&host_target).and_then(|c| c.llvm_config.as_ref()).is_some();
 
         if llvm_from_ci {
             let warn = |option: &str| {
@@ -1179,8 +1191,8 @@ impl Config {
                     "HELP: To use `llvm.libzstd` for LLVM/LLD builds, set `download-ci-llvm` option to false."
                 );
             }
-        }
 
+<<<<<<< ferrocene/release/1.99
         let mut ferrocene_raw_channel = "rolling".into();
         let mut ferrocene_aws_profile = Default::default();
         let mut ferrocene_traceability_matrix_mode = Default::default();
@@ -1307,14 +1319,18 @@ impl Config {
         }
 
         if llvm_from_ci {
+||||||| 8a2fbe3ea88
+        if llvm_from_ci {
+=======
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
             let triple = &host_target.triple;
             let ci_llvm_bin = ci_llvm_root(&dwn_ctx, llvm_from_ci, &out).join("bin");
             let build_target =
                 target_config.entry(host_target).or_insert_with(|| Target::from_triple(triple));
             check_ci_llvm!(build_target.llvm_config);
             check_ci_llvm!(build_target.llvm_filecheck);
+            // FIXME: Do not overwrite the LLVM config here
             build_target.llvm_config = Some(ci_llvm_bin.join(exe("llvm-config", host_target)));
-            build_target.llvm_filecheck = Some(ci_llvm_bin.join(exe("FileCheck", host_target)));
         }
 
         for (target, linker_override) in default_linux_linker_overrides() {
@@ -1360,8 +1376,6 @@ impl Config {
                     .default_linker_linux_override = linker_override;
             }
         }
-
-        let initial_rustfmt = build_rustfmt.or_else(|| maybe_download_rustfmt(&dwn_ctx, &out));
 
         if matches!(bootstrap_override_lld, BootstrapOverrideLld::SelfContained)
             && !lld_enabled
@@ -1416,7 +1430,7 @@ impl Config {
                 eprintln!(
                     "ERROR: cannot {kind} anything on stage 0. Use at least stage 1 or set build.local-rebuild=true and use a stage0 compiler built from in-tree sources."
                 );
-                exit!(1);
+                helpers::exit_process(1);
             }
         };
 
@@ -1444,14 +1458,14 @@ impl Config {
                 eprintln!(
                     "ERROR: cannot test anything on stage 0. Use at least stage 1. If you want to run compiletest with an external stage0 toolchain, enable `build.compiletest-allow-stage0`."
                 );
-                exit!(1);
+                helpers::exit_process(1);
             }
             _ => {}
         }
 
         if flags_compile_time_deps && !matches!(flags_cmd, Subcommand::Check { .. }) {
             eprintln!("ERROR: Can't use --compile-time-deps with any subcommand other than check.");
-            exit!(1);
+            helpers::exit_process(1);
         }
 
         if matches!(flags_cmd, Subcommand::Fix) {
@@ -1658,6 +1672,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             explicit_stage_from_cli: flags_stage.is_some(),
             explicit_stage_from_config,
             extended: build_extended.unwrap_or(false),
+            external_rustfmt: build_rustfmt,
             free_args: flags_free_args,
             full_bootstrap: build_full_bootstrap.unwrap_or(false),
             gcc_ci_mode,
@@ -1672,7 +1687,6 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             initial_cargo_clippy: build_cargo_clippy,
             initial_rustc,
             initial_rustdoc,
-            initial_rustfmt,
             initial_sysroot,
             jobs: Some(threads_from_config(flags_jobs.or(build_jobs).unwrap_or(0))),
             json_output: flags_json_output,
@@ -1806,6 +1820,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
                 .or(rust_rustc_debug_assertions)
                 .unwrap_or(rust_debug == Some(true)),
             stderr_is_tty: std::io::stderr().is_terminal(),
+            stdlib_semver_baseline: rust_stdlib_semver_baseline,
             stdout_is_tty: std::io::stdout().is_terminal(),
             submodules: build_submodules,
             sysconfdir: install_sysconfdir.map(PathBuf::from),
@@ -1820,6 +1835,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
                 .unwrap_or(rust_debug == Some(true)),
             vendor,
             verbose_tests,
+            wasm_proc_macros: wasm_proc_macros.unwrap_or(false),
             windows_rc: build_windows_rc.map(PathBuf::from),
             yarn: build_yarn.map(PathBuf::from),
             // tidy-alphabetical-end
@@ -2032,7 +2048,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
                             }
                             Err(e) => {
                                 eprintln!("ERROR: Failed to parse CI rustc bootstrap.toml: {e}");
-                                exit!(2);
+                                helpers::exit_process(2);
                             }
                         };
 
@@ -2481,7 +2497,7 @@ fn postprocess_toml(
                 "ERROR: Failed to parse default config profile at '{}': {e}",
                 include_path.display()
             );
-            exit!(2);
+            helpers::exit_process(2);
         });
         toml.merge(
             Some(include_path),
@@ -2523,7 +2539,7 @@ fn postprocess_toml(
             }
         }
         eprintln!("failed to parse override `{option}`: `{err}");
-        exit!(2);
+        helpers::exit_process(2);
     }
     toml.merge(None, &mut Default::default(), override_toml, ReplaceOpt::Override);
 }
@@ -2631,7 +2647,7 @@ pub fn download_ci_rustc_commit<'a>(
                 println!(
                     "ERROR: `download-rustc=if-unchanged` is only compatible with Git managed sources."
                 );
-                crate::exit!(1);
+                helpers::exit_process(1);
             }
 
             true
@@ -2724,7 +2740,7 @@ pub fn parse_download_ci_llvm<'a>(
         if rust_info.is_from_tarball() {
             // Git is needed for running "if-unchanged" logic.
             println!("ERROR: 'if-unchanged' is only compatible with Git managed sources.");
-            crate::exit!(1);
+            helpers::exit_process(1);
         }
 
         // Fetching the LLVM submodule is unnecessary for self-tests.
@@ -2994,7 +3010,7 @@ fn bad_config(toml_path: &Path, e: toml::de::Error) -> ! {
         }
     }
 
-    exit!(2);
+    helpers::exit_process(2);
 }
 
 #[derive(Copy, Clone, Debug)]

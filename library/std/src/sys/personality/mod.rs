@@ -15,7 +15,7 @@ mod dwarf;
 #[rustfmt::skip]
 #[cfg(not(any(test, doctest)))]
 cfg_select! {
-    any(target_env = "msvc", target_family = "wasm", target_os = "motor") => {
+    any(target_env = "msvc", target_family = "wasm") => {
         // This is required by the compiler to exist (e.g., it's a lang item),
         // but it's never actually called by the compiler because
         // __CxxFrameHandler3 (msvc) / __gxx_wasm_personality_v0 (wasm) is the
@@ -43,6 +43,7 @@ cfg_select! {
         // - os=uefi
         // - os=espidf
         // - os=hermit
+        // - os=motor
         // - nvptx64-nvidia-cuda
         // - arch=avr
     }

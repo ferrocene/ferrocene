@@ -15,12 +15,8 @@ use crate::core::build_steps::setup::Profile;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
-<<<<<<< ferrocene/release/1.99
 use crate::ferrocene::test_variants::TestVariantName;
-||||||| 8a2fbe3ea88
-=======
 use crate::utils::helpers;
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 use crate::{Build, CodegenBackendKind, TestTarget};
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]

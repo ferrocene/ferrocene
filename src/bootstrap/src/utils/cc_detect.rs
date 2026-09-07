@@ -25,14 +25,8 @@ use std::collections::HashSet;
 use std::iter;
 use std::path::{Path, PathBuf};
 
-<<<<<<< ferrocene/release/1.99
-use crate::core::config::{CompressDebuginfo, TargetSelection};
-use crate::utils::cache::Interned;
-||||||| 8a2fbe3ea88
-use crate::core::config::{CompressDebuginfo, TargetSelection};
-=======
 use crate::core::config::{CompressDebuginfo, Subcommand, TargetSelection};
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::{Build, CLang, GitRepo};
 

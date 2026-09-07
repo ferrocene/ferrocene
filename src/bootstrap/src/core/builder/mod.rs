@@ -620,54 +620,12 @@ impl<'a> ShouldRun<'a> {
         self
     }
 
-<<<<<<< ferrocene/release/1.99
     // Ferrocene addition: Marker for upstream `CommandLineStep`s which are disabled in Ferrocene
     pub fn ferrocene_disabled(mut self) -> ShouldRun<'a> {
         self.paths.insert(PathSet::Set(BTreeSet::new()));
         self
     }
 
-    /// Given a set of requested paths, return the subset which match the Step for this `ShouldRun`,
-    /// removing the matches from `paths`.
-    ///
-    /// NOTE: this returns multiple PathSets to allow for the possibility of multiple units of work
-    /// within the same step. For example, `test::Crate` allows testing multiple crates in the same
-    /// cargo invocation, which are put into separate sets because they aren't aliases.
-    ///
-    /// The reason we return PathSet instead of PathBuf is to allow for aliases that mean the same thing
-    /// (for now, just `all_krates` and `paths`, but we may want to add an `aliases` function in the future?)
-    fn pathsets_for_paths_flagging_matches(&self, paths: &mut [CLIStepPath]) -> Vec<PathSet> {
-        let mut sets = vec![];
-        for pathset in &self.paths {
-            if pathset.match_and_flag_selectors(paths) {
-                sets.push(pathset.clone());
-            }
-        }
-        sets
-    }
-
-||||||| 8a2fbe3ea88
-    /// Given a set of requested paths, return the subset which match the Step for this `ShouldRun`,
-    /// removing the matches from `paths`.
-    ///
-    /// NOTE: this returns multiple PathSets to allow for the possibility of multiple units of work
-    /// within the same step. For example, `test::Crate` allows testing multiple crates in the same
-    /// cargo invocation, which are put into separate sets because they aren't aliases.
-    ///
-    /// The reason we return PathSet instead of PathBuf is to allow for aliases that mean the same thing
-    /// (for now, just `all_krates` and `paths`, but we may want to add an `aliases` function in the future?)
-    fn pathsets_for_paths_flagging_matches(&self, paths: &mut [CLIStepPath]) -> Vec<PathSet> {
-        let mut sets = vec![];
-        for pathset in &self.paths {
-            if pathset.match_and_flag_selectors(paths) {
-                sets.push(pathset.clone());
-            }
-        }
-        sets
-    }
-
-=======
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     /// When the corresponding step is run "by default" (without explicit command-line paths),
     /// act as though the user had explicitly specified these paths.
     fn default_pathsets(&self) -> Vec<PathSet> {

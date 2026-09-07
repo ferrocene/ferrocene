@@ -16,15 +16,9 @@ use crate::core::builder::{
     self, Alias, Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
     crate_description,
 };
-<<<<<<< ferrocene/release/1.99
-use crate::core::config::TargetSelection;
+use crate::core::config::{Subcommand, TargetSelection};
 // Ferrocene addition
 use crate::ferrocene::tool::SymbolReport;
-||||||| 8a2fbe3ea88
-use crate::core::config::TargetSelection;
-=======
-use crate::core::config::{Subcommand, TargetSelection};
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::helpers::t;
 use crate::{CodegenBackendKind, Compiler, Mode};

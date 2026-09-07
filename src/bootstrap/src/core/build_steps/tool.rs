@@ -16,15 +16,14 @@ use std::{env, fs};
 use crate::core::build_steps::compile::is_lto_stage;
 use crate::core::build_steps::toolstate::ToolState;
 use crate::core::build_steps::{compile, llvm};
-use crate::core::builder;
 use crate::core::builder::{
-    Builder, Cargo as CargoCommand, CommandLineStep, RunConfig, ShouldRun, Step, StepMetadata,
-    apply_pgo, cargo_profile_var,
+    self, Builder, Cargo as CargoCommand, CommandLineStep, Kind, RunConfig, ShouldRun, Step,
+    StepMetadata, apply_pgo, cargo_profile_var,
 };
 use crate::core::config::{Allocator, DebuginfoLevel, RustcLto, TargetSelection};
 use crate::utils::exec::{BootstrapCommand, command};
-use crate::utils::helpers::{add_dylib_path, exe, t};
-use crate::{Compiler, FileType, Kind, Mode};
+use crate::utils::helpers::{self, add_dylib_path, exe, t};
+use crate::{Compiler, FileType, Mode};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum SourceType {
@@ -162,7 +161,7 @@ impl Step for ToolBuild {
         );
 
         if !build_success {
-            crate::exit!(1);
+            helpers::exit_process(1);
         } else {
             // HACK(#82501): on Windows, the tools directory gets added to PATH when running tests, and
             // compiletest confuses HTML tidy with the in-tree tidy. Name the in-tree tidy something

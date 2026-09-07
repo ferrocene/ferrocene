@@ -159,11 +159,11 @@ impl_disjoint_bitor! {
 pub const trait FunnelShift: Copy + 'static {
     /// See [`super::unchecked_funnel_shl`]; we just need the trait indirection to handle
     /// different types since calling intrinsics with generics doesn't work.
-    unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self;
+    unsafe fn unchecked_funnel_shl(self, right: Self, shift: u32) -> Self;
 
     /// See [`super::unchecked_funnel_shr`]; we just need the trait indirection to handle
     /// different types since calling intrinsics with generics doesn't work.
-    unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self;
+    unsafe fn unchecked_funnel_shr(self, right: Self, shift: u32) -> Self;
 }
 
 macro_rules! impl_funnel_shifts {
@@ -172,8 +172,14 @@ macro_rules! impl_funnel_shifts {
         const impl FunnelShift for $type {
             #[cfg_attr(miri, track_caller)]
             #[inline]
+<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
+||||||| 8a2fbe3ea88
+            unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
+=======
+            unsafe fn unchecked_funnel_shl(self, right: Self, shift: u32) -> Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };
@@ -190,7 +196,7 @@ macro_rules! impl_funnel_shifts {
                     unsafe {
                         super::disjoint_bitor(
                             super::unchecked_shl(self, shift),
-                            super::unchecked_shr(rhs, $type::BITS - shift),
+                            super::unchecked_shr(right, $type::BITS - shift),
                         )
                     }
                 }
@@ -198,13 +204,19 @@ macro_rules! impl_funnel_shifts {
 
             #[cfg_attr(miri, track_caller)]
             #[inline]
+<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
+||||||| 8a2fbe3ea88
+            unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
+=======
+            unsafe fn unchecked_funnel_shr(self, right: Self, shift: u32) -> Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };
                 if shift == 0 {
-                    rhs
+                    right
                 } else {
                     // SAFETY:
                     //  - `shift < T::BITS`, which satisfies `unchecked_shr`
@@ -216,7 +228,7 @@ macro_rules! impl_funnel_shifts {
                     unsafe {
                         super::disjoint_bitor(
                             super::unchecked_shl(self, $type::BITS - shift),
-                            super::unchecked_shr(rhs, shift),
+                            super::unchecked_shr(right, shift),
                         )
                     }
                 }

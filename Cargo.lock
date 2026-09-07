@@ -3690,11 +3690,11 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_hir",
  "rustc_macros",
  "rustc_session",
  "rustc_span",
@@ -3736,10 +3736,10 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
- "rustc_hir",
  "rustc_lexer",
  "rustc_lint_defs",
  "rustc_macros",
@@ -3792,12 +3792,12 @@ version = "0.0.0"
 dependencies = [
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
  "rustc_feature",
- "rustc_hir",
  "rustc_index",
  "rustc_lexer",
  "rustc_lint_defs",
@@ -3828,6 +3828,7 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_codegen_ssa",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fs_util",
@@ -3864,6 +3865,7 @@ dependencies = [
  "rustc_arena",
  "rustc_ast",
  "rustc_attr_parsing",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fs_util",
@@ -3912,6 +3914,19 @@ dependencies = [
  "rustc_target",
  "rustc_trait_selection",
  "tracing",
+]
+
+[[package]]
+name = "rustc_crate_store"
+version = "0.0.0"
+dependencies = [
+ "rustc_abi",
+ "rustc_attr_ir",
+ "rustc_data_structures",
+ "rustc_hir_id",
+ "rustc_macros",
+ "rustc_serialize",
+ "rustc_span",
 ]
 
 [[package]]
@@ -4048,6 +4063,7 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_passes",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4101,7 +4117,6 @@ name = "rustc_hir"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "odht",
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
@@ -4109,7 +4124,6 @@ dependencies = [
  "rustc_data_structures",
  "rustc_error_messages",
  "rustc_errors",
- "rustc_hashes",
  "rustc_hir_id",
  "rustc_index",
  "rustc_lint_defs",
@@ -4149,11 +4163,14 @@ dependencies = [
 name = "rustc_hir_id"
 version = "0.0.0"
 dependencies = [
+ "odht",
  "rustc_data_structures",
+ "rustc_hashes",
  "rustc_index",
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
+ "tracing",
 ]
 
 [[package]]
@@ -4263,6 +4280,7 @@ dependencies = [
  "rustc_codegen_llvm",
  "rustc_codegen_ssa",
  "rustc_const_eval",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
@@ -4391,6 +4409,7 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_attr_parsing",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
@@ -4424,6 +4443,7 @@ dependencies = [
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_ir",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_error_messages",
  "rustc_errors",
@@ -4519,12 +4539,14 @@ name = "rustc_monomorphize"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
+ "rustc_ast",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
+ "rustc_serialize",
  "rustc_session",
  "rustc_span",
  "rustc_symbol_mangling",
@@ -4587,9 +4609,9 @@ dependencies = [
  "rustc_ast",
  "rustc_ast_lowering",
  "rustc_attr_parsing",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
- "rustc_expand",
  "rustc_feature",
  "rustc_hir",
  "rustc_index",
@@ -4652,10 +4674,10 @@ name = "rustc_public"
 version = "0.1.0-preview"
 dependencies = [
  "rustc_abi",
+ "rustc_crate_store",
  "rustc_hir",
  "rustc_middle",
  "rustc_public_bridge",
- "rustc_session",
  "rustc_span",
  "rustc_target",
  "scoped-tls",
@@ -4669,11 +4691,11 @@ name = "rustc_public_bridge"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_hir",
  "rustc_hir_pretty",
  "rustc_middle",
- "rustc_session",
  "rustc_span",
  "rustc_target",
 ]
@@ -4757,12 +4779,12 @@ dependencies = [
  "libc",
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
  "rustc_fs_util",
  "rustc_hashes",
- "rustc_hir",
  "rustc_lint_defs",
  "rustc_macros",
  "rustc_serialize",
@@ -4864,6 +4886,7 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",

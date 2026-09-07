@@ -7,14 +7,8 @@ use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::flags::{Color, FerroceneCoverageFor};
 use crate::core::config::toml::pgo::PgoConfig;
-<<<<<<< ferrocene/main
-use crate::core::config::{CompressDebuginfo, SplitDebuginfo};
-use crate::ferrocene::code_coverage::Paths;
-||||||| 8a2fbe3ea88
-use crate::core::config::{CompressDebuginfo, SplitDebuginfo};
-=======
 use crate::core::config::{CompressDebuginfo, Config, DryRun, SplitDebuginfo, TargetSelection};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::ferrocene::code_coverage::Paths;
 use crate::utils::build_stamp;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, linker_flags, t};

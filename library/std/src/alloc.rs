@@ -363,6 +363,22 @@ pub fn take_alloc_error_hook() -> fn(Layout) {
     if hook.is_null() { default_alloc_error_hook } else { unsafe { mem::transmute(hook) } }
 }
 
+// Ferrocene addition:
+// The calls here cannot reach the macro from rt.rs, so it's duplicated here
+// FIXME: remove after solving that problem
+macro_rules! rtprintpanic {
+    ($($t:tt)*) => {
+        #[cfg(not(panic = "immediate-abort"))]
+        if let Some(mut out) = crate::sys::stdio::panic_output() {
+            let _ = crate::io::Write::write_fmt(&mut out, format_args!($($t)*));
+        }
+        #[cfg(panic = "immediate-abort")]
+        {
+            let _ = format_args!($($t)*);
+        }
+    }
+}
+
 #[optimize(size)]
 fn default_alloc_error_hook(layout: Layout) {
     if cfg!(panic = "immediate-abort") {

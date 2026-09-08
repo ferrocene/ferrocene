@@ -1,6 +1,6 @@
 use rustc_hir::attrs::CoverageAttrKind;
 use rustc_hir::def::DefKind;
-use rustc_hir::{Constness, find_attr};
+use rustc_hir::{self as hir, find_attr};
 use rustc_index::bit_set::DenseBitSet;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::coverage::{BasicCoverageBlock, CoverageIdsInfo, CoverageKind, MappingKind};
@@ -29,8 +29,20 @@ fn is_eligible_for_coverage(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
     // expressions from coverage spans in enclosing MIR's, like we do for closures. (That might
     // be tricky if const expressions have no corresponding statements in the enclosing MIR.
     // Closures are carved out by their initial `Assign` statement.)
-    if !tcx.def_kind(def_id).is_fn_like() {
+    let def_kind = tcx.def_kind(def_id);
+    if !def_kind.is_fn_like() {
         trace!("InstrumentCoverage skipped for {def_id:?} (not an fn-like)");
+        return false;
+    }
+
+    // Comptime functions can't exist at runtime, so instrumenting them is useless.
+    // This also avoids an ICE when getting the symbol name for an unused-function record
+    // (due to <https://github.com/rust-lang/rust/pull/159777>).
+    // We check `def_kind` first to avoid any unexpected panics from merely asking for constness.
+    if matches!(def_kind, DefKind::Fn | DefKind::AssocFn)
+        && matches!(tcx.constness(def_id), hir::Constness::Const { always: true })
+    {
+        trace!("InstrumentCoverage skipped for {def_id:?} (comptime)");
         return false;
     }
 
@@ -42,21 +54,6 @@ fn is_eligible_for_coverage(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
     if !tcx.coverage_attr_on(def_id) {
         trace!("InstrumentCoverage skipped for {def_id:?} (`#[coverage(off)]`)");
         return false;
-    }
-
-    // Ferrocene addition: Do not generate coverage records for "always-const" intrinsics
-    //
-    // An always-const intrinsic is one which should always resolve to a definite value at
-    // compile time, and so should never be called at runtime. This is enforced by a check in
-    // `compute_symbol_name` in `compiler/rustc_symbol_mangling/src/lib.rs`.
-    //
-    // Because these intrinsics are never used at runtime, `prepare_covfun_records_for_unused_functions`
-    // will detect them as unused functions and try to generate dummy coverage records, which will
-    // trip the above check. To avoid this, skip generating coverage for these intrinsics.
-    if let DefKind::Fn | DefKind::AssocFn = tcx.def_kind(def_id) {
-        if tcx.constness(def_id) == (Constness::Const { always: true }) {
-            return false;
-        }
     }
 
     true

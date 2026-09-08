@@ -31,65 +31,15 @@ use std::{env, fs, io, str};
 
 use build_helper::ci::gha;
 use termcolor::{ColorChoice, StandardStream, WriteColor};
-<<<<<<< ferrocene/main
-use utils::build_stamp::BuildStamp;
-use utils::channel::GitInfo;
-use utils::exec::ExecutionContext;
-
-use crate::core::builder;
-use crate::core::builder::Kind;
-use crate::core::config::{BootstrapOverrideLld, DryRun, LlvmLibunwind, TargetSelection, flags};
-use crate::utils::exec::{BootstrapCommand, command};
-use crate::utils::helpers::{self, dir_is_empty, exe, libdir, set_file_times, split_debuginfo};
-
-mod core;
-mod ferrocene;
-mod utils;
-
-// Ferrocene addition
-#[cfg(test)]
-mod tests;
-
-#[cfg(feature = "tracing")]
-pub use core::builder::STEP_SPAN_TARGET;
-pub use core::builder::{PathSet, StepStack};
-pub use core::config::flags::{Flags, Subcommand};
-pub use core::config::{ChangeId, Config};
-
-||||||| 8a2fbe3ea88
-use utils::build_stamp::BuildStamp;
-use utils::channel::GitInfo;
-use utils::exec::ExecutionContext;
-
-use crate::core::builder;
-use crate::core::builder::Kind;
-use crate::core::config::{BootstrapOverrideLld, DryRun, LlvmLibunwind, TargetSelection, flags};
-use crate::utils::exec::{BootstrapCommand, command};
-use crate::utils::helpers::{self, dir_is_empty, exe, libdir, set_file_times, split_debuginfo};
-
-mod core;
-mod utils;
-
-#[cfg(feature = "tracing")]
-pub use core::builder::STEP_SPAN_TARGET;
-pub use core::builder::{PathSet, StepStack};
-pub use core::config::flags::{Flags, Subcommand};
-pub use core::config::{ChangeId, Config};
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[cfg(feature = "tracing")]
 use tracing::{instrument, span};
 
 use crate::core::build_steps::format::InternalRustfmt;
 use crate::core::build_steps::vendor::VENDOR_DIR;
-<<<<<<< ferrocene/main
-use crate::ferrocene::code_coverage::generate_coverage_report;
-||||||| 8a2fbe3ea88
-=======
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::flags::{self, Subcommand};
 use crate::core::config::{BootstrapOverrideLld, Config, DryRun, LlvmLibunwind, TargetSelection};
+use crate::ferrocene::code_coverage::generate_coverage_report;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::channel::GitInfo;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
@@ -99,8 +49,8 @@ use crate::utils::helpers::{
 
 pub mod cli_main;
 mod core;
+mod ferrocene;
 mod utils;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 const LLVM_TOOLS: &[&str] = &[
     "llvm-cov",      // used to generate coverage report
@@ -867,12 +817,12 @@ impl Build {
 
                 if builder.is_serve_flag_unsupported() {
                     eprintln!("error: --serve flag is not supported for the requested path");
-                    exit!(1);
+                    helpers::exit_process(1);
                 }
 
                 if builder.is_serve_flag_called_multiple_times() {
                     eprintln!("error: --serve can only be used when building a single document");
-                    exit!(1);
+                    helpers::exit_process(1);
                 }
             }
 

@@ -3,11 +3,11 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::builder::{
-    Builder, Cargo, CommandLineStep, RunConfig, ShouldRun, Step, crate_description,
-};
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
+use crate::core::builder::{
+    Builder, Cargo, CommandLineStep, RunConfig, ShouldRun, Step, crate_description,
+};
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};

@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 use build_helper::ci::CiEnv;
 use build_helper::git::get_closest_upstream_commit;
 
-use crate::builder::Builder;
+use crate::core::builder::Builder;
 use crate::core::config::Config;
 use crate::utils::exec::{BootstrapCommand, command};
 

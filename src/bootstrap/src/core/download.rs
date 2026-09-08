@@ -567,14 +567,8 @@ pub(crate) fn maybe_download_rustfmt(config: &Config, out: &Path) -> Option<Path
     }
 
     download_component(
-<<<<<<< ferrocene/main
         None,
-        dwn_ctx,
-||||||| 8a2fbe3ea88
-        dwn_ctx,
-=======
         DownloadContext::from(config),
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         out,
         DownloadSource::Dist,
         format!("rustfmt-{version}-{build}.tar.xz", build = host.triple),
@@ -584,14 +578,8 @@ pub(crate) fn maybe_download_rustfmt(config: &Config, out: &Path) -> Option<Path
     );
 
     download_component(
-<<<<<<< ferrocene/main
         None,
-        dwn_ctx,
-||||||| 8a2fbe3ea88
-        dwn_ctx,
-=======
         DownloadContext::from(config),
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         out,
         DownloadSource::Dist,
         format!("rustc-{version}-{build}.tar.xz", build = host.triple),

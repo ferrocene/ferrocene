@@ -5,10 +5,10 @@ pub(crate) mod flip_link;
 
 use std::path::PathBuf;
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::tool::{
     RustcPrivateCompilers, SourceType, ToolArtifactKind, ToolBuild, prepare_tool_cargo,
 };
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
 use crate::{Compiler, Kind, Mode, exe};

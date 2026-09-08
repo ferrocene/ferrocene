@@ -170,16 +170,10 @@ macro_rules! impl_funnel_shifts {
     ($($type:ident),*) => {$(
         #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
         const impl FunnelShift for $type {
+            #[ferrocene::prevalidated]
             #[cfg_attr(miri, track_caller)]
             #[inline]
-<<<<<<< ferrocene/main
-            #[ferrocene::prevalidated]
-            unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
-||||||| 8a2fbe3ea88
-            unsafe fn unchecked_funnel_shl(self, rhs: Self, shift: u32) -> Self {
-=======
             unsafe fn unchecked_funnel_shl(self, right: Self, shift: u32) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };
@@ -202,16 +196,10 @@ macro_rules! impl_funnel_shifts {
                 }
             }
 
+            #[ferrocene::prevalidated]
             #[cfg_attr(miri, track_caller)]
             #[inline]
-<<<<<<< ferrocene/main
-            #[ferrocene::prevalidated]
-            unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
-||||||| 8a2fbe3ea88
-            unsafe fn unchecked_funnel_shr(self, rhs: Self, shift: u32) -> Self {
-=======
             unsafe fn unchecked_funnel_shr(self, right: Self, shift: u32) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 // This implementation is also used by Miri so we have to check the precondition.
                 // SAFETY: this is guaranteed by the caller
                 unsafe { super::assume(shift < $type::BITS) };

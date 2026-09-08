@@ -20,17 +20,12 @@ mod offload;
 mod partitioning;
 mod util;
 
-<<<<<<< ferrocene/main
 // Ferrocene addition
 pub use collector::ferrocene::collect_validated_roots;
-
-||||||| 8a2fbe3ea88
-=======
 // Exposed so `rustc_codegen_ssa::base::codegen_crate` can trigger the
 // host-metadata manifest write.
 pub use offload::manifest::write_host_metadata_offload_manifest;
 
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 fn custom_coerce_unsize_info<'tcx>(
     tcx: TyCtxtAt<'tcx>,
     source_ty: Ty<'tcx>,

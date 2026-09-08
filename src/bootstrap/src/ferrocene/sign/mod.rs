@@ -10,9 +10,8 @@ pub(crate) mod signature_files;
 
 use std::path::{Path, PathBuf};
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
-use crate::core::builder::Kind;
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;

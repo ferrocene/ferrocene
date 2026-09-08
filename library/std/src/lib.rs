@@ -742,13 +742,8 @@ mod sys;
 mod panicking;
 
 #[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
-<<<<<<< ferrocene/main
-#[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"] // FIXME
-||||||| 8a2fbe3ea88
-// FIXME
-=======
+#[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
 #[allow(clippy::len_zero)] // FIXME
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 mod backtrace_rs;
 
 #[stable(feature = "cfg_select", since = "1.95.0")]

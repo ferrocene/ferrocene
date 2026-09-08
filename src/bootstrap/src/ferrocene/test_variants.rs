@@ -33,8 +33,7 @@ use std::collections::BTreeMap;
 use build_helper::metrics::FerroceneVariantMetadata;
 
 use crate::Subcommand;
-use crate::builder::Builder;
-use crate::core::builder::Cargo;
+use crate::core::builder::{Builder, Cargo};
 use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
 

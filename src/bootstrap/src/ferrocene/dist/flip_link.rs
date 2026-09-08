@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::FileType;
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 

@@ -4,9 +4,9 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use crate::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::utils::build_stamp::BuildStamp;

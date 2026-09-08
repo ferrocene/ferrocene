@@ -17,13 +17,9 @@ use crate::core::builder::{
     crate_description,
 };
 use crate::core::config::TargetSelection;
-<<<<<<< ferrocene/main
+use crate::core::config::flags::Subcommand;
 // Ferrocene addition
 use crate::ferrocene::tool::SymbolReport;
-||||||| 8a2fbe3ea88
-=======
-use crate::core::config::flags::Subcommand;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::helpers::t;
 use crate::{CodegenBackendKind, Compiler, Mode};

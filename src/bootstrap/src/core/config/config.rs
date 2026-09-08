@@ -343,7 +343,8 @@ pub struct Config {
     pub skip_std_check_if_no_download_rustc: bool,
 
     pub exec_ctx: ExecutionContext,
-<<<<<<< ferrocene/main
+
+    pub wasm_proc_macros: bool,
 
     // Ferrocene-specific configuration
     pub uv: Option<PathBuf>,
@@ -409,11 +410,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-||||||| 8a2fbe3ea88
-=======
-
-    pub wasm_proc_macros: bool,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 impl Config {
@@ -1191,7 +1187,16 @@ impl Config {
                 );
             }
 
-<<<<<<< ferrocene/main
+            let triple = &host_target.triple;
+            let ci_llvm_bin = ci_llvm_root(&dwn_ctx, llvm_from_ci, &out).join("bin");
+            let build_target =
+                target_config.entry(host_target).or_insert_with(|| Target::from_triple(triple));
+            check_ci_llvm!(build_target.llvm_config);
+            check_ci_llvm!(build_target.llvm_filecheck);
+            // FIXME: Do not overwrite the LLVM config here
+            build_target.llvm_config = Some(ci_llvm_bin.join(exe("llvm-config", host_target)));
+        }
+
         let mut ferrocene_raw_channel = "rolling".into();
         let mut ferrocene_aws_profile = Default::default();
         let mut ferrocene_traceability_matrix_mode = Default::default();
@@ -1315,21 +1320,6 @@ impl Config {
             if let Some(s) = f.allow_dev_signing {
                 ferrocene_allow_dev_signing = s;
             }
-        }
-
-        if llvm_from_ci {
-||||||| 8a2fbe3ea88
-        if llvm_from_ci {
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
-            let triple = &host_target.triple;
-            let ci_llvm_bin = ci_llvm_root(&dwn_ctx, llvm_from_ci, &out).join("bin");
-            let build_target =
-                target_config.entry(host_target).or_insert_with(|| Target::from_triple(triple));
-            check_ci_llvm!(build_target.llvm_config);
-            check_ci_llvm!(build_target.llvm_filecheck);
-            // FIXME: Do not overwrite the LLVM config here
-            build_target.llvm_config = Some(ci_llvm_bin.join(exe("llvm-config", host_target)));
         }
 
         for (target, linker_override) in default_linux_linker_overrides() {

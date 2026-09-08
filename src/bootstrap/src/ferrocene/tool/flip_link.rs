@@ -3,9 +3,9 @@
 
 use std::path::PathBuf;
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::{Kind, Mode, exe};
 

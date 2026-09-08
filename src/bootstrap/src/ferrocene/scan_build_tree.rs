@@ -4,7 +4,7 @@
 use std::fs::DirEntry;
 use std::path::Path;
 
-use crate::builder::Builder;
+use crate::core::builder::Builder;
 
 // Scan the build directory for a given stage, and iterate over all the files within.
 //

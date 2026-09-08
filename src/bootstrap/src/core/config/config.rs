@@ -344,7 +344,8 @@ pub struct Config {
     pub skip_std_check_if_no_download_rustc: bool,
 
     pub exec_ctx: ExecutionContext,
-<<<<<<< ferrocene/release/1.99
+
+    pub wasm_proc_macros: bool,
 
     // Ferrocene-specific configuration
     pub uv: Option<PathBuf>,
@@ -410,11 +411,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-||||||| 8a2fbe3ea88
-=======
-
-    pub wasm_proc_macros: bool,
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 }
 
 impl Config {
@@ -1158,41 +1154,6 @@ impl Config {
         let is_host_system_llvm =
             target_config.get(&host_target).and_then(|c| c.llvm_config.as_ref()).is_some();
 
-        if llvm_from_ci {
-            let warn = |option: &str| {
-                println!(
-                    "WARNING: `{option}` will only be used on `compiler/rustc_llvm` build, not for the LLVM build."
-                );
-                println!(
-                    "HELP: To use `{option}` for LLVM builds, set `download-ci-llvm` option to false."
-                );
-            };
-
-            if llvm_static_libstdcpp.is_some() {
-                warn("static-libstdcpp");
-            }
-
-            if llvm_link_shared.is_some() {
-                warn("link-shared");
-            }
-
-            // FIXME(#129153): instead of all the ad-hoc `download-ci-llvm` checks that follow,
-            // use the `builder-config` present in tarballs since #128822 to compare the local
-            // config to the ones used to build the LLVM artifacts on CI, and only notify users
-            // if they've chosen a different value.
-
-            if llvm_libzstd.is_some() {
-                println!(
-                    "WARNING: when using `download-ci-llvm`, the local `llvm.libzstd` option, \
-                    like almost all `llvm.*` options, will be ignored and set by the LLVM CI \
-                    artifacts builder config."
-                );
-                println!(
-                    "HELP: To use `llvm.libzstd` for LLVM/LLD builds, set `download-ci-llvm` option to false."
-                );
-            }
-
-<<<<<<< ferrocene/release/1.99
         let mut ferrocene_raw_channel = "rolling".into();
         let mut ferrocene_aws_profile = Default::default();
         let mut ferrocene_traceability_matrix_mode = Default::default();
@@ -1319,10 +1280,39 @@ impl Config {
         }
 
         if llvm_from_ci {
-||||||| 8a2fbe3ea88
-        if llvm_from_ci {
-=======
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+            let warn = |option: &str| {
+                println!(
+                    "WARNING: `{option}` will only be used on `compiler/rustc_llvm` build, not for the LLVM build."
+                );
+                println!(
+                    "HELP: To use `{option}` for LLVM builds, set `download-ci-llvm` option to false."
+                );
+            };
+
+            if llvm_static_libstdcpp.is_some() {
+                warn("static-libstdcpp");
+            }
+
+            if llvm_link_shared.is_some() {
+                warn("link-shared");
+            }
+
+            // FIXME(#129153): instead of all the ad-hoc `download-ci-llvm` checks that follow,
+            // use the `builder-config` present in tarballs since #128822 to compare the local
+            // config to the ones used to build the LLVM artifacts on CI, and only notify users
+            // if they've chosen a different value.
+
+            if llvm_libzstd.is_some() {
+                println!(
+                    "WARNING: when using `download-ci-llvm`, the local `llvm.libzstd` option, \
+                    like almost all `llvm.*` options, will be ignored and set by the LLVM CI \
+                    artifacts builder config."
+                );
+                println!(
+                    "HELP: To use `llvm.libzstd` for LLVM/LLD builds, set `download-ci-llvm` option to false."
+                );
+            }
+
             let triple = &host_target.triple;
             let ci_llvm_bin = ci_llvm_root(&dwn_ctx, llvm_from_ci, &out).join("bin");
             let build_target =

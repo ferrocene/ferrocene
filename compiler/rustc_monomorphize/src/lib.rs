@@ -7,7 +7,7 @@
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
-use rustc_middle::ty::{self, Ty};
+use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, traits};
 use rustc_span::ErrorGuaranteed;
@@ -20,17 +20,12 @@ mod offload;
 mod partitioning;
 mod util;
 
-<<<<<<< ferrocene/release/1.99
 // Ferrocene addition
 pub use collector::ferrocene::collect_validated_roots;
-
-||||||| 8a2fbe3ea88
-=======
 // Exposed so `rustc_codegen_ssa::base::codegen_crate` can trigger the
 // host-metadata manifest write.
 pub use offload::manifest::write_host_metadata_offload_manifest;
 
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 fn custom_coerce_unsize_info<'tcx>(
     tcx: TyCtxtAt<'tcx>,
     source_ty: Ty<'tcx>,
@@ -48,7 +43,7 @@ fn custom_coerce_unsize_info<'tcx>(
         Ok(traits::ImplSource::UserDefined(traits::ImplSourceUserDefinedData {
             impl_def_id,
             ..
-        })) => Ok(tcx.coerce_unsized_info(*impl_def_id)?.custom_kind.unwrap()),
+        })) => Ok(TyCtxt::coerce_unsized_info(*tcx, *impl_def_id)?.custom_kind.unwrap()),
         impl_source => {
             bug!(
                 "invalid `CoerceUnsized` from {source_ty} to {target_ty}: impl_source: {:?}",

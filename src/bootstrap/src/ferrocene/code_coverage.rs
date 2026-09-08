@@ -12,7 +12,8 @@ use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
-use crate::{BootstrapCommand, Compiler, Mode, exit};
+use crate::utils::helpers;
+use crate::{BootstrapCommand, Compiler, Mode};
 
 pub(crate) fn instrument_coverage(
     builder: &Builder<'_>,
@@ -23,7 +24,7 @@ pub(crate) fn instrument_coverage(
         eprintln!();
         eprintln!("Error: the profiler needs to be enabled to measure coverage.");
         eprintln!("Please set `build.profiler` to `true` in your bootstrap configuration.");
-        exit!(1);
+        helpers::exit_process(1);
     }
 
     // This guarantees that the coverage information is not stripped away from the binary
@@ -78,7 +79,7 @@ pub(crate) fn measure_coverage(
                 eprintln!("error: cannot measure coverage in steps with different configuration!");
                 eprintln!("step 1 configuration: {state:?}");
                 eprintln!("step 2 configuration: {existing:?}");
-                exit!(1);
+                helpers::exit_process(1);
             }
         }
     }
@@ -148,7 +149,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     }
     let Some(state) = builder.ferrocene_coverage.borrow_mut().take() else {
         eprintln!("error: --coverage was passed but no steps measured coverage data.");
-        exit!(1);
+        helpers::exit_process(1);
     };
 
     let paths = Paths::find(builder, state.target, state.coverage_for);

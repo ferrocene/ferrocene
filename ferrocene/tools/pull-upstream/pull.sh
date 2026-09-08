@@ -153,7 +153,7 @@ fi
 # Set up the workdir
 # Note that a fresh worktree will not have any of its submodules initialized.
 # See https://stackoverflow.com/a/687052 for why we use `trap` here
-WORKDIR_ROOT=$(mktemp -d -t upstream-pull-workdir)
+WORKDIR_ROOT=$(mktemp -d)
 git worktree add -b "${TEMP_BRANCH}" "${WORKDIR_ROOT}" "${upstream_commit}"
 trap "cd \"${SCRIPTDIR_ROOT}\" && git worktree remove --force \"${WORKDIR_ROOT}\" && git branch -D \"${TEMP_BRANCH}\"" EXIT
 

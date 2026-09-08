@@ -491,6 +491,18 @@ local branch to GitHub and open a PR for it.
         return f"The automation failed to pull the latest changes from {self.repo_link} again."
 
 
+def update_submodules():
+    run(["git", "submodule", "update", "--recursive"])
+
+
+def is_git_worktree_dirty():
+    # The update-index command ensures diff-index doesn't spuriously fail.
+    # https://stackoverflow.com/questions/3878624#comment108071431_3879077
+    run(["git", "update-index", "--refresh"], check=False)
+    status = run(["git", "diff-index", "--quiet", "HEAD"], check=False).returncode
+    return status != 0
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -509,6 +521,17 @@ if __name__ == "__main__":
 
     config_file = Path(__file__).parent / "subtrees.yml"
     repo_root = retrieve_git_repo_root()
+
+    # Safety check to avoid messing with uncommitted changes.
+    # Submodules are updated before that, as submodules needing an update should
+    # not block merging changes from upstream.
+    update_submodules()
+    if is_git_worktree_dirty():
+        err("pull-subtrees: the current branch contains uncommitted changes!")
+        err(
+            "pull-subtrees: make sure all changes are committed before running this script."
+        )
+        exit(1)
 
     subtrees = parse_configuration(config_file)
     if args.automation_for_branch is not None:

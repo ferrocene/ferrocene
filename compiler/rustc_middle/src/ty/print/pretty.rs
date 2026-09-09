@@ -1548,7 +1548,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
         let mut input_iter = inputs.iter().copied();
         if let Some(index) = splatted_arg_index {
             self.comma_sep((&mut input_iter).take(usize::from(index)))?;
-            write!(self, ", #[splat]")?;
+            write!(self, ", #[rustc_splat]")?;
             self.comma_sep(input_iter)?;
         } else {
             self.comma_sep(input_iter)?;
@@ -3269,11 +3269,6 @@ define_print! {
             }
             ty::PredicateKind::Ambiguous => write!(p, "ambiguous")?,
             ty::PredicateKind::NormalizesTo(data) => data.print(p)?,
-            ty::PredicateKind::AliasRelate(t1, t2, dir) => {
-                t1.print(p)?;
-                write!(p, " {dir} ")?;
-                t2.print(p)?;
-            }
         }
     }
 

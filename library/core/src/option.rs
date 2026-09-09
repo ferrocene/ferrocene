@@ -1319,7 +1319,7 @@ impl<T> Option<T> {
     ///
     /// [default value]: Default::default
     #[inline]
-    #[stable(feature = "result_option_map_or_default", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "result_option_map_or_default", since = "1.98.0")]
     #[rustc_const_unstable(feature = "const_option_ops", issue = "143956")]
     #[ferrocene::prevalidated]
     pub const fn map_or_default<U, F>(self, f: F) -> U

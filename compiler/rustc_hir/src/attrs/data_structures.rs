@@ -1271,8 +1271,9 @@ pub enum AttributeKind {
 
     /// Represents `#[patchable_function_entry]`
     PatchableFunctionEntry {
-        prefix: u8,
-        entry: u8,
+        prefix: Option<u8>,
+        entry: Option<u8>,
+        section: Option<Symbol>,
     },
 
     /// Represents `#[path]`
@@ -1664,7 +1665,7 @@ pub enum AttributeKind {
         reason: Option<Symbol>,
     },
 
-    /// Represents `#[splat]`
+    /// Represents `#[rustc_splat]`
     Splat(Span),
 
     /// Represents `#[stable]`, `#[unstable]` and `#[rustc_allowed_through_unstable_modules]`.
@@ -1696,7 +1697,8 @@ pub enum AttributeKind {
         limit: Limit,
     },
 
-    /// Represents `#[unroll]`
+    /// Represents `#[rustc_unroll]`
+    // FIXME(#159429): temporarily renamed from `#[unroll]` to mitigate nameres ambiguity
     Unroll(UnrollAttr),
 
     /// Represents `#[unstable_feature_bound]`.

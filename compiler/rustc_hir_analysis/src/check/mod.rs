@@ -450,7 +450,7 @@ fn fn_sig_suggestion<'tcx>(
         .iter()
         .enumerate()
         .map(|(i, ty)| {
-            let splat = if splatted_arg_index == Some(i) { "#[splat] " } else { "" };
+            let splat = if splatted_arg_index == Some(i) { "#[rustc_splat] " } else { "" };
             let arg_ty = match ty.kind() {
                 ty::Param(_) if assoc.is_method() && i == 0 => "self".to_string(),
                 ty::Ref(reg, ref_ty, mutability) if i == 0 => {
@@ -479,10 +479,9 @@ fn fn_sig_suggestion<'tcx>(
                     }
                 }
             };
-            Some(format!("{splat}{arg_ty}"))
+            format!("{splat}{arg_ty}")
         })
-        .chain(std::iter::once(if sig.c_variadic() { Some("...".to_string()) } else { None }))
-        .flatten()
+        .chain(if sig.c_variadic() { Some("...".to_string()) } else { None })
         .collect::<Vec<String>>()
         .join(", ");
     let mut output = sig.output();

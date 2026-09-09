@@ -1,10 +1,14 @@
-//! Test failing use of `#[splat]` on tuple trait arguments of generic functions.
+//! Test failing use of `#[rustc_splat]` on tuple trait arguments of generic functions.
 
 #![allow(incomplete_features)]
 #![feature(splat)]
 #![feature(tuple_trait)]
 
-fn splat_generic_tuple<T: std::marker::Tuple>(#[splat] _t: T) {}
+use std::marker::Tuple;
+
+fn splat_generic_tuple<T: Tuple>(#[rustc_splat] _t: T) {}
+
+fn f<Args: Tuple>(#[rustc_splat] args: Args) {}
 
 fn main() {
     // FIXME(splat): should splatted functions be callable with tupled and un-tupled arguments?
@@ -24,4 +28,6 @@ fn main() {
 
     splat_generic_tuple::<(u32, i8)>((1, 2)); //~ ERROR this splatted function takes 2 arguments, but 1 was provided
     splat_generic_tuple::<(u32, i8)>((1u32, 2i8)); //~ ERROR this splatted function takes 2 arguments, but 1 was provided
+
+    const F1: fn((u8, u32)) = f::<(u8, u32)>; //~ ERROR mismatched types
 }

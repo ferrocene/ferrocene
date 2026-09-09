@@ -1,4 +1,3 @@
-use crate::instrumentation_profile::types::*;
 use crate::instrumentation_profile::*;
 use crate::util::parse_string_ref;
 use core::hash::Hash;
@@ -37,7 +36,7 @@ pub enum RawProfileError {
     EmptyRawProfile,
 }
 
-const INSTR_PROF_NAME_SEP: char = '\u{1}';
+pub(crate) const INSTR_PROF_NAME_SEP: char = '\u{1}';
 
 pub type RawInstrProf32 = RawInstrProf<u32>;
 pub type RawInstrProf64 = RawInstrProf<u64>;

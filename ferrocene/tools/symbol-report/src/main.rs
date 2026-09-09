@@ -19,7 +19,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{AttrId, Attribute, HirId};
 use rustc_interface::interface::Compiler;
-use rustc_middle::ty::TyCtxt;
+use rustc_middle::ty::{Instance, TyCtxt};
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
 };
@@ -166,10 +166,30 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
             start_line = start_line.min(span_start_line);
         }
 
-        vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
+        let linkage_name = get_linkage_name(tcx, def);
+
+        vis.report.symbols.push(Function {
+            qualified_name,
+            filename,
+            start_line,
+            end_line,
+            linkage_name,
+        });
     }
 
     vis
+}
+
+/// Returns the mangled linkage (symbol) name for a compiled monomorphic item.
+/// For generic items returns an empty string.
+/// Later when a generic item is used by a dependent binary the compiler will
+/// produce a new monomorphized item with a new name.
+fn get_linkage_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
+    if tcx.generics_of(def.to_def_id()).count() != 0 {
+        return String::new();
+    }
+    let instance = Instance::mono(tcx, def.to_def_id());
+    tcx.symbol_name(instance).name.to_string()
 }
 
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {

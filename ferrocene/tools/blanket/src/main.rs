@@ -236,8 +236,11 @@ fn get_coverage(
     span: Span,
     ferrocene: &std::path::Path,
     source_name: String,
+    linkage_name: &str,
     annotations: Option<&mut Vec<Annotation>>,
 ) -> Result<FunctionCoverage> {
+    let normalized_name = llvm_profparser::strip_crate_hashes(linkage_name);
+
     let Span { filename, start_line, end_line } = span;
     let absolute_path = if filename.is_relative() {
         ferrocene
@@ -279,7 +282,7 @@ fn get_coverage(
     for line in source_lines {
         // one more thing to do: within a function, some lines will always be uncovered (e.g. }
         // closing braces). so we do have to trust the coverage tool to report those accurately.
-        let line_regions = column_ranges_for_line(func_coverage, line);
+        let line_regions = column_ranges_for_line(func_coverage, &normalized_name, line);
         let status = if line_regions.is_empty() {
             LineCoverageStatus::Ignored
         } else if line_regions.iter().all(|range| range.tested) {
@@ -305,9 +308,17 @@ fn get_coverage(
     ))
 }
 
-fn column_ranges_for_line(func_coverage: &CoverageResult, line: usize) -> Vec<ColumnRange> {
-    let mut ranges: Vec<ColumnRange> = func_coverage
-        .hits
+fn column_ranges_for_line(
+    func_coverage: &CoverageResult,
+    normalized_name: &str,
+    line: usize,
+) -> Vec<ColumnRange> {
+    let hits = match func_coverage.hits_by_function.get(normalized_name) {
+        Some(scoped) if !scoped.is_empty() => scoped,
+        _ => &func_coverage.hits,
+    };
+
+    let mut ranges: Vec<ColumnRange> = hits
         .iter()
         .filter(|(loc, _)| loc.line_start <= line && loc.line_end >= line)
         .map(|(loc, &count)| {

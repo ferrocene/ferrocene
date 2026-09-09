@@ -11,6 +11,35 @@ pub struct CoverageReport {
 #[derive(Clone, Debug, Default)]
 pub struct CoverageResult {
     pub hits: BTreeMap<SourceLocation, usize>,
+    /// key is a compiled function name with crate-disambiguator hashes
+    /// stripped out
+    pub hits_by_function: BTreeMap<String, BTreeMap<SourceLocation, usize>>,
+}
+
+/// Strips crate-disambiguator hashes out of a v0-mangled name.
+/// Turns
+/// `_RNvMs6_NtCs7JbMdGCVdSh_4core3numm8abs_diff`
+/// into
+/// `_RNvMs6_NtC4core3numm8abs_diff`.
+///
+/// These hashes are different for each compilation run, and when running
+/// coverage tests Cargo reuses some previously built object files from prior
+/// compilations.
+pub fn strip_crate_hashes(name: &str) -> String {
+    let mut result = String::with_capacity(name.len());
+    let mut chars = name.chars().peekable();
+    while let Some(c) = chars.next() {
+        result.push(c);
+        if c == 'C' && chars.peek() == Some(&'s') {
+            chars.next(); // consume the 's'
+            for c2 in chars.by_ref() {
+                if c2 == '_' {
+                    break;
+                }
+            }
+        }
+    }
+    result
 }
 
 impl CoverageReport {
@@ -35,8 +64,14 @@ impl CoverageResult {
         self.hits.values().max().copied().unwrap_or_default()
     }
 
-    pub fn insert(&mut self, loc: SourceLocation, count: usize) {
+    pub fn insert(&mut self, function_linkage_name: &str, loc: SourceLocation, count: usize) {
         self.hits
+            .entry(loc.clone())
+            .and_modify(|x| *x = x.saturating_add(count))
+            .or_insert(count);
+        self.hits_by_function
+            .entry(strip_crate_hashes(function_linkage_name))
+            .or_default()
             .entry(loc)
             .and_modify(|x| *x = x.saturating_add(count))
             .or_insert(count);
@@ -99,6 +134,19 @@ impl FromStr for PathRemapping {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn strip_crate_hashes_normalizes_names_from_separate_compilations() {
+        // Two real mangled names for `core::num::<impl u32>::abs_diff`,
+        // taken from two separate compilations of `core`
+        let name1 = "_RNvMs6_NtCslH8vsGE0CQU_4core3numm8abs_diff";
+        let name2 = "_RNvMs6_NtCs7JbMdGCVdSh_4core3numm8abs_diff";
+
+        assert_eq!(
+            strip_crate_hashes(name1),
+            strip_crate_hashes(name2),
+        );
+    }
 
     #[test]
     fn report_remapping() {

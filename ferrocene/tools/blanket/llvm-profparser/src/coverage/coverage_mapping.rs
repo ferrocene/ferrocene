@@ -99,11 +99,21 @@ pub fn read_object_file(object: &Path, version: u64) -> Result<CoverageMappingIn
 
     debug!("Parsed covmap section: {:?}", cov_map);
 
+    let prof_names = object_file
+        .section_by_name("__llvm_prf_names")
+        .or(object_file.section_by_name(".lprfn"))
+        .map(|x| parse_profile_names(&x))
+        .transpose()?
+        .unwrap_or_default();
+
+    debug!("Parsed prf_names section: {} names", prof_names.len());
+
     Ok(CoverageMappingInfo {
         cov_map,
         cov_fun,
         prof_counts,
         prof_data,
+        prof_names,
     })
 }
 
@@ -158,6 +168,9 @@ impl<'a> CoverageMapping<'a> {
                     continue;
                 }
 
+                let function_name =
+                    info.prof_names.get(&func.header.name_hash).map(String::as_str).unwrap_or("");
+
                 let mut region_ids = base_region_ids.clone();
 
                 for region in func.regions.iter().filter(|x| !x.count.is_expression()) {
@@ -166,7 +179,7 @@ impl<'a> CoverageMapping<'a> {
                         .files
                         .entry(paths[region.file_id].clone())
                         .or_default();
-                    result.insert(region.loc.clone(), count as usize);
+                    result.insert(function_name, region.loc.clone(), count as usize);
                 }
 
                 let mut pending_exprs = vec![];
@@ -202,7 +215,7 @@ impl<'a> CoverageMapping<'a> {
                                     .files
                                     .entry(paths[expr_region.file_id].clone())
                                     .or_default();
-                                result.insert(expr_region.loc.clone(), count as _);
+                                result.insert(function_name, expr_region.loc.clone(), count as _);
                             }
                         }
                         _ => {
@@ -258,7 +271,7 @@ impl<'a> CoverageMapping<'a> {
                                     .files
                                     .entry(paths[expr_region.file_id].clone())
                                     .or_default();
-                                result.insert(expr_region.loc.clone(), count as _);
+                                result.insert(function_name, expr_region.loc.clone(), count as _);
                             }
                             pending_exprs[index] = None;
                             cleared_expressions += 1;
@@ -424,6 +437,30 @@ fn parse_coverage_functions<'data, R: ReadRef<'data>>(
             LlvmSection::CoverageFunctions,
         ))
     }
+}
+
+/// Parses `__llvm_prf_names`: a sequence of length-prefixed, optionally zlib-compressed chunks
+/// (see `parse_string_ref`), each containing one or more `\x01`-separated raw function names.
+/// Returns a map from each name's `compute_hash` to the name itself.
+fn parse_profile_names<'data, R: ReadRef<'data>>(
+    section: &Section<'data, '_, R>,
+) -> Result<FxHashMap<u64, String>, SectionReadError> {
+    let Ok(mut input) = section.data() else {
+        return Err(SectionReadError::EmptySection(LlvmSection::ProfileNames));
+    };
+    let mut result = FxHashMap::default();
+    while !input.is_empty() {
+        let Ok((rest, names)) = parse_string_ref::<NomError<_>>(input) else {
+            break;
+        };
+        for name in names.split(crate::instrumentation_profile::raw_profile::INSTR_PROF_NAME_SEP) {
+            if !name.is_empty() {
+                result.insert(compute_hash(name.as_bytes()), name.to_string());
+            }
+        }
+        input = rest;
+    }
+    Ok(result)
 }
 
 /// This code is ported from `RawCoverageMappingReader::readMappingRegionsSubArray`

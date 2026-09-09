@@ -14,6 +14,8 @@ pub struct CoverageMappingInfo {
     pub cov_fun: Vec<FunctionRecordV3>,
     pub prof_counts: Option<Vec<u64>>,
     pub prof_data: Option<Vec<ProfileData>>,
+    /// LLVM function hash -> function linkage name
+    pub prof_names: FxHashMap<u64, String>,
 }
 
 impl CoverageMappingInfo {

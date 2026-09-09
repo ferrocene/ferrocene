@@ -82,29 +82,24 @@ impl Env {
 // macOS by default ships BSD tar, which does not support the --sort flag we need to generate the
 // archived sha256. This tries to probe the system for a few well-known names of GNU tar, and if
 // missing recommends the user to install tar with Homebrew.
-#[cfg(target_os = "macos")]
+// We also do this on other platforms, since BusyBox tar also doesn't support `--sort=name`.
 fn find_tar_binary() -> Result<&'static str, Error> {
     use std::process::Command;
 
-    for name in ["tar", "gtar"] {
+    for name in ["tar", "gtar", "/usr/bin/tar"] {
         let Ok(output) = Command::new(name).arg("--version").output() else { continue };
         if std::str::from_utf8(&output.stdout).map(|s| s.contains("GNU tar")).unwrap_or(false) {
-            eprintln!("note: inferred macOS GNU tar -> {name}");
+            eprintln!("note: inferred GNU tar -> {name}");
             return Ok(name);
         }
     }
 
     anyhow::bail!(
         "could not find GNU tar on this system\n\n\
-         You should install the `gnu-tar` Homebrew package:\n\
+         On MacOS, you should install the `gnu-tar` Homebrew package:\n\
          \n\
          \u{20}   brew install gnu-tar\n"
     );
-}
-
-#[cfg(not(target_os = "macos"))]
-fn find_tar_binary() -> Result<&'static str, Error> {
-    Ok("tar")
 }
 
 fn maybe_env<T>(var: &str) -> Result<Option<T>, Error>

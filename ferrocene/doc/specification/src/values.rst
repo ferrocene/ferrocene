@@ -62,39 +62,6 @@ It is undefined behavior to create an :t:`allocated object` with :t:`memory
 size` ``size`` where ``size`` is greater than the architectures maximum
 :c:`isize` value.
 
-.. _fls_Dqk4eIvxHloY:
-
-Provenance
-----------
-
-.. rubric:: Legality Rules
-
-:dp:`fls_jriT46yWgIR0`
-A :t:`pointer` is a :t:`value` of a :t:`pointer type`.
-
-:dp:`fls_VWUlxTy0QF9d`
-An :t:`original pointer` is a :t:`pointer` created via allocation.
-
-:dp:`fls_kaPNJ7iIHPro`
-A :t:`derived pointer` is a :t:`pointer` obtained by :t:`borrowing`, copying a :t:`pointer`, reading a stored :t:`pointer`, performing :t:`pointer` arithmetic, or :t:`casting` a :t:`pointer`.
-
-:dp:`fls_5MkKtNL9oCsL`
-:t:`Provenance` is an optional property of :t:`[pointer]s` that restricts the memory locations the :t:`pointer` may access, the timespan during which the accesses may occur, and whether the accesses may read from or write to said memory locations.
-
-:dp:`fls_1NJhTBN1D2qv`
-An :t:`original pointer` carries :t:`provenance` over all or part of the :t:`allocated object` it was created from.
-
-:dp:`fls_wnJmQYT7iKQf`
-A :t:`derived pointer` inherits the :t:`provenance` of the :t:`pointer` it was created from, if any.
-
-:dp:`fls_ffh8mAkebORJ`
-A :t:`well-formed pointer` is a :t:`pointer` where either no byte of the :t:`pointer` carries :t:`provenance`, or every byte of the :t:`pointer` is the corresponding byte of a single :t:`pointer` with :t:`provenance`.
-
-.. rubric:: Undefined Behavior
-
-:dp:`fls_c3DaCLQEBpYQ`
-It is undefined behavior to access memory through a :t:`pointer` that does not have :t:`provenance` permitting the access.
-
 .. _fls_ixjc5jaamx84:
 
 Constants
@@ -157,6 +124,95 @@ the :t:`constant`.
 .. code-block:: rust
 
    const ZERO: u32 = 0;
+
+.. _fls_xOuhiItK1hK0:
+
+Pointers
+--------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_jriT46yWgIR0`
+A :t:`pointer` is a :t:`value` of a :t:`pointer type`.
+
+:dp:`fls_8RBNIR0E6pnI`
+A :t:`pointer` is :t:`dangling` if it is either :c:`null` or not all of the bytes at the referred memory location are part of the same allocation.
+
+:dp:`fls_jnCncQ9PpqWf`
+A :t:`thin pointer` is a :t:`value` of a :t:`thin pointer type`.
+
+:dp:`fls_qpARFqqnKGMn`
+A :t:`fat pointer` is a :t:`value` of a :t:`fat pointer type`.
+
+:dp:`fls_VWUlxTy0QF9d`
+An :t:`original pointer` is a :t:`pointer` created via allocation.
+
+:dp:`fls_kaPNJ7iIHPro`
+A :t:`derived pointer` is a :t:`pointer` obtained by :t:`borrowing`, copying a :t:`pointer`, reading a stored :t:`pointer`, performing :t:`pointer` arithmetic, or :t:`casting` a :t:`pointer`.
+
+.. _fls_qPWQnNXH52R3:
+
+Raw Pointers
+~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_c2Guy3fPYaUV`
+A :t:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
+
+:dp:`fls_hrum767l6dte`
+Comparing two :t:`[raw pointer]s` compares the addresses of the :t:`[raw pointer]s`.
+
+:dp:`fls_k6ues2936pjq`
+Comparing a :t:`raw pointer` to a :t:`value` of a :t:`dynamically sized type` compares the data being pointed to.
+
+.. _fls_phgP8YIwpXpi:
+
+References
+~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_fHDXn6CafgU7`
+A :t:`shared reference` is a :t:`value` of a :t:`shared reference type`.
+
+:dp:`fls_ftE05Blr5Esv`
+Copying a :t:`shared reference` performs a shallow copy.
+
+:dp:`fls_csdjfwczlzfd`
+Releasing a :t:`shared reference` has no effect on the :t:`value` it refers to.
+
+:dp:`fls_3szBrTEI2Rzo`
+A :t:`mutable reference` is a :t:`value` of a :t:`mutable reference type`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_ezh8aq6fmdvz`
+It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be not :c:`null`.
+
+.. _fls_Dqk4eIvxHloY:
+
+Provenance
+~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_5MkKtNL9oCsL`
+:t:`Provenance` is an optional property of :t:`[pointer]s` that restricts the memory locations the :t:`pointer` may access, the timespan during which the accesses may occur, and whether the accesses may read from or write to said memory locations.
+
+:dp:`fls_1NJhTBN1D2qv`
+An :t:`original pointer` carries :t:`provenance` over all or part of the :t:`allocated object` it was created from.
+
+:dp:`fls_wnJmQYT7iKQf`
+A :t:`derived pointer` inherits the :t:`provenance` of the :t:`pointer` it was created from, if any.
+
+:dp:`fls_ffh8mAkebORJ`
+A :t:`well-formed pointer` is a :t:`pointer` where either no byte of the :t:`pointer` carries :t:`provenance`, or every byte of the :t:`pointer` is the corresponding byte of a single :t:`pointer` with :t:`provenance`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_c3DaCLQEBpYQ`
+It is undefined behavior to access memory through a :t:`pointer` that does not have :t:`provenance` permitting the access.
 
 .. _fls_xdvdl2ssnhlo:
 

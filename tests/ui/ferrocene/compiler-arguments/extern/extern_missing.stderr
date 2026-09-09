@@ -1,4 +1,4 @@
-error[E0433]: cannot find `some_crate` in the crate root
+error[E0433]: cannot find `some_crate` in the list of imported crates
   --> $DIR/extern_missing.rs:7:7
    |
 LL |     ::some_crate::hello();

@@ -10,16 +10,10 @@
 //@ normalize-stderr: ".*note: Some details are omitted.*\n" -> ""
 //@ normalize-stderr: ".*--> .*/splat-fn-ptr-tuple.rs:\d{1,}:\d{1,}.*\n" -> ""
 
-<<<<<<< ferrocene/release/1.98
 // Ferrocene addition
 //@ normalize-stderr: "appreciate a bug report: .*" -> "appreciate a bug report"
 
-//! Test using `#[splat]` on tuple arguments of simple functions.
-||||||| 7fb284d9037
-//! Test using `#[splat]` on tuple arguments of simple functions.
-=======
 //! Test using `#[rustc_splat]` on tuple arguments of simple functions.
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
 //! Currently ICEs, but if we fix it, we'll want to know and update this test to pass.
 
 #![allow(incomplete_features)]

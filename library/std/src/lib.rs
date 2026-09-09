@@ -476,8 +476,6 @@ extern crate test;
 #[macro_use]
 extern crate alloc as alloc_crate;
 
-pub mod alloc;
-
 // Many compiler tests depend on libc being pulled in by std
 // so include it here even if it's unused.
 #[doc(masked)]
@@ -737,6 +735,8 @@ pub mod arch {
 pub use std_detect::is_x86_feature_detected;
 
 mod sys;
+
+pub mod alloc;
 
 // Private support modules
 mod panicking;

@@ -7,6 +7,7 @@ pub mod instrumentation_profile;
 pub mod summary;
 pub mod util;
 
+pub use crate::instrumentation_profile::types::compute_hash;
 pub use crate::instrumentation_profile::{parse, parse_bytes};
 pub use coverage::coverage_mapping::CoverageMapping;
 pub use coverage::reporting::*;

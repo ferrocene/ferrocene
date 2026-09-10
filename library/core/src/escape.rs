@@ -173,15 +173,25 @@ union MaybeEscapedCharacter<const N: usize> {
 /// Marker type to indicate that the character is always escaped,
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
+<<<<<<< ferrocene/main
 #[non_exhaustive]
 #[ferrocene::prevalidated]
+||||||| 8a2fbe3ea88
+#[non_exhaustive]
+=======
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub(crate) struct AlwaysEscaped;
 
 /// Marker type to indicate that the character may be escaped,
 /// used to optimize the iterator implementation.
 #[derive(Clone, Copy)]
+<<<<<<< ferrocene/main
 #[non_exhaustive]
 #[ferrocene::prevalidated]
+||||||| 8a2fbe3ea88
+#[non_exhaustive]
+=======
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub(crate) struct MaybeEscaped;
 
 /// An iterator over a possibly escaped character.

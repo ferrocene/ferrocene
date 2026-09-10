@@ -15,7 +15,7 @@ use std::fs::File;
 use std::hash::Hash;
 use std::io::{BufWriter, Write};
 use std::panic::Location;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{
     Child, ChildStderr, ChildStdout, Command, CommandArgs, CommandEnvs, ExitStatus, Output, Stdio,
 };
@@ -25,7 +25,7 @@ use std::time::{Duration, Instant};
 use build_helper::drop_bomb::DropBomb;
 
 use crate::core::config::DryRun;
-use crate::{PathBuf, exit, t};
+use crate::utils::helpers::{self, t};
 
 /// What should be done when the command fails.
 #[derive(Debug, Copy, Clone)]
@@ -668,7 +668,7 @@ impl ExecutionContext {
         for failure in &*failures {
             eprintln!("  - {failure}");
         }
-        exit!(1);
+        helpers::exit_process(1);
     }
 
     /// Execute a command and return its output.
@@ -758,7 +758,7 @@ impl ExecutionContext {
         if !self.is_verbose() {
             println!("Command has failed. Rerun with -v to see more details.");
         }
-        exit!(1);
+        helpers::exit_process(1);
     }
 
     /// Spawns the command with configured stdout and stderr handling.

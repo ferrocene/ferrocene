@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable
     pr_title = os.environ["PR_TITLE"]
 
-    pr_source_branch = os.environ["GITHUB_REF"]
+    pr_source_branch = os.environ["GITHUB_HEAD_REF"]
 
     if is_automated_pr(pr_source_branch):
         # Automations are currently exempt from the ticket rule

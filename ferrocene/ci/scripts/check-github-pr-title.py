@@ -11,9 +11,9 @@
 # are a sequence of lowercase ASCII letters and digits.
 # Example of expected format: "[869ed4uxf] Fix bug in ..."
 
+import os
 import re
 import sys
-import os
 
 
 def is_automated_pr(pr_source_branch):

@@ -2790,10 +2790,12 @@ impl<T> [T] {
 
     /// Returns a subslice with the prefix and suffix removed.
     ///
-    /// If the slice starts with `prefix` and ends with `suffix`, returns the subslice after the
-    /// prefix and before the suffix, wrapped in `Some`.
+    /// If the slice starts with `prefix`, ends with `suffix`, and
+    /// the prefix and suffix don't overlap, returns the subslice after
+    /// the prefix and before the suffix, wrapped in `Some`.
     ///
-    /// If the slice does not start with `prefix` or does not end with `suffix`, returns `None`.
+    /// If the slice does not start with `prefix`, does not end with `suffix`,
+    /// or the prefix and suffix overlap in the slice, returns `None`.
     ///
     /// # Examples
     ///
@@ -2806,9 +2808,10 @@ impl<T> [T] {
     /// assert_eq!(v.strip_circumfix(&[10], &[40]), None);
     /// assert_eq!(v.strip_circumfix(&[], &[40, 30]), Some(&[10, 50][..]));
     /// assert_eq!(v.strip_circumfix(&[10, 50], &[]), Some(&[40, 30][..]));
+    /// assert_eq!(v.strip_circumfix(&[10, 50, 40], &[50, 40, 30]), None);
     /// ```
     #[must_use = "returns the subslice without modifying the original"]
-    #[stable(feature = "strip_circumfix", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "strip_circumfix", since = "1.98.0")]
     pub fn strip_circumfix<S, P>(&self, prefix: &P, suffix: &S) -> Option<&[T]>
     where
         T: PartialEq,
@@ -5381,7 +5384,7 @@ impl<T> [T] {
     /// assert_eq!(iter.next(), Some(Range { start: 5, end: 6 }));
     /// ```
     #[must_use]
-    #[stable(feature = "substr_range", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "substr_range", since = "1.98.0")]
     pub fn subslice_range(&self, subslice: &[T]) -> Option<core::range::Range<usize>> {
         if T::IS_ZST {
             panic!("elements are zero-sized");

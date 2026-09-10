@@ -8,6 +8,9 @@
 //@ no-prefer-dynamic
 //@ compile-flags: -Ctarget-feature=+crt-static -Crpath=no -Crelocation-model=static
 //@ ignore-backends: gcc
+// aarch64-unknown-linux-pauthtest requires dynamic linking, which makes use of file descriptors.
+// Setting RLIMIT_NOFILE would result in the binary failing even before main is reached.
+//@ ignore-pauthtest
 
 // Ferrocene addition: QEMU user space emulation behaves differently when spawning processes fails
 //@ ignore-qemu

@@ -6,6 +6,8 @@
 //@ needs-target-std
 //@ ignore-android: FIXME(#142855)
 //@ ignore-sgx: (x86 machine code cannot be directly executed)
+//@ ignore-pauthtest: (it requires non-trivial compilation of c sources, and only supports dynamic
+//  linking, ignore the test).
 
 // Ferrocene addition: Various compile and link errors on these platforms:
 // missing <assert.h>, missing libraries, and breakage when not using -fPIC

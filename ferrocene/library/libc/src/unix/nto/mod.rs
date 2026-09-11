@@ -284,13 +284,7 @@ s! {
         pub gl_pathv: *mut *mut c_char,
         pub gl_offs: size_t,
         pub gl_flags: c_int,
-<<<<<<< ferrocene/c81c8c15f9a0c179b1503fcc73368fcdca640ba1
-        pub gl_errfunc: Option<extern "C" fn(*const c_char, c_int) -> c_int>,
-||||||| ef0906e2082
-        pub gl_errfunc: extern "C" fn(*const c_char, c_int) -> c_int,
-=======
         pub gl_errfunc: Option<unsafe extern "C" fn(*const c_char, c_int) -> c_int>,
->>>>>>> 31503352774deadf65cc53257b59ee4f3299f644
 
         __unused1: Padding<*mut c_void>,
         __unused2: Padding<*mut c_void>,

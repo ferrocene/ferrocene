@@ -55,49 +55,6 @@ fn do_cc(t: &Target) {
     }
 }
 
-<<<<<<< ferrocene/c81c8c15f9a0c179b1503fcc73368fcdca640ba1:ferrocene/library/libc/libc-test/build.rs
-fn do_ctest() {
-    match &env::var("TARGET").unwrap() {
-        t if t.contains("android") => test_android(t),
-        t if t.contains("apple") => test_apple(t),
-        t if t.contains("dragonfly") => test_dragonflybsd(t),
-        t if t.contains("emscripten") => test_emscripten(t),
-        t if t.contains("freebsd") => test_freebsd(t),
-        t if t.contains("haiku") => test_haiku(t),
-        t if t.contains("l4re") => test_linux(t),
-        t if t.contains("linux") => test_linux(t),
-        t if t.contains("netbsd") => test_netbsd(t),
-        t if t.contains("openbsd") => test_openbsd(t),
-        t if t.contains("cygwin") => test_cygwin(t),
-        t if t.contains("redox") => test_redox(t),
-        t if t.contains("solaris") => test_solarish(t),
-        t if t.contains("illumos") => test_solarish(t),
-        t if t.contains("wasi") => test_wasi(t),
-        t if t.contains("windows") => test_windows(t),
-        t if t.contains("vxworks") => test_vxworks(t),
-        t if t.contains("qnx") => test_neutrino(t),
-||||||| ef0906e2082:ferrocene/library/libc/libc-test/build.rs
-fn do_ctest() {
-    match &env::var("TARGET").unwrap() {
-        t if t.contains("android") => test_android(t),
-        t if t.contains("apple") => test_apple(t),
-        t if t.contains("dragonfly") => test_dragonflybsd(t),
-        t if t.contains("emscripten") => test_emscripten(t),
-        t if t.contains("freebsd") => test_freebsd(t),
-        t if t.contains("haiku") => test_haiku(t),
-        t if t.contains("l4re") => test_linux(t),
-        t if t.contains("linux") => test_linux(t),
-        t if t.contains("netbsd") => test_netbsd(t),
-        t if t.contains("openbsd") => test_openbsd(t),
-        t if t.contains("cygwin") => test_cygwin(t),
-        t if t.contains("redox") => test_redox(t),
-        t if t.contains("solaris") => test_solarish(t),
-        t if t.contains("illumos") => test_solarish(t),
-        t if t.contains("wasi") => test_wasi(t),
-        t if t.contains("windows") => test_windows(t),
-        t if t.contains("vxworks") => test_vxworks(t),
-        t if t.contains("nto-qnx") => test_neutrino(t),
-=======
 fn do_ctest(t: &Target) {
     match t {
         t if t.android() => test_android(t),
@@ -118,7 +75,6 @@ fn do_ctest(t: &Target) {
         t if t.win() => test_windows(t),
         t if t.vxworks() => test_vxworks(t),
         t if t.nto() => test_neutrino(t),
->>>>>>> 31503352774deadf65cc53257b59ee4f3299f644:ferrocene/library/libc/libc-test/build/main.rs
         // QuRT ctest requires a sched_yield stub (static inline in SDK).
         t if t.qurt() => return,
         t if t.aix() => return test_aix(t),
@@ -142,163 +98,6 @@ fn ctest_cfg() -> ctest::TestGenerator {
     cfg
 }
 
-<<<<<<< ferrocene/c81c8c15f9a0c179b1503fcc73368fcdca640ba1:ferrocene/library/libc/libc-test/build.rs
-fn do_semver() {
-    let mut out = PathBuf::from(env::var("OUT_DIR").unwrap());
-    out.push("semver.rs");
-    let mut output = BufWriter::new(File::create(&out).unwrap());
-
-    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
-    let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
-    let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
-
-    // `libc-test/semver` dir.
-    let mut semver_root = PathBuf::from("semver");
-
-    // NOTE: Windows has the same `family` as `os`, no point in including it
-    // twice.
-    // NOTE: Android doesn't include the unix file (or the Linux file) because
-    // there are some many definitions missing it's actually easier just to
-    // maintain a file for Android.
-    // NOTE: AIX, L4Re and QNX do not include the unix file because there are
-    // definitions missing on these systems. It is easier to maintain separate
-    // files for them.
-    if family != os
-        && !matches!(os.as_str(), "android" | "aix" | "l4re" | "nto" | "qnx")
-        && os != "vxworks"
-    {
-        process_semver_file(&mut output, &mut semver_root, &family);
-    }
-    // We don't do semver for unknown targets.
-    if vendor != "unknown" {
-        process_semver_file(&mut output, &mut semver_root, &vendor);
-    }
-    process_semver_file(&mut output, &mut semver_root, &os);
-    let os_arch = format!("{os}-{arch}");
-    process_semver_file(&mut output, &mut semver_root, &os_arch);
-    if !target_env.is_empty() {
-        let os_env = format!("{os}-{target_env}");
-        process_semver_file(&mut output, &mut semver_root, &os_env);
-
-        let os_env_arch = format!("{os}-{target_env}-{arch}");
-        process_semver_file(&mut output, &mut semver_root, &os_env_arch);
-    }
-}
-
-fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut PathBuf, file: P) {
-    // NOTE: `path` is reused between calls, so always remove the file again.
-    path.push(file);
-    path.set_extension("txt");
-
-    println!("cargo:rerun-if-changed={}", path.display());
-    let input_file = match File::open(&*path) {
-        Ok(file) => file,
-        Err(ref err) if err.kind() == io::ErrorKind::NotFound => {
-            path.pop();
-            return;
-        }
-        Err(err) => panic!("unexpected error opening file: {err}"),
-    };
-    let input = BufReader::new(input_file);
-
-    writeln!(output, "// Source: {}.", path.display()).unwrap();
-    output.write_all(b"use libc::{\n").unwrap();
-    for line in input.lines() {
-        let line = line.unwrap().into_bytes();
-        match line.first() {
-            // Ignore comments and empty lines.
-            Some(b'#') | None => continue,
-            _ => {
-                output.write_all(b"    ").unwrap();
-                output.write_all(&line).unwrap();
-                output.write_all(b",\n").unwrap();
-            }
-        }
-    }
-    output.write_all(b"};\n\n").unwrap();
-    path.pop();
-}
-
-||||||| ef0906e2082:ferrocene/library/libc/libc-test/build.rs
-fn do_semver() {
-    let mut out = PathBuf::from(env::var("OUT_DIR").unwrap());
-    out.push("semver.rs");
-    let mut output = BufWriter::new(File::create(&out).unwrap());
-
-    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
-    let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
-    let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
-
-    // `libc-test/semver` dir.
-    let mut semver_root = PathBuf::from("semver");
-
-    // NOTE: Windows has the same `family` as `os`, no point in including it
-    // twice.
-    // NOTE: Android doesn't include the unix file (or the Linux file) because
-    // there are some many definitions missing it's actually easier just to
-    // maintain a file for Android.
-    // NOTE: AIX and L4Re do not include the unix file because there are
-    // definitions missing on these systems. It is easier to maintain separate
-    // files for them.
-    if family != os && !matches!(os.as_str(), "android" | "aix" | "l4re") && os != "vxworks" {
-        process_semver_file(&mut output, &mut semver_root, &family);
-    }
-    // We don't do semver for unknown targets.
-    if vendor != "unknown" {
-        process_semver_file(&mut output, &mut semver_root, &vendor);
-    }
-    process_semver_file(&mut output, &mut semver_root, &os);
-    let os_arch = format!("{os}-{arch}");
-    process_semver_file(&mut output, &mut semver_root, &os_arch);
-    if !target_env.is_empty() {
-        let os_env = format!("{os}-{target_env}");
-        process_semver_file(&mut output, &mut semver_root, &os_env);
-
-        let os_env_arch = format!("{os}-{target_env}-{arch}");
-        process_semver_file(&mut output, &mut semver_root, &os_env_arch);
-    }
-}
-
-fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut PathBuf, file: P) {
-    // NOTE: `path` is reused between calls, so always remove the file again.
-    path.push(file);
-    path.set_extension("txt");
-
-    println!("cargo:rerun-if-changed={}", path.display());
-    let input_file = match File::open(&*path) {
-        Ok(file) => file,
-        Err(ref err) if err.kind() == io::ErrorKind::NotFound => {
-            path.pop();
-            return;
-        }
-        Err(err) => panic!("unexpected error opening file: {err}"),
-    };
-    let input = BufReader::new(input_file);
-
-    writeln!(output, "// Source: {}.", path.display()).unwrap();
-    output.write_all(b"use libc::{\n").unwrap();
-    for line in input.lines() {
-        let line = line.unwrap().into_bytes();
-        match line.first() {
-            // Ignore comments and empty lines.
-            Some(b'#') | None => continue,
-            _ => {
-                output.write_all(b"    ").unwrap();
-                output.write_all(&line).unwrap();
-                output.write_all(b",\n").unwrap();
-            }
-        }
-    }
-    output.write_all(b"};\n\n").unwrap();
-    path.pop();
-}
-
-=======
->>>>>>> 31503352774deadf65cc53257b59ee4f3299f644:ferrocene/library/libc/libc-test/build/main.rs
 fn main() {
     // Avoid unnecessary re-building.
     println!("cargo:rerun-if-changed=.");
@@ -3757,16 +3556,8 @@ fn test_emscripten(t: &Target) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-<<<<<<< ferrocene/c81c8c15f9a0c179b1503fcc73368fcdca640ba1:ferrocene/library/libc/libc-test/build.rs
-fn test_neutrino(target: &str) {
-    assert!(target.contains("qnx"));
-||||||| ef0906e2082:ferrocene/library/libc/libc-test/build.rs
-fn test_neutrino(target: &str) {
-    assert!(target.contains("nto-qnx"));
-=======
 fn test_neutrino(t: &Target) {
     assert!(t.nto());
->>>>>>> 31503352774deadf65cc53257b59ee4f3299f644:ferrocene/library/libc/libc-test/build/main.rs
 
     let mut cfg = ctest_cfg();
     if t.nto_iosock() {

@@ -152,7 +152,7 @@ s! {
         __f_unused: Padding<c_int>,
         pub f_flag: c_ulong,
         pub f_namemax: c_ulong,
-        __f_spare: [c_int; 6],
+        __f_spare: Padding<[c_int; 6]>,
     }
 
     pub struct sigset_t {
@@ -177,13 +177,6 @@ s! {
         pub c_cc: [crate::cc_t; crate::NCCS],
         pub c_ispeed: crate::speed_t,
         pub c_ospeed: crate::speed_t,
-    }
-
-    pub struct siginfo_t {
-        pub si_signo: c_int,
-        pub si_errno: c_int,
-        pub si_code: c_int,
-        pub _pad: [c_int; 29],
     }
 
     pub struct stack_t {
@@ -227,10 +220,13 @@ s! {
         pub shm_perm: crate::ipc_perm,
         pub shm_segsz: size_t,
         pub shm_atime: crate::time_t,
+        #[cfg(not(linux_time_bits64))]
         __unused1: Padding<c_ulong>,
         pub shm_dtime: crate::time_t,
+        #[cfg(not(linux_time_bits64))]
         __unused2: Padding<c_ulong>,
         pub shm_ctime: crate::time_t,
+        #[cfg(not(linux_time_bits64))]
         __unused3: Padding<c_ulong>,
         pub shm_cpid: crate::pid_t,
         pub shm_lpid: crate::pid_t,

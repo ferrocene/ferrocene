@@ -30,10 +30,11 @@ const ALLOWED_CFGS: &[&str] = &[
     // GNU to expose a 64-bit `time_t`.
     "gnu_time_bits64",
     "libc_deny_warnings",
+    "libc_elfv2",
     // Corresponds to `__USE_TIME_BITS64` in UAPI
     "linux_time_bits64",
-    "musl_v1_2_3",
-    // musl v1.2.3+ && 32-bit: time_t is i64, struct layouts change
+    "musl_v1_2",
+    // musl v1.2.0+ && 32-bit: time_t is i64, struct layouts change
     "musl32_time64",
     // Corresponds to `_REDIR_TIME64` in musl: symbol redirects to __*_time64
     "musl_redir_time64",
@@ -47,6 +48,7 @@ const CHECK_CFG_EXTRA: &[(&str, &[&str])] = &[
         "target_os",
         &[
             "switch", "aix", "ohos", "hurd", "rtems", "visionos", "nuttx", "cygwin", "qurt", "qnx",
+            "helenos",
         ],
     ),
     (
@@ -92,9 +94,12 @@ fn main() {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
     let target_abi = env::var("CARGO_CFG_TARGET_ABI").unwrap_or_default();
 
-    // FIXME(msrv): Once the MSRV is 1.78, use `cfg(target_abi = "pauthtest")`
-    // directly instead of translating it to `libc_pauthtest`. `target_abi`
-    // cannot be used directly in cfg expressions on the current MSRV.
+    // FIXME(msrv): Once the MSRV is 1.78, use `cfg(target_abi)` directly instead
+    // of translating its values. `target_abi` cannot be used directly in cfg
+    // expressions on the current MSRV.
+    if target_abi == "elfv2" {
+        set_cfg("libc_elfv2");
+    }
     if target_abi == "pauthtest" {
         set_cfg("libc_pauthtest");
     }
@@ -146,7 +151,21 @@ fn main() {
         _ => (),
     }
 
-    let mut musl_v1_2_3 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3");
+    let mut musl_v1_2 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2");
+    if let Ok(old_musl_v1_2_3) = env::var("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3") {
+        println!(
+            "cargo:warning=`--cfg=libc_unstable_musl_v1_2_3` will be removed; \
+            set `--cfg=libc_unstable_musl_v1_2`instead"
+        );
+        musl_v1_2 |= old_musl_v1_2_3 != "0";
+    }
+    if let Ok(old_musl_v1_2_3) = env::var("RUST_LIBC_UNSTABLE_MUSL_V1_2_3") {
+        println!(
+            "cargo:warning=RUST_LIBC_UNSTABLE_MUSL_V1_2_3 will be removed; \
+            set `--cfg=libc_unstable_musl_v1_2` via RUSTFLAGS instead"
+        );
+        musl_v1_2 |= old_musl_v1_2_3 != "0";
+    }
 
     // OpenHarmony uses a fork of the musl libc
     let musl = target_env == "musl" || target_env == "ohos";
@@ -157,11 +176,11 @@ fn main() {
         || target_env == "ohos"
         || target_abi == "pauthtest"
     {
-        musl_v1_2_3 = true;
+        musl_v1_2 = true;
     }
 
-    if musl && musl_v1_2_3 {
-        set_cfg("musl_v1_2_3");
+    if musl && musl_v1_2 {
+        set_cfg("musl_v1_2");
         if target_ptr_width == "32" {
             set_cfg("musl32_time64");
             set_cfg("linux_time_bits64");
@@ -177,7 +196,7 @@ fn main() {
     }
 
     if target_env == "gnu"
-        && matches!(target_os.as_str(), "linux" | "windows")
+        && matches!(target_os.as_str(), "linux" | "windows" | "hurd")
         && target_ptr_width == "32"
         && target_arch != "riscv32"
         && target_arch != "x86_64"

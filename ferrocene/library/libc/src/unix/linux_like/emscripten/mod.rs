@@ -28,20 +28,39 @@ pub type fsfilcnt_t = u32;
 pub type rlim_t = u64;
 pub type nlink_t = u32;
 
-pub type ino64_t = crate::ino_t;
-pub type off64_t = off_t;
-pub type blkcnt64_t = crate::blkcnt_t;
-pub type rlim64_t = crate::rlim_t;
+// FIXME(1.0,deprecate): lfs binding to be removed
+pub type ino64_t = ino_t;
 
+// FIXME(1.0,deprecate): lfs binding to be removed
+pub type off64_t = off_t;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type blkcnt64_t = blkcnt_t;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type rlim64_t = rlim_t;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
 pub type rlimit64 = crate::rlimit;
-pub type flock64 = crate::flock;
-pub type stat64 = crate::stat;
-pub type statfs64 = crate::statfs;
-pub type statvfs64 = crate::statvfs;
-pub type dirent64 = crate::dirent;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type flock64 = flock;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type stat64 = stat;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type statfs64 = statfs;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type statvfs64 = statvfs;
+
+//FIXME(1.0,deprecate): lfs binding to be removed
+pub type dirent64 = dirent;
 
 extern_ty! {
-    pub type fpos64_t; // FIXME(emscripten): fill this out with a struct
+    //FIXME(1.0,deprecate): lfs binding to be removed
+    pub type fpos64_t;
 }
 
 s! {
@@ -93,7 +112,7 @@ s! {
         __f_unused: Padding<c_int>,
         pub f_flag: c_ulong,
         pub f_namemax: c_ulong,
-        __f_spare: [c_int; 6],
+        __f_spare: Padding<[c_int; 6]>,
     }
 
     pub struct signalfd_siginfo {
@@ -788,6 +807,8 @@ pub const O_TRUNC: c_int = 512;
 pub const O_NOATIME: c_int = 0o1000000;
 pub const O_CLOEXEC: c_int = 0x80000;
 
+pub const EPOLL_CLOEXEC: c_int = 0x80000;
+
 // Defined as wasi value.
 pub const EPERM: c_int = 63;
 pub const ENOENT: c_int = 44;
@@ -953,10 +974,6 @@ pub const RLIMIT_NLIMITS: c_int = 16;
 pub const RLIM_NLIMITS: c_int = RLIMIT_NLIMITS;
 
 pub const MAP_ANONYMOUS: c_int = MAP_ANON;
-
-#[doc(hidden)]
-#[deprecated(since = "0.2.55", note = "Use SIGSYS instead")]
-pub const SIGUNUSED: c_int = crate::SIGSYS;
 
 pub const __SIZEOF_PTHREAD_CONDATTR_T: usize = 4;
 pub const __SIZEOF_PTHREAD_MUTEXATTR_T: usize = 4;
@@ -1284,14 +1301,12 @@ f! {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] |= 1 << offset;
-        ()
     }
 
     pub unsafe fn CPU_CLR(cpu: usize, cpuset: &mut cpu_set_t) -> () {
         let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
         let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
         cpuset.bits[idx] &= !(1 << offset);
-        ()
     }
 
     pub unsafe fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
@@ -1303,9 +1318,7 @@ f! {
     pub unsafe fn CPU_EQUAL(set1: &cpu_set_t, set2: &cpu_set_t) -> bool {
         set1.bits == set2.bits
     }
-}
 
-safe_f! {
     pub const safe fn makedev(major: c_uint, minor: c_uint) -> crate::dev_t {
         let major = major as crate::dev_t;
         let minor = minor as crate::dev_t;
@@ -1466,8 +1479,26 @@ extern "C" {
         timeout: *const crate::timespec,
     ) -> c_int;
     pub fn faccessat(dirfd: c_int, pathname: *const c_char, mode: c_int, flags: c_int) -> c_int;
+    pub fn epoll_create(size: c_int) -> c_int;
+    pub fn epoll_create1(flags: c_int) -> c_int;
+    pub fn epoll_ctl(epfd: c_int, op: c_int, fd: c_int, event: *mut crate::epoll_event) -> c_int;
+    pub fn epoll_wait(
+        epfd: c_int,
+        events: *mut crate::epoll_event,
+        maxevents: c_int,
+        timeout: c_int,
+    ) -> c_int;
+    pub fn epoll_pwait(
+        epfd: c_int,
+        events: *mut crate::epoll_event,
+        maxevents: c_int,
+        timeout: c_int,
+        sigmask: *const crate::sigset_t,
+    ) -> c_int;
 }
 
 // Alias <foo> to <foo>64 to mimic glibc's LFS64 support
 mod lfs64;
+
+// FIXME(1.0,deprecate): lfs bindings to be removed
 pub use self::lfs64::*;

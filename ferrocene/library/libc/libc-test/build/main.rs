@@ -1,96 +1,84 @@
 #![allow(clippy::match_like_matches_macro)]
 
+mod semver;
+mod target;
+
+use std::env;
 use std::env::VarError;
-use std::fs::File;
-use std::io::{
-    BufRead,
-    BufReader,
-    BufWriter,
-    Write,
-};
-use std::path::{
-    Path,
-    PathBuf,
-};
+use std::io::Write;
 use std::process::{
     Command,
     Stdio,
 };
 use std::sync::LazyLock;
-use std::{
-    env,
-    io,
-};
 
 use regex::Regex;
 
-fn do_cc() {
-    // NOTE: family could be one of: unix, windows, wasm, or multiple values
-    // (e.g. "unix,wasm")
-    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
-    let target = env::var("TARGET").unwrap();
-    if family.contains("unix") || target.contains("cygwin") {
-        let exclude = ["redox", "wasi", "wali", "qurt"];
-        if !exclude.iter().any(|x| target.contains(x)) {
+use crate::target::PointerWidth::P32;
+use crate::target::Target;
+
+fn do_cc(t: &Target) {
+    if t.families.iter().any(|x| x == "unix") || t.cygwin() {
+        let exclude = t.redox() || t.wasi() || t.wali() || t.qurt();
+        if !exclude {
             let mut cmsg = cc::Build::new();
 
             cmsg.file("src/cmsg.c");
 
-            if target.contains("solaris") || target.contains("illumos") {
+            if t.solaris() || t.illumos() {
                 cmsg.define("_XOPEN_SOURCE", "700");
             }
             cmsg.compile("cmsg");
         }
 
-        if (target.contains("linux") && !target.contains("wasm32"))
-            || target.contains("android")
-            || target.contains("emscripten")
-            || target.contains("fuchsia")
-            || target.contains("dragonfly")
-            || target.contains("bsd")
-            || target.contains("cygwin")
+        if t.linux()
+            || t.android()
+            || t.emscripten()
+            || t.fuchsia()
+            || t.dragonfly()
+            || t.triple.contains("bsd")
+            || t.cygwin()
         {
             cc::Build::new().file("src/makedev.c").compile("makedev");
         }
     }
-    if target.contains("android") || (target.contains("linux") && !target.contains("wasm32")) {
+    if (t.android() || t.linux()) && !t.wali() {
         cc::Build::new().file("src/errqueue.c").compile("errqueue");
     }
-    if (target.contains("linux") && !target.contains("wasm32"))
-        || target.contains("l4re")
-        || target.contains("android")
-        || target.contains("emscripten")
-        || target.contains("solaris")
-        || target.contains("illumos")
+    if t.linux() && !t.wali() {
+        cc::Build::new().file("src/nlmsg.c").compile("nlmsg");
+    }
+    if (t.linux() || t.l4re() || t.android() || t.emscripten() || t.solaris() || t.illumos())
+        && !t.wali()
     {
         cc::Build::new().file("src/sigrt.c").compile("sigrt");
     }
 }
 
-fn do_ctest() {
-    match &env::var("TARGET").unwrap() {
-        t if t.contains("android") => test_android(t),
-        t if t.contains("apple") => test_apple(t),
-        t if t.contains("dragonfly") => test_dragonflybsd(t),
-        t if t.contains("emscripten") => test_emscripten(t),
-        t if t.contains("freebsd") => test_freebsd(t),
-        t if t.contains("haiku") => test_haiku(t),
-        t if t.contains("l4re") => test_linux(t),
-        t if t.contains("linux") => test_linux(t),
-        t if t.contains("netbsd") => test_netbsd(t),
-        t if t.contains("openbsd") => test_openbsd(t),
-        t if t.contains("cygwin") => test_cygwin(t),
-        t if t.contains("redox") => test_redox(t),
-        t if t.contains("solaris") => test_solarish(t),
-        t if t.contains("illumos") => test_solarish(t),
-        t if t.contains("wasi") => test_wasi(t),
-        t if t.contains("windows") => test_windows(t),
-        t if t.contains("vxworks") => test_vxworks(t),
-        t if t.contains("qnx") => test_neutrino(t),
+fn do_ctest(t: &Target) {
+    match t {
+        t if t.android() => test_android(t),
+        t if t.apple() => test_apple(t),
+        t if t.dragonfly() => test_dragonflybsd(t),
+        t if t.emscripten() => test_emscripten(t),
+        t if t.freebsd() => test_freebsd(t),
+        t if t.haiku() => test_haiku(t),
+        t if t.l4re() => test_linux(t),
+        t if t.linux() => test_linux(t),
+        t if t.netbsd() => test_netbsd(t),
+        t if t.openbsd() => test_openbsd(t),
+        t if t.cygwin() => test_cygwin(t),
+        t if t.redox() => test_redox(t),
+        t if t.solaris() => test_solarish(t),
+        t if t.illumos() => test_solarish(t),
+        t if t.wasi() => test_wasi(t),
+        t if t.win() => test_windows(t),
+        t if t.vxworks() => test_vxworks(t),
+        t if t.nto() => test_neutrino(t),
         // QuRT ctest requires a sched_yield stub (static inline in SDK).
-        t if t.contains("qurt") => return,
-        t if t.contains("aix") => return test_aix(t),
-        t => panic!("unknown target {t}"),
+        t if t.qurt() => return,
+        t if t.aix() => return test_aix(t),
+        t => panic!("unknown target {t:?}"),
     }
 }
 
@@ -110,93 +98,17 @@ fn ctest_cfg() -> ctest::TestGenerator {
     cfg
 }
 
-fn do_semver() {
-    let mut out = PathBuf::from(env::var("OUT_DIR").unwrap());
-    out.push("semver.rs");
-    let mut output = BufWriter::new(File::create(&out).unwrap());
-
-    let family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap();
-    let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
-    let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
-
-    // `libc-test/semver` dir.
-    let mut semver_root = PathBuf::from("semver");
-
-    // NOTE: Windows has the same `family` as `os`, no point in including it
-    // twice.
-    // NOTE: Android doesn't include the unix file (or the Linux file) because
-    // there are some many definitions missing it's actually easier just to
-    // maintain a file for Android.
-    // NOTE: AIX, L4Re and QNX do not include the unix file because there are
-    // definitions missing on these systems. It is easier to maintain separate
-    // files for them.
-    if family != os
-        && !matches!(os.as_str(), "android" | "aix" | "l4re" | "nto" | "qnx")
-        && os != "vxworks"
-    {
-        process_semver_file(&mut output, &mut semver_root, &family);
-    }
-    // We don't do semver for unknown targets.
-    if vendor != "unknown" {
-        process_semver_file(&mut output, &mut semver_root, &vendor);
-    }
-    process_semver_file(&mut output, &mut semver_root, &os);
-    let os_arch = format!("{os}-{arch}");
-    process_semver_file(&mut output, &mut semver_root, &os_arch);
-    if !target_env.is_empty() {
-        let os_env = format!("{os}-{target_env}");
-        process_semver_file(&mut output, &mut semver_root, &os_env);
-
-        let os_env_arch = format!("{os}-{target_env}-{arch}");
-        process_semver_file(&mut output, &mut semver_root, &os_env_arch);
-    }
-}
-
-fn process_semver_file<W: Write, P: AsRef<Path>>(output: &mut W, path: &mut PathBuf, file: P) {
-    // NOTE: `path` is reused between calls, so always remove the file again.
-    path.push(file);
-    path.set_extension("txt");
-
-    println!("cargo:rerun-if-changed={}", path.display());
-    let input_file = match File::open(&*path) {
-        Ok(file) => file,
-        Err(ref err) if err.kind() == io::ErrorKind::NotFound => {
-            path.pop();
-            return;
-        }
-        Err(err) => panic!("unexpected error opening file: {err}"),
-    };
-    let input = BufReader::new(input_file);
-
-    writeln!(output, "// Source: {}.", path.display()).unwrap();
-    output.write_all(b"use libc::{\n").unwrap();
-    for line in input.lines() {
-        let line = line.unwrap().into_bytes();
-        match line.first() {
-            // Ignore comments and empty lines.
-            Some(b'#') | None => continue,
-            _ => {
-                output.write_all(b"    ").unwrap();
-                output.write_all(&line).unwrap();
-                output.write_all(b",\n").unwrap();
-            }
-        }
-    }
-    output.write_all(b"};\n\n").unwrap();
-    path.pop();
-}
-
 fn main() {
     // Avoid unnecessary re-building.
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=.");
+    let t = Target::from_env();
+
     // Ensure version checking works, even if we don't use it.
     LazyLock::force(&VERSIONS);
 
-    do_cc();
-    do_ctest();
-    do_semver();
+    do_cc(&t);
+    do_ctest(&t);
+    semver::do_semver();
 }
 
 macro_rules! headers {
@@ -221,11 +133,14 @@ macro_rules! headers {
     };
 }
 
-fn test_apple(target: &str) {
-    assert!(target.contains("apple"));
-    let x86_64 = target.contains("x86_64");
-    let i686 = target.contains("i686");
-    let macos = VERSIONS.macos;
+fn test_apple(t: &Target) {
+    assert!(t.apple());
+    let x86_64 = t.x86_64();
+    let x86_32 = t.x86_32();
+    let macos = t.macos();
+    let tvos = t.tvos();
+    let watchos = t.watchos();
+    let apple = VERSIONS.apple;
 
     let mut cfg = ctest_cfg();
 
@@ -253,35 +168,36 @@ fn test_apple(target: &str) {
         "ifaddrs.h",
         "langinfo.h",
         "libgen.h",
-        "libproc.h",
+        (macos, "libproc.h"),
         "limits.h",
         "locale.h",
         "mach-o/dyld.h",
-        "mach/mach_init.h",
+        (macos, "mach/mach_init.h"),
         "mach/mach.h",
-        "mach/mach_time.h",
-        "mach/mach_types.h",
-        "mach/mach_vm.h",
+        (macos, "mach/mach_time.h"),
+        (macos, "mach/mach_types.h"),
+        (macos, "mach/mach_vm.h"),
         "mach/thread_act.h",
         "mach/thread_policy.h",
         "malloc/malloc.h",
-        "net/bpf.h",
-        "net/dlil.h",
+        (macos, "net/bpf.h"),
+        (macos, "net/dlil.h"),
         "net/if.h",
-        "net/if_arp.h",
+        (macos, "net/if_arp.h"),
         "net/if_dl.h",
-        "net/if_mib.h",
-        "net/if_utun.h",
+        (macos, "net/if_mib.h"),
+        (macos, "net/if_utun.h"),
         "net/if_var.h",
-        "net/ndrv.h",
-        "net/route.h",
+        (macos, "net/ndrv.h"),
+        (macos, "net/route.h"),
         "netdb.h",
-        "netinet/if_ether.h",
+        (macos, "netinet/if_ether.h"),
         "netinet/in.h",
         "netinet/ip.h",
         "netinet/tcp.h",
         "netinet/udp.h",
-        "netinet6/in6_var.h",
+        "netinet6/scope6_var.h",
+        (macos, "netinet6/in6_var.h"),
         "os/clock.h",
         "os/lock.h",
         "os/signpost.h",
@@ -312,13 +228,13 @@ fn test_apple(target: &str) {
         "sys/file.h",
         "sys/ioctl.h",
         "sys/ipc.h",
-        "sys/kern_control.h",
+        (macos, "sys/kern_control.h"),
         "sys/mman.h",
         "sys/mount.h",
-        "sys/proc_info.h",
-        "sys/ptrace.h",
+        (macos, "sys/proc_info.h"),
+        (macos, "sys/ptrace.h"),
         "sys/quota.h",
-        "sys/random.h",
+        (macos, "sys/random.h"),
         "sys/resource.h",
         "sys/sem.h",
         "sys/shm.h",
@@ -326,7 +242,7 @@ fn test_apple(target: &str) {
         "sys/sockio.h",
         "sys/stat.h",
         "sys/statvfs.h",
-        "sys/sys_domain.h",
+        (macos, "sys/sys_domain.h"),
         "sys/sysctl.h",
         "sys/time.h",
         "sys/times.h",
@@ -347,7 +263,7 @@ fn test_apple(target: &str) {
         "utmpx.h",
         "wchar.h",
         "xlocale.h",
-        (x86_64, "crt_externs.h"),
+        "crt_externs.h",
     );
 
     cfg.skip_struct(move |s| {
@@ -375,10 +291,6 @@ fn test_apple(target: &str) {
         match constant.ident() {
             // They're declared via `deprecated_mach` and we don't support it anymore.
             x if x.starts_with("VM_FLAGS_") => true,
-            // FIXME(deprecated): These OSX constants are removed in Sierra.
-            // https://developer.apple.com/library/content/releasenotes/General/APIDiffsMacOS10_12/Swift/Darwin.html
-            "KERN_KDENABLE_BG_TRACE" | "KERN_KDDISABLE_BG_TRACE" => true,
-
             // FIXME(deprecated): Removed since 12.0.1 / xnu-8019.41.5. See `ttycom.h` at
             // https://github.com/apple-oss-distributions/xnu/commit/e6231be02a03711ca404e5121a151b24afbff733
             "TIOCREMOTE" => true,
@@ -387,11 +299,11 @@ fn test_apple(target: &str) {
             // https://github.com/apple-oss-distributions/xnu/commit/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea
             "ELAST" => true,
 
-            // FIXME(macos): bumped up on macOS 27, it's sizeof `vm_statistics64_data_t`
-            "HOST_VM_INFO64_COUNT" => macos.unwrap() < (27, 0),
+            // FIXME(macos): bumped up on macOS/iOS/... 27, it's sizeof `vm_statistics64_data_t`
+            "HOST_VM_INFO64_COUNT" => apple.unwrap() < (27, 0),
 
-            // FIXME(macos): bumped up on macOS 27, from 16 to 32
-            "AIO_LISTIO_MAX" => macos.unwrap() < (27, 0),
+            // FIXME(macos): bumped up on macOS/iOS/... 27, from 16 to 32
+            "AIO_LISTIO_MAX" => apple.unwrap() < (27, 0),
 
             _ => false,
         }
@@ -399,8 +311,8 @@ fn test_apple(target: &str) {
 
     cfg.skip_alias(move |ty| {
         match ty.ident() {
-            // FIXME(macos): The size is changed in macOS 27.
-            "vm_statistics64_data_t" => macos.unwrap() < (27, 0),
+            // FIXME(macos): The size is changed in macOS/iOS/... 27.
+            "vm_statistics64_data_t" => apple.unwrap() < (27, 0),
             _ => false,
         }
     });
@@ -414,6 +326,10 @@ fn test_apple(target: &str) {
             "close" if x86_64 => true,
             // FIXME(1.0): std removed libresolv support: https://github.com/rust-lang/rust/pull/102766
             "res_init" => true,
+            // https://github.com/rust-lang/libc/issues/5409
+            "getentropy" => !macos,
+            // https://github.com/rust-lang/libc/issues/5410
+            ident if ident.starts_with("posix_spawn") => tvos || watchos,
             _ => false,
         }
     });
@@ -477,20 +393,20 @@ fn test_apple(target: &str) {
 
     cfg.skip_roundtrip(move |s| match s {
         // FIXME(macos): this type has the wrong ABI
-        "max_align_t" if i686 => true,
+        "max_align_t" if x86_32 => true,
         _ => false,
     });
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_openbsd(target: &str) {
-    assert!(target.contains("openbsd"));
+fn test_openbsd(t: &Target) {
+    assert!(t.openbsd());
 
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
 
-    let x86_64 = target.contains("x86_64");
+    let x86_64 = t.x86_64();
 
     headers!(
         cfg,
@@ -693,8 +609,8 @@ fn test_openbsd(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_cygwin(target: &str) {
-    assert!(target.contains("cygwin"));
+fn test_cygwin(t: &Target) {
+    assert!(t.cygwin());
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
@@ -867,14 +783,14 @@ fn test_cygwin(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_windows(target: &str) {
-    assert!(target.contains("windows"));
-    let gnu = target.contains("gnu");
-    let i686 = target.contains("i686");
+fn test_windows(t: &Target) {
+    assert!(t.win());
+    let gnu = t.gnu();
+    let x86_32 = t.x86_32();
 
     let mut cfg = ctest_cfg();
 
-    if target.contains("msvc") {
+    if t.msvc() {
         cfg.flag("/wd4324");
     }
     cfg.define("_WIN32_WINNT", Some("0x8000"));
@@ -891,7 +807,7 @@ fn test_windows(target: &str) {
     // Needed for the Windows `time_t` test.
     println!("cargo::rustc-check-cfg=cfg(gnu_time_bits64)");
 
-    if i686 && gnu && win_gnu_x86_time64 {
+    if x86_32 && gnu && win_gnu_x86_time64 {
         cfg.cfg("gnu_time_bits64", None);
         println!("cargo::rustc-cfg=gnu_time_bits64");
     }
@@ -953,14 +869,14 @@ fn test_windows(target: &str) {
         "SSIZE_T" if !gnu => true,
         "ssize_t" if !gnu => true,
         // FIXME(windows): The size and alignment of this type are incorrect
-        "time_t" if gnu && i686 && !win_gnu_x86_time64 => true,
+        "time_t" if gnu && x86_32 && !win_gnu_x86_time64 => true,
         _ => false,
     });
 
     cfg.skip_struct(move |struct_| {
         match struct_.ident() {
             // FIXME(windows): The size and alignment of this struct are incorrect
-            "timespec" if gnu && i686 => true,
+            "timespec" if gnu && x86_32 => true,
             // Extern types
             "FILE" | "fpos_t" | "timezone" => true,
             _ => false,
@@ -1007,8 +923,8 @@ fn test_windows(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_redox(target: &str) {
-    assert!(target.contains("redox"));
+fn test_redox(t: &Target) {
+    assert!(t.redox());
 
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
@@ -1057,10 +973,10 @@ fn test_redox(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_solarish(target: &str) {
-    let is_solaris = target.contains("solaris");
-    let is_illumos = target.contains("illumos");
-    assert!(is_solaris || is_illumos);
+fn test_solarish(t: &Target) {
+    let solaris = t.solaris();
+    let illumos = t.illumos();
+    assert!(solaris || illumos);
 
     // ctest generates arguments supported only by clang, so make sure to run with CC=clang.
     // While debugging, "CFLAGS=-ferror-limit=<large num>" is useful to get more error output.
@@ -1073,7 +989,7 @@ fn test_solarish(target: &str) {
 
     // FIXME(solaris): This should be removed once new Nix crate is released.
     // See comment in src/unix/solarish/solaris.rs for these.
-    if is_solaris {
+    if solaris {
         cfg.define("O_DIRECT", Some("0x2000000"));
         cfg.define("SIGINFO", Some("41"));
     }
@@ -1160,11 +1076,11 @@ fn test_solarish(target: &str) {
         "wchar.h",
     );
 
-    if is_illumos {
+    if illumos {
         headers!(cfg, "sys/epoll.h", "sys/eventfd.h", "sys/timerfd.h",);
     }
 
-    if is_solaris {
+    if solaris {
         headers!(cfg, "sys/lgrp_user_impl.h",);
     }
 
@@ -1222,7 +1138,7 @@ fn test_solarish(target: &str) {
         // EPOLLEXCLUSIVE is a relatively recent addition to the epoll interface and may not be
         // defined on older systems.  It is, however, safe to use on systems which do not
         // explicitly support it. (A no-op is an acceptable implementation of EPOLLEXCLUSIVE.)
-        "EPOLLEXCLUSIVE" if is_illumos => true,
+        "EPOLLEXCLUSIVE" if illumos => true,
 
         // FIXME(illumos)
         // illumos has changed this constant, see https://www.illumos.org/issues/16200 for details.
@@ -1231,7 +1147,7 @@ fn test_solarish(target: &str) {
         // https://github.com/illumos/sysroot/pull/5, however this will still predate the new value.
         // When this does eventually make it to the sysroot we should update it in this crate and
         // remove this test skip.
-        "PTHREAD_MUTEX_DEFAULT" if is_illumos => true,
+        "PTHREAD_MUTEX_DEFAULT" if illumos => true,
 
         _ => false,
     });
@@ -1250,7 +1166,7 @@ fn test_solarish(target: &str) {
             // the union handling is a mess
             x if x.contains("door_desc_t_") => true,
             // a bunch of solaris-only fields
-            "utmpx" if is_illumos => true,
+            "utmpx" if illumos => true,
 
             // Extern types
             "DIR" | "FILE" | "fpos_t" | "timezone" | "ucred_t" => true,
@@ -1288,7 +1204,7 @@ fn test_solarish(target: &str) {
 
             // The LX brand (integrated into some illumos distros) commandeered several of the
             // `uc_filler` fields to use for brand-specific state.
-            ("ucontext_t", "uc_filler" | "uc_brand_data") if is_illumos => true,
+            ("ucontext_t", "uc_filler" | "uc_brand_data") if illumos => true,
 
             _ => false,
         }
@@ -1321,9 +1237,9 @@ fn test_solarish(target: &str) {
             "fexecve" => true,
 
             // Solaris-different
-            "getpwent_r" | "getgrent_r" | "updwtmpx" if is_illumos => true,
-            "madvise" | "mprotect" if is_illumos => true,
-            "door_call" | "door_return" | "door_create" if is_illumos => true,
+            "getpwent_r" | "getgrent_r" | "updwtmpx" if illumos => true,
+            "madvise" | "mprotect" if illumos => true,
+            "door_call" | "door_return" | "door_create" if illumos => true,
 
             // The compat functions use these "native" functions linked to their
             // non-prefixed implementations in libc.
@@ -1341,7 +1257,7 @@ fn test_solarish(target: &str) {
             // redefine_extname symbol in order to preserve compatibility.
             // Until better symbol binding story is figured out, it must be
             // excluded from the tests.
-            "getifaddrs" if is_illumos => true,
+            "getifaddrs" if illumos => true,
 
             // FIXME(ctest): Our API is unsound. The Rust API allows aliasing
             // pointers, but the C API requires pointers not to alias.
@@ -1351,7 +1267,7 @@ fn test_solarish(target: &str) {
 
             // Exists on illumos too but, for now, is
             // [a recent addition](https://www.illumos.org/issues/17094).
-            "secure_getenv" if is_illumos => true,
+            "secure_getenv" if illumos => true,
 
             _ => false,
         }
@@ -1360,8 +1276,8 @@ fn test_solarish(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_netbsd(target: &str) {
-    assert!(target.contains("netbsd"));
+fn test_netbsd(t: &Target) {
+    assert!(t.netbsd());
     let mut cfg = ctest_cfg();
 
     // Assume netbsd10 but check for netbsd9 for test config.
@@ -1545,7 +1461,6 @@ fn test_netbsd(target: &str) {
     cfg.skip_const(move |constant| {
         match constant.ident() {
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
-            "SIGUNUSED" => true,                       // removed in glibc 2.26
 
             // deprecated, obsolete upstream
             "PT_LWPINFO" | "PL_EVENT_NONE" | "PL_EVENT_SIGNAL" | "PL_EVENT_SUSPENDED" => true,
@@ -1672,8 +1587,8 @@ fn test_netbsd(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_dragonflybsd(target: &str) {
-    assert!(target.contains("dragonfly"));
+fn test_dragonflybsd(t: &Target) {
+    assert!(t.dragonfly());
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
 
@@ -2036,9 +1951,10 @@ fn which_dragonfly() -> Option<u32> {
     parse_dragonfly_version(stdout.trim())
 }
 
-fn test_wasi(target: &str) {
-    assert!(target.contains("wasi"));
-    let p2 = target.contains("wasip2");
+fn test_wasi(t: &Target) {
+    assert!(t.wasi());
+    let p2 = t.wasip2();
+    let wasi_sdk = VERSIONS.wasi_sdk.unwrap();
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
@@ -2102,6 +2018,15 @@ fn test_wasi(target: &str) {
     // used here to generate a pointer to them in bindings so skip these tests.
     cfg.skip_static(|s| s.ident().starts_with("_CLOCK_"));
 
+    match wasi_sdk.1 {
+        WasiVersion::P1 => {}
+        // This was removed in wasip2 target for wasi-sdk-30+, but it's just a
+        // typedef, so ignore it.
+        _ => {
+            cfg.skip_alias(|s| s.ident() == "__wasi_rights_t");
+        }
+    }
+
     cfg.skip_const(|c| match c.ident() {
         // These constants aren't yet defined in wasi-libc.
         // Exposing them is being tracked by https://github.com/WebAssembly/wasi-libc/issues/531.
@@ -2138,18 +2063,21 @@ fn test_wasi(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_android(target: &str) {
-    assert!(target.contains("android"));
-    let target_pointer_width = match target {
-        t if t.contains("aarch64") || t.contains("x86_64") => 64,
-        t if t.contains("i686") || t.contains("arm") => 32,
-        t => panic!("unsupported target: {t}"),
-    };
-    let x86 = target.contains("i686") || target.contains("x86_64");
-    let aarch64 = target.contains("aarch64");
+fn test_android(t: &Target) {
+    assert!(t.android());
+    let x86 = t.x86();
+    let aarch64 = t.aarch64();
+    // The API level the NDK toolchain targets, which caps the available libc
+    // API surface (see `Versions`). Detection is required, so unwrap and let a
+    // toolchain we can't read fail loudly rather than silently skip every test.
+    let android = VERSIONS.android.unwrap();
 
     let mut cfg = ctest_cfg();
     cfg.define("_GNU_SOURCE", None);
+
+    // This ensure we avoid the `ioctl` overload for request parameters that use
+    // an unsigned integer instead of a signed integer.
+    cfg.define("BIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD", None);
 
     headers!(
         cfg,
@@ -2242,7 +2170,7 @@ fn test_android(target: &str) {
         "xlocale.h",
         // time64_t is not defined for 64-bit targets If included it will
         // generate the error 'Your time_t is already 64-bit'
-        (target_pointer_width == 32, "time64.h"),
+        (t.p32(), "time64.h"),
         (x86, "sys/reg.h"),
     );
 
@@ -2298,6 +2226,9 @@ fn test_android(target: &str) {
 
     cfg.rename_type(move |ty| match ty {
         "Ioctl" => Some("int".to_string()),
+        // `stat64` is an alias of `struct stat`, so it needs the "struct" prefix:
+        // the bare name refers to the `stat64()` function in C.
+        "stat64" => Some("struct stat64".to_string()),
         _ => None,
     });
 
@@ -2342,8 +2273,7 @@ fn test_android(target: &str) {
             "posix_spawn_file_actions_t" => true,
             "posix_spawnattr_t" => true,
 
-            // Added in API level 24
-            "if_nameindex" => true,
+            "if_nameindex" if android < 24 => true,
 
             _ => false,
         }
@@ -2354,8 +2284,6 @@ fn test_android(target: &str) {
             // These are tested as part of the linux_fcntl tests since there are
             // header conflicts when including them with all the other structs.
             "termios2" => true,
-            // uc_sigmask and uc_sigmask64 of ucontext_t are an anonymous union
-            "ucontext_t" => true,
             // 'private' type
             "prop_info" => true,
 
@@ -2397,14 +2325,8 @@ fn test_android(target: &str) {
             // The `ARPHRD_CAN` is tested in the `linux_if_arp.rs` tests:
             "ARPHRD_CAN" => true,
 
-            // FIXME(deprecated): deprecated: not available in any header
-            // See: https://github.com/rust-lang/libc/issues/1356
-            "ENOATTR" => true,
-
             // FIXME(android): still necessary?
             "SIG_DFL" | "SIG_ERR" | "SIG_IGN" => true, // sighandler_t weirdness
-            // FIXME(deprecated): deprecated - removed in glibc 2.26
-            "SIGUNUSED" => true,
 
             // Needs a newer Android SDK for the definition
             "P_PIDFD" => true,
@@ -2457,8 +2379,12 @@ fn test_android(target: &str) {
             | "NTF_EXT_LOCKED"
             | "ALG_SET_DRBG_ENTROPY" => true,
 
+            // FIXME(android): NDK r28 minimum required
+            | "STATX_SUBVOL"
+            | "STATX_WRITE_ATOMIC"
+            | "STATX_ATTR_WRITE_ATOMIC" => true,
+
             // FIXME(android): Something has been changed on r26b:
-            | "IPPROTO_MAX"
             | "NFNL_SUBSYS_COUNT"
             | "NF_NETDEV_NUMHOOKS"
             | "NFT_MSG_MAX"
@@ -2544,8 +2470,11 @@ fn test_android(target: &str) {
             "reallocarray" => true,
             "__system_property_wait" => true,
 
-            // Added in API level 30, but tests use level 28.
-            "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp" => true,
+            "memfd_create" | "mlock2" | "renameat2" | "statx" | "statx_timestamp"
+                if android < 30 =>
+            {
+                true
+            }
 
             // Added in API level 33, but tests use level 28.
             "preadv2" | "pwritev2" => true,
@@ -2553,34 +2482,23 @@ fn test_android(target: &str) {
             // Added in glibc 2.25.
             "getentropy" => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "getrandom" => true,
+            "getrandom" | "syncfs" | "aligned_alloc" if android < 28 => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "syncfs" => true,
+            "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" if android < 28 => true,
 
-            // Added in API level 28, but some tests use level 24.
-            "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" => true,
-            // Added in API level 28, but some tests use level 24.
-            "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked" => true,
+            "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked"
+                if android < 28 =>
+            {
+                true
+            }
 
-            // Added in API level 28, but some tests use level 24.
-            "aligned_alloc" => true,
+            "getgrent" | "setgrent" | "endgrent" | "getpwent" | "setpwent" | "endpwent"
+                if android < 26 =>
+            {
+                true
+            }
 
-            // Added in API level 26, but some tests use level 24.
-            "getgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "setgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "endgrent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "getpwent" | "setpwent" | "endpwent" => true,
-
-            // Added in API level 26, but some tests use level 24.
-            "getdomainname" | "setdomainname" => true,
+            "getdomainname" | "setdomainname" if android < 26 => true,
 
             // FIXME(android): bad function pointers:
             "isalnum" | "isalpha" | "iscntrl" | "isdigit" | "isgraph" | "islower" | "isprint"
@@ -2590,10 +2508,21 @@ fn test_android(target: &str) {
             // Added in API level 24
             "if_nameindex" | "if_freenameindex" => true,
 
-            // FIXME(ctest): In our current method of testing, we cast the function to a `void *`,
-            // which is not possible for functions that have been overloaded.
-            "ioctl" => true,
+            _ => false,
+        }
+    });
 
+    cfg.skip_fn_ptrcheck(move |func| {
+        match func {
+            // termios functions are <termios.h> inlines below API 28, so
+            // their C-side address never matches the symbol Rust links.
+            "tcdrain" | "tcflow" | "tcflush" | "tcgetattr" | "tcgetsid" | "tcsendbreak"
+            | "tcsetattr" | "cfgetispeed" | "cfgetospeed" | "cfmakeraw" | "cfsetispeed"
+            | "cfsetospeed" | "cfsetspeed"
+                if android < 28 =>
+            {
+                true
+            }
             _ => false,
         }
     });
@@ -2629,17 +2558,20 @@ fn test_android(target: &str) {
             ("ifreq", "ifr_ifru") => true,
             ("ifconf", "ifc_ifcu") => true,
 
+            // uc_sigmask and uc_sigmask64 are an anonymous union
+            ("ucontext_t", "uc_sigmask" | "uc_sigmask64" | "uc_sigmask__c_anonymous_union") => true,
+
             _ => false,
         }
     });
 
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 
-    test_linux_like_apis(target);
+    test_linux_like_apis(t);
 }
 
-fn test_freebsd(target: &str) {
-    assert!(target.contains("freebsd"));
+fn test_freebsd(t: &Target) {
+    assert!(t.freebsd());
     let mut cfg = ctest_cfg();
 
     // FIXME: this can be removed in 1-2 releases
@@ -2890,11 +2822,6 @@ fn test_freebsd(target: &str) {
             }
 
             // FIXME(deprecated): These are deprecated - remove in a couple of releases.
-            // These constants were removed in FreeBSD 11 (svn r273250) but will
-            // still be accepted and ignored at runtime.
-            "MAP_RENAME" | "MAP_NORESERVE" => true,
-
-            // FIXME(deprecated): These are deprecated - remove in a couple of releases.
             // These constants were removed in FreeBSD 11 (svn r262489),
             // and they've never had any legitimate use outside of the
             // base system anyway.
@@ -2944,12 +2871,6 @@ fn test_freebsd(target: &str) {
             // This constant was removed in FreeBSD 13 (svn r363622), and never
             // had any legitimate use outside of the base system anyway.
             "CTL_P1003_1B_MAXID" => true,
-
-            // This was renamed in FreeBSD 12.2 and 13 (r352486).
-            "CTL_UNSPEC" | "CTL_SYSCTL" => true,
-
-            // This was renamed in FreeBSD 12.2 and 13 (r350749).
-            "IPPROTO_SEP" | "IPPROTO_DCCP" => true,
 
             // This was changed to 96(0x60) in FreeBSD 13:
             // https://github.com/freebsd/freebsd/
@@ -3354,7 +3275,7 @@ fn test_freebsd(target: &str) {
             _ => false,
         }
     });
-    if target.contains("arm") {
+    if t.arm32() {
         cfg.skip_roundtrip(move |s| match s {
             // Can't return an array from a C function.
             "__gregset_t" => true,
@@ -3368,8 +3289,8 @@ fn test_freebsd(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_emscripten(target: &str) {
-    assert!(target.contains("emscripten"));
+fn test_emscripten(t: &Target) {
+    assert!(t.emscripten());
     let emscripten = VERSIONS.emscripten.unwrap();
 
     let mut cfg = ctest_cfg();
@@ -3417,6 +3338,9 @@ fn test_emscripten(target: &str) {
         "stdio.h",
         "stdlib.h",
         "string.h",
+        // `sys/epoll.h` was restored in Emscripten 6.0.2
+        // https://github.com/emscripten-core/emscripten/pull/27206
+        (emscripten >= (6, 0, 2), "sys/epoll.h"),
         "sys/file.h",
         "sys/ioctl.h",
         "sys/ipc.h",
@@ -3492,11 +3416,11 @@ fn test_emscripten(target: &str) {
         }
     });
 
-    cfg.skip_union(|union_| {
+    cfg.skip_union(move |union_| {
         match union_.ident() {
-            // No epoll support
-            // https://github.com/emscripten-core/emscripten/issues/5033
-            ty if ty.starts_with("epoll") => true,
+            // `sys/epoll.h` was restored in Emscripten 6.0.2
+            // https://github.com/emscripten-core/emscripten/pull/27206
+            ty if ty.starts_with("epoll") => emscripten < (6, 0, 2),
 
             _ => false,
         }
@@ -3523,9 +3447,9 @@ fn test_emscripten(target: &str) {
             // Extern types
             "DIR" | "FILE" | "fpos_t" | "fpos64_t" | "timezone" => true,
 
-            // No epoll support
-            // https://github.com/emscripten-core/emscripten/issues/5033
-            ty if ty.starts_with("epoll") => true,
+            // `sys/epoll.h` was restored in Emscripten 6.0.2
+            // https://github.com/emscripten-core/emscripten/pull/27206
+            ty if ty.starts_with("epoll") => emscripten < (6, 0, 2),
 
             ty if ty.starts_with("signalfd") => true,
             _ => false,
@@ -3539,7 +3463,15 @@ fn test_emscripten(target: &str) {
             "execv" | "execve" | "execvp" | "execvpe" | "fexecve" | "wait4" => true,
 
             // Emscripten's `pthread_kill` used to only be linkable when building with `-pthread`
-            "pthread_kill" if emscripten < (6, 0) => true,
+            "pthread_kill" if emscripten < (6, 0, 0) => true,
+
+            // epoll support was added in Emscripten 6.0.8
+            // https://github.com/emscripten-core/emscripten/pull/27207
+            "epoll_create" | "epoll_create1" | "epoll_ctl" | "epoll_wait" | "epoll_pwait"
+                if emscripten < (6, 0, 8) =>
+            {
+                true
+            }
 
             _ => false,
         }
@@ -3547,16 +3479,12 @@ fn test_emscripten(target: &str) {
 
     cfg.skip_const(move |constant| {
         match constant.ident() {
-            // FIXME(deprecated): deprecated - SIGNUNUSED was removed in glibc 2.26
-            // users should use SIGSYS instead
-            "SIGUNUSED" => true,
-
             // FIXME(emscripten): emscripten uses different constants to constructs these
             n if n.contains("__SIZEOF_PTHREAD") => true,
 
-            // No epoll support
-            // https://github.com/emscripten-core/emscripten/issues/5033
-            n if n.starts_with("EPOLL") => true,
+            // `sys/epoll.h` was restored in Emscripten 6.0.2
+            // https://github.com/emscripten-core/emscripten/pull/27206
+            n if n.starts_with("EPOLL") => emscripten < (6, 0, 2),
 
             // No ptrace.h
             // https://github.com/emscripten-core/emscripten/pull/17704
@@ -3628,11 +3556,11 @@ fn test_emscripten(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_neutrino(target: &str) {
-    assert!(target.contains("qnx"));
+fn test_neutrino(t: &Target) {
+    assert!(t.nto());
 
     let mut cfg = ctest_cfg();
-    if target.ends_with("_iosock") {
+    if t.nto_iosock() {
         let qnx_target_val = env::var("QNX_TARGET")
             .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
 
@@ -3924,8 +3852,8 @@ fn which_vxworks() -> Option<(u32, u32)> {
     Some((major, minor))
 }
 
-fn test_vxworks(target: &str) {
-    assert!(target.contains("vxworks"));
+fn test_vxworks(t: &Target) {
+    assert!(t.vxworks());
 
     let mut cfg = ctest_cfg();
 
@@ -4063,14 +3991,8 @@ fn test_vxworks(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
-    let pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap_or_default();
-    if target.contains("gnu")
-        && target.contains("linux")
-        && !target.ends_with("x32")
-        && !target.contains("riscv32")
-        && pointer_width == "32"
-    {
+fn config_gnu_bits(t: &Target, cfg: &mut ctest::TestGenerator) {
+    if t.gnu() && t.linux() && !t.x32() && !t.riscv32() && t.pointer_width == P32 {
         let defaultbits = "32";
         let mut tb_env = env::var("CARGO_CFG_LIBC_UNSTABLE_GNU_TIME_BITS");
 
@@ -4112,24 +4034,17 @@ fn config_gnu_bits(target: &str, cfg: &mut ctest::TestGenerator) {
 }
 
 // This also covers the L4Re targets since they have a similar API surface
-fn test_linux(target: &str) {
-    assert!(target.contains("linux") || target.contains("l4re"));
-
-    // FIXME(linux32): Some 32 bit targets use old kernel headers because newer distros enforce 64
-    // bit time. Use this to avoid skipping tests also on 64 bit targets.
-    let pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH")
-        .unwrap_or_default()
-        .parse::<usize>()
-        .unwrap_or_default();
+fn test_linux(t: &Target) {
+    assert!(t.linux() || t.l4re());
 
     // target_os
-    let linux = target.contains("linux");
-    let l4re = target.contains("l4re");
+    let linux = t.linux();
+    let l4re = t.l4re();
 
     // target_env
-    let gnu = target.contains("gnu");
-    let musl = target.contains("musl") || target.contains("ohos") || target.contains("pauthtest");
-    let uclibc = target.contains("uclibc");
+    let gnu = t.gnu();
+    let musl = t.musl();
+    let uclibc = t.uclibc();
 
     match (l4re, gnu, musl, uclibc) {
         (false, true, false, false) => (),
@@ -4142,59 +4057,62 @@ fn test_linux(target: &str) {
         ),
     }
 
-    let arm = target.contains("arm");
-    let eabihf = target.contains("eabihf");
-    let aarch64 = target.contains("aarch64");
-    let i686 = target.contains("i686");
-    let ppc = target.contains("powerpc");
-    let ppc64 = target.contains("powerpc64");
-    let ppc64le = target.contains("powerpc64le");
-    let _ppc64be = target.contains("powerpc64-");
-    let ppc32 = ppc && !ppc64;
-    let s390x = target.contains("s390x");
-    let sparc = target.contains("sparc");
-    let sparc64 = target.contains("sparc64");
-    let x32 = target.contains("x32");
-    let x86_32 = target.contains("i686");
-    let x86_64 = target.contains("x86_64");
-    let gnueabihf = target.contains("gnueabihf");
-    let x86_64_gnux32 = target.contains("gnux32") && x86_64;
-    let riscv64 = target.contains("riscv64");
-    let hexagon = target.contains("hexagon");
-    let loongarch64 = target.contains("loongarch64");
-    let wasm32 = target.contains("wasm32");
-    let uclibc = target.contains("uclibc");
-    let mips = target.contains("mips");
-    let mips64 = target.contains("mips64");
-    let mips32 = mips && !mips64;
-    let pauthtest = target.contains("pauthtest");
+    let arm32 = t.arm32();
+    let eabihf = t.eabihf();
+    let aarch64 = t.aarch64();
+    let ppc = t.ppc();
+    let ppc64 = t.ppc64();
+    let ppc64le = t.ppc64le();
+    let ppc32 = t.ppc32();
+    let s390x = t.s390x();
+    let sparc = t.sparc();
+    let sparc64 = t.sparc64();
+    let x32 = t.x32();
+    let x86_32 = t.x86_32();
+    let x86_64 = t.x86_64();
+    let gnueabihf = t.eabihf() && t.gnu();
+    let x86_64_gnux32 = x86_64 && t.gnu() && x32;
+    let riscv64 = t.riscv64();
+    let hexagon = t.hexagon();
+    let loongarch64 = t.loongarch64();
+    let wasm32 = t.wasm32();
+    let uclibc = t.uclibc();
+    let mips = t.mips();
+    let mips32 = t.mips32();
+    let pauthtest = t.pauthtest();
+    let p32 = t.p32();
     let versions = &*VERSIONS;
     let kernel = match versions.linux {
         Some(v) => v,
         None if l4re => (0, 0),
-        None => panic!("failed to detect kernel version for Linux target {target}"),
+        None => panic!("failed to detect kernel version for Linux target {t:?}",),
     };
 
-    // Force modern musl also for pauthtest.
-    let musl_v1_2_3 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2_3") || pauthtest;
-    if musl_v1_2_3 {
+    let mut musl_v1_2 = env_flag("CARGO_CFG_LIBC_UNSTABLE_MUSL_V1_2");
+    if musl_v1_2 {
         assert!(musl);
     }
-    let old_musl = musl && !musl_v1_2_3;
 
-    let b32 = arm || target.contains("hexagon") || mips32 || ppc32 || x86_32;
+    // Some platforms only exist with recent musl. Keep in sync with libc's build.rs.
+    if musl && (loongarch64 || hexagon || pauthtest/* || ohos */) {
+        musl_v1_2 = true;
+    }
+
+    let old_musl = musl && !musl_v1_2;
 
     let mut cfg = ctest_cfg();
-    if (musl_v1_2_3 || loongarch64 || hexagon) && musl {
-        cfg.cfg("musl_v1_2_3", None);
-        if b32 {
+
+    if musl_v1_2 {
+        cfg.cfg("musl_v1_2", None);
+        if p32 {
             cfg.cfg("musl32_time64", None);
             cfg.cfg("linux_time_bits64", None);
         }
-        if arm || ppc32 || x86_32 || mips32 {
+        if arm32 || ppc32 || x86_32 || mips32 {
             cfg.cfg("musl_redir_time64", None);
         }
     }
+
     let uclibc_use_time64 = env_flag("CARGO_CFG_LIBC_UNSTABLE_UCLIBC_TIME64");
     if uclibc && uclibc_use_time64 {
         cfg.cfg("linux_time_bits64", None);
@@ -4205,7 +4123,7 @@ fn test_linux(target: &str) {
         // glibc versions older than 2.29.
         .define("__GLIBC_USE_DEPRECATED_SCANF", None);
 
-    config_gnu_bits(target, &mut cfg);
+    config_gnu_bits(t, &mut cfg);
     // The L4Re libc headers contain some L4Re helper functions which are not needed for the libc
     // interface and must not be added to the libc crate
     if l4re {
@@ -4315,7 +4233,10 @@ fn test_linux(target: &str) {
         // ARM: https://bugzilla.redhat.com/show_bug.cgi?id=1116162
         // Also unavailable on gnueabihf with glibc 2.30.
         // https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=6b33f373c7b9199e00ba5fbafd94ac9bfb4337b1
-        ((x86_64 || x86_32 || arm) && !gnueabihf && !l4re, "sys/io.h"),
+        (
+            (x86_64 || x86_32 || arm32) && !gnueabihf && !l4re,
+            "sys/io.h"
+        ),
         // `sys/reg.h` is only available on x86 and x86_64
         ((x86_64 || x86_32) && !l4re, "sys/reg.h"),
         // sysctl system call is deprecated and not available on musl
@@ -4451,7 +4372,7 @@ fn test_linux(target: &str) {
             "Ioctl" => Some("int".to_string()),
             // LFS64 types have been removed in musl 1.2.4+
             "off64_t" if musl => Some("off_t".to_string()),
-            "fsword_t" if uclibc => Some("__SWORD_TYPE".to_string()),
+            "__sword_type" if uclibc => Some("__SWORD_TYPE".to_string()),
             _ => None,
         }
     });
@@ -4512,6 +4433,10 @@ fn test_linux(target: &str) {
             // specific type.
             "Ioctl" => true,
 
+            // This type was renamed to more closely match upstream's
+            // `__SWORD_TYPE`; It now goes by `__sword_type`.
+            "fsword_t" if uclibc => true,
+
             t => {
                 if musl {
                     // LFS64 types have been removed in musl 1.2.4+
@@ -4538,7 +4463,7 @@ fn test_linux(target: &str) {
 
         // FIXME(rust-lang/rust#43894): pass by value for structs that are not an even 32/64 bits
         // on big-endian systems corrupts the value for unknown reasons.
-        if (sparc64 || ppc || ppc64 || s390x)
+        if (sparc64 || ppc || s390x)
             && (ty == "sockaddr_pkt"
                 || ty == "tpacket_auxdata"
                 || ty == "tpacket_hdr_variant1"
@@ -4582,7 +4507,7 @@ fn test_linux(target: &str) {
 
             // FIXME(ppc): tests fail due to a field type mismatch (`long long unsigned` vs
             // `long unsigned`).
-            "clone_args" if ppc64 => true,
+            "clone_args" if ppc64 && gnu => true,
 
             // Linux >= 6.13 (pidfd_info.exit_code: Linux >= 6.15)
             // Might differ between kernel versions
@@ -4596,7 +4521,7 @@ fn test_linux(target: &str) {
             // https://github.com/torvalds/linux/commit/341ac980eab90ac1f6c22ee9f9da83ed9604d899
             // The previous version of the struct was removed in 6.11 due to a bug.
             // https://github.com/torvalds/linux/commit/32654bbd6313b4cfc82297e6634fa9725c3c900f
-            "xdp_umem_reg" if musl || pointer_width == 32 => true,
+            "xdp_umem_reg" if musl || p32 => true,
 
             // FIXME(1.0,linux): A new field was added to `xsk_tx_metadata_request` in linux 6.15.
             // https://github.com/torvalds/linux/commit/ca4419f15abd19ba8be1e109661b60f9f5b6c9f0
@@ -4635,15 +4560,15 @@ fn test_linux(target: &str) {
             // FIXME(musl): Struct has changed for new musl versions
             "tcp_info" if musl => true,
 
-            // FIXME(musl): Supported in new musl but we don't have a new enough version in CI.
-            "statx" | "statx_timestamp" if musl => true,
+            // Added in musl 1.2.5
+            "statx" | "statx_timestamp" if old_musl => true,
 
             // FIXME(musl): New fields in newer versions
             "utmpx" if !old_musl => true,
 
             // FIXME(linux): Requires >= 6.16 kernel headers.
             // On 64 bits the size did not change, skip only for 32 bits.
-            "ptrace_syscall_info" if pointer_width == 32 => true,
+            "ptrace_syscall_info" if p32 => true,
 
             // not in sys/fanotify.h in uclibc
             "fanotify_event_info_header" | "fanotify_event_info_fid" if uclibc => true,
@@ -4729,16 +4654,10 @@ fn test_linux(target: &str) {
             }
         }
         if musl {
-            // LFS64 types have been removed in musl 1.2.4+
-            if name.starts_with("RLIM64") {
-                return true;
-            }
-            // CI fails because musl targets use Linux v4 kernel
-            if name.starts_with("NI_IDN") {
-                return true;
-            }
-
             match name {
+                // LFS64 types have been removed in musl 1.2.4+
+                x if x.starts_with("RLIM64") && musl_v1_2 => return true,
+
                 // FIXME: Does not exist on non-x86 architectures, slated for removal
                 // in libc in 1.0
                 "MAP_32BIT" if ppc64 => return true,
@@ -4790,11 +4709,14 @@ fn test_linux(target: &str) {
                 | "PR_SCHED_CORE_SHARE_FROM"
                 | "PR_SCHED_CORE_SHARE_TO" => return true,
 
+                // Not present in musl, deprecated in libc.
+                "NI_IDN" => return true,
+
                 /* Added in versions more recent than what we test */
                 // Since 1.2.0
-                "SO_DETACH_REUSEPORT_BPF" => return true,
+                "SO_DETACH_REUSEPORT_BPF" if old_musl => return true,
                 // Since 1.2.3
-                "SO_BUSY_POLL_BUDGET" | "SO_PREFER_BUSY_POLL" => return true,
+                "SO_BUSY_POLL_BUDGET" | "SO_PREFER_BUSY_POLL" if old_musl => return true,
 
                 // FIXME(musl): value was updated in new musl
                 "RLIM_NLIMITS" => return true,
@@ -4802,129 +4724,15 @@ fn test_linux(target: &str) {
                 // FIXME(musl): Values changed in newer musl versions on these arches
                 "O_LARGEFILE" if riscv64 || x86_64 => return true,
 
+                // musl 1.2.2 was the first version where this appeared at.
+                "SIGEV_THREAD_ID" if old_musl => return true,
+
                 _ => (),
             }
         }
 
         if uclibc {
             match name {
-                // The canonical uClibc toolchain, bootlin bleeding-edge-2024.02-1,
-                // uses linux 5.15, so several constants are not available.
-
-                // requires linux 5.16
-                "PR_SCHED_CORE_SCOPE_PROCESS_GROUP"
-                | "PR_SCHED_CORE_SCOPE_THREAD_GROUP"
-                | "PR_SCHED_CORE_SCOPE_THREAD"
-                | "NF_NETDEV_EGRESS"
-                | "SO_RESERVE_MEM" => return true,
-
-                // TLS_CIPHER_SM4_[GC]CM requires linux 5.16
-                "TLS_CIPHER_SM4_CCM_IV_SIZE"
-                | "TLS_CIPHER_SM4_CCM_KEY_SIZE"
-                | "TLS_CIPHER_SM4_CCM_REC_SEQ_SIZE"
-                | "TLS_CIPHER_SM4_CCM_SALT_SIZE"
-                | "TLS_CIPHER_SM4_CCM_TAG_SIZE"
-                | "TLS_CIPHER_SM4_CCM"
-                | "TLS_CIPHER_SM4_GCM_IV_SIZE"
-                | "TLS_CIPHER_SM4_GCM_KEY_SIZE"
-                | "TLS_CIPHER_SM4_GCM_REC_SEQ_SIZE"
-                | "TLS_CIPHER_SM4_GCM_SALT_SIZE"
-                | "TLS_CIPHER_SM4_GCM_TAG_SIZE"
-                | "TLS_CIPHER_SM4_GCM" => return true,
-
-                // requires linux 5.17
-                "PR_SET_VMA_ANON_NAME"
-                | "PR_SET_VMA"
-                | "RTNLGRP_MCTP_IFADDR" => return true,
-
-                // requires linux 5.18
-                "RTNLGRP_STATS"
-                | "RTNLGRP_TUNNEL"
-                | "TLS_TX_ZEROCOPY_RO"
-                | "MADV_DONTNEED_LOCKED"
-                | "NFQA_PRIORITY"
-                | "SO_TXREHASH" => return true,
-
-                // requires linux 5.19
-                "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"
-                | "NLM_F_BULK"
-                | "SO_RCVMARK"
-                | "TLS_INFO_ZC_RO_TX" => return true,
-
-                // CAN_* consts requiring linux 6.0
-                "CAN_BUS_OFF_THRESHOLD"
-                | "CAN_CTRLMODE_TDC_AUTO"
-                | "CAN_CTRLMODE_TDC_MANUAL"
-                | "CAN_ERR_CNT"
-                | "CAN_ERROR_PASSIVE_THRESHOLD"
-                | "CAN_ERROR_WARNING_THRESHOLD" => return true,
-
-                // requires linux 6.0
-                "IFF_NO_CARRIER"
-                | "TLS_INFO_RX_NO_PAD"
-                | "TLS_RX_EXPECT_NO_PAD" => return true,
-
-                // CAN_* consts requiring linux 6.1
-                "CAN_RAW_XL_FRAMES"
-                | "CANXL_HDR_SIZE"
-                | "CANXL_MAX_DLC_MASK"
-                | "CANXL_MAX_DLC"
-                | "CANXL_MAX_DLEN"
-                | "CANXL_MAX_MTU"
-                | "CANXL_MIN_DLC"
-                | "CANXL_MIN_DLEN"
-                | "CANXL_MIN_MTU"
-                | "CANXL_MTU"
-                | "CANXL_PRIO_BITS"
-                | "CANXL_PRIO_MASK"
-                | "CANXL_SEC"
-                | "CANXL_XLF" => return true,
-
-                // TLS_CIPHER_ARIA_GCM_* requires linux 6.1
-                "TLS_CIPHER_ARIA_GCM_128_IV_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_128_KEY_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_128_REC_SEQ_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_128_SALT_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_128_TAG_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_128"
-                | "TLS_CIPHER_ARIA_GCM_256_IV_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_256_KEY_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_256_REC_SEQ_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_256_SALT_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_256_TAG_SIZE"
-                | "TLS_CIPHER_ARIA_GCM_256" => return true,
-
-                // requires linux 6.2
-                "ALG_SET_KEY_BY_KEY_SERIAL"
-                | "PACKET_FANOUT_FLAG_IGNORE_OUTGOING"
-                | "SOF_TIMESTAMPING_OPT_ID_TCP"
-                | "TUN_F_USO4"
-                | "TUN_F_USO6" => return true,
-
-                // FAN_* consts require kernel 6.3
-                "FAN_INFO"
-                | "FAN_RESPONSE_INFO_AUDIT_RULE"
-                | "FAN_RESPONSE_INFO_NONE" => return true,
-
-                // requires linux 6.3
-                "MFD_EXEC"
-                | "MFD_NOEXEC_SEAL"
-                | "PR_GET_MDWE"
-                | "PR_SET_MDWE" => return true,
-
-                // requires linux 6.4
-                "PACKET_VNET_HDR_SZ" => return true,
-                "PR_GET_MEMORY_MERGE" => return true,
-                "PR_SET_MEMORY_MERGE" => return true,
-
-                // requires linux 6.5
-                "SO_PASSPIDFD"
-                | "SO_PEERPIDFD" => return true,
-
-                // requires linux 6.6
-                "PR_MDWE_NO_INHERIT"
-                | "PR_MDWE_REFUSE_EXEC_GAIN" => return true,
-
                 // defined as a synonym for EM_ARC_COMPACT in gnu but not uclibc
                 "EM_ARC_A5" => return true,
 
@@ -4968,6 +4776,10 @@ fn test_linux(target: &str) {
                 | "UDP_GRO"
                 | "UDP_SEGMENT" => return true,
 
+                // FIXME: once uclibc catches up with the kernel headers, remove.
+                // See https://github.com/rust-lang/libc/issues/1896
+                "IPPROTO_MAX" => return true,
+
                 _ => (),
             }
         }
@@ -4996,14 +4808,6 @@ fn test_linux(target: &str) {
             // because including `linux/if_arp.h` causes some conflicts:
             "ARPHRD_CAN" => true,
 
-            // FIXME(deprecated): deprecated: not available in any header
-            // See: https://github.com/rust-lang/libc/issues/1356
-            "ENOATTR" => true,
-
-            // FIXME(deprecated): SIGUNUSED was removed in glibc 2.26
-            // Users should use SIGSYS instead.
-            "SIGUNUSED" => true,
-
             // FIXME(linux): conflicts with glibc headers and is tested in
             // `linux_termios.rs` below:
             "BOTHER" | "IBSHIFT" | "TCGETS2" | "TCSETS2" | "TCSETSW2" | "TCSETSF2" => true,
@@ -5016,18 +4820,12 @@ fn test_linux(target: &str) {
             // We should do so after a while.
             "SOMAXCONN" if gnu => true,
 
-            // deprecated: not available from Linux kernel 5.6:
-            "VMADDR_CID_RESERVED" => true,
-
-            // FIXME(value): IPPROTO_MAX was increased in 5.6 for IPPROTO_MPTCP:
-            "IPPROTO_MAX" => true,
-
             // Requires >= 6.9 kernel headers.
-            n if (arm || ppc32) && n.starts_with("FUTEX2_") => kernel < (6, 9),
+            n if (arm32 || ppc32) && n.starts_with("FUTEX2_") => kernel < (6, 9),
 
             // FIXME(linux): Not defined on ARM, gnueabihf, mips, musl, PowerPC, riscv64, s390x, and sparc64.
             "SYS_memfd_secret"
-                if arm | gnueabihf | mips | musl | ppc | riscv64 | s390x | sparc64 =>
+                if arm32 | gnueabihf | mips | musl | ppc | riscv64 | s390x | sparc64 =>
             {
                 true
             }
@@ -5070,7 +4868,7 @@ fn test_linux(target: &str) {
             "PR_SME_VL_LEN_MAX" | "PR_SME_SET_VL_INHERIT" | "PR_SME_SET_VL_ONE_EXEC" if gnu => true,
 
             // FIXME(linux): The below is no longer const in glibc 2.34:
-            // https://github.com/bminor/glibc/commit/5d98a7dae955bafa6740c26eaba9c86060ae0344
+            // https://github.com/sailfishos-mirror/glibc/commit/5d98a7dae955bafa6740c26eaba9c86060ae0344
             "PTHREAD_STACK_MIN" | "SIGSTKSZ" | "MINSIGSTKSZ" if gnu => true,
 
             // value changed
@@ -5104,7 +4902,7 @@ fn test_linux(target: &str) {
             }
 
             // FIXME(linux32): Requires >= 6.6 kernel headers.
-            "XDP_USE_SG" | "XDP_PKT_CONTD" if pointer_width == 32 => kernel < (6, 6),
+            "XDP_USE_SG" | "XDP_PKT_CONTD" if p32 => kernel < (6, 6),
 
             // FIXME(linux): Missing only on this platform for some reason
             "PR_MDWE_NO_INHERIT" if gnueabihf => true,
@@ -5115,7 +4913,7 @@ fn test_linux(target: &str) {
             | "XDP_TXMD_FLAGS_TIMESTAMP"
             | "XDP_TXMD_FLAGS_CHECKSUM"
             | "XDP_TX_METADATA"
-                if musl || pointer_width == 32 =>
+                if musl || p32 =>
             {
                 musl || kernel < (6, 8)
             }
@@ -5141,6 +4939,8 @@ fn test_linux(target: &str) {
             | "PF_BLOCK_TS" | "PF_SUSPEND_TASK" => true,
 
             "EPIOCSPARAMS" | "EPIOCGPARAMS" if old_musl => true,
+            // Changed value
+            "IPPROTO_MAX" if old_musl => true,
 
             // FIXME(linux): Requires >= 6.6 kernel headers.
             "SECCOMP_IOCTL_NOTIF_SET_FLAGS" => kernel < (6, 6),
@@ -5166,6 +4966,12 @@ fn test_linux(target: &str) {
             "AT_HWCAP3" | "AT_HWCAP4" => kernel < (6, 9),
             "PTRACE_SET_SYSCALL_INFO" => kernel < (6, 16),
             "TLS_INFO_TX_MAX_PAYLOAD_LEN" | "TLS_INFO_MAX" => kernel < (6, 19),
+
+            // statx mask and attribute bits
+            "STATX_MNT_ID_UNIQUE" => kernel < (6, 8),
+            "STATX_SUBVOL" => kernel < (6, 10),
+            "STATX_WRITE_ATOMIC" | "STATX_ATTR_WRITE_ATOMIC" => kernel < (6, 11),
+            "STATX_DIO_READ_ALIGN" => kernel < (6, 14),
 
             // Changed value recently
             "SW_MAX" | "SW_CNT" => kernel < (6, 16),
@@ -5243,6 +5049,8 @@ fn test_linux(target: &str) {
             "posix_spawn_file_actions_addclosefrom_np" if gnu && sparc64 => true,
             // Needs glibc 2.35 or later.
             "posix_spawn_file_actions_addtcsetpgrp_np" if gnu && sparc64 => true,
+            // Needs glibc 2.42 or later.
+            "pthread_gettid_np" if gnu && versions.glibc.unwrap() < (2, 42) => true,
 
             // FIXME(linux): Deprecated since glibc 2.30. Remove fn once upstream does.
             "sysctl" if gnu => true,
@@ -5275,15 +5083,14 @@ fn test_linux(target: &str) {
             // assume it's a int instead.
             "getnameinfo" if uclibc => true,
 
-            // FIXME(musl): This needs musl 1.2.2 or later, which is newer than what we test with
-            // on CI.
-            "gettid" | "reallocarray" if musl => true,
+            // Added in musl 1.2.2
+            "gettid" | "reallocarray" if old_musl => true,
             // Needs musl 1.2.3 or later.
-            "pthread_getname_np" if musl => true,
+            "pthread_getname_np" if old_musl => true,
             // Added in musl 1.2.5
-            "preadv2" | "pwritev2" if musl => true,
-            // FIXME(musl): Supported in new musl but we don't have a new enough version in CI.
-            "statx" if musl => true,
+            "preadv2" | "pwritev2" if old_musl => true,
+            // Added in musl 1.2.5
+            "statx" if old_musl => true,
             // FIXME(musl): Supported since musl 1.2.6 but not yet in CI.
             "renameat2" if musl => true,
 
@@ -5393,7 +5200,7 @@ fn test_linux(target: &str) {
             ("timex", f) if f.starts_with("__unused") => true,
             // // FIXME(linux): It now takes mode_t since glibc 2.31 on some targets.
             ("ipc_perm", "mode")
-                if ((x86_64 || i686 || arm || riscv64) && gnu || x86_64_gnux32) =>
+                if ((x86_64 || x86_32 || arm32 || riscv64) && gnu || x86_64_gnux32) =>
             {
                 true
             }
@@ -5413,7 +5220,7 @@ fn test_linux(target: &str) {
             // the `ifc_ifcu` field is an anonymous union
             ("ifconf", "ifc_ifcu") => true,
             // glibc uses a single array `uregs` instead of individual fields.
-            ("user_regs", _) if arm => true,
+            ("user_regs", _) if arm32 => true,
             // the `ifr_ifrn` field is an anonymous union
             ("iwreq", "ifr_ifrn") => true,
             // the `key` field is a zero-sized array
@@ -5440,9 +5247,12 @@ fn test_linux(target: &str) {
             }
             // invalid application of 'sizeof' to incomplete type 'long unsigned int[]'
             ("mcontext_t", "__extcontext") if musl && loongarch64 => true,
-            // FIXME(#4121): a new field was added from `f_spare`
-            ("statvfs", "__f_spare") => true,
-            ("statvfs64", "__f_spare") => true,
+            // glibc 2.39 took one of the six spares for `f_type`
+            ("statvfs" | "statvfs64", "f_type" | "__f_spare")
+                if gnu && versions.glibc.unwrap() < (2, 39) =>
+            {
+                true
+            }
             // the `xsk_tx_metadata_union` field is an anonymous union
             ("xsk_tx_metadata", "xsk_tx_metadata_union") => true,
             // After musl 1.2.0, the type becomes `int` instead of `long`.
@@ -5475,30 +5285,6 @@ fn test_linux(target: &str) {
         // FIXME(union): This is actually a union.
         "fpreg_t" if s390x => true,
 
-        // The test doesn't work on some env:
-        "ipv6_mreq"
-        | "ip_mreq_source"
-        | "sockaddr_in6"
-        | "sockaddr_ll"
-        | "in_pktinfo"
-        | "arpreq"
-        | "arpreq_old"
-        | "sockaddr_un"
-        | "ff_constant_effect"
-        | "ff_ramp_effect"
-        | "ff_condition_effect"
-        | "Elf32_Ehdr"
-        | "Elf32_Chdr"
-        | "ucred"
-        | "in6_pktinfo"
-        | "sockaddr_nl"
-        | "termios"
-        | "nlmsgerr"
-            if sparc64 && gnu =>
-        {
-            true
-        }
-
         // The following types contain Flexible Array Member fields which have unspecified calling
         // convention. The roundtripping tests deliberately pass the structs by value to check "by
         // value" layout consistency, but this would be UB for the these types.
@@ -5508,7 +5294,7 @@ fn test_linux(target: &str) {
         "bcm_msg_head" => true,
 
         // FIXME(linux): the call ABI of max_align_t is incorrect on these platforms:
-        "max_align_t" if i686 || ppc64 => true,
+        "max_align_t" if x86_32 => true,
 
         _ => false,
     });
@@ -5553,25 +5339,25 @@ fn test_linux(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 
     if !l4re {
-        test_linux_like_apis(target);
+        test_linux_like_apis(t);
     }
 }
 
 // This function tests APIs that are incompatible to test when other APIs
 // are included (e.g. because including both sets of headers clashes)
-fn test_linux_like_apis(target: &str) {
-    let gnu = target.contains("gnu");
-    let musl = target.contains("musl") || target.contains("ohos") || target.contains("pauthtest");
-    let linux = target.contains("linux");
-    let wali = target.contains("linux") && target.contains("wasm32");
-    let emscripten = target.contains("emscripten");
-    let android = target.contains("android");
+fn test_linux_like_apis(t: &Target) {
+    let gnu = t.gnu();
+    let musl = t.musl();
+    let linux = t.linux();
+    let wali = t.wali();
+    let emscripten = t.emscripten();
+    let android = t.android();
     assert!(linux || android || emscripten);
 
     let mut cfg = ctest_cfg();
     if linux || android || emscripten {
         // test strerror_r from the `string.h` header
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
 
         cfg.header("string.h")
             .skip_alias(|_| true)
@@ -5604,7 +5390,7 @@ fn test_linux_like_apis(target: &str) {
             .skip_fn(|_| true)
             .skip_const(move |constant| !fnctl_constants.contains(&constant.ident()));
 
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
         if musl {
             cfg.header("fcntl.h");
         } else {
@@ -5617,7 +5403,7 @@ fn test_linux_like_apis(target: &str) {
     let mut cfg = ctest_cfg();
     if (linux && !wali) || android {
         // test termios
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
 
         let termios_constants = [
             "BOTHER", "IBSHIFT", "TCGETS2", "TCSETS2", "TCSETSW2", "TCSETSF2",
@@ -5656,7 +5442,7 @@ fn test_linux_like_apis(target: &str) {
             .skip_union(|_| true)
             .skip_const(move |constant| !ipv6_constants.contains(&constant.ident()));
 
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
         headers!(cfg, "linux/in6.h",);
 
         ctest::generate_test(&mut cfg, "../src/lib.rs", "linux_ipv6.rs").unwrap();
@@ -5678,7 +5464,7 @@ fn test_linux_like_apis(target: &str) {
             .skip_struct(move |struct_| !elf_structs.contains(&struct_.ident()))
             .skip_alias(move |alias| !elf_structs.contains(&alias.ident()));
 
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
 
         ctest::generate_test(&mut cfg, "../src/lib.rs", "linux_elf.rs").unwrap();
     }
@@ -5686,7 +5472,7 @@ fn test_linux_like_apis(target: &str) {
     if (linux && !wali) || android {
         // Test `ARPHRD_CAN`.
         let mut cfg = ctest_cfg();
-        config_gnu_bits(target, &mut cfg);
+        config_gnu_bits(t, &mut cfg);
         cfg.header("linux/if_arp.h")
             .skip_fn(|_| true)
             .skip_static(|_| true)
@@ -5700,8 +5486,8 @@ fn test_linux_like_apis(target: &str) {
     }
 }
 
-fn test_haiku(target: &str) {
-    assert!(target.contains("haiku"));
+fn test_haiku(t: &Target) {
+    assert!(t.haiku());
 
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
@@ -5869,9 +5655,6 @@ fn test_haiku(target: &str) {
 
             "Elf64_Phdr" => true,
 
-            // is an union
-            "cpuid_info" => true,
-
             _ => false,
         }
     });
@@ -5958,11 +5741,9 @@ fn test_haiku(target: &str) {
 
             // these are actually unions, but we cannot represent it well
             ("siginfo_t", "sigval") => true,
-            ("sem_t", "named_sem_id") => true,
             ("sigaction", "sa_sigaction") => true,
             ("sigevent", "sigev_value") => true,
             ("fpu_state", "_fpreg") => true,
-            ("cpu_topology_node_info", "data") => true,
             // these fields have a simplified data definition in libc
             ("fpu_state", "_xmm") => true,
             ("savefpu", "_fp_ymm") => true,
@@ -6038,8 +5819,8 @@ fn test_haiku(target: &str) {
     ctest::generate_test(&mut cfg, "../src/lib.rs", "ctest_output.rs").unwrap();
 }
 
-fn test_aix(target: &str) {
-    assert!(target.contains("aix"));
+fn test_aix(t: &Target) {
+    assert!(t.aix());
 
     // ctest generates arguments supported only by clang, so make sure to
     // run with CC=clang. While debugging, "CFLAGS=-ferror-limit=<large num>"
@@ -6251,6 +6032,7 @@ fn test_aix(target: &str) {
         match s.ident() {
             // The field 'u' is actually a unnamed union in the AIX header.
             "poll_ctl_ext" if field.ident() == "u" => true,
+            "pollfd_ext_t" if field.ident() == "u" => true,
 
             // The field 'data' is actually a unnamed union in the AIX header.
             "pollfd_ext" if field.ident() == "data" => true,
@@ -6340,8 +6122,8 @@ fn test_aix(target: &str) {
 // QuRT ctest is disabled: sched_yield is static inline in the SDK (no
 // linkable symbol).  A stub or --defsym is needed.  The semver test works.
 #[allow(dead_code)]
-fn test_qurt(target: &str) {
-    assert!(target.contains("qurt"));
+fn test_qurt(t: &Target) {
+    assert!(t.qurt());
 
     let mut cfg = ctest_cfg();
     cfg.flag("-Wno-deprecated-declarations");
@@ -6368,10 +6150,6 @@ fn test_qurt(target: &str) {
             // These are compatibility stubs in libc, not from QuRT headers
             "stat" | "tm" | "timespec" | "timeval" | "itimerspec" | "dirent" | "DIR"
             | "termios" | "rlimit" | "rusage" | "flock" | "div_t" | "ldiv_t" | "lldiv_t" => true,
-            // sigaction: sa_handler/sa_sigaction are a union in C but separate fields in Rust
-            "sigaction" => true,
-            // sem_t is typedef of anonymous struct in C (no struct tag)
-            "sem_t" => true,
             _ => false,
         }
     });
@@ -6588,8 +6366,19 @@ struct Versions {
     freebsd: Option<(u32, u32)>,
     openbsd: Option<(u32, u32)>,
     netbsd: Option<(u32, u32)>,
-    macos: Option<(u32, u32)>,
-    emscripten: Option<(u32, u32)>,
+    apple: Option<(u32, u32)>,
+    emscripten: Option<(u32, u32, u32)>,
+    wasi_sdk: Option<(u32, WasiVersion)>,
+    /// Android API level (no minor version).
+    android: Option<u32>,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+enum WasiVersion {
+    #[default]
+    P1,
+    P2,
+    P3,
 }
 
 impl Versions {
@@ -6610,21 +6399,36 @@ impl Versions {
             #include "gnu/libc-version.h"
             #endif
 
+            #ifdef __ANDROID__
+            /* The clang driver predefines __ANDROID_MIN_SDK_VERSION__ from the API level
+             * in the target triple; including api-level.h ensures it is defined even on
+             * toolchains that leave it to the header. */
+            #include "android/api-level.h"
+            #endif
+
             #if defined(__FreeBSD__) \
                 || defined(__NetBSD__) \
-                || defined(__OpenBSD__) \
-                || defined(__APPLE__)
+                || defined(__OpenBSD__)
             /* FreeBSD: __FreeBSD_version (MMmmRxx string, e.g. 1600018)
              * NetBSD: __NetBSD_Version__ (MMmmrrpp00 string, e.g. 1001000000)
              * OpenBSD: OpenBSD (release date, e.g. 202510) and OpenBSDM_m (e.g. OpenBSD7_8)
-             * Apple: __MAC_OS_X_VERSION_MAX_ALLOWED __MAC_M_m (e.g. __MAC_26_5)
              */
             #include "sys/param.h"
             #endif
 
+            #if defined(__APPLE__)
+            /* Apple: __MAC_OS_X_VERSION_MAX_ALLOWED __MAC_M_m (e.g. __MAC_26_5) */
+            #include "Availability.h"
+            #endif
+
             #ifdef __EMSCRIPTEN__
-            /* Provides __EMSCRIPTEN_MAJOR__, __EMSCRIPTEN_MINOR__ */
+            /* Provides __EMSCRIPTEN_major__, __EMSCRIPTEN_minor__, __EMSCRIPTEN_tiny__ */
             #include "emscripten/version.h"
+            #endif
+
+            #if __has_include(<wasi/version.h>)
+            /* provides __wasi_sdk_major__, __wasi_sdk_version__ */
+            #include <wasi/version.h>
             #endif
         "#;
 
@@ -6656,7 +6460,7 @@ impl Versions {
         // Allow spaces everywhere so we match things like `\n  # define foo bar \n`.
         let re = Regex::new(r"^\s*#\s*define\s+(\w+)\s+(.*?)\s*$").unwrap();
         let obsd_re = Regex::new(r"^OpenBSD(\d+)_(\d+)$").unwrap();
-        let mac_re = Regex::new(r"^__MAC_(\d+)_(\d+)").unwrap();
+        let apple_re = Regex::new(r"^__[A-Z]*_(\d+)_(\d+)").unwrap();
 
         for line in out.lines() {
             let Some(caps) = re.captures(line) else {
@@ -6674,11 +6478,24 @@ impl Versions {
                 }
                 "__GLIBC__" => ret.glibc.get_or_insert_default().0 = value.parse().unwrap(),
                 "__GLIBC_MINOR__" => ret.glibc.get_or_insert_default().1 = value.parse().unwrap(),
-                "__MAC_OS_X_VERSION_MAX_ALLOWED" => {
-                    let caps = mac_re.captures(value).unwrap();
+                // Clang 12+ predefines the target API level here as a plain integer.
+                // Every NDK wrapper we build with carries an API level, so parse it like
+                // the other version macros above and let a missing value fail loudly at
+                // the unwrap in `test_android` rather than silently skipping tests.
+                "__ANDROID_MIN_SDK_VERSION__" => ret.android = Some(value.parse().unwrap()),
+                "__MAC_OS_X_VERSION_MAX_ALLOWED"
+                | "__IPHONE_OS_VERSION_MAX_ALLOWED"
+                | "__WATCH_OS_VERSION_MAX_ALLOWED"
+                | "__TV_OS_VERSION_MAX_ALLOWED"
+                | "__VISION_OS_VERSION_MAX_ALLOWED" => {
+                    let caps = apple_re.captures(value).unwrap();
                     let major: u32 = caps[1].parse().unwrap();
                     let minor: u32 = caps[2].parse().unwrap();
-                    ret.macos = Some((major, minor));
+                    // Override any previous value.
+                    //
+                    // (`__IPHONE_OS_VERSION_MAX_ALLOWED` is defined first,
+                    // and is set on watchOS, tvOS and visionOS too).
+                    ret.apple = Some((major, minor));
                 }
                 "__FreeBSD_version" => {
                     // Format: MmmRxx where M is major (possibly multi-digit), mm is minor, R
@@ -6700,12 +6517,30 @@ impl Versions {
                     let minor: u32 = caps[2].parse().unwrap();
                     ret.openbsd = Some((major, minor));
                 }
-                "__EMSCRIPTEN_major__" => {
-                    ret.emscripten.get_or_insert_default().0 = value.parse().unwrap()
+                // Versions before 5.0.1 define the lowercase names as integers; 5.0.1 and
+                // later define the uppercase names as integers and the lowercase names as
+                // non-integer aliases of them.
+                "__EMSCRIPTEN_major__" | "__EMSCRIPTEN_MAJOR__" => {
+                    if let Ok(v) = value.parse() {
+                        ret.emscripten.get_or_insert_default().0 = v;
+                    }
                 }
-                "__EMSCRIPTEN_minor__" => {
-                    ret.emscripten.get_or_insert_default().1 = value.parse().unwrap()
+                "__EMSCRIPTEN_minor__" | "__EMSCRIPTEN_MINOR__" => {
+                    if let Ok(v) = value.parse() {
+                        ret.emscripten.get_or_insert_default().1 = v;
+                    }
                 }
+                "__EMSCRIPTEN_tiny__" | "__EMSCRIPTEN_TINY__" => {
+                    if let Ok(v) = value.parse() {
+                        ret.emscripten.get_or_insert_default().2 = v;
+                    }
+                }
+                "__wasi_sdk_major__" => {
+                    ret.wasi_sdk.get_or_insert_default().0 = value.parse().unwrap()
+                }
+                "__wasip1__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P1,
+                "__wasip2__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P2,
+                "__wasip3__" => ret.wasi_sdk.get_or_insert_default().1 = WasiVersion::P3,
                 _ => (),
             }
         }

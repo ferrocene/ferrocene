@@ -3,6 +3,7 @@ use crate::core::build_steps::compile::Std;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::test::{SourceType, tool};
 use crate::ferrocene::tool::flip_link::PATH as FLIP_LINK_PATH;
+use crate::utils::helpers;
 use crate::{Kind, Mode};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -29,11 +30,11 @@ impl CommandLineStep for FlipLink {
         let thumb = TargetSelection::from_user("thumbv7em-none-eabi");
         if !builder.targets.contains(&thumb) {
             eprintln!("can't run flip-link tests without thumbv7 built!");
-            crate::exit!(1);
+            helpers::exit_process(1);
         }
         if !builder.config.lld_enabled {
             eprintln!("can't run flip-link tests without LLD built!");
-            crate::exit!(1);
+            helpers::exit_process(1);
         }
 
         let host = builder.config.host_target;

@@ -9,6 +9,7 @@ use build_helper::symbol_report::SymbolReport;
 use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::run;
+use crate::utils::helpers;
 
 const TRACKED_FILE: &str = "ferrocene/doc/symbol-report.csv";
 
@@ -76,7 +77,7 @@ impl CommandLineStep for CertifiedCoreSymbols {
                     "The certified core symbol report is out of date. \
                     Run `./x test {TRACKED_FILE} --bless` to update it."
                 ));
-                crate::exit!(1);
+                helpers::exit_process(1);
             }
         }
     }

@@ -9,8 +9,8 @@ use sha2::digest::Digest;
 
 use crate::core::builder::Builder;
 use crate::core::config::TargetSelection;
-use crate::utils::helpers::{hex_encode, mtime};
-use crate::{CodegenBackendKind, Compiler, Mode, helpers, t};
+use crate::utils::helpers::{self, hex_encode, mtime, t};
+use crate::{CodegenBackendKind, Compiler, Mode};
 
 #[cfg(test)]
 mod tests;
@@ -134,7 +134,7 @@ pub fn codegen_backend_stamp(
     // Ferrocene addition
     if *backend == CodegenBackendKind::Gcc {
         eprintln!("error: Ferrocene does not support the gcc codegen backend");
-        crate::exit!(1);
+        helpers::exit_process(1);
     }
 
     BuildStamp::new(&builder.cargo_out(compiler, Mode::Codegen, target))

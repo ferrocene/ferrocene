@@ -144,5 +144,6 @@ pub(crate) fn incomplete_config_for_rustdoc_gui_test() -> Config {
         jobs: Default::default(),
         parallel_frontend_threads: Config::DEFAULT_PARALLEL_FRONTEND_THREADS,
         iteration_count: Config::DEFAULT_ITERATION_COUNT,
+        wasm_proc_macros: false,
     }
 }

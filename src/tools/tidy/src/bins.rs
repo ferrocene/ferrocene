@@ -103,6 +103,9 @@ mod os_impl {
         "src/tools/rust-installer/test/image1/bin/bad-bin",
         "src/tools/rust-installer/test/image2/bin/oldprogram",
         "src/tools/rust-installer/test/image3/bin/cargo",
+        // Ferrocene addition:
+        // out libc must be ahead of rust-lang/rust since this failed on our libc pull
+        "ferrocene/library/libc/libc-test/build/main.rs",
     ];
 
     fn filter_rust_installer_no_so_bins(path: &Path) -> bool {
@@ -116,7 +119,6 @@ mod os_impl {
         use std::ffi::OsStr;
 
         const ALLOWED: &[&str] = &["configure", "x", "ferrocene/library/libc/ci/test-runner-linux"];
-
         for p in RI_EXCLUSION_LIST {
             if !path.join(Path::new(p)).exists() {
                 check.error(format!("rust-installer test bins missed: {p}"));

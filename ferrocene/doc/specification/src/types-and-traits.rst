@@ -3086,7 +3086,7 @@ A :t:`type` is its own :t:`subtype`.
      -
      - :t:`invariant`
    * - :dp:`fls_owp42z12l4lc`
-     - ``core::call::UnsafeCell<T>``
+     - ``core::cell::UnsafeCell<T>``
      -
      - :t:`invariant`
    * - :dp:`fls_i1vuix3gj9ej`

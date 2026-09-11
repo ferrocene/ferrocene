@@ -16,11 +16,15 @@ mod collector;
 mod diagnostics;
 mod graph_checks;
 mod mono_checks;
+mod offload;
 mod partitioning;
 mod util;
 
 // Ferrocene addition
 pub use collector::ferrocene::collect_validated_roots;
+// Exposed so `rustc_codegen_ssa::base::codegen_crate` can trigger the
+// host-metadata manifest write.
+pub use offload::manifest::write_host_metadata_offload_manifest;
 
 fn custom_coerce_unsize_info<'tcx>(
     tcx: TyCtxtAt<'tcx>,

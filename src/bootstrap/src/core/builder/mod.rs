@@ -16,7 +16,6 @@ use clap::ValueEnum;
 use tracing::instrument;
 
 pub use self::cargo::{Cargo, apply_pgo, cargo_profile_var};
-pub use crate::Compiler;
 use crate::core::build_steps::compile::{Std, StdLink, looks_like_codegen_backend};
 use crate::core::build_steps::tool::RustcPrivateCompilers;
 // Ferrocene: this will conflict because we do not include "install" module,
@@ -24,7 +23,6 @@ use crate::core::build_steps::tool::RustcPrivateCompilers;
 use crate::core::build_steps::{
     check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, tool, vendor,
 };
-use crate::core::builder::cli_paths::CLIStepPath;
 use crate::core::builder::step_stack::StepRecord;
 pub use crate::core::builder::step_stack::StepStack;
 use crate::core::config::flags::Subcommand;
@@ -35,7 +33,7 @@ use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
 use crate::utils::helpers::{self, LldThreads, add_dylib_path, exe, libdir, linker_args, t};
 use crate::utils::tracing::format_location;
-use crate::{Build, Crate, trace};
+use crate::{Build, Compiler, Crate, trace};
 
 mod cargo;
 mod cli_paths;
@@ -372,7 +370,7 @@ struct CommandLineStepDescription {
     kind: Kind,
 }
 
-#[derive(Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct TaskPath {
     pub path: PathBuf,
 }
@@ -384,7 +382,7 @@ impl Debug for TaskPath {
 }
 
 /// Collection of paths used to match a task rule.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum PathSet {
     /// A collection of individual paths or aliases.
     ///
@@ -424,34 +422,6 @@ impl PathSet {
     fn check(p: &TaskPath, needle: &Path) -> bool {
         // This order is important for retro-compatibility, as `starts_with` was introduced later.
         p.path.ends_with(needle) || p.path.starts_with(needle)
-    }
-
-    /// Returns true if self is matched by any of the command-line selectors,
-    /// and mutates those selectors to flag them as will-be-executed.
-    fn match_and_flag_selectors(&self, selectors: &mut [CLIStepPath]) -> bool {
-        let mut check_and_flag = |p| {
-            let mut result = false;
-            for selector in selectors.iter_mut() {
-                let matched = Self::check(p, &selector.path);
-                if matched {
-                    selector.will_be_executed = true;
-                    result = true;
-                }
-            }
-            result
-        };
-
-        match self {
-            PathSet::Set(set) => {
-                // Flag all matching selectors, not just the first match.
-                let mut matched = false;
-                for p in set {
-                    matched |= check_and_flag(p);
-                }
-                matched
-            }
-            PathSet::Suite(suite) => check_and_flag(suite),
-        }
     }
 
     /// A convenience wrapper for Steps which know they have no aliases and all their sets contain only a single path.
@@ -644,14 +614,6 @@ impl<'a> ShouldRun<'a> {
         self
     }
 
-    /// Handles individual files (not directories) within a test suite.
-    fn is_suite_path(&self, requested_path: &Path) -> Option<&PathSet> {
-        self.paths.iter().find(|pathset| match pathset {
-            PathSet::Suite(suite) => requested_path.starts_with(&suite.path),
-            PathSet::Set(_) => false,
-        })
-    }
-
     pub fn suite_path(mut self, suite: &str) -> Self {
         self.paths.insert(PathSet::Suite(TaskPath { path: suite.into() }));
         self
@@ -661,25 +623,6 @@ impl<'a> ShouldRun<'a> {
     pub fn ferrocene_disabled(mut self) -> ShouldRun<'a> {
         self.paths.insert(PathSet::Set(BTreeSet::new()));
         self
-    }
-
-    /// Given a set of requested paths, return the subset which match the Step for this `ShouldRun`,
-    /// removing the matches from `paths`.
-    ///
-    /// NOTE: this returns multiple PathSets to allow for the possibility of multiple units of work
-    /// within the same step. For example, `test::Crate` allows testing multiple crates in the same
-    /// cargo invocation, which are put into separate sets because they aren't aliases.
-    ///
-    /// The reason we return PathSet instead of PathBuf is to allow for aliases that mean the same thing
-    /// (for now, just `all_krates` and `paths`, but we may want to add an `aliases` function in the future?)
-    fn pathsets_for_paths_flagging_matches(&self, paths: &mut [CLIStepPath]) -> Vec<PathSet> {
-        let mut sets = vec![];
-        for pathset in &self.paths {
-            if pathset.match_and_flag_selectors(paths) {
-                sets.push(pathset.clone());
-            }
-        }
-        sets
     }
 
     /// When the corresponding step is run "by default" (without explicit command-line paths),
@@ -905,6 +848,7 @@ impl<'a> Builder<'a> {
                 check::Clippy,
                 check::Miri,
                 check::CargoMiri,
+                check::Priroda,
                 check::MiroptTestTools,
                 check::Rustfmt,
                 check::RustAnalyzer,
@@ -980,6 +924,7 @@ impl<'a> Builder<'a> {
                 test::Rustfmt,
                 test::Miri,
                 test::CargoMiri,
+                test::Priroda,
                 test::Clippy,
                 test::CompiletestTest,
                 test::StdarchVerify,
@@ -1081,6 +1026,7 @@ impl<'a> Builder<'a> {
                 dist::LlvmBitcodeLinker,
                 dist::RustDev,
                 dist::Enzyme,
+                dist::Offload,
                 dist::Bootstrap,
                 dist::Extended,
                 // It seems that PlainSourceTarball somehow changes how some of the tools
@@ -1682,7 +1628,7 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
     /// *target*.
     pub fn llvm_config(&self, target: TargetSelection) -> Option<PathBuf> {
         if self.config.llvm_enabled(target) && self.kind != Kind::Check && !self.config.dry_run() {
-            let llvm::LlvmResult { host_llvm_config, .. } = self.ensure(llvm::Llvm { target });
+            let llvm::LlvmOutput { host_llvm_config, .. } = self.ensure(llvm::Llvm { target });
             if host_llvm_config.is_file() {
                 return Some(host_llvm_config);
             }

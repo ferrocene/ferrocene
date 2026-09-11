@@ -10,8 +10,8 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf, absolute};
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::run::GenerateCopyright;
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;

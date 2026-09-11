@@ -4,9 +4,9 @@
 pub(crate) mod certified_core_symbols;
 pub(crate) mod flip_link;
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
 use crate::utils::exec::BootstrapCommand;

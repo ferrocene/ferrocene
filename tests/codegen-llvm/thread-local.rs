@@ -6,6 +6,7 @@
 //@ ignore-android does not use #[thread_local]
 //@ ignore-nto does not use #[thread_local]
 //@ ignore-qnx does not use #[thread_local]
+//@ ignore-ohos does not use #[thread_local]
 //@ ignore-ferrocene.facade no support for thread locals
 
 #![crate_type = "lib"]

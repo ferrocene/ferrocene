@@ -256,6 +256,7 @@ fn sample_config() -> Config {
         iteration_count: Default::default(),
         verbose_run_make_subprocess_output: Default::default(),
         gcc_supported_target_tuples: Default::default(),
+        wasm_proc_macros: Default::default(),
     }
 }
 

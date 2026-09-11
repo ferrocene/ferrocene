@@ -11,9 +11,9 @@ use std::rc::Rc;
 
 use serde_json::json;
 
-use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::doc::Rustc;
 use crate::core::build_steps::run::GenerateCopyright;
+use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;

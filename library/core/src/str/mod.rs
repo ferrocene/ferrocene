@@ -152,13 +152,14 @@ impl str {
     /// assert_eq!("ƒoo".len(), 4); // fancy f!
     /// assert_eq!("ƒoo".chars().count(), 3);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_str_len", since = "1.39.0")]
     #[rustc_diagnostic_item = "str_len"]
     #[rustc_no_implicit_autorefs]
     #[must_use]
     #[inline]
-    #[ferrocene::prevalidated]
+    #[allow(clippy::needless_as_bytes)]
     pub const fn len(&self) -> usize {
         self.as_bytes().len()
     }

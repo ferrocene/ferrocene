@@ -6,6 +6,7 @@ use rustc_hir::HirId;
 use rustc_hir::attrs::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::has_requires_validation_attribute;
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
@@ -98,6 +99,40 @@ fn body_or_value(tcx: TyCtxt<'_>, def_id: DefId) -> &str {
         DefKind::AssocFn => "body",
         _ => unreachable!("this must only be called on associated constants or functions"),
     }
+}
+
+pub(super) fn lint_impl_requires_validation(
+    tcx: TyCtxt<'_>,
+    implementation_id: LocalDefId,
+    definition_id: DefId,
+) {
+    let implementation_hir_id = tcx.local_def_id_to_hir_id(implementation_id);
+    let implementation_id = implementation_id.to_def_id();
+    let implementation_span = ident_span(tcx, implementation_id);
+
+    let descr = tcx.def_descr(implementation_id);
+    tcx.emit_node_span_lint(
+        UNVALIDATED,
+        implementation_hir_id,
+        implementation_span,
+        rustc_errors::DiagDecorator(|diag| {
+            let mut definition_span = MultiSpan::from_span(ident_span(tcx, definition_id));
+            if let Some(annotation) = has_requires_validation_attribute(tcx, definition_id) {
+                definition_span.push_span_label(annotation, "required to be validated here");
+            }
+            let definition_path = tcx.def_path_str(definition_id);
+
+            diag.primary_message(format!(
+                "unvalidated {descr} implements a trait item that requires validation",
+            ))
+            .span_label(implementation_span, "this implementation is unvalidated")
+            .help("add `#[ferrocene::prevalidated]` to this implementation")
+            .span_note(
+                definition_span,
+                format!("all implementations of `{definition_path}` must be validated"),
+            );
+        }),
+    );
 }
 
 /// Diagnostics.

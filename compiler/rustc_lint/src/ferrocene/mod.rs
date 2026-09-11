@@ -219,6 +219,7 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
         item: &'tcx rustc_hir::ImplItem<'tcx>,
     ) {
         check_attribute_placement(cx.tcx, item.owner_id.def_id, None);
+        check_impl_of_requires_validation(cx.tcx, item.owner_id.def_id);
         LintThir::check_item(cx.tcx, item.owner_id, item.owner_id.def_id);
     }
 }
@@ -325,6 +326,34 @@ impl ValidationItem {
         debug!("{descr} has type `{ty_ty:?}`");
 
         Self::ConstOrType { default_value, is_fn_ptr }
+    }
+}
+
+/// Check that every implementation of a trait item marked with
+/// `requires_validation` is marked with `prevalidated`.
+///
+/// A trait item that inherits the default implementation is not checked by
+/// this. That is okay because [`check_attribute_placement`] guarantees that a
+/// trait item with a default that is marked with `requires_validation`
+/// is also marked `prevalidated`.
+fn check_impl_of_requires_validation(tcx: TyCtxt<'_>, implementation_id: LocalDefId) {
+    // Get the id of the trait item definition being implemented by
+    // `implementation_id`. `trait_item_of` will only return `Some` if
+    // `implementation_id` is a trait item.
+    let Some(trait_item_definition) = tcx.trait_item_of(implementation_id.to_def_id()) else {
+        return;
+    };
+
+    if has_requires_validation_attribute(tcx, trait_item_definition).is_none() {
+        // If the trait method definition has no `requires_validation`
+        // attribute, there is nothing to check.
+    } else if item_is_validated(tcx, implementation_id.to_def_id()).allowed_in_certified_build() {
+        // If the trait method implementation is `prevalidated` everything is fine
+    } else {
+        debug!(
+            "{implementation_id:?} implements {trait_item_definition:?}, which requires validation"
+        );
+        diagnostics::lint_impl_requires_validation(tcx, implementation_id, trait_item_definition);
     }
 }
 

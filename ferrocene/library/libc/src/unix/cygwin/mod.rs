@@ -1710,7 +1710,7 @@ f! {
     pub unsafe fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
         let mut s: u32 = 0;
         let size_of_mask = size_of_val(&cpuset.bits[0]);
-        for i in cpuset.bits[..(size / size_of_mask)].iter() {
+        for i in &cpuset.bits[..(size / size_of_mask)] {
             s += i.count_ones();
         }
         s as c_int
@@ -1783,9 +1783,7 @@ f! {
     pub unsafe fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
         cmsg.offset(1).cast_mut().cast()
     }
-}
 
-safe_f! {
     pub const safe fn makedev(ma: c_uint, mi: c_uint) -> dev_t {
         let ma = ma as dev_t;
         let mi = mi as dev_t;

@@ -627,7 +627,6 @@ EM_XTENSA
 EM_ZSP
 ENAVAIL
 ENOANO
-ENOATTR
 ENOCSI
 ENODATA
 ENOKEY
@@ -728,6 +727,7 @@ ETH_P_IPX
 ETH_P_IRDA
 ETH_P_LAT
 ETH_P_LINK_CTL
+ETH_P_LLDP
 ETH_P_LOCALTALK
 ETH_P_LOOP
 ETH_P_LOOPBACK
@@ -2145,11 +2145,18 @@ NLA_F_NESTED
 NLA_F_NET_BYTEORDER
 NLA_TYPE_MASK
 NLDLY
+NLMSG_ALIGN
+NLMSG_DATA
 NLMSG_DONE
 NLMSG_ERROR
+NLMSG_LENGTH
 NLMSG_MIN_TYPE
+NLMSG_NEXT
 NLMSG_NOOP
+NLMSG_OK
 NLMSG_OVERRUN
+NLMSG_PAYLOAD
+NLMSG_SPACE
 NLM_F_ACK
 NLM_F_ACK_TLVS
 NLM_F_APPEND
@@ -3023,6 +3030,7 @@ SHORT_INODE
 SIGEV_NONE
 SIGEV_SIGNAL
 SIGEV_THREAD
+SIGEV_THREAD_ID
 SIGIO
 SIGPOLL
 SIGPWR
@@ -3772,7 +3780,6 @@ VMADDR_CID_ANY
 VMADDR_CID_HOST
 VMADDR_CID_HYPERVISOR
 VMADDR_CID_LOCAL
-VMADDR_CID_RESERVED
 VMADDR_PORT_ANY
 VREPRINT
 VSWTC
@@ -4093,6 +4100,12 @@ erand48
 eventfd
 eventfd_read
 eventfd_write
+execl
+execle
+execlp
+execv
+execve
+execvp
 execvpe
 faccessat
 fallocate
@@ -4123,6 +4136,7 @@ file_handle
 flistxattr
 fmemopen
 fopen64
+fork
 forkpty
 fpos64_t
 fread_unlocked
@@ -4177,6 +4191,8 @@ getspnam
 getspnam_r
 gettid
 getxattr
+group_req
+group_source_req
 hasmntopt
 hwtstamp_config
 iconv
@@ -4545,6 +4561,7 @@ sync_file_range
 syncfs
 syscall
 sysinfo
+system
 tee
 telldir
 timer_create

@@ -1102,6 +1102,12 @@ pub const MAP_NORESERVE: c_int = 0x0000;
 pub const MAP_HASSEMAPHORE: c_int = 0x0000;
 pub const MAP_TRYFIXED: c_int = 0;
 
+// minherit syscall inherit values
+pub const MAP_INHERIT_SHARE: c_int = 0;
+pub const MAP_INHERIT_COPY: c_int = 1;
+pub const MAP_INHERIT_NONE: c_int = 2;
+pub const MAP_INHERIT_ZERO: c_int = 3;
+
 pub const EIPSEC: c_int = 82;
 pub const ENOMEDIUM: c_int = 85;
 pub const EMEDIUMTYPE: c_int = 86;
@@ -1338,6 +1344,8 @@ pub const NI_DGRAM: c_int = 16;
 pub const NI_MAXHOST: size_t = 256;
 
 pub const RTLD_LOCAL: c_int = 0;
+pub const RTLD_NODELETE: c_int = 0x400;
+pub const RTLD_NOLOAD: c_int = 0x800;
 
 pub const CTL_MAXNAME: c_int = 12;
 
@@ -1358,8 +1366,6 @@ pub const CTL_MACHDEP: c_int = 7;
 pub const CTL_DDB: c_int = 9;
 pub const CTL_VFS: c_int = 10;
 pub const CTL_MAXID: c_int = 11;
-
-pub const HW_NCPUONLINE: c_int = 25;
 
 pub const KERN_OSTYPE: c_int = 1;
 pub const KERN_OSRELEASE: c_int = 2;
@@ -1401,6 +1407,7 @@ pub const KERN_MALLOCSTATS: c_int = 39;
 pub const KERN_CPTIME: c_int = 40;
 pub const KERN_NCHSTATS: c_int = 41;
 pub const KERN_FORKSTAT: c_int = 42;
+#[deprecated(since = "0.2.190", note = "Removed in OpenBSD 7.2")]
 pub const KERN_NSELCOLL: c_int = 43;
 pub const KERN_TTY: c_int = 44;
 pub const KERN_CCPU: c_int = 45;
@@ -1872,9 +1879,7 @@ f! {
     pub const unsafe fn CMSG_SPACE(length: c_uint) -> c_uint {
         (_ALIGN(size_of::<cmsghdr>()) + _ALIGN(length as usize)) as c_uint
     }
-}
 
-safe_f! {
     pub const safe fn WSTOPSIG(status: c_int) -> c_int {
         status >> 8
     }

@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Setup Rust toolchain
@@ -44,11 +44,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - run: rustup update stable --no-self-update
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       # Here we use the latest stable Rust toolchain already installed by GitHub
       # Ideally we should run it for every target, but we cannot rely on unstable toolchains
       # due to Clippy not being consistent between them.
@@ -75,14 +75,14 @@ jobs:
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Setup Rust toolchain
         run: ./ci/install-rust.sh
 
       - name: Install semver-checks
-        uses: taiki-e/install-action@a6b2e2dcd845ddd7f509ce4f3ed3d922b80cc5d9 # v2.84.0
+        uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
         if: matrix.toolchain == 'stable'
         with:
           tool: cargo-semver-checks
@@ -94,7 +94,7 @@ jobs:
       # FIXME(ci): These `du` statements are temporary for debugging cache
       - name: Target size before restoring cache
         run: du -sh target | sort -k 2 || true
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           key: ${{ matrix.os }}-${{ matrix.toolchain }}
       - name: Target size after restoring cache
@@ -133,8 +133,6 @@ jobs:
             os: windows-11-arm
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-26.04-arm
-          - target: i686-pc-windows-gnu
-            os: windows-2025
           - target: i686-pc-windows-msvc
             os: windows-2025
           - target: i686-unknown-linux-gnu
@@ -148,12 +146,12 @@ jobs:
     env:
       TARGET: ${{ matrix.target }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Setup Rust toolchain
         run: ./ci/install-rust.sh
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           key: ${{ matrix.target }}
 
@@ -193,34 +191,34 @@ jobs:
           - target: aarch64-linux-android
           - target: aarch64-unknown-linux-musl
           - target: aarch64-unknown-linux-musl
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           - target: arm-linux-androideabi
           - target: arm-unknown-linux-gnueabihf
           - target: arm-unknown-linux-musleabihf
           - target: arm-unknown-linux-musleabihf
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           # FIXME(#4297): Disabled due to spurious failue
           # - target: i686-linux-android
           - target: i686-unknown-linux-musl
           - target: i686-unknown-linux-musl
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           - target: loongarch64-unknown-linux-gnu
           - target: loongarch64-unknown-linux-musl
           - target: loongarch64-unknown-linux-musl
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           - target: powerpc64-unknown-linux-gnu
           - target: powerpc64-unknown-linux-musl
           - target: powerpc64-unknown-linux-musl
-            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2_3: 1 }
+            env: { RUST_LIBC_UNSTABLE_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           - target: powerpc64le-unknown-linux-gnu
           - target: powerpc64le-unknown-linux-musl
           - target: powerpc64le-unknown-linux-musl
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           - target: riscv64gc-unknown-linux-gnu
           - target: s390x-unknown-linux-gnu
@@ -231,14 +229,13 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-26-intel
           - target: x86_64-linux-android
-            env: { TEST_CUTTLEFISH: 1 }
             # Keep in sync with the Android build pinned in ci/cuttlefish-setup.sh
             artifact-tag: android17
           # FIXME: Exec format error (os error 8)
           # - target: x86_64-unknown-linux-gnux32
           - target: x86_64-unknown-linux-musl
           - target: x86_64-unknown-linux-musl
-            env: { TEST_MUSL_V1_2_3: 1 }
+            env: { TEST_MUSL_V1_2: 1 }
             artifact-tag: new-musl
           # FIXME: It seems some items in `src/unix/mod.rs` aren't defined on redox actually.
           # - target: x86_64-unknown-redox
@@ -246,17 +243,26 @@ jobs:
           # FIXME(ppc): SIGILL running tests, see
           # https://github.com/rust-lang/libc/pull/4254#issuecomment-2636288713
           # - target: powerpc-unknown-linux-gnu
+
+          # Testing iOS and tvOS should give us reasonably good coverage for Apple platforms.
+          # (watchOS is similar to tvOS, and visionOS is similar to iOS).
+          - target: aarch64-apple-ios-sim
+            os: macos-26
+            cargo-apple-runner: true
+          - target: aarch64-apple-tvos-sim
+            os: macos-26
+            cargo-apple-runner: true
     runs-on: ${{ matrix.os && matrix.os || 'ubuntu-26.04' }}
     timeout-minutes: 25
     env:
       TARGET: ${{ matrix.target }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Setup Rust toolchain
         run: ./ci/install-rust.sh
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           key: ${{ matrix.target }}
 
@@ -267,12 +273,21 @@ jobs:
             jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]' >>$GITHUB_ENV
         shell: bash
 
+      - name: Install `cargo-apple-runner`
+        if: matrix.cargo-apple-runner
+        uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-apple-runner
+
       - name: Run natively
-        if: runner.os != 'Linux'
+        if: runner.os != 'Linux' && !matrix.cargo-apple-runner
         run: ./ci/run.sh ${{ matrix.target }}
       - name: Run in Docker
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.cargo-apple-runner
         run: ./ci/run-docker.sh ${{ matrix.target }}
+      - name: Run on Apple's simulator
+        if: matrix.cargo-apple-runner
+        run: ./ci/run-apple-simulator.sh ${{ matrix.target }}
 
       - name: Create CI artifacts
         id: create_artifacts
@@ -303,11 +318,11 @@ jobs:
           - target: x86_64-unknown-illumos
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Test on FreeBSD
-        uses: vmactions/freebsd-vm@77ed28d336d03fe19a3f4f7266c1d2c4714dd79d # v1.5.2
+        uses: vmactions/freebsd-vm@f0552d3b69211736abd97f02ff3d4674c56b73b1 # v1.5.5
         if: contains(matrix.target, 'freebsd')
         with:
           release: ${{ matrix.release }}
@@ -322,7 +337,7 @@ jobs:
             ./ci/run.sh ${{ matrix.target }}
 
       - name: Test on Solaris
-        uses: vmactions/solaris-vm@315163f088b66e55bbcc45928bd224d4973b2312 # v1.3.8
+        uses: vmactions/solaris-vm@96d8d976f9e67d82ec6c7e8ce9c1060731f9e21c # v1.3.9
         if: contains(matrix.target, 'solaris')
         with:
           release: "11.4-gcc"
@@ -334,7 +349,7 @@ jobs:
           run: ./ci/bsd-run.sh ${{ matrix.target }}
 
       - name: Test on NetBSD
-        uses: vmactions/netbsd-vm@0c26a4c4a5e234038862a4a53a00c905b8a107c9 # v1.4.2
+        uses: vmactions/netbsd-vm@7f23a491dcc69c34195721ab67934917707f84c7 # v1.4.9
         if: contains(matrix.target, 'netbsd')
         with:
           release: "10.1"
@@ -346,7 +361,7 @@ jobs:
           run: ./ci/bsd-run.sh ${{ matrix.target }}
 
       - name: Test on illumos
-        uses: vmactions/omnios-vm@027e3ec08fed6fb740ab5f300c2605f9de02997a # v1.3.4
+        uses: vmactions/omnios-vm@317e4f8069dad8a65e1520808f1a68ef3fd20565 # v1.3.6
         if: contains(matrix.target, 'illumos')
         with:
           # Use the latest LTS
@@ -363,12 +378,13 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install Rust
-      run: rustup update nightly --no-self-update && rustup default nightly
-    - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      # FIXME(rust-lang/rust#160439): unpin once the issue is fixed
+      run: rustup update nightly-2026-08-02 --no-self-update && rustup default nightly-2026-08-02
+    - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
     - run: cargo doc --workspace --no-deps
 
   zizmor:
@@ -379,12 +395,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
 
   # One job that "summarizes" the success state of this pipeline. This can then be added to branch
   # protection, rather than having to add each job separately.

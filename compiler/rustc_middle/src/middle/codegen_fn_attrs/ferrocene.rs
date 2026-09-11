@@ -16,6 +16,9 @@ pub struct Validated {
 
 const VALIDATED_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
 
+/// Avoid using this directly; prefer the helper functions
+/// [`allowed_in_certified_build`](Self::allowed_in_certified_build) and
+/// [`needs_test`](Self::needs_test).
 #[derive(Debug)]
 pub enum ValidatedStatus {
     Validated {
@@ -24,7 +27,7 @@ pub enum ValidatedStatus {
         annotation: Option<Span>,
         /// We want to distinguish between items that are *directly* annotated and items that are
         /// *indirectly* annotated.
-        /// Indirecty annotated items can sometimes have no meaning: macros, `use` statements, etc.
+        /// Indirectly annotated items can sometimes have no meaning: macros, `use` statements, etc.
         /// But we may wish to give them a meaning in the future if they're directly annotated.
         /// So: only consider indirect annotations for certain kinds of items.
         inherited: bool,
@@ -34,23 +37,31 @@ pub enum ValidatedStatus {
 }
 
 impl ValidatedStatus {
+    /// Should `warn(ferrocene::unvalidated)` emit a diagnostic if this item is called by main?
+    /// If so, return `false`.
     pub fn allowed_in_certified_build(self) -> bool {
         match self {
             ValidatedStatus::Validated { .. } => true,
+            // We don't know if a WorkaroundBugs function is validated, so assume it's not.
             ValidatedStatus::WorkaroundDelegationBugs | ValidatedStatus::Unvalidated => false,
         }
     }
 
+    /// Does this function need to be covered by the test suite?
     pub fn needs_test(self) -> bool {
         match self {
             ValidatedStatus::Validated { annotation, inherited } => {
+                // Synthesized functions don't need to be tested.
                 annotation.is_some() || inherited
             }
+            // We don't know if this function needs to be tested, so assume it does.
+            ValidatedStatus::WorkaroundDelegationBugs  => true,
             _ => false,
         }
     }
 }
 
+/// Is this item validated even if it doesn't have a `ferrocene::prevalidated` annotation?
 fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedStatus> {
     match tcx.hir_node_by_def_id(local) {
         // Skip intrinsics, extern functions, and associated functions with no default.
@@ -61,6 +72,7 @@ fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedSta
             | Node::ForeignItem(ForeignItem { kind: ForeignItemKind::Fn(..), .. })
             | Node::TraitItem(TraitItem { kind: TraitItemKind::Fn(_, TraitFn::Required(_)), .. }) => {
                 info!("skipping item {local:?}");
+                // Allowed in a certified build, does not need a test.
                 return Some(ValidatedStatus::Validated { annotation: None, inherited: false, });
             }
         Node::ImplItem(..) => {}
@@ -110,6 +122,8 @@ fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedSta
     }
 }
 
+/// Given an item, determine whether it's validated, either directly or indirectly.
+///
 /// Shared between `rustc_lint` and `rustc_codegen_ssa` attr parsing.
 ///
 /// This analysis needs to be conservative. If you don't have enough information to determine the
@@ -119,11 +133,12 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     // A closure is validated if the function it's defined in is validated.
     let owner = tcx.typeck_root_def_id(def_id);
 
-    // Skip items synthesized by the compiler.
+    // Look for items synthesized by the compiler.
     let synthetic = match tcx.def_kind(owner) {
         DefKind::Ctor(..) | DefKind::SyntheticCoroutineBody => true,
         // NOTE: intrinsics might have a "fallback body" that is used as a default if the codegen
-        // backend doesn't override it.
+        // backend doesn't override it. For example, if this is used in Miri, or if there's no
+        // target-specific assembly in LLVM's compiler-rt.
         _ => tcx.intrinsic(owner).is_some_and(|def| def.must_be_overridden),
     };
     if synthetic {
@@ -137,7 +152,7 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         return status;
     }
 
-    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
+    if let Some(annotation) = any_parent_is_annotated(tcx, owner) {
         return annotation;
     }
 
@@ -160,8 +175,8 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     }
 }
 
-/// Check if this item or any of its parents are validated.
-fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
+/// Check if this item or any of its parents are directly annotated.
+fn any_parent_is_annotated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
     let mut current = item;
     loop {
         // Check if it's possible for this item to have attributes.
@@ -173,7 +188,7 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
             }
             _ => {}
         }
-        // Check if the current item has an annotation
+        // Check if the current item has an annotation.
         if let Some(attr) = tcx.get_attrs_by_path(current, VALIDATED_ATTR).next() {
             return Some(ValidatedStatus::Validated {
                 annotation: Some(attr.span()),

@@ -24,13 +24,13 @@ use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, MacroKinds, NonMacroAttrKind, PerNS};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
 use rustc_hir::{Attribute, PrimTy, Stability, StabilityLevel, find_attr};
-use rustc_middle::bug;
-use rustc_middle::ty::{TyCtxt, Visibility};
-use rustc_session::Session;
-use rustc_session::lint::builtin::{
+use rustc_lint_defs::builtin::{
     ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES,
     AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
+use rustc_middle::bug;
+use rustc_middle::ty::{TyCtxt, Visibility};
+use rustc_session::Session;
 use rustc_session::utils::was_invoked_from_cargo;
 use rustc_span::def_id::ModId;
 use rustc_span::edit_distance::find_best_match_for_name;
@@ -256,9 +256,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             for note in notes {
                 diag.note(note);
             }
-        } else if let Some((_, UnresolvedImportError { note: Some(note), .. })) =
-            errors.iter().last()
-        {
+        } else if let Some((_, UnresolvedImportError { note: Some(note), .. })) = errors.last() {
             diag.note(note.clone());
         }
 
@@ -1873,7 +1871,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     self.resolutions(parent_scope.module).iter().any(|(key, name_resolution)| {
                         if key.ns == TypeNS
                             && key.ident == *ident
-                            && let Some(decl) = name_resolution.borrow(self).best_decl()
+                            && let Some(decl) = name_resolution.borrow_checked(self).best_decl()
                         {
                             match decl.res() {
                                 // No disambiguation needed if the identically named item we
@@ -2876,7 +2874,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         if struct_expr.fields.is_empty() {
             return;
         }
-        let last_span = struct_expr.fields.iter().last().unwrap().span;
+        let last_span = struct_expr.fields.last().unwrap().span;
         let mut iter = struct_expr.fields.iter().peekable();
         let mut prev: Option<Span> = None;
         while let Some(field) = iter.next() {
@@ -3637,7 +3635,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 let mut res = false;
                 let m = r.expect_module(parent_module);
                 if m.is_local() {
-                    for importer in m.glob_importers.borrow(r).iter() {
+                    for importer in m.glob_importers.borrow_checked(r).iter() {
                         if let Some(next_parent_module) = importer.parent_scope.module.opt_def_id()
                         {
                             if next_parent_module == module

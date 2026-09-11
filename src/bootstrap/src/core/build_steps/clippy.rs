@@ -22,11 +22,12 @@ use crate::core::builder::{
     self, Alias, Builder, CommandLineStep, Kind, RunConfig, ShouldRun, StepMetadata,
     crate_description,
 };
+use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
 use crate::core::config::flags::Subcommand;
+use crate::core::session::Mode;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::helpers;
-use crate::{Compiler, Mode};
 
 /// Disable the most spammy clippy lints
 const IGNORED_RULES_FOR_STD_AND_RUSTC: &[&str] = &[
@@ -590,6 +591,10 @@ impl CommandLineStep for CI {
                 "clippy::ptr_offset_with_cast".into(),
                 "clippy::let_and_return".into(),
                 "clippy::needless_return".into(),
+                "clippy::needless_borrow".into(),
+                "clippy::op_ref".into(),
+                "clippy::borrow_deref_ref".into(),
+                "clippy::explicit_auto_deref".into(),
             ],
             forbid: vec![],
         };

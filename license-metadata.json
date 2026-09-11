@@ -540,6 +540,7 @@
             "type": "directory"
           },
           {
+<<<<<<< ferrocene/main
             "directories": [
               ".circleci",
               "src/bootstrap/src/ferrocene"
@@ -571,6 +572,14 @@
             "type": "file"
           },
           {
+||||||| b4116af55fb
+=======
+            "directories": [],
+            "files": [
+              "compiler/rustc_llvm/llvm-wrapper/SymbolWrapper.cpp",
+              "compiler/rustc_middle/src/ptrauth/llvm_siphash/tests.rs"
+            ],
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             "license": {
               "copyright": [
                 "2003-2019 University of Illinois at Urbana-Champaign",
@@ -578,8 +587,7 @@
               ],
               "spdx": "Apache-2.0 WITH LLVM-exception AND (Apache-2.0 OR MIT)"
             },
-            "name": "compiler/rustc_llvm/llvm-wrapper/SymbolWrapper.cpp",
-            "type": "file"
+            "type": "group"
           },
           {
             "children": [],

@@ -69,11 +69,10 @@ use rustc_hir::def::{DefKind, DocLinkResMap};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdSet, LocalModId};
 use rustc_hir::{ItemLocalId, PreciseCapturingArgKind};
 use rustc_index::IndexVec;
-use rustc_lint_defs::LintId;
+use rustc_lint_defs::{LintId, StableLintExpectationId};
 use rustc_macros::rustc_queries;
 use rustc_session::Limits;
 use rustc_session::config::{EntryFnType, OptLevel, OutputFilenames, SymbolManglingVersion};
-use rustc_session::lint::StableLintExpectationId;
 use rustc_span::def_id::{LOCAL_CRATE, ModId};
 use rustc_span::{DUMMY_SP, LocalExpnId, Span, Spanned, Symbol};
 use rustc_target::spec::PanicStrategy;
@@ -422,7 +421,7 @@ rustc_queries! {
     ///
     /// This is almost always *the* predicates/clauses query that you want.
     ///
-    /// **Tip**: You can use `#[rustc_dump_predicates]` on an item to basically print
+    /// **Tip**: You can use `#[rustc_dump_clauses]` on an item to basically print
     /// the result of this query for use in UI tests or for debugging purposes.
     query clauses_of(key: DefId) -> ty::GenericClauses<'tcx> {
         desc { "computing clauses of `{}`", tcx.def_path_str(key) }

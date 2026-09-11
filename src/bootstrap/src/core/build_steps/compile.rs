@@ -28,24 +28,16 @@ use crate::core::builder::{
     self, Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
     apply_pgo, crate_description,
 };
-<<<<<<< ferrocene/main
 use crate::core::config::flags::FerroceneCoverageFor;
-||||||| b4116af55fb
-=======
 use crate::core::compiler::Compiler;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::core::config::toml::target::DefaultLinuxLinkerOverride;
 use crate::core::config::{
     Allocator, CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
-<<<<<<< ferrocene/main
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestCondition, TestVariant};
-||||||| b4116af55fb
-=======
 use crate::core::session::{CLang, DependencyType, FileType, GitRepo, Mode};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;

@@ -315,18 +315,12 @@ impl<'a> BootstrapCommand {
     }
 
     #[must_use]
-<<<<<<< ferrocene/main
     pub fn force_delay_failure(self) -> Self {
         Self { failure_behavior: BehaviorOnFailure::ForceDelayFail, ..self }
     }
 
     #[must_use]
-    pub fn delay_failure(self) -> Self {
-||||||| b4116af55fb
-    pub fn delay_failure(self) -> Self {
-=======
     pub(crate) fn delay_failure(self) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         Self { failure_behavior: BehaviorOnFailure::DelayFail, ..self }
     }
 
@@ -526,7 +520,6 @@ impl CommandOutput {
     }
 
     #[must_use]
-<<<<<<< ferrocene/main
     pub fn stdout_bytes(&self) -> &[u8] {
         self.stdout.as_deref().expect("Accessing stdout of a command that did not capture stdout")
     }
@@ -537,17 +530,7 @@ impl CommandOutput {
     }
 
     #[must_use]
-    pub fn stdout_if_ok(&self) -> Option<String> {
-||||||| b4116af55fb
-    pub fn stdout_if_present(&self) -> Option<String> {
-        self.stdout.as_ref().and_then(|s| String::from_utf8(s.clone()).ok())
-    }
-
-    #[must_use]
-    pub fn stdout_if_ok(&self) -> Option<String> {
-=======
     pub(crate) fn stdout_if_ok(&self) -> Option<String> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         if self.is_success() { Some(self.stdout()) } else { None }
     }
 

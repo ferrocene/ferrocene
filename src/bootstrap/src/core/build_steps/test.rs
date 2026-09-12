@@ -40,16 +40,10 @@ use crate::core::builder::{
 };
 use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
-<<<<<<< ferrocene/main
 use crate::core::config::flags::{
     FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
 };
-||||||| b4116af55fb
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
-=======
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
 use crate::core::session::{CLang, GitRepo, Mode};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;
@@ -2299,9 +2293,9 @@ impl Step for Compiletest {
 
         if builder.top_stage == 0 && !builder.config.compiletest_allow_stage0 {
             eprintln!("\
-ERROR: `--stage 0` runs compiletest on the stage0 (precompiled) compiler, not your local changes, and will almost always cause tests to fail
-HELP: to test the compiler or standard library, omit the stage or explicitly use `--stage 1` instead
-NOTE: if you're sure you want to do this, please open an issue as to why. In the meantime, you can override this with `--set build.compiletest-allow-stage0=true`."
+    ERROR: `--stage 0` runs compiletest on the stage0 (precompiled) compiler, not your local changes, and will almost always cause tests to fail
+    HELP: to test the compiler or standard library, omit the stage or explicitly use `--stage 1` instead
+    NOTE: if you're sure you want to do this, please open an issue as to why. In the meantime, you can override this with `--set build.compiletest-allow-stage0=true`."
             );
             helpers::exit_process(1);
         }
@@ -2556,8 +2550,8 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
             {
                 eprintln!(
                     "\
-ERROR: No configured backend named `{name}`
-HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}]`",
+    ERROR: No configured backend named `{name}`
+    HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}]`",
                     name = codegen_backend.name(),
                 );
                 helpers::exit_process(1);
@@ -2568,7 +2562,7 @@ HELP: You can add it into `bootstrap.toml` in `rust.codegen-backends = [{name:?}
             {
                 eprintln!(
                     r#"WARNING: Running tests with the GCC codegen backend while rustc debug assertions are enabled. This might lead to test failures.
-Please disable assertions with `rust.debug-assertions = false`.
+    Please disable assertions with `rust.debug-assertions = false`.
         "#
                 );
             }
@@ -3447,17 +3441,9 @@ impl CommandLineStep for CrateLibrustc {
 /// Given a `cargo test` subcommand, add the appropriate flags and run it.
 ///
 /// Returns whether the test succeeded.
-<<<<<<< ferrocene/main
 // ferrocene change: changed privacy to pub(crate)
 pub(crate) fn run_cargo_test<'a>(
-    cargo: builder::Cargo,
-||||||| b4116af55fb
-fn run_cargo_test<'a>(
-    cargo: builder::Cargo,
-=======
-fn run_cargo_test<'a>(
     mut cargo: builder::Cargo,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     libtest_args: &[&str],
     crates: &[String],
     description: impl Into<Option<&'a str>>,

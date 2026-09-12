@@ -28,14 +28,10 @@ pub use crate::core::builder::step_stack::StepStack;
 use crate::core::compiler::Compiler;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
-<<<<<<< ferrocene/main
 use crate::ferrocene::code_coverage::CoverageState;
-||||||| b4116af55fb
-=======
 use crate::core::metadata::Crate;
 use crate::core::session::Build;
 use crate::trace;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};

@@ -476,6 +476,8 @@ extern crate test;
 #[macro_use]
 extern crate alloc as alloc_crate;
 
+pub mod alloc;
+
 // Many compiler tests depend on libc being pulled in by std
 // so include it here even if it's unused.
 #[doc(masked)]
@@ -735,20 +737,12 @@ pub use std_detect::is_x86_feature_detected;
 
 mod sys;
 
-pub mod alloc;
-
 // Private support modules
 mod panicking;
 
 #[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
-<<<<<<< ferrocene/main
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
-#[allow(clippy::len_zero)] // FIXME
-||||||| b4116af55fb
-#[allow(clippy::len_zero)] // FIXME
-=======
 #[allow(clippy::len_zero, clippy::needless_borrow)] // FIXME
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 mod backtrace_rs;
 
 #[stable(feature = "cfg_select", since = "1.95.0")]

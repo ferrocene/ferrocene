@@ -710,7 +710,7 @@ impl<T, const N: usize> AsRef<[Cell<T>; N]> for Cell<[T; N]> {
 impl<T, const N: usize> AsRef<[Cell<T>]> for Cell<[T; N]> {
     #[inline]
     fn as_ref(&self) -> &[Cell<T>] {
-        &*self.as_array_of_cells()
+        self.as_array_of_cells()
     }
 }
 

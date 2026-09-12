@@ -75,8 +75,14 @@ use crate::{fmt, hash, intrinsics, mem, ptr};
 #[stable(feature = "nonnull", since = "1.25.0")]
 #[repr(transparent)]
 #[rustc_nonnull_optimization_guaranteed]
+<<<<<<< ferrocene/main
 #[rustc_diagnostic_item = "NonNull"]
 #[ferrocene::prevalidated]
+||||||| b4116af55fb
+#[rustc_diagnostic_item = "NonNull"]
+=======
+#[lang = "non_null"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub struct NonNull<T: PointeeSized> {
     pointer: crate::pattern_type!(*const T is !null),
 }

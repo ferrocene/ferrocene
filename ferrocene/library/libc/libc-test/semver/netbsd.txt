@@ -650,6 +650,11 @@ MAP_ALIGNMENT_MASK
 MAP_ALIGNMENT_SHIFT
 MAP_FILE
 MAP_HASSEMAPHORE
+MAP_INHERIT_COPY
+MAP_INHERIT_DONATE_COPY
+MAP_INHERIT_NONE
+MAP_INHERIT_SHARE
+MAP_INHERIT_ZERO
 MAP_NORESERVE
 MAP_REMAPDUP
 MAP_RENAME
@@ -1298,6 +1303,12 @@ estrndup
 estrtoi
 estrtou
 evasprintf
+execl
+execle
+execlp
+execv
+execve
+execvp
 explicit_memset
 extattr_delete_fd
 extattr_delete_file
@@ -1322,6 +1333,7 @@ fgetxattr
 flags_to_string
 flistxattr
 fmemopen
+fork
 forkpty
 freeifaddrs
 freelocale
@@ -1410,6 +1422,7 @@ labs
 lastlog
 lastlogx
 lchflags
+lchmod
 lcong48
 lgetxattr
 lio_listio
@@ -1621,6 +1634,7 @@ sysctl
 sysctlbyname
 sysctldesc
 sysctlnametomib
+system
 tcp_info
 telldir
 timer_create

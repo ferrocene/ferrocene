@@ -142,6 +142,7 @@ BIOCSSEESENT
 BIOCVERSION
 BOOT_TIME
 BPF_ALIGNMENT
+BPF_WORDALIGN
 BUFSIZ
 BUS_ADRALN
 BUS_ADRERR
@@ -545,6 +546,10 @@ IN6_IFF_NODAD
 IN6_IFF_PREFER_SOURCE
 IN6_IFF_TEMPORARY
 IN6_IFF_TENTATIVE
+INHERIT_COPY
+INHERIT_NONE
+INHERIT_SHARE
+INHERIT_ZERO
 INIT_PROCESS
 IOV_MAX
 IPC_CREAT
@@ -861,6 +866,12 @@ MAXFREQ
 MAXPHASE
 MAXSEC
 MAXTC
+MCAST_BLOCK_SOURCE
+MCAST_JOIN_GROUP
+MCAST_JOIN_SOURCE_GROUP
+MCAST_LEAVE_GROUP
+MCAST_LEAVE_SOURCE_GROUP
+MCAST_UNBLOCK_SOURCE
 MCL_CURRENT
 MCL_FUTURE
 MDMBUF
@@ -1991,8 +2002,14 @@ eui64_ntoa
 eui64_ntohost
 eventfd_read
 eventfd_write
+execl
+execle
+execlp
 exect
+execv
 execvP
+execve
+execvp
 execvpe
 explicit_bzero
 extattr_delete_fd
@@ -2027,6 +2044,7 @@ fls
 flsl
 flsll
 fmemopen
+fork
 forkpty
 fparseln
 freeifaddrs
@@ -2074,6 +2092,8 @@ getutxuser
 glob
 glob_t
 globfree
+group_req
+group_source_req
 hexdump
 humanize_number
 icmp6_ifstat
@@ -2117,6 +2137,7 @@ kld_load
 kqueue
 labs
 lchflags
+lchmod
 lcong48
 lio_listio
 lockf
@@ -2314,6 +2335,8 @@ regfree
 register_t
 regmatch_t
 regoff_t
+rt_metrics
+rt_msghdr
 rtprio
 rtprio_thread
 sallocx
@@ -2448,6 +2471,7 @@ syscall
 sysctl
 sysctlbyname
 sysctlnametomib
+system
 tcp_fastopen
 tcp_function_set
 tcp_info

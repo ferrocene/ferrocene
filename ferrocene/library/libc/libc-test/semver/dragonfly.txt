@@ -115,6 +115,7 @@ BIOCSSEESENT
 BIOCVERSION
 BOOT_TIME
 BPF_ALIGNMENT
+BPF_WORDALIGN
 BTUARTDISC
 BUFSIZ
 BUS_ADRALN
@@ -381,6 +382,10 @@ IFF_SMART
 IFF_STATICARP
 IFF_UP
 IMAXBEL
+INHERIT_COPY
+INHERIT_NONE
+INHERIT_SHARE
+INHERIT_ZERO
 INIT_PROCESS
 IOV_MAX
 IPC_CREAT
@@ -1370,8 +1375,14 @@ eui64_aton
 eui64_hostton
 eui64_ntoa
 eui64_ntohost
+execl
+execle
+execlp
 exect
+execv
 execvP
+execve
+execvp
 exit_status
 explicit_bzero
 extattr_delete_file
@@ -1384,6 +1395,7 @@ fdatasync
 fdopendir
 fexecve
 fmemopen
+fork
 forkpty
 fparseln
 freeifaddrs
@@ -1684,6 +1696,7 @@ syscall
 sysctl
 sysctlbyname
 sysctlnametomib
+system
 telldir
 timex
 truncate

@@ -52,7 +52,7 @@ s! {
         pub f_fsid: c_ulong,
         pub f_flag: c_ulong,
         pub f_namemax: c_ulong,
-        __f_spare: [c_int; 6],
+        __f_spare: Padding<[c_int; 6]>,
     }
 
     pub struct regex_t {
@@ -133,82 +133,16 @@ s! {
         pub tcpi_rcv_space: u32,
         pub tcpi_total_retrans: u32,
     }
-}
 
-impl siginfo_t {
-    pub unsafe fn si_addr(&self) -> *mut c_void {
-        #[repr(C)]
-        struct siginfo_sigfault {
-            _si_signo: c_int,
-            _si_errno: c_int,
-            _si_code: c_int,
-            si_addr: *mut c_void,
-        }
-        (*(self as *const siginfo_t).cast::<siginfo_sigfault>()).si_addr
+    pub struct mbstate_t {
+        __mask: crate::wchar_t,
+        __wc: crate::wchar_t,
     }
 
-    pub unsafe fn si_value(&self) -> crate::sigval {
-        #[repr(C)]
-        struct siginfo_si_value {
-            _si_signo: c_int,
-            _si_errno: c_int,
-            _si_code: c_int,
-            _si_timerid: c_int,
-            _si_overrun: c_int,
-            si_value: crate::sigval,
-        }
-        (*(self as *const siginfo_t).cast::<siginfo_si_value>()).si_value
-    }
-}
-
-s_no_extra_traits! {
-    // Internal, for casts to access union fields
-    struct sifields_sigchld {
-        si_pid: crate::pid_t,
-        si_uid: crate::uid_t,
-        si_status: c_int,
-        si_utime: c_long,
-        si_stime: c_long,
-    }
-
-    // Internal, for casts to access union fields
-    union sifields {
-        _align_pointer: *mut c_void,
-        sigchld: sifields_sigchld,
-    }
-
-    // Internal, for casts to access union fields. Note that some variants
-    // of sifields start with a pointer, which makes the alignment of
-    // sifields vary on 32-bit and 64-bit architectures.
-    struct siginfo_f {
-        _siginfo_base: [c_int; 3],
-        sifields: sifields,
-    }
-}
-
-impl siginfo_t {
-    unsafe fn sifields(&self) -> &sifields {
-        &(*(self as *const siginfo_t).cast::<siginfo_f>()).sifields
-    }
-
-    pub unsafe fn si_pid(&self) -> crate::pid_t {
-        self.sifields().sigchld.si_pid
-    }
-
-    pub unsafe fn si_uid(&self) -> crate::uid_t {
-        self.sifields().sigchld.si_uid
-    }
-
-    pub unsafe fn si_status(&self) -> c_int {
-        self.sifields().sigchld.si_status
-    }
-
-    pub unsafe fn si_utime(&self) -> c_long {
-        self.sifields().sigchld.si_utime
-    }
-
-    pub unsafe fn si_stime(&self) -> c_long {
-        self.sifields().sigchld.si_stime
+    pub struct fpos64_t {
+        __pos: off64_t,
+        __mbstate: crate::mbstate_t,
+        __mblen_pending: c_int,
     }
 }
 
@@ -216,15 +150,7 @@ pub const MCL_CURRENT: c_int = 0x0001;
 pub const MCL_FUTURE: c_int = 0x0002;
 pub const MCL_ONFAULT: c_int = 0x0004;
 
-pub const SIGEV_THREAD_ID: c_int = 4;
-
 pub const AF_VSOCK: c_int = 40;
-
-// Most `*_SUPER_MAGIC` constants are defined at the `linux_like` level; the
-// following are only available on newer Linux versions than the versions
-// currently used in CI in some configurations, so we define them here.
-pub const BINDERFS_SUPER_MAGIC: c_long = 0x6c6f6f70;
-pub const XFS_SUPER_MAGIC: c_long = 0x58465342;
 
 pub const PTRACE_TRACEME: c_int = 0;
 pub const PTRACE_PEEKTEXT: c_int = 1;

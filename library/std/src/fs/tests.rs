@@ -640,7 +640,7 @@ fn set_get_permissions_nofollows() {
                 permission_bits.set_readonly(false);
                 check!(fs::set_permissions_nofollow(&filename, permission_bits));
             }
-        },
+        }
         _ => {
             let error_kind = result.unwrap_err().kind();
             assert_eq!(error_kind, crate::io::ErrorKind::Unsupported);
@@ -677,6 +677,7 @@ fn set_get_permissions_nofollows_symlink() {
     let result = fs::set_permissions_nofollow(&symlink_name, init_symlink_permissions);
 
     cfg_select! {
+<<<<<<< ferrocene/main
         any(
             windows,
             target_os = "macos",
@@ -687,6 +688,19 @@ fn set_get_permissions_nofollows_symlink() {
             target_os = "nto",
             target_os = "qnx"
         ) => {
+||||||| b4116af55fb
+        any(windows, target_os = "android", target_os = "macos", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "dragonfly") => {
+=======
+        any(
+            windows,
+            target_os = "android",
+            target_os = "macos",
+            target_os = "freebsd",
+            target_os = "openbsd",
+            target_os = "netbsd",
+            target_os = "dragonfly"
+        ) => {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             assert_eq!(result.unwrap(), ());
 
             let after_target_metadata = check!(fs::metadata(&symlink_name));
@@ -708,7 +722,7 @@ fn set_get_permissions_nofollows_symlink() {
                 symlink_permission_bits.set_readonly(false);
                 check!(fs::set_permissions_nofollow(&symlink_name, symlink_permission_bits));
             }
-        },
+        }
         _ => {
             let after_target_metadata = check!(fs::metadata(&symlink_name));
             // We should expect the target file to not have its permission bits
@@ -1535,6 +1549,7 @@ fn open_flavors() {
 
     // This error string is set by std itself so we are not at the whim of the OS here.
     let invalid_options = "creating or truncating a file requires write or append access";
+    let append_truncate_error = "append and truncate cannot both be enabled";
 
     // Test various combinations of creation modes and access modes.
     //
@@ -1572,15 +1587,21 @@ fn open_flavors() {
 
     // append
     check!(c(&a).create_new(true).open(&tmpdir.join("d")));
-    error_contains!(c(&a).create(true).truncate(true).open(&tmpdir.join("d")), invalid_options);
-    error_contains!(c(&a).truncate(true).open(&tmpdir.join("d")), invalid_options);
+    error_contains!(
+        c(&a).create(true).truncate(true).open(&tmpdir.join("d")),
+        append_truncate_error
+    );
+    error_contains!(c(&a).truncate(true).open(&tmpdir.join("d")), append_truncate_error);
     check!(c(&a).create(true).open(&tmpdir.join("d")));
     check!(c(&a).open(&tmpdir.join("d")));
 
     // read-append
     check!(c(&ra).create_new(true).open(&tmpdir.join("e")));
-    error_contains!(c(&ra).create(true).truncate(true).open(&tmpdir.join("e")), invalid_options);
-    error_contains!(c(&ra).truncate(true).open(&tmpdir.join("e")), invalid_options);
+    error_contains!(
+        c(&ra).create(true).truncate(true).open(&tmpdir.join("e")),
+        append_truncate_error
+    );
+    error_contains!(c(&ra).truncate(true).open(&tmpdir.join("e")), append_truncate_error);
     check!(c(&ra).create(true).open(&tmpdir.join("e")));
     check!(c(&ra).open(&tmpdir.join("e")));
 
@@ -2393,7 +2414,6 @@ fn test_open_options_invalid_combinations() {
         (|| OO::new().create(true).read(true).clone(), "create without write"),
         (|| OO::new().create_new(true).read(true).clone(), "create_new without write"),
         (|| OO::new().truncate(true).read(true).clone(), "truncate without write"),
-        (|| OO::new().truncate(true).append(true).clone(), "truncate with append"),
     ];
 
     for (make_opts, desc) in test_cases {
@@ -2408,7 +2428,13 @@ fn test_open_options_invalid_combinations() {
             "{desc} - wrong error message"
         );
     }
+    let result = OO::new().truncate(true).append(true).open("nonexistent.txt");
 
+    assert!(result.is_err(), "truncate with append should fail");
+
+    let err = result.unwrap_err();
+    assert_eq!(err.kind(), ErrorKind::InvalidInput);
+    assert_eq!(err.to_string(), "append and truncate cannot both be enabled");
     let result = OO::new().open("nonexistent.txt");
     assert!(result.is_err(), "no access mode should fail");
     let err = result.unwrap_err();

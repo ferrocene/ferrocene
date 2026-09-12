@@ -768,7 +768,9 @@ impl AtomicBool {
     pub const fn load(&self, order: Ordering) -> bool {
         // SAFETY: any data races are prevented by atomic intrinsics and the raw
         // pointer passed in is valid because we got it from a reference.
-        unsafe { atomic_load(self.v.get().cast::<u8>(), order) != 0 }
+        unsafe {
+            atomic_load::<_, /* VOLATILE */ false>(self.v.get().cast::<u8>(), order) != 0
+        }
     }
 
     /// Stores a value into the bool.
@@ -800,7 +802,7 @@ impl AtomicBool {
         // SAFETY: any data races are prevented by atomic intrinsics and the raw
         // pointer passed in is valid because we got it from a reference.
         unsafe {
-            atomic_store(self.v.get().cast::<u8>(), val as u8, order);
+            atomic_store::<_, /* VOLATILE */ false>(self.v.get().cast::<u8>(), val as u8, order);
         }
     }
 
@@ -1784,7 +1786,9 @@ impl<T> AtomicPtr<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub const fn load(&self, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
-        unsafe { atomic_load(self.as_ptr(), order) }
+        unsafe {
+            atomic_load::<_, /* VOLATILE */ false>(self.as_ptr(), order)
+        }
     }
 
     /// Stores a value into the pointer.
@@ -1816,7 +1820,7 @@ impl<T> AtomicPtr<T> {
     pub const fn store(&self, ptr: *mut T, order: Ordering) {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
-            atomic_store(self.as_ptr(), ptr, order);
+            atomic_store::<_, /* VOLATILE */ false>(self.as_ptr(), ptr, order);
         }
     }
 
@@ -2946,7 +2950,7 @@ macro_rules! atomic_int {
             #[ferrocene::prevalidated]
             pub const fn load(&self, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
-                unsafe { atomic_load(self.as_ptr(), order) }
+                unsafe { atomic_load::<_, /* VOLATILE */ false>(self.as_ptr(), order) }
             }
 
             /// Stores a value into the atomic integer.
@@ -2977,7 +2981,7 @@ macro_rules! atomic_int {
             #[ferrocene::prevalidated]
             pub const fn store(&self, val: $int_type, order: Ordering) {
                 // SAFETY: data races are prevented by atomic intrinsics.
-                unsafe { atomic_store(self.as_ptr(), val, order); }
+                unsafe { atomic_store::<_, /* VOLATILE */ false>(self.as_ptr(), val, order); }
             }
 
             /// Stores a value into the atomic integer, returning the previous value.
@@ -4022,14 +4026,20 @@ const fn strongest_failure_ordering(order: Ordering) -> Ordering {
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
+||||||| b4116af55fb
+const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
+=======
+const unsafe fn atomic_store<T: Copy, const VOLATILE: bool>(dst: *mut T, val: T, order: Ordering) {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_store`.
     unsafe {
         match order {
-            Relaxed => intrinsics::atomic_store::<T, { AO::Relaxed }>(dst, val),
-            Release => intrinsics::atomic_store::<T, { AO::Release }>(dst, val),
-            SeqCst => intrinsics::atomic_store::<T, { AO::SeqCst }>(dst, val),
+            Relaxed => intrinsics::atomic_store::<T, { AO::Relaxed }, VOLATILE>(dst, val),
+            Release => intrinsics::atomic_store::<T, { AO::Release }, VOLATILE>(dst, val),
+            SeqCst => intrinsics::atomic_store::<T, { AO::SeqCst }, VOLATILE>(dst, val),
             Acquire => panic!("there is no such thing as an acquire store"),
             AcqRel => panic!("there is no such thing as an acquire-release store"),
         }
@@ -4039,14 +4049,20 @@ const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
+||||||| b4116af55fb
+const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
+=======
+const unsafe fn atomic_load<T: Copy, const VOLATILE: bool>(dst: *const T, order: Ordering) -> T {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_load`.
     unsafe {
         match order {
-            Relaxed => intrinsics::atomic_load::<T, { AO::Relaxed }>(dst),
-            Acquire => intrinsics::atomic_load::<T, { AO::Acquire }>(dst),
-            SeqCst => intrinsics::atomic_load::<T, { AO::SeqCst }>(dst),
+            Relaxed => intrinsics::atomic_load::<T, { AO::Relaxed }, VOLATILE>(dst),
+            Acquire => intrinsics::atomic_load::<T, { AO::Acquire }, VOLATILE>(dst),
+            SeqCst => intrinsics::atomic_load::<T, { AO::SeqCst }, VOLATILE>(dst),
             Release => panic!("there is no such thing as a release load"),
             AcqRel => panic!("there is no such thing as an acquire-release load"),
         }

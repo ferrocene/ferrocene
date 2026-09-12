@@ -211,7 +211,6 @@ pub(crate) mod ferrocene;
 use std::cell::OnceCell;
 use std::ops::ControlFlow;
 
-use rustc_data_structures::Limit;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::sync::{Lock, par_for_each_in};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
@@ -237,6 +236,7 @@ use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
 use rustc_session::config::{DebugInfo, EntryFnType, Offload};
 use rustc_span::{DUMMY_SP, Span, Spanned, Symbol, dummy_spanned, respan};
+use rustc_structures::Limit;
 use tracing::{debug, instrument, trace};
 
 use crate::diagnostics::{
@@ -1071,7 +1071,8 @@ fn visit_instance_use<'tcx>(
         | ty::InstanceKind::Shim(ty::ShimKind::ConstructCoroutineInClosure { .. })
         | ty::InstanceKind::Shim(ty::ShimKind::FnPtr(..))
         | ty::InstanceKind::Shim(ty::ShimKind::Clone(..))
-        | ty::InstanceKind::Shim(ty::ShimKind::FnPtrAddr(..)) => {
+        | ty::InstanceKind::Shim(ty::ShimKind::FnPtrAsPtr(..))
+        | ty::InstanceKind::Shim(ty::ShimKind::FnPtrFromPtr(..)) => {
             output.push(create_fn_mono_item(tcx, instance, source));
         }
     }

@@ -348,7 +348,7 @@
 #![feature(float_gamma)]
 #![feature(float_minimum_maximum)]
 #![feature(fmt_internals)]
-#![feature(fn_ptr_trait)]
+#![feature(fn_static)]
 #![feature(formatting_options)]
 #![feature(funnel_shifts)]
 #![feature(generic_atomic)]
@@ -653,7 +653,6 @@ pub mod process;
 pub mod random;
 pub mod sync;
 pub mod time;
-#[cfg_attr(feature = "nightly", not(bootstrap))]
 #[unstable(feature = "view_type_macro", issue = "155938")]
 pub mod view;
 
@@ -742,8 +741,14 @@ pub mod alloc;
 mod panicking;
 
 #[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
+<<<<<<< ferrocene/main
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
 #[allow(clippy::len_zero)] // FIXME
+||||||| b4116af55fb
+#[allow(clippy::len_zero)] // FIXME
+=======
+#[allow(clippy::len_zero, clippy::needless_borrow)] // FIXME
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 mod backtrace_rs;
 
 #[stable(feature = "cfg_select", since = "1.95.0")]

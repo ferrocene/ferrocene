@@ -10,6 +10,14 @@ emulatordir=/tmp/emulator
 # we'll statically assign this IP address to the other QNX VMs
 vm_ipv4_addr=172.31.1.105
 
+EMULATOR_PATH=${EMULATOR_PATH:""}
+if [ -z "$EMULATOR_PATH" ]; then
+    echo "Using the system provided emulator"
+else
+    echo "Using the emulator in ${EMULATOR_PATH}"
+    export PATH="${EMULATOR_PATH}:${PATH}"
+fi
+
 panic() {
     echo "error:" "${@}" >&2
     exit 1

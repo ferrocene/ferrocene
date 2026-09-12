@@ -26,8 +26,9 @@ start_vm() {
     # set memory to 11G as `tests/ui/codegen/huge-stacks.rs` requires 5GB+ and has two
     # variants which can run in parallel
     qemu-system-x86_64 \
-        -smp 2 \
-        -cpu max \
+        -enable-kvm \
+        -cpu host \
+        -smp 4 \
         -m 11G \
         -drive file="${emulatordir}"/disk-qemu.vmdk,if=ide,id=drv0 \
         -netdev bridge,br=br0,id=net0 -device virtio-net-pci,netdev=net0 \
@@ -72,7 +73,7 @@ cmd_prepare() {
     # directories. use a directory in `/data` (QNX6 FS) as `TMPDIR` to avoid
     # failing tests due to FS limitations
     echo 'mkdir -p /data/tmp' >> "${startup}"
-    echo 'RUST_TEST_THREADS=1 TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
+    echo 'RUST_TEST_THREADS=4 TMPDIR=/data/tmp remote-test-server -v --bind 0.0.0.0:12345 --sequential' >> "${startup}"
 
     rm output/ifs.bin
     mkifs "${ifsbuild}" output/ifs.bin

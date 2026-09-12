@@ -11,8 +11,16 @@ use crate::core::backend::CodegenBackendKind;
 use crate::core::builder::Builder;
 use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
-use crate::core::session::Mode;
+<<<<<<< ferrocene/main
 use crate::utils::helpers::{self, exit_process, hex_encode, mtime, t};
+use crate::{CodegenBackendKind, Compiler, Mode};
+||||||| b4116af55fb
+use crate::utils::helpers::{self, hex_encode, mtime, t};
+use crate::{CodegenBackendKind, Compiler, Mode};
+=======
+use crate::core::session::Mode;
+use crate::utils::helpers::{self, hex_encode, mtime, t};
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 #[cfg(test)]
 mod tests;

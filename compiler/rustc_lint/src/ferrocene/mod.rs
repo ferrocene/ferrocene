@@ -255,53 +255,28 @@ fn check_attribute_placement(
     };
 
     let trait_method = ValidationItem::new(tcx, def_id, trait_item.kind);
-    match trait_method {
-        ValidationItem::ConstOrType { is_fn_ptr, default_value: has_value } => {
-            match (prevalidated, requires_validation, is_fn_ptr, has_value) {
-                // err: fn ptr const with value, without prevalidated, with requires validation
-                (None, Some(span), true, true) => {
-                    diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
-                }
-                // err: fn ptr const without value, with both attributes
-                (Some(span), Some(_), true, false) => {
-                    diagnostics::error_prevalidated_without_default(tcx, def_id, span)
-                }
-                // err: const, no fn ptr, with either one attribute
-                (_, Some(span), false, _) | (Some(span), _, false, _) => {
-                    diagnostics::error_const_no_fn_ptr(tcx, def_id, span)
-                }
-
-                (Some(_), None, true, _) => {} // ok: fn ptr const, marked as prevalidated, either with value or not
-                (None, None, _, _) => {}       // ok: const without either attribute
-                (None, Some(_), true, false) => {} // ok: fn ptr const without value that is marked requires_validation
-                (Some(_), Some(_), true, true) => {} // ok: fn ptr const with value and both attributes
-            }
+    match (trait_method, prevalidated, requires_validation) {
+        (
+            ValidationItem::ConstOrType { is_fn_ptr: true, default_value: true }
+            | ValidationItem::Fn { default_body: true },
+            None,
+            Some(span),
+        ) => diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span),
+        (
+            ValidationItem::ConstOrType { is_fn_ptr: true, default_value: false }
+            | ValidationItem::Fn { default_body: false },
+            Some(span),
+            _,
+        ) => diagnostics::error_prevalidated_without_default(tcx, def_id, span),
+        (ValidationItem::ConstOrType { is_fn_ptr: false, .. }, _, Some(span))
+        | (ValidationItem::ConstOrType { is_fn_ptr: false, .. }, Some(span), _) => {
+            diagnostics::error_const_no_fn_ptr(tcx, def_id, span)
         }
-        ValidationItem::Fn { default_body } => {
-            match (prevalidated, requires_validation, default_body) {
-                (None, Some(span), true) => {
-                    diagnostics::error_requires_validation_without_prevalidated(tcx, def_id, span)
-                }
-                (Some(span), _, false) => {
-                    diagnostics::error_prevalidated_without_default(tcx, def_id, span);
-                }
-
-                (Some(_), Some(_), true) => {} // ok: method with default body and both attributes
-                (Some(_), None, true) => {}    // ok: method with default body and prevalidated
-                (None, Some(_), false) => {} // ok: method without default body and requires_validation
-                (None, None, _) => {}        // ok: method without either attribute
-            }
+        (ValidationItem::TypeWithoutDefault, _, Some(span)) => {
+            diagnostics::error_requires_validation_wrong_item(tcx, def_id, span);
         }
-        ValidationItem::TypeWithoutDefault => {
-            match (prevalidated, requires_validation) {
-                (_, Some(span)) => {
-                    diagnostics::error_requires_validation_wrong_item(tcx, def_id, span);
-                }
 
-                (Some(_), None) => {} // ok
-                (None, None) => {}    // ok
-            }
-        }
+        _ => {}
     }
 }
 

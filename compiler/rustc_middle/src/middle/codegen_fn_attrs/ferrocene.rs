@@ -189,3 +189,8 @@ pub fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<Validated
         current = tcx.parent(current);
     }
 }
+
+/// Check if this item is marked with `#[ferrocene::requires_validation]`.
+pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
+    tcx.get_attrs_by_path(def_id, REQUIRES_VALIDATION_ATTR).next().map(|attr| attr.span())
+}

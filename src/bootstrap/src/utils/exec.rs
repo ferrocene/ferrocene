@@ -518,11 +518,6 @@ impl CommandOutput {
         .expect("Cannot parse process stdout as UTF-8")
     }
 
-    #[must_use]
-    pub fn stdout_bytes(&self) -> &[u8] {
-        self.stdout.as_deref().expect("Accessing stdout of a command that did not capture stdout")
-    }
-
     pub(crate) fn stdout_if_ok(&self) -> Option<String> {
         if self.is_success() { Some(self.stdout()) } else { None }
     }

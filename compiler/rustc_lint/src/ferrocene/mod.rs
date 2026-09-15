@@ -307,7 +307,7 @@ impl ValidationItem {
                 ValidationItem::const_or_type(tcx, def_id, const_value.is_some())
             }
             // Associated type, with a default type (unstable)
-            TraitItemKind::Type(_bounds, Some(_assoc_ty)) => {
+            TraitItemKind::Type(_bounds, Some(_hir_ty)) => {
                 ValidationItem::const_or_type(tcx, def_id, false)
             }
             // Associated type, without a default type

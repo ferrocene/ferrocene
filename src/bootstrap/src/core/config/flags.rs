@@ -17,8 +17,8 @@ use crate::core::build_steps::test::TestTarget;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
-use crate::ferrocene::test_variants::TestVariantName;
 use crate::core::session::Build;
+use crate::ferrocene::test_variants::TestVariantName;
 use crate::utils::helpers;
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]
@@ -712,14 +712,6 @@ impl Subcommand {
     pub fn pass(&self) -> Option<&str> {
         match *self {
             Subcommand::Test { ref pass, .. } => pass.as_ref().map(|s| &s[..]),
-            _ => None,
-        }
-    }
-
-    // Ferrocene addition
-    pub fn test_variant(&self) -> Option<TestVariantName> {
-        match self {
-            Subcommand::Test { test_variant, .. } => *test_variant,
             _ => None,
         }
     }

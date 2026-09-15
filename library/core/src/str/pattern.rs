@@ -1118,6 +1118,7 @@ struct EmptyNeedle {
 }
 
 /// Fast searcher for a single-byte needle using `memchr`/`memrchr`.
+#[ferrocene::prevalidated]
 #[derive(Clone, Debug)]
 struct ByteNeedle {
     b: u8,

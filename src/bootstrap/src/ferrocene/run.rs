@@ -6,10 +6,12 @@ use std::path::{Path, PathBuf};
 use crate::core::build_steps::compile::{run_cargo, std_cargo};
 use crate::core::build_steps::tool::{SourceType, Tool};
 use crate::core::builder::{
-    Builder, Cargo, CommandLineStep, RunConfig, ShouldRun, Step, crate_description,
+    Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
+use crate::core::compiler::Compiler;
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
+use crate::core::session::Mode;
 use crate::ferrocene::code_coverage::{self, CoverageState, Paths, coverage_file};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
@@ -17,7 +19,6 @@ use crate::ferrocene::tool::{Blanket, SymbolReport};
 use crate::utils::channel::GitInfo;
 use crate::utils::exec::{self, BootstrapCommand};
 use crate::utils::{build_stamp, helpers};
-use crate::{Compiler, Kind, Mode};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {

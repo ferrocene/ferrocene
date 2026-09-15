@@ -21,6 +21,8 @@ pub(crate) struct Crate {
     pub(crate) deps: HashSet<String>,
     pub(crate) path: PathBuf,
     pub(crate) features: Vec<String>,
+    // Ferrocene addition: added for retrieving version, for rustfmt qualification
+    pub(crate) version: String,
 }
 
 impl Crate {

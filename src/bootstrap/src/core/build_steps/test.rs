@@ -40,16 +40,10 @@ use crate::core::builder::{
 };
 use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
-<<<<<<< ferrocene/main
 use crate::core::config::flags::{
     FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
 };
-||||||| b4116af55fb
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
-=======
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
 use crate::core::session::{CLang, GitRepo, Mode};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;
@@ -2367,19 +2361,6 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 target,
             });
         }
-<<<<<<< ferrocene/main
-        if mode == CompiletestMode::RunMake {
-            builder.tool_exe(Tool::RunMakeSupport);
-            // Ferrocene addition: ensure that `symbol-report` is available when running the
-            // `run-make` tests.
-            builder.ensure(SymbolReport { target_compiler: test_compiler });
-        }
-||||||| b4116af55fb
-        if mode == CompiletestMode::RunMake {
-            builder.tool_exe(Tool::RunMakeSupport);
-        }
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
         // ensure that `libproc_macro` is available on the host.
         if suite == "mir-opt" {
@@ -2420,6 +2401,9 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                     cmd.arg("--run-make-support-rmeta").arg(rmeta);
                 }
             }
+            // Ferrocene addition: ensure that `symbol-report` is available when running the
+            // `run-make` tests.
+            builder.ensure(SymbolReport { target_compiler: test_compiler });
         }
 
         if suite == "mir-opt" {
@@ -3447,17 +3431,9 @@ impl CommandLineStep for CrateLibrustc {
 /// Given a `cargo test` subcommand, add the appropriate flags and run it.
 ///
 /// Returns whether the test succeeded.
-<<<<<<< ferrocene/main
 // ferrocene change: changed privacy to pub(crate)
 pub(crate) fn run_cargo_test<'a>(
-    cargo: builder::Cargo,
-||||||| b4116af55fb
-fn run_cargo_test<'a>(
-    cargo: builder::Cargo,
-=======
-fn run_cargo_test<'a>(
     mut cargo: builder::Cargo,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     libtest_args: &[&str],
     crates: &[String],
     description: impl Into<Option<&'a str>>,

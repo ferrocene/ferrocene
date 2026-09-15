@@ -8,26 +8,14 @@ use crate::core::build_steps::compile::is_lto_stage;
 use crate::core::build_steps::llvm::prebuilt_llvm_output;
 use crate::core::build_steps::test;
 use crate::core::build_steps::tool::SourceType;
-<<<<<<< ferrocene/main
-use crate::core::config::flags::{Color, FerroceneCoverageFor};
-||||||| b4116af55fb
-use crate::core::config::flags::Color;
-=======
 use crate::core::compiler::Compiler;
-use crate::core::config::flags::{Color, Subcommand};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::core::config::flags::{Color, FerroceneCoverageFor, Subcommand};
 use crate::core::config::toml::pgo::PgoConfig;
-<<<<<<< ferrocene/main
-use crate::core::config::{CompressDebuginfo, Config, DryRun, SplitDebuginfo, TargetSelection};
-use crate::ferrocene::code_coverage::Paths;
-||||||| b4116af55fb
-use crate::core::config::{CompressDebuginfo, Config, DryRun, SplitDebuginfo, TargetSelection};
-=======
 use crate::core::config::{
     CompressDebuginfo, Config, DryRun, RustcLto, SplitDebuginfo, TargetSelection,
 };
 use crate::core::session::{CLang, GitRepo, Mode, RemapScheme};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::ferrocene::code_coverage::Paths;
 use crate::utils::build_stamp;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, envify, linker_flags, t};
@@ -45,6 +33,10 @@ const EXTRA_CHECK_CFGS: &[(Option<Mode>, &str, Option<&[&'static str]>)] = &[
     // Any library specific cfgs like `target_os`, `target_arch` should be put in
     // priority the `[lints.rust.unexpected_cfgs.check-cfg]` table
     // in the appropriate `library/{std,alloc,core}/Cargo.toml`
+    // Ferrocene addition: see `std_cargo` function
+    (None, "ferrocene_facade_secretsauce", None),
+    // Ferrocene addition: used to ignore tests when measuring coverage
+    (None, "ferrocene_coverage", None),
 ];
 
 /// Represents flag values in `String` form with a `\x1f` delimiter to pass to the compiler later.
@@ -210,7 +202,6 @@ impl Cargo {
         self.profile = if release_build { Some("release") } else { None };
     }
 
-    #[expect(dead_code, reason = "general-purpose, currently unused")]
     pub(crate) fn profile(&mut self, profile: &'static str) {
         self.profile = Some(profile);
     }
@@ -219,17 +210,7 @@ impl Cargo {
         self.compiler
     }
 
-<<<<<<< ferrocene/main
-    pub fn target(&self) -> TargetSelection {
-        self.target
-    }
-
-    pub fn mode(&self) -> Mode {
-||||||| b4116af55fb
-    pub fn mode(&self) -> Mode {
-=======
     pub(crate) fn mode(&self) -> Mode {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.mode
     }
 

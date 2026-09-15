@@ -5,9 +5,10 @@ use std::path::PathBuf;
 
 use crate::core::build_steps::compile::Std;
 use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
-use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
-use crate::{Kind, Mode, exe};
+use crate::core::session::Mode;
+use crate::utils::helpers::exe;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct FlipLink {

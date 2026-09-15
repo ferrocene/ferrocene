@@ -58,6 +58,7 @@ const fn as_underlying(x: ControlFlow<bool>) -> u8 {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 const impl<T: [const] PartialOrd> PartialOrd for [T] {
+    #[ferrocene::prevalidated]
     #[inline]
     fn partial_cmp(&self, other: &[T]) -> Option<Ordering> {
         SlicePartialOrd::partial_compare(self, other)

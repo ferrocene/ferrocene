@@ -17,12 +17,8 @@ use crate::core::build_steps::test::TestTarget;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
-<<<<<<< ferrocene/main
 use crate::ferrocene::test_variants::TestVariantName;
-||||||| b4116af55fb
-=======
 use crate::core::session::Build;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::helpers;
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]

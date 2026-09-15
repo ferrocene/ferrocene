@@ -12,13 +12,14 @@ use std::path::{Path, PathBuf, absolute};
 
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
+use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
+use crate::core::session::FileType;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext};
-use crate::utils::helpers::git;
-use crate::{Compiler, FileType, t};
+use crate::utils::helpers::{git, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;

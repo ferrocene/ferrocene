@@ -18,7 +18,6 @@ cfg_select! {
     target_env = "msvc" => {
         // Windows MSVC no extra unwinder support needed
     }
-<<<<<<< ferrocene/main
     any(
         target_os = "none",
         target_os = "espidf",
@@ -26,15 +25,6 @@ cfg_select! {
         // ferrocene addition
         ferrocene_facade_secretsauce,
     ) => {
-||||||| b4116af55fb
-    any(
-        target_os = "none",
-        target_os = "espidf",
-        target_os = "nuttx",
-    ) => {
-=======
-    any(target_os = "none", target_os = "espidf", target_os = "nuttx") => {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // These "unix" family members do not have unwinder.
     }
     any(
@@ -97,14 +87,7 @@ cfg_select! {
         unsafe extern "C" {}
     }
     _ => {
-<<<<<<< ferrocene/main
         #[cfg(not(ferrocene_facade_secretsauce))] // ferrocene addition: don't link to libgcc_s
-        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
-        #[link(name = "gcc_s", cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon"))))]
-||||||| b4116af55fb
-        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
-        #[link(name = "gcc_s", cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon"))))]
-=======
         #[link(
             name = "unwind",
             kind = "static",
@@ -115,7 +98,6 @@ cfg_select! {
             name = "gcc_s",
             cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon")))
         )]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         unsafe extern "C" {}
     }
 }

@@ -1,6 +1,7 @@
 //! Ferrocene specific configuration
 
-use crate::PathBuf;
+use std::path::PathBuf;
+
 use crate::core::config::macros::define_config;
 
 define_config! {

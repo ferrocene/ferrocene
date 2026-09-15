@@ -32,9 +32,9 @@ use std::collections::BTreeMap;
 #[cfg(feature = "build-metrics")]
 use build_helper::metrics::FerroceneVariantMetadata;
 
-use crate::Subcommand;
 use crate::core::builder::{Builder, Cargo};
 use crate::core::config::TargetSelection;
+use crate::core::config::flags::Subcommand;
 use crate::utils::exec::BootstrapCommand;
 
 #[derive(Clone, Copy, Debug, clap::ValueEnum)]

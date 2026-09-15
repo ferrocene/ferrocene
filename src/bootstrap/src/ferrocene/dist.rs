@@ -15,14 +15,15 @@ use crate::core::build_steps::doc::Rustc;
 use crate::core::build_steps::run::GenerateCopyright;
 use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
+use crate::core::session::FileType;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
 use crate::utils::exec::command;
+use crate::utils::helpers::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
-use crate::{FileType, t};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {

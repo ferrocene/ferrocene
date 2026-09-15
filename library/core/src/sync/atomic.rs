@@ -4023,17 +4023,11 @@ const fn strongest_failure_ordering(order: Ordering) -> Ordering {
     }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
-||||||| b4116af55fb
-const unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {
-=======
 const unsafe fn atomic_store<T: Copy, const VOLATILE: bool>(dst: *mut T, val: T, order: Ordering) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_store`.
     unsafe {
         match order {
@@ -4046,17 +4040,11 @@ const unsafe fn atomic_store<T: Copy, const VOLATILE: bool>(dst: *mut T, val: T,
     }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
-||||||| b4116af55fb
-const unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
-=======
 const unsafe fn atomic_load<T: Copy, const VOLATILE: bool>(dst: *const T, order: Ordering) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // SAFETY: the caller must uphold the safety contract for `atomic_load`.
     unsafe {
         match order {

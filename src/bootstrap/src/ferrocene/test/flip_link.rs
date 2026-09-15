@@ -1,10 +1,10 @@
 use crate::core::build_steps::compile::Std;
-use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
+use crate::core::session::Mode;
 use crate::ferrocene::test::{SourceType, tool};
 use crate::ferrocene::tool::flip_link::PATH as FLIP_LINK_PATH;
 use crate::utils::helpers;
-use crate::{Kind, Mode};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct FlipLink {}

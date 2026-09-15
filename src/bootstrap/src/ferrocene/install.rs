@@ -15,10 +15,10 @@ use walkdir::WalkDir;
 
 use crate::core::build_steps::dist;
 use crate::core::build_steps::tool::RustcPrivateCompilers;
-use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
+use crate::core::compiler::Compiler;
 use crate::core::config::{Config, TargetSelection};
 use crate::utils::tarball::GeneratedTarball;
-use crate::{Compiler, Kind};
 
 fn install(
     builder: &Builder<'_>,

@@ -1898,7 +1898,6 @@ pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
 
 #[cfg(not(target_os = "android"))]
 pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
-<<<<<<< ferrocene/main
     #[inline]
     /// Helper function for fallback open with `O_NOFOLLOW` + `fchmod` behavior
     fn open_and_set_permissions(p: &CStr, perm: FilePermissions) -> io::Result<()> {
@@ -1913,30 +1912,9 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             #[cfg(not(target_os = "wasi"))]
             use crate::os::unix::fs::OpenOptionsExt;
             #[cfg(target_os = "wasi")]
-||||||| b4116af55fb
-    // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
-    // Their filesystems do not have symbolic links, so no special handling is required.
-    cfg_select! {
-        // wasm32-wasip1 targets do not support fchmodat, so we fall down to
-        // open + fchmod
-        target_os = "wasi" => {
-            use crate::fs::OpenOptions;
-            use crate::fs::Permissions;
-            use crate::os::wasi::ffi::OsStrExt;
-=======
-    // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
-    // Their filesystems do not have symbolic links, so no special handling is required.
-    cfg_select! {
-        // wasm32-wasip1 targets do not support fchmodat, so we fall down to
-        // open + fchmod
-        target_os = "wasi" => {
-            use crate::fs::{OpenOptions, Permissions};
-            use crate::os::wasi::ffi::OsStrExt;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             use crate::os::wasi::fs::OpenOptionsExt;
             options.read(true).custom_flags(libc::O_NOFOLLOW);
         }
-<<<<<<< ferrocene/main
 
         // SAFETY: Since this function is called with `with_native_path`
         // and that successfully converted the `&Path` to a `CString`,
@@ -1990,27 +1968,7 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             }
 
             Err(err)
-||||||| b4116af55fb
-        all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
-            cvt_r(|| unsafe {
-                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
-            })
-            .map(|_| ())
-        },
-        _ => {
-            cvt_r(|| unsafe {
-                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, 0)
-            })
-            .map(|_| ())
-=======
-        all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
-            cvt_r(|| unsafe {
-                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
-            })
-            .map(|_| ())
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
-        _ => cvt_r(|| unsafe { libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, 0) }).map(|_| ()),
     }
 }
 

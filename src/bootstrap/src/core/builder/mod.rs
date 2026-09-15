@@ -28,14 +28,10 @@ pub use crate::core::builder::step_stack::StepStack;
 use crate::core::compiler::Compiler;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
-<<<<<<< ferrocene/main
-use crate::ferrocene::code_coverage::CoverageState;
-||||||| b4116af55fb
-=======
 use crate::core::metadata::Crate;
 use crate::core::session::Build;
+use crate::ferrocene::code_coverage::CoverageState;
 use crate::trace;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::cache::Cache;
 use crate::utils::exec::{BootstrapCommand, ExecutionContext, command};
@@ -1217,7 +1213,7 @@ impl<'a> Builder<'a> {
         self.run_step_descriptions(&Builder::get_step_descriptions(self.kind), &self.paths);
 
         // Ferrocene addition
-        crate::generate_coverage_report(&self);
+        crate::ferrocene::code_coverage::generate_coverage_report(&self);
     }
 
     /// Run all default documentation steps to build documentation.

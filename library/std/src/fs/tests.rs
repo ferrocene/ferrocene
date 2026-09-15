@@ -677,7 +677,6 @@ fn set_get_permissions_nofollows_symlink() {
     let result = fs::set_permissions_nofollow(&symlink_name, init_symlink_permissions);
 
     cfg_select! {
-<<<<<<< ferrocene/main
         any(
             windows,
             target_os = "macos",
@@ -686,21 +685,8 @@ fn set_get_permissions_nofollows_symlink() {
             target_os = "netbsd",
             target_os = "dragonfly",
             target_os = "nto",
-            target_os = "qnx"
+            target_os = "qnx",
         ) => {
-||||||| b4116af55fb
-        any(windows, target_os = "android", target_os = "macos", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "dragonfly") => {
-=======
-        any(
-            windows,
-            target_os = "android",
-            target_os = "macos",
-            target_os = "freebsd",
-            target_os = "openbsd",
-            target_os = "netbsd",
-            target_os = "dragonfly"
-        ) => {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             assert_eq!(result.unwrap(), ());
 
             let after_target_metadata = check!(fs::metadata(&symlink_name));

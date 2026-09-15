@@ -102,6 +102,13 @@ pub(crate) struct Build {
 
     #[cfg(feature = "tracing")]
     pub(crate) step_graph: std::cell::RefCell<crate::utils::step_graph::StepGraph>,
+
+    // Ferrocene addition
+    pub(crate) ferrocene_version: String,
+    /// Ferrocene addition: needed for code coverage instrumentation
+    ///
+    /// NOTE: separate from ferrocene_coverage because it gets initialized at different times.
+    pub(crate) profiler_runtime: std::cell::RefCell<Option<PathBuf>>,
 }
 
 /// When building Rust various objects are handled differently.
@@ -166,6 +173,11 @@ pub(crate) enum Mode {
     /// everything that links to rustc as a library, such as rustdoc, clippy,
     /// rustfmt, miri, etc.
     ToolRustcPrivate,
+
+    // Ferrocene addition
+    ToolCustom {
+        name: &'static str,
+    },
 }
 
 impl Mode {
@@ -176,6 +188,7 @@ impl Mode {
             | Mode::ToolRustcPrivate
             | Mode::ToolStd
             | Mode::ToolTarget
+            | Mode::ToolCustom { .. } // Ferrocene addition
             | Mode::Rustc => false,
         }
     }
@@ -361,6 +374,11 @@ impl Build {
             config.description = Some("built from a source tarball".to_owned());
         }
 
+        // Ferrocene addition
+        let ferrocene_version = std::fs::read_to_string(src.join("ferrocene").join("version"))
+            .expect("failed to read ferrocene/version");
+        let ferrocene_version = ferrocene_version.trim();
+
         let mut build = Build {
             initial_lld,
             initial_relative_libdir,
@@ -406,6 +424,11 @@ impl Build {
 
             #[cfg(feature = "tracing")]
             step_graph: std::cell::RefCell::new(crate::utils::step_graph::StepGraph::default()),
+
+            // Ferrocene addition
+            ferrocene_version: ferrocene_version.to_owned(),
+            // Ferrocene addition
+            profiler_runtime: std::cell::RefCell::new(None),
         };
 
         // If local-rust is the same major.minor as the current version, then force a
@@ -619,6 +642,16 @@ impl Build {
                 self.config.set_dry_run(DryRun::SelfCheck);
                 let builder = Builder::new(self);
                 builder.execute_cli();
+
+                if builder.is_serve_flag_unsupported() {
+                    eprintln!("error: --serve flag is not supported for the requested path");
+                    helpers::exit_process(1);
+                }
+
+                if builder.is_serve_flag_called_multiple_times() {
+                    eprintln!("error: --serve can only be used when building a single document");
+                    helpers::exit_process(1);
+                }
             }
 
             // Actual run.
@@ -767,6 +800,7 @@ impl Build {
             (Some(build_compiler.stage + 1), "tools")
         }
 
+        let mut subdir = None; // Ferrocene addition
         let (stage, suffix) = match mode {
             // Std is special, stage N std is built with stage N rustc
             Mode::Std => (Some(build_compiler.stage), "std"),
@@ -784,6 +818,11 @@ impl Build {
                     staged_tool(build_compiler)
                 }
             }
+            // Ferrocene addition to give custom tools a separate build directory
+            Mode::ToolCustom { name } => {
+                subdir = Some(name);
+                (Some(build_compiler.stage), "tools-custom")
+            }
         };
         let path = self.out.join(build_compiler.host);
         let mut dir_name = String::new();
@@ -791,7 +830,11 @@ impl Build {
             write!(dir_name, "stage{stage}-").unwrap();
         }
         dir_name.push_str(suffix);
-        path.join(dir_name)
+        let mut path = path.join(dir_name);
+        if let Some(name) = subdir {
+            path = path.join(name);
+        }
+        path
     }
 
     /// Returns the root output directory for all Cargo output in a given stage,
@@ -920,7 +963,8 @@ impl Build {
                 | Mode::ToolBootstrap
                 | Mode::ToolTarget
                 | Mode::ToolStd
-                | Mode::ToolRustcPrivate,
+                | Mode::ToolRustcPrivate
+                | Mode::ToolCustom { .. }, // Ferrocene addition
             )
             | None => target_and_stage.stage + 1,
         };
@@ -1436,8 +1480,27 @@ impl Build {
             && !s.is_empty()
         {
             version.push_str(" (");
+
+            // Ferrocene addition
+            let channel = crate::ferrocene::ferrocene_release_channel(
+                &self.config.channel,
+                &self.config.ferrocene_raw_channel,
+                &self.ferrocene_version,
+            );
+            version.push_str("Ferrocene ");
+            version.push_str(&channel);
+            version.push(' ');
             version.push_str(s);
             version.push(')');
+        } else {
+            // Ferrocene addition
+            use std::fmt::Write;
+            let channel = crate::ferrocene::ferrocene_release_channel(
+                &self.config.channel,
+                &self.config.ferrocene_raw_channel,
+                &self.ferrocene_version,
+            );
+            let _ = write!(version, " (Ferrocene {})", channel);
         }
         version
     }
@@ -1762,7 +1825,7 @@ impl Build {
         self.create_dir(dir);
     }
 
-    pub(crate) fn read_dir(&self, dir: &Path) -> impl Iterator<Item = fs::DirEntry> {
+    pub(crate) fn read_dir(&self, dir: &Path) -> impl Iterator<Item = fs::DirEntry> + use<> {
         let iter = match fs::read_dir(dir) {
             Ok(v) => v,
             Err(_) if self.config.dry_run() => return vec![].into_iter(),

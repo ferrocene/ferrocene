@@ -219,9 +219,9 @@ fn generate_function(
                                 LineCoverageStatus::Untested => span class="line line-untested" data-filename=(filename) data-linenum=(linenum) {
                                     @for (chunk, tested) in line_runs(line, function.regions.get(linenum)) {
                                         @if tested {
-                                            span class="region-tested" { (chunk) }
-                                        } @else {
                                             (chunk)
+                                        } @else {
+                                            span class="region-untested" { (chunk) }
                                         }
                                     }
                                     "\n"
@@ -250,6 +250,9 @@ fn line_runs(line: &str, regions: Option<&Vec<ColumnRange>>) -> Vec<(String, boo
 
     let mut tested = vec![false; len];
 
+    // Wider regions first, narrower regions last
+    // So if a wider region has hits but a smaller region within it is not hit
+    // we show it as untested properly and not blindly assume that we cover it.
     let mut by_specificity: Vec<&ColumnRange> = regions.iter().collect();
     by_specificity.sort_by_key(|range| {
         std::cmp::Reverse(range.end_col.unwrap_or(len).saturating_sub(range.start_col))
@@ -350,7 +353,7 @@ mod tests {
     }
 
     #[test]
-    fn generate_function_highlights_covered_fragment_of_untested_line() {
+    fn generate_function_highlights_uncovered_fragment_of_untested_line() {
         let dir = std::env::temp_dir().join(format!("blanket-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let relative_path = std::path::PathBuf::from("lib.rs");
@@ -384,8 +387,10 @@ mod tests {
         let html = generate_function(&function, &dir).unwrap().into_string();
         std::fs::remove_dir_all(&dir).ok();
 
-        assert!(html.contains(r#"<span class="region-tested">if cond { covered() } else </span>"#));
-        assert!(html.contains("{ uncovered() }"));
-        assert!(!html.contains(r#"<span class="region-tested">{ uncovered() }</span>"#));
+        assert!(html.contains("if cond { covered() } else "));
+        assert!(html.contains(r#"<span class="region-untested">{ uncovered() }</span>"#));
+        assert!(
+            !html.contains(r#"<span class="region-untested">if cond { covered() } else </span>"#)
+        );
     }
 }

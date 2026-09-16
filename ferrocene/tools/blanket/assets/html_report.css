@@ -5,7 +5,7 @@
     --var-partial: #B3589A;
     --var-annotated: #BE8239;
     --var-ignored: gray;
-    --var-region-tested-bg: color-mix(in srgb, var(--var-tested) 35%, transparent);
+    --var-region-untested-bg: color-mix(in srgb, var(--var-untested) 35%, transparent);
     --var-untested-annotated: var(--var-untested);
     --var-partial-annotated: var(--var-partial);
     --var-annotated-text: none;
@@ -159,8 +159,8 @@ details.partial-annotation summary::after {
     background-color: var(--var-untested);
 }
 
-.functions .line-untested .region-tested {
-    background-color: var(--var-region-tested-bg);
+.functions .line-untested .region-untested {
+    background-color: var(--var-region-untested-bg);
     border-radius: 2px;
 }
 

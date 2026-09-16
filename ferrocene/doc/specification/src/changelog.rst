@@ -19,6 +19,63 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.99.0
+-------------------------------
+
+- `Add allow-by-default 'raw_borrows_via_references' lint that checks for references that decay immediately into raw borrows <https://github.com/rust-lang/rust/pull/138230>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Extend 'unconditional_panic' lint to function calls that panic when the chunks/windows size is zero <https://github.com/rust-lang/rust/pull/153563>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Stabilize C-variadic function definitions <https://github.com/rust-lang/rust/pull/155697>`_
+
+- `Trait methods are now resolved on an adjusted never type (producing a FCW) <https://github.com/rust-lang/rust/pull/156047>`_
+
+- `Coerce from inference variables to trait objects if the inference variable is related via subtyping to a type that is known to be 'Sized' <https://github.com/rust-lang/rust/pull/157820>`_
+
+- `Stabilize '#[my_macro] mod foo;' <https://github.com/rust-lang/rust/pull/157857>`_
+
+- `Fix the 'overflowing_literals' lint with repeated negation <https://github.com/rust-lang/rust/pull/158302>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Add POSIX symbols to the 'invalid_runtime_symbol_definitions' and 'suspicious_runtime_symbol_definitions' lints <https://github.com/rust-lang/rust/pull/158522>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Lint unused '#[path]' attributes on inline modules <https://github.com/rust-lang/rust/pull/158835>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Enable 'unreachable_cfg_select_predicates' lint as part of 'unused' lint group <https://github.com/rust-lang/rust/pull/159179>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Stabilize passing 128-bit integers via vector registers with 'asm!' on x86 <https://github.com/rust-lang/rust/pull/159525>`_
+
+- `Macros that expand to a semicolon now produce a warning lint even when the macro comes from another crate <https://github.com/rust-lang/rust/issues/160029>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Explicitly document that some allocations are allowed to grow in-place (but none are allowed to shrink) <https://github.com/rust-lang/rust/pull/159729>`_
+
+  - Details of conforming tools are outside the scope of the FLS
+
+- `We now guarantee that the contents of an UnsafeCell can be accessed without going through 'get' <https://github.com/rust-lang/rust/pull/159730>`_
+
+  - The Rust Standard Library is outside the scope of the FLS.
+
+- `Stabilize the ability to use '#[unsafe(naked)' functions to define C-variadic functions '#![feature(c_variadic_naked_functions)]' <https://github.com/rust-lang/rust/pull/159746>`_
+
+- `Warn if an invalid 'doc' attribute is used on a macro invocation <https://github.com/rust-lang/rust/pull/161003>`_
+
+  - Diagnostics are outside the scope of the FLS
+
+- `Infer anonymous lifetimes in the types of associated consts as 'static <https://github.com/rust-lang/rust/pull/156508>`_
+
 FLS maintenance
 ---------------
 

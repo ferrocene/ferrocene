@@ -33,6 +33,15 @@ if __name__ == "__main__":
 
     pr_source_branch = os.environ["GITHUB_HEAD_REF"]
 
+    print(f"""
+===== check-github-pr-title.py =====
+    pr_title = {pr_title!r}
+    pr_source_branch = {pr_source_branch!r}
+    is_automated_pr() = {is_automated_pr(pr_source_branch)}
+    is_valid_pr_title() = {is_valid_pr_title(pr_title)}
+===== check-github-pr-title.py =====
+""")
+
     if is_automated_pr(pr_source_branch):
         # Automations are currently exempt from the ticket rule
         sys.exit(0)

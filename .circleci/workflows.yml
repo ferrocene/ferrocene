@@ -514,7 +514,7 @@ jobs:
 
   llvm--aarch64-apple-darwin:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -542,7 +542,7 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -563,7 +563,7 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -585,7 +585,7 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -606,7 +606,7 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -629,7 +629,7 @@ jobs:
 
   aarch64-darwin-generic-test-runner:
     macos:
-      xcode: "27.0.0"
+      xcode: "26.6"
     parameters:
       job:
         type: string
@@ -983,7 +983,7 @@ workflows:
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
-          name:  build-docker--qnx-runner--aarch64
+          name: build-docker--qnx-runner--aarch64
           image: qnx-runner
           tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--aarch64
           rebuild: << pipeline.parameters.llvm-rebuild >>
@@ -1053,7 +1053,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: x86_64-unknown-linux-gnu
           restore_from_job: x86_64-linux-build
-          requires: [ x86_64-linux-build ]
+          requires: [x86_64-linux-build]
       - linux-generic-test-container:
           name: x86_64-linux-test-flip-link
           executor: *executor-x86_64-runner
@@ -1063,7 +1063,7 @@ workflows:
           extra-args: --target thumbv7em-none-eabi
           ferrocene_host: x86_64-unknown-linux-gnu
           restore_from_job: x86_64-linux-build
-          requires: [ x86_64-linux-build ]
+          requires: [x86_64-linux-build]
       - linux-generic-test-container:
           name: x86_64-linux-test-library
           executor: *executor-x86_64-runner
@@ -1072,7 +1072,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: x86_64-unknown-linux-gnu
           restore_from_job: x86_64-linux-build
-          requires: [ x86_64-linux-build ]
+          requires: [x86_64-linux-build]
       - linux-generic-test-container:
           name: x86_64-linux-compiletest
           executor: *executor-x86_64-runner
@@ -1081,7 +1081,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: x86_64-unknown-linux-gnu
           restore_from_job: x86_64-linux-build
-          requires: [ x86_64-linux-build ]
+          requires: [x86_64-linux-build]
       - x86_64-linux-library-coverage:
           requires:
             - x86_64-linux-build
@@ -1283,7 +1283,7 @@ workflows:
 
       - aarch64-qnx8-generic-test-vm:
           name: aarch64-qnx8-test-library-compiletest
-          tasks:  $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
+          tasks: $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts) $(ferrocene/ci/split-tasks.py test:library)
           test-variant: "2021"
           extra-args: --tests # We do not run cross compiled doctests for this job on this platform, there are segfaults
           resource-class: large.gen3 # 4-core
@@ -1311,7 +1311,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: aarch64-unknown-linux-gnu
           restore_from_job: aarch64-linux-build
-          requires: [ aarch64-linux-build ]
+          requires: [aarch64-linux-build]
       - linux-generic-test-container:
           name: aarch64-linux-test-library
           executor: *executor-aarch64-runner
@@ -1320,7 +1320,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: aarch64-unknown-linux-gnu
           restore_from_job: aarch64-linux-build
-          requires: [ aarch64-linux-build ]
+          requires: [aarch64-linux-build]
       - linux-generic-test-container:
           name: aarch64-linux-compiletest
           executor: *executor-aarch64-runner
@@ -1329,7 +1329,7 @@ workflows:
           test-variant: "2021"
           ferrocene_host: aarch64-unknown-linux-gnu
           restore_from_job: aarch64-linux-build
-          requires: [ aarch64-linux-build ]
+          requires: [aarch64-linux-build]
       - aarch64-linux-library-coverage:
           requires:
             - aarch64-linux-build
@@ -1348,7 +1348,7 @@ workflows:
           restore_from_job: aarch64-linux-build
           ferrocene_host: aarch64-unknown-linux-gnu
           resource_class: ferrocene/k8s-rhel-10-arm64-medium
-          tasks:  $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
+          tasks: $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py qnx:compiletest-no-only-hosts)
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--aarch64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:rhivos-2.0-19-04-2026-testimage
           requires:

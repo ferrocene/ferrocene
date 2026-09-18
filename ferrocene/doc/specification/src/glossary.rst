@@ -713,6 +713,11 @@ with an implicit 0x00 byte appended to it.
 
 See :s:`CStringLiteral`.
 
+C-variadic function
+^^^^^^^^^^^^^^^^^^^
+
+A :dt:`C-variadic function` is a :t:`variadic function` with :t:`ABI` ``extern "C"`` or ``extern "C-unwind"``.
+
 Call conformance
 ^^^^^^^^^^^^^^^^
 
@@ -1487,21 +1492,24 @@ See :s:`ExpressionWithoutBlock`.
 external block
 ^^^^^^^^^^^^^^
 
-An :dt:`external block` is a :t:`construct` that provides the declarations of
-foreign :t:`[function]s` as unchecked imports.
+An :dt:`external block` is a :t:`construct` that provides the declarations of :t:`[external block function]s` and :t:`[external static]s` as unchecked imports.
 
 See :s:`ExternalBlock`.
+
+external block function
+^^^^^^^^^^^^^^^^^^^^^^^
+
+An :dt:`external block function` is a :t:`function` declared within an :t:`external block`.
 
 external function
 ^^^^^^^^^^^^^^^^^
 
-An :dt:`external function` is an unchecked import of a foreign :t:`function`.
+An :dt:`external function` is a :t:`function` subject to :t:`function qualifier` ``extern``.
 
 external function item type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An :dt:`external function item type` is a :t:`function item type` where the
-related :t:`function` is an :t:`external function`.
+An :dt:`external function item type` is a :t:`function item type` where the related :t:`function` is an :t:`external block function`.
 
 external static
 ^^^^^^^^^^^^^^^
@@ -1639,9 +1647,7 @@ See :s:`ForLoopExpression`.
 Foreign Function Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`,
-:t:`external block`, :t:`[external function]s`, linkage, and :t:`type`
-:t:`layout` to interface a Rust program with foreign code.
+:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`, :t:`external block`, :t:`[external block function]s`, linkage, and :t:`type` :t:`layout` to interface a Rust program with foreign code.
 
 fragment specifier
 ^^^^^^^^^^^^^^^^^^
@@ -5137,11 +5143,15 @@ variable
 A :dt:`variable` is a placeholder for a :t:`value` that is allocated on the
 stack.
 
+variadic function
+^^^^^^^^^^^^^^^^^
+
+A :t:`variadic function` is an :t:`external block function` or a :t:`external function` that specifies a :t:`variadic part`.
+
 variadic part
 ^^^^^^^^^^^^^
 
-A :dt:`variadic part` indicates the presence of :t:`C`-like optional
-parameters.
+A :dt:`variadic part` indicates the presence of :t:`C`-like optional parameters.
 
 See :s:`VariadicPart`.
 

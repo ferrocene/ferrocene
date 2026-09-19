@@ -33,8 +33,11 @@ if __name__ == "__main__":
 
     pr_source_branch = os.environ["GITHUB_HEAD_REF"]
 
+    print(f"pr_title = {pr_title!r}")
+    print(f"pr_source_branch = {pr_source_branch!r}")
+
     if is_automated_pr(pr_source_branch):
-        # Automations are currently exempt from the ticket rule
+        print("Automated branch, so Clickup ticket rule does not apply")
         sys.exit(0)
 
     if not is_valid_pr_title(pr_title):

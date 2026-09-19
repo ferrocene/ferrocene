@@ -6,11 +6,11 @@ pub(crate) mod flip_link;
 
 use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
-use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
+use crate::core::session::Mode;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
 use crate::utils::exec::BootstrapCommand;
-use crate::{Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct TraceabilityMatrixTool {

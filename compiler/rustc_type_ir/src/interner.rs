@@ -5,6 +5,8 @@ use std::ops::Deref;
 
 use rustc_ast_ir::Movability;
 use rustc_ast_ir::visit::VisitorResult;
+#[cfg(feature = "nightly")]
+use rustc_data_structures::stable_hash::StableHash;
 use rustc_index::bit_set::DenseBitSet;
 
 use crate::fold::TypeFoldable;
@@ -29,11 +31,11 @@ pub trait Interner:
     + IrPrint<ty::AliasTy<Self>>
     + IrPrint<ty::AliasTerm<Self>>
     + IrPrint<ty::TraitRef<Self>>
-    + IrPrint<ty::TraitPredicate<Self>>
+    + IrPrint<ty::TraitClause<Self>>
     + IrPrint<ty::HostEffectClause<Self>>
     + IrPrint<ty::ExistentialTraitRef<Self>>
     + IrPrint<ty::ExistentialProjection<Self>>
-    + IrPrint<ty::ProjectionPredicate<Self>>
+    + IrPrint<ty::ProjectionClause<Self>>
     + IrPrint<ty::NormalizesTo<Self>>
     + IrPrint<ty::SubtypePredicate<Self>>
     + IrPrint<ty::CoercePredicate<Self>>
@@ -184,8 +186,20 @@ pub trait Interner:
     type ScalarInt: Copy + Debug + Hash + Eq;
 
     // Kinds of regions
+    /// (2026/08/13)
+    /// Do not uplift, the underlying types differ between r-a and rustc.
+    ///
+    /// See <https://github.com/rust-lang/rust/pull/160986#issuecomment-5269817932>.
     type EarlyParamRegion: ParamLike;
-    type LateParamRegion: Copy + Debug + Hash + Eq;
+    /// (2026/08/13)
+    /// Do not uplift, the underlying types differ between r-a and rustc.
+    ///
+    /// See <https://github.com/rust-lang/rust/pull/160986#issuecomment-5269817932>.
+    #[cfg(feature = "nightly")]
+    type LateParamRegionKind: Clone + Copy + Debug + PartialEq + Eq + Hash + StableHash;
+
+    #[cfg(not(feature = "nightly"))]
+    type LateParamRegionKind: Clone + Copy + Debug + PartialEq + Eq + Hash;
 
     type InternedRegionKind: Interned<Self, Value = RegionKind<Self>>;
 
@@ -522,7 +536,6 @@ declare_lift_into! {
     InherentAssocConstId,
     InherentAssocTyId,
     InternedRegionKind,
-    LateParamRegion,
     OpaqueTyId,
     ParamEnv,
     PatList,

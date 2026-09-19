@@ -3,6 +3,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::core::backend::CodegenBackendKind;
 use crate::core::build_steps::compile::{
     ArtifactKeepMode, add_to_sysroot, run_cargo, rustc_cargo, rustc_cargo_env, std_cargo,
     std_crates_for_make_run,
@@ -16,13 +17,13 @@ use crate::core::builder::{
     self, Alias, Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
     crate_description,
 };
+use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
-use crate::core::config::flags::Subcommand;
+use crate::core::session::Mode;
 // Ferrocene addition
 use crate::ferrocene::tool::SymbolReport;
 use crate::utils::build_stamp::{self, BuildStamp};
 use crate::utils::helpers::t;
-use crate::{CodegenBackendKind, Compiler, Mode};
 
 /// Allows individual check-step instances to keep track of whether they
 /// represent `cargo check` or `cargo fix`, independently of [`Builder::kind`].
@@ -113,7 +114,7 @@ impl CommandLineStep for Std {
         );
 
         std_cargo(builder, target, &mut cargo, &self.crates);
-        if matches!(builder.config.cmd, Subcommand::Fix) {
+        if matches!(builder.kind, Kind::Fix) {
             // By default, cargo tries to fix all targets. Tell it not to fix tests until we've added `test` to the sysroot.
             cargo.arg("--lib");
 

@@ -14,7 +14,7 @@ use xz2::read::XzDecoder;
 use crate::core::builder::{Builder, Step};
 use crate::core::config::FerroceneDocumentSignatures;
 use crate::ferrocene::doc::IsSphinxBook;
-use crate::t;
+use crate::utils::helpers::t;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CacheSignatureFiles<B: Step + IsSphinxBook> {

@@ -6,13 +6,15 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use crate::core::builder::{Builder, Cargo, Kind, Step};
+use crate::core::compiler::Compiler;
 use crate::core::config::flags::FerroceneCoverageFor;
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::core::session::{self, Mode};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers;
-use crate::{BootstrapCommand, Compiler, Mode};
 
 pub(crate) fn instrument_coverage(
     builder: &Builder<'_>,
@@ -179,7 +181,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
         .join(state.target.to_string())
         .join(html_report.file_name().expect("No coverage report filename determined."));
     builder.info(&format!("Saving coverage report to {}", dist_report.display()));
-    builder.copy_link(&html_report, &dist_report, crate::FileType::Regular);
+    builder.copy_link(&html_report, &dist_report, session::FileType::Regular);
 
     if builder.test_target.runs_doctests() {
         // Remove the doctest binaries so they're not distributed afterwards.

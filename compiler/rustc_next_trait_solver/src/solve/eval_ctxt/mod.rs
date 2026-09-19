@@ -1403,19 +1403,21 @@ where
         Ok(())
     }
 
-    // Try to evaluate a const, or return `None` if the const is too generic.
-    // This doesn't mean the const isn't evaluatable, though, and should be treated
-    // as an ambiguity rather than no-solution.
+    // Try to evaluate a const and normalize the type of the resulting value, or return `None` if
+    // the const is too generic. This doesn't mean the const isn't evaluatable, though, and should
+    // be treated as an ambiguity rather than no-solution.
     pub(super) fn evaluate_const(
         &mut self,
         param_env: I::ParamEnv,
         alias_const: ty::AliasConst<I>,
-    ) -> Result<Option<I::Const>, RerunNonErased> {
+    ) -> Result<Option<I::Const>, NoSolutionOrRerunNonErased> {
         if self.typing_mode().is_erased_not_coherence() {
             match self.opaque_accesses.rerun_always(RerunReason::EvaluateConst)? {}
         }
 
-        Ok(self.delegate.evaluate_const(param_env, alias_const))
+        self.delegate.evaluate_const(param_env, alias_const, |ty| {
+            self.normalize(GoalSource::Misc, param_env, ty)
+        })
     }
 
     pub(super) fn evaluate_const_and_instantiate_projection_term(
@@ -1709,7 +1711,7 @@ where
         let infcx = self.delegate.deref();
         let mut folder = NormalizationFolder::new(infcx, vec![], |alias_term| {
             let infer_term = self.next_term_infer_of_alias_kind(alias_term);
-            let pred = ty::ProjectionPredicate { projection_term: alias_term, term: infer_term };
+            let pred = ty::ProjectionClause { projection_term: alias_term, term: infer_term };
             let goal = Goal::new(self.cx(), param_env, pred);
             self.inspect.add_goal(self.delegate, self.max_input_universe, source, goal);
             let GoalEvaluation { goal, certainty, has_changed: _, stalled_on } =

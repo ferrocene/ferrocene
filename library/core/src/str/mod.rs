@@ -845,13 +845,13 @@ impl str {
         unsafe { &mut *(begin..end).get_unchecked_mut(self) }
     }
 
-    /// Divides one string slice into two at an index.
+    /// Divides one string slice into two at a byte offset.
     ///
     /// The argument, `mid`, should be a byte offset from the start of the
     /// string. It must also be on the boundary of a UTF-8 code point.
     ///
-    /// The two slices returned go from the start of the string slice to `mid`,
-    /// and from `mid` to the end of the string slice.
+    /// The first returned slice contains exactly the first `mid` bytes, and the
+    /// second contains all remaining bytes.
     ///
     /// To get mutable string slices instead, see the [`split_at_mut`]
     /// method.
@@ -885,13 +885,13 @@ impl str {
         }
     }
 
-    /// Divides one mutable string slice into two at an index.
+    /// Divides one mutable string slice into two at a byte offset.
     ///
     /// The argument, `mid`, should be a byte offset from the start of the
     /// string. It must also be on the boundary of a UTF-8 code point.
     ///
-    /// The two slices returned go from the start of the string slice to `mid`,
-    /// and from `mid` to the end of the string slice.
+    /// The first returned slice contains exactly the first `mid` bytes, and the
+    /// second contains all remaining bytes.
     ///
     /// To get immutable string slices instead, see the [`split_at`] method.
     ///
@@ -929,14 +929,14 @@ impl str {
         }
     }
 
-    /// Divides one string slice into two at an index.
+    /// Divides one string slice into two at a byte offset.
     ///
     /// The argument, `mid`, should be a valid byte offset from the start of the
     /// string. It must also be on the boundary of a UTF-8 code point. The
     /// method returns `None` if that’s not the case.
     ///
-    /// The two slices returned go from the start of the string slice to `mid`,
-    /// and from `mid` to the end of the string slice.
+    /// The first returned slice contains exactly the first `mid` bytes, and the
+    /// second contains all remaining bytes.
     ///
     /// To get mutable string slices instead, see the [`split_at_mut_checked`]
     /// method.
@@ -969,14 +969,14 @@ impl str {
         }
     }
 
-    /// Divides one mutable string slice into two at an index.
+    /// Divides one mutable string slice into two at a byte offset.
     ///
     /// The argument, `mid`, should be a valid byte offset from the start of the
     /// string. It must also be on the boundary of a UTF-8 code point. The
     /// method returns `None` if that’s not the case.
     ///
-    /// The two slices returned go from the start of the string slice to `mid`,
-    /// and from `mid` to the end of the string slice.
+    /// The first returned slice contains exactly the first `mid` bytes, and the
+    /// second contains all remaining bytes.
     ///
     /// To get immutable string slices instead, see the [`split_at_checked`] method.
     ///
@@ -1010,7 +1010,7 @@ impl str {
         }
     }
 
-    /// Divides one string slice into two at an index.
+    /// Divides one string slice into two at a byte offset.
     ///
     /// # Safety
     ///
@@ -1029,7 +1029,7 @@ impl str {
         }
     }
 
-    /// Divides one string slice into two at an index.
+    /// Divides one mutable string slice into two at a byte offset.
     ///
     /// # Safety
     ///

@@ -403,7 +403,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 // If T is a function type, the compiler synthesizes an impl, so we'll check
                 // the trait declaration in libcore which isn't what we want. Check if the
                 // function is annotated instead.
-                if let InstanceKind::Shim(ShimKind::FnPtr(_, ty) | ShimKind::FnPtrAddr(_, ty)) =
+                if let InstanceKind::Shim(ShimKind::FnPtr(_, ty) | ShimKind::FnPtrAsPtr(_, ty)) =
                     instance.def
                     && let ty::FnDef(fn_item, fn_args) = ty.kind()
                 {

@@ -8,10 +8,12 @@ use std::path::PathBuf;
 use crate::core::build_steps::tool::{
     RustcPrivateCompilers, SourceType, ToolArtifactKind, ToolBuild, prepare_tool_cargo,
 };
-use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
+use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
+use crate::core::session::Mode;
 use crate::utils::exec::BootstrapCommand;
-use crate::{Compiler, Kind, Mode, exe};
+use crate::utils::helpers::exe;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SelfTest {

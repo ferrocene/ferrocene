@@ -14,11 +14,11 @@ use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
 use std::{env, fs};
 
-use crate::Build;
 use crate::core::build_steps::tool;
 use crate::core::builder::Builder;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{CompilerBuiltins, DebuggerPath, Target};
+use crate::core::session::Build;
 use crate::utils::exec::command;
 use crate::utils::helpers::{self, t};
 
@@ -46,7 +46,6 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
-    "aarch64-unknown-l4re-uclibc",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM
@@ -121,7 +120,7 @@ pub fn check(build: &mut Build) {
     if cfg!(not(test))
         && !build.config.dry_run()
         && !build.host_target.is_msvc()
-        && build.config.llvm_from_ci
+        && build.config.llvm_ci_mode.download_from_ci()
     {
         let builder = Builder::new(build);
         let libcxx_version = builder.ensure(tool::LibcxxVersionTool { target: build.host_target });
@@ -149,7 +148,7 @@ pub fn check(build: &mut Build) {
     }
 
     // We need cmake, but only if we're actually building LLVM or sanitizers.
-    let building_llvm = !build.config.llvm_from_ci
+    let building_llvm = !build.config.llvm_ci_mode.download_from_ci()
         && !build.config.local_rebuild
         && build.hosts.iter().any(|host| {
             build.config.llvm_enabled(*host)

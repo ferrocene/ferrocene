@@ -6,6 +6,7 @@ use rustc_hir::attrs::{
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{self as hir, Attribute, find_attr};
+use rustc_lint_defs::builtin::{INLINE_NO_SANITIZE, RTSAN_NONBLOCKING_ASYNC};
 use rustc_macros::Diagnostic;
 use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
@@ -18,7 +19,6 @@ use rustc_middle::mono::Visibility;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self as ty, TyCtxt};
 use rustc_session::diagnostics::feature_err;
-use rustc_session::lint;
 use rustc_span::{Span, sym};
 use rustc_target::spec::Os;
 
@@ -475,7 +475,7 @@ fn check_result(
     {
         let hir_id = tcx.local_def_id_to_hir_id(did);
         tcx.emit_node_span_lint(
-            lint::builtin::INLINE_NO_SANITIZE,
+            INLINE_NO_SANITIZE,
             hir_id,
             sanitize_span,
             SanitizeOnInline { inline_span },
@@ -496,12 +496,7 @@ fn check_result(
                     != rustc_hir::ClosureKind::Closure))
     {
         let hir_id = tcx.local_def_id_to_hir_id(did);
-        tcx.emit_node_span_lint(
-            lint::builtin::RTSAN_NONBLOCKING_ASYNC,
-            hir_id,
-            sanitize_span,
-            AsyncBlocking,
-        );
+        tcx.emit_node_span_lint(RTSAN_NONBLOCKING_ASYNC, hir_id, sanitize_span, AsyncBlocking);
     }
 
     // error when specifying link_name together with link_ordinal

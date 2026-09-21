@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::FileType;
 use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::config::{FerroceneCoverageOutcomes, TargetSelection};
+use crate::core::session::FileType;
 use crate::ferrocene::code_coverage::CoverageOutcomesDir;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]

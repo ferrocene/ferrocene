@@ -798,7 +798,7 @@ mod impls {
         #[rustc_diagnostic_item = "noop_method_clone"]
         #[ferrocene::prevalidated]
         fn clone(&self) -> Self {
-            *self
+            self
         }
     }
 

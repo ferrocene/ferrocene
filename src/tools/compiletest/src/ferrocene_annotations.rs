@@ -257,6 +257,9 @@ fn sample_config() -> Config {
         verbose_run_make_subprocess_output: Default::default(),
         gcc_supported_target_tuples: Default::default(),
         wasm_proc_macros: Default::default(),
+        run_make_support_rlib: Default::default(),
+        run_make_support_rmeta: Default::default(),
+        query_rustc_lib_path: Default::default(),
     }
 }
 

@@ -12,11 +12,12 @@ use std::path::{Path, PathBuf};
 
 use crate::core::build_steps::tool::Tool;
 use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
+use crate::core::config::flags::Subcommand;
 use crate::core::config::{self, TargetSelection};
+use crate::core::session::Mode;
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::utils::exec::BootstrapCommand;
-use crate::{Mode, Subcommand};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {

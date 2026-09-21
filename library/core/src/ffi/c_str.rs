@@ -695,7 +695,7 @@ impl PartialEq<&Self> for CStr {
 impl PartialOrd for CStr {
     #[inline]
     fn partial_cmp(&self, other: &CStr) -> Option<Ordering> {
-        self.to_bytes().partial_cmp(&other.to_bytes())
+        self.to_bytes().partial_cmp(other.to_bytes())
     }
 }
 
@@ -703,7 +703,7 @@ impl PartialOrd for CStr {
 impl Ord for CStr {
     #[inline]
     fn cmp(&self, other: &CStr) -> Ordering {
-        self.to_bytes().cmp(&other.to_bytes())
+        self.to_bytes().cmp(other.to_bytes())
     }
 }
 

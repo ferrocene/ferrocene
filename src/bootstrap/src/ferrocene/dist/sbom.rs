@@ -3,8 +3,8 @@
 
 use std::path::PathBuf;
 
-use crate::FileType;
 use crate::core::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
+use crate::core::session::FileType;
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 

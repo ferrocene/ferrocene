@@ -3,9 +3,8 @@
 
 use std::path::PathBuf;
 
-use crate::TargetSelection;
 use crate::core::builder::{Builder, Step};
-use crate::core::config::FerroceneSecretSauce;
+use crate::core::config::{FerroceneSecretSauce, TargetSelection};
 
 // After `bors try` on secret sauce repo, append "/try" to the following string.
 // Remove the "/try" after the PR on secret sauce repo is merged.

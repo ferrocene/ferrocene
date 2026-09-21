@@ -3317,7 +3317,7 @@ impl<T: ?Sized + Debug> Debug for Ref<'_, T> {
 impl<T: ?Sized + Debug> Debug for RefMut<'_, T> {
     #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        Debug::fmt(&*(self.deref()), f)
+        Debug::fmt(self.deref(), f)
     }
 }
 

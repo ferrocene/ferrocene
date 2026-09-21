@@ -120,7 +120,9 @@ impl TargetSelection {
             | "aarch64v8r-unknown-ferrocene.facade"
             | "armv7r-ferrocene.facade-eabihf"
             | "thumbv7em-ferrocene.facade-eabi"
-            | "thumbv7em-ferrocene.facade-eabihf" => true,
+            | "thumbv7em-ferrocene.facade-eabihf"
+            | "thumbv8m.main-ferrocene.facade-eabi"
+            | "thumbv8m.main-ferrocene.facade-eabihf" => true,
             _ => {
                 // ignore-tidy-todo
                 todo!("expand this `match`");
@@ -138,7 +140,9 @@ impl TargetSelection {
             | "thumbv7em-none-eabi"
             | "thumbv7em-ferrocene.facade-eabi"
             | "thumbv7em-none-eabihf"
-            | "thumbv7em-ferrocene.facade-eabihf" => true,
+            | "thumbv7em-ferrocene.facade-eabihf"
+            | "thumbv8m.main-ferrocene.facade-eabihf"
+            | "thumbv8m.main-ferrocene.facade-eabi" => true,
             _ => false,
         }
     }

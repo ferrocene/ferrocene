@@ -27,6 +27,8 @@ qualification, in accordance to the standards above.
    rustc/armv7r-none-eabihf.rst
    rustc/thumbv7em-none-eabi
    rustc/thumbv7em-none-eabihf
+   rustc/thumbv8m.main-none-eabi
+   rustc/thumbv8m.main-none-eabihf
    rustc/x86_64-unknown-linux-gnu
 
 .. appendices::

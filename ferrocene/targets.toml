@@ -13,6 +13,8 @@ targets = [
     { tuple = "armv7r-none-eabihf", is_bare_metal = true, host = "x86_64-unknown-linux-gnu" },
     { tuple = "thumbv7em-none-eabi", is_bare_metal = true, host = "x86_64-unknown-linux-gnu" },
     { tuple = "thumbv7em-none-eabihf", is_bare_metal = true, host = "x86_64-unknown-linux-gnu" },
+    { tuple = "thumbv8m.main-none-eabi", is_bare_metal = true, host = "x86_64-unknown-linux-gnu" },
+    { tuple = "thumbv8m.main-none-eabihf", is_bare_metal = true, host = "x86_64-unknown-linux-gnu" },
     { tuple = "x86_64-pc-nto-qnx710", is_bare_metal = false, host = "x86_64-unknown-linux-gnu" },
     { tuple = "x86_64-pc-qnx", is_bare_metal = false, host = "x86_64-unknown-linux-gnu" },
     { tuple = "x86_64-unknown-linux-gnu", is_bare_metal = false, host = "x86_64-unknown-linux-gnu" },

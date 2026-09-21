@@ -58,6 +58,8 @@ fn main() {
         "armv7r-ferrocene.facade-eabihf",
         "thumbv7em-ferrocene.facade-eabihf",
         "thumbv7em-ferrocene.facade-eabi",
+        "thumbv8m.main-ferrocene.facade-eabi",
+        "thumbv8m.main-ferrocene.facade-eabihf",
     ];
     let mut invalid_target_name_found = false;
     for target in &target_list {

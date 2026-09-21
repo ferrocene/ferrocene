@@ -36,6 +36,8 @@ Ferrocene User Manual
    targets/armv7r-none-eabihf
    targets/thumbv7em-none-eabi
    targets/thumbv7em-none-eabihf
+   targets/thumbv8m.main-none-eabi
+   targets/thumbv8m.main-none-eabihf
    targets/aarch64-unknown-none
    targets/aarch64-apple-darwin
    targets/x86_64-unknown-linux-gnu

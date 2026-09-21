@@ -45,6 +45,8 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "aarch64-rhivos2-linux-gnu",
     "thumbv7em-ferrocene.facade-eabi",
     "thumbv7em-ferrocene.facade-eabihf",
+    "thumbv8m.main-ferrocene.facade-eabi",
+    "thumbv8m.main-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
     "aarch64-unknown-l4re-uclibc",
 ];

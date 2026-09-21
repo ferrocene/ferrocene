@@ -177,6 +177,13 @@ pub(crate) fn prepare_conditions(config: &Config) -> PreparedConditions {
         "when the architecture is part of the Thumb family",
     );
 
+    // ferrocene addition
+    builder.cond(
+        "thumbv8m.main",
+        config.target.starts_with("thumbv8m.main"),
+        "when the architecture is part of the Armv8-M.main (thumb mode) family",
+    );
+
     // The "arch" of `i586-` targets is "x86", so for more specific matching
     // we have to resort to a string-prefix check.
     builder.cond("i586", config.matches_arch("i586"), "when the subarchitecture is i586");

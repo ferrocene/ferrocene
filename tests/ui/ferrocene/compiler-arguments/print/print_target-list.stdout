@@ -270,6 +270,8 @@ thumbv7r-none-eabi
 thumbv7r-none-eabihf
 thumbv8m.base-none-eabi
 thumbv8m.base-nuttx-eabi
+thumbv8m.main-ferrocene.facade-eabi
+thumbv8m.main-ferrocene.facade-eabihf
 thumbv8m.main-none-eabi
 thumbv8m.main-none-eabihf
 thumbv8m.main-nuttx-eabi

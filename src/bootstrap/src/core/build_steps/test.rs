@@ -1129,6 +1129,18 @@ impl CommandLineStep for IntrinsicTest {
             return;
         }
 
+        let cc_tool = builder.cc_tool(host);
+        let cc_type = if cc_tool.is_like_clang() {
+            "clang"
+        } else if cc_tool.is_like_gnu() {
+            "gcc"
+        } else {
+            builder.info(&format!(
+                "Skipping intrinsic-test, as it requires the C compiler to be either gcc or clang"
+            ));
+            return;
+        };
+
         // Ferrocene addition: Run directly on the host
         let (input_file, skip_file, cflags) = if host.contains("x86_64-unknown-linux") {
             (
@@ -1137,7 +1149,9 @@ impl CommandLineStep for IntrinsicTest {
                     builder
                         .src
                         .join("library/stdarch/crates/intrinsic-test/missing_x86_common.txt"),
-                    builder.src.join("library/stdarch/crates/intrinsic-test/missing_x86_gcc.txt"),
+                    builder.src.join(format!(
+                        "library/stdarch/crates/intrinsic-test/missing_x86_{cc_type}.txt"
+                    )),
                 ],
                 "-I/usr/include/x86_64-linux-gnu/",
             )
@@ -1148,9 +1162,9 @@ impl CommandLineStep for IntrinsicTest {
                     builder
                         .src
                         .join("library/stdarch/crates/intrinsic-test/missing_aarch64_common.txt"),
-                    builder
-                        .src
-                        .join("library/stdarch/crates/intrinsic-test/missing_aarch64_gcc.txt"),
+                    builder.src.join(format!(
+                        "library/stdarch/crates/intrinsic-test/missing_aarch64_{cc_type}.txt"
+                    )),
                 ],
                 "-I/usr/aarch64-linux-gnu/include/",
             )
@@ -1181,7 +1195,7 @@ impl CommandLineStep for IntrinsicTest {
             cmd.arg("--skip").arg(skip);
         }
         cmd.arg("--sample-percentage").arg("100");
-        cmd.arg("--cc-arg-style").arg("gcc");
+        cmd.arg("--cc-arg-style").arg(cc_type);
         cmd.env("CC", builder.cc(host));
         cmd.env("CFLAGS", cflags);
         // intrinsic-test shells out to `cargo` and `rustfmt` make bootstrap's

@@ -26,7 +26,7 @@ pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<Functi
             )
         })
         .collect::<BTreeMap<_, _>>();
-    for Function { qualified_name, filename, start_line, end_line } in symbols {
+    for Function { qualified_name, filename, start_line, end_line, linkage_name } in symbols {
         let annotations = annotations.get_mut(&filename);
         let span = Span { filename: filename.into(), start_line, end_line };
         coverage.push(super::get_coverage(
@@ -34,6 +34,7 @@ pub fn coverage(cmd: &ShowCommand, report: &CoverageReport) -> Result<Vec<Functi
             span,
             &cmd.ferrocene,
             qualified_name,
+            &linkage_name,
             annotations,
         )?);
     }

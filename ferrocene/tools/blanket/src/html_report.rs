@@ -3,7 +3,7 @@ use std::path::Path;
 
 use maud::{DOCTYPE, PreEscaped};
 
-use crate::{Annotated, FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
+use crate::{Annotated, ColumnRange, FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
 
 const CSS: &str = include_str!("../assets/html_report.css");
 const JS: &str = include_str!("../assets/html_report.js");
@@ -217,7 +217,14 @@ fn generate_function(
                                     (line) "\n"
                                 },
                                 LineCoverageStatus::Untested => span class="line line-untested" data-filename=(filename) data-linenum=(linenum) {
-                                    (line) "\n"
+                                    @for (chunk, tested) in line_runs(line, function.regions.get(linenum)) {
+                                        @if tested {
+                                            span class="region-tested" { (chunk) }
+                                        } @else {
+                                            (chunk)
+                                        }
+                                    }
+                                    "\n"
                                 },
                                 LineCoverageStatus::Annotated => span class="line line-annotated" data-filename=(filename) data-linenum=(linenum) {
                                     (line) "\n"
@@ -233,4 +240,152 @@ fn generate_function(
         }
     );
     Ok(html)
+}
+
+fn line_runs(line: &str, regions: Option<&Vec<ColumnRange>>) -> Vec<(String, bool)> {
+    let len = line.len();
+    let Some(regions) = regions.filter(|regions| !regions.is_empty() && len > 0) else {
+        return vec![(line.to_string(), false)];
+    };
+
+    let mut tested = vec![false; len];
+
+    let mut by_specificity: Vec<&ColumnRange> = regions.iter().collect();
+    by_specificity.sort_by_key(|range| {
+        std::cmp::Reverse(range.end_col.unwrap_or(len).saturating_sub(range.start_col))
+    });
+
+    for range in by_specificity {
+        let start = floor_char_boundary(line, range.start_col.saturating_sub(1).min(len));
+        let end = ceil_char_boundary(line, range.end_col.unwrap_or(len).min(len)).max(start);
+        tested[start..end].fill(range.tested);
+    }
+
+    let mut offset = 0;
+    tested
+        .chunk_by(|a, b| a == b)
+        .map(|chunk| {
+            let start = offset;
+            offset += chunk.len();
+            (line[start..offset].to_string(), chunk[0])
+        })
+        .collect()
+}
+
+fn floor_char_boundary(line: &str, index: usize) -> usize {
+    (0..=index).rev().find(|&i| line.is_char_boundary(i)).unwrap_or(0)
+}
+
+fn ceil_char_boundary(line: &str, index: usize) -> usize {
+    (index..=line.len()).find(|&i| line.is_char_boundary(i)).unwrap_or(line.len())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn range(start_col: usize, end_col: Option<usize>, tested: bool) -> ColumnRange {
+        ColumnRange { start_col, end_col, tested }
+    }
+
+    #[test]
+    fn no_regions_is_one_untested_run() {
+        let runs = line_runs("    baz();", None);
+        assert_eq!(runs, vec![("    baz();".to_string(), false)]);
+    }
+
+    #[test]
+    fn single_region_covering_whole_line() {
+        let regions = vec![range(1, None, true)];
+        let runs = line_runs("    baz();", Some(&regions));
+        assert_eq!(runs, vec![("    baz();".to_string(), true)]);
+    }
+
+    #[test]
+    fn splits_covered_arm_from_uncovered_arm() {
+        // `if cond { covered() } else { uncovered() }`
+        let line = "if cond { covered() } else { uncovered() }";
+        let regions = vec![
+            range(1, Some(9), true),    // `if cond `
+            range(10, Some(21), true),  // `{ covered() }`
+            range(22, Some(27), true),  // ` else `
+            range(28, Some(42), false), // `{ uncovered() }`
+        ];
+        let runs = line_runs(line, Some(&regions));
+        assert_eq!(
+            runs,
+            vec![
+                ("if cond { covered() } else ".to_string(), true),
+                ("{ uncovered() }".to_string(), false),
+            ]
+        );
+    }
+
+    #[test]
+    fn narrower_region_overrides_broader_untested_one() {
+        // The whole line is nominally untested, but a nested, more specific region within it
+        // was hit (e.g. a branch condition that runs even though the statement as a whole
+        // never completes).
+        let line = "    a && b";
+        let regions = vec![
+            range(1, None, false),   // whole line, untested
+            range(5, Some(5), true), // `a`
+        ];
+        let runs = line_runs(line, Some(&regions));
+        assert_eq!(
+            runs,
+            vec![
+                ("    ".to_string(), false),
+                ("a".to_string(), true),
+                (" && b".to_string(), false),
+            ]
+        );
+    }
+
+    #[test]
+    fn out_of_range_columns_are_clamped_not_panicking() {
+        let regions = vec![range(1, Some(9999), true)];
+        let runs = line_runs("short", Some(&regions));
+        assert_eq!(runs, vec![("short".to_string(), true)]);
+    }
+
+    #[test]
+    fn generate_function_highlights_covered_fragment_of_untested_line() {
+        let dir = std::env::temp_dir().join(format!("blanket-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let relative_path = std::path::PathBuf::from("lib.rs");
+        std::fs::write(
+            dir.join(&relative_path),
+            "fn f(cond: bool) {\n    if cond { covered() } else { uncovered() }\n}\n",
+        )
+        .unwrap();
+
+        let mut regions = std::collections::BTreeMap::new();
+        regions.insert(
+            2,
+            vec![
+                range(5, Some(13), true),   // `if cond `
+                range(14, Some(25), true),  // `{ covered() }`
+                range(26, Some(31), true),  // ` else `
+                range(32, Some(46), false), // `{ uncovered() }`
+            ],
+        );
+
+        let lines = crate::LineCoverage {
+            lines: vec![
+                (1, LineCoverageStatus::Ignored),
+                (2, LineCoverageStatus::Untested),
+                (3, LineCoverageStatus::Ignored),
+            ],
+        };
+        let function =
+            FunctionCoverage::new("f".to_string(), relative_path, lines, regions, Annotated::Not);
+
+        let html = generate_function(&function, &dir).unwrap().into_string();
+        std::fs::remove_dir_all(&dir).ok();
+
+        assert!(html.contains(r#"<span class="region-tested">if cond { covered() } else </span>"#));
+        assert!(html.contains("{ uncovered() }"));
+        assert!(!html.contains(r#"<span class="region-tested">{ uncovered() }</span>"#));
+    }
 }

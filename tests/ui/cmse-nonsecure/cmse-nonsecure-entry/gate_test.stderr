@@ -1,11 +1,11 @@
 error[E0570]: "cmse-nonsecure-entry" is not a supported ABI for the current target
-  --> $DIR/gate_test.rs:4:12
+  --> $DIR/gate_test.rs:6:12
    |
 LL | pub extern "cmse-nonsecure-entry" fn entry_function(input: u32) -> u32 {
    |            ^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0658]: the extern "cmse-nonsecure-entry" ABI is experimental and subject to change
-  --> $DIR/gate_test.rs:4:12
+  --> $DIR/gate_test.rs:6:12
    |
 LL | pub extern "cmse-nonsecure-entry" fn entry_function(input: u32) -> u32 {
    |            ^^^^^^^^^^^^^^^^^^^^^^

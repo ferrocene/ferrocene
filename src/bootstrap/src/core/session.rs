@@ -370,18 +370,12 @@ impl Session {
             config.description = Some("built from a source tarball".to_owned());
         }
 
-<<<<<<< ferrocene/main
         // Ferrocene addition
         let ferrocene_version = std::fs::read_to_string(src.join("ferrocene").join("version"))
             .expect("failed to read ferrocene/version");
         let ferrocene_version = ferrocene_version.trim();
 
-        let mut build = Build {
-||||||| 124c16e0de9
-        let mut build = Build {
-=======
         let mut sess = Session {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             initial_lld,
             initial_relative_libdir,
             initial_rustc: config.initial_rustc.clone(),

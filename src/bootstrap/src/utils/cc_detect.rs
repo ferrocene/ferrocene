@@ -27,14 +27,8 @@ use std::path::{Path, PathBuf};
 
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{CompressDebuginfo, TargetSelection};
-<<<<<<< ferrocene/main
-use crate::core::session::{Build, CLang, GitRepo};
-use crate::utils::cache::Interned;
-||||||| 124c16e0de9
-use crate::core::session::{Build, CLang, GitRepo};
-=======
 use crate::core::session::{CLang, GitRepo, Session};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 
 /// Creates and configures a new [`cc::Build`] instance for the given target.
@@ -168,20 +162,10 @@ fn fill_target_compiler(sess: &mut Session, target: TargetSelection) {
     };
 
     // for VxWorks, record CXX compiler which will be used in lib.rs:linker()
-<<<<<<< ferrocene/main
     // Ferrocene annotation: see annotation above `facade_compiler` definition
     if cxx_configured || target.contains("vxworks") || facade_compiler.is_some() {
         let compiler = facade_compiler.clone().unwrap_or_else(|| cfg.get_compiler());
-        build.cxx.insert(target, compiler);
-||||||| 124c16e0de9
-    if cxx_configured || target.contains("vxworks") {
-        let compiler = cfg.get_compiler();
-        build.cxx.insert(target, compiler);
-=======
-    if cxx_configured || target.contains("vxworks") {
-        let compiler = cfg.get_compiler();
         sess.cxx.insert(target, compiler);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 
     sess.do_if_verbose(|| println!("CC_{} = {:?}", target.triple, sess.cc(target)));

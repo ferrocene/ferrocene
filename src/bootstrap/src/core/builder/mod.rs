@@ -29,14 +29,8 @@ use crate::core::compiler::Compiler;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{DryRun, TargetSelection};
 use crate::core::metadata::Crate;
-<<<<<<< ferrocene/main
-use crate::core::session::Build;
-use crate::ferrocene::code_coverage::CoverageState;
-||||||| 124c16e0de9
-use crate::core::session::Build;
-=======
 use crate::core::session::Session;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+use crate::ferrocene::code_coverage::CoverageState;
 use crate::trace;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::cache::Cache;

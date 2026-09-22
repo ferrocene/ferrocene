@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 // check that the `for<T> T: From<!>` impl is reserved
 
 //@ revisions: current next

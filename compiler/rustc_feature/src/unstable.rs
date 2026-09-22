@@ -288,6 +288,8 @@ declare_features! (
     (internal, rustc_attrs, "1.0.0", None),
     /// Allows using the `#[stable]` and `#[unstable]` attributes.
     (internal, staged_api, "1.0.0", None),
+    /// Perma-unstable, only used in the test suite for binders (`for<'a>`).
+    (internal, test_binder_constraints, "CURRENT_RUSTC_VERSION", None),
     /// Perma-unstable, only used to test the `incomplete_features` lint.
     (incomplete, test_incomplete_feature, "1.96.0", None),
     /// Added for testing unstable lints; perma-unstable.
@@ -313,8 +315,6 @@ declare_features! (
     /// Allows features specific to auto traits.
     /// Renamed from `optin_builtin_traits`.
     (unstable, auto_traits, "1.50.0", Some(13231)),
-    /// Allows using `box` in patterns (RFC 469).
-    (unstable, box_patterns, "1.0.0", Some(29641)),
     /// Allows builtin # foo() syntax
     (internal, builtin_syntax, "1.71.0", Some(110680)),
     /// Allows `#[doc(notable_trait)]`.
@@ -673,8 +673,6 @@ declare_features! (
     (unstable, negative_impls, "1.44.0", Some(68318)),
     /// Allows the `!` pattern.
     (incomplete, never_patterns, "1.76.0", Some(118155)),
-    /// Allows the `!` type. Does not imply 'exhaustive_patterns' (below) any more.
-    (unstable, never_type, "1.13.0", Some(35121)),
     /// Switch `..` syntax to use the new (`Copy + IntoIterator`) range types.
     (unstable, new_range, "1.86.0", Some(123741)),
     /// Allows `#![no_core]`.

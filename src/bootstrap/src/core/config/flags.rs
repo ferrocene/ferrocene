@@ -17,8 +17,14 @@ use crate::core::build_steps::test::TestTarget;
 use crate::core::builder::{Builder, Kind};
 use crate::core::config::Config;
 use crate::core::config::target_selection::{TargetSelectionList, target_selection_list};
+<<<<<<< ferrocene/main
 use crate::core::session::Build;
 use crate::ferrocene::test_variants::TestVariantName;
+||||||| 124c16e0de9
+use crate::core::session::Build;
+=======
+use crate::core::session::Session;
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::helpers;
 
 #[derive(Copy, Clone, Default, Debug, ValueEnum)]
@@ -237,8 +243,8 @@ impl Flags {
             println!("NOTE: updating submodules before printing available paths");
             let flags = Self::parse(&[String::from("build")]);
             let config = Config::parse(flags);
-            let build = Build::new(config);
-            let paths = Builder::get_help(&build, subcommand);
+            let sess = Session::new(config);
+            let paths = Builder::get_help(&sess, subcommand);
             if let Some(s) = paths {
                 println!("{s}");
             } else {

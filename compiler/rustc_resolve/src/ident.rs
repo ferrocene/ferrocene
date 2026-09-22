@@ -1596,18 +1596,28 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         }
 
                         RibKind::ConstParamTy => {
-                            if !self.features.generic_const_parameter_types() {
+                            let adt_enabled = self.features.min_adt_const_params()
+                                || self.features.adt_const_params();
+                            let is_self = matches!(res, Res::SelfTyAlias { .. });
+                            // We check whether Self depends on generics parameters in `fn type_of`
+                            if self.features.generic_const_parameter_types()
+                                || (adt_enabled && is_self)
+                            {
+                                continue;
+                            } else {
                                 if let Some(span) = finalize {
-                                    self.report_error(
-                                        span,
-                                        ResolutionError::ParamInTyOfConstParam {
-                                            name: rib_ident.name,
-                                        },
-                                    );
+                                    if matches!(res, Res::SelfTyAlias { .. }) {
+                                        self.report_error(span, ResolutionError::SelfInConstParam);
+                                    } else {
+                                        self.report_error(
+                                            span,
+                                            ResolutionError::ParamInTyOfConstParam {
+                                                name: rib_ident.name,
+                                            },
+                                        );
+                                    }
                                 }
                                 return Res::Err;
-                            } else {
-                                continue;
                             }
                         }
 
@@ -1897,6 +1907,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 "this `super` would go above the crate root".to_string(),
                                 None,
                                 None,
+                                None,
                             )
                         },
                     );
@@ -1973,7 +1984,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 "can only be used in path start position".to_string(),
                             )
                         };
-                        (message, label, None, None)
+                        (message, label, None, None, None)
                     },
                 );
             }
@@ -2130,7 +2141,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 } else {
                                     None
                                 };
-                                (message, label, None, note)
+                                (message, label, None, note, None)
                             },
                         );
                     }
@@ -2155,7 +2166,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         module_had_parse_errors,
                         module,
                         || {
-                            let (message, label, suggestion) =
+                            let (message, label, suggestion, help) =
                                 this.get_mut().report_path_resolution_error(
                                     path,
                                     opt_ns,
@@ -2168,7 +2179,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                     ident,
                                     diag_metadata,
                                 );
-                            (message, label, suggestion, None)
+                            (message, label, suggestion, None, help)
                         },
                     );
                 }

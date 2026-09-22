@@ -143,6 +143,7 @@ impl<T: PointeeSized> *mut T {
     /// [without_provenance]: without_provenance_mut
     #[must_use]
     #[inline(always)]
+    #[expect(clippy::transmutes_expressible_as_ptr_casts, reason = "implements pointer cast")]
     #[stable(feature = "strict_provenance", since = "1.84.0")]
     #[ferrocene::prevalidated]
     pub fn addr(self) -> usize {
@@ -1391,6 +1392,7 @@ impl<T: PointeeSized> *mut T {
     /// [`ptr::drop_in_place`]: crate::ptr::drop_in_place()
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[rustc_const_unstable(feature = "const_drop_in_place", issue = "109342")]
+    #[rustc_diagnostic_item = "ptr_drop_in_place_self"]
     #[inline(always)]
     #[ferrocene::prevalidated]
     pub const unsafe fn drop_in_place(self)

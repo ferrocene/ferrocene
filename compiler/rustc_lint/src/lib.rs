@@ -374,7 +374,8 @@ fn register_builtins(store: &mut LintStore) {
         UNUSED_PARENS,
         UNUSED_BRACES,
         REDUNDANT_SEMICOLONS,
-        MAP_UNIT_FN
+        MAP_UNIT_FN,
+        REPEATED_REPRS
     );
 
     add_lint_group!("let_underscore", LET_UNDERSCORE_DROP, LET_UNDERSCORE_LOCK);
@@ -719,6 +720,10 @@ fn register_builtins(store: &mut LintStore) {
         "no_mangle_generic_items",
         "converted into hard error, \
          generic items must always be mangled",
+    );
+    store.register_removed(
+        "dependency_on_unit_never_type_fallback",
+        "the code warned by this lint no longer compiles",
     );
 }
 

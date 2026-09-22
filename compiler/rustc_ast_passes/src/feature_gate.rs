@@ -261,9 +261,6 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                 // Function pointers cannot be `const`
                 self.check_late_bound_lifetime_defs(&fn_ptr_ty.generic_params);
             }
-            ast::TyKind::Never => {
-                gate!(self, never_type, ty.span, "the `!` type is experimental");
-            }
             ast::TyKind::Pat(..) => {
                 gate!(self, pattern_types, ty.span, "pattern types are unstable");
             }
@@ -294,15 +291,6 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
     }
 
     fn visit_generic_args(&mut self, args: &'a ast::GenericArgs) {
-        // This check needs to happen here because the never type can be returned from a function,
-        // but cannot be used in any other context. If this check was in `visit_fn_ret_ty`, it
-        // include both functions and generics like `impl Fn() -> !`.
-        if let ast::GenericArgs::Parenthesized(generic_args) = args
-            && let ast::FnRetTy::Ty(ref ty) = generic_args.output
-            && matches!(ty.kind, ast::TyKind::Never)
-        {
-            gate!(self, never_type, ty.span, "the `!` type is experimental");
-        }
         visit::walk_generic_args(self, args);
     }
 
@@ -350,9 +338,6 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
                         );
                     }
                 }
-            }
-            PatKind::Box(..) => {
-                gate!(self, box_patterns, pattern.span, "box pattern syntax is experimental");
             }
             _ => {}
         }
@@ -427,6 +412,16 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
             );
         }
         visit::walk_assoc_item(self, i, ctxt)
+    }
+
+    fn visit_test_binder_forall(&mut self, forall: &'a ast::TestBinderForall) {
+        self.check_late_bound_lifetime_defs(&forall.generics.params);
+        visit::walk_test_binder_forall(self, forall)
+    }
+
+    fn visit_test_binder_exists(&mut self, exists: &'a ast::TestBinderExists) {
+        self.check_late_bound_lifetime_defs(&exists.params);
+        visit::walk_test_binder_exists(self, exists)
     }
 }
 
@@ -608,7 +603,6 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
 
     // tidy-alphabetical-start
     soft_gate_all_legacy_dont_use!(auto_traits, "`auto` traits are unstable");
-    soft_gate_all_legacy_dont_use!(box_patterns, "box pattern syntax is experimental");
     soft_gate_all_legacy_dont_use!(decl_macro, "`macro` is experimental");
     soft_gate_all_legacy_dont_use!(negative_impls, "negative impls are experimental");
     soft_gate_all_legacy_dont_use!(specialization, "specialization is experimental");

@@ -1119,6 +1119,27 @@ pub(crate) struct ArrayBracketsInsteadOfBracesSugg {
 }
 
 #[derive(Diagnostic)]
+#[diag("attributes are not allowed inside imports")]
+pub(crate) struct AttrInUseTree {
+    #[primary_span]
+    pub attr_span: Span,
+    #[subdiagnostic]
+    pub sub: Option<AttrInUseTreeSugg>,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion("move the import to its own item", style = "verbose")]
+pub(crate) struct AttrInUseTreeSugg {
+    #[suggestion_part(code = "{code}")]
+    pub use_lo: Span,
+    #[suggestion_part(code = "")]
+    pub attr_span: Span,
+    #[suggestion_part(code = "")]
+    pub tree_span: Span,
+    pub code: String,
+}
+
+#[derive(Diagnostic)]
 #[diag("`match` arm body without braces")]
 pub(crate) struct MatchArmBodyWithoutBraces {
     #[primary_span]
@@ -3726,6 +3747,13 @@ pub(crate) struct AddBoxNew {
     pub box_kw_and_lo: Span,
     #[suggestion_part(code = ")")]
     pub hi: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("`box_patterns` has been removed")]
+pub(crate) struct BoxPatternsRemoved {
+    #[primary_span]
+    pub span: Span,
 }
 
 #[derive(Diagnostic)]

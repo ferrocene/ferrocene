@@ -2989,7 +2989,7 @@ macro_rules! fmt_refs {
 
 fmt_refs! { Debug, Display, Octal, Binary, LowerHex, UpperHex, LowerExp, UpperExp }
 
-#[unstable(feature = "never_type", issue = "35121")]
+#[stable(feature = "never_type", since = "CURRENT_RUSTC_VERSION")]
 impl Debug for ! {
     #[inline]
     #[ferrocene::prevalidated]
@@ -2998,7 +2998,7 @@ impl Debug for ! {
     }
 }
 
-#[unstable(feature = "never_type", issue = "35121")]
+#[stable(feature = "never_type", since = "CURRENT_RUSTC_VERSION")]
 impl Display for ! {
     #[inline]
     #[ferrocene::prevalidated]

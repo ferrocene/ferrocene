@@ -287,7 +287,8 @@ impl RibKind<'_> {
 #[derive(Debug)]
 pub(crate) struct Rib<'ra, R = Res> {
     pub bindings: FxIndexMap<Ident, R>,
-    pub patterns_with_skipped_bindings: UnordMap<DefId, Vec<(Span, Result<(), ErrorGuaranteed>)>>,
+    pub patterns_with_skipped_bindings:
+        UnordMap<DefId, Vec<(Span, Option<Span>, Result<(), ErrorGuaranteed>)>>,
     pub kind: RibKind<'ra>,
 }
 
@@ -1488,6 +1489,37 @@ impl<'ast, 'ra, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'ra, 'tc
         if let Some(v) = f.default_value() {
             self.resolve_anon_const(v, AnonConstKind::FieldDefaultValue);
         }
+    }
+
+    fn visit_test_binder_forall(&mut self, forall: &'ast TestBinderForall) {
+        self.with_generic_param_rib(
+            &forall.generics.params,
+            RibKind::Normal,
+            forall.node_id,
+            LifetimeBinderKind::WhereBound,
+            forall.span,
+            |this| {
+                this.visit_generics(&forall.generics);
+                this.visit_test_binder_body(&forall.body)
+            },
+        );
+        // exit assertions don't have the bound vars in scope
+        if let Some(assert_on_exit) = &forall.assert_on_exit {
+            for constraint in assert_on_exit {
+                self.visit_test_binder_constraint(constraint);
+            }
+        }
+    }
+
+    fn visit_test_binder_exists(&mut self, exists: &'ast TestBinderExists) {
+        self.with_generic_param_rib(
+            &exists.params,
+            RibKind::Normal,
+            exists.node_id,
+            LifetimeBinderKind::WhereBound,
+            exists.span,
+            |this| visit::walk_test_binder_exists(this, exists),
+        );
     }
 }
 
@@ -3055,6 +3087,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             ItemKind::MacCall(_) | ItemKind::DelegationMac(..) => {
                 panic!("unexpanded macro in resolve!")
             }
+
+            ItemKind::TestBinderConstraints(constraints) => {
+                self.resolve_test_binder_constraints(constraints, item.id);
+            }
         }
     }
 
@@ -3547,6 +3583,28 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         );
     }
 
+    fn resolve_test_binder_constraints(
+        &mut self,
+        constraints: &'ast TestBinderConstraints,
+        item_id: NodeId,
+    ) {
+        let generics = &constraints.generics;
+        self.with_generic_param_rib(
+            &generics.params,
+            RibKind::Item(
+                HasGenericParams::Yes(generics.span),
+                self.r.tcx.def_kind(self.r.current_owner.def_id),
+            ),
+            item_id,
+            LifetimeBinderKind::ImplBlock,
+            generics.span,
+            |this| {
+                this.visit_generics(generics);
+                this.visit_test_binder_body(&constraints.body);
+            },
+        );
+    }
+
     fn resolve_impl_item(
         &mut self,
         item: &'ast AssocItem,
@@ -3957,8 +4015,8 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
     /// A never pattern by definition indicates an unreachable case. For example, matching on
     /// `Result<T, &!>` could look like:
     /// ```rust
-    /// # #![feature(never_type)]
     /// # #![feature(never_patterns)]
+    #[cfg_attr(bootstrap, doc = "#![feature(never_type)]")]
     /// # fn bar(_x: u32) {}
     /// let foo: Result<u32, &!> = Ok(0);
     /// match foo {
@@ -4023,8 +4081,8 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
     /// A never pattern by definition indicates an unreachable case. For example, destructuring a
     /// `Result<T, &!>` could look like:
     /// ```rust
-    /// # #![feature(never_type)]
     /// # #![feature(never_patterns)]
+    #[cfg_attr(bootstrap, doc = "#![feature(never_type)]")]
     /// # fn foo() -> Result<bool, &'static !> { Ok(true) }
     /// let (Ok(x) | Err(&!)) = foo();
     /// # let _ = x;
@@ -4306,6 +4364,10 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         .or_default()
                         .push((
                             pat.span,
+                            match rest {
+                                ast::PatFieldsRest::Rest(span) => Some(*span),
+                                _ => None,
+                            },
                             match rest {
                                 ast::PatFieldsRest::Recovered(guar) => Err(*guar),
                                 _ => Ok(()),
@@ -4987,6 +5049,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 span,
                 label,
                 suggestion,
+                help,
                 module,
                 segment,
                 error_implied_by_parse_error: _,
@@ -4999,6 +5062,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         segment: segment.name,
                         label,
                         suggestion,
+                        help,
                         module,
                         message,
                     },
@@ -5582,27 +5646,19 @@ fn required_generic_args_suggestion(generics: &ast::Generics) -> Option<String> 
 
 impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, 'ast, '_, '_> {
     fn visit_item(&mut self, item: &'ast Item) {
-        match &item.kind {
-            ItemKind::TyAlias(TyAlias { generics, .. })
-            | ItemKind::Const(ConstItem { generics, .. })
-            | ItemKind::Fn(Fn { generics, .. })
-            | ItemKind::Enum(_, generics, _)
-            | ItemKind::Struct(_, generics, _)
-            | ItemKind::Union(_, generics, _)
-            | ItemKind::Impl(Impl { generics, .. })
-            | ItemKind::Trait(Trait { generics, .. })
-            | ItemKind::TraitAlias(TraitAlias { generics, .. }) => {
-                if let ItemKind::Fn(Fn { sig, .. }) = &item.kind {
-                    self.collect_fn_info(&sig.decl, item.id);
-                }
+        if let Some(generics) = item.opt_generics() {
+            let def_id = self.r.owner_def_id(item.id);
+            let count = generics
+                .params
+                .iter()
+                .filter(|param| matches!(param.kind, ast::GenericParamKind::Lifetime { .. }))
+                .count();
+            self.r.item_generics_num_lifetimes.insert(def_id, count);
+        }
 
-                let def_id = self.r.owner_def_id(item.id);
-                let count = generics
-                    .params
-                    .iter()
-                    .filter(|param| matches!(param.kind, ast::GenericParamKind::Lifetime { .. }))
-                    .count();
-                self.r.item_generics_num_lifetimes.insert(def_id, count);
+        match &item.kind {
+            ItemKind::Fn(Fn { sig, .. }) => {
+                self.collect_fn_info(&sig.decl, item.id);
             }
 
             ItemKind::ForeignMod(ForeignMod { items, .. }) => {
@@ -5623,7 +5679,16 @@ impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, 'ast, '_, '_> {
             | ItemKind::MacroDef(..)
             | ItemKind::GlobalAsm(..)
             | ItemKind::MacCall(..)
-            | ItemKind::DelegationMac(..) => {}
+            | ItemKind::DelegationMac(..)
+            | ItemKind::TyAlias(..)
+            | ItemKind::Const(..)
+            | ItemKind::Enum(..)
+            | ItemKind::Struct(..)
+            | ItemKind::Union(..)
+            | ItemKind::Impl(..)
+            | ItemKind::Trait(..)
+            | ItemKind::TraitAlias(..)
+            | ItemKind::TestBinderConstraints(..) => {}
             ItemKind::Delegation(..) => {
                 // Delegated functions have lifetimes, their count is not necessarily zero.
                 // But skipping the delegation items here doesn't mean that the count will be considered zero,

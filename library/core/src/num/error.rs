@@ -36,30 +36,7 @@ impl fmt::Display for TryFromIntError {
 #[stable(feature = "try_from", since = "1.34.0")]
 impl Error for TryFromIntError {}
 
-<<<<<<< ferrocene/main
-#[stable(feature = "try_from", since = "1.34.0")]
-#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-const impl From<Infallible> for TryFromIntError {
-    #[ferrocene::prevalidated]
-    fn from(x: Infallible) -> TryFromIntError {
-        match x {}
-    }
-}
-
-#[unstable(feature = "never_type", issue = "35121")]
-||||||| 124c16e0de9
-#[stable(feature = "try_from", since = "1.34.0")]
-#[rustc_const_unstable(feature = "const_convert", issue = "143773")]
-const impl From<Infallible> for TryFromIntError {
-    fn from(x: Infallible) -> TryFromIntError {
-        match x {}
-    }
-}
-
-#[unstable(feature = "never_type", issue = "35121")]
-=======
 #[stable(feature = "never_type", since = "CURRENT_RUSTC_VERSION")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl From<!> for TryFromIntError {
     #[inline]

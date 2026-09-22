@@ -1617,7 +1617,7 @@ impl Builder<'_> {
             build_compiler_stage,
             extra_rustflags,
             profile,
-<<<<<<< ferrocene/main
+            kind: cmd_kind,
         };
 
         if mode == Mode::Std
@@ -1626,10 +1626,6 @@ impl Builder<'_> {
         {
             let paths = Paths::find(self, target, FerroceneCoverageFor::Library);
             cargo.rustdocflag(&format!("--persist-doctests={}", paths.doctests_bins_dir.display()));
-||||||| 124c16e0de9
-=======
-            kind: cmd_kind,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
 
         cargo

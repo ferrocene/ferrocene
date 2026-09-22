@@ -1633,20 +1633,11 @@ impl CommandLineStep for Miri {
         // This prevents miri from being built for "dist" or "install"
         // on the stable/beta channels. It is a nightly-only tool and should
         // not be included.
-<<<<<<< ferrocene/main
+
         // Ferrocene annotation: We want miri on stable/beta channels.
-        // if !builder.build.unstable_features() {
+        // if !builder.sess.unstable_features() {
         //     return None;
         // }
-||||||| 124c16e0de9
-        if !builder.build.unstable_features() {
-            return None;
-        }
-=======
-        if !builder.sess.unstable_features() {
-            return None;
-        }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
         let miri = builder.ensure(tool::Miri::from_compilers(self.compilers));
         let cargomiri = builder.ensure(tool::CargoMiri::from_compilers(self.compilers));

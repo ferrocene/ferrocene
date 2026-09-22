@@ -211,7 +211,7 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("reuse"));
 
-    build.config.uv = build
+    sess.config.uv = sess
         .config
         .uv
         .take()

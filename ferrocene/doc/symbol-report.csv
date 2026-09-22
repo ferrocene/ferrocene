@@ -1556,10 +1556,6 @@
 <core::cmp::Ordering as core::cmp::PartialOrd>::partial_cmp
 <core::cmp::Ordering as core::fmt::Debug>::fmt
 <core::cmp::Ordering as core::hash::Hash>::hash
-<core::convert::Infallible as core::clone::Clone>::clone
-<core::convert::Infallible as core::cmp::PartialEq>::eq
-<core::convert::Infallible as core::fmt::Debug>::fmt
-<core::convert::Infallible as core::fmt::Display>::fmt
 <core::escape::AlwaysEscaped as core::clone::Clone>::clone
 <core::escape::EscapeIterInner<N, ESCAPING> as core::clone::Clone>::clone
 <core::escape::EscapeIterInner<N, core::escape::AlwaysEscaped> as core::fmt::Debug>::fmt
@@ -1832,7 +1828,6 @@
 <core::num::error::TryFromIntError as core::cmp::Eq>::assert_fields_are_eq
 <core::num::error::TryFromIntError as core::cmp::PartialEq>::eq
 <core::num::error::TryFromIntError as core::convert::From<!>>::from
-<core::num::error::TryFromIntError as core::convert::From<core::convert::Infallible>>::from
 <core::num::error::TryFromIntError as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::fmt::Display>::fmt
 <core::num::imp::bignum::Big32x40 as core::clone::Clone>::clone
@@ -3322,7 +3317,7 @@
 <core::ops::control_flow::ControlFlow<B, C> as core::cmp::PartialEq>::eq
 <core::ops::control_flow::ControlFlow<B, C> as core::fmt::Debug>::fmt
 <core::ops::control_flow::ControlFlow<B, C> as core::hash::Hash>::hash
-<core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::FromResidual<core::ops::control_flow::ControlFlow<B, core::convert::Infallible>>>::from_residual
+<core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::FromResidual<core::ops::control_flow::ControlFlow<B, !>>>::from_residual
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::branch
 <core::ops::control_flow::ControlFlow<B, C> as core::ops::try_trait::Try>::from_output
 <core::ops::index_range::IndexRange as core::clone::Clone>::clone
@@ -3496,7 +3491,7 @@
 <core::option::Option<T> as core::fmt::Debug>::fmt
 <core::option::Option<T> as core::hash::Hash>::hash
 <core::option::Option<T> as core::iter::traits::collect::IntoIterator>::into_iter
-<core::option::Option<T> as core::ops::try_trait::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual
+<core::option::Option<T> as core::ops::try_trait::FromResidual<core::option::Option<!>>>::from_residual
 <core::option::Option<T> as core::ops::try_trait::Try>::branch
 <core::option::Option<T> as core::ops::try_trait::Try>::from_output
 <core::panic::location::Location<'_> as core::fmt::Debug>::fmt
@@ -3544,7 +3539,7 @@
 <core::result::Result<T, E> as core::hash::Hash>::hash
 <core::result::Result<T, E> as core::ops::try_trait::Try>::branch
 <core::result::Result<T, E> as core::ops::try_trait::Try>::from_output
-<core::result::Result<T, F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible, E>>>::from_residual
+<core::result::Result<T, F> as core::ops::try_trait::FromResidual<core::result::Result<!, E>>>::from_residual
 <core::slice::ascii::EscapeAscii<'a> as core::clone::Clone>::clone
 <core::slice::ascii::EscapeAscii<'a> as core::fmt::Debug>::fmt
 <core::slice::ascii::EscapeAscii<'a> as core::fmt::Display>::fmt

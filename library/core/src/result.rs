@@ -1776,14 +1776,10 @@ impl<T, E> Result<&T, E> {
     /// let cloned = x.cloned();
     /// assert_eq!(cloned, Ok(12));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "result_cloned", since = "1.59.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 124c16e0de9
-=======
     #[expect(clippy::map_clone, reason = "implements Result::cloned")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub fn cloned(self) -> Result<T, E>
     where
         T: Clone,

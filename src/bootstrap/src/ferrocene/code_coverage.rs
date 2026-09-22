@@ -154,10 +154,7 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     };
 
     let paths = Paths::find(builder, state.target, state.coverage_for);
-    let llvm_bin_dir = match builder.llvm_config(builder.host_target) {
-        None => builder.llvm_out(builder.host_target).join("bin"),
-        Some(system_llvm) => system_llvm.parent().unwrap().into(),
-    };
+    let llvm_bin_dir: PathBuf = builder.host_llvm_config().parent().unwrap().into();
 
     builder.info("Merging together code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));

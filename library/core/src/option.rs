@@ -1936,15 +1936,11 @@ impl<T> Option<T> {
     /// assert_eq!(x, None);
     /// assert_eq!(y, None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 124c16e0de9
-=======
     #[expect(clippy::mem_replace_option_with_none, reason = "implements Option::take")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn take(&mut self) -> Option<T> {
         // FIXME(const-hack) replace `mem::replace` by `mem::take` when the latter is const ready
         mem::replace(self, None)
@@ -2001,15 +1997,11 @@ impl<T> Option<T> {
     /// assert_eq!(x, Some(3));
     /// assert_eq!(old, None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "option_replace", since = "1.31.0")]
     #[rustc_const_stable(feature = "const_option", since = "1.83.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 124c16e0de9
-=======
     #[expect(clippy::mem_replace_option_with_some, reason = "implements Option::replace")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn replace(&mut self, value: T) -> Option<T> {
         mem::replace(self, Some(value))
     }
@@ -2211,14 +2203,10 @@ impl<T> Option<&T> {
     /// let cloned = opt_x.cloned();
     /// assert_eq!(cloned, Some(12));
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 124c16e0de9
-=======
     #[expect(clippy::map_clone, reason = "implements Option::cloned")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub fn cloned(self) -> Option<T>
     where
         T: Clone,

@@ -284,7 +284,7 @@ error: validated function calls an unvalidated associated function
   --> $DIR/trait-ops.rs:140:5
    |
 LL |     fn from_residual(_: Option<Infallible>) -> Self {
-   |        ------------- `<Unvalidated as core::ops::FromResidual<Option<Infallible>>>::from_residual` is unvalidated
+   |        ------------- `<Unvalidated as core::ops::FromResidual<Option<!>>>::from_residual` is unvalidated
 ...
 LL |     x?;
    |     ^^

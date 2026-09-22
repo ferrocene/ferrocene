@@ -174,8 +174,8 @@ add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
 add --set 'target."armv7r-ferrocene.facade-eabihf".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
-add --set 'target."thumbv8m-ferrocene.facade-eabi".profiler=true'
-add --set 'target."thumbv8m-ferrocene.facade-eabihf".profiler=true'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabi".profiler=true'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabihf".profiler=true'
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

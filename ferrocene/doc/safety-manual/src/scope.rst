@@ -60,6 +60,13 @@ as well as environments listed in target specific documentation:
      - ``alloc``, ``std``, ``test``
      - ``proc_macro``
 
+
+.. note::
+
+    Your Ferrocene installation may contain additional documentation packages for targets.
+    These packages may contain their own "Qualification Scope" section which should be
+    considered in addition to this list.
+
 The uncertified libraries provided are evaluated and tested within the scope of
 Ferrocene qualification for compiler use only. The use of these libraries by
 end-use code is outside the scope of the current Ferrocene qualification. It

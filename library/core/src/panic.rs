@@ -164,6 +164,12 @@ pub macro const_panic {
         #[inline(always)] // inline the wrapper
         #[track_caller]
         #[ferrocene::prevalidated]
+        #[ferrocene::annotation("\
+            Cannot be reliably tested in all configurations.
+            The inner generated `runtime` function still is measured as tested. \
+            `library/coretests/tests/ferrocene/panic.rs` contains `test_const_panic_do_panic` \
+            and `test_runtime_const_panic` which directly exercise this function at runtime. \
+        ")]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

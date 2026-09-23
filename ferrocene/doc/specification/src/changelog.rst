@@ -40,6 +40,11 @@ Language changes in Rust 1.99.0
 
 - `Stabilize '#[my_macro] mod foo;' <https://github.com/rust-lang/rust/pull/157857>`_
 
+  New paragraphs:
+
+  - :p:`fls_TFDKS0Nl3Rwh`
+  - :p:`fls_yJma4E9orknX`
+
 - `Fix the 'overflowing_literals' lint with repeated negation <https://github.com/rust-lang/rust/pull/158302>`_
 
   - Lints are outside the scope of the FLS

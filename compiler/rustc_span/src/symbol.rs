@@ -1726,6 +1726,7 @@ symbols! {
         repr_simd,
         repr_transparent,
         require,
+        requires_validation,
         reserve_x18: "reserve-x18",
         residual,
         result,

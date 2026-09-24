@@ -104,13 +104,13 @@ if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.thumbv7em-none-eabihf.cxx=clang
     add --set target.thumbv7em-none-eabihf.ar=llvm-ar
 
-    add --set target.thumbv8m.main-none-eabi.cc=clang
-    add --set target.thumbv8m.main-none-eabi.cxx=clang
-    add --set target.thumbv8m.main-none-eabi.ar=llvm-ar
+    add --set 'target."thumbv8m.main-none-eabi".cc=clang'
+    add --set 'target."thumbv8m.main-none-eabi".cxx=clang'
+    add --set 'target."thumbv8m.main-none-eabi".ar=llvm-ar'
 
-    add --set target.thumbv8m.main-none-eabihf.cc=clang
-    add --set target.thumbv8m.main-none-eabihf.cxx=clang
-    add --set target.thumbv8m.main-none-eabihf.ar=llvm-ar
+    add --set 'target."thumbv8m.main-none-eabihf".cc=clang'
+    add --set 'target."thumbv8m.main-none-eabihf".cxx=clang'
+    add --set 'target."thumbv8m.main-none-eabihf".ar=llvm-ar'
 
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang

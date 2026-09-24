@@ -953,7 +953,7 @@ impl Iterator for ReadDir {
     }
 }
 
-/// Aborts the process if a file desceriptor is not open, if debug asserts are enabled
+/// Aborts the process if a file descriptor is not open, if debug asserts are enabled
 ///
 /// Many IO syscalls can't be fully trusted about EBADF error codes because those
 /// might get bubbled up from a remote FUSE server rather than the file descriptor
@@ -1884,6 +1884,7 @@ pub fn set_perm(p: &CStr, perm: FilePermissions) -> io::Result<()> {
     cvt_r(|| unsafe { libc::chmod(p.as_ptr(), perm.mode) }).map(|_| ())
 }
 
+<<<<<<< ferrocene/main
 #[cfg(target_os = "android")]
 pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
     // Currently Android seems to be having inconsistent behavior with fchmodat
@@ -1897,7 +1898,31 @@ pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
 }
 
 #[cfg(not(target_os = "android"))]
+||||||| d9dd0703ba3
+=======
+#[cfg(target_os = "vxworks")]
+pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
+    // VxWorks has no `O_NOFOLLOW`, and its `fchmodat` rejects
+    // `AT_SYMLINK_NOFOLLOW` with `ENOTSUP`, so a no-follow chmod is unsupported.
+    Err(crate::io::ErrorKind::Unsupported.into())
+}
+
+#[cfg(target_os = "android")]
+pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
+    // Currently Android seems to be having inconsistent behavior with fchmodat
+    // with `AT_SYMLINK_NOFOLLOW` or openat with `O_NOFOLLOW` + fchmod.
+    // See this issue here mentioning inconsistent behavior on fchmodat:
+    // https://github.com/android/ndk/issues/1258
+    // On the arm-android CI job, using fchmodat with `AT_SYMLINK_NOFOLLOW` +
+    // fallback behavior on a symlink sets the target file's permissions,
+    // which is incorrect behavior.
+    Err(crate::io::ErrorKind::Unsupported.into())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "vxworks")))]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
+<<<<<<< ferrocene/main
     #[inline]
     /// Helper function for fallback open with `O_NOFOLLOW` + `fchmod` behavior
     fn open_and_set_permissions(p: &CStr, perm: FilePermissions) -> io::Result<()> {
@@ -1912,8 +1937,45 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             #[cfg(not(target_os = "wasi"))]
             use crate::os::unix::fs::OpenOptionsExt;
             #[cfg(target_os = "wasi")]
+||||||| d9dd0703ba3
+    // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
+    // Their filesystems do not have symbolic links, so no special handling is required.
+    cfg_select! {
+        // wasm32-wasip1 targets do not support fchmodat, so we fall down to
+        // open + fchmod
+        target_os = "wasi" => {
+            use crate::fs::{OpenOptions, Permissions};
+            use crate::os::wasi::ffi::OsStrExt;
+=======
+    #[inline]
+    /// Helper function for fallback open with `O_NOFOLLOW` + `fchmod` behavior
+    fn open_and_set_permissions(p: &CStr, perm: FilePermissions) -> io::Result<()> {
+        use crate::fs::{OpenOptions, Permissions};
+
+        let mut options = OpenOptions::new();
+        options.read(true);
+
+        // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
+        // Their filesystems do not have symbolic links, so no special handling is required.
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+        {
+            #[cfg(not(target_os = "wasi"))]
+            use crate::os::unix::fs::OpenOptionsExt;
+            #[cfg(target_os = "wasi")]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             use crate::os::wasi::fs::OpenOptionsExt;
+<<<<<<< ferrocene/main
             options.read(true).custom_flags(libc::O_NOFOLLOW);
+||||||| d9dd0703ba3
+
+            let mut options = OpenOptions::new();
+            options.custom_flags(libc::O_NOFOLLOW);
+
+            let bytes = p.to_bytes();
+            let os_str = OsStr::from_bytes(bytes);
+            options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
+=======
+            options.custom_flags(libc::O_NOFOLLOW);
         }
 
         // SAFETY: Since this function is called with `with_native_path`
@@ -1968,7 +2030,73 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             }
 
             Err(err)
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
+<<<<<<< ferrocene/main
+
+        // SAFETY: Since this function is called with `with_native_path`
+        // and that successfully converted the `&Path` to a `CString`,
+        // it should be safe to convert the `&CStr` back to a `Path`.
+        let os_str = unsafe { OsStr::from_encoded_bytes_unchecked(p.to_bytes()) };
+        options.open(Path::new(os_str))?.set_permissions(Permissions::from_inner(perm))
+    }
+
+    // This res value is modified for platforms that support the `fchmodat` syscall.
+    #[allow(unused)]
+    let mut res: Result<(), core::io::Error> = Err(crate::io::ErrorKind::Unsupported.into());
+
+    // These platforms support `fchmodat`, so utilize this syscall over `open` + `fchmod`
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "nto",
+        target_os = "qnx"
+    ))]
+    {
+        res = cvt_r(|| unsafe {
+            libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
+        })
+        .map(|_| ());
+    }
+
+    // If fchmodat fails with `ErrorKind::Unsupported` fallback to using open + fchmod. This is just in case
+    // for older systems like Ubuntu 20.04 where fchmodat fails with EOPNOTSUPP on both regular files and
+    // symlinks when AT_SYMLINK_NOFOLLOW is passed in.
+    match res {
+        Ok(_) => Ok(()),
+        Err(err) => {
+            if err.kind() == crate::io::ErrorKind::Unsupported {
+                match open_and_set_permissions(p, perm) {
+                    Ok(_) => return Ok(()),
+                    Err(e) => {
+                        if e.kind() == crate::io::ErrorKind::FilesystemLoop {
+                            // When open is used with O_NOFOLLOW flag, if the trailing component of
+                            // a path is a symbolic link, it should fail with ELOOP error. Instead of
+                            // returning `FilesystemLoop`, this returns `Unsupported` to keep it consistent
+                            // with what `fchmodat` would return when chmoding a symlink using AT_SYMLINK_NOFOLLOW.
+                            return Err(err);
+                        }
+                        return Err(e);
+                    }
+                }
+            }
+
+            Err(err)
+        }
+||||||| d9dd0703ba3
+        all(target_os = "linux", not(any(target_os = "espidf", target_os = "horizon"))) => {
+            cvt_r(|| unsafe {
+                libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, libc::AT_SYMLINK_NOFOLLOW)
+            })
+            .map(|_| ())
+        }
+        _ => cvt_r(|| unsafe { libc::fchmodat(libc::AT_FDCWD, p.as_ptr(), perm.mode, 0) }).map(|_| ()),
+=======
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 }
 

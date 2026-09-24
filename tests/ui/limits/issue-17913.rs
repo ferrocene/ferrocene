@@ -18,6 +18,7 @@ fn main() {
 }
 
 //~? ERROR are too big for the target architecture
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_xinykul167l
 // Array Expressions
@@ -27,3 +28,7 @@ fn main() {
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg
+||||||| d9dd0703ba3
+=======
+//~? ERROR are too big for the target architecture
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

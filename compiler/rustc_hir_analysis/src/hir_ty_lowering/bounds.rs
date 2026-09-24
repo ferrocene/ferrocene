@@ -477,7 +477,12 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 );
                 debug!(?alias_args);
 
-                ty::AliasTerm::new_from_def_id(tcx, assoc_item.def_id, alias_args)
+                ty::AliasTerm::new_from_def_id(
+                    tcx,
+                    assoc_item.def_id,
+                    alias_args,
+                    ty::AliasConstInherentArgsKind::WithSelf,
+                )
             })
         };
 
@@ -552,22 +557,19 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                         });
 
                         if let ty::AssocTag::Const = assoc_tag
-                            && !self.tcx().is_type_const(assoc_item.def_id)
+                            && !self.tcx().is_direct_const(assoc_item.def_id)
                             && !tcx.features().generic_const_args()
                         {
                             if tcx.features().min_generic_const_args() {
-                                let mut err = self.dcx().struct_span_err(
+                                let err = self.dcx().struct_span_err(
                                     constraint.span,
-                                    "use of trait associated const not defined as `type const`",
-                                );
-                                err.note(
-                                    "the declaration in the trait must begin with `type const` not just `const` alone",
+                                    "use of trait associated const not defined as `#[rustc_always_gca]`",
                                 );
                                 return Err(err.emit());
                             } else {
                                 let err = self.dcx().span_delayed_bug(
                                     constraint.span,
-                                    "use of trait associated const defined as `type const`",
+                                    "use of trait associated const defined as `#[rustc_always_gca]`",
                                 );
                                 return Err(err);
                             }

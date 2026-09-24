@@ -120,7 +120,7 @@ pub(crate) fn check(sess: &mut Session) {
     if cfg!(not(test))
         && !sess.config.dry_run()
         && !sess.host_target.is_msvc()
-        && sess.config.llvm_ci_mode.download_from_ci()
+        && sess.config.llvm_ci_mode.requests_download_from_ci()
     {
         let builder = Builder::new(sess);
         let libcxx_version = builder.ensure(tool::LibcxxVersionTool { target: sess.host_target });
@@ -148,7 +148,7 @@ pub(crate) fn check(sess: &mut Session) {
     }
 
     // We need cmake, but only if we're actually building LLVM or sanitizers.
-    let building_llvm = !sess.config.llvm_ci_mode.download_from_ci()
+    let building_llvm = !sess.config.llvm_ci_mode.requests_download_from_ci()
         && !sess.config.local_rebuild
         && sess.hosts.iter().any(|host| {
             sess.config.llvm_enabled(*host)
@@ -211,6 +211,7 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("reuse"));
 
+<<<<<<< ferrocene/main
     sess.config.uv = sess
         .config
         .uv
@@ -219,6 +220,11 @@ than building it.
         .or_else(|| cmd_finder.maybe_have("uv"));
 
     let stage0_supported_target_list: HashSet<String> = command(&sess.config.initial_rustc)
+||||||| d9dd0703ba3
+    let stage0_supported_target_list: HashSet<String> = command(&sess.config.initial_rustc)
+=======
+    let stage0_supported_target_list: HashSet<String> = command(&sess.initial_rustc)
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         .args(["--print", "target-list"])
         .run_in_dry_run()
         .run_capture_stdout(&sess)
@@ -331,7 +337,7 @@ than building it.
         }
     }
 
-    for target in &sess.targets {
+    for target in &sess.config.targets {
         sess.config
             .target_config
             .entry(*target)

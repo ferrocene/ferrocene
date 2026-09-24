@@ -215,8 +215,16 @@ pub(crate) struct TestProps {
     pub(crate) disable_gdb_pretty_printers: bool,
     /// Compare the output by lines, rather than as a single string.
     pub(crate) compare_output_by_lines: bool,
+<<<<<<< ferrocene/main
     // Flag to execute the test within a temporary directory
     pub(crate) ferrocene_execute_in_temp: bool,
+||||||| d9dd0703ba3
+=======
+    /// Use CCI (`--read-doc-meta` and `--write-doc-meta`) merge mode.
+    pub(crate) use_rustdoc_cci_doc_meta_merge: bool,
+    /// Where the `//@ should-fail` instruction is present.
+    pub(crate) should_fail: bool,
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 mod directives {
@@ -264,7 +272,12 @@ mod directives {
     pub(crate) const MINICORE_COMPILE_FLAGS: &str = "minicore-compile-flags";
     pub(crate) const DISABLE_GDB_PRETTY_PRINTERS: &str = "disable-gdb-pretty-printers";
     pub(crate) const COMPARE_OUTPUT_BY_LINES: &str = "compare-output-by-lines";
+<<<<<<< ferrocene/main
     pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
+||||||| d9dd0703ba3
+=======
+    pub(crate) const USE_RUSTDOC_CCI_DOC_META_MERGE: &str = "use-rustdoc-cci-doc-meta-merge";
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 impl TestProps {
@@ -322,7 +335,13 @@ impl TestProps {
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
             compare_output_by_lines: false,
+<<<<<<< ferrocene/main
             ferrocene_execute_in_temp: false,
+||||||| d9dd0703ba3
+=======
+            use_rustdoc_cci_doc_meta_merge: false,
+            should_fail: false,
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
     }
 
@@ -855,30 +874,6 @@ pub(crate) fn extract_llvm_version_from_binary(binary_path: &str) -> Option<Vers
     None
 }
 
-pub(crate) fn find_gcc_supported_targets(sysroot_base: &Utf8Path, host: &str) -> Vec<String> {
-    // E.g. `lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/lib`.
-    let backends_dir =
-        sysroot_base.join("lib").join("rustlib").join(host).join("codegen-backends").join("lib");
-
-    match std::fs::read_dir(&backends_dir) {
-        Ok(entries) => {
-            // Search for `aarch64-unknown-linux-gnu/libgccjit.so` et cetera.
-            let target_tuples: Vec<_> = entries
-                .filter_map(|entry| entry.ok())
-                .filter(|entry| entry.path().join("libgccjit.so").exists())
-                .filter_map(|entry| entry.file_name().into_string().ok())
-                .collect();
-
-            if target_tuples.is_empty() {
-                panic!("did not find `libgccjit.so` for any target in {backends_dir}");
-            }
-
-            target_tuples
-        }
-        Err(e) => panic!("unable to find `libgccjit.so` for any target in {backends_dir}: {e:?}",),
-    }
-}
-
 /// Takes a directive of the form `"<version1> [- <version2>]"`, returns the numeric representation
 /// of `<version1>` and `<version2>` as tuple: `(<version1>, <version2>)`.
 ///
@@ -1262,7 +1257,7 @@ fn ignore_unsupported_backend_target(config: &Config, line: &DirectiveLine<'_>) 
         return IgnoreDecision::Continue;
     };
 
-    if !config.gcc_supported_target_tuples.iter().any(|t| t == target) {
+    if target != "x86_64-unknown-linux-gnu" {
         IgnoreDecision::Ignore {
             reason: format!(
                 "backend `{}` cannot build for target `{target}`",

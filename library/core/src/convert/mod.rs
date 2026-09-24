@@ -822,11 +822,17 @@ const impl<T, U> TryFrom<U> for T
 where
     U: [const] Into<T>,
 {
-    type Error = Infallible;
+    type Error = !;
 
     #[inline]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     fn try_from(value: U) -> Result<Self, Self::Error> {
+||||||| d9dd0703ba3
+    fn try_from(value: U) -> Result<Self, Self::Error> {
+=======
+    fn try_from(value: U) -> Result<Self, !> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         Ok(U::into(value))
     }
 }

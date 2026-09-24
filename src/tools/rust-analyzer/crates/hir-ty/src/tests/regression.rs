@@ -2797,10 +2797,48 @@ where
 fn extern_fns_cannot_have_param_patterns() {
     check_no_mismatches(
         r#"
-pub(crate) struct Builder<'a>(&'a ());
+macro_rules! m {
+    () => { Builder };
+}
 
-unsafe extern "C"  {
-    pub(crate) fn foo<'a>(Builder: &Builder<'a>);
+pub(crate) struct Builder;
+
+unsafe extern "C" {
+    pub(crate) fn foo(Builder: (), m!(): ());
+}
+    "#,
+    );
+}
+
+#[test]
+fn trait_assoc_fns_cannot_have_param_patterns() {
+    check_no_mismatches(
+        r#"
+macro_rules! m {
+    () => { Builder };
+}
+
+pub(crate) struct Builder;
+
+trait Trait {
+    fn foo(Builder: (), m!(): ());
+}
+    "#,
+    );
+    // But assoc fns with bodies do have patterns:
+    check(
+        r#"
+macro_rules! m {
+    () => { Builder };
+}
+
+pub(crate) struct Builder;
+
+trait Trait {
+    fn foo(Builder: (),
+        // ^^^^^^^ expected (), got Builder
+        m!(): ()) {}
+     // ^^ expected (), got Builder
 }
     "#,
     );
@@ -3001,6 +3039,7 @@ fn array_repeat_closure() {
         r#"
 fn f() {[_; || ()]}
      // ^^^^^^^^^^ expected (), got [{unknown}; _]
+         // ^^^^^ expected usize, got impl Fn()
     "#,
     );
 }
@@ -3091,22 +3130,6 @@ fn rpit_function_with_non_trivial_anon_const() {
         r#"
 fn f() -> impl Sized {
     let x = [0u8; 1 + 2];
-}
-    "#,
-    );
-}
-
-#[test]
-fn regression_22836() {
-    check(
-        r#"
-fn main() {
-  match () {
-    const {
-      async | v | ()
-   // ^^^^^^^^^^^^^^ expected (), got impl AsyncFn({unknown})
-    }
-  }
 }
     "#,
     );

@@ -4,12 +4,11 @@ use std::fmt::Debug;
 
 use rustc_ast as ast;
 use rustc_ast::NodeId;
-use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
 use rustc_hir_id::HirId;
 use rustc_macros::{Decodable, Encodable, StableHash};
 use rustc_span::Symbol;
-use rustc_span::def_id::{DefId, LocalDefId};
+use rustc_span::def_id::DefId;
 use rustc_span::hygiene::MacroKind;
 
 use crate as hir;
@@ -120,9 +119,7 @@ pub enum DefKind {
 
     // Value namespace
     Fn,
-    Const {
-        is_type_const: bool,
-    },
+    Const,
     /// Constant generic parameter: `struct Foo<const N: usize> { ... }`
     ConstParam,
     Static {
@@ -154,9 +151,7 @@ pub enum DefKind {
     /// or `trait Foo { fn associated() {} }`
     AssocFn,
     /// Associated constant: `trait MyTrait { const ASSOC: usize; }`
-    AssocConst {
-        is_type_const: bool,
-    },
+    AssocConst,
 
     // Macro namespace
     Macro(MacroKinds),
@@ -232,8 +227,8 @@ impl DefKind {
             DefKind::Trait => "trait",
             DefKind::ForeignTy => "foreign type",
             DefKind::AssocFn => "associated function",
-            DefKind::Const { .. } => "constant",
-            DefKind::AssocConst { .. } => "associated constant",
+            DefKind::Const => "constant",
+            DefKind::AssocConst => "associated constant",
             DefKind::TyParam => "type parameter",
             DefKind::ConstParam => "const parameter",
             DefKind::Macro(kinds) => kinds.descr(),
@@ -259,7 +254,7 @@ impl DefKind {
     pub fn article(&self) -> &'static str {
         match *self {
             DefKind::AssocTy
-            | DefKind::AssocConst { .. }
+            | DefKind::AssocConst
             | DefKind::AssocFn
             | DefKind::Enum
             | DefKind::OpaqueTy
@@ -286,12 +281,12 @@ impl DefKind {
             | DefKind::TyParam => Some(Namespace::TypeNS),
 
             DefKind::Fn
-            | DefKind::Const { .. }
+            | DefKind::Const
             | DefKind::ConstParam
             | DefKind::Static { .. }
             | DefKind::Ctor(..)
             | DefKind::AssocFn
-            | DefKind::AssocConst { .. } => Some(Namespace::ValueNS),
+            | DefKind::AssocConst => Some(Namespace::ValueNS),
 
             DefKind::Macro(..) => Some(Namespace::MacroNS),
 
@@ -332,11 +327,11 @@ impl DefKind {
             DefKind::AssocTy => DefPathData::TypeNs(name.unwrap()),
 
             DefKind::Fn
-            | DefKind::Const { .. }
+            | DefKind::Const
             | DefKind::ConstParam
             | DefKind::Static { .. }
             | DefKind::AssocFn
-            | DefKind::AssocConst { .. }
+            | DefKind::AssocConst
             | DefKind::Field => DefPathData::ValueNs(name.unwrap()),
             DefKind::Macro(..) => DefPathData::MacroNs(name.unwrap()),
             DefKind::LifetimeParam => DefPathData::LifetimeNs(name.unwrap()),
@@ -354,7 +349,7 @@ impl DefKind {
     }
 
     pub fn is_assoc(self) -> bool {
-        matches!(self, DefKind::AssocConst { .. } | DefKind::AssocFn | DefKind::AssocTy)
+        matches!(self, DefKind::AssocConst | DefKind::AssocFn | DefKind::AssocTy)
     }
 
     /// This is a "module" in name resolution sense.
@@ -380,11 +375,11 @@ impl DefKind {
     pub fn has_generics(self) -> bool {
         match self {
             DefKind::AnonConst
-            | DefKind::AssocConst { .. }
+            | DefKind::AssocConst
             | DefKind::AssocFn
             | DefKind::AssocTy
             | DefKind::Closure
-            | DefKind::Const { .. }
+            | DefKind::Const
             | DefKind::Ctor(..)
             | DefKind::Enum
             | DefKind::Field
@@ -432,8 +427,8 @@ impl DefKind {
             | DefKind::ForeignTy
             | DefKind::TraitAlias
             | DefKind::AssocTy
-            | DefKind::Const { .. }
-            | DefKind::AssocConst { .. }
+            | DefKind::Const
+            | DefKind::AssocConst
             | DefKind::Macro(..)
             | DefKind::Use
             | DefKind::ForeignMod
@@ -584,63 +579,6 @@ pub enum Res<Id = HirId> {
 impl<Id> IntoDiagArg for Res<Id> {
     fn into_diag_arg(self, _: &mut Option<std::path::PathBuf>) -> DiagArgValue {
         DiagArgValue::Str(Cow::Borrowed(self.descr()))
-    }
-}
-
-/// The result of resolving a path before lowering to HIR,
-/// with "module" segments resolved and associated item
-/// segments deferred to type checking.
-/// `base_res` is the resolution of the resolved part of the
-/// path, `unresolved_segments` is the number of unresolved
-/// segments.
-///
-/// ```text
-/// module::Type::AssocX::AssocY::MethodOrAssocType
-/// ^~~~~~~~~~~~  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// base_res      unresolved_segments = 3
-///
-/// <T as Trait>::AssocX::AssocY::MethodOrAssocType
-///       ^~~~~~~~~~~~~~  ^~~~~~~~~~~~~~~~~~~~~~~~~
-///       base_res        unresolved_segments = 2
-/// ```
-#[derive(Copy, Clone, Debug)]
-pub struct PartialRes {
-    base_res: Res<NodeId>,
-    unresolved_segments: usize,
-}
-
-impl PartialRes {
-    #[inline]
-    pub fn new(base_res: Res<NodeId>) -> Self {
-        PartialRes { base_res, unresolved_segments: 0 }
-    }
-
-    #[inline]
-    pub fn with_unresolved_segments(base_res: Res<NodeId>, mut unresolved_segments: usize) -> Self {
-        if base_res == Res::Err {
-            unresolved_segments = 0
-        }
-        PartialRes { base_res, unresolved_segments }
-    }
-
-    #[inline]
-    pub fn base_res(&self) -> Res<NodeId> {
-        self.base_res
-    }
-
-    #[inline]
-    pub fn unresolved_segments(&self) -> usize {
-        self.unresolved_segments
-    }
-
-    #[inline]
-    pub fn full_res(&self) -> Option<Res<NodeId>> {
-        (self.unresolved_segments == 0).then_some(self.base_res)
-    }
-
-    #[inline]
-    pub fn expect_full_res(&self) -> Res<NodeId> {
-        self.full_res().expect("unexpected unresolved segments")
     }
 }
 
@@ -933,43 +871,3 @@ impl<Id> Res<Id> {
         matches!(self, Res::Def(DefKind::Ctor(_, CtorKind::Const), _) | Res::SelfCtor(..))
     }
 }
-
-/// Resolution for a lifetime appearing in a type.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub enum LifetimeRes {
-    /// Successfully linked the lifetime to a generic parameter.
-    Param {
-        /// Id of the generic parameter that introduced it.
-        param: LocalDefId,
-        /// Id of the introducing place. That can be:
-        /// - an item's id, for the item's generic parameters;
-        /// - a TraitRef's ref_id, identifying the `for<...>` binder;
-        /// - a FnPtr type's id.
-        ///
-        /// This information is used for impl-trait lifetime captures, to know when to or not to
-        /// capture any given lifetime.
-        binder: NodeId,
-    },
-    /// Created a generic parameter for an anonymous lifetime.
-    Fresh {
-        /// Id of the generic parameter that introduced it.
-        ///
-        /// Creating the associated `LocalDefId` is the responsibility of lowering.
-        param: NodeId,
-        /// Kind of elided lifetime
-        kind: hir::MissingLifetimeKind,
-    },
-    /// This variant is used for anonymous lifetimes that we did not resolve during
-    /// late resolution. Those lifetimes will be inferred by typechecking.
-    Infer,
-    /// `'static` lifetime.
-    Static,
-    /// Resolution failure.
-    Error(rustc_span::ErrorGuaranteed),
-    /// HACK: This is used to recover the NodeId of an elided lifetime.
-    ElidedAnchor { start: NodeId, end: NodeId },
-}
-
-// FxIndexMap is necessary because its data ends up in .rmeta files,
-// so its iteration order must be consistent. See #159677 for context.
-pub type DocLinkResMap = FxIndexMap<(Symbol, Namespace), Option<Res<NodeId>>>;

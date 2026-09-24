@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_errors::formatting::DiagMessageAddArg;
-use rustc_errors::{Applicability, Diag, DiagMessage, EmissionGuarantee, MultiSpan, listify, msg};
+use rustc_errors::{Applicability, Diag, DiagMessage, MultiSpan, listify, msg};
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::{CtorKind, Namespace};
 use rustc_hir::{
@@ -398,6 +398,7 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
                         }
                     }
                 }
+                ProjectionElem::PhantomDeref => (),
                 ProjectionElem::Downcast(..) if opt.including_downcast => return None,
                 ProjectionElem::Downcast(..) => (),
                 ProjectionElem::OpaqueCast(..) => (),
@@ -486,6 +487,7 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
                     PlaceTy::from_ty(*ty)
                 }
                 ProjectionElem::Field(_, field_type) => PlaceTy::from_ty(*field_type),
+                ProjectionElem::PhantomDeref => unreachable!("not a field"),
             },
         };
         self.describe_field_from_ty(
@@ -667,7 +669,7 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
     ///
     /// This is very similar to `fn suggest_static_lifetime_for_gat_from_hrtb` which handles this
     /// note for failed type tests instead of outlives errors.
-    fn add_placeholder_from_predicate_note<G: EmissionGuarantee>(
+    fn add_placeholder_from_predicate_note<G>(
         &self,
         diag: &mut Diag<'_, G>,
         path: &[OutlivesConstraint<'tcx>],
@@ -729,7 +731,7 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
 
     /// Add a label to region errors and borrow explanations when outlives constraints arise from
     /// proving a type implements `Sized` or `Copy`.
-    fn add_sized_or_copy_bound_info<G: EmissionGuarantee>(
+    fn add_sized_or_copy_bound_info<G>(
         &self,
         err: &mut Diag<'_, G>,
         blamed_category: ConstraintCategory<'tcx>,

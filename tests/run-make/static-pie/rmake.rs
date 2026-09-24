@@ -1,10 +1,13 @@
-// How to manually run this
-// $ ./x.py test --target x86_64-unknown-linux-[musl,gnu] tests/run-make/static-pie
-
 //@ only-x86_64
 //@ only-linux
 //@ ignore-32bit
+<<<<<<< ferrocene/main
 //@ ignore-test CentOS 7 cannot support static-pie the glibc lacks support for early relocation
+||||||| d9dd0703ba3
+=======
+// FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
+//@ ignore-backends: gcc
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 use std::process::Command;
 

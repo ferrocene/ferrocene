@@ -364,6 +364,7 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 &mut props.compare_output_by_lines,
             );
         }),
+<<<<<<< ferrocene/main
         handler(FERROCENE_EXECUTE_IN_TEMP, |config, ln, props| {
             config.set_name_directive(
                 ln,
@@ -371,6 +372,19 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 &mut props.ferrocene_execute_in_temp,
             );
         }),
+||||||| d9dd0703ba3
+=======
+        handler(USE_RUSTDOC_CCI_DOC_META_MERGE, |config, ln, props| {
+            config.set_name_directive(
+                ln,
+                USE_RUSTDOC_CCI_DOC_META_MERGE,
+                &mut props.use_rustdoc_cci_doc_meta_merge,
+            );
+        }),
+        handler("should-fail", |config, ln, props| {
+            config.set_name_directive(ln, "should-fail", &mut props.should_fail);
+        }),
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     ];
 
     handlers

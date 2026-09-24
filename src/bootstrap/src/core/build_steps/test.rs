@@ -40,10 +40,18 @@ use crate::core::builder::{
 };
 use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
+<<<<<<< ferrocene/main
 use crate::core::config::flags::{
     FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
 };
 use crate::core::session::{CLang, GitRepo, Mode};
+||||||| d9dd0703ba3
+use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
+use crate::core::session::{CLang, GitRepo, Mode};
+=======
+use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
+use crate::core::session::{CLang, Mode};
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;
@@ -58,7 +66,6 @@ use crate::utils::helpers::{
     target_supports_cranelift_backend, up_to_date,
 };
 use crate::utils::render_tests::{add_flags_and_try_run_tests, try_run_tests};
-
 mod compiletest;
 pub mod failed_tests;
 
@@ -1630,7 +1637,7 @@ impl CommandLineStep for RustdocGUI {
             cmd.arg("--out-dir").arg(out_dir);
         }
 
-        if let Some(initial_cargo) = builder.config.initial_cargo.to_str() {
+        if let Some(initial_cargo) = builder.sess.initial_cargo.to_str() {
             cmd.arg("--initial-cargo").arg(initial_cargo);
         }
 
@@ -2889,9 +2896,9 @@ Please disable assertions with `rust.debug-assertions = false`.
         // requires that a C++ compiler was configured which isn't always the case.
         if !builder.config.dry_run() && mode == CompiletestMode::RunMake {
             let mut cflags = builder.cc_handled_cflags(target, CLang::C);
-            cflags.extend(builder.cc_unhandled_cflags(target, GitRepo::Rustc, CLang::C));
+            cflags.extend(builder.cc_unhandled_cflags(target, CLang::C));
             let mut cxxflags = builder.cc_handled_cflags(target, CLang::Cxx);
-            cxxflags.extend(builder.cc_unhandled_cflags(target, GitRepo::Rustc, CLang::Cxx));
+            cxxflags.extend(builder.cc_unhandled_cflags(target, CLang::Cxx));
             cmd.arg("--cc")
                 .arg(builder.cc(target))
                 .arg("--cxx")
@@ -4643,7 +4650,6 @@ impl CommandLineStep for CodegenCranelift {
         cargo
             .arg("--manifest-path")
             .arg(builder.src.join("compiler/rustc_codegen_cranelift/build_system/Cargo.toml"));
-        compile::rustc_cargo_env(builder, &mut cargo, target);
 
         // Avoid incremental cache issues when changing rustc
         cargo.env("CARGO_BUILD_INCREMENTAL", "false");
@@ -4769,7 +4775,6 @@ impl CommandLineStep for CodegenGCC {
         cargo
             .arg("--manifest-path")
             .arg(builder.src.join("compiler/rustc_codegen_gcc/build_system/Cargo.toml"));
-        compile::rustc_cargo_env(builder, &mut cargo, target);
         add_cg_gcc_cargo_flags(&mut cargo, &gcc);
 
         // Avoid incremental cache issues when changing rustc

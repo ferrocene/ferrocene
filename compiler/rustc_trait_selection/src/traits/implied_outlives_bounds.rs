@@ -39,14 +39,6 @@ impl<'tcx> QueryTypeOp<'tcx> for ImpliedOutlivesBounds<'tcx> {
     ) -> Result<CanonicalQueryResponse<'tcx, Self::QueryResponse>, NoSolution> {
         tcx.implied_outlives_bounds((canonicalized, false))
     }
-
-    fn perform_locally_with_next_solver(
-        ocx: &ObligationCtxt<'_, 'tcx>,
-        key: ParamEnvAnd<'tcx, Self>,
-        _span: Span,
-    ) -> Result<Self::QueryResponse, NoSolution> {
-        query_compute_implied_outlives_bounds(ocx, key.param_env, key.value.ty, false)
-    }
 }
 
 pub fn compute_implied_outlives_bounds_inner<'tcx>(
@@ -72,7 +64,7 @@ pub fn compute_implied_outlives_bounds_inner<'tcx>(
             continue;
         }
 
-        let arg = ocx.infcx.resolve_vars_if_possible(arg);
+        let arg = ocx.infcx.deeply_resolve_ignoring_regions(arg);
         // From the full set of obligations, just filter down to the region relationships.
         for obligation in
             wf::unnormalized_obligations(ocx.infcx, param_env, arg, DUMMY_SP, CRATE_DEF_ID)

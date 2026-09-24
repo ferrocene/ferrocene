@@ -20,6 +20,7 @@ impl AttributeKind {
             // tidy-alphabetical-start
             AllowInternalUnsafe(..) => Yes,
             AllowInternalUnstable(..) => Yes,
+            AlwaysGca => Yes,
             AutomaticallyDerived => Yes,
             CfgAttrTrace(..) => Yes,
             CfgTrace(..) => Yes,
@@ -165,7 +166,6 @@ impl AttributeKind {
             RustcMustImplementOneOf { .. } => No,
             RustcMustMatchExhaustively(..) => Yes,
             RustcNeverReturnsNullPtr => Yes,
-            RustcNeverTypeOptions { .. } => No,
             RustcNoImplicitAutorefs => Yes,
             RustcNoImplicitBounds => No,
             RustcNoMirInline => Yes,
@@ -192,7 +192,6 @@ impl AttributeKind {
             RustcSpecializationTrait => No,
             RustcStdInternalSymbol => No,
             RustcStrictCoherence(..) => Yes,
-            RustcTestEntrypointMarker => No,
             RustcTestMarker(..) => No,
             RustcThenThisWouldNeed(..) => No,
             RustcTrivialFieldReads => Yes,

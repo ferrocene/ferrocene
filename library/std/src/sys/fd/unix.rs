@@ -74,16 +74,19 @@ pub struct FileDesc(OwnedFd);
 // intentionally showing odd behavior by rejecting any read with a size
 // larger than INT_MAX.
 //
-// On QNX, reads/writes larger than INT_MAX bytes return an incorrect count of
-// bytes written, as if the length is cast to a C int and back to a `usize`.
+// Meanwhile on QNX, reads/writes/sends larger than INT_MAX return the wrong
+// number of bytes written (eg, writing 2^31 bytes returns (2^64 - 2^31) instead
+// of the correct byte count).
 //
-// To handle both of these the read size is capped on both platforms.
-const READ_LIMIT: usize =
-    if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
+// To handle both of these the read/write/send size is capped on both platforms.
+const READ_LIMIT: usize = cfg_select! {
+    any(target_vendor = "apple", target_os = "nto", target_os = "qnx") => {
         libc::c_int::MAX as usize
-    } else {
+    },
+    _ => {
         libc::ssize_t::MAX as usize
-    };
+    }
+};
 
 #[cfg(any(
     target_os = "dragonfly",

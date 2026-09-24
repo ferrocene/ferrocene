@@ -18,6 +18,13 @@ pub(crate) use precise_captures::*;
 pub(crate) mod remove_or_use_generic;
 
 #[derive(Diagnostic)]
+#[diag("complex const arguments must be placed inside of a `const` block")]
+pub(crate) struct ComplexConstArg {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("ambiguous associated {$assoc_kind} `{$assoc_ident}` in bounds of `{$qself}`")]
 pub(crate) struct AmbiguousAssocItem<'a> {
     #[primary_span]
@@ -1074,17 +1081,10 @@ pub(crate) struct StaticSpecialize {
 }
 
 #[derive(Diagnostic)]
-pub(crate) enum DropImplPolarity {
-    #[diag("negative `Drop` impls are not supported")]
-    Negative {
-        #[primary_span]
-        span: Span,
-    },
-    #[diag("reservation `Drop` impls are not supported")]
-    Reservation {
-        #[primary_span]
-        span: Span,
-    },
+#[diag("negative `Drop` impls are not supported")]
+pub(crate) struct NegativeDropImplPolarity {
+    #[primary_span]
+    pub span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -2143,4 +2143,13 @@ pub(crate) struct OnlyStructsCanBeViewedAdt<'tcx> {
     pub ty: Ty<'tcx>,
     pub article: &'static str,
     pub kind: &'static str,
+}
+
+#[derive(Diagnostic)]
+#[diag("the type of const parameters must not depend on other generic parameters", code = E0770)]
+pub(crate) struct ParamInTyOfConstParam<'tcx> {
+    #[primary_span]
+    #[label("the type `{$ty}` must not depend on other generic parameter")]
+    pub(crate) span: Span,
+    pub(crate) ty: Ty<'tcx>,
 }

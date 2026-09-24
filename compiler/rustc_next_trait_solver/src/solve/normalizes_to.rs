@@ -255,7 +255,7 @@ where
         goal: Goal<I, NormalizesTo<I>>,
         goal_trait_ref: ty::TraitRef<I>,
         impl_def_id: I::ImplId,
-        then: impl FnOnce(&mut EvalCtxt<'_, D>, Certainty) -> QueryResultOrRerunNonErased<I>,
+        then: impl FnOnce(&mut EvalCtxt<'_, D>) -> QueryResultOrRerunNonErased<I>,
     ) -> Result<Candidate<I>, NoSolutionOrRerunNonErased> {
         let cx = ecx.cx();
 
@@ -267,13 +267,17 @@ where
             return Err(NoSolution.into());
         }
 
+        // For every `default impl`, there's always a non-default `impl` that will *also* apply.
+        // There's no reason to register a candidate for this impl, since it is *not* proof that
+        // the trait goal holds.
+        if cx.impl_is_default(impl_def_id) {
+            return Err(NoSolution.into());
+        }
+
         // We have to ignore negative impls when projecting.
         let impl_polarity = cx.impl_polarity(impl_def_id);
         match impl_polarity {
             ty::ImplPolarity::Negative => return Err(NoSolution.into()),
-            ty::ImplPolarity::Reservation => {
-                unimplemented!("reservation impl for trait with assoc item: {:?}", goal)
-            }
             ty::ImplPolarity::Positive => {}
         };
 
@@ -358,8 +362,9 @@ where
                     }
                     FetchEligibleAssocItemResponse::Err(guar) => return error_response(ecx, guar),
                     FetchEligibleAssocItemResponse::NotFoundBecauseErased => {
-                        ecx.opaque_accesses.rerun_always(RerunReason::FetchEligibleAssocItem)?;
-                        return Err(NoSolution.into());
+                        match ecx
+                            .opaque_accesses
+                            .rerun_always(RerunReason::FetchEligibleAssocItem)? {}
                     }
                 };
 
@@ -382,10 +387,10 @@ where
                         // This is not the case here and we only prefer adding an ambiguous
                         // nested goal for consistency.
                         ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous))?;
-                        return then(ecx, Certainty::Yes);
+                        return then(ecx);
                     } else {
                         ecx.instantiate_normalizes_to_as_rigid(goal)?;
-                        return then(ecx, Certainty::Yes);
+                        return then(ecx);
                     }
                 } else {
                     return error_response(ecx, cx.delay_bug("missing item"));

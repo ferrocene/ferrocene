@@ -260,6 +260,7 @@ fn sample_config() -> Config {
         run_make_support_rlib: Default::default(),
         run_make_support_rmeta: Default::default(),
         query_rustc_lib_path: Default::default(),
+        disable_minification: Default::default(),
     }
 }
 

@@ -2773,3 +2773,42 @@ fn test_dir_rename_file() {
     check!(f.read_exact(&mut buf));
     assert_eq!(b"bar", &buf);
 }
+
+// FIXME: re-enable once QNX fixes TOCTOU bug for fs::remove_dir
+// Note that it may get fixed in QNX 8 in a future libc release
+// ... https://github.com/rust-lang/rust/issues/153781
+#[cfg_attr(any(target_os = "nto", target_os = "qnx"), ignore)]
+#[test]
+fn test_dir_remove_dir() {
+    let tmpdir = tmpdir();
+    check!(fs::create_dir(tmpdir.join("foo")));
+    let dir = check!(Dir::open(tmpdir.path()));
+    check!(dir.remove_dir("foo"));
+    assert!(!matches!(exists(tmpdir.join("foo")), Ok(true)));
+}
+
+#[test]
+fn test_dir_create_dir() {
+    let tmpdir = tmpdir();
+    let dir = check!(Dir::open(tmpdir.path()));
+    check!(dir.create_dir("foo"));
+    check!(Dir::open(tmpdir.join("foo")));
+}
+
+#[test]
+fn test_dir_open_dir() {
+    let tmpdir = tmpdir();
+    let dir1 = check!(Dir::open(tmpdir.path()));
+    check!(dir1.create_dir("foo"));
+    let dir2 = check!(Dir::open(tmpdir.path().join("foo")));
+    let mut f =
+        check!(dir2.open_file_with("bar.txt", &OpenOptions::new().create(true).write(true)));
+    check!(f.write(b"baz"));
+    check!(f.flush());
+    drop(f);
+    let dir3 = check!(dir1.open_dir("foo"));
+    let mut f = check!(dir3.open_file("bar.txt"));
+    let mut buf = [0u8; 3];
+    check!(f.read_exact(&mut buf));
+    assert_eq!(b"baz", &buf);
+}

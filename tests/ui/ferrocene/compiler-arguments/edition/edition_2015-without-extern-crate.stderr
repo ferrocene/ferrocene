@@ -4,7 +4,8 @@ error[E0433]: cannot find module or crate `some_crate` in the crate root
 LL |     ::some_crate::hello();
    |       ^^^^^^^^^^ use of unresolved module or unlinked crate `some_crate`
    |
-help: you might be missing a crate named `some_crate`, add it to your project and import it in your code
+   = help: if you're trying to use a dependency named `some_crate`, upgrade your edition to be able to reference it with a `use` declaration
+help: on Rust 2015, `extern crate` is required to specify a dependency on an external crate
    |
 LL + extern crate some_crate;
    |

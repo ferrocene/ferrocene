@@ -302,7 +302,6 @@
 #![feature(must_not_suspend)]
 #![feature(needs_panic_runtime)]
 #![feature(negative_impls)]
-#![feature(never_type)]
 #![feature(optimize_attribute)]
 #![feature(prelude_import)]
 #![feature(rustc_attrs)]
@@ -742,7 +741,7 @@ mod panicking;
 
 #[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
-#[allow(clippy::len_zero, clippy::needless_borrow)] // FIXME
+#[allow(clippy::len_zero, clippy::needless_borrow, clippy::filter_map_next)] // FIXME
 mod backtrace_rs;
 
 #[stable(feature = "cfg_select", since = "1.95.0")]

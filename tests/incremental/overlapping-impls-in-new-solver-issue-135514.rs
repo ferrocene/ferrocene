@@ -38,3 +38,6 @@ impl Trait for W {}
 impl Trait for S<W> {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

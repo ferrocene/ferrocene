@@ -272,8 +272,12 @@ mod directives {
     pub(crate) const MINICORE_COMPILE_FLAGS: &str = "minicore-compile-flags";
     pub(crate) const DISABLE_GDB_PRETTY_PRINTERS: &str = "disable-gdb-pretty-printers";
     pub(crate) const COMPARE_OUTPUT_BY_LINES: &str = "compare-output-by-lines";
+<<<<<<< ferrocene/main
     pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
+||||||| d9dd0703ba3
+=======
     pub(crate) const USE_RUSTDOC_CCI_DOC_META_MERGE: &str = "use-rustdoc-cci-doc-meta-merge";
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 impl TestProps {
@@ -331,9 +335,13 @@ impl TestProps {
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
             compare_output_by_lines: false,
+<<<<<<< ferrocene/main
             ferrocene_execute_in_temp: false,
+||||||| d9dd0703ba3
+=======
             use_rustdoc_cci_doc_meta_merge: false,
             should_fail: false,
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
     }
 

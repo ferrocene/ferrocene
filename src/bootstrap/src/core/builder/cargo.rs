@@ -14,8 +14,14 @@ use crate::core::config::toml::pgo::PgoConfig;
 use crate::core::config::{
     CompressDebuginfo, Config, DryRun, RustcLto, SplitDebuginfo, TargetSelection,
 };
-use crate::core::session::{CLang, Mode, RemapScheme};
+<<<<<<< ferrocene/main
+use crate::core::session::{CLang, GitRepo, Mode, RemapScheme};
 use crate::ferrocene::code_coverage::Paths;
+||||||| d9dd0703ba3
+use crate::core::session::{CLang, GitRepo, Mode, RemapScheme};
+=======
+use crate::core::session::{CLang, Mode, RemapScheme};
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{self, LldThreads, check_cfg_arg, envify, linker_flags, t};
@@ -1223,10 +1229,58 @@ impl Builder<'_> {
             | Mode::ToolBootstrap
             | Mode::ToolRustcPrivate
             | Mode::ToolStd
+<<<<<<< ferrocene/main
             | Mode::ToolTarget
             | Mode::ToolCustom { .. } => {
+                if let Some(ref map_to) =
+                    self.sess.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
+                {
+                    // When building the standard library sources, we want to apply the std remap scheme.
+                    let map = [
+                        // Cargo use relative paths for workspace members, so let's remap those.
+                        format!("library/={map_to}/library"),
+                        // rustc creates absolute paths (in part bc of the `rust-src` unremap
+                        // and for working directory) so let's remap the build directory as well.
+                        format!("{}={map_to}", self.sess.src.display()),
+                        // remap OUT_DIR so they don't leak into artifacts.
+                        format!("{}={map_to}/out", self.sess.out.display()),
+                        // on windows, rustc may use forward slashes internally
+                        #[cfg(windows)]
+                        format!(
+                            "{}={map_to}\\out",
+                            self.sess.out.display().to_string().replace('/', "\\")
+                        ),
+                    ]
+                    .join("\t");
+                    cargo.env("RUSTC_DEBUGINFO_MAP", map);
+||||||| d9dd0703ba3
+            | Mode::ToolTarget => {
+                if let Some(ref map_to) =
+                    self.sess.debuginfo_map_to(GitRepo::Rustc, RemapScheme::NonCompiler)
+                {
+                    // When building the standard library sources, we want to apply the std remap scheme.
+                    let map = [
+                        // Cargo use relative paths for workspace members, so let's remap those.
+                        format!("library/={map_to}/library"),
+                        // rustc creates absolute paths (in part bc of the `rust-src` unremap
+                        // and for working directory) so let's remap the build directory as well.
+                        format!("{}={map_to}", self.sess.src.display()),
+                        // remap OUT_DIR so they don't leak into artifacts.
+                        format!("{}={map_to}/out", self.sess.out.display()),
+                        // on windows, rustc may use forward slashes internally
+                        #[cfg(windows)]
+                        format!(
+                            "{}={map_to}\\out",
+                            self.sess.out.display().to_string().replace('/', "\\")
+                        ),
+                    ]
+                    .join("\t");
+                    cargo.env("RUSTC_DEBUGINFO_MAP", map);
+=======
+            | Mode::ToolTarget => {
                 if let Some(ref map_to) = self.sess.debuginfo_map_to(RemapScheme::NonCompiler) {
                     trim_paths(&mut cargo, map_to);
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 }
             }
         }

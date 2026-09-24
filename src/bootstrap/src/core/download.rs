@@ -392,9 +392,9 @@ impl Config {
 <<<<<<< ferrocene/main
         let filename = format!("rust-dev-{}-{}.tar.xz", self.host_target.triple, version); // Ferrocene change: We swap the arg names
 ||||||| d9dd0703ba3
-        let filename = format!("rust-dev-{}-{}.tar.xz", version, self.host_target.triple); // Ferrocene change: We swap the arg names
+        let filename = format!("rust-dev-{}-{}.tar.xz", version, self.host_target.triple);
 =======
-        let filename = format!("rust-dev-{}-{}.tar.xz", version, target.triple); // Ferrocene change: We swap the arg names
+        let filename = format!("rust-dev-{}-{}.tar.xz", version, target.triple);
 >>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         let tarball = rustc_cache.join(&filename);
         if !tarball.exists() {

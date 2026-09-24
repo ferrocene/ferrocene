@@ -806,7 +806,6 @@ impl Subcommand {
             _ => false,
         }
     }
-<<<<<<< ferrocene/main
 
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
@@ -816,14 +815,10 @@ impl Subcommand {
             _ => false,
         }
     }
-||||||| d9dd0703ba3
-=======
-
     /// Are we executing a `check --all-targets` command?
     pub(crate) fn check_all_targets(&self) -> bool {
         matches!(self, Subcommand::Check { all_targets: true, .. })
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 /// Returns the shell completion for a given shell, if the result differs from the current

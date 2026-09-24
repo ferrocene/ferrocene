@@ -40,18 +40,10 @@ use crate::core::builder::{
 };
 use crate::core::compiler::Compiler;
 use crate::core::config::TargetSelection;
-<<<<<<< ferrocene/main
 use crate::core::config::flags::{
     FerroceneCoverageFor, Subcommand, get_completion, top_level_help,
 };
-use crate::core::session::{CLang, GitRepo, Mode};
-||||||| d9dd0703ba3
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
-use crate::core::session::{CLang, GitRepo, Mode};
-=======
-use crate::core::config::flags::{Subcommand, get_completion, top_level_help};
 use crate::core::session::{CLang, Mode};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::core::{android, debuggers};
 use crate::ferrocene::code_coverage::{instrument_coverage, measure_coverage};
 use crate::ferrocene::doc::code_coverage::AllCoverageReports;

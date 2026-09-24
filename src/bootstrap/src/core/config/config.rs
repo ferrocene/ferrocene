@@ -1309,58 +1309,55 @@ impl Config {
                 ferrocene_allow_dev_signing = s;
             }
         }
-
-        for (target, linker_override) in default_linux_linker_overrides() {
 ||||||| d9dd0703ba3
-        for (target, linker_override) in default_linux_linker_overrides() {
 =======
         let is_host_system_llvm =
             target_config.get(&host_target).and_then(|c| c.llvm_config.as_ref()).is_some();
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
         for (target, linker_override) in default_linux_linker_overrides(&channel) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
-            // If the user overrode the default Linux linker, do not apply bootstrap defaults
-            if targets_with_user_linker_override.contains(&target) {
-                continue;
-            }
-
-            // The rust.lld option is global, and not target specific, so if we enable it, it will
-            // be applied to all targets being built.
-            // So we only apply an override if we're building a compiler/host code for the given
-            // override target.
-            // Note: we could also make the LLD config per-target, but that would complicate things
-            if !hosts.contains(&TargetSelection::from_user(&target)) {
-                continue;
-            }
-
-            let default_linux_linker_override = match linker_override {
-                DefaultLinuxLinkerOverride::Off => continue,
-                DefaultLinuxLinkerOverride::SelfContainedLldCc => {
-                    // If we automatically default to the self-contained LLD linker,
-                    // we also need to handle the rust.lld option.
-                    match rust_lld_enabled {
-                        // If LLD was not enabled explicitly, we enable it, unless LLVM config has
-                        // been set
-                        None if !is_host_system_llvm => {
-                            lld_enabled = true;
-                            Some(DefaultLinuxLinkerOverride::SelfContainedLldCc)
-                        }
-                        None => None,
-                        // If it was enabled already, we don't need to do anything
-                        Some(true) => Some(DefaultLinuxLinkerOverride::SelfContainedLldCc),
-                        // If it was explicitly disabled, we do not apply the
-                        // linker override
-                        Some(false) => None,
-                    }
-                }
-            };
-            if let Some(linker_override) = default_linux_linker_override {
-                target_config
-                    .entry(TargetSelection::from_user(&target))
-                    .or_default()
-                    .default_linker_linux_override = linker_override;
-            }
+        // If the user overrode the default Linux linker, do not apply bootstrap defaults
+        if targets_with_user_linker_override.contains(&target) {
+            continue;
         }
+
+        // The rust.lld option is global, and not target specific, so if we enable it, it will
+        // be applied to all targets being built.
+        // So we only apply an override if we're building a compiler/host code for the given
+        // override target.
+        // Note: we could also make the LLD config per-target, but that would complicate things
+        if !hosts.contains(&TargetSelection::from_user(&target)) {
+            continue;
+        }
+
+        let default_linux_linker_override = match linker_override {
+            DefaultLinuxLinkerOverride::Off => continue,
+            DefaultLinuxLinkerOverride::SelfContainedLldCc => {
+                // If we automatically default to the self-contained LLD linker,
+                // we also need to handle the rust.lld option.
+                match rust_lld_enabled {
+                    // If LLD was not enabled explicitly, we enable it, unless LLVM config has
+                    // been set
+                    None if !is_host_system_llvm => {
+                        lld_enabled = true;
+                        Some(DefaultLinuxLinkerOverride::SelfContainedLldCc)
+                    }
+                    None => None,
+                    // If it was enabled already, we don't need to do anything
+                    Some(true) => Some(DefaultLinuxLinkerOverride::SelfContainedLldCc),
+                    // If it was explicitly disabled, we do not apply the
+                    // linker override
+                    Some(false) => None,
+                }
+            }
+        };
+        if let Some(linker_override) = default_linux_linker_override {
+            target_config
+                .entry(TargetSelection::from_user(&target))
+                .or_default()
+                .default_linker_linux_override = linker_override;
+        }
+    }
 
         if matches!(bootstrap_override_lld, BootstrapOverrideLld::SelfContained)
             && !lld_enabled

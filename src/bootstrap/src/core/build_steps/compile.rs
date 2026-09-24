@@ -34,16 +34,11 @@ use crate::core::config::toml::target::DefaultLinuxLinkerOverride;
 use crate::core::config::{
     Allocator, CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
-<<<<<<< ferrocene/main
 use crate::core::session::{CLang, DependencyType, FileType, GitRepo, Mode};
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestCondition, TestVariant};
-||||||| d9dd0703ba3
-use crate::core::session::{CLang, DependencyType, FileType, GitRepo, Mode};
-=======
 use crate::core::session::{CLang, DependencyType, FileType, Mode};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;

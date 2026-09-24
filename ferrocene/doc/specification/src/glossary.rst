@@ -4537,8 +4537,7 @@ See :s:`TraitBody`.
 trait bound
 ^^^^^^^^^^^
 
-A :dt:`trait bound` is a :t:`bound` that imposes a constraint on the
-:t:`[trait]s` of :t:`[generic parameter]s`.
+A :dt:`trait bound` is a :t:`bound` that uses a :t:`[trait]` to impose a constraint.
 
 See :s:`TraitBound`.
 

@@ -2913,8 +2913,7 @@ A :t:`lifetime bound` is a :t:`bound` that imposes a constraint on the
 :t:`[lifetime]s` of :t:`[generic parameter]s`.
 
 :dp:`fls_knut10hoz6wc`
-A :t:`trait bound` is a :t:`bound` that imposes a constraint on the
-:t:`[trait]s` of :t:`[generic parameter]s`.
+A :dt:`trait bound` is a :t:`bound` that uses a :t:`[trait]` to impose a constraint.
 
 :dp:`fls_sf6zg0ez9hbb`
 A :s:`ForGenericParameterList` shall not specify :s:`[ConstantParameter]s` or

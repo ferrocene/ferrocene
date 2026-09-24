@@ -79,6 +79,8 @@ Language changes in Rust 1.99.0
 FLS maintenance
 ---------------
 
+- Fix definition of "trait bound", changing paragraph  :p:`fls_knut10hoz6wc`.
+
 - Remove the term "indirection", and associated derivatives
 
   Changed glossary entries:

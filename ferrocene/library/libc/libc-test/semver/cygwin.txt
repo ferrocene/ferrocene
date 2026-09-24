@@ -472,6 +472,8 @@ WINDOWS_SEND
 XTABS
 _CS_PATH
 _IONBF
+_PATH_BSHELL
+_PATH_DEFPATH
 _PC_2_SYMLINKS
 _PC_ALLOC_SIZE_MIN
 _PC_ASYNC_IO
@@ -653,6 +655,12 @@ eaccess
 endpwent
 erand48
 euidaccess
+execl
+execle
+execlp
+execv
+execve
+execvp
 execvpe
 explicit_bzero
 faccessat
@@ -666,6 +674,7 @@ ffsll
 fls
 flsl
 flsll
+fork
 forkpty
 freelocale
 fstatfs
@@ -859,6 +868,7 @@ strncasecmp_l
 strptime
 strsep
 sync
+system
 telldir
 timer_create
 timer_delete

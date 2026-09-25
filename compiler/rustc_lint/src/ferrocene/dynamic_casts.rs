@@ -450,7 +450,7 @@ impl<'tcx> LintState<'tcx> {
         }
 
         let normalized_impl =
-            tcx.erase_and_anonymize_regions(infcx.resolve_vars_if_possible(impl_source));
+            tcx.erase_and_anonymize_regions(infcx.deeply_resolve_ignoring_regions(impl_source));
         debug!("found impl {normalized_impl:?}");
         Some(normalized_impl)
     }

@@ -26,10 +26,9 @@ use super::{
     SeqSep, TokenType,
 };
 use crate::diagnostics::{
-    AddParen, AmbiguousPlus, AsyncMoveBlockIn2015, AsyncUseBlockIn2015, AttributeOnParamType,
-    AwaitSuggestion, BadQPathStage2, BadTypePlus, BadTypePlusSub, ColonAsSemi,
-    ComparisonOperatorsCannotBeChained, ComparisonOperatorsCannotBeChainedSugg,
-    DocCommentDoesNotDocumentAnything, DocCommentOnParamType, DoubleColonInBound,
+    AddParen, AmbiguousPlus, AsyncMoveBlockIn2015, AsyncUseBlockIn2015, AwaitSuggestion,
+    BadQPathStage2, BadTypePlus, BadTypePlusSub, ColonAsSemi, ComparisonOperatorsCannotBeChained,
+    ComparisonOperatorsCannotBeChainedSugg, DocCommentDoesNotDocumentAnything, DoubleColonInBound,
     ExpectedIdentifier, ExpectedSemi, ExpectedSemiSugg, ExprParenthesesNeeded, FoundPathInGenerics,
     GenericParamsWithoutAngleBrackets, GenericParamsWithoutAngleBracketsSugg,
     HelpIdentifierStartsWithNumber, HelpUseLatestEdition, InInTypo, IncorrectAwait,
@@ -1721,7 +1720,7 @@ impl<'a> Parser<'a> {
         );
         err.span_label(op_span, format!("not a valid {} operator", kind.fixity));
 
-        let help_base_case = |mut err: Diag<'_, _>, base| {
+        let help_base_case = |mut err: Diag<'_, ErrorGuaranteed>, base| {
             err.help(format!("use `{}= 1` instead", kind.op.chr()));
             err.emit();
             Ok(base)
@@ -2216,22 +2215,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub(super) fn eat_incorrect_doc_comment_for_param_type(&mut self) {
-        if let token::DocComment(..) = self.token.kind {
-            self.dcx().emit_err(DocCommentOnParamType { span: self.token.span });
-            self.bump();
-        } else if self.token == token::Pound && self.look_ahead(1, |t| *t == token::OpenBracket) {
-            let lo = self.token.span;
-            // Skip every token until next possible arg.
-            while self.token != token::CloseBracket {
-                self.bump();
-            }
-            let sp = lo.to(self.token.span);
-            self.bump();
-            self.dcx().emit_err(AttributeOnParamType { span: sp });
-        }
-    }
-
     pub(super) fn parameter_without_type(
         &mut self,
         err: &mut Diag<'_>,
@@ -2396,6 +2379,7 @@ impl<'a> Parser<'a> {
             target: match context {
                 FnContext::Trait => "methods without bodies",
                 FnContext::FunctionPtrType => "function pointer types",
+                FnContext::ParenthesizedArgumentList => "parenthesized argument list",
                 FnContext::Free => unreachable!("This method is not called in free functions, as patterns are always allowed there"),
                 FnContext::Impl => unreachable!("This method is not called in impls, as patterns are always allowed there"),
             },

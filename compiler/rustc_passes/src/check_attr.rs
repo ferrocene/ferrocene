@@ -13,7 +13,7 @@ use rustc_ast::{AttrStyle, MetaItemKind, ast};
 use rustc_attr_parsing::AttributeParser;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, msg};
-use rustc_feature::BUILTIN_ATTRIBUTE_MAP;
+use rustc_feature::BUILTIN_ATTRIBUTE_SET;
 use rustc_hir::attrs::diagnostic::Directive;
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::attrs::{
@@ -146,7 +146,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::allow | sym::expect | sym::warn | sym::deny | sym::forbid, ..] => {}
 
                         [name, rest @ ..] => {
-                            if let Some(_) = BUILTIN_ATTRIBUTE_MAP.get(name) {
+                            if BUILTIN_ATTRIBUTE_SET.contains(name) {
                                 if rest.len() > 0
                                     && AttributeParser::is_parsed_attribute(slice::from_ref(name))
                                 {
@@ -208,9 +208,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 self.check_rustc_allow_const_fn_unstable(hir_id, *first_span, span, target)
             }
             AttributeKind::Naked(..) => self.check_naked(hir_id, target),
-            AttributeKind::NonExhaustive(attr_span) => {
-                self.check_non_exhaustive(*attr_span, span, target, item)
-            }
             AttributeKind::MayDangle(attr_span) => self.check_may_dangle(hir_id, *attr_span),
             AttributeKind::Link(_, attr_span) => self.check_link(hir_id, *attr_span, target),
             AttributeKind::MacroExport { span, .. } => {
@@ -244,6 +241,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             // tidy-alphabetical-start
             AttributeKind::AllowInternalUnsafe(..) => (),
             AttributeKind::AllowInternalUnstable(..) => (),
+            AttributeKind::AlwaysGca => (),
             AttributeKind::AutomaticallyDerived => (),
             AttributeKind::CfgAttrTrace(..) => (),
             AttributeKind::CfgTrace(..) => (),
@@ -293,6 +291,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::NoMain => (),
             AttributeKind::NoMangle(..) => (),
             AttributeKind::NoStd { .. } => (),
+            AttributeKind::NonExhaustive(_) => (),
             AttributeKind::OnUnknown { .. } => (),
             AttributeKind::OnUnmatchedArgs { .. } => (),
             AttributeKind::Opaque => (),
@@ -372,7 +371,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::RustcMir(_) => (),
             AttributeKind::RustcMustMatchExhaustively(..) => (),
             AttributeKind::RustcNeverReturnsNullPtr => (),
-            AttributeKind::RustcNeverTypeOptions { .. } => (),
             AttributeKind::RustcNoImplicitAutorefs => (),
             AttributeKind::RustcNoImplicitBounds => (),
             AttributeKind::RustcNoMirInline => (),
@@ -400,7 +398,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::RustcSpecializationTrait => (),
             AttributeKind::RustcStdInternalSymbol => (),
             AttributeKind::RustcStrictCoherence(..) => (),
-            AttributeKind::RustcTestEntrypointMarker => (),
             AttributeKind::RustcTestMarker(..) => (),
             AttributeKind::RustcThenThisWouldNeed(..) => (),
             AttributeKind::RustcTrivialFieldReads => (),
@@ -793,32 +790,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         ),
                     )
                     .emit();
-                }
-            }
-            _ => {}
-        }
-    }
-
-    /// Checks if the `#[non_exhaustive]` attribute on an `item` is valid.
-    fn check_non_exhaustive(
-        &self,
-        attr_span: Span,
-        span: Span,
-        target: Target,
-        item: Option<&'tcx Item<'tcx>>,
-    ) {
-        match target {
-            Target::Struct => {
-                if let hir::Item {
-                    kind: hir::ItemKind::Struct(_, _, hir::VariantData::Struct { fields, .. }),
-                    ..
-                } = item.unwrap()
-                    && fields.iter().any(|f| f.default.is_some())
-                {
-                    self.dcx().emit_err(diagnostics::NonExhaustiveWithDefaultFieldValues {
-                        attr_span,
-                        defn_span: span,
-                    });
                 }
             }
             _ => {}

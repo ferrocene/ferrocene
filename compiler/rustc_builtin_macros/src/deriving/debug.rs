@@ -1,5 +1,5 @@
-use rustc_ast::{self as ast, EnumDef, ExprKind, MetaItem, Safety, TyKind, token};
-use rustc_expand::base::{Annotatable, ExtCtxt};
+use rustc_ast::{self as ast, EnumDef, Safety};
+use rustc_expand::base::ExtCtxt;
 use rustc_session::config::FmtDebug;
 use rustc_span::{Ident, Span, Symbol, sym};
 use thin_vec::{ThinVec, thin_vec};
@@ -11,9 +11,8 @@ use crate::deriving::path_std;
 pub(crate) fn expand_deriving_debug(
     cx: &ExtCtxt<'_>,
     span: Span,
-    mitem: &MetaItem,
-    item: &Annotatable,
-    push: &mut dyn FnMut(Annotatable),
+    item: &ast::Item,
+    push: &mut dyn FnMut(Box<ast::Item>),
     is_const: bool,
 ) {
     // &mut ::std::fmt::Formatter
@@ -28,7 +27,7 @@ pub(crate) fn expand_deriving_debug(
         supports_unions: false,
         methods: smallvec![MethodDef {
             name: sym::fmt,
-            generics: Bounds::empty(),
+            generics: cx.empty_generics(span),
             explicit_self: true,
             nonself_args: smallvec![(fmtr, sym::character('f'))],
             ret_ty: Path(path_std!(fmt::Result)),
@@ -42,10 +41,10 @@ pub(crate) fn expand_deriving_debug(
         safety: Safety::Default,
         document: true,
     };
-    trait_def.expand(cx, mitem, item, push)
+    trait_def.expand(cx, item, push)
 }
 
-fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: &Substructure<'_>) -> BlockOrExpr {
+fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: Substructure<'_>) -> BlockOrExpr {
     // We want to make sure we have the ctxt set so that we can use unstable methods
     let span = cx.with_def_site_ctxt(span);
 
@@ -55,12 +54,10 @@ fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: &Substructure<'_>) ->
     }
 
     let (ident, vdata, fields) = match substr.fields {
-        Struct(vdata, fields) => (substr.type_ident, *vdata, fields),
+        Struct(vdata, fields) => (substr.type_ident, vdata, fields),
         EnumMatching(v, fields) => (v.ident, &v.data, fields),
         AllFieldlessEnum(enum_def) => return show_fieldless_enum(cx, span, enum_def, substr),
-        EnumDiscr(..) | StaticStruct(..) | StaticEnum(..) => {
-            cx.dcx().span_bug(span, "nonsensical .fields in `#[derive(Debug)]`")
-        }
+        _ => cx.dcx().span_bug(span, "unexpected substructure in `derive(Debug)`"),
     };
 
     let name = cx.expr_str(span, ident.name);
@@ -88,20 +85,15 @@ fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: &Substructure<'_>) ->
     // The number of fields that can be handled without an array.
     const CUTOFF: usize = 5;
 
-    fn expr_for_field(
-        cx: &ExtCtxt<'_>,
-        field: &FieldInfo,
-        index: usize,
-        len: usize,
-    ) -> Box<ast::Expr> {
-        if index < len - 1 {
+    let expr_for_field = |field: &FieldInfo, index: usize| -> Box<ast::Expr> {
+        if index < fields.len() - 1 {
             field.self_expr.clone()
         } else {
             // Unsized types need an extra indirection, but only the last field
             // may be unsized.
             cx.expr_addr_of(field.span, field.self_expr.clone())
         }
-    }
+    };
 
     if fields.is_empty() {
         // Special case for no fields.
@@ -126,7 +118,7 @@ fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: &Substructure<'_>) ->
                 args.push(name);
             }
 
-            let field = expr_for_field(cx, field, i, fields.len());
+            let field = expr_for_field(field, i);
             args.push(field);
         }
         let expr = cx.expr_call_global(span, fn_path_debug, args);
@@ -142,7 +134,7 @@ fn show_substructure(cx: &ExtCtxt<'_>, span: Span, substr: &Substructure<'_>) ->
                 name_exprs.push(cx.expr_str(field.span, field.name.unwrap().name));
             }
 
-            let field = expr_for_field(cx, field, i, fields.len());
+            let field = expr_for_field(field, i);
             value_exprs.push(field);
         }
 
@@ -224,13 +216,9 @@ fn show_fieldless_enum(
     cx: &ExtCtxt<'_>,
     span: Span,
     def: &EnumDef,
-    substr: &Substructure<'_>,
+    substr: Substructure<'_>,
 ) -> BlockOrExpr {
     let fmt = substr.nonselflike_args[0].clone();
-    if let Some((stmts, expr)) = show_fieldless_enum_concat_str(cx, span, def, fmt.clone()) {
-        return BlockOrExpr::new_mixed(stmts, Some(expr));
-    }
-    let fn_path_write_str = cx.std_path(&[sym::fmt, sym::Formatter, sym::write_str]);
     let arms = def
         .variants
         .iter()
@@ -251,128 +239,6 @@ fn show_fieldless_enum(
         })
         .collect::<ThinVec<_>>();
     let name = cx.expr_match(span, cx.expr_self(span), arms);
+    let fn_path_write_str = cx.std_path(&[sym::fmt, sym::Formatter, sym::write_str]);
     BlockOrExpr::new_expr(cx.expr_call_global(span, fn_path_write_str, thin_vec![fmt, name]))
-}
-
-/// Special case for fieldless enums with no discriminants. Builds
-/// ```text
-/// impl ::core::fmt::Debug for A {
-///     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
-///         static __NAMES: &str = "ABBBCC";
-///         static __OFFSET: [usize; 4] =[0, 1, 4, 6];
-///         let __d = ::core::intrinsics::discriminant_value(self) as usize;
-///         ::core::fmt::Formatter::debug_c_like_enums_write_str(f, __NAMES, &__OFFSET, __d)
-///     }
-/// }
-/// ```
-fn show_fieldless_enum_concat_str(
-    cx: &ExtCtxt<'_>,
-    span: Span,
-    def: &EnumDef,
-    fmt: Box<ast::Expr>,
-) -> Option<(ThinVec<ast::Stmt>, Box<ast::Expr>)> {
-    // Minimum variants count where this optimization starts to pay off.
-    // See https://github.com/rust-lang/rust/pull/155452 for more details.
-    const THRESHOLD: usize = 10;
-    let variants_count = def.variants.len();
-    if variants_count < THRESHOLD {
-        return None;
-    }
-
-    let variant_names = def
-        .variants
-        .iter()
-        .map(|v| v.disr_expr.is_none().then_some(v.ident.name.as_str()))
-        .collect::<Option<ThinVec<_>>>()?;
-
-    let total_bytes: usize = variant_names.iter().map(|n| n.len()).sum();
-    let mut concatenated_names = String::with_capacity(total_bytes);
-    let mut offset_indices = Vec::with_capacity(variant_names.len() + 1);
-    offset_indices.push(0);
-
-    for name in variant_names.iter() {
-        concatenated_names.push_str(name);
-        offset_indices.push(concatenated_names.len());
-    }
-
-    // Create the constant concatenated string
-    let names_ident = Ident::from_str_and_span("__NAMES", span);
-    let str_ty = cx.ty(
-        span,
-        TyKind::Ref(
-            None,
-            ast::MutTy {
-                ty: cx.ty(
-                    span,
-                    TyKind::Path(None, ast::Path::from_ident(Ident::new(sym::str, span))),
-                ),
-                mutbl: ast::Mutability::Not,
-            },
-        ),
-    );
-    let names_str_body = cx.expr_str(span, Symbol::intern(&concatenated_names));
-    let names_static_item =
-        cx.item_static(span, names_ident, str_ty, ast::Mutability::Not, names_str_body);
-
-    // Create the constant offset array
-    let offset_ident = Ident::from_str_and_span("__OFFSET", span);
-    let offset_index_exprs =
-        offset_indices.iter().map(|s| cx.expr_usize(span, *s)).collect::<ThinVec<_>>();
-    let starts_array_body = cx.expr_array(span, offset_index_exprs);
-    let usize_ty =
-        cx.ty(span, TyKind::Path(None, ast::Path::from_ident(Ident::new(sym::usize, span))));
-    let offset_array_len_expr = cx.anon_const(
-        span,
-        ExprKind::Lit(token::Lit::new(
-            token::LitKind::Integer,
-            Symbol::intern(&(variants_count + 1).to_string()),
-            None,
-        )),
-    );
-    let offset_static_item = cx.item_static(
-        span,
-        offset_ident,
-        cx.ty(span, TyKind::Array(usize_ty, offset_array_len_expr)),
-        ast::Mutability::Not,
-        starts_array_body,
-    );
-
-    // let __d = ::core::intrinsics::discriminant_value(self) as usize;
-    let discriminant_ident = Ident::from_str_and_span("__d", span);
-    let discriminant_intrinsic_path = cx.std_path(&[sym::intrinsics, sym::discriminant_value]);
-    let discriminant_cast_expr = cx.expr(
-        span,
-        ast::ExprKind::Cast(
-            cx.expr_call_global(span, discriminant_intrinsic_path, thin_vec![cx.expr_self(span)]),
-            cx.ty_path(ast::Path::from_ident(Ident::new(sym::usize, span))),
-        ),
-    );
-    let discriminant_let_stmt =
-        cx.stmt_let(span, false, discriminant_ident, discriminant_cast_expr);
-
-    // __d expression
-    let discriminant_expr = cx.expr_ident(span, discriminant_ident);
-
-    // __NAMES expression
-    let names_expr = cx.expr_ident(span, names_ident);
-
-    // &__OFFSET expression
-    let offset_ref_expr = cx.expr_addr_of(span, cx.expr_ident(span, offset_ident));
-
-    // ::core::fmt::Formatter::debug_c_like_enum_write_str(f, __NAMES, &__OFFSET, __d)
-    let fn_path = cx.std_path(&[sym::fmt, sym::Formatter, sym::debug_c_like_enum_write_str]);
-    let call_expr = cx.expr_call_global(
-        span,
-        fn_path,
-        thin_vec![fmt, names_expr, offset_ref_expr, discriminant_expr],
-    );
-
-    Some((
-        thin_vec![
-            cx.stmt_item(span, names_static_item),
-            cx.stmt_item(span, offset_static_item),
-            discriminant_let_stmt,
-        ],
-        call_expr,
-    ))
 }

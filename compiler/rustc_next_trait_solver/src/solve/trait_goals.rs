@@ -240,9 +240,6 @@ where
             goal.predicate.self_ty().kind()
         {
             debug_assert!(is_rigid == ty::IsRigid::Yes);
-            if ecx.opaque_accesses.might_rerun() {
-                match ecx.opaque_accesses.rerun_always(RerunReason::AutoTraitLeakage)? {}
-            }
 
             for item_bound in cx.item_self_bounds(def_id.into()).skip_binder() {
                 if item_bound
@@ -1117,7 +1114,7 @@ where
                     return Ok(false);
                 }
                 match ecx.probe(|_| ProbeKind::ProjectionCompatibility).enter(|ecx| {
-                    let target_projection = ecx.resolve_vars_if_possible(target_projection);
+                    let target_projection = ecx.deeply_resolve_ignoring_regions(target_projection);
                     ecx.enter_forall_with_assumptions(
                         target_projection,
                         param_env,
@@ -1144,7 +1141,8 @@ where
                         let source_principal = upcast_principal.unwrap();
                         let target_principal = bound.rebind(target_principal);
                         // We might unify infer vars in previous iterations.
-                        let target_principal = ecx.resolve_vars_if_possible(target_principal);
+                        let target_principal =
+                            ecx.deeply_resolve_ignoring_regions(target_principal);
                         ecx.enter_forall_with_assumptions(
                             target_principal,
                             param_env,
@@ -1179,7 +1177,8 @@ where
                         };
 
                         // We might unify infer vars in previous iterations.
-                        let target_projection = ecx.resolve_vars_if_possible(target_projection);
+                        let target_projection =
+                            ecx.deeply_resolve_ignoring_regions(target_projection);
                         ecx.enter_forall_with_assumptions(
                             target_projection,
                             param_env,

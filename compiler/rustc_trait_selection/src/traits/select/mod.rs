@@ -9,7 +9,7 @@ use std::ops::ControlFlow;
 
 use hir::def::DefKind;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
-use rustc_errors::{Diag, EmissionGuarantee};
+use rustc_errors::Diag;
 use rustc_hir as hir;
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::DefId;
@@ -63,7 +63,7 @@ pub enum IntercrateAmbiguityCause<'tcx> {
 impl<'tcx> IntercrateAmbiguityCause<'tcx> {
     /// Emits notes when the overlap is caused by complex intercrate ambiguities.
     /// See #23980 for details.
-    pub fn add_intercrate_ambiguity_hint<G: EmissionGuarantee>(&self, err: &mut Diag<'_, G>) {
+    pub fn add_intercrate_ambiguity_hint<G>(&self, err: &mut Diag<'_, G>) {
         err.note(self.intercrate_ambiguity_hint());
     }
 
@@ -255,7 +255,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         &mut self,
         obligation: &PolyTraitObligation<'tcx>,
     ) -> SelectionResult<'tcx, Selection<'tcx>> {
-        assert!(!self.infcx.next_trait_solver());
+        if self.infcx.next_trait_solver() {
+            return self.infcx.select_in_new_trait_solver(obligation);
+        }
 
         let candidate = match self.select_from_obligation(obligation) {
             Err(SelectionError::Overflow(OverflowError::Canonical)) => {
@@ -292,10 +294,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         &mut self,
         obligation: &TraitObligation<'tcx>,
     ) -> SelectionResult<'tcx, Selection<'tcx>> {
-        if self.infcx.next_trait_solver() {
-            return self.infcx.select_in_new_trait_solver(obligation);
-        }
-
         self.poly_select(&Obligation {
             cause: obligation.cause.clone(),
             param_env: obligation.param_env,
@@ -381,7 +379,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     }
 
                     if !candidate_set.ambiguous && no_candidates_apply {
-                        let trait_ref = self.infcx.resolve_vars_if_possible(
+                        let trait_ref = self.infcx.deeply_resolve_ignoring_regions(
                             stack.obligation.predicate.skip_binder().trait_ref,
                         );
                         if !trait_ref.references_error() {
@@ -510,15 +508,16 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> Result<EvaluationResult, OverflowError> {
         debug_assert!(!self.infcx.next_trait_solver());
         self.evaluation_probe(|this| {
-            let goal =
-                this.infcx.resolve_vars_if_possible((obligation.predicate, obligation.param_env));
+            let goal = this
+                .infcx
+                .deeply_resolve_ignoring_regions((obligation.predicate, obligation.param_env));
             let mut result = this.evaluate_predicate_recursively(
                 TraitObligationStackList::empty(&ProvisionalEvaluationCache::default()),
                 obligation.clone(),
             )?;
             // If the predicate has done any inference, then downgrade the
             // result to ambiguous.
-            if this.infcx.resolve_vars_if_possible(goal) != goal {
+            if this.infcx.deeply_resolve_ignoring_regions(goal) != goal {
                 result = result.max(EvaluatedToAmbig);
             }
             Ok(result)
@@ -571,7 +570,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         let mut result = EvaluatedToOk;
         for mut obligation in predicates {
             obligation.set_depth_from_parent(stack.depth());
-            let eval = self.evaluate_predicate_recursively(stack, obligation.clone())?;
+            let eval = self.evaluate_predicate_recursively(stack, obligation)?;
             if let EvaluatedToErr = eval {
                 // fast-path - EvaluatedToErr is the top of the lattice,
                 // so we don't need to look on the other predicates.
@@ -876,7 +875,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                                 && matches!(
                                     a.kind,
                                     ty::AliasConstKind::Projection { .. }
-                                        | ty::AliasConstKind::Inherent { .. }
+                                        | ty::AliasConstKind::InherentSelf { .. }
+                                        | ty::AliasConstKind::InherentImpl { .. }
                                 ) =>
                         {
                             if let Ok(InferOk { obligations, value: () }) = self
@@ -1446,7 +1446,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
 
         debug!("is_knowable()");
 
-        let predicate = self.infcx.resolve_vars_if_possible(obligation.predicate);
+        let predicate = self.infcx.deeply_resolve_ignoring_regions(obligation.predicate);
 
         // Okay to skip binder because of the nature of the
         // trait-ref-is-knowable check, which does not care about
@@ -2471,7 +2471,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         match self.match_impl(impl_def_id, impl_trait_header, obligation) {
             Ok(args) => args,
             Err(()) => {
-                let predicate = self.infcx.resolve_vars_if_possible(obligation.predicate);
+                let predicate = self.infcx.deeply_resolve_ignoring_regions(obligation.predicate);
                 bug!("impl {impl_def_id:?} was matchable against {predicate:?} but now is not")
             }
         }

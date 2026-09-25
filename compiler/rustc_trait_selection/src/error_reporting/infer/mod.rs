@@ -79,7 +79,6 @@ use crate::error_reporting::traits::ambiguity::{
 use crate::infer;
 use crate::infer::relate::{self, RelateResult, TypeRelation};
 use crate::infer::{InferCtxt, InferCtxtExt as _, TypeTrace, ValuePairs};
-use crate::solve::deeply_normalize_for_diagnostics;
 use crate::traits::{
     MatchExpressionArmCause, Obligation, ObligationCause, ObligationCauseCode, ObligationCtxt,
     specialization_graph,
@@ -131,7 +130,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             let ocx = ObligationCtxt::new(self);
             let normalized_fn_sig = ocx.normalize(&ObligationCause::dummy(), param_env, fn_sig);
             if ocx.evaluate_obligations_error_on_ambiguity().no_errors() {
-                let normalized_fn_sig = self.resolve_vars_if_possible(normalized_fn_sig);
+                let normalized_fn_sig = self.deeply_resolve_ignoring_regions(normalized_fn_sig);
                 if !normalized_fn_sig.has_infer() {
                     return normalized_fn_sig;
                 }
@@ -159,7 +158,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     where
         M: FnOnce(String) -> Diag<'a>,
     {
-        let actual_ty = self.resolve_vars_if_possible(actual_ty);
+        let actual_ty = self.deeply_resolve_ignoring_regions(actual_ty);
         debug!("type_error_struct_with_diag({:?}, {:?})", sp, actual_ty);
 
         let mut err = mk_diag(self.ty_to_string(actual_ty));
@@ -337,7 +336,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 span: Some(span),
                 root_ty,
             } => {
-                let expected_ty = self.resolve_vars_if_possible(root_ty);
+                let expected_ty = self.deeply_resolve_ignoring_regions(root_ty);
                 if !matches!(
                     expected_ty.kind(),
                     ty::Infer(ty::InferTy::TyVar(_) | ty::InferTy::FreshTy(_))
@@ -467,7 +466,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 }
                 _ => {
                     // `prior_arm_ty` can be `!`, `expected` will have better info when present.
-                    let t = self.resolve_vars_if_possible(match exp_found {
+                    let t = self.deeply_resolve_ignoring_regions(match exp_found {
                         Some(ty::error::ExpectedFound { expected, .. }) => expected,
                         _ => prior_arm_ty,
                     });
@@ -1374,7 +1373,12 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             (ty::Alias(kind1, alias1), ty::Alias(kind2, alias2)) if kind1 == kind2 => {
                 let mut values = (DiagStyledString::new(), DiagStyledString::new());
                 match (alias1.kind, alias2.kind) {
-                    (ty::Projection { def_id: def_id1 }, ty::Projection { def_id: def_id2 }) => {
+                    (ty::Projection { def_id: def_id1 }, ty::Projection { def_id: def_id2 })
+                        // RPITIT projections use anonymous associated type and have no item name,
+                        // so it will be ICE from call of `tcx.item_name(def_id)` below, issue #161915.
+                        if !self.tcx.is_impl_trait_in_trait(def_id1)
+                            && !self.tcx.is_impl_trait_in_trait(def_id2) =>
+                    {
                         // `<Type as Trait>::Name<args>`
                         values.0.push_normal("<");
                         values.1.push_normal("<");
@@ -1572,10 +1576,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let (expected_found, exp_found, is_simple_error, values, param_env) = match values {
             None => (None, Mismatch::Fixed("type"), false, None, None),
             Some(ty::ParamEnvAnd { param_env, value: values }) => {
-                let mut values = self.resolve_vars_if_possible(values);
-                if self.next_trait_solver() {
-                    values = deeply_normalize_for_diagnostics(self, param_env, values);
-                }
+                let values = self.deeply_resolve_ignoring_regions(values);
                 let (is_simple_error, exp_found) = match values {
                     ValuePairs::Terms(ExpectedFound { expected, found }) => {
                         match (expected.kind(), found.kind()) {
@@ -1613,7 +1614,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             ty::AliasTermKind::AnonConst { def_id } => def_id.into(),
                             ty::AliasTermKind::ProjectionConst { def_id } => def_id.into(),
                             ty::AliasTermKind::FreeConst { def_id } => def_id.into(),
-                            ty::AliasTermKind::InherentConst { def_id } => def_id.into(),
+                            ty::AliasTermKind::InherentConstSelf { def_id } => def_id.into(),
+                            ty::AliasTermKind::InherentConstImpl { def_id } => def_id.into(),
                         };
                         (false, Mismatch::Fixed(self.tcx.def_descr(def_id)))
                     }
@@ -1986,7 +1988,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     ) -> Vec<TypeErrorAdditionalDiags> {
         let mut suggestions = Vec::new();
         let span = trace.cause.span;
-        let values = self.resolve_vars_if_possible(trace.values);
+        let values = self.deeply_resolve_ignoring_regions(trace.values);
         if let Some((expected, found)) = values.ty() {
             match (expected.kind(), found.kind()) {
                 (ty::Tuple(_), ty::Tuple(_)) => {}
@@ -2342,7 +2344,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 }
             }
             ValuePairs::PolySigs(exp_found) => {
-                let exp_found = self.resolve_vars_if_possible(exp_found);
+                let exp_found = self.deeply_resolve_ignoring_regions(exp_found);
                 if exp_found.references_error() {
                     return None;
                 }
@@ -2367,7 +2369,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         exp_found: ty::error::ExpectedFound<ty::Term<'tcx>>,
         long_ty_path: &mut Option<PathBuf>,
     ) -> Option<(DiagStyledString, DiagStyledString)> {
-        let exp_found = self.resolve_vars_if_possible(exp_found);
+        let exp_found = self.deeply_resolve_ignoring_regions(exp_found);
         if exp_found.references_error() {
             return None;
         }
@@ -2439,7 +2441,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         &self,
         exp_found: ty::error::ExpectedFound<T>,
     ) -> Option<(DiagStyledString, DiagStyledString)> {
-        let exp_found = self.resolve_vars_if_possible(exp_found);
+        let exp_found = self.deeply_resolve_ignoring_regions(exp_found);
         if exp_found.references_error() {
             return None;
         }
@@ -2465,7 +2467,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     /// FloatVar inference type are compatible with themselves or their concrete types (Int and
     /// Float types, respectively). When comparing two ADTs, these rules apply recursively.
     pub fn same_type_modulo_infer<T: relate::Relate<TyCtxt<'tcx>>>(&self, a: T, b: T) -> bool {
-        let (a, b) = self.resolve_vars_if_possible((a, b));
+        let (a, b) = self.deeply_resolve_ignoring_regions((a, b));
         SameTypeModuloInfer(self).relate(a, b).is_ok()
     }
 }

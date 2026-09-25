@@ -1711,13 +1711,13 @@ pub(crate) fn rewrite_type_alias<'a>(
     match (visitor_kind, &op_ty) {
         (Item | AssocTraitItem | ForeignItem, Some(op_bounds)) => {
             let op = OpaqueType { bounds: op_bounds };
-            rewrite_ty(rw_info, Some(bounds), Some(&op), rhs_hi, vis)
+            rewrite_ty(rw_info, Some(bounds), Some(&op), rhs_hi, vis, defaultness)
         }
         (Item | AssocTraitItem | ForeignItem, None) => {
-            rewrite_ty(rw_info, Some(bounds), ty_opt, rhs_hi, vis)
+            rewrite_ty(rw_info, Some(bounds), ty_opt, rhs_hi, vis, defaultness)
         }
         (AssocImplItem, _) => {
-            let result = if let Some(op_bounds) = op_ty {
+            if let Some(op_bounds) = op_ty {
                 let op = OpaqueType { bounds: op_bounds };
                 rewrite_ty(
                     rw_info,
@@ -1725,13 +1725,10 @@ pub(crate) fn rewrite_type_alias<'a>(
                     Some(&op),
                     rhs_hi,
                     &DEFAULT_VISIBILITY,
+                    defaultness,
                 )
             } else {
-                rewrite_ty(rw_info, Some(bounds), ty_opt, rhs_hi, vis)
-            }?;
-            match defaultness {
-                ast::Defaultness::Default(..) => Ok(format!("default {result}")),
-                _ => Ok(result),
+                rewrite_ty(rw_info, Some(bounds), ty_opt, rhs_hi, vis, defaultness)
             }
         }
     }
@@ -1744,10 +1741,15 @@ fn rewrite_ty<R: Rewrite>(
     // the span of the end of the RHS (or the end of the generics, if there is no RHS)
     rhs_hi: BytePos,
     vis: &ast::Visibility,
+    defaultness: ast::Defaultness,
 ) -> RewriteResult {
     let mut result = String::with_capacity(128);
     let TyAliasRewriteInfo(context, indent, generics, after_where_clause, ident, span) = *rw_info;
-    result.push_str(&format!("{}type ", format_visibility(context, vis)));
+    result.push_str(&format!(
+        "{}{}type ",
+        format_visibility(context, vis),
+        format_defaultness(defaultness)
+    ));
     let ident_str = rewrite_ident(context, ident);
 
     if generics.params.is_empty() {
@@ -2008,11 +2010,7 @@ impl<'a> StaticParts<'a> {
                 ),
                 ast::ItemKind::Const(c) => (
                     Some(c.defaultness),
-                    if c.kind == ast::ConstItemKind::TypeConst {
-                        "type const"
-                    } else {
-                        "const"
-                    },
+                    "const",
                     ast::Safety::Default,
                     c.ident,
                     &c.ty,
@@ -2037,25 +2035,14 @@ impl<'a> StaticParts<'a> {
     }
 
     pub(crate) fn from_trait_item(ti: &'a ast::AssocItem, ident: Ident) -> Self {
-        let (defaultness, ty, expr_opt, generics, prefix) = match &ti.kind {
+        let (defaultness, ty, expr_opt, generics) = match &ti.kind {
             ast::AssocItemKind::Const(c) => {
-                let prefix = if c.kind == ast::ConstItemKind::TypeConst {
-                    "type const"
-                } else {
-                    "const"
-                };
-                (
-                    c.defaultness,
-                    &c.ty,
-                    c.body.as_deref(),
-                    Some(&c.generics),
-                    prefix,
-                )
+                (c.defaultness, &c.ty, c.body.as_deref(), Some(&c.generics))
             }
             _ => unreachable!(),
         };
         StaticParts {
-            prefix,
+            prefix: "const",
             safety: ast::Safety::Default,
             vis: &ti.vis,
             ident,
@@ -2069,25 +2056,14 @@ impl<'a> StaticParts<'a> {
     }
 
     pub(crate) fn from_impl_item(ii: &'a ast::AssocItem, ident: Ident) -> Self {
-        let (defaultness, ty, expr_opt, generics, prefix) = match &ii.kind {
+        let (defaultness, ty, expr_opt, generics) = match &ii.kind {
             ast::AssocItemKind::Const(c) => {
-                let prefix = if c.kind == ast::ConstItemKind::TypeConst {
-                    "type const"
-                } else {
-                    "const"
-                };
-                (
-                    c.defaultness,
-                    &c.ty,
-                    c.body.as_deref(),
-                    Some(&c.generics),
-                    prefix,
-                )
+                (c.defaultness, &c.ty, c.body.as_deref(), Some(&c.generics))
             }
             _ => unreachable!(),
         };
         StaticParts {
-            prefix,
+            prefix: "const",
             safety: ast::Safety::Default,
             vis: &ii.vis,
             ident,
@@ -2106,28 +2082,44 @@ fn rewrite_static(
     static_parts: &StaticParts<'_>,
     offset: Indent,
 ) -> Option<String> {
-    // For now, if this static (or const) has generics, then bail.
+    // For now, if this static (or const) has a where clause, then bail.
     if static_parts
         .generics
-        .is_some_and(|g| !g.params.is_empty() || !g.where_clause.is_empty())
+        .is_some_and(|g| !g.where_clause.is_empty())
     {
         return None;
     }
-
+    let generics = static_parts
+        .generics
+        .and_then(|g| {
+            format_generics(
+                context,
+                &g,
+                context.config.brace_style(),
+                BracePos::None,
+                offset,
+                // make a span that starts right after `const x<n>`
+                mk_sp(static_parts.ident.span.hi(), static_parts.ty.span.lo()),
+                offset.block_indent,
+            )
+        })
+        .map_or("".into(), |x| format!("{x}"));
     let colon = colon_spaces(context.config);
     let mut prefix = format!(
-        "{}{}{}{} {}{}{}",
+        "{}{}{}{} {}{}{}{}",
         format_visibility(context, static_parts.vis),
         static_parts.defaultness.map_or("", format_defaultness),
         format_safety(static_parts.safety),
         static_parts.prefix,
         format_mutability(static_parts.mutability),
         rewrite_ident(context, static_parts.ident),
-        colon,
+        generics,
+        colon
     );
+
     // 2 = " =".len()
-    let ty_shape =
-        Shape::indented(offset.block_only(), context.config).offset_left_opt(prefix.len() + 2)?;
+    let ty_shape = Shape::indented(offset.block_only(), context.config)
+        .offset_left_opt(last_line_width(&prefix) + 2)?;
     let ty_str = match static_parts.ty.rewrite(context, ty_shape) {
         Some(ty_str) => ty_str,
         None => {
@@ -2880,7 +2872,7 @@ fn rewrite_params(
         context
             .config
             .fn_params_layout()
-            .to_list_tactic(param_items.len()),
+            .to_list_tactic(context.config.style_edition(), param_items.len()),
         Separator::Comma,
         one_line_budget,
     );

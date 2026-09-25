@@ -16,7 +16,7 @@ use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalDefIdMap;
 use rustc_hir::definitions::{DefPathData, PerParentDisambiguatorsMap};
-use rustc_hir::intravisit::{self, InferKind, Visitor, VisitorExt};
+use rustc_hir::intravisit::{self, InferKind, Visitor};
 use rustc_hir::{
     self as hir, AmbigArg, GenericArg, GenericParam, GenericParamKind, HirId, LifetimeKind, Node,
 };
@@ -33,7 +33,7 @@ use tracing::{debug, debug_span, instrument};
 use crate::diagnostics;
 use crate::hir::definitions::PerParentDisambiguatorState;
 
-#[extension(trait RegionExt)]
+#[extension(trait ResolvedArgExt)]
 impl ResolvedArg {
     fn early(param: &GenericParam<'_>) -> ResolvedArg {
         ResolvedArg::EarlyBound(param.def_id)
@@ -1087,7 +1087,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
 
     fn visit_test_binder_forall(
         &mut self,
-        forall: &'tcx rustc_hir::TestBinderForall<'tcx>,
+        forall: &'tcx hir::TestBinderForall<'tcx>,
     ) -> Self::Result {
         let (bound_vars, binders): (FxIndexMap<LocalDefId, ResolvedArg>, Vec<_>) = forall
             .generics
@@ -1121,7 +1121,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
 
     fn visit_test_binder_exists(
         &mut self,
-        exists: &'tcx rustc_hir::TestBinderExists<'tcx>,
+        exists: &'tcx hir::TestBinderExists<'tcx>,
     ) -> Self::Result {
         let (bound_vars, binders): (FxIndexMap<LocalDefId, ResolvedArg>, Vec<_>) = exists
             .params
@@ -1147,6 +1147,34 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 this.visit_generic_param(param);
             }
             this.visit_test_binder_body(exists.body);
+        });
+    }
+
+    fn visit_test_binder_bound_type_constraint(
+        &mut self,
+        bound_type: &'tcx hir::TestBinderBoundTypeConstraint<'tcx>,
+    ) -> Self::Result {
+        let (bound_vars, binders): (FxIndexMap<LocalDefId, ResolvedArg>, Vec<_>) = bound_type
+            .params
+            .iter()
+            .enumerate()
+            .map(|(late_bound_idx, param)| {
+                (
+                    (param.def_id, ResolvedArg::late(late_bound_idx as u32, param)),
+                    late_arg_as_bound_arg(param),
+                )
+            })
+            .unzip();
+        self.record_late_bound_vars(bound_type.hir_id, binders);
+        let scope = Scope::Binder {
+            hir_id: bound_type.hir_id,
+            bound_vars,
+            s: self.scope,
+            scope_type: BinderScopeType::Normal,
+            where_bound_origin: None,
+        };
+        self.with(scope, |this| {
+            intravisit::walk_test_binder_bound_type_constraint(this, bound_type);
         });
     }
 }
@@ -2023,10 +2051,10 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                 _ => None,
             },
             DefKind::AnonConst
-            | DefKind::AssocConst { .. }
+            | DefKind::AssocConst
             | DefKind::AssocFn
             | DefKind::Closure
-            | DefKind::Const { .. }
+            | DefKind::Const
             | DefKind::ConstParam
             | DefKind::Ctor(..)
             | DefKind::ExternCrate

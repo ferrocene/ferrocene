@@ -814,7 +814,7 @@ impl f32 {
     /// conserved over arithmetic operations, the result of `is_sign_positive` on
     /// a NaN might produce an unexpected or non-portable result. See the [specification
     /// of NaN bit patterns](f32#nan-bit-patterns) for more info. Use `self.signum() == 1.0`
-    /// if you need fully portable behavior (will return `false` for all NaNs).
+    /// if you need fully portable behavior (will return NaN for all NaNs).
     ///
     /// ```
     /// let f = 7.0_f32;
@@ -839,7 +839,7 @@ impl f32 {
     /// conserved over arithmetic operations, the result of `is_sign_negative` on
     /// a NaN might produce an unexpected or non-portable result. See the [specification
     /// of NaN bit patterns](f32#nan-bit-patterns) for more info. Use `self.signum() == -1.0`
-    /// if you need fully portable behavior (will return `false` for all NaNs).
+    /// if you need fully portable behavior (will return NaN for all NaNs).
     ///
     /// ```
     /// let f = 7.0f32;
@@ -1717,6 +1717,41 @@ impl f32 {
         assert!(limit >= 0.0, "limit must be non-negative and not NaN");
         let limit = limit.abs(); // Canonicalises -0.0 to 0.0
         self.clamp(-limit, limit)
+    }
+
+    /// Restrict a value to a certain range, unless it is NaN.
+    ///
+    /// This is largely equal to `max`, `min`, or `clamp`, depending on whether the range is
+    /// `min..`, `..=max`, or `min..=max`, respectively. However, unlike `max` and `min`, it will
+    /// panic if any bound is NaN.
+    ///
+    /// Note that this function returns NaN if the initial value was NaN as
+    /// well.
+    ///
+    /// Exclusive ranges are not permitted.
+    ///
+    /// # Panics
+    ///
+    /// Panics on `min..=max` if `min > max`, or if any bound is NaN.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(clamp_to)]
+    /// assert_eq!((-3.0f32).clamp_to(-2.0..=1.0), -2.0);
+    /// assert_eq!(0.0f32.clamp_to(-2.0..=1.0), 0.0);
+    /// assert_eq!(2.0f32.clamp_to(..=1.0), 1.0);
+    /// assert_eq!(5.0f32.clamp_to(7.0..), 7.0);
+    /// assert!(f32::NAN.clamp_to(1.0..=2.0).is_nan());
+    /// ```
+    #[must_use]
+    #[inline]
+    #[unstable(feature = "clamp_to", issue = "147781")]
+    pub fn clamp_to<R>(self, range: R) -> Self
+    where
+        R: crate::cmp::ClampBounds<Self>,
+    {
+        range.clamp(self)
     }
 
     /// Computes the absolute value of `self`.

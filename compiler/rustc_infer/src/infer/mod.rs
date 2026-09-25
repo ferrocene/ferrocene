@@ -30,8 +30,8 @@ use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{
     self, BoundVarReplacerDelegate, ConstVid, FloatVid, GenericArg, GenericArgKind, GenericArgs,
     GenericArgsRef, GenericParamDefKind, InferConst, OpaqueTypeKey, ProvisionalHiddenType,
-    PseudoCanonicalInput, RegionExt, Term, Ty, TyCtxt, TyVid, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeVisitable, TypeVisitableExt, TypingEnv, TypingMode, fold_regions,
+    PseudoCanonicalInput, Term, Ty, TyCtxt, TyVid, TypeFoldable, TypeFolder, TypeSuperFoldable,
+    TypeVisitable, TypeVisitableExt, TypingEnv, TypingMode, fold_regions,
 };
 use rustc_span::{DUMMY_SP, Span, Symbol};
 use rustc_type_ir::{CanonicalizerState, MayBeErased};
@@ -89,10 +89,11 @@ pub(crate) type UnificationTable<'a, 'tcx, T> = ut::UnificationTable<
     ut::InPlace<T, &'a mut ut::UnificationStorage<T>, &'a mut InferCtxtUndoLogs<'tcx>>,
 >;
 
-/// This type contains all the things within `InferCtxt` that sit within a
-/// `RefCell` and are involved with taking/rolling back snapshots. Snapshot
-/// operations are hot enough that we want only one call to `borrow_mut` per
-/// call to `start_snapshot` and `rollback_to`.
+/// This type contains all the things within [`InferCtxt`] that sit within a
+/// [`RefCell`] and are involved with taking/rolling back snapshots. Snapshot
+/// operations are hot enough that we want only one call to
+/// [`RefCell::borrow_mut`] per call to [`InferCtxt::start_snapshot`] and
+///  [`InferCtxt::rollback_to`].
 #[derive(Clone)]
 pub struct InferCtxtInner<'tcx> {
     undo_log: InferCtxtUndoLogs<'tcx>,
@@ -102,7 +103,10 @@ pub struct InferCtxtInner<'tcx> {
     /// This cache is snapshotted along with the infcx.
     projection_cache: traits::ProjectionCacheStorage<'tcx>,
 
-    /// We instantiate `UnificationTable` with `bounds<Ty>` because the types
+    /// Primary map of inference variables to the types that they currently
+    /// represent.
+    ///
+    /// We instantiate [`UnificationTable`] with `bounds<Ty>` because the types
     /// that might instantiate a general type variable have an order,
     /// represented by its upper and lower bounds.
     type_variable_storage: type_variable::TypeVariableStorage<'tcx>,
@@ -719,7 +723,7 @@ impl<'tcx> InferOk<'tcx, ()> {
 
 impl<'tcx> InferCtxt<'tcx> {
     pub fn dcx(&self) -> DiagCtxtHandle<'_> {
-        self.tcx.dcx().taintable_handle(&self.tainted_by_errors)
+        self.tcx.dcx().into_taintable(&self.tainted_by_errors)
     }
 
     pub fn next_trait_solver(&self) -> bool {
@@ -994,7 +998,8 @@ impl<'tcx> InferCtxt<'tcx> {
             | ty::AliasTermKind::OpaqueTy { .. }
             | ty::AliasTermKind::FreeTy { .. } => self.next_ty_var(span).into(),
             ty::AliasTermKind::FreeConst { .. }
-            | ty::AliasTermKind::InherentConst { .. }
+            | ty::AliasTermKind::InherentConstSelf { .. }
+            | ty::AliasTermKind::InherentConstImpl { .. }
             | ty::AliasTermKind::AnonConst { .. }
             | ty::AliasTermKind::ProjectionConst { .. } => self.next_const_var(span).into(),
         }
@@ -1218,7 +1223,7 @@ impl<'tcx> InferCtxt<'tcx> {
     }
 
     pub fn ty_to_string(&self, t: Ty<'tcx>) -> String {
-        self.resolve_vars_if_possible(t).to_string()
+        self.deeply_resolve_ignoring_regions(t).to_string()
     }
 
     /// If `TyVar(vid)` resolves to a type, return that type. Else, return the
@@ -1242,6 +1247,25 @@ impl<'tcx> InferCtxt<'tcx> {
         }
     }
 
+    /// Resolve a type variable. Resolving means the following:
+    ///
+    /// - If a `Ty` is a rigid type (like, an integer, or some ADT), do nothing.
+    /// - If a `Ty` is a type infer variable, but has been equated with an actual type,
+    ///   return that type.
+    /// - If a `Ty` is an int or float infer variable, and has been equated with an integer
+    ///   or floating point type, return that type.
+    /// - If a `Ty` is any kind of infer variable that has been equated, but not yet with a rigid
+    ///   type, then this set of equated variables forms an equivalence class. One of the variables
+    ///   in that equivalent class is said to be the root variable, and resolving makes sure to
+    ///   consistently return this root variable. This is beneficial for caching.
+    ///   This behavior, of returning roots, changed in <https://github.com/rust-lang/rust/pull/158447>.
+    ///
+    /// Otherwise, resolving simply does nothing.
+    ///
+    /// The "shallow" part of the name refers to the fact that types may themselves contain more
+    /// type variables. e.g. The field types of a struct. `shallow_resolve` does not recurse into
+    /// these nested variables. If that's what you want, use [`deeply_resolve_ignoring_regions`](Self::deeply_resolve_ignoring_regions),
+    /// or better [`deeply_resolve_via_unification_table`](rustc_type_ir::InferCtxtLike::deeply_resolve_via_unification_table), if you can, which *does* resolve regions.
     pub fn shallow_resolve(&self, ty: Ty<'tcx>) -> Ty<'tcx> {
         if let ty::Infer(v) = *ty.kind() {
             match v {
@@ -1307,6 +1331,8 @@ impl<'tcx> InferCtxt<'tcx> {
         }
     }
 
+    /// See docs on [`shallow_resolve`](Self::shallow_resolve) for more explanation.
+    /// It's the same, but for consts.
     pub fn shallow_resolve_const(&self, ct: ty::Const<'tcx>) -> ty::Const<'tcx> {
         match ct.kind() {
             ty::ConstKind::Infer(infer_ct) => match infer_ct {
@@ -1333,6 +1359,8 @@ impl<'tcx> InferCtxt<'tcx> {
         }
     }
 
+    /// See docs on [`shallow_resolve`](Self::shallow_resolve) for more explanation.
+    /// It's the same, but for terms (types or consts).
     pub fn shallow_resolve_term(&self, term: ty::Term<'tcx>) -> ty::Term<'tcx> {
         match term.kind() {
             ty::TermKind::Ty(ty) => self.shallow_resolve(ty).into(),
@@ -1367,9 +1395,27 @@ impl<'tcx> InferCtxt<'tcx> {
         self.inner.borrow_mut().const_unification_table().find(var).vid
     }
 
+    /// Resolves a const var to a rigid const, if it was constrained to one,
+    /// or else the root const var in the unification table.
+    pub fn shallow_resolve_const_var(&self, vid: ty::ConstVid) -> ty::Const<'tcx> {
+        match self.try_resolve_const_var(vid) {
+            Ok(ct) => ct,
+            Err(_) => ty::Const::new_var(self.tcx, self.root_const_var(vid)),
+        }
+    }
+
+    /// Resolves a type var to a rigid type, if it was constrained to one,
+    /// or else the root type var in the unification table.
+    pub fn shallow_resolve_ty_var(&self, vid: ty::TyVid) -> Ty<'tcx> {
+        match self.try_resolve_ty_var(vid) {
+            Ok(ty) => ty,
+            Err(_) => Ty::new_var(self.tcx, self.root_var(vid)),
+        }
+    }
+
     /// Resolves an int var to a rigid int type, if it was constrained to one,
     /// or else the root int var in the unification table.
-    pub fn opportunistic_resolve_int_var(&self, vid: ty::IntVid) -> Ty<'tcx> {
+    pub fn shallow_resolve_int_var(&self, vid: ty::IntVid) -> Ty<'tcx> {
         let mut inner = self.inner.borrow_mut();
         let value = inner.int_unification_table().probe_value(vid);
         match value {
@@ -1381,9 +1427,9 @@ impl<'tcx> InferCtxt<'tcx> {
         }
     }
 
-    /// Resolves a float var to a rigid int type, if it was constrained to one,
+    /// Resolves a float var to a rigid type, if it was constrained to one,
     /// or else the root float var in the unification table.
-    pub fn opportunistic_resolve_float_var(&self, vid: ty::FloatVid) -> Ty<'tcx> {
+    pub fn shallow_resolve_float_var(&self, vid: ty::FloatVid) -> Ty<'tcx> {
         let mut inner = self.inner.borrow_mut();
         let value = inner.float_unification_table().probe_value(vid);
         match value {
@@ -1394,13 +1440,13 @@ impl<'tcx> InferCtxt<'tcx> {
         }
     }
 
-    /// Where possible, replaces type/const variables in
-    /// `value` with their final value. Note that region variables
-    /// are unaffected. If a type/const variable has not been unified, it
-    /// is left as is. This is an idempotent operation that does
-    /// not affect inference state in any way and so you can do it
-    /// at will.
-    pub fn resolve_vars_if_possible<T>(&self, value: T) -> T
+    /// If a type/const variable has not (yet) been unified, it is left as is.
+    ///
+    /// This is an idempotent operation that does not affect inference state in any way,
+    /// which means it's safe to call this function at will.
+    ///
+    /// Region variables are unaffected.
+    pub fn deeply_resolve_ignoring_regions<T>(&self, value: T) -> T
     where
         T: TypeFoldable<TyCtxt<'tcx>>,
     {
@@ -1410,7 +1456,7 @@ impl<'tcx> InferCtxt<'tcx> {
         if !value.has_non_region_infer() {
             return value;
         }
-        let mut r = resolve::OpportunisticVarResolver::new(self);
+        let mut r = resolve::DeepResolverIgnoringRegions::new(self);
         value.fold_with(&mut r)
     }
 
@@ -1442,8 +1488,11 @@ impl<'tcx> InferCtxt<'tcx> {
     ///
     /// This method is idempotent, but it not typically not invoked
     /// except during the writeback phase.
-    pub fn fully_resolve<T: TypeFoldable<TyCtxt<'tcx>>>(&self, value: T) -> FixupResult<T> {
-        match resolve::fully_resolve(self, value) {
+    pub fn deeply_resolve_via_region_graph<T: TypeFoldable<TyCtxt<'tcx>>>(
+        &self,
+        value: T,
+    ) -> FixupResult<T> {
+        match resolve::deeply_resolve_via_region_graph(self, value) {
             Ok(value) => {
                 if value.has_non_region_infer() {
                     bug!("`{value:?}` is not fully resolved");

@@ -2025,10 +2025,10 @@ impl From<String> for PathBuf {
 
 #[stable(feature = "path_from_str", since = "1.32.0")]
 impl FromStr for PathBuf {
-    type Err = core::convert::Infallible;
+    type Err = !;
 
     #[inline]
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, !> {
         Ok(PathBuf::from(s))
     }
 }
@@ -2983,7 +2983,8 @@ impl Path {
     #[must_use]
     #[inline]
     pub fn has_trailing_sep(&self) -> bool {
-        self.as_os_str().as_encoded_bytes().last().copied().is_some_and(is_sep_byte)
+        let comps = self.components();
+        self.as_os_str().as_encoded_bytes().last().copied().is_some_and(|b| comps.is_sep_byte(b))
     }
 
     /// Ensures that a path has a trailing [separator](MAIN_SEPARATOR),
@@ -3034,10 +3035,11 @@ impl Path {
     #[must_use]
     #[inline]
     pub fn trim_trailing_sep(&self) -> &Path {
+        let comps = self.components();
         if self.has_trailing_sep() && (!self.has_root() || self.parent().is_some()) {
             let mut bytes = self.inner.as_encoded_bytes();
             while let Some((last, init)) = bytes.split_last()
-                && is_sep_byte(*last)
+                && comps.is_sep_byte(*last)
             {
                 bytes = init;
             }
@@ -3423,6 +3425,8 @@ impl Path {
     /// In particular, `a/c` and `a/b/../c` are distinct on many systems because `b` may be a symbolic link, so its parent isn't `a`.
     ///
     /// </div>
+    ///
+    /// On Windows this will convert all `/` to `\` unless a [verbatim](Prefix::is_verbatim()) path is given.
     ///
     /// [`path::absolute`](absolute) is an alternative that preserves `..`.
     /// Or [`Path::canonicalize`] can be used to resolve any `..` by querying the filesystem.

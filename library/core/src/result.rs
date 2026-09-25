@@ -511,7 +511,7 @@
 //! [`Result`] of a collection of each contained value of the original
 //! [`Result`] values, or [`Err`] if any of the elements was [`Err`].
 //!
-//! [impl-FromIterator]: Result#impl-FromIterator%3CResult%3CA,+E%3E%3E-for-Result%3CV,+E%3E
+//! [impl-FromIterator]: Result#impl-FromIterator%3CResult%3CT,+E%3E%3E-for-Result%3CV,+E%3E
 //!
 //! ```
 //! let v = [Ok(2), Ok(4), Err("err!"), Ok(8)];
@@ -544,7 +544,7 @@
 use crate::iter::{self, FusedIterator, TrustedLen};
 use crate::marker::Destruct;
 use crate::ops::{self, ControlFlow, Deref, DerefMut};
-use crate::{convert, fmt, hint};
+use crate::{fmt, hint};
 
 /// `Result` is a type that represents either success ([`Ok`]) or failure ([`Err`]).
 ///
@@ -2161,7 +2161,7 @@ unsafe impl<A> TrustedLen for IntoIter<A> {}
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
+impl<T, E, V: FromIterator<T>> FromIterator<Result<T, E>> for Result<V, E> {
     /// Takes each element in the `Iterator`: if it is an `Err`, no further
     /// elements are taken, and the `Err` is returned. Should no `Err` occur, a
     /// container with the values of each `Result` is returned.
@@ -2205,7 +2205,7 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
     /// Since the third element caused an underflow, no further elements were taken,
     /// so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.
     #[inline]
-    fn from_iter<I: IntoIterator<Item = Result<A, E>>>(iter: I) -> Result<V, E> {
+    fn from_iter<I: IntoIterator<Item = Result<T, E>>>(iter: I) -> Result<V, E> {
         iter::try_process(iter.into_iter(), |i| i.collect())
     }
 }
@@ -2214,7 +2214,7 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
 const impl<T, E> ops::Try for Result<T, E> {
     type Output = T;
-    type Residual = Result<convert::Infallible, E>;
+    type Residual = Result<!, E>;
 
     #[inline]
     #[ferrocene::prevalidated]
@@ -2234,13 +2234,11 @@ const impl<T, E> ops::Try for Result<T, E> {
 
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-const impl<T, E, F: [const] From<E>> ops::FromResidual<Result<convert::Infallible, E>>
-    for Result<T, F>
-{
+const impl<T, E, F: [const] From<E>> ops::FromResidual<Result<!, E>> for Result<T, F> {
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
-    #[ferrocene::prevalidated]
-    fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
+    fn from_residual(residual: Result<!, E>) -> Self {
         match residual {
             Err(e) => Err(From::from(e)),
         }
@@ -2258,6 +2256,6 @@ const impl<T, E, F: [const] From<E>> ops::FromResidual<ops::Yeet<E>> for Result<
 
 #[unstable(feature = "try_trait_v2_residual", issue = "91285")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
-const impl<T, E> ops::Residual<T> for Result<convert::Infallible, E> {
+const impl<T, E> ops::Residual<T> for Result<!, E> {
     type TryType = Result<T, E>;
 }

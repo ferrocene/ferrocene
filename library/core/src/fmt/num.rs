@@ -262,8 +262,12 @@ macro_rules! impl_Display {
         }
 
         impl $Signed {
-            /// Allows users to write an integer (in signed decimal format) into a variable `buf` of
-            /// type [`NumBuffer`] that is passed by the caller by mutable reference.
+            /// Formats this integer as a signed decimal number, using the memory pointed to by
+            /// `buf` as storage for the returned string slice.
+            ///
+            /// This method can be used to convert integers to strings without involving the
+            /// dynamic dispatch that using [`Display`][fmt::Display] would.
+            /// This may be more efficient in situations where [`fmt`] is not otherwise used.
             ///
             /// # Examples
             ///
@@ -307,8 +311,12 @@ macro_rules! impl_Display {
         }
 
         impl $Unsigned {
-            /// Allows users to write an integer (in unsigned decimal format) into a variable `buf`
-            /// of type [`NumBuffer`] that is passed by the caller by mutable reference.
+            /// Formats this integer as an unsigned decimal number, using the memory pointed to by
+            /// `buf` as storage for the returned string slice.
+            ///
+            /// This method can be used to convert integers to strings without involving the
+            /// dynamic dispatch that using [`Display`][fmt::Display] would.
+            /// This may be more efficient in situations where [`fmt`] is not otherwise used.
             ///
             /// # Examples
             ///
@@ -760,8 +768,12 @@ impl u128 {
         offset
     }
 
-    /// Allows users to write an integer (in unsigned decimal format) into a variable `buf` of
-    /// type [`NumBuffer`] that is passed by the caller by mutable reference.
+    /// Formats this integer as an unsigned decimal number, using the memory pointed to by
+    /// `buf` as storage for the returned string slice.
+    ///
+    /// This method can be used to convert integers to strings without involving the
+    /// dynamic dispatch that using [`Display`][fmt::Display] would.
+    /// This may be more efficient in situations where [`fmt`] is not otherwise used.
     ///
     /// # Examples
     ///
@@ -795,8 +807,12 @@ impl u128 {
 }
 
 impl i128 {
-    /// Allows users to write an integer (in signed decimal format) into a variable `buf` of
-    /// type [`NumBuffer`] that is passed by the caller by mutable reference.
+    /// Formats this integer as a signed decimal number, using the memory pointed to by
+    /// `buf` as storage for the returned string slice.
+    ///
+    /// This method can be used to convert integers to strings without involving the
+    /// dynamic dispatch that using [`Display`][fmt::Display] would.
+    /// This may be more efficient in situations where [`fmt`] is not otherwise used.
     ///
     /// # Examples
     ///

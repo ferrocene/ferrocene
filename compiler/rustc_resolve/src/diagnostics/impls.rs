@@ -50,7 +50,7 @@ use crate::diagnostics::{
 };
 use crate::hygiene::Macros20NormalizedSyntaxContext;
 use crate::imports::{Import, ImportKind, UnresolvedImportError, import_path_to_string};
-use crate::late::{DiagMetadata, PatternSource, Rib};
+use crate::late::{ConstantRequiresType, DiagMetadata, PatternSource, Rib};
 use crate::{
     AmbiguityError, AmbiguityKind, AmbiguityWarning, BindingError, BindingKey, Decl, DeclKind,
     DelayedVisResolutionError, Finalize, ForwardGenericParamBanReason, HasGenericParams, IdentKey,
@@ -809,7 +809,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     DefKind::Static { .. } => {
                         Some(diagnostics::GenericParamsFromOuterItemStaticOrConst::Static)
                     }
-                    DefKind::Const { .. } => {
+                    DefKind::Const => {
                         Some(diagnostics::GenericParamsFromOuterItemStaticOrConst::Const)
                     }
                     _ => None,
@@ -993,8 +993,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 Res::Def(
                                     DefKind::Ctor(CtorOf::Variant, CtorKind::Const)
                                         | DefKind::Ctor(CtorOf::Struct, CtorKind::Const)
-                                        | DefKind::Const { .. }
-                                        | DefKind::AssocConst { .. },
+                                        | DefKind::Const
+                                        | DefKind::AssocConst,
                                     _,
                                 )
                             )
@@ -1005,8 +1005,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         let kind_matches: [fn(DefKind) -> bool; 4] = [
                             |kind| matches!(kind, DefKind::Ctor(CtorOf::Variant, CtorKind::Const)),
                             |kind| matches!(kind, DefKind::Ctor(CtorOf::Struct, CtorKind::Const)),
-                            |kind| matches!(kind, DefKind::Const { .. }),
-                            |kind| matches!(kind, DefKind::AssocConst { .. }),
+                            |kind| matches!(kind, DefKind::Const),
+                            |kind| matches!(kind, DefKind::AssocConst),
                         ];
                         let mut local_names = vec![];
                         self.add_module_candidates(
@@ -1188,6 +1188,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 suggestion,
                 current,
                 type_span,
+                requires_type,
             } => {
                 // let foo =...
                 //     ^^^ given this Span
@@ -1224,11 +1225,23 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
                         if is_simple_binding {
                             (
-                                Some(diagnostics::AttemptToUseNonConstantValueInConstantWithSuggestion {
-                                    span: sp,
-                                    suggestion,
-                                    current,
-                                    type_span,
+                                Some(match requires_type {
+                                    ConstantRequiresType::Usize => {
+                                        diagnostics::AttemptToUseNonConstantValueInConstantWithSuggestion::Usize {
+                                            span: sp,
+                                            suggestion,
+                                            current,
+                                            type_span,
+                                        }
+                                    }
+                                    ConstantRequiresType::No => {
+                                        diagnostics::AttemptToUseNonConstantValueInConstantWithSuggestion::Placeholder {
+                                            span: sp,
+                                            suggestion,
+                                            current,
+                                            type_span,
+                                        }
+                                    }
                                 }),
                                 Some(diagnostics::AttemptToUseNonConstantValueInConstantLabelWithSuggestion { span }),
                                 None,
@@ -1509,7 +1522,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     // Never recommend deprecated helper attributes.
                 }
                 Scope::MacroRules(macro_rules_scope) => {
-                    if let MacroRulesScope::Def(macro_rules_def) = macro_rules_scope.get() {
+                    if let MacroRulesScope::Def(macro_rules_def) = *macro_rules_scope.read() {
                         let res = macro_rules_def.decl.res();
                         if filter_fn(res) {
                             suggestions.push(TypoSuggestion::new(
@@ -2099,7 +2112,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         // Not in scope: check if the name refers to a trait importable from elsewhere.
-        if macro_kind == MacroKind::Derive {
+        // An exact derive macro candidate is much more likely to be intended than any
+        // same-named traits, so we only consider them if there are no import suggestions for the derive macro.
+        if macro_kind == MacroKind::Derive && import_suggestions.is_empty() {
             let trait_candidates =
                 self.lookup_import_candidates(ident, TypeNS, parent_scope, |res| {
                     matches!(res, Res::Def(DefKind::Trait, _))
@@ -3622,10 +3637,15 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 }
             } else {
                 // If the root import is module-relative, add the import separately
-                corrections.push((
-                    import.use_span.shrink_to_lo(),
-                    format!("use {module_name}::{import_snippet};\n"),
-                ));
+                if let Ok(vis) = source_map.span_to_snippet(import.vis_span)
+                    && let Some(indentation) = source_map.indentation_before(import.use_span)
+                {
+                    let vis = if vis.trim().is_empty() { String::new() } else { format!("{vis} ") };
+                    corrections.push((
+                        import.use_span.shrink_to_lo(),
+                        format!("{vis}use {module_name}::{import_snippet};\n{indentation}"),
+                    ));
+                }
             }
         }
 

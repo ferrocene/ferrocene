@@ -13,7 +13,7 @@ use rustc_middle::traits::ObligationCauseCode;
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::print::RegionHighlightMode;
 use rustc_middle::ty::{
-    self, IsSuggestable, Region, RegionExt, Ty, TyCtxt, TypeVisitableExt as _, Upcast as _,
+    self, IsSuggestable, Region, Ty, TyCtxt, TypeVisitableExt as _, Upcast as _,
 };
 use rustc_span::{BytePos, ErrorGuaranteed, Span, Symbol, kw, sym};
 use tracing::{debug, instrument};
@@ -430,7 +430,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 );
                 self.dcx().create_err(FulfillReqLifetime {
                     span,
-                    ty: self.resolve_vars_if_possible(ty),
+                    ty: self.deeply_resolve_ignoring_regions(ty),
                     note,
                 })
             }
@@ -495,7 +495,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 );
                 self.dcx().create_err(RefLongerThanData {
                     span,
-                    ty: self.resolve_vars_if_possible(ty),
+                    ty: self.deeply_resolve_ignoring_regions(ty),
                     notes: pointer_valid.into_iter().chain(data_valid).collect(),
                 })
             }

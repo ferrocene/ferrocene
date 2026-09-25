@@ -1,8 +1,10 @@
 use std::borrow::Borrow;
+use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::sync::Arc;
 
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
@@ -66,7 +68,7 @@ pub(super) struct EncodeContext<'a, 'tcx> {
     // order of `SourceFiles`, and encoded inside `Span`s.
     required_source_files: Option<FxIndexSet<usize>>,
     is_proc_macro: bool,
-    hygiene_ctxt: &'a HygieneEncodeContext,
+    hygiene_ctxt: Rc<RefCell<HygieneEncodeContext>>,
     // Used for both `Symbol`s and `ByteSymbol`s.
     symbol_index_table: FxHashMap<u32, usize>,
 }
@@ -156,7 +158,8 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
     }
 
     fn encode_syntax_context(&mut self, syntax_context: SyntaxContext) {
-        rustc_span::hygiene::raw_encode_syntax_context(syntax_context, self.hygiene_ctxt, self);
+        let idx = self.hygiene_ctxt.borrow_mut().get_syntax_ctxt_encoding_index(syntax_context);
+        idx.encode(self);
     }
 
     fn encode_expn_id(&mut self, expn_id: ExpnId) {
@@ -165,7 +168,7 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
             // data from the corresponding crate's metadata.
             // FIXME(#43047) FIXME(#74731) We may eventually want to avoid relying on external
             // metadata from proc-macro crates.
-            self.hygiene_ctxt.schedule_expn_data_for_encoding(expn_id);
+            self.hygiene_ctxt.borrow_mut().schedule_expn_data_for_encoding(expn_id);
         }
         expn_id.krate.encode(self);
         expn_id.local_id.encode(self);
@@ -642,6 +645,8 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
         let canonical_symbols = stat!("canonical-symbols", || self.encode_canonical_symbols());
 
+        let fake_doc_items = stat!("fake-doc-items", || self.encode_fake_doc_items());
+
         let native_libraries = stat!("native-libs", || self.encode_native_libraries());
 
         let foreign_modules = stat!("foreign-modules", || self.encode_foreign_modules());
@@ -761,6 +766,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 lang_items,
                 diagnostic_items,
                 canonical_symbols,
+                fake_doc_items,
                 lang_items_missing,
                 stripped_cfg_items,
                 native_libraries,
@@ -912,11 +918,11 @@ fn should_encode_span(def_kind: DefKind) -> bool {
         | DefKind::ConstParam
         | DefKind::LifetimeParam
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { .. }
         | DefKind::Ctor(..)
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Macro(_)
         | DefKind::ExternCrate
         | DefKind::Use
@@ -943,10 +949,10 @@ fn should_encode_attrs(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::AssocTy
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { nested: false, .. }
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Macro(_)
         | DefKind::Field
         | DefKind::ConstParam
@@ -989,12 +995,12 @@ fn should_encode_expn_that_defined(def_kind: DefKind) -> bool {
         | DefKind::AssocTy
         | DefKind::TyParam
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::ConstParam
         | DefKind::Static { .. }
         | DefKind::Ctor(..)
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Macro(_)
         | DefKind::ExternCrate
         | DefKind::Use
@@ -1023,11 +1029,11 @@ fn should_encode_visibility(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::AssocTy
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { nested: false, .. }
         | DefKind::Ctor(..)
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Macro(..)
         | DefKind::Field => true,
         DefKind::Use
@@ -1056,11 +1062,11 @@ fn should_encode_stability(def_kind: DefKind) -> bool {
         | DefKind::Struct
         | DefKind::AssocTy
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::TyParam
         | DefKind::ConstParam
         | DefKind::Static { .. }
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Fn
         | DefKind::ForeignMod
         | DefKind::TyAlias
@@ -1112,7 +1118,7 @@ fn should_encode_mir(
         // instance_mir uses mir_for_ctfe rather than optimized_mir for constructors
         DefKind::Ctor(_, _) => (true, false),
         // Constants
-        DefKind::AnonConst | DefKind::AssocConst { .. } | DefKind::Const { .. } => (true, false),
+        DefKind::AnonConst | DefKind::AssocConst | DefKind::Const => (true, false),
         // Coroutines require optimized MIR to compute layout.
         DefKind::Closure if tcx.is_coroutine(def_id.to_def_id()) => (false, true),
         DefKind::SyntheticCoroutineBody => (false, true),
@@ -1151,11 +1157,11 @@ fn should_encode_variances<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, def_kind: Def
         DefKind::Mod
         | DefKind::Variant
         | DefKind::Field
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::TyParam
         | DefKind::ConstParam
         | DefKind::Static { .. }
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::ForeignMod
         | DefKind::TyAlias
         | DefKind::Impl { .. }
@@ -1186,11 +1192,11 @@ fn should_encode_generics(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::AssocTy
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { .. }
         | DefKind::Ctor(..)
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::AnonConst
         | DefKind::OpaqueTy
         | DefKind::Impl { .. }
@@ -1219,13 +1225,13 @@ fn should_encode_type(tcx: TyCtxt<'_>, def_id: LocalDefId, def_kind: DefKind) ->
         | DefKind::Ctor(..)
         | DefKind::Field
         | DefKind::Fn
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { nested: false, .. }
         | DefKind::TyAlias
         | DefKind::ForeignTy
         | DefKind::Impl { .. }
         | DefKind::AssocFn
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Closure
         | DefKind::ConstParam
         | DefKind::AnonConst
@@ -1280,14 +1286,14 @@ fn should_encode_fn_sig(def_kind: DefKind) -> bool {
         | DefKind::Enum
         | DefKind::Variant
         | DefKind::Field
-        | DefKind::Const { .. }
+        | DefKind::Const
         | DefKind::Static { .. }
         | DefKind::Ctor(..)
         | DefKind::TyAlias
         | DefKind::OpaqueTy
         | DefKind::ForeignTy
         | DefKind::Impl { .. }
-        | DefKind::AssocConst { .. }
+        | DefKind::AssocConst
         | DefKind::Closure
         | DefKind::ConstParam
         | DefKind::AnonConst
@@ -1319,8 +1325,8 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
         | DefKind::Union
         | DefKind::Enum
         | DefKind::Field
-        | DefKind::Const { .. }
-        | DefKind::AssocConst { .. }
+        | DefKind::Const
+        | DefKind::AssocConst
         | DefKind::AnonConst
         | DefKind::Static { .. }
         | DefKind::TyAlias
@@ -1349,7 +1355,7 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
 fn should_encode_const(def_kind: DefKind) -> bool {
     match def_kind {
         // FIXME(mgca): should we remove Const and AssocConst here?
-        DefKind::Const { .. } | DefKind::AssocConst { .. } | DefKind::AnonConst => true,
+        DefKind::Const | DefKind::AssocConst | DefKind::AnonConst => true,
 
         DefKind::Struct
         | DefKind::Union
@@ -1379,20 +1385,6 @@ fn should_encode_const(def_kind: DefKind) -> bool {
         | DefKind::ExternCrate
         | DefKind::SyntheticCoroutineBody
         | DefKind::TestBinderConstraints => false,
-    }
-}
-
-fn should_encode_const_of_item<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, def_kind: DefKind) -> bool {
-    // AssocConst ==> assoc item has value
-    tcx.is_type_const(def_id)
-        && (!matches!(def_kind, DefKind::AssocConst { .. }) || assoc_item_has_value(tcx, def_id))
-}
-
-fn assoc_item_has_value<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> bool {
-    let assoc_item = tcx.associated_item(def_id);
-    match assoc_item.container {
-        ty::AssocContainer::InherentImpl | ty::AssocContainer::TraitImpl(_) => true,
-        ty::AssocContainer::Trait => assoc_item.defaultness(tcx).has_value(),
     }
 }
 
@@ -1585,8 +1577,19 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             }
             if let DefKind::Static { .. } = def_kind {
                 if !self.tcx.is_foreign_item(def_id) {
-                    let data = self.tcx.eval_static_initializer(def_id).unwrap();
-                    record!(self.tables.eval_static_initializer[def_id] <- data);
+                    match self.tcx.eval_static_initializer(def_id) {
+                        Ok(data) => record!(self.tables.eval_static_initializer[def_id] <- data),
+                        Err(err) => match err {
+                            interpret::ErrorHandled::Reported(_, _) => {
+                                self.tcx.dcx().delayed_bug(format!(
+                                    "eval_static_initializer returned an error in metadata emission"
+                                ));
+                            }
+                            interpret::ErrorHandled::TooGeneric(span) => {
+                                span_bug!(span, "generic static???");
+                            }
+                        },
+                    };
                 }
             }
             if let DefKind::Enum | DefKind::Struct | DefKind::Union = def_kind {
@@ -1632,7 +1635,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if let DefKind::AnonConst = def_kind {
                 record!(self.tables.anon_const_kind[def_id] <- self.tcx.anon_const_kind(def_id));
             }
-            if should_encode_const_of_item(self.tcx, def_id, def_kind) {
+            if let DefKind::Const | DefKind::AssocConst = def_kind {
                 record!(self.tables.const_of_item[def_id] <- self.tcx.const_of_item(def_id));
             }
             if tcx.impl_method_has_trait_impl_trait_tys(def_id)
@@ -1969,14 +1972,17 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         let mut expn_data_table: TableBuilder<_, _> = Default::default();
         let mut expn_hash_table: TableBuilder<_, _> = Default::default();
 
-        self.hygiene_ctxt.encode(
+        HygieneEncodeContext::encode(
+            &Rc::clone(&self.hygiene_ctxt),
             &mut (&mut *self, &mut syntax_contexts, &mut expn_data_table, &mut expn_hash_table),
             |(this, syntax_contexts, _, _), index, ctxt_data| {
                 syntax_contexts.set_some(index, this.lazy(ctxt_data));
             },
             |(this, _, expn_data_table, expn_hash_table), index, expn_data, hash| {
                 if let Some(index) = index.as_local() {
-                    expn_data_table.set_some(index.as_raw(), this.lazy(expn_data));
+                    expn_data_table
+                        .set_some(index.as_raw(), this.lazy(expn_data.expect("local expn")));
+
                     expn_hash_table.set_some(index.as_raw(), this.lazy(hash));
                 }
             },
@@ -2105,7 +2111,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                     hash: self.tcx.crate_hash(cnum),
                     host_hash: self.tcx.crate_host_hash(cnum),
                     kind: self.tcx.crate_dep_kind(cnum),
-                    extra_filename: self.tcx.extra_filename(cnum).clone(),
+                    extra_filename: self.tcx.extra_filename(cnum).to_owned(),
                     is_private: self.tcx.is_private_dep(cnum),
                 };
                 (cnum, dep)
@@ -2167,6 +2173,13 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         let tcx = self.tcx;
         let diagnostic_items = &tcx.diagnostic_items(LOCAL_CRATE).name_to_id;
         self.lazy_array(diagnostic_items.iter().map(|(&name, def_id)| (name, def_id.index)))
+    }
+
+    fn encode_fake_doc_items(&mut self) -> LazyArray<DefIndex> {
+        empty_proc_macro!(self);
+        let tcx = self.tcx;
+        let fake_doc_items = &tcx.fake_doc_items(LOCAL_CRATE);
+        self.lazy_array(fake_doc_items.iter().map(|cs| cs.index))
     }
 
     fn encode_lang_items(&mut self) -> LazyArray<(DefIndex, LangItem)> {
@@ -2562,8 +2575,6 @@ fn with_encode_metadata_header(
     let required_source_files = Some(FxIndexSet::default());
     drop(source_map_files);
 
-    let hygiene_ctxt = HygieneEncodeContext::default();
-
     let mut ecx = EncodeContext {
         opaque: encoder,
         tcx,
@@ -2577,7 +2588,7 @@ fn with_encode_metadata_header(
         interpret_allocs: Default::default(),
         required_source_files,
         is_proc_macro: tcx.crate_types().contains(&CrateType::ProcMacro),
-        hygiene_ctxt: &hygiene_ctxt,
+        hygiene_ctxt: Default::default(),
         symbol_index_table: Default::default(),
     };
 

@@ -4,7 +4,9 @@ pub mod ferrocene;
 use std::borrow::Cow;
 
 use rustc_abi::Align;
-use rustc_hir::attrs::{InlineAttr, InstructionSetAttr, Linkage, OptimizeAttr, RtsanSetting};
+use rustc_attr_ir::{
+    InlineAttr, InstructionSetAttr, InstrumentFnAttr, Linkage, OptimizeAttr, RtsanSetting,
+};
 use rustc_hir::def_id::DefId;
 use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::Symbol;
@@ -124,26 +126,10 @@ pub struct CodegenFnAttrs {
     /// The `#[rustc_objc_selector = "..."]` attribute.
     pub objc_selector: Option<Symbol>,
     /// The `#[instrument_fn]` attribute.
-    pub instrument_fn: InstrumentFnAttr,
+    pub instrument_fn: Option<InstrumentFnAttr>,
 
     // Ferrocene addition
     pub validated: Option<ferrocene::Validated>,
-}
-
-#[derive(Copy, Clone, TyEncodable, TyDecodable, StableHash, Debug)]
-pub enum InstrumentFnAttr {
-    /// Always instrument function
-    On,
-    /// Never instrument function
-    Off,
-    /// Instrument based on command line options, if any.
-    Default,
-}
-
-const impl Default for InstrumentFnAttr {
-    fn default() -> Self {
-        InstrumentFnAttr::Default
-    }
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash, PartialEq, Eq)]
@@ -280,7 +266,7 @@ impl CodegenFnAttrs {
             patchable_function_entry: None,
             objc_class: None,
             objc_selector: None,
-            instrument_fn: InstrumentFnAttr::default(),
+            instrument_fn: None,
 
             // Ferrocene addition
             validated: None,

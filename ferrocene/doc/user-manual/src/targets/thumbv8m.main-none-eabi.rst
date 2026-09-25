@@ -7,7 +7,7 @@
 ===============================================
 
 The ``thumbv8m.main-none-eabi`` Ferrocene target provides support for
-bare-metal ARMv8-M.mainnline processors with the
+bare-metal ARMv8-M Mainline processors with the
 `T32 ISA <https://developer.arm.com/Architectures/T32%20Instruction%20Set%20Architecture>`_,
 using the *soft-float ABI*. This includes the Arm Cortex-M33, Arm Cortex-M35P, Cortex-M55 and
 Cortex-M85.
@@ -21,6 +21,10 @@ For the *hard-float* ABI, :ref:`thumbv8m.main-none-eabihf` is also available.
 
 By default, this target will *not* emit DSP or MVE instructions and it does not
 support using those instructions in inline assembly.
+
+Please contact support if your use case requires DSP and/or MVE instructions;
+FPU support with soft-float ABI; and/or fully optimized builds for a
+specific CPU configuration.
 
 Prerequisites
 -------------

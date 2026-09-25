@@ -852,7 +852,9 @@ pub fn std_cargo(
             | "aarch64v8r-unknown-ferrocene.facade"
             | "armv7r-ferrocene.facade-eabihf"
             | "thumbv7em-ferrocene.facade-eabi"
-            | "thumbv7em-ferrocene.facade-eabihf" => {
+            | "thumbv7em-ferrocene.facade-eabihf"
+            | "thumbv8m.main-ferrocene.facade-eabi"
+            | "thumbv8m.main-ferrocene.facade-eabihf" => {
                 cargo.rustflag("--cfg=ferrocene_facade_secretsauce");
             }
             _ => unimplemented!("extend this `match`"),

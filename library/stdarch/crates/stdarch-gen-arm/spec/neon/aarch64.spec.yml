@@ -12757,6 +12757,8 @@ intrinsics:
             - link: "llvm.aarch64.neon.tbx4.{neon_type[1]}"
               arch: aarch64,arm64ec
 
+  # Ferrocene addition: Only mark vld1q_u8 as prevalidated; this is needed for
+  # `is_ascii_neon()` in core
   - name: "vld1{neon_type[1].no}"
     doc: "Load multiple single-element structures to one, two, three, or four registers"
     arguments: ["ptr: {type[0]}"]
@@ -12765,8 +12767,27 @@ intrinsics:
       - FnCall: [target_feature, ['enable = "{type[2]}"']]
       - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [ldr]]}]]
       - *neon-stable
-      # Ferrocene addition
       - 'ferrocene::prevalidated'
+    safety:
+      unsafe: [neon]
+    types:
+      - ['*const u8', uint8x16_t, "neon"]
+    compose:
+      - FnCall:
+          - 'crate::ptr::read_unaligned'
+          - - MethodCall:
+                - ptr
+                - cast
+                - []
+
+  - name: "vld1{neon_type[1].no}"
+    doc: "Load multiple single-element structures to one, two, three, or four registers"
+    arguments: ["ptr: {type[0]}"]
+    return_type: "{neon_type[1]}"
+    attr:
+      - FnCall: [target_feature, ['enable = "{type[2]}"']]
+      - FnCall: [cfg_attr, [test, {FnCall: [assert_instr, [ldr]]}]]
+      - *neon-stable
     safety:
       unsafe: [neon]
     types:
@@ -12779,7 +12800,7 @@ intrinsics:
       - ['*const i64', int64x1_t, "neon"]
       - ['*const i64', int64x2_t, "neon"]
       - ['*const u8', uint8x8_t, "neon"]
-      - ['*const u8', uint8x16_t, "neon"]
+      #- ['*const u8', uint8x16_t, "neon"]
       - ['*const u16', uint16x4_t, "neon"]
       - ['*const u16', uint16x8_t, "neon"]
       - ['*const u32', uint32x2_t, "neon"]
@@ -13224,21 +13245,35 @@ intrinsics:
     compose:
       - FnCall: [simd_reduce_max, [a]]
 
+  # Ferrocene addition: Only mark vmaxvq_u8 as prevalidated; this is needed for
+  # `is_ascii_neon()` in core
   - name: "vmaxv{neon_type[0].no}"
     doc: "Horizontal vector max."
     arguments: ["a: {neon_type[0]}"]
     return_type: "{type[1]}"
     attr:
       - *neon-stable
-      # Ferrocene addition
       - 'ferrocene::prevalidated'
+    assert_instr: ['{type[2]}']
+    safety: safe
+    types:
+      - [uint8x16_t, u8, 'umaxv']
+    compose:
+      - FnCall: [simd_reduce_max, [a]]
+
+  - name: "vmaxv{neon_type[0].no}"
+    doc: "Horizontal vector max."
+    arguments: ["a: {neon_type[0]}"]
+    return_type: "{type[1]}"
+    attr:
+      - *neon-stable
     assert_instr: ['{type[2]}']
     safety: safe
     types:
       - [uint8x8_t, u8, 'umaxv']
       - [uint16x4_t, u16, 'umaxv']
       - [uint32x2_t, u32, 'umaxp']
-      - [uint8x16_t, u8, 'umaxv']
+      #- [uint8x16_t, u8, 'umaxv']
       - [uint16x8_t, u16, 'umaxv']
       - [uint32x4_t, u32, 'umaxv']
     compose:

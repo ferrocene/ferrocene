@@ -94,6 +94,8 @@ pub(crate) struct Config {
     pub change_id: Option<ChangeId>,
     pub bypass_bootstrap_lock: bool,
     pub ccache: Option<String>,
+    // Ferrocene addition: We don't use this field
+    #[allow(unused)]
     pub sde: Option<PathBuf>,
     /// Call `Session::ninja` instead of this.
     pub ninja_in_file: bool,

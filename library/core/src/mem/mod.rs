@@ -1731,18 +1731,12 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 #[rustc_const_stable(feature = "mem_conjure_zst", since = "1.100.0")]
 #[rustc_allow_const_fn_unstable(const_type_name)] // type_name() called only at run time
 pub const unsafe fn conjure_zst<T>() -> T {
-    #[ferrocene::annotation(
-        "This assertion only runs in compilation, meaning that it cannot be covered in runtime"
-    )]
-    // Ferrocene addition: add curly braces in order to apply annotation to whole const_assert.
-    {
-        const_assert!(
-            T::IS_ZST,
-            "mem::conjure_zst invoked on a non-zero-sized type",
-            "mem::conjure_zst invoked on type {name}, which is not zero-sized",
-            name: &str = crate::any::type_name::<T>()
-        );
-    }
+    const_assert!(
+        T::IS_ZST,
+        "mem::conjure_zst invoked on a non-zero-sized type",
+        "mem::conjure_zst invoked on type {name}, which is not zero-sized",
+        name: &str = crate::any::type_name::<T>()
+    );
 
     // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,
     // there's nothing in the representation that needs to be set.

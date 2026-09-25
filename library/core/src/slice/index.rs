@@ -1022,6 +1022,7 @@ pub(crate) enum RangeError {
 }
 
 impl RangeError {
+    #[ferrocene::prevalidated]
     #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
     #[cfg_attr(panic = "immediate-abort", inline)]
     #[track_caller]
@@ -1073,14 +1074,10 @@ pub(crate) const fn try_into_slice_range(
 
 /// Converts pair of `ops::Bound`s into `ops::Range`.
 /// Panics on overflowing indices.
-#[inline]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
+#[inline]
 #[track_caller]
 #[rustc_const_unstable(feature = "const_range", issue = "none")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub(crate) const fn into_slice_range(
     len: usize,
     bounds: (ops::Bound<usize>, ops::Bound<usize>),

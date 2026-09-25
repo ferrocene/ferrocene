@@ -715,6 +715,7 @@ impl Kind {
     /// build code for the target? (it can still build code for the host, i.e. proc macros).
     pub fn is_check_like(&self) -> bool {
         match self {
+            Kind::Sign | Kind::SymbolReport => true, // for Ferrocene
             Kind::Check | Kind::Clippy | Kind::Fix | Kind::Doc => true,
             Kind::Build
             | Kind::Format

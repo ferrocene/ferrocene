@@ -128,15 +128,9 @@ const impl<B, C> ops::Try for ControlFlow<B, C> {
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
 const impl<B, C> ops::FromResidual<ControlFlow<B, !>> for ControlFlow<B, C> {
-    #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn from_residual(residual: ControlFlow<B, convert::Infallible>) -> Self {
-||||||| d9dd0703ba3
-    fn from_residual(residual: ControlFlow<B, convert::Infallible>) -> Self {
-=======
+    #[inline]
     fn from_residual(residual: ControlFlow<B, !>) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         match residual {
             ControlFlow::Break(b) => ControlFlow::Break(b),
         }

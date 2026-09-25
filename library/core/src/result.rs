@@ -2235,16 +2235,10 @@ const impl<T, E> ops::Try for Result<T, E> {
 #[unstable(feature = "try_trait_v2", issue = "84277", old_name = "try_trait")]
 #[rustc_const_unstable(feature = "const_try", issue = "74935")]
 const impl<T, E, F: [const] From<E>> ops::FromResidual<Result<!, E>> for Result<T, F> {
+    #[ferrocene::prevalidated]
     #[inline]
     #[track_caller]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
-||||||| d9dd0703ba3
-    fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
-=======
     fn from_residual(residual: Result<!, E>) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         match residual {
             Err(e) => Err(From::from(e)),
         }

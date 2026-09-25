@@ -1189,7 +1189,6 @@ impl Config {
             }
         }
 
-<<<<<<< ferrocene/main
         let mut ferrocene_raw_channel = "rolling".into();
         let mut ferrocene_aws_profile = Default::default();
         let mut ferrocene_traceability_matrix_mode = Default::default();
@@ -1310,15 +1309,10 @@ impl Config {
             }
         }
 
-        for (target, linker_override) in default_linux_linker_overrides() {
-||||||| d9dd0703ba3
-        for (target, linker_override) in default_linux_linker_overrides() {
-=======
         let is_host_system_llvm =
             target_config.get(&host_target).and_then(|c| c.llvm_config.as_ref()).is_some();
 
         for (target, linker_override) in default_linux_linker_overrides(&channel) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             // If the user overrode the default Linux linker, do not apply bootstrap defaults
             if targets_with_user_linker_override.contains(&target) {
                 continue;

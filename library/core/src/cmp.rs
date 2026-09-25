@@ -2359,11 +2359,13 @@ mod impls {
             }
         };
         ($t:ident) => {
+            #[ferrocene::prevalidated]
             #[inline]
             fn min(self, other: Self) -> Self {
                 crate::intrinsics::integer_min(self, other)
             }
 
+            #[ferrocene::prevalidated]
             #[inline]
             fn max(self, other: Self) -> Self {
                 crate::intrinsics::integer_max(self, other)

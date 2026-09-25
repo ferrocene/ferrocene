@@ -1732,6 +1732,7 @@ pub const fn frem_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 /// (Not on `bool` nor on `char`.)
 ///
 /// Stabilized as [`u16::min`] and [`i64::min`] and similar.
+#[ferrocene::prevalidated]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[rustc_nounwind]
 #[rustc_intrinsic]
@@ -1746,6 +1747,7 @@ pub const fn integer_min<T: [const] bounds::IntegerPrimitive>(a: T, b: T) -> T {
 /// (Not on `bool` nor on `char`.)
 ///
 /// Stabilized as [`u16::max`] and [`i64::max`] and similar.
+#[ferrocene::prevalidated]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 #[rustc_nounwind]
 #[rustc_intrinsic]
@@ -3711,20 +3713,14 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 ///
 /// The stabilized versions of this intrinsic are available on the float
 /// primitives via the `abs` method. For example, [`f32::abs`].
+#[ferrocene::prevalidated]
 #[rustc_nounwind]
 #[rustc_const_unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
-<<<<<<< ferrocene/main
-#[ferrocene::prevalidated]
-pub const fn fabs<T: const bounds::FloatPrimitive>(x: T) -> T {
-||||||| d9dd0703ba3
-pub const fn fabs<T: const bounds::FloatPrimitive>(x: T) -> T {
-=======
 #[rustc_do_not_const_check] // use built-in impl to avoid const-checks in the fallback body.
 pub const fn fabs<T: bounds::FloatPrimitive>(x: T) -> T {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     T::from_bits(x.to_bits() & !T::SIGN_MASK)
 }
 

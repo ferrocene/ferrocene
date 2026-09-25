@@ -604,6 +604,15 @@ impl Default for Subcommand {
 }
 
 impl Subcommand {
+    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
+        match *self {
+            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
+                ferrocene_test_one_crate_per_cargo_call
+            }
+            _ => false,
+        }
+    }
+
     pub fn compiletest_rustc_args(&self) -> Vec<&str> {
         match *self {
             Subcommand::Test { ref compiletest_rustc_args, .. } => {
@@ -806,24 +815,11 @@ impl Subcommand {
             _ => false,
         }
     }
-<<<<<<< ferrocene/main
-
-    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
-        match *self {
-            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
-                ferrocene_test_one_crate_per_cargo_call
-            }
-            _ => false,
-        }
-    }
-||||||| d9dd0703ba3
-=======
 
     /// Are we executing a `check --all-targets` command?
     pub(crate) fn check_all_targets(&self) -> bool {
         matches!(self, Subcommand::Check { all_targets: true, .. })
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 /// Returns the shell completion for a given shell, if the result differs from the current

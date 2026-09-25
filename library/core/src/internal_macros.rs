@@ -82,15 +82,9 @@ macro_rules! impl_fn_for_zst {
             $body: block;
     )+) => {
         $(
-            $( #[$attr] )*
-<<<<<<< ferrocene/main
             #[ferrocene::prevalidated]
-            struct $Name;
-||||||| d9dd0703ba3
-            struct $Name;
-=======
+            $( #[$attr] )*
             $vis struct $Name;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
             impl $( <$( $lifetime ),+> )? Fn<($( $ArgTy, )*)> for $Name {
                 #[inline]

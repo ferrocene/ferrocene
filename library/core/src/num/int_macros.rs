@@ -2155,17 +2155,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.saturating_div(-1), ", stringify!($SelfT), "::MAX);")]
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "saturating_div", since = "1.58.0")]
         #[rustc_const_stable(feature = "saturating_div", since = "1.58.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
         #[track_caller]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn saturating_div(self, rhs: Self) -> Self {
             match self.overflowing_div(rhs) {
                 (result, false) => result,
@@ -2304,6 +2300,7 @@ macro_rules! int_impl {
         /// # Examples
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[doc = concat!("assert_eq!(100", stringify!($SelfT), ".wrapping_div(10), 10);")]
         /// assert_eq!((-128i8).wrapping_div(-1), -128);
         /// ```
@@ -2312,12 +2309,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
         #[track_caller]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn wrapping_div(self, rhs: Self) -> Self {
             self.overflowing_div(rhs).0
         }
@@ -2363,6 +2355,7 @@ macro_rules! int_impl {
         /// # Examples
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[doc = concat!("assert_eq!(100", stringify!($SelfT), ".wrapping_rem(10), 0);")]
         /// assert_eq!((-128i8).wrapping_rem(-1), 0);
         /// ```
@@ -2371,12 +2364,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
         #[track_caller]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn wrapping_rem(self, rhs: Self) -> Self {
             self.overflowing_rem(rhs).0
         }
@@ -2901,6 +2889,7 @@ macro_rules! int_impl {
         /// # Examples
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_div(2), (2, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_div(-1), (", stringify!($SelfT), "::MIN, true));")]
         /// ```
@@ -2909,12 +2898,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_overflowing_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
         #[track_caller]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn overflowing_div(self, rhs: Self) -> (Self, bool) {
             // Using `&` helps LLVM see that it is the same check made in division.
             if intrinsics::unlikely((self == Self::MIN) & (rhs == -1)) {
@@ -2966,6 +2950,7 @@ macro_rules! int_impl {
         /// # Examples
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_rem(2), (1, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_rem(-1), (0, true));")]
         /// ```
@@ -2974,12 +2959,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_overflowing_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-=======
         #[track_caller]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn overflowing_rem(self, rhs: Self) -> (Self, bool) {
             if intrinsics::unlikely(rhs == -1) {
                 (0, self == Self::MIN)

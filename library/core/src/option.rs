@@ -2957,15 +2957,9 @@ const impl<T> ops::Try for Option<T> {
 // Note: manually specifying the residual type instead of using the default to work around
 // https://github.com/rust-lang/rust/issues/99940
 const impl<T> ops::FromResidual<Option<!>> for Option<T> {
-    #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn from_residual(residual: Option<convert::Infallible>) -> Self {
-||||||| d9dd0703ba3
-    fn from_residual(residual: Option<convert::Infallible>) -> Self {
-=======
+    #[inline]
     fn from_residual(residual: Option<!>) -> Self {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         match residual {
             None => None,
         }

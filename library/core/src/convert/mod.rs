@@ -824,15 +824,9 @@ where
 {
     type Error = !;
 
-    #[inline]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn try_from(value: U) -> Result<Self, Self::Error> {
-||||||| d9dd0703ba3
-    fn try_from(value: U) -> Result<Self, Self::Error> {
-=======
+    #[inline]
     fn try_from(value: U) -> Result<Self, !> {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         Ok(U::into(value))
     }
 }

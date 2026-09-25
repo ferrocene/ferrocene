@@ -36,3 +36,9 @@ fn main() {
     //~^ WARNING parsed as a C string literal in Rust 2021 and onward
     //~| WARNING this changes meaning in Rust 2021
 }
+
+// ferrocene-annotations: fls_u1ghcy16emve
+// C String Literals
+//
+// ferrocene-annotations: fls_p090c5otnelw
+// Simple C String Literals

@@ -389,13 +389,7 @@ impl Config {
             &self.stage0_metadata.config.artifacts_server
         };
         let version = self.artifact_version_part(llvm_sha);
-<<<<<<< ferrocene/main
-        let filename = format!("rust-dev-{}-{}.tar.xz", self.host_target.triple, version); // Ferrocene change: We swap the arg names
-||||||| d9dd0703ba3
-        let filename = format!("rust-dev-{}-{}.tar.xz", version, self.host_target.triple);
-=======
-        let filename = format!("rust-dev-{}-{}.tar.xz", version, target.triple);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+        let filename = format!("rust-dev-{}-{}.tar.xz", target.triple, version); // Ferrocene change: We swap the arg names
         let tarball = rustc_cache.join(&filename);
         if !tarball.exists() {
             let help_on_error = format!(

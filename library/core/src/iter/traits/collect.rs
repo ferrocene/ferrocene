@@ -417,15 +417,9 @@ pub trait Extend<T> {
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I);
 
     /// Extends a collection with exactly one element.
-    #[unstable(feature = "extend_one", issue = "72631")]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    fn extend_one(&mut self, item: A) {
-||||||| d9dd0703ba3
-    fn extend_one(&mut self, item: A) {
-=======
+    #[unstable(feature = "extend_one", issue = "72631")]
     fn extend_one(&mut self, item: T) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.extend(Some(item));
     }
 
@@ -449,16 +443,10 @@ pub trait Extend<T> {
     /// invoke UB if they are violated), it must implement `extend_reserve` correctly. In other words,
     /// callers may assume that if they `extend_reserve`ed enough space they can call this method.
     // This method is for internal usage only. It is only on the trait because of specialization's limitations.
+    #[ferrocene::prevalidated]
     #[unstable(feature = "extend_one_unchecked", issue = "none")]
     #[doc(hidden)]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    unsafe fn extend_one_unchecked(&mut self, item: A)
-||||||| d9dd0703ba3
-    unsafe fn extend_one_unchecked(&mut self, item: A)
-=======
     unsafe fn extend_one_unchecked(&mut self, item: T)
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     where
         Self: Sized,
     {

@@ -250,38 +250,22 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
 
         file.set_mangling(original_mangling);
     }
-<<<<<<< ferrocene/main
-    let e_flags = elf_e_flags(architecture, sess);
-    // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
-    let os_abi = elf_os_abi(sess);
-    let abi_version = 0;
-    // Ferrocene change:
-    // aarch64-unknown_nto_qnx710 uses GNU LD 2.32, and that version does not
-    // support the linker section added here.
-    // Adding the section makes the linker emit warnings.
-    let is_aarch64_qnx71 =
-        (architecture == Architecture::Aarch64) && (sess.target.env == Env::Nto71);
-    if !is_aarch64_qnx71 {
-        add_gnu_property_note(&mut file, architecture, binary_format, endianness);
-    }
-    file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
-||||||| d9dd0703ba3
-    let e_flags = elf_e_flags(architecture, sess);
-    // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
-    let os_abi = elf_os_abi(sess);
-    let abi_version = 0;
-    add_gnu_property_note(&mut file, architecture, binary_format, endianness);
-    file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
-=======
     if binary_format == BinaryFormat::Elf {
         let e_flags = elf_e_flags(architecture, sess);
         // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
         let os_abi = elf_os_abi(sess);
         let abi_version = 0;
-        add_gnu_property_note(&mut file, architecture, endianness);
+        // Ferrocene change:
+        // aarch64-unknown_nto_qnx710 uses GNU LD 2.32, and that version does not
+        // support the linker section added here.
+        // Adding the section makes the linker emit warnings.
+        let is_aarch64_qnx71 =
+            (architecture == Architecture::Aarch64) && (sess.target.env == Env::Nto71);
+        if !is_aarch64_qnx71 {
+            add_gnu_property_note(&mut file, architecture, endianness);
+        }
         file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     Some(file)
 }
 

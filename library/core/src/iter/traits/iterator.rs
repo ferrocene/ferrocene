@@ -2852,35 +2852,21 @@ pub const trait Iterator {
     /// // we can still use `iter`, as there are more elements.
     /// assert_eq!(iter.next(), Some(3));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< ferrocene/main
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-    #[rustc_non_const_trait_method]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn all<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
         F: [const] FnMut(Self::Item) -> bool + [const] Destruct,
     {
+        #[ferrocene::prevalidated]
         #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
         #[inline]
-<<<<<<< ferrocene/main
-        #[ferrocene::prevalidated]
-        fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
-            move |(), x| {
-||||||| d9dd0703ba3
-        fn check<T>(mut f: impl FnMut(T) -> bool) -> impl FnMut((), T) -> ControlFlow<()> {
-            move |(), x| {
-=======
         const fn check<T>(
             mut f: impl [const] FnMut(T) -> bool + [const] Destruct,
         ) -> impl [const] FnMut((), T) -> ControlFlow<()> + [const] Destruct {
             const move |(), x| {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 if f(x) { ControlFlow::Continue(()) } else { ControlFlow::Break(()) }
             }
         }
@@ -3388,30 +3374,17 @@ pub const trait Iterator {
     /// let a = [-3_i32, 0, 1, 5, -10];
     /// assert_eq!(a.into_iter().max_by(|x, y| x.cmp(y)).unwrap(), 5);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iter_max_by", since = "1.15.0")]
-<<<<<<< ferrocene/main
-    #[rustc_non_const_trait_method]
-    #[ferrocene::prevalidated]
-||||||| d9dd0703ba3
-    #[rustc_non_const_trait_method]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn max_by<F>(self, compare: F) -> Option<Self::Item>
     where
         Self: Sized + [const] Destruct,
         Self::Item: [const] Destruct,
         F: [const] FnMut(&Self::Item, &Self::Item) -> Ordering + [const] Destruct,
     {
-        #[inline]
-<<<<<<< ferrocene/main
         #[ferrocene::prevalidated]
-        fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
-            move |x, y| cmp::max_by(x, y, &mut compare)
-||||||| d9dd0703ba3
-        fn fold<T>(mut compare: impl FnMut(&T, &T) -> Ordering) -> impl FnMut(T, T) -> T {
-            move |x, y| cmp::max_by(x, y, &mut compare)
-=======
+        #[inline]
         #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
         const fn fold<T>(
             mut compare: impl [const] FnMut(&T, &T) -> Ordering + [const] Destruct,
@@ -3420,7 +3393,6 @@ pub const trait Iterator {
             T: [const] Destruct,
         {
             const move |x, y| cmp::max_by(x, y, &mut compare)
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         }
 
         self.reduce(fold(compare))

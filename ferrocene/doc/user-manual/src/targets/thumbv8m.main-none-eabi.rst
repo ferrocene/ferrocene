@@ -50,9 +50,8 @@ To use the target, the following additional flags must be provided to
 Testing Facade (Experimental)
 -----------------------------
 
-Bare metal targets cannot use test harnesses that require ``libc``. Instead, a testing facade that emulates the bare metal target can
-be used instead, but also provides access to ``std``
-functionality.
+Bare metal targets cannot use test harnesses that require ``libc``.
+Instead, a testing facade that emulates the bare metal target can be used instead, but also provides access to ``std`` functionality.
 
 The following additional archive is needed when :doc:`installing </rustc/install>`:
 

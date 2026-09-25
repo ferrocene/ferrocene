@@ -1070,9 +1070,7 @@ the tool compiling the :t:`crate`.
 dangling
 ^^^^^^^^
 
-A :t:`value` of an :t:`indirection type` is :dt:`dangling` if it is either
-:c:`null` or not all of the bytes at the referred memory location are part of
-the same allocation.
+A :t:`pointer` is :dt:`dangling` if it is either :c:`null` or not all of the bytes at the referred memory location are part of the same allocation.
 
 data race
 ^^^^^^^^^
@@ -1530,7 +1528,7 @@ A :dt:`fat pointer` is a :t:`value` of a :t:`fat pointer type`.
 fat pointer type
 ^^^^^^^^^^^^^^^^
 
-A :dt:`fat pointer type` is an :t:`indirection type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
+A :dt:`fat pointer type` is a :t:`pointer type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
 
 FFI
 ^^^
@@ -1699,8 +1697,7 @@ See :s:`FunctionParameter`.
 function pointer type
 ^^^^^^^^^^^^^^^^^^^^^
 
-A :dt:`function pointer type` is an :t:`indirection type` that refers to a
-:t:`function`.
+A :dt:`function pointer type` is a :t:`type` that refers to a :t:`function`.
 
 See :s:`FunctionPointerTypeSpecification`.
 
@@ -2191,12 +2188,6 @@ An :dt:`indexing operand` is an :t:`operand` which specifies the index for the
 :t:`indexed operand` being indexed into by an :t:`index expression`.
 
 See :s:`IndexingOperand`.
-
-indirection type
-^^^^^^^^^^^^^^^^
-
-An :dt:`indirection type` is a :t:`type` whose :t:`[value]s` refer to memory
-locations.
 
 inert attribute
 ^^^^^^^^^^^^^^^
@@ -3420,7 +3411,7 @@ A :dt:`pointer` is a :t:`value` of a :t:`pointer type`.
 pointer type
 ^^^^^^^^^^^^
 
-A :dt:`pointer type` is either a :t:`raw pointer type` or a :t:`reference type`.
+A :dt:`pointer type` is a :t:`type` whose :t:`[value]s` refer to memory locations.
 
 positional register argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3678,8 +3669,7 @@ A :dt:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
 raw pointer type
 ^^^^^^^^^^^^^^^^
 
-A :dt:`raw pointer type` is an :t:`indirection type` without safety and
-liveness guarantees.
+A :dt:`raw pointer type` is a :t:`pointer type` without safety and liveness guarantees.
 
 See :s:`RawPointerTypeSpecification`.
 
@@ -3776,7 +3766,7 @@ See :s:`ReferencePattern`.
 reference type
 ^^^^^^^^^^^^^^
 
-A :dt:`reference type` is an :t:`indirection type` with :t:`ownership`.
+A :dt:`reference type` is a :t:`pointer type` with :t:`ownership`.
 
 See :s:`ReferenceTypeSpecification`.
 
@@ -4512,8 +4502,7 @@ A :dt:`thin pointer` is a :t:`value` of a :t:`thin pointer type`.
 thin pointer type
 ^^^^^^^^^^^^^^^^^
 
-A :dt:`thin pointer type` is an :t:`indirection type` that refers to a
-:t:`fixed sized type`.
+A :dt:`thin pointer type` is a :t:`pointer type` that refers to a :t:`fixed sized type`.
 
 token matching
 ^^^^^^^^^^^^^^

@@ -27,14 +27,8 @@ use std::path::{Path, PathBuf};
 
 use crate::core::config::flags::Subcommand;
 use crate::core::config::{CompressDebuginfo, TargetSelection};
-<<<<<<< ferrocene/release/1.100
-use crate::core::session::{CLang, GitRepo, Session};
-use crate::utils::cache::Interned;
-||||||| d9dd0703ba3
-use crate::core::session::{CLang, GitRepo, Session};
-=======
 use crate::core::session::{CLang, Session};
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+use crate::utils::cache::Interned;
 use crate::utils::exec::{BootstrapCommand, command};
 /// Creates and configures a new [`cc::Build`] instance for the given target.
 fn new_cc_build(sess: &Session, target: TargetSelection) -> cc::Build {

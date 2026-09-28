@@ -709,6 +709,28 @@ impl Kind {
         }
         .to_owned()
     }
+
+    /// Is this a command similar to check, which only runs the compiler frontend and doesn't
+    /// build code for the target? (it can still build code for the host, i.e. proc macros).
+    pub fn is_check_like(&self) -> bool {
+        match self {
+            Kind::Check | Kind::Clippy | Kind::Fix | Kind::Doc => true,
+            Kind::Build
+            | Kind::Format
+            | Kind::Test
+            | Kind::Miri
+            | Kind::MiriSetup
+            | Kind::MiriTest
+            | Kind::Bench
+            | Kind::Clean
+            | Kind::Dist
+            | Kind::Install
+            | Kind::Run
+            | Kind::Setup
+            | Kind::Vendor
+            | Kind::Perf => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -1570,11 +1592,10 @@ Alternatively, you can set `build.local-rebuild=true` and use a stage0 compiler 
     /// The used Clippy is (or in the case of stage 0, already was) built using `build_compiler`.
     pub fn cargo_clippy_cmd(&self, build_compiler: Compiler) -> BootstrapCommand {
         if build_compiler.stage == 0 {
-            let cargo_clippy = self
-                .config
-                .initial_cargo_clippy
-                .clone()
-                .unwrap_or_else(|| self.sess.config.download_clippy());
+            let cargo_clippy =
+                self.config.external_cargo_clippy.clone().unwrap_or_else(|| {
+                    self.sess.config.download_clippy(&self.sess.initial_sysroot)
+                });
 
             let mut cmd = command(cargo_clippy);
             cmd.env("CARGO", &self.initial_cargo);

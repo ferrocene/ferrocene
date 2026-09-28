@@ -218,7 +218,7 @@ than building it.
         .map(|c| cmd_finder.must_have(c))
         .or_else(|| cmd_finder.maybe_have("uv"));
 
-    let stage0_supported_target_list: HashSet<String> = command(&sess.config.initial_rustc)
+    let stage0_supported_target_list: HashSet<String> = command(&sess.initial_rustc)
         .args(["--print", "target-list"])
         .run_in_dry_run()
         .run_capture_stdout(&sess)
@@ -331,7 +331,7 @@ than building it.
         }
     }
 
-    for target in &sess.targets {
+    for target in &sess.config.targets {
         sess.config
             .target_config
             .entry(*target)

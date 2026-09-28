@@ -683,9 +683,17 @@ fn set_get_permissions_nofollows_symlink() {
             target_os = "freebsd",
             target_os = "openbsd",
             target_os = "netbsd",
+<<<<<<< ferrocene/release/1.100
             target_os = "dragonfly",
             target_os = "nto",
             target_os = "qnx",
+||||||| d9dd0703ba3
+            target_os = "dragonfly"
+=======
+            target_os = "dragonfly",
+            target_os = "nto",
+            target_os = "qnx"
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         ) => {
             assert_eq!(result.unwrap(), ());
 

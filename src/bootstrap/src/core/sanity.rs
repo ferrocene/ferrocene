@@ -211,6 +211,7 @@ than building it.
         .map(|p| cmd_finder.must_have(p))
         .or_else(|| cmd_finder.maybe_have("reuse"));
 
+<<<<<<< ferrocene/release/1.100
     sess.config.uv = sess
         .config
         .uv
@@ -219,6 +220,11 @@ than building it.
         .or_else(|| cmd_finder.maybe_have("uv"));
 
     let stage0_supported_target_list: HashSet<String> = command(&sess.config.initial_rustc)
+||||||| d9dd0703ba3
+    let stage0_supported_target_list: HashSet<String> = command(&sess.config.initial_rustc)
+=======
+    let stage0_supported_target_list: HashSet<String> = command(&sess.initial_rustc)
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         .args(["--print", "target-list"])
         .run_in_dry_run()
         .run_capture_stdout(&sess)
@@ -331,7 +337,7 @@ than building it.
         }
     }
 
-    for target in &sess.targets {
+    for target in &sess.config.targets {
         sess.config
             .target_config
             .entry(*target)

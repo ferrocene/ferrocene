@@ -132,14 +132,14 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         return ValidatedStatus::Validated { annotation: None, inherited: false };
     }
 
+    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
+        return annotation;
+    }
+
     if let Some(local) = owner.as_local()
         && let Some(status) = implied_validation(tcx, local)
     {
         return status;
-    }
-
-    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
-        return annotation;
     }
 
     // HACK: `feature(delegation)` is horribly buggy and causes infinite cycles within the query
@@ -162,7 +162,7 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
 }
 
 /// Check if this item or any of its parents are validated.
-pub fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
+fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
     let mut current = item;
     loop {
         // Check if it's possible for this item to have attributes.

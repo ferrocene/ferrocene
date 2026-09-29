@@ -183,7 +183,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::{HirId, Item, TraitFn, TraitItem, TraitItemKind};
 use rustc_lint_defs::{declare_lint_pass, declare_tool_lint};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
-    ValidatedStatus, any_parent_is_validated, has_requires_validation_attribute, item_is_validated,
+    ValidatedStatus, has_requires_validation_attribute, item_is_validated,
 };
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
@@ -235,14 +235,17 @@ impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {
 ///
 /// This is run when the item itself is checked, so the errors do not depend on
 /// the item being called from a prevalidated function.
+///
+/// Note: this check is not required for soundness, only to prevent accidental misplacements of an attribute.
 fn check_attribute_placement(
     tcx: TyCtxt<'_>,
     def_id: LocalDefId,
     trait_item: Option<&TraitItem<'_>>,
 ) {
-    let prevalidated = match any_parent_is_validated(tcx, def_id.to_def_id()) {
-        // FIXME: consider if validation is inherited
-        Some(ValidatedStatus::Validated { annotation, inherited: false }) => annotation,
+    let prevalidated = match item_is_validated(tcx, def_id.to_def_id()) {
+        // If the item is inherited, its annotation will be of the *parent*, not the current item.
+        // In that case we'll have already checked the parent earlier.
+        ValidatedStatus::Validated { annotation, inherited: false } => annotation,
         _ => None,
     };
     let requires_validation = has_requires_validation_attribute(tcx, def_id.to_def_id());
@@ -336,6 +339,8 @@ impl ValidationItem {
 /// this. That is okay because [`check_attribute_placement`] guarantees that a
 /// trait item with a default that is marked with `requires_validation`
 /// is also marked `prevalidated`.
+///
+/// Note: this check is required for soundness.
 fn check_impl_of_requires_validation(tcx: TyCtxt<'_>, implementation_id: LocalDefId) {
     // Get the id of the trait item definition being implemented by
     // `implementation_id`. `trait_item_of` will only return `Some` if

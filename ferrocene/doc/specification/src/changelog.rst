@@ -34,6 +34,8 @@ Language changes in Rust 1.99.0
 
 - `Trait methods are now resolved on an adjusted never type (producing a FCW) <https://github.com/rust-lang/rust/pull/156047>`_
 
+  - Bug fix in the compiler without a corresponding language change.
+
 - `Coerce from inference variables to trait objects if the inference variable is related via subtyping to a type that is known to be 'Sized' <https://github.com/rust-lang/rust/pull/157820>`_
 
 - `Stabilize '#[my_macro] mod foo;' <https://github.com/rust-lang/rust/pull/157857>`_

@@ -3,7 +3,9 @@
 
 #![crate_type = "lib"]
 
-// CHECK: define void @test_type
+// Ferrocene addition: Allow attributes between `define` and `void`
+// We get `define dso_local void @test_type(...)`
+// CHECK: define {{.*}}void @test_type
 // CHECK-SAME: !kcfi_type
 // CHECK-NOT: [ "kcfi"
 // CHECK: call void %f()
@@ -15,7 +17,7 @@ pub fn test_type(f: fn(), g: fn(i32), x: &mut i32) {
     g(1);
 }
 
-// CHECK: define void @test_type_2()
+// CHECK: define {{.*}}void @test_type_2()
 // CHECK-SAME: !kcfi_type
 #[no_mangle]
 pub fn test_type_2() {}

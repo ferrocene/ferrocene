@@ -5,6 +5,9 @@
 //@ ignore-pauthtest: (it requires non-trivial compilation of c sources, and only supports dynamic
 //  linking, ignore the test).
 
+// Ferrocene addition: This is currently broken on facade targets, as our CI's libc is too old
+//@ ignore-qemu
+
 use run_make_support::{bin_name, build_native_static_lib, env_var, run, rustc};
 
 fn main() {

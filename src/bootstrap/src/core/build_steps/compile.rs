@@ -300,13 +300,9 @@ impl CommandLineStep for Std {
                 helpers::exit_process(1);
             }
 
-            // Usually profiler_builtins is loaded from the sysroot, but that cannot happen when
-            // building the sysroot itself: in those cases, the sysroot is empty. We thus need to
-            // to build it from source.
-            //
-            // We don't do this when testing, because when download-rustc is enabled, we may have
-            // overridden `build_compiler` to something else. Rather than trying to duplicate the
-            // logic, just smuggle the proper path through a RefCell.
+            // Why do we need to pass `profiler_runtime` (the path) explicitly?
+            // Usually `profiler_builtins` (the crate) is loaded from the sysroot, but that cannot happen when
+            // building the sysroot itself: in those cases, the sysroot is empty. We thus need to build it from source.
             let rlib = builder.ensure(ProfilerBuiltins { target, build_compiler });
             instrument_coverage(builder, &mut cargo, &rlib);
             builder.profiler_runtime.replace(Some(rlib));

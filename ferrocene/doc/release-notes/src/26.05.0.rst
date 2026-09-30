@@ -62,3 +62,7 @@ shipped as a preview.
   not qualified for safety critical use. The new target is:
 
   * :target-with-tuple:`aarch64v8r-unknown-none-softfloat`
+
+.. rust-changelog::
+    :from: 1.93.0
+    :to: 1.95.0

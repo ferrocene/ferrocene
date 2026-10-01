@@ -1678,6 +1678,10 @@ pub const FALLOC_FL_COLLAPSE_RANGE: c_int = 0x0008;
 pub const FALLOC_FL_INSERT_RANGE: c_int = 0x0010;
 pub const FALLOC_FL_KEEP_SIZE: c_int = 0x1000;
 
+// include/paths.h
+pub const _PATH_DEFPATH: *const c_char = cstr(b"/bin\0");
+pub const _PATH_BSHELL: *const c_char = cstr(b"/bin/sh\0");
+
 f! {
     pub unsafe fn FD_CLR(fd: c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
@@ -1710,7 +1714,7 @@ f! {
     pub unsafe fn CPU_COUNT_S(size: usize, cpuset: &cpu_set_t) -> c_int {
         let mut s: u32 = 0;
         let size_of_mask = size_of_val(&cpuset.bits[0]);
-        for i in cpuset.bits[..(size / size_of_mask)].iter() {
+        for i in &cpuset.bits[..(size / size_of_mask)] {
             s += i.count_ones();
         }
         s as c_int
@@ -1783,9 +1787,7 @@ f! {
     pub unsafe fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
         cmsg.offset(1).cast_mut().cast()
     }
-}
 
-safe_f! {
     pub const safe fn makedev(ma: c_uint, mi: c_uint) -> dev_t {
         let ma = ma as dev_t;
         let mi = mi as dev_t;

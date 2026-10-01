@@ -368,12 +368,6 @@ s! {
         sa_userdata: *mut c_void,
     }
 
-    pub struct sem_t {
-        pub type_: i32,
-        pub named_sem_id: i32, // actually a union with unnamed_sem (i32)
-        padding: Padding<[i32; 2]>,
-    }
-
     pub struct ucred {
         pub pid: crate::pid_t,
         pub uid: crate::uid_t,
@@ -496,6 +490,19 @@ s! {
         pub ut_line: [c_char; 16],
         pub ut_host: [c_char; 128],
         __ut_reserved: Padding<[c_char; 64]>,
+    }
+}
+
+s_no_extra_traits! {
+    pub struct sem_t {
+        pub type_: i32,
+        pub named_sem_id: __c_anonymous_sem_t_u,
+        padding: Padding<[i32; 2]>,
+    }
+
+    pub union __c_anonymous_sem_t_u {
+        pub named_sem_id: i32,
+        pub unnamed_sem: i32,
     }
 }
 
@@ -1381,6 +1388,10 @@ pub const POSIX_SPAWN_SETSIGDEF: c_int = 0x10;
 pub const POSIX_SPAWN_SETSIGMASK: c_int = 0x20;
 pub const POSIX_SPAWN_SETSID: c_int = 0x40;
 
+// include/paths.h
+pub const _PATH_DEFPATH: *const c_char = cstr(b"/usr/bin:/bin\0");
+pub const _PATH_BSHELL: *const c_char = cstr(b"/bin/sh\0");
+
 const fn CMSG_ALIGN(len: usize) -> usize {
     len + size_of::<usize>() - 1 & !(size_of::<usize>() - 1)
 }
@@ -1444,9 +1455,7 @@ f! {
     pub unsafe fn FD_ZERO(set: *mut fd_set) -> () {
         (*set).fds_bits.fill(0);
     }
-}
 
-safe_f! {
     pub const safe fn WIFEXITED(status: c_int) -> bool {
         (status & !0xff) == 0
     }

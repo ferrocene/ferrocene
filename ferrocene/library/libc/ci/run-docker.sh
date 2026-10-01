@@ -27,6 +27,7 @@ if [ "${CI:-0}" != "0" ] && [ "$target" = "aarch64-linux-android" ]; then
 fi
 
 run() {
+    export RUSTFLAGS="${RUSTFLAGS:-}"
     run_target="$1"
     echo "Building docker container for target $run_target"
 
@@ -40,8 +41,8 @@ run() {
     # and test them both in `ci/run.sh` more similar to what we do with glibc,
     # rather than needing two separate jobs.
     if [[ "$run_target" = *"musl"* ]]; then
-        if [ -n "${TEST_MUSL_V1_2_3:-}" ]; then
-            export RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_musl_v1_2_3"
+        if [ -n "${TEST_MUSL_V1_2:-}" ]; then
+            RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_musl_v1_2"
             build_args+=("--build-arg=MUSL_VERSION=new")
         else
             build_args+=("--build-arg=MUSL_VERSION=old")
@@ -50,8 +51,17 @@ run() {
 
     if [ -n "${TEST_UCLIBC_TIME64:-}" ]; then
         build_args+=("--build-arg=TEST_UCLIBC_TIME64=1")
-        export RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_uclibc_time64"
+        RUSTFLAGS="$RUSTFLAGS --cfg=libc_unstable_uclibc_time64"
     fi
+    if [[ "$run_target" = *-linux-uclibc* ]]; then
+        if [ "${UCLIBC_TOOLCHAIN_URL:-}" ]; then
+            build_args+=("--build-arg=UCLIBC_TOOLCHAIN_URL=$UCLIBC_TOOLCHAIN_URL")
+        else
+            echo "Expected a URL to a UCLIBC toolchain in \$UCLIBC_TOOLCHAIN_URL"
+            exit 1
+        fi
+    fi
+
 
     # use -f so we can use ci/ as build context
     docker build "${build_args[@]}"
@@ -59,13 +69,11 @@ run() {
     mkdir -p target
 
     extra_args=()
-    if [ -n "${TEST_CUTTLEFISH:-}" ]; then
-        # Cuttlefish-based Android targets boot their virtual device inside
-        # the container (see cuttlefish-entrypoint.sh in the target's docker
-        # dir): pass the virtualization device nodes and let the entrypoint
-        # create its tap networking. It starts as root and drops to an
-        # unprivileged user matching HOST_UID for the device and the tests.
-        # Same flags as upstream's containerized Cuttlefish CI.
+    # x86_64-linux-android boots a Cuttlefish virtual device inside the
+    # container. Give it the virtualization device nodes and NET_ADMIN it needs.
+    # These are the same flags Google's android-cuttlefish project uses for its
+    # own containerized CI.
+    if [ "$run_target" = "x86_64-linux-android" ]; then
         extra_args+=(
             --device /dev/kvm
             --device /dev/net/tun

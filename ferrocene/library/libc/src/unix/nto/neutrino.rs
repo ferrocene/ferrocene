@@ -191,7 +191,26 @@ s! {
         pub nsec_stable: u64, // volatile
         pub timer_load_max: u64,
         pub timer_prog_time: u32,
-        spare: [u32; 7],
+        spare: Padding<[u32; 7]>,
+    }
+
+    #[cfg(target_os = "qnx")]
+    pub struct qtime_entry {
+        pub cycles_per_sec: u64,
+        pub nsec_tod_adjust: u64, // volatile
+        pub nsec_inc: u32,
+        pub boot_time: u32,
+        pub adjust: _clockadjust,
+        pub timer_period: u32,
+        pub timer_scale: i32,
+        pub intr: i32,
+        pub epoch: u32,
+        pub flags: u32,
+        pub rr_interval_mul: u32,
+        pub timer_load_max: u64,
+        pub boot_cc: u64,
+        pub tick_period_cc: u64,
+        spare: Padding<[u64; 3]>,
     }
 
     #[cfg(target_os = "qnx")]
@@ -261,8 +280,16 @@ s_no_extra_traits! {
         pub smp: syspage_entry_info,
         pub pminfo: syspage_entry_info,
         pub old_mdriver: syspage_entry_info,
+<<<<<<< ferrocene/dc137044c3307e55d9afee285be85a9e2f5a051d
         spare0: [u32; 1],
         __reserved: Padding<[u64; 20]>, // anonymous union with architecture dependent structs
+||||||| ef0906e2082
+        spare0: [u32; 1],
+        __reserved: Padding<[u8; 160]>, // anonymous union with architecture dependent structs
+=======
+        spare0: Padding<[u32; 1]>,
+        __reserved: Padding<[u64; 20]>, // anonymous union with architecture dependent structs
+>>>>>>> b29beb056cb7cea51dd1b9e68342e30a956951a9
         pub new_asinfo: syspage_array_info,
         pub new_cpuinfo: syspage_array_info,
         pub new_cacheattr: syspage_array_info,

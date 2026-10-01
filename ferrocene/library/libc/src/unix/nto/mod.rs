@@ -284,7 +284,13 @@ s! {
         pub gl_pathv: *mut *mut c_char,
         pub gl_offs: size_t,
         pub gl_flags: c_int,
+<<<<<<< ferrocene/dc137044c3307e55d9afee285be85a9e2f5a051d
         pub gl_errfunc: Option<extern "C" fn(*const c_char, c_int) -> c_int>,
+||||||| ef0906e2082
+        pub gl_errfunc: extern "C" fn(*const c_char, c_int) -> c_int,
+=======
+        pub gl_errfunc: Option<unsafe extern "C" fn(*const c_char, c_int) -> c_int>,
+>>>>>>> b29beb056cb7cea51dd1b9e68342e30a956951a9
 
         __unused1: Padding<*mut c_void>,
         __unused2: Padding<*mut c_void>,
@@ -511,7 +517,7 @@ s! {
         pub f_basetype: [c_char; 16],
         pub f_flag: c_ulong,
         pub f_namemax: c_ulong,
-        f_filler: [c_uint; 21],
+        f_filler: Padding<[c_uint; 21]>,
     }
 
     pub struct aiocb {
@@ -570,7 +576,22 @@ s! {
         pub __param: crate::__sched_param,
         pub __guardsize: c_uint,
         pub __prealloc: c_uint,
-        __spare: [c_int; 2],
+        __spare: Padding<[c_int; 2]>,
+    }
+
+    // FIXME(1.0): This should not implement `PartialEq`
+    #[cfg(target_os = "qnx")]
+    #[allow(unpredictable_function_pointer_comparisons)]
+    pub struct _thread_attr {
+        pub __flags: c_int,
+        pub __stacksize: size_t,
+        pub __stackaddr: *mut c_void,
+        __reserved0: Padding<crate::uintptr_t>,
+        pub __policy: c_int,
+        pub __param: crate::__sched_param,
+        pub __guardsize: c_uint,
+        pub __prealloc: c_uint,
+        __reserved1: Padding<crate::uintptr_t>,
     }
 
     // FIXME(1.0): This should not implement `PartialEq`
@@ -771,7 +792,7 @@ s_no_extra_traits! {
     // form would be bogus and it would potentially change the size of the data type. On QNX SDP 8, this
     // got fixed and both C and C++ are using the same definition.
     pub struct max_align_t {
-        _ll: crate::c_longlong,
+        _ll: c_longlong,
         _ld: i128,
     }
 }
@@ -2413,9 +2434,7 @@ f! {
         let ngrps = if ngrps > 0 { ngrps - 1 } else { 0 };
         size_of::<sockcred>() + size_of::<crate::gid_t>() * ngrps
     }
-}
 
-safe_f! {
     pub const safe fn WIFSTOPPED(status: c_int) -> bool {
         (status & 0xff) == 0x7f
     }

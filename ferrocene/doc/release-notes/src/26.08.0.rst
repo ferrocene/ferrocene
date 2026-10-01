@@ -27,4 +27,4 @@ to the targets and platforms supported by Ferrocene.
 
 .. rust-changelog::
     :from: 1.96.0
-    :to: 1.97.0
+    :to: 1.97.1

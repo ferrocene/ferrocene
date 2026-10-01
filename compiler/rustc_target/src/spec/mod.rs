@@ -990,12 +990,14 @@ crate::target_spec_enum! {
 crate::target_spec_enum! {
     /// The Rustc-specific variant of the ABI used for this target.
     pub enum RustcAbi {
+        /// On x86-32/64, aarch64, and S390x: do not use any FPU or SIMD registers for the ABI.
+        Softfloat = "softfloat",
         /// On x86-32 only: make use of SSE and SSE2 for ABI purposes.
         X86Sse2 = "x86-sse2",
         /// On PowerPC only: build for SPE.
         PowerPcSpe = "powerpc-spe",
-        /// On x86-32/64, aarch64, and S390x: do not use any FPU or SIMD registers for the ABI.
-        Softfloat = "softfloat",
+        /// On SPARC-32: use the V8+ ABI.
+        SparcV8Plus = "sparc-v8plus",
     }
 
     parse_error_type = "rustc abi";
@@ -1615,6 +1617,7 @@ supported_targets! {
     ("armv7a-kmc-solid_asp3-eabi", armv7a_kmc_solid_asp3_eabi),
     ("armv7a-kmc-solid_asp3-eabihf", armv7a_kmc_solid_asp3_eabihf),
 
+    ("powerpc64-sony-ps3", powerpc64_sony_ps3),
     ("mipsel-sony-psp", mipsel_sony_psp),
     ("mipsel-sony-psx", mipsel_sony_psx),
     ("mipsel-unknown-none", mipsel_unknown_none),
@@ -1873,6 +1876,7 @@ crate::target_spec_enum! {
         Nto = "nto",
         NuttX = "nuttx",
         OpenBsd = "openbsd",
+        Ps3 = "ps3",
         Psp = "psp",
         Psx = "psx",
         Qnx = "qnx",
@@ -1961,6 +1965,7 @@ crate::target_spec_enum! {
         VecDefault = "vec-default",
         VecExtAbi = "vec-extabi",
         X32 = "x32",
+        V8Plus = "v8plus",
         Unspecified = "",
     }
     other_variant = Other;
@@ -2270,11 +2275,12 @@ pub struct TargetOptions {
     /// Extra arguments to pass to the external assembler (when used)
     pub asm_args: StaticCow<[StaticCow<str>]>,
 
-    /// Default CPU to pass to LLVM. Corresponds to `llc -mcpu=$cpu`. Defaults
-    /// to "generic".
+    /// Default CPU to pass to LLVM. Corresponds to `llc -mcpu=$cpu`. Must be a name the backend
+    /// accepts. Defaults to "generic" (which some backends won't accept).
     pub cpu: StaticCow<str>,
-    /// Whether a cpu needs to be explicitly set.
-    /// Set to true if there is no default cpu. Defaults to false.
+    /// Whether a cpu needs to be explicitly set via `-Ctarget-cpu` for codegen to run. (Even if
+    /// true, `cpu` is still consulted on non-codegen paths such as cfg/feature computation.)
+    /// Defaults to false.
     pub need_explicit_cpu: bool,
     /// Whether `-Ctarget-cpu` is treated as a target modifier. If this is set
     /// all crates that are linked together must have been compiled with the

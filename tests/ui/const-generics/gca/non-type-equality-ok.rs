@@ -4,6 +4,7 @@
 #![feature(
     min_generic_const_args,
     macroless_generic_const_args,
+    macroless_const_item_generic_const_args,
     generic_const_args,
     generic_const_items
 )]
@@ -35,6 +36,8 @@ struct Struct<const N: usize>;
 fn f<const N: usize>() {
     let _: Struct<{ <GenericStructImpl<N> as Trait>::PROJECTED_A }> =
         Struct::<{ <GenericStructImpl<N> as Trait>::PROJECTED_A }>;
+    let _: Struct<{ <GenericStructImpl<N> as Trait>::PROJECTED_A }> =
+        Struct::<{ <GenericStructImpl<N> as Trait>::PROJECTED_B }>;
 }
 
 fn g<T: Trait>() {

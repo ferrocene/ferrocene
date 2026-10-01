@@ -77,14 +77,14 @@ macro_rules! forward_ref_op_assign {
 macro_rules! impl_fn_for_zst {
     ($(
         $( #[$attr: meta] )*
-        struct $Name: ident impl$( <$( $lifetime : lifetime ),+> )? Fn =
+        $vis:vis struct $Name: ident impl$( <$( $lifetime : lifetime ),+> )? Fn =
             |$( $arg: ident: $ArgTy: ty ),*| -> $ReturnTy: ty
             $body: block;
     )+) => {
         $(
-            $( #[$attr] )*
             #[ferrocene::prevalidated]
-            struct $Name;
+            $( #[$attr] )*
+            $vis struct $Name;
 
             impl $( <$( $lifetime ),+> )? Fn<($( $ArgTy, )*)> for $Name {
                 #[inline]

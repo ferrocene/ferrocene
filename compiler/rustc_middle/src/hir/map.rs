@@ -321,9 +321,7 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn hir_body_owner_kind(self, def_id: impl Into<DefId>) -> BodyOwnerKind {
         let def_id = def_id.into();
         match self.def_kind(def_id) {
-            DefKind::Const { .. } | DefKind::AssocConst { .. } => {
-                BodyOwnerKind::Const { inline: false }
-            }
+            DefKind::Const | DefKind::AssocConst => BodyOwnerKind::Const { inline: false },
             DefKind::AnonConst => BodyOwnerKind::Const {
                 inline: self.anon_const_kind(def_id) == ty::AnonConstKind::NonTypeSystemInline,
             },
@@ -798,6 +796,7 @@ impl<'tcx> TyCtxt<'tcx> {
             Node::PreciseCapturingNonLifetimeArg(_param) => node_str("parameter"),
             Node::TestBinderForall(_) => node_str("forall"),
             Node::TestBinderExists(_) => node_str("exists"),
+            Node::TestBinderBoundTypeConstraint(_) => node_str("test bound type constraint"),
             Node::Synthetic => unreachable!(),
             Node::Err(_) => node_str("error"),
         }
@@ -1075,6 +1074,7 @@ impl<'tcx> TyCtxt<'tcx> {
             Node::PreciseCapturingNonLifetimeArg(param) => param.ident.span,
             Node::TestBinderForall(forall) => forall.span,
             Node::TestBinderExists(exists) => exists.span,
+            Node::TestBinderBoundTypeConstraint(bound_type) => bound_type.span,
             Node::Synthetic => unreachable!(),
             Node::Err(span) => span,
         }

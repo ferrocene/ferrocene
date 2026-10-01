@@ -1,10 +1,8 @@
-use std::ffi::CString;
+use std::ffi::{CString, c_uint};
 use std::path::Path;
 
 use rustc_data_structures::small_c_str::SmallCStr;
-use rustc_errors::{
-    Diag, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level, format_diag_message, msg,
-};
+use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level, format_diag_message, msg};
 use rustc_macros::Diagnostic;
 use rustc_span::Span;
 
@@ -22,7 +20,7 @@ pub(crate) struct SanitizerMemtagRequiresMte;
 
 pub(crate) struct ParseTargetMachineConfig<'a>(pub LlvmError<'a>);
 
-impl<G: EmissionGuarantee> Diagnostic<'_, G> for ParseTargetMachineConfig<'_> {
+impl<G> Diagnostic<'_, G> for ParseTargetMachineConfig<'_> {
     fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
         // Reuse the formatted primary message from `LlvmError` without emitting it.
         let diag: Diag<'_, ()> = self.0.into_diag(dcx, level);
@@ -108,6 +106,10 @@ pub(crate) struct OffloadBundleImagesFailed;
 pub(crate) struct OffloadEmbedFailed;
 
 #[derive(Diagnostic)]
+#[diag("call to WrapImages failed, device image was not wrapped into the host module")]
+pub(crate) struct OffloadWrapImagesFailed;
+
+#[derive(Diagnostic)]
 #[diag("failed to get bitcode from object file for LTO ({$err})")]
 pub(crate) struct LtoBitcodeFromRlib {
     pub err: String,
@@ -119,6 +121,8 @@ pub(crate) enum LlvmError<'a> {
     WriteOutput { path: &'a Path },
     #[diag("could not create LLVM TargetMachine for triple: {$triple}")]
     CreateTargetMachine { triple: SmallCStr },
+    #[diag("could not create LLVM MCSubtargetInfo for triple: {$triple}")]
+    CreateMCSubtargetInfo { triple: SmallCStr },
     #[diag("failed to run LLVM passes")]
     RunLlvmPasses,
     #[diag("failed to write LLVM IR to {$path}")]
@@ -137,13 +141,16 @@ pub(crate) enum LlvmError<'a> {
 
 pub(crate) struct WithLlvmError<'a>(pub LlvmError<'a>, pub String);
 
-impl<G: EmissionGuarantee> Diagnostic<'_, G> for WithLlvmError<'_> {
+impl<G> Diagnostic<'_, G> for WithLlvmError<'_> {
     fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
         use LlvmError::*;
         let msg_with_llvm_err = match &self.0 {
             WriteOutput { .. } => msg!("could not write output to {$path}: {$llvm_err}"),
             CreateTargetMachine { .. } => {
                 msg!("could not create LLVM TargetMachine for triple: {$triple}: {$llvm_err}")
+            }
+            CreateMCSubtargetInfo { .. } => {
+                msg!("could not create LLVM MCSubtargetInfo for triple: {$triple}: {$llvm_err}")
             }
             RunLlvmPasses => msg!("failed to run LLVM passes: {$llvm_err}"),
             WriteIr { .. } => msg!("failed to write LLVM IR to {$path}: {$llvm_err}"),
@@ -264,4 +271,16 @@ pub(crate) struct IntrinsicWrongArch<'a> {
 #[note("features must begin with a `+` to enable or `-` to disable it")]
 pub(crate) struct UnknownLlvmTargetFeaturePrefix<'a> {
     pub feature: &'a str,
+}
+
+#[derive(Diagnostic)]
+#[diag(
+    "LLVM version mismatch: this compiler was built for LLVM {$expected_version}, but LLVM {$llvm_major}.{$llvm_minor}.{$llvm_patch} was found{$dll_loc}"
+)]
+pub(crate) struct LlvmVersionMismatch<'a> {
+    pub expected_version: c_uint,
+    pub llvm_major: c_uint,
+    pub llvm_minor: c_uint,
+    pub llvm_patch: c_uint,
+    pub dll_loc: &'a str,
 }

@@ -2405,7 +2405,6 @@ impl<T> UnsafeCell<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(unsafe_cell_access)]
     /// use std::cell::UnsafeCell;
     ///
     /// let uc = UnsafeCell::new(5);
@@ -2414,7 +2413,8 @@ impl<T> UnsafeCell<T> {
     /// assert_eq!(old, 5);
     /// ```
     #[inline]
-    #[unstable(feature = "unsafe_cell_access", issue = "136327")]
+    #[stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn replace(&self, value: T) -> T {
         // SAFETY: pointer comes from `&self` so naturally satisfies invariants.
@@ -2534,8 +2534,7 @@ impl<T: ?Sized> UnsafeCell<T> {
     #[ferrocene::prevalidated]
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
-        // #[repr(transparent)]. This exploits std's special status, there is
-        // no guarantee for user code that this will work in future versions of the compiler!
+        // #[repr(transparent)].
         this as *const T as *mut T
     }
 
@@ -2551,7 +2550,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(unsafe_cell_access)]
     /// use std::cell::UnsafeCell;
     ///
     /// let uc = UnsafeCell::new(5);
@@ -2560,7 +2558,8 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// assert_eq!(val, &5);
     /// ```
     #[inline]
-    #[unstable(feature = "unsafe_cell_access", issue = "136327")]
+    #[stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn as_ref_unchecked(&self) -> &T {
         // SAFETY: pointer comes from `&self` so naturally satisfies ptr-to-ref invariants.
@@ -2579,7 +2578,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(unsafe_cell_access)]
     /// use std::cell::UnsafeCell;
     ///
     /// let uc = UnsafeCell::new(5);
@@ -2588,7 +2586,8 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// assert_eq!(uc.into_inner(), 6);
     /// ```
     #[inline]
-    #[unstable(feature = "unsafe_cell_access", issue = "136327")]
+    #[stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "unsafe_cell_access", since = "CURRENT_RUSTC_VERSION")]
     #[allow(clippy::mut_from_ref)]
     #[rustc_should_not_be_called_on_const_items]
     pub const unsafe fn as_mut_unchecked(&self) -> &mut T {

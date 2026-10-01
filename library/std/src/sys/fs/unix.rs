@@ -953,7 +953,7 @@ impl Iterator for ReadDir {
     }
 }
 
-/// Aborts the process if a file desceriptor is not open, if debug asserts are enabled
+/// Aborts the process if a file descriptor is not open, if debug asserts are enabled
 ///
 /// Many IO syscalls can't be fully trusted about EBADF error codes because those
 /// might get bubbled up from a remote FUSE server rather than the file descriptor
@@ -1884,6 +1884,13 @@ pub fn set_perm(p: &CStr, perm: FilePermissions) -> io::Result<()> {
     cvt_r(|| unsafe { libc::chmod(p.as_ptr(), perm.mode) }).map(|_| ())
 }
 
+#[cfg(target_os = "vxworks")]
+pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
+    // VxWorks has no `O_NOFOLLOW`, and its `fchmodat` rejects
+    // `AT_SYMLINK_NOFOLLOW` with `ENOTSUP`, so a no-follow chmod is unsupported.
+    Err(crate::io::ErrorKind::Unsupported.into())
+}
+
 #[cfg(target_os = "android")]
 pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
     // Currently Android seems to be having inconsistent behavior with fchmodat
@@ -1896,7 +1903,7 @@ pub fn set_perm_nofollow(_p: &CStr, _perm: FilePermissions) -> io::Result<()> {
     Err(crate::io::ErrorKind::Unsupported.into())
 }
 
-#[cfg(not(target_os = "android"))]
+#[cfg(not(any(target_os = "android", target_os = "vxworks")))]
 pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
     #[inline]
     /// Helper function for fallback open with `O_NOFOLLOW` + `fchmod` behavior
@@ -1904,6 +1911,7 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
         use crate::fs::{OpenOptions, Permissions};
 
         let mut options = OpenOptions::new();
+        options.read(true);
 
         // ESP-IDF and Horizon do not support O_NOFOLLOW, so we skip setting it.
         // Their filesystems do not have symbolic links, so no special handling is required.
@@ -1913,7 +1921,7 @@ pub fn set_perm_nofollow(p: &CStr, perm: FilePermissions) -> io::Result<()> {
             use crate::os::unix::fs::OpenOptionsExt;
             #[cfg(target_os = "wasi")]
             use crate::os::wasi::fs::OpenOptionsExt;
-            options.read(true).custom_flags(libc::O_NOFOLLOW);
+            options.custom_flags(libc::O_NOFOLLOW);
         }
 
         // SAFETY: Since this function is called with `with_native_path`

@@ -604,6 +604,15 @@ impl Default for Subcommand {
 }
 
 impl Subcommand {
+    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
+        match *self {
+            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
+                ferrocene_test_one_crate_per_cargo_call
+            }
+            _ => false,
+        }
+    }
+
     pub fn compiletest_rustc_args(&self) -> Vec<&str> {
         match *self {
             Subcommand::Test { ref compiletest_rustc_args, .. } => {
@@ -807,13 +816,9 @@ impl Subcommand {
         }
     }
 
-    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
-        match *self {
-            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
-                ferrocene_test_one_crate_per_cargo_call
-            }
-            _ => false,
-        }
+    /// Are we executing a `check --all-targets` command?
+    pub(crate) fn check_all_targets(&self) -> bool {
+        matches!(self, Subcommand::Check { all_targets: true, .. })
     }
 }
 

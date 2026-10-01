@@ -512,27 +512,29 @@ pub trait Visitor<'v>: Sized {
     ) -> Self::Result {
         walk_test_binder_constraint(self, constraint)
     }
-}
+    fn visit_test_binder_bound_type_constraint(
+        &mut self,
+        bound_type: &'v TestBinderBoundTypeConstraint<'v>,
+    ) -> Self::Result {
+        walk_test_binder_bound_type_constraint(self, bound_type)
+    }
 
-pub trait VisitorExt<'v>: Visitor<'v> {
-    /// Extension trait method to visit types in unambiguous positions, this is not
-    /// directly on the [`Visitor`] trait as this method should never be overridden.
-    ///
     /// Named `visit_ty_unambig` instead of `visit_unambig_ty` to aid in discovery
     /// by IDes when `v.visit_ty` is written.
-    fn visit_ty_unambig(&mut self, t: &'v Ty<'v>) -> Self::Result {
+    ///
+    /// This method cannot be overridden.
+    final fn visit_ty_unambig(&mut self, t: &'v Ty<'v>) -> Self::Result {
         walk_unambig_ty(self, t)
     }
-    /// Extension trait method to visit consts in unambiguous positions, this is not
-    /// directly on the [`Visitor`] trait as this method should never be overridden.
-    ///
+
     /// Named `visit_const_arg_unambig` instead of `visit_unambig_const_arg` to aid in
     /// discovery by IDes when `v.visit_const_arg` is written.
-    fn visit_const_arg_unambig(&mut self, c: &'v ConstArg<'v>) -> Self::Result {
+    ///
+    /// This method cannot be overridden.
+    final fn visit_const_arg_unambig(&mut self, c: &'v ConstArg<'v>) -> Self::Result {
         walk_unambig_const_arg(self, c)
     }
 }
-impl<'v, V: Visitor<'v>> VisitorExt<'v> for V {}
 
 pub fn walk_param<'v, V: Visitor<'v>>(visitor: &mut V, param: &'v Param<'v>) -> V::Result {
     let Param { hir_id, pat, ty_span: _, span: _ } = param;
@@ -1082,7 +1084,7 @@ pub fn walk_const_item_rhs<'v, V: Visitor<'v>>(
 ) -> V::Result {
     match ct_rhs {
         ConstItemRhs::Body(body_id) => visitor.visit_nested_body(body_id),
-        ConstItemRhs::TypeConst(const_arg) => visitor.visit_const_arg_unambig(const_arg),
+        ConstItemRhs::Direct(const_arg) => visitor.visit_const_arg_unambig(const_arg),
     }
 }
 
@@ -1581,9 +1583,11 @@ pub fn walk_test_binder_body<'v, V: Visitor<'v>>(
     visitor: &mut V,
     body: &'v TestBinderBody<'v>,
 ) -> V::Result {
-    walk_list!(visitor, visit_test_binder_forall, body.foralls);
-    walk_list!(visitor, visit_test_binder_exists, body.exists);
-    try_visit!(visitor.visit_test_binder_constraint(&body.constraints));
+    let TestBinderBody { foralls, exists, constraints, predicates } = body;
+    walk_list!(visitor, visit_test_binder_forall, *foralls);
+    walk_list!(visitor, visit_test_binder_exists, *exists);
+    try_visit!(visitor.visit_test_binder_constraint(&constraints));
+    walk_list!(visitor, visit_where_predicate, *predicates);
     V::Result::output()
 }
 
@@ -1591,10 +1595,11 @@ pub fn walk_test_binder_forall<'v, V: Visitor<'v>>(
     visitor: &mut V,
     forall: &'v TestBinderForall<'v>,
 ) -> V::Result {
-    try_visit!(visitor.visit_id(forall.hir_id));
-    try_visit!(visitor.visit_generics(forall.generics));
-    try_visit!(visitor.visit_test_binder_body(forall.body));
-    if let Some(assert_on_exit) = &forall.assert_on_exit {
+    let TestBinderForall { span: _, hir_id, generics, body, assert_on_exit } = forall;
+    try_visit!(visitor.visit_id(*hir_id));
+    try_visit!(visitor.visit_generics(generics));
+    try_visit!(visitor.visit_test_binder_body(body));
+    if let Some(assert_on_exit) = &assert_on_exit {
         try_visit!(visitor.visit_test_binder_constraint(assert_on_exit));
     }
     V::Result::output()
@@ -1604,9 +1609,10 @@ pub fn walk_test_binder_exists<'v, V: Visitor<'v>>(
     visitor: &mut V,
     exists: &'v TestBinderExists<'v>,
 ) -> V::Result {
-    try_visit!(visitor.visit_id(exists.hir_id));
-    walk_list!(visitor, visit_generic_param, exists.params);
-    try_visit!(visitor.visit_test_binder_body(exists.body));
+    let TestBinderExists { span: _, hir_id, params, body } = exists;
+    try_visit!(visitor.visit_id(*hir_id));
+    walk_list!(visitor, visit_generic_param, *params);
+    try_visit!(visitor.visit_test_binder_body(body));
     V::Result::output()
 }
 
@@ -1625,10 +1631,25 @@ pub fn walk_test_binder_constraint<'v, V: Visitor<'v>>(
             try_visit!(visitor.visit_lifetime(lhs));
             try_visit!(visitor.visit_lifetime(rhs));
         }
-        TestBinderConstraint::Type { lhs, rhs } => {
+        TestBinderConstraint::PlaceholderOutlives { lhs, rhs } => {
             try_visit!(visitor.visit_ty_unambig(lhs));
             try_visit!(visitor.visit_lifetime(rhs));
         }
+        TestBinderConstraint::AliasOutlives { bound_type_constraint } => {
+            try_visit!(visitor.visit_test_binder_bound_type_constraint(bound_type_constraint));
+        }
     }
+    V::Result::output()
+}
+
+pub fn walk_test_binder_bound_type_constraint<'v, V: Visitor<'v>>(
+    visitor: &mut V,
+    constraint: &'v TestBinderBoundTypeConstraint<'v>,
+) -> V::Result {
+    let TestBinderBoundTypeConstraint { span: _, hir_id, params, lhs, rhs } = constraint;
+    try_visit!(visitor.visit_id(*hir_id));
+    walk_list!(visitor, visit_generic_param, *params);
+    try_visit!(visitor.visit_ty_unambig(lhs));
+    try_visit!(visitor.visit_lifetime(rhs));
     V::Result::output()
 }

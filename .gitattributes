@@ -32,6 +32,7 @@ Cargo.lock linguist-generated=false
 /INSTALL.md ferrocene-avoid-pulling-from-upstream
 /CODE_OF_CONDUCT.md ferrocene-avoid-pulling-from-upstream
 /CONTRIBUTING.md ferrocene-avoid-pulling-from-upstream
+/src/gcc ferrocene-avoid-pulling-from-upstream
 
 # CSS files are hand-written, not generated.
 # Show them by default in PR review diffs.

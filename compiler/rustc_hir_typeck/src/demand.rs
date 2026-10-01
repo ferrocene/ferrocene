@@ -261,7 +261,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         mut expected_ty_expr: Option<&'tcx hir::Expr<'tcx>>,
         allow_two_phase: AllowTwoPhase,
     ) -> Result<Ty<'tcx>, Diag<'a>> {
-        let expected = self.resolve_vars_with_obligations(expected);
+        let expected = self.deeply_resolve_ignoring_regions_with_obligations(expected);
 
         let e = match self.coerce(expr, checked_ty, expected, allow_two_phase, None) {
             Ok(ty) => return Ok(ty),
@@ -276,7 +276,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         ));
         let expr = expr.peel_drop_temps();
         let cause = self.misc(expr.span);
-        let expr_ty = self.resolve_vars_if_possible(checked_ty);
+        let expr_ty = self.deeply_resolve_ignoring_regions(checked_ty);
         let mut err =
             self.err_ctxt().report_mismatched_types(&cause, self.param_env, expected, expr_ty, e);
 
@@ -423,7 +423,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         // Yeet the errors, we're already reporting errors.
                         errs.clear();
                     });
-                    Some(self.resolve_vars_if_possible(possible_rcvr_ty))
+                    Some(self.deeply_resolve_ignoring_regions(possible_rcvr_ty))
                 });
                 let Some(rcvr_ty) = possible_rcvr_ty else { return false };
                 rcvr_ty
@@ -546,7 +546,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 .borrow()
                                 .type_dependent_def_id(parent_expr.hir_id)
                         && let ideal_arg_ty =
-                            self.resolve_vars_if_possible(ideal_method.sig.inputs()[idx + 1])
+                            self.deeply_resolve_ignoring_regions(ideal_method.sig.inputs()[idx + 1])
                         && !ideal_arg_ty.has_non_region_infer()
                     {
                         self.emit_type_mismatch_suggestions(
@@ -711,9 +711,31 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &hir::Expr<'_>,
         error: Option<TypeError<'tcx>>,
     ) {
-        match (self.tcx.parent_hir_node(expr.hir_id), error) {
+        // Skip nested block to find the correct parent node to point at.
+        let mut current_hir_id = expr.hir_id;
+        let parent = self
+            .tcx
+            .hir_parent_iter(expr.hir_id)
+            .find_map(|(parent_hir_id, parent)| match parent {
+                hir::Node::Block(block)
+                    if block.expr.is_some_and(|expr| expr.hir_id == current_hir_id) =>
+                {
+                    current_hir_id = parent_hir_id;
+                    None
+                }
+                hir::Node::Expr(hir::Expr { kind: hir::ExprKind::Block(block, _), .. })
+                    if block.hir_id == current_hir_id =>
+                {
+                    current_hir_id = parent_hir_id;
+                    None
+                }
+                parent => Some(parent),
+            })
+            .expect("an expression must have a non-block ancestor");
+
+        match (parent, error) {
             (hir::Node::LetStmt(hir::LetStmt { ty: Some(ty), init: Some(init), .. }), _)
-                if init.hir_id == expr.hir_id && !ty.span.source_equal(init.span) =>
+                if init.hir_id == current_hir_id && !ty.span.source_equal(init.span) =>
             {
                 // Point at `let` assignment type.
                 err.span_label(ty.span, "expected due to this");
@@ -733,8 +755,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         hir::Path {
                             res:
                                 hir::def::Res::Def(
-                                    hir::def::DefKind::Static { .. }
-                                    | hir::def::DefKind::Const { .. },
+                                    hir::def::DefKind::Static { .. } | hir::def::DefKind::Const,
                                     def_id,
                                 ),
                             ..

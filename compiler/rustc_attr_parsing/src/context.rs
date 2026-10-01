@@ -246,7 +246,6 @@ attribute_parsers!(
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMacroTransparencyParser>,
         Single<RustcMustImplementOneOfParser>,
-        Single<RustcNeverTypeOptionsParser>,
         Single<RustcObjcClassParser>,
         Single<RustcObjcSelectorParser>,
         Single<RustcScalableVectorParser>,
@@ -260,6 +259,7 @@ attribute_parsers!(
         Single<UnrollParser>,
         Single<WindowsSubsystemParser>,
         Single<WithoutArgs<AllowInternalUnsafeParser>>,
+        Single<WithoutArgs<AlwaysGcaParser>>,
         Single<WithoutArgs<AutomaticallyDerivedParser>>,
         Single<WithoutArgs<ColdParser>>,
         Single<WithoutArgs<CompilerBuiltinsParser>>,
@@ -354,7 +354,6 @@ attribute_parsers!(
         Single<WithoutArgs<RustcSpecializationTraitParser>>,
         Single<WithoutArgs<RustcStdInternalSymbolParser>>,
         Single<WithoutArgs<RustcStrictCoherenceParser>>,
-        Single<WithoutArgs<RustcTestEntrypointMarkerParser>>,
         Single<WithoutArgs<RustcTrivialFieldReadsParser>>,
         Single<WithoutArgs<SplatParser>>,
         Single<WithoutArgs<ThreadLocalParser>>,
@@ -835,6 +834,10 @@ pub(crate) struct FinalizeCheckContext<'p, 'sess> {
     ///
     /// Unlike [`all_attrs`](Self::all_attrs), this contains the fully parsed attributes.
     pub(crate) parsed_attrs: &'p [Attribute],
+
+    /// The AST item these attributes were applied to, when the target is an item.
+    /// Used by `finalize_check` to inspect item structure that is not encoded in [`Target`].
+    pub(crate) target_item: Option<&'p rustc_ast::ast::Item>,
 }
 
 impl<'p, 'sess: 'p> Deref for FinalizeCheckContext<'p, 'sess> {
@@ -863,12 +866,6 @@ impl<'p, 'sess: 'p> DerefMut for SharedContext<'p, 'sess> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.cx
     }
-}
-
-#[derive(PartialEq, Clone, Copy, Debug)]
-pub enum OmitDoc {
-    Lower,
-    Skip,
 }
 
 #[derive(Copy, Clone, Debug)]

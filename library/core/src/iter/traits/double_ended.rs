@@ -420,16 +420,22 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iter_rfind", since = "1.27.0")]
-    #[rustc_non_const_trait_method]
     fn rfind<P>(&mut self, predicate: P) -> Option<Self::Item>
     where
         Self: Sized,
-        P: FnMut(&Self::Item) -> bool,
+        P: [const] FnMut(&Self::Item) -> bool + [const] Destruct,
+        Self::Item: [const] Destruct,
     {
-        #[inline]
         #[ferrocene::prevalidated]
-        fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
-            move |(), x| {
+        #[inline]
+        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+        const fn check<T>(
+            mut predicate: impl [const] FnMut(&T) -> bool + [const] Destruct,
+        ) -> impl [const] FnMut((), T) -> ControlFlow<T> + [const] Destruct
+        where
+            T: [const] Destruct,
+        {
+            const move |(), x| {
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }
             }
         }

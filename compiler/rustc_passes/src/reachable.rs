@@ -209,7 +209,7 @@ impl<'tcx> ReachableContext<'tcx> {
                         }
                     }
                     // For `type const` we want to evaluate the RHS.
-                    hir::ItemKind::Const(_, _, _, init @ hir::ConstItemRhs::TypeConst(_)) => {
+                    hir::ItemKind::Const(_, _, _, init @ hir::ConstItemRhs::Direct(_)) => {
                         self.visit_const_item_rhs(init);
                     }
                     hir::ItemKind::Const(_, _, _, init) => {
@@ -368,7 +368,7 @@ impl<'tcx> ReachableContext<'tcx> {
             }
             // Reachable constants and reachable statics can have their contents inlined
             // into other crates. Mark them as reachable and recurse into their body.
-            DefKind::Const { .. } | DefKind::AssocConst { .. } | DefKind::Static { .. } => {
+            DefKind::Const | DefKind::AssocConst | DefKind::Static { .. } => {
                 self.worklist.push(def_id);
             }
             _ => {

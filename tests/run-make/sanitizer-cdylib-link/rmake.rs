@@ -7,6 +7,8 @@
 
 //@ needs-sanitizer-support
 //@ needs-sanitizer-address
+// FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
+//@ ignore-backends: gcc
 
 // Ferrocene addition: QEMU user mode does not support (most) sanitizers
 //@ ignore-qemu

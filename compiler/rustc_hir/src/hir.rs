@@ -35,7 +35,7 @@ use tracing::debug;
 
 use crate::def::{CtorKind, DefKind, MacroKinds, PerNS, Res};
 use crate::def_id::{DefId, LocalDefIdMap};
-use crate::intravisit::{FnKind, VisitorExt};
+use crate::intravisit::FnKind;
 use crate::lints::DelayedLints;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, StableHash)]
@@ -416,21 +416,21 @@ impl<'hir> PathSegment<'hir> {
 #[derive(Clone, Copy, Debug, StableHash)]
 pub enum ConstItemRhs<'hir> {
     Body(BodyId),
-    TypeConst(&'hir ConstArg<'hir>),
+    Direct(&'hir ConstArg<'hir>),
 }
 
 impl<'hir> ConstItemRhs<'hir> {
     pub fn hir_id(&self) -> HirId {
         match self {
             ConstItemRhs::Body(body_id) => body_id.hir_id,
-            ConstItemRhs::TypeConst(ct_arg) => ct_arg.hir_id,
+            ConstItemRhs::Direct(ct_arg) => ct_arg.hir_id,
         }
     }
 
     pub fn span<'tcx>(&self, tcx: impl crate::intravisit::HirTyCtxt<'tcx>) -> Span {
         match self {
             ConstItemRhs::Body(body_id) => tcx.hir_body(*body_id).value.span,
-            ConstItemRhs::TypeConst(ct_arg) => ct_arg.span,
+            ConstItemRhs::Direct(ct_arg) => ct_arg.span,
         }
     }
 }
@@ -2293,7 +2293,7 @@ impl Expr<'_> {
 
             // Type ascription inherits its place expression kind from its
             // operand. See:
-            // https://github.com/rust-lang/rfcs/blob/master/text/0803-type-ascription.md#type-ascription-and-temporaries
+            // https://rust-lang.github.io/rfcs/0803-type-ascription.html#type-ascription-and-temporaries
             ExprKind::Type(ref e, _) => e.is_place_expr(allow_projections_from),
 
             // Unsafe binder cast preserves place-ness of the sub-expression.
@@ -4467,7 +4467,10 @@ impl FnHeader {
 pub struct TestBinderBody<'hir> {
     pub foralls: &'hir [TestBinderForall<'hir>],
     pub exists: &'hir [TestBinderExists<'hir>],
+    /// Constraints to be inserted directly into constraint storage to be proven
     pub constraints: TestBinderConstraint<'hir>,
+    /// Constraints declared using `where` syntax, used via `register_obligation`
+    pub predicates: &'hir [WherePredicate<'hir>],
 }
 
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -4492,7 +4495,17 @@ pub enum TestBinderConstraint<'hir> {
     And { items: &'hir [TestBinderConstraint<'hir>] },
     Or { items: &'hir [TestBinderConstraint<'hir>] },
     Lifetime { lhs: &'hir Lifetime, rhs: &'hir Lifetime },
-    Type { lhs: &'hir Ty<'hir>, rhs: &'hir Lifetime },
+    PlaceholderOutlives { lhs: &'hir Ty<'hir>, rhs: &'hir Lifetime },
+    AliasOutlives { bound_type_constraint: &'hir TestBinderBoundTypeConstraint<'hir> },
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct TestBinderBoundTypeConstraint<'hir> {
+    pub span: Span,
+    pub hir_id: HirId,
+    pub params: &'hir [GenericParam<'hir>],
+    pub lhs: &'hir Ty<'hir>,
+    pub rhs: &'hir Lifetime,
 }
 
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -4910,6 +4923,7 @@ pub enum Node<'hir> {
     PreciseCapturingNonLifetimeArg(&'hir PreciseCapturingNonLifetimeArg),
     TestBinderForall(&'hir TestBinderForall<'hir>),
     TestBinderExists(&'hir TestBinderExists<'hir>),
+    TestBinderBoundTypeConstraint(&'hir TestBinderBoundTypeConstraint<'hir>),
     // Created by query feeding
     Synthetic,
     Err(Span),
@@ -4967,6 +4981,7 @@ impl<'hir> Node<'hir> {
             | Node::WherePredicate(..)
             | Node::TestBinderForall(..)
             | Node::TestBinderExists(..)
+            | Node::TestBinderBoundTypeConstraint(..)
             | Node::Synthetic
             | Node::Err(..) => None,
         }

@@ -45,7 +45,7 @@ macro_rules! error_contains {
 // have permission, and return otherwise. This way, we still don't run these
 // tests most of the time, but at least we do if the user has the right
 // permissions.
-pub fn got_symlink_permission(tmpdir: &TempDir) -> bool {
+pub(crate) fn got_symlink_permission(tmpdir: &TempDir) -> bool {
     if cfg!(not(windows)) || env::var_os("CI").is_some() {
         return true;
     }
@@ -685,7 +685,7 @@ fn set_get_permissions_nofollows_symlink() {
             target_os = "netbsd",
             target_os = "dragonfly",
             target_os = "nto",
-            target_os = "qnx",
+            target_os = "qnx"
         ) => {
             assert_eq!(result.unwrap(), ());
 

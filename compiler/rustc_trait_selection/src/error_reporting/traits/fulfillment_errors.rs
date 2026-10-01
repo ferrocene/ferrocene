@@ -6,24 +6,26 @@ use std::path::PathBuf;
 
 use rustc_ast::ast::LitKind;
 use rustc_ast::{LitIntType, TraitObjectSyntax};
+use rustc_attr_ir::diagnostic::CustomDiagnostic;
+use rustc_attr_ir::find_attr;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
 use rustc_errors::{
-    Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey, StringPart, Sublevel, Suggestions,
-    msg, pluralize, struct_span_code_err,
+    Applicability, Diag, ErrorGuaranteed, MultiSpan, StringPart, Sublevel, msg, pluralize,
+    struct_span_code_err,
 };
-use rustc_hir::attrs::diagnostic::CustomDiagnostic;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::intravisit::Visitor;
-use rustc_hir::{self as hir, Node, expr_needs_parens, find_attr};
+use rustc_hir::{self as hir, Node, expr_needs_parens};
 use rustc_infer::infer::{InferOk, TypeTrace};
 use rustc_infer::traits::solve::Goal;
 use rustc_infer::traits::{ImplSource, TraitErrors};
 use rustc_middle::traits::SignatureMismatchData;
 use rustc_middle::traits::select::OverflowError;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
+use rustc_middle::ty::consts::ConstExt;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::print::{
     PrintPolyTraitClauseExt, PrintPolyTraitRefExt as _, PrintTraitClauseExt as _,
@@ -33,15 +35,15 @@ use rustc_middle::ty::{
     self, GenericArgKind, GenericParamDefKind, TraitRef, Ty, TyCtxt, TypeFoldable, TypeFolder,
     TypeSuperFoldable, TypeVisitableExt, Unnormalized, Upcast,
 };
-use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::CrateNum;
-use rustc_span::{BytePos, DUMMY_SP, STDLIB_STABLE_CRATES, Span, Symbol, sym};
+use rustc_span::{BytePos, DUMMY_SP, STDLIB_STABLE_CRATES, Span, Symbol, bug, span_bug, sym};
 use tracing::{debug, instrument};
 
 use super::suggestions::get_explanation_based_on_obligation;
 use super::{ArgKind, CandidateSimilarity, GetSafeTransmuteErrorAndReason, ImplCandidate};
 use crate::diagnostics::{
-    ClosureFnMutLabel, ClosureFnOnceLabel, ClosureKindMismatch, CoroClosureNotFn,
+    AssocTypeWithSameName, ClosureFnMutLabel, ClosureFnOnceLabel, ClosureKindMismatch,
+    CoroClosureNotFn,
 };
 use crate::error_reporting::TypeErrCtxt;
 use crate::error_reporting::infer::TyCategory;
@@ -99,13 +101,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             trait_item_def_id,
                             &format!("`{}`", obligation.predicate),
                         )
-                        .emit();
+                        .emit_err();
                 }
 
                 // Report a const-param specific error
                 if let ObligationCauseCode::ConstParam(ty) = *obligation.cause.code().peel_derives()
                 {
-                    return self.report_const_param_not_wf(ty, &obligation).emit();
+                    return self.report_const_param_not_wf(ty, &obligation).emit_err();
                 }
 
                 let bound_predicate = obligation.predicate.kind();
@@ -375,7 +377,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             have_alt_message,
                         ) {
                             self.note_obligation_cause(&mut err, &obligation);
-                            return err.emit();
+                            return err.emit_err();
                         }
 
                         let ty_span = match leaf_trait_predicate.self_ty().skip_binder().kind() {
@@ -525,11 +527,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             &mut err,
                             leaf_trait_predicate,
                         ) {
-                            return err.emit();
+                            return err.emit_err();
                         }
 
                         if self.suggest_impl_trait(&mut err, &obligation, leaf_trait_predicate) {
-                            return err.emit();
+                            return err.emit_err();
                         }
 
                         if is_unsize {
@@ -633,7 +635,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                                 Some(sym::Debug | sym::Display)
                             )
                         {
-                            return err.emit();
+                            return err.emit_err();
                         }
 
                         err
@@ -829,7 +831,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         };
 
         self.note_obligation_cause(&mut err, &obligation);
-        err.emit()
+        err.emit_err()
     }
 }
 
@@ -1079,7 +1081,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             );
             self.suggest_change_mut_ref_for_closure(&mut err, &obligation);
             self.note_obligation_cause(&mut err, &obligation);
-            return Some(err.emit());
+            return Some(err.emit_err());
         }
 
         // If the closure has captures, then perhaps the reason that the trait
@@ -1100,7 +1102,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 coro_kind,
             });
             self.note_obligation_cause(&mut err, &obligation);
-            return Some(err.emit());
+            return Some(err.emit_err());
         }
 
         None
@@ -1459,7 +1461,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     self.dcx(),
                     span,
                     E0741,
-                    "`{ty_str}` must implement `ConstParamTy` to be used as the type of a const generic parameter",
+                    "`{ty_str}` must implement `ConstParamTy` to be used as the type of a const \
+                     generic parameter",
                 );
                 // Only suggest derive if this isn't a derived obligation,
                 // and the struct is local.
@@ -1467,7 +1470,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     && obligation.cause.code().parent().is_none()
                 {
                     if ty.is_structural_eq_shallow(self.tcx) {
-                        diag.span_suggestion(
+                        diag.span_suggestion_verbose(
                             span.shrink_to_lo(),
                             format!("add `#[derive(ConstParamTy)]` to the {}", def.descr()),
                             "#[derive(ConstParamTy)]\n",
@@ -1476,7 +1479,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                     } else {
                         // FIXME(adt_const_params): We should check there's not already an
                         // overlapping `Eq`/`PartialEq` impl.
-                        diag.span_suggestion(
+                        diag.span_suggestion_verbose(
                             span.shrink_to_lo(),
                             format!(
                                 "add `#[derive(ConstParamTy, PartialEq, Eq)]` to the {}",
@@ -1902,7 +1905,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             if mention_bounds {
                 self.note_obligation_cause(&mut diag, obligation);
             }
-            diag.emit()
+            diag.emit_err()
         })
     }
 
@@ -3105,13 +3108,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             );
             self.suggest_unsized_bound_if_applicable(err, obligation);
             if let Some(span) = err.span.primary_span()
-                && let Some(mut diag) =
-                    self.dcx().steal_non_err(span, StashKey::AssociatedTypeSuggestion)
-                && let Suggestions::Enabled(ref mut s1) = err.suggestions
-                && let Suggestions::Enabled(ref mut s2) = diag.suggestions
+                && self
+                    .tcx
+                    .resolutions(())
+                    .paths_matching_assoc_types
+                    .contains(&span.with_parent(None))
             {
-                s1.append(s2);
-                diag.cancel()
+                err.subdiagnostic(AssocTypeWithSameName { span: span.shrink_to_lo() });
             }
         }
     }
@@ -3981,8 +3984,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         obligation: &PredicateObligation<'tcx>,
         span: Span,
     ) -> Result<Diag<'a>, ErrorGuaranteed> {
-        if !self.tcx.features().generic_const_exprs()
-            && !self.tcx.features().min_generic_const_args()
+        if !self.tcx.features().generic_const_exprs() && !self.tcx.features().gca_min_const_items()
         {
             let guar = self
                 .dcx()
@@ -3994,7 +3996,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 // Note that with `feature(generic_const_exprs)` this case should not
                 // be reachable.
                 .with_note("this may fail depending on what value the parameter takes")
-                .emit();
+                .emit_err();
             return Err(guar);
         }
 

@@ -211,12 +211,12 @@ pub(crate) mod ferrocene;
 use std::cell::OnceCell;
 use std::ops::ControlFlow;
 
+use rustc_attr_ir::InlineAttr;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::sync::{Lock, par_for_each_in};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_hir as hir;
-use rustc_hir::attrs::InlineAttr;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdMap, LocalDefId};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
@@ -233,9 +233,8 @@ use rustc_middle::ty::{
     TypeFoldable, TypeVisitable, TypeVisitableExt, TypeVisitor, Unnormalized, VtblEntry,
 };
 use rustc_middle::util::Providers;
-use rustc_middle::{bug, span_bug};
 use rustc_session::config::{DebugInfo, EntryFnType, Offload};
-use rustc_span::{DUMMY_SP, Span, Spanned, Symbol, dummy_spanned, respan};
+use rustc_span::{DUMMY_SP, Span, Spanned, Symbol, bug, dummy_spanned, respan, span_bug};
 use rustc_structures::Limit;
 use tracing::{debug, instrument, trace};
 

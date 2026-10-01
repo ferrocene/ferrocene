@@ -7,12 +7,12 @@ use rustc_infer::traits::{
     FromSolverError, Normalized, Obligation, PredicateObligations, TraitEngine, TraitErrors,
 };
 use rustc_macros::extension;
-use rustc_middle::span_bug;
 use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::{
     self, AliasTerm, PredicateProxy, Term, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable,
     TypeVisitable, TypeVisitableExt, TypingMode, Unnormalized,
 };
+use rustc_span::span_bug;
 use thin_vec::ThinVec;
 use tracing::{debug, instrument};
 
@@ -479,7 +479,7 @@ impl<'a, 'b, 'tcx> TypeFolder<TyCtxt<'tcx>> for AssocTypeNormalizer<'a, 'b, 'tcx
         };
 
         // Note that the Projection/Inherent/Free cases are unreachable on stable,
-        // unless a `min_generic_const_args` feature gate error has already
+        // unless a `gca_min_const_items` feature gate error has already
         // been emitted earlier in compilation.
         //
         // That's because we can only end up with an Alias ty::Const for a const item

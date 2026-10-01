@@ -124,12 +124,10 @@ fn annotation_level_for_level(level: Level) -> annotate_snippets::level::Level<'
             annotate_snippets::Level::ERROR.with_name("error: internal compiler error")
         }
         Level::Fatal | Level::Error => annotate_snippets::level::ERROR,
-        Level::ForceWarning | Level::Warning => annotate_snippets::Level::WARNING,
+        Level::Warning(_) => annotate_snippets::Level::WARNING,
         Level::Note => annotate_snippets::Level::NOTE,
         Level::Help => annotate_snippets::Level::HELP,
         Level::FailureNote => annotate_snippets::Level::NOTE.no_name(),
-        Level::Allow => panic!("Should not call with Allow"),
-        Level::Expect => panic!("Should not call with Expect"),
     }
 }
 
@@ -712,6 +710,18 @@ fn collect_annotations(
             } else {
                 output.push((file, vec![ann]));
             }
+        }
+    }
+
+    for span in msp.span_context() {
+        let file = sm.lookup_source_file(span.lo());
+        let ann = Annotation { kind: AnnotationKind::Visible, span: *span, label: None };
+        if let Some((_, annotations)) =
+            output.iter_mut().find(|(f, _)| f.stable_id == file.stable_id)
+        {
+            annotations.push(ann);
+        } else {
+            output.push((file, vec![ann]));
         }
     }
 

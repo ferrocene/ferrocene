@@ -21,7 +21,7 @@ use core::mem::{ManuallyDrop, SizedTypeProperties};
 use core::ops::{Index, IndexMut, Range, RangeBounds};
 use core::{fmt, ptr, slice};
 
-use crate::alloc::{Allocator, Global};
+use crate::alloc::{Allocator, AllocatorNightly, Global};
 use crate::collections::{TryReserveError, TryReserveErrorKind};
 use crate::raw_vec::RawVec;
 use crate::vec::Vec;
@@ -103,7 +103,7 @@ mod tests;
 #[rustc_insignificant_dtor]
 pub struct VecDeque<
     T,
-    #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global,
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")] A: Allocator = Global,
 > {
     // `self[0]`, if it exists, is `buf[head]`.
     // `head < buf.capacity()`, unless `buf.capacity() == 0` when `head == 0`.
@@ -904,7 +904,7 @@ impl<T, A: Allocator> VecDeque<T, A> {
     /// # Examples
     ///
     /// ```
-    /// # #![feature(allocator_api)]
+    /// # #![feature(allocator_ext)]
     ///
     /// use std::collections::VecDeque;
     /// use std::alloc::Global;
@@ -912,7 +912,7 @@ impl<T, A: Allocator> VecDeque<T, A> {
     /// let deque: VecDeque<i32> = VecDeque::new_in(Global);
     /// ```
     #[inline]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     pub const fn new_in(alloc: A) -> VecDeque<T, A> {
         VecDeque { head: WrappedIndex::zero(), len: 0, buf: RawVec::new_in(alloc) }
     }
@@ -922,14 +922,14 @@ impl<T, A: Allocator> VecDeque<T, A> {
     /// # Examples
     ///
     /// ```
-    /// # #![feature(allocator_api)]
+    /// # #![feature(allocator_ext)]
     ///
     /// use std::collections::VecDeque;
     /// use std::alloc::Global;
     ///
     /// let deque: VecDeque<i32> = VecDeque::with_capacity_in(10, Global);
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     pub fn with_capacity_in(capacity: usize, alloc: A) -> VecDeque<T, A> {
         VecDeque {
             head: WrappedIndex::zero(),
@@ -1648,7 +1648,7 @@ impl<T, A: Allocator> VecDeque<T, A> {
     }
 
     /// Returns a reference to the underlying allocator.
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn allocator(&self) -> &A {
         self.buf.allocator()
@@ -4051,7 +4051,7 @@ impl<T: fmt::Debug, A: Allocator> fmt::Debug for VecDeque<T, A> {
 }
 
 #[stable(feature = "vecdeque_vec_conversions", since = "1.10.0")]
-impl<T, A: Allocator> From<Vec<T, A>> for VecDeque<T, A> {
+impl<T, A: AllocatorNightly> From<Vec<T, A>> for VecDeque<T, A> {
     /// Turn a [`Vec<T>`] into a [`VecDeque<T>`].
     ///
     /// [`Vec<T>`]: crate::vec::Vec

@@ -18,8 +18,7 @@ use rustc_middle::ty::{
     TypeFolder, TypeSuperFoldable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
     Unnormalized, Upcast,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::{BytePos, DUMMY_SP, Span};
+use rustc_span::{BytePos, DUMMY_SP, Span, bug, span_bug};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
@@ -639,7 +638,7 @@ pub(super) fn collect_return_position_impl_trait_in_trait_tys<'tcx>(
                 false,
                 None,
             );
-            return Err(diag.emit());
+            return Err(diag.emit_err());
         }
     }
 
@@ -951,7 +950,7 @@ impl<'tcx> ty::FallibleTypeFolder<TyCtxt<'tcx>> for RemapHiddenTyRegions<'tcx> {
                             "hidden type must only reference lifetimes captured by this impl trait",
                         )
                         .with_note(format!("hidden type inferred to be `{}`", self.ty))
-                        .emit()
+                        .emit_err()
                 }
                 None => {
                     // This code path is not reached in any tests, but may be
@@ -1067,12 +1066,12 @@ fn report_trait_method_mismatch<'tcx>(
                     };
                 };
             } else if let Some(trait_ty) = trait_sig.inputs().get(*i) {
-                diag.span_suggestion_verbose(
+                rustc_middle::ty::print::with_crate_prefix!(diag.span_suggestion_verbose(
                     impl_err_span,
                     "change the parameter type to match the trait",
                     trait_ty,
                     Applicability::MachineApplicable,
-                );
+                ));
             }
         }
         _ => {}
@@ -1092,7 +1091,7 @@ fn report_trait_method_mismatch<'tcx>(
         None,
     );
 
-    diag.emit()
+    diag.emit_err()
 }
 
 fn check_region_bounds_on_impl_item<'tcx>(
@@ -1135,7 +1134,7 @@ fn check_region_bounds_on_impl_item<'tcx>(
             bounds_span,
             where_span,
         })
-        .emit_unless_delay(delay);
+        .emit_err_unless_delay(delay);
 
     Err(reported)
 }
@@ -1436,7 +1435,7 @@ fn check_region_late_boundedness<'tcx>(
         }
     }
 
-    Some(diag.emit())
+    Some(diag.emit_err())
 }
 
 fn find_region_in_clauses<'tcx>(
@@ -1539,7 +1538,7 @@ fn compare_self_type<'tcx>(
             } else {
                 err.note_trait_signature(trait_m.name(), trait_m.signature(tcx));
             }
-            return Err(err.emit_unless_delay(delay));
+            return Err(err.emit_err_unless_delay(delay));
         }
 
         (true, false) => {
@@ -1560,7 +1559,7 @@ fn compare_self_type<'tcx>(
                 err.note_trait_signature(trait_m.name(), trait_m.signature(tcx));
             }
 
-            return Err(err.emit_unless_delay(delay));
+            return Err(err.emit_err_unless_delay(delay));
         }
     }
 
@@ -1720,8 +1719,8 @@ fn compare_number_of_generics<'tcx>(
                 err.span_label(*span, "`impl Trait` introduces an implicit type parameter");
             }
 
-            let reported = err.emit_unless_delay(delay);
-            err_occurred = Some(reported);
+            let guar = err.emit_err_unless_delay(delay);
+            err_occurred = Some(guar);
         }
     }
 
@@ -1902,7 +1901,7 @@ fn compare_number_of_method_arguments<'tcx>(
             }
         }
 
-        return Err(err.emit_unless_delay(delay));
+        return Err(err.emit_err_unless_delay(delay));
     }
 
     Ok(())
@@ -2029,7 +2028,7 @@ fn compare_synthetic_generics<'tcx>(
                     );
                 };
             }
-            error_found = Some(err.emit_unless_delay(delay));
+            error_found = Some(err.emit_err_unless_delay(delay));
         }
     }
     if let Some(reported) = error_found { Err(reported) } else { Ok(()) }
@@ -2124,15 +2123,15 @@ fn compare_generic_param_kinds<'tcx>(
             };
 
             let trait_header_span = tcx.def_ident_span(tcx.parent(trait_item.def_id)).unwrap();
-            err.span_label(trait_header_span, "");
+            err.span_context(trait_header_span);
             err.span_label(param_trait_span, make_param_message("expected", param_trait));
 
             let impl_header_span = tcx.def_span(tcx.parent(impl_item.def_id));
-            err.span_label(impl_header_span, "");
+            err.span_context(impl_header_span);
             err.span_label(param_impl_span, make_param_message("found", param_impl));
 
-            let reported = err.emit_unless_delay(delay);
-            return Err(reported);
+            let guar = err.emit_err_unless_delay(delay);
+            return Err(guar);
         }
     }
 
@@ -2163,8 +2162,8 @@ pub(super) fn compare_const_directness<'tcx>(
     if trait_is_gca == impl_is_gca {
         return Ok(());
     }
-    // feature(generic_const_args) is allowed to impl non-GCA traits with a GCA const
-    if tcx.features().generic_const_args() && !trait_is_gca && impl_is_gca {
+    // feature(gca_const_items) is allowed to impl non-GCA traits with a GCA const
+    if tcx.features().gca_const_items() && !trait_is_gca && impl_is_gca {
         return Ok(());
     }
 
@@ -2172,24 +2171,24 @@ pub(super) fn compare_const_directness<'tcx>(
         tcx.dcx()
             .struct_span_err(
                 tcx.def_span(impl_const_item.def_id),
-                "implementation of a `#[rustc_always_gca]` must have a `direct_const_arg!` RHS",
+                "implementation of a `#[rustc_always_gca]` must have a `gca!` RHS",
             )
             .with_span_note(
                 tcx.def_span(trait_const_item.def_id),
                 "trait declaration of const is marked as `#[rustc_always_gca]`",
             )
-            .emit()
+            .emit_err()
     } else {
         tcx.dcx()
             .struct_span_err(
                 tcx.def_span(impl_const_item.def_id),
-                "implementation of a regular const cannot have a `direct_const_arg!` RHS",
+                "implementation of a regular const cannot have a `gca!` RHS",
             )
             .with_span_note(
                 tcx.def_span(trait_const_item.def_id),
                 "trait declaration of const is not marked as `#[rustc_always_gca]`",
             )
-            .emit()
+            .emit_err()
     };
     Err(guar)
 }
@@ -2304,7 +2303,7 @@ fn compare_const_clause_entailment<'tcx>(
             false,
             None,
         );
-        return Err(diag.emit());
+        return Err(diag.emit_err());
     };
 
     // Check that all obligations are satisfied by the implementation's

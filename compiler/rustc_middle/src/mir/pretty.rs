@@ -6,6 +6,7 @@ use std::{fs, io};
 use rustc_abi::Size;
 use rustc_ast::InlineAsmTemplatePiece;
 use rustc_hir::Constness;
+use rustc_span::bug;
 use tracing::trace;
 use ty::print::PrettyPrinter;
 
@@ -17,6 +18,7 @@ use crate::mir::interpret::{
 use crate::mir::visit::Visitor;
 use crate::mir::*;
 use crate::ty::CoroutineArgsExt;
+use crate::ty::consts::ConstExt;
 
 const INDENT: &str = "    ";
 /// Alignment for lining up comments following MIR statements

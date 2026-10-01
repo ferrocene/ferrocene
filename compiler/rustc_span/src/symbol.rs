@@ -413,7 +413,6 @@ symbols! {
         alloc_layout,
         alloc_zeroed,
         allocator,
-        allocator_api,
         allocator_internals,
         allow,
         allow_fail,
@@ -621,6 +620,7 @@ symbols! {
         cfg_target_has_atomic,
         cfg_target_has_atomic_equal_alignment,
         cfg_target_has_reliable_f16_f128,
+        cfg_target_has_reliable_f16b,
         cfg_target_has_threads,
         cfg_target_object_format,
         cfg_target_thread_local,
@@ -679,6 +679,7 @@ symbols! {
         complex,
         concat,
         concat_bytes,
+        concat_str,
         conservative_impl_trait,
         console,
         const_allocate,
@@ -805,7 +806,6 @@ symbols! {
         default_field_values,
         default_fn,
         default_lib_allocator,
-        default_method_body_is_const,
         // --------------------------
         // Lang items which are used only for experiments with auto traits with default bounds.
         // These lang items are not actually defined in core/std. Experiment is a part of
@@ -847,7 +847,6 @@ symbols! {
         diagnostic_opaque,
         dialect,
         direct,
-        direct_const_arg,
         discriminant_kind,
         discriminant_type,
         discriminant_value,
@@ -914,6 +913,8 @@ symbols! {
         entry_nops,
         env,
         env_CFG_RELEASE: env!("CFG_RELEASE"),
+        eprint_macro,
+        eprintln_macro,
         eq,
         ergonomic_clones,
         ermsb_target_feature,
@@ -957,6 +958,7 @@ symbols! {
         external_doc,
         f16,
         f16_nan,
+        f16b,
         f16c_target_feature,
         f32,
         f32_nan,
@@ -1030,6 +1032,7 @@ symbols! {
         forget,
         format_args,
         format_args_capture,
+        format_args_macro,
         format_args_nl,
         format_argument,
         format_arguments,
@@ -1064,6 +1067,11 @@ symbols! {
         future_output,
         future_trait,
         fxsr,
+        gca,
+        gca_const_items,
+        gca_macroless_args,
+        gca_macroless_items,
+        gca_min_const_items,
         gdb_script_file,
         ge,
         gen_blocks,
@@ -1635,6 +1643,8 @@ symbols! {
         prfchw_target_feature,
         prid,
         primitive,
+        print_macro,
+        println_macro,
         proc_dash_macro: "proc-macro",
         proc_macro,
         proc_macro_attribute,
@@ -2124,6 +2134,7 @@ symbols! {
         target_has_atomic_primitive_alignment,
         target_has_reliable_f16,
         target_has_reliable_f16_math,
+        target_has_reliable_f16b,
         target_has_reliable_f128,
         target_has_reliable_f128_math,
         target_has_threads,
@@ -2156,6 +2167,7 @@ symbols! {
         to_owned_method,
         to_string,
         to_vec,
+        todo_macro,
         tool_attributes,
         tool_lints,
         trace_macros,
@@ -2271,6 +2283,7 @@ symbols! {
         underscore_lifetimes,
         uniform_paths,
         unimplemented,
+        unimplemented_macro,
         unit,
         universal_impl_trait,
         unix,
@@ -2464,9 +2477,12 @@ pub struct Ident {
 
 impl Ident {
     #[inline]
+    #[track_caller]
     /// Constructs a new identifier from a symbol and a span.
     pub fn new(name: Symbol, span: Span) -> Ident {
-        debug_assert_ne!(name, sym::empty);
+        if cfg!(debug_assertions) && name == sym::empty {
+            crate::span_bug!(span, "called `Ident::new` with empty symbol");
+        }
         Ident { name, span }
     }
 

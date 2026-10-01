@@ -1705,6 +1705,7 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!((-13_", stringify!($SelfT), ").unbounded_shr(", stringify!($BITS), "), -1);")]
         #[doc = concat!("assert_eq!((-13_", stringify!($SelfT), ").unbounded_shr(1).unbounded_shr(", stringify!($BITS_MINUS_ONE), "), -1);")]
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[rustc_const_stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \

@@ -1,6 +1,45 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+//! Code coverage for the standard library.
+//!
+//! This is unfortunately quite complicated.
+//! The main problem is that coverage for core is *holistic*, whereas bootstrap expects dependencies
+//! between [`Step`]s to be exclusively through [`Builder::ensure`].
+//!
+//! Here's an example.
+//! Say that you run `./x test --coverage=library --stage=2 library/core`.
+//! What should be instrumented?
+//! - stage 2 `library/coretests` (as a binary crate)
+//! - stage 2 `library/core` (as a library crate loaded by coretests)
+//! - any doctests in stage 2 core (as binary crates)
+//! What should *not* be instrumented?
+//! - `compiler_builtins`: it breaks things
+//! - `profiler_builtins`: we can't instrument the instrumentation itself.
+//! - the newly built compiler: it will be too slow to build core, and we don't need its info anyway.
+//! - anything in stage 1: it will be linked into the stage 2 compiler, which will be slow and spam .profraw files.
+//!
+//! To generate a coverage report, we need to know where these `coretests` binaries were placed, so
+//! that `blanket` can read their coverage mappings and correlate counters back to source lines.
+//! But in order to do *that*, we need to know which compiler they were built by (in this case stage 2).
+//!
+//! Now consider: what compiler is a "stage 2" compiler?
+//! It does *not* always mean "the second compiler in dependency order" -- see for example [`Builder::compiler_for_std`].
+//! The logic for this is actually rather complicated and duplicating it when generating the report
+//! would be prone to error. Instead, we stuff this in the [`Builder`] through [`CoverageState`],
+//! which lets [`instrumented_binaries`] later use the existing bootstrap code as a source of truth.
+//! We do something similar for the profiler_builtins runtime; see the comments on calls to [`instrument_coverage`].
+//!
+//! This is all a big mess and comes from the goal of wanting to support a customizable list of
+//! crates that will be instrumented. If we had a single `./x run collect-coverage`, this would be
+//! way easier, because we'd have a single Step that holds on to the reference to the [`Compiler`].
+//! But because it's customizable, [`generate_coverage_report`] is instead called when a build
+//! finishes, and doesn't have access to any state except the Builder itself.
+//!
+//! FIXME: it might be possible to make `generate_coverage_report` a `Step` that's in
+//! `describe!(Kind::Test)`, ordered after all other Steps? That would still smuggle state, but it
+//! would at least avoid putting things in `execute_cli` directly.
+
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
@@ -16,9 +55,11 @@ use crate::ferrocene::{self, download_and_extract_ci_outcomes};
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers;
 
+/// Instruct Rustc to inject coverage instrumentation into the crates being compiled by Cargo.
 pub(crate) fn instrument_coverage(
     builder: &Builder<'_>,
     cargo: &mut Cargo,
+    // See comments on the calls to this function for why this argument exists.
     profiler_runtime: &Path,
 ) {
     if !builder.config.profiler {
@@ -52,6 +93,7 @@ pub(crate) fn instrument_coverage(
     }
 }
 
+/// Statefully save the (compiler, target, coverage_for) tuple into `builder.ferrocene_coverage`.
 pub(crate) fn measure_coverage(
     builder: &Builder<'_>,
     cmd: &mut BootstrapCommand,
@@ -85,6 +127,8 @@ pub(crate) fn measure_coverage(
         }
     }
 }
+
+/// Return the paths of the binaries we instrumented.
 
 // FIXME(@pvdrz): `blanket` needs to receive the path to the binaries that were instrumented.
 // However there is no quick and easy way to fetch those. For now, we just go inside the

@@ -25,13 +25,9 @@ use crate::diagnostics::{
     UnpredictableFunctionPointerComparisonsSuggestion, UnusedComparisons,
     VariantSizeDifferencesDiag,
 };
-<<<<<<< ferrocene/main
 // Ferrocene addition
 pub(crate) use crate::ferrocene::LintUnvalidated;
-||||||| 2b9a7be8551
-=======
 use crate::utils::std_or_core;
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use crate::{LateContext, LateLintPass, LintContext};
 
 mod literal;

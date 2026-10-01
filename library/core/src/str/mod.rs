@@ -522,17 +522,11 @@ impl str {
     /// let bytes = "bors".as_bytes();
     /// assert_eq!(b"bors", bytes);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "str_as_bytes", since = "1.39.0")]
     #[must_use]
     #[inline(always)]
-<<<<<<< ferrocene/main
-    #[allow(unused_attributes)]
-    #[ferrocene::prevalidated]
-||||||| 2b9a7be8551
-    #[allow(unused_attributes)]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_bytes(&self) -> &[u8] {
         // SAFETY: const sound because we transmute two types with the same layout
         unsafe { mem::transmute(self) }

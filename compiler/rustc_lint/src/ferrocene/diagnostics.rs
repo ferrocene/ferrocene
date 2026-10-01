@@ -204,7 +204,7 @@ impl<'tcx> LintState<'tcx> {
         }));
     }
 
-    fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_, ()>) {
+    fn decorate_cast(&self, use_: Use<'tcx>, diag: &mut Diag<'_>) {
         let tcx = self.tcx;
         if matches!(use_.kind, UseKind::FnPtrCast(..)) {
             diag.note("once a function is cast to a function pointer, Ferrocene can no longer tell whether it is validated");
@@ -228,7 +228,7 @@ impl<'tcx> LintState<'tcx> {
     fn decorate_instantiation(
         &self,
         use_: Use<'tcx>,
-        diag: &mut Diag<'_, ()>,
+        diag: &mut Diag<'_>,
         validated_span: Option<&mut MultiSpan>,
     ) {
         let tcx = self.tcx;

@@ -742,16 +742,8 @@ pub mod alloc;
 // Private support modules
 mod panicking;
 
-<<<<<<< ferrocene/main
-#[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
-||||||| 2b9a7be8551
-#[path = "../../backtrace/src/lib.rs"]
-#[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
-=======
-#[path = "../../backtrace/src/lib.rs"]
 #[allow(implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[allow(clippy::len_zero, clippy::needless_borrow, clippy::filter_map_next)] // FIXME
 mod backtrace_rs;
 

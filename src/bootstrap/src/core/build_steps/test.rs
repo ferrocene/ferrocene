@@ -3731,7 +3731,6 @@ impl CommandLineStep for Crate {
         }
         if crates.iter().any(|crate_| crate_ == "alloc") {
             crates.push("alloctests".to_owned());
-<<<<<<< ferrocene/main
         }
 
         // Ferrocene annotation:
@@ -3753,7 +3752,13 @@ impl CommandLineStep for Crate {
             // Avoid panicking because we are not executing the Cargo we prepared.
             cargo.into_cmd().mark_as_executed();
         } else {
-            let description = crate_description(&self.crates);
+            let mut description = crate_description(&self.crates);
+            if builder.kind == Kind::Miri {
+                if !description.is_empty() {
+                    description.push(' ');
+                }
+                description.push_str("in Miri");
+            }
             run_cargo_test(
                 cargo,
                 &[],
@@ -3850,21 +3855,6 @@ toolchain with a more recent libc version"
             builder,
             record_failed_tests,
         );
-||||||| 2b9a7be8551
-        };
-        let description = crate_description(&self.crates);
-        run_cargo_test(cargo, &[], &crates, &*description, target, builder, record_failed_tests);
-=======
-        };
-        let mut description = crate_description(&self.crates);
-        if builder.kind == Kind::Miri {
-            if !description.is_empty() {
-                description.push(' ');
-            }
-            description.push_str("in Miri");
-        }
-        run_cargo_test(cargo, &[], &crates, &*description, target, builder, record_failed_tests);
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 }
 

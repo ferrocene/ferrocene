@@ -1250,11 +1250,17 @@ const impl<A: [const] Step + [const] Destruct> Iterator for ops::Range<A> {
         self.spec_nth(n)
     }
 
+    // TEMPORARY: The trait bound isn't being propagated properly in this function,
+    // leading to an error message about "the trait bound `A: [const] Step` is not satisfied"
+    // even though this is inside an `impl <A: [const Step] + ...>` block.
+    // Fall back to the default impl while testing other things
+    /*
     #[inline]
     #[ferrocene::prevalidated]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
+    */
 
     #[inline]
     fn min(mut self) -> Option<A>

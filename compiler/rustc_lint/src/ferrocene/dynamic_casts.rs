@@ -7,13 +7,12 @@ use rustc_infer::traits::{
     ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
 };
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
-use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
     self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, ShimKind, Ty, TyCtxt,
     TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
-use rustc_span::Span;
+use rustc_span::{Span, span_bug};
 use rustc_trait_selection::traits::{ObligationCtxt, SelectionContext, supertraits};
 use tracing::{debug, instrument};
 

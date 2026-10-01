@@ -768,14 +768,8 @@ const impl AsRef<CStr> for CStr {
 #[inline]
 #[unstable(feature = "cstr_internals", issue = "none")]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-const unsafe fn strlen(ptr: *const c_char) -> usize {
-||||||| 2b9a7be8551
-const unsafe fn strlen(ptr: *const c_char) -> usize {
-=======
 const unsafe fn strlen(ptr: *const c_char) -> UsizeNoHighBitMinusOne {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     const_eval_select!(
         @capture { s: *const c_char = ptr } -> UsizeNoHighBitMinusOne:
         if const {

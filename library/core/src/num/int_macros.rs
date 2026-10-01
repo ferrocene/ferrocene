@@ -3010,18 +3010,12 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(2", stringify!($SelfT), ".overflowing_neg(), (-2, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_neg(), (", stringify!($SelfT), "::MIN, true));")]
         /// ```
+        #[ferrocene::prevalidated]
         #[inline]
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-<<<<<<< ferrocene/main
-        #[allow(unused_attributes)]
-        #[ferrocene::prevalidated]
-||||||| 2b9a7be8551
-        #[allow(unused_attributes)]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         pub const fn overflowing_neg(self) -> (Self, bool) {
             if intrinsics::unlikely(self == Self::MIN) {
                 (Self::MIN, true)

@@ -1,4 +1,4 @@
-use rustc_ast::token::{self, Delimiter, IdentIsRaw, Lit, Token, TokenKind};
+use rustc_ast::token::{self, Delimiter, IdentKind, Lit, Token, TokenKind};
 use rustc_ast::tokenstream::{TokenStream, TokenStreamIter, TokenTree};
 use rustc_ast::{LitIntType, LitKind};
 use rustc_ast_pretty::pprust;
@@ -15,8 +15,11 @@ pub(crate) const UNSUPPORTED_CONCAT_ELEM_ERR: &str = "expected identifier or str
 /// A meta-variable expression, for expansions based on properties of meta-variables.
 #[derive(Debug, PartialEq, Encodable, Decodable)]
 pub(crate) enum MetaVarExpr {
-    /// Unification of two or more identifiers.
-    Concat(Box<[MetaVarExprConcatElem]>),
+    /// Unification of two or more identifiers/literals/metavariables into an identifier.
+    ConcatIdent(Box<[MetaVarExprConcatElem]>),
+
+    /// Unification of two or more identifiers/literals/metavariables into a string literal.
+    ConcatStr(Box<[MetaVarExprConcatElem]>),
 
     /// The number of repetitions of an identifier.
     Count(Ident, usize),
@@ -73,7 +76,12 @@ impl MetaVarExpr {
 
         let mut iter = args.iter();
         let rslt = match ident.name {
-            sym::concat => parse_concat(&mut iter, psess, outer_span, ident.span)?,
+            sym::concat => {
+                MetaVarExpr::ConcatIdent(parse_concat(&mut iter, psess, outer_span, ident.span)?)
+            }
+            sym::concat_str => {
+                MetaVarExpr::ConcatStr(parse_concat(&mut iter, psess, outer_span, ident.span)?)
+            }
             sym::count => parse_count(&mut iter, psess, ident.span)?,
             sym::ignore => {
                 eat_dollar(&mut iter, psess, ident.span)?;
@@ -95,7 +103,7 @@ impl MetaVarExpr {
 
     pub(crate) fn for_each_metavar<A>(&self, mut aux: A, mut cb: impl FnMut(A, &Ident) -> A) -> A {
         match self {
-            MetaVarExpr::Concat(elems) => {
+            MetaVarExpr::ConcatIdent(elems) | MetaVarExpr::ConcatStr(elems) => {
                 for elem in elems {
                     if let MetaVarExprConcatElem::Var(ident) = elem {
                         aux = cb(aux, ident)
@@ -175,7 +183,7 @@ fn parse_concat<'psess>(
     psess: &'psess ParseSess,
     outer_span: Span,
     expr_ident_span: Span,
-) -> PResult<'psess, MetaVarExpr> {
+) -> PResult<'psess, Box<[MetaVarExprConcatElem]>> {
     let mut result = Vec::new();
     loop {
         let is_var = try_eat_dollar(iter);
@@ -210,7 +218,7 @@ fn parse_concat<'psess>(
             .dcx()
             .struct_span_err(expr_ident_span, "`concat` must have at least two elements"));
     }
-    Ok(MetaVarExpr::Concat(result.into()))
+    Ok(result.into())
 }
 
 /// Parse a meta-variable `count` expression: `count(ident[, depth])`
@@ -272,8 +280,8 @@ fn parse_ident_from_token<'psess>(
     psess: &'psess ParseSess,
     token: &Token,
 ) -> PResult<'psess, Ident> {
-    if let Some((elem, is_raw)) = token.ident() {
-        if let IdentIsRaw::Yes = is_raw {
+    if let Some((elem, kind)) = token.ident() {
+        if let IdentKind::Raw = kind {
             return Err(psess.dcx().struct_span_err(elem.span, RAW_IDENT_ERR));
         }
         return Ok(elem);
@@ -282,7 +290,7 @@ fn parse_ident_from_token<'psess>(
     let mut err = psess
         .dcx()
         .struct_span_err(token.span, format!("expected identifier, found `{token_str}`"));
-    err.span_suggestion(
+    err.span_suggestion_short(
         token.span,
         format!("try removing `{token_str}`"),
         "",

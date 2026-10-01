@@ -185,10 +185,9 @@ use rustc_lint_defs::{declare_lint_pass, declare_tool_lint};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
     ValidatedStatus, has_requires_validation_attribute, item_is_validated,
 };
-use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
-use rustc_span::Span;
 use rustc_span::def_id::{DefId, LocalDefId};
+use rustc_span::{Span, span_bug};
 use tracing::{debug, info};
 
 use crate::ferrocene::post_mono::InstantiationSite;

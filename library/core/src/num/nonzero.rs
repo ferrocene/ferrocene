@@ -1426,8 +1426,44 @@ macro_rules! nonzero_integer {
         }
 
         #[stable(feature = "nonzero_parse", since = "1.35.0")]
-        impl FromStr for NonZero<$Int> {
+        #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+        const impl FromStr for NonZero<$Int> {
             type Err = ParseIntError;
+
+            /// Parses a non-zero integer from a string slice with decimal digits.
+            ///
+            /// The characters are expected to be an optional
+            #[doc = sign_dependent_expr!{
+                $signedness ?
+                if signed {
+                    " `+` or `-` "
+                }
+                if unsigned {
+                    " `+` "
+                }
+            }]
+            /// sign followed by only digits. Leading and trailing non-digit characters (including
+            /// whitespace) represent an error. Underscores (which are accepted in Rust literals)
+            /// also represent an error.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// use std::num::NonZero;
+            /// use std::str::FromStr;
+            ///
+            #[doc = concat!("assert_eq!(NonZero::<", stringify!($Int), ">::from_str(\"+10\"), Ok(NonZero::new(10).unwrap()));")]
+            /// ```
+            ///
+            /// Trailing space returns error:
+            ///
+            /// ```
+            /// use std::num::NonZero;
+            /// use std::str::FromStr;
+            ///
+            #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_str(\"1 \").is_err());")]
+            /// ```
+            #[inline]
             fn from_str(src: &str) -> Result<Self, Self::Err> {
                 Self::from_str_radix(src, 10)
             }
@@ -1550,38 +1586,6 @@ macro_rules! nonzero_integer_signedness_dependent_impls {
             #[inline]
             fn rem_assign(&mut self, other: NonZero<$Int>) {
                 *self = *self % other;
-            }
-        }
-
-        impl NonZero<$Int> {
-            /// Calculates the quotient of `self` and `rhs`, rounding the result towards positive infinity.
-            ///
-            /// The result is guaranteed to be non-zero.
-            ///
-            /// # Examples
-            ///
-            /// ```
-            /// # use std::num::NonZero;
-            #[doc = concat!("let one = NonZero::new(1", stringify!($Int), ").unwrap();")]
-            #[doc = concat!("let max = NonZero::new(", stringify!($Int), "::MAX).unwrap();")]
-            /// assert_eq!(one.div_ceil(max), one);
-            ///
-            #[doc = concat!("let two = NonZero::new(2", stringify!($Int), ").unwrap();")]
-            #[doc = concat!("let three = NonZero::new(3", stringify!($Int), ").unwrap();")]
-            /// assert_eq!(three.div_ceil(two), two);
-            /// ```
-            #[stable(feature = "unsigned_nonzero_div_ceil", since = "1.92.0")]
-            #[rustc_const_stable(feature = "unsigned_nonzero_div_ceil", since = "1.92.0")]
-            #[must_use = "this returns the result of the operation, \
-                          without modifying the original"]
-            #[inline]
-            pub const fn div_ceil(self, rhs: Self) -> Self {
-                // An implementation of the function without calculating the remainder.
-                // It is better than the implementation for normal integers, but it can only
-                // be used here because of the possibility to subtract by one without overflow.
-                let v = (self.get() - 1) / rhs.get() + 1;
-                // SAFETY: ceiled division of two positive integers can never be zero.
-                unsafe { Self::new_unchecked(v) }
             }
         }
     };
@@ -1750,6 +1754,36 @@ macro_rules! nonzero_integer_signedness_dependent_methods {
         pub const unsafe fn unchecked_add(self, other: $Int) -> Self {
             // SAFETY: The caller ensures there is no overflow.
             unsafe { Self::new_unchecked(self.get().unchecked_add(other)) }
+        }
+
+        /// Calculates the quotient of `self` and `rhs`, rounding the result towards positive infinity.
+        ///
+        /// The result is guaranteed to be non-zero.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// # use std::num::NonZero;
+        #[doc = concat!("let one = NonZero::new(1", stringify!($Int), ").unwrap();")]
+        #[doc = concat!("let max = NonZero::new(", stringify!($Int), "::MAX).unwrap();")]
+        /// assert_eq!(one.div_ceil(max), one);
+        ///
+        #[doc = concat!("let two = NonZero::new(2", stringify!($Int), ").unwrap();")]
+        #[doc = concat!("let three = NonZero::new(3", stringify!($Int), ").unwrap();")]
+        /// assert_eq!(three.div_ceil(two), two);
+        /// ```
+        #[stable(feature = "unsigned_nonzero_div_ceil", since = "1.92.0")]
+        #[rustc_const_stable(feature = "unsigned_nonzero_div_ceil", since = "1.92.0")]
+        #[must_use = "this returns the result of the operation, \
+                      without modifying the original"]
+        #[inline]
+        pub const fn div_ceil(self, rhs: Self) -> Self {
+            // An implementation of the function without calculating the remainder.
+            // It is better than the implementation for normal integers, but it can only
+            // be used here because of the possibility to subtract by one without overflow.
+            let v = (self.get() - 1) / rhs.get() + 1;
+            // SAFETY: ceiled division of two positive integers can never be zero.
+            unsafe { Self::new_unchecked(v) }
         }
 
         /// Returns the smallest power of two greater than or equal to `self`.

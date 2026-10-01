@@ -1613,7 +1613,8 @@ impl<'test> TestCx<'test> {
             // Exhaustively match all other suites.
             // Note that some suites never actually use this method, so the
             // return value for those suites is not necessarily meaningful.
-            TestSuite::AssemblyLlvm
+            TestSuite::AssemblyGcc
+            | TestSuite::AssemblyLlvm
             | TestSuite::BuildStd
             | TestSuite::CodegenLlvm
             | TestSuite::CodegenUnits

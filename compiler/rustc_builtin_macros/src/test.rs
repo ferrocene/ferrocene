@@ -411,10 +411,10 @@ fn not_testable_error(cx: &ExtCtxt<'_>, is_bench: bool, attr_sp: Span, item: Opt
     let level = match item.map(|i| &i.kind) {
         // These were a warning before #92959 and need to continue being that to avoid breaking
         // stable user code (#94508).
-        Some(ast::ItemKind::MacCall(_)) => Level::Warning,
+        Some(ast::ItemKind::MacCall(_)) => Level::Warning(None),
         _ => Level::Error,
     };
-    let mut err = Diag::<()>::new(dcx, level, msg);
+    let mut err = Diag::new(dcx, level, msg);
     err.span(attr_sp);
     if let Some(item) = item {
         err.span_label(

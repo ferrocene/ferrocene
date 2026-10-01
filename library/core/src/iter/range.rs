@@ -2,6 +2,7 @@ use super::{
     FusedIterator, TrustedLen, TrustedRandomAccess, TrustedRandomAccessNoCoerce, TrustedStep,
 };
 use crate::ascii::Char as AsciiChar;
+use crate::marker::Destruct;
 use crate::mem;
 use crate::net::{Ipv4Addr, Ipv6Addr};
 use crate::num::NonZero;
@@ -1022,7 +1023,7 @@ macro_rules! range_incl_exact_iter_impl {
 }
 
 /// Specialization implementations for `Range`.
-trait RangeIteratorImpl {
+const trait RangeIteratorImpl {
     type Item;
 
     // Iterator
@@ -1036,7 +1037,8 @@ trait RangeIteratorImpl {
     fn spec_advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
 }
 
-impl<A: Step> RangeIteratorImpl for ops::Range<A> {
+#[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+const impl<A: [const] Step + [const] Destruct> RangeIteratorImpl for ops::Range<A> {
     type Item = A;
 
     #[inline]
@@ -1122,7 +1124,8 @@ impl<A: Step> RangeIteratorImpl for ops::Range<A> {
     }
 }
 
-impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
+#[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+const impl<T: [const] TrustedStep + [const] Destruct> RangeIteratorImpl for ops::Range<T> {
     #[inline]
     #[ferrocene::prevalidated]
     fn spec_next(&mut self) -> Option<T> {
@@ -1211,7 +1214,8 @@ impl<T: TrustedStep> RangeIteratorImpl for ops::Range<T> {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<A: Step> Iterator for ops::Range<A> {
+#[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+const impl<A: [const] Step + [const] Destruct> Iterator for ops::Range<A> {
     type Item = A;
 
     #[inline]
@@ -1246,11 +1250,17 @@ impl<A: Step> Iterator for ops::Range<A> {
         self.spec_nth(n)
     }
 
+    // TEMPORARY: The trait bound isn't being propagated properly in this function,
+    // leading to an error message about "the trait bound `A: [const] Step` is not satisfied"
+    // even though this is inside an `impl <A: [const Step] + ...>` block.
+    // Fall back to the default impl while testing other things
+    /*
     #[inline]
     #[ferrocene::prevalidated]
     fn last(mut self) -> Option<A> {
         self.next_back()
     }
+    */
 
     #[inline]
     fn min(mut self) -> Option<A>
@@ -1269,7 +1279,10 @@ impl<A: Step> Iterator for ops::Range<A> {
     }
 
     #[inline]
-    fn is_sorted(self) -> bool {
+    fn is_sorted(self) -> bool
+    where
+        Self: [const] Destruct,
+    {
         true
     }
 
@@ -1350,7 +1363,8 @@ range_incl_exact_iter_impl! {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<A: Step> DoubleEndedIterator for ops::Range<A> {
+#[rustc_const_unstable(feature = "const_iter", issue = "92476")]
+const impl<A: [const] Step + [const] Destruct> DoubleEndedIterator for ops::Range<A> {
     #[inline]
     #[ferrocene::prevalidated]
     fn next_back(&mut self) -> Option<A> {

@@ -29,24 +29,6 @@ pub(crate) struct MixedExportNameAndNoMangle {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate-level attribute should be an inner attribute")]
-pub(crate) struct OuterCrateLevelAttr {
-    #[subdiagnostic]
-    pub suggestion: OuterCrateLevelAttrSuggestion,
-}
-
-#[derive(Subdiagnostic)]
-#[multipart_suggestion("add a `!`", style = "verbose")]
-pub(crate) struct OuterCrateLevelAttrSuggestion {
-    #[suggestion_part(code = "!")]
-    pub bang_position: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("crate-level attribute should be in the root module")]
-pub(crate) struct InnerCrateLevelAttr;
-
-#[derive(Diagnostic)]
 #[diag("`#[doc(alias = \"...\")]` isn't allowed on {$location}")]
 pub(crate) struct DocAliasBadLocation<'a> {
     #[primary_span]
@@ -237,8 +219,6 @@ pub(crate) enum UnusedNote {
     EmptyList { name: Symbol },
     #[note("attribute `{$name}` without any lints has no effect")]
     NoLints { name: Symbol },
-    #[note("`default_method_body_is_const` has been replaced with `const` on traits")]
-    DefaultMethodBodyConst,
     #[note(
         "the `linker_messages` and `linker_info` lints can only be controlled at the root of a crate that needs to be linked"
     )]
@@ -412,9 +392,9 @@ pub(crate) struct NoMainErr {
     pub add_teach_note: bool,
 }
 
-impl<'a, G> Diagnostic<'a, G> for NoMainErr {
+impl<'a> Diagnostic<'a> for NoMainErr {
     #[track_caller]
-    fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, G> {
+    fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
         let mut diag =
             Diag::new(dcx, level, msg!("`main` function not found in crate `{$crate_name}`"));
         diag.span(DUMMY_SP);
@@ -478,9 +458,9 @@ pub(crate) struct DuplicateLangItem {
     pub(crate) duplicate: Duplicate,
 }
 
-impl<G> Diagnostic<'_, G> for DuplicateLangItem {
+impl Diagnostic<'_> for DuplicateLangItem {
     #[track_caller]
-    fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_, G> {
+    fn into_diag(self, dcx: DiagCtxtHandle<'_>, level: Level) -> Diag<'_> {
         let mut diag = Diag::new(
             dcx,
             level,

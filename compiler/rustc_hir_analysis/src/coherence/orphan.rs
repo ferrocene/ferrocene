@@ -9,8 +9,8 @@ use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor, TypingMode,
     Unnormalized,
 };
-use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::{DefId, LocalDefId};
+use rustc_span::{bug, span_bug};
 use rustc_trait_selection::traits::{
     self, IsFirstInputType, OrphanCheckErr, OrphanCheckMode, UncoveredTyParams,
 };
@@ -487,7 +487,7 @@ fn emit_orphan_check_error<'tcx>(
                 }
             }
 
-            diag.emit()
+            diag.emit_err()
         }
         traits::OrphanCheckErr::UncoveredTyParams(UncoveredTyParams { uncovered, local_ty }) => {
             let mut guar = None;

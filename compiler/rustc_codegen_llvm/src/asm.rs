@@ -9,10 +9,9 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_middle::mir::interpret::{PointerArithmetic, Scalar as ConstScalar};
 use rustc_middle::ty::Instance;
 use rustc_middle::ty::layout::TyAndLayout;
-use rustc_middle::{bug, span_bug};
 use rustc_session::Session;
 use rustc_session::config::Lto;
-use rustc_span::{Pos, Span, Symbol, sym};
+use rustc_span::{Pos, Span, Symbol, bug, span_bug, sym};
 use rustc_target::asm::*;
 use rustc_target::spec::HasTargetSpec;
 use smallvec::SmallVec;
@@ -503,13 +502,13 @@ impl<'tcx> AsmCodegenMethods<'tcx> for CodegenCx<'_, 'tcx> {
         }
 
         // Globally-enabled features that are already in the backend format.
-        let global_features = self.tcx.global_backend_features(()).iter().map(String::as_str);
+        let global_features = self.tcx.sess.global_backend_features.iter().map(String::as_str);
 
         // Features enabled on a particular instance, in the rust format.
         // These need to be translated to the LLVM format.
         let function_features: Vec<_> = extra_rust_target_features
             .iter()
-            .flat_map(|feat| llvm_util::to_llvm_features(self.tcx.sess, feat))
+            .flat_map(|feat| llvm_util::to_llvm_features(&self.tcx.sess.target, feat))
             .flat_map(|feat| feat.into_iter().map(|f| format!("+{f}")))
             .collect();
 
@@ -753,8 +752,13 @@ fn reg_to_llvm(reg: InlineAsmRegOrRegClass, layout: Option<&TyAndLayout<'_>>) ->
                     // We use i32 as the type for discarded outputs
                     'w'
                 };
-                if class == 'x' && reg == InlineAsmReg::AArch64(AArch64InlineAsmReg::x30) {
-                    // LLVM doesn't recognize x30. use lr instead.
+
+                if class == 'x'
+                    && reg == InlineAsmReg::AArch64(AArch64InlineAsmReg::x30)
+                    && llvm_util::get_version() < (23, 0, 0)
+                {
+                    // FIXME(llvm): LLVM <23 does not recognize `x30` as a register name.
+                    // This workaround can be removed when support for LLVM 22 is dropped.
                     "{lr}".to_string()
                 } else {
                     format!("{{{}{}}}", class, idx)
@@ -788,7 +792,9 @@ fn reg_to_llvm(reg: InlineAsmRegOrRegClass, layout: Option<&TyAndLayout<'_>>) ->
                 // LLVM uses `wN` for Hexagon HVX vector pair registers.
                 format!("{{w{}}}", idx)
             } else if reg == InlineAsmReg::Arm(ArmInlineAsmReg::r14) {
-                // LLVM doesn't recognize r14
+                // FIXME(llvm): LLVM <23 does not recognize `r14` as a register name
+                // in inline assembly.
+                // We can make this branch fallthrough again for LLVM 23+ when https://github.com/llvm/llvm-project/pull/225746 gets released.
                 "{lr}".to_string()
             } else if let InlineAsmReg::Sparc(reg) = reg
                 && let Some(num) = reg.dreg_number()

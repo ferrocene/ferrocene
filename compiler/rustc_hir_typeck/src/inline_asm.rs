@@ -6,15 +6,14 @@ use rustc_hir as hir;
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_lint_defs::builtin::ASM_SUB_REGISTER;
-use rustc_middle::bug;
+use rustc_middle::ty::consts::ConstExt;
 use rustc_middle::ty::{
     self, Article, FloatTy, IntTy, Ty, TyCtxt, TypeVisitableExt, UintTy, Unnormalized,
 };
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{ErrorGuaranteed, Span, Symbol, sym};
+use rustc_span::{ErrorGuaranteed, Span, Symbol, bug, sym};
 use rustc_target::asm::{
-    InlineAsmReg, InlineAsmRegClass, InlineAsmRegOrRegClass, InlineAsmSize, InlineAsmType,
-    ModifierInfo,
+    InlineAsmReg, InlineAsmRegClass, InlineAsmSize, InlineAsmType, ModifierInfo,
 };
 use rustc_trait_selection::infer::InferCtxtExt;
 
@@ -191,7 +190,7 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
     fn check_asm_operand_type(
         &self,
         idx: usize,
-        reg: InlineAsmRegOrRegClass,
+        reg: hir::InlineAsmRegOrRegClass,
         expr: &'tcx hir::Expr<'tcx>,
         template: &[InlineAsmTemplatePiece],
         is_input: bool,
@@ -208,8 +207,8 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
             default_size: InlineAsmSize,
         }
 
-        impl<'a, 'b> Diagnostic<'a, ()> for FormattingSubRegisterArg<'b> {
-            fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+        impl<'a, 'b> Diagnostic<'a> for FormattingSubRegisterArg<'b> {
+            fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
                 let Self {
                     expr_span,
                     idx,
@@ -477,7 +476,7 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
             if let Some(reg) = op.reg() {
                 // Some explicit registers cannot be used depending on the
                 // target. Reject those here.
-                if let InlineAsmRegOrRegClass::Reg(reg) = reg {
+                if let hir::InlineAsmRegOrRegClass::Reg { reg, source_name } = reg {
                     if let InlineAsmReg::Err = reg {
                         // `validate` will panic on `Err`, as an error must
                         // already have been reported.
@@ -490,7 +489,11 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
                         &self.tcx().sess.target,
                         op.is_clobber(),
                     ) {
-                        let msg = format!("cannot use register `{}`: {}", reg.name(), msg);
+                        let reg_name = match source_name {
+                            Some(ref reg_name) => reg_name.as_str(),
+                            None => &reg.name(),
+                        };
+                        let msg = format!("cannot use register `{reg_name}`: {msg}");
                         self.fcx.dcx().span_err(op_sp, msg);
                         continue;
                     }

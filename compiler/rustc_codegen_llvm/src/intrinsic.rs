@@ -19,12 +19,12 @@ use rustc_hir::def_id::LOCAL_CRATE;
 use rustc_hir::find_attr;
 use rustc_lint_defs::builtin::DEPRECATED_LLVM_INTRINSIC;
 use rustc_middle::mir::BinOp;
+use rustc_middle::ty::consts::ConstExt;
 use rustc_middle::ty::layout::{FnAbiOf, HasTyCtxt, HasTypingEnv, LayoutOf};
 use rustc_middle::ty::offload_meta::OffloadMetadata;
 use rustc_middle::ty::{self, GenericArgsRef, Instance, SimdAlign, Ty, TyCtxt, TypingEnv};
-use rustc_middle::{bug, span_bug};
 use rustc_session::diagnostics::feature_err;
-use rustc_span::{ErrorGuaranteed, Span, Symbol, sym};
+use rustc_span::{ErrorGuaranteed, Span, Symbol, bug, span_bug, sym};
 use rustc_structures::CrateType;
 use rustc_symbol_mangling::{
     mangle_internal_symbol, mangle_offload_export, symbol_name_for_instance_in_crate,
@@ -338,6 +338,9 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                     Primitive::Float(Float::F16) => {
                         bug!("the va_arg intrinsic does not support `f16`")
                     }
+                    Primitive::Float(Float::F16B) => {
+                        bug!("the va_arg intrinsic does not support `f16b`")
+                    }
                     Primitive::Float(Float::F32) => {
                         // c_double is actually f32 on avr.
                         if self.cx().sess().target.arch != Arch::Avr {
@@ -348,12 +351,11 @@ impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                         // 64-bit floats are always OK.
                     }
                     Primitive::Float(Float::F128) => {
-                        // FIXME(f128) figure out whether we should support this.
-                        bug!("the va_arg intrinsic does not support `f128`")
+                        // Supported on some targets, especially where long double is IEEE f128.
                     }
                 }
 
-                emit_va_arg(self, args[0], result_layout.ty)
+                emit_va_arg(self, args[0], result_layout)
             }
 
             sym::volatile_load | sym::unaligned_volatile_load => {
@@ -1359,9 +1361,9 @@ fn catch_unwind_intrinsic<'ll, 'tcx>(
         // Return 0 unconditionally from the intrinsic call;
         // we can never unwind.
         bx.const_bool(false)
-    } else if wants_msvc_seh(bx.sess()) {
+    } else if wants_msvc_seh(&bx.sess().target) {
         codegen_msvc_try(bx, try_func, data, catch_func)
-    } else if wants_wasm_eh(bx.sess()) {
+    } else if wants_wasm_eh(&bx.sess().target) {
         codegen_wasm_try(bx, try_func, data, catch_func)
     } else {
         codegen_gnu_try(bx, try_func, data, catch_func)

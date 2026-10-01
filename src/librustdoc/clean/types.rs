@@ -18,7 +18,6 @@ use rustc_hir::def_id::{CrateNum, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{Attribute, BodyId, ConstStability, Mutability, Stability, StableSince, find_attr};
 use rustc_index::IndexVec;
 use rustc_metadata::rendered_const;
-use rustc_middle::span_bug;
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, Ty, TyCtxt, Visibility};
 use rustc_resolve::rustdoc::{
@@ -28,7 +27,7 @@ use rustc_session::Session;
 use rustc_span::def_id::{CRATE_DEF_ID, ModId};
 use rustc_span::hygiene::MacroKind;
 use rustc_span::symbol::{Symbol, kw, sym};
-use rustc_span::{DUMMY_SP, FileName, Ident, Loc, RemapPathScopeComponents};
+use rustc_span::{DUMMY_SP, FileName, Ident, Loc, RemapPathScopeComponents, span_bug};
 use tracing::{debug, trace};
 
 pub(crate) use self::ItemKind::*;
@@ -577,7 +576,7 @@ impl Item {
     }
 
     pub(crate) fn links(&self, cx: &Context<'_>) -> Vec<RenderedLink> {
-        use crate::html::format::{href, link_tooltip};
+        use crate::html::format::{href_with_path_check, link_tooltip};
 
         let Some(links) = cx.cache().intra_doc_links.get(&self.item_or_reexport_id()) else {
             return vec![];
@@ -586,7 +585,7 @@ impl Item {
             .iter()
             .filter_map(|ItemLink { link: s, link_text, page_id: id, fragment }| {
                 debug!(?id);
-                if let Ok(HrefInfo { mut url, .. }) = href(*id, cx) {
+                if let Ok(HrefInfo { mut url, .. }) = href_with_path_check(*id, cx, link_text) {
                     debug!(?url);
                     match fragment {
                         Some(UrlFragment::Item(def_id)) => {
@@ -602,7 +601,7 @@ impl Item {
                     Some(RenderedLink {
                         original_text: s.clone(),
                         new_text: link_text.clone(),
-                        tooltip: link_tooltip(*id, fragment, cx).to_string(),
+                        tooltip: link_tooltip(*id, fragment, cx, Some(link_text)).to_string(),
                         href: url,
                     })
                 } else {

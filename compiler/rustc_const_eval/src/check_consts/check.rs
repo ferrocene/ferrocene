@@ -5,21 +5,21 @@ use std::num::NonZero;
 use std::ops::Deref;
 use std::{assert_matches, mem};
 
+use rustc_attr_ir::lang_items::LangItem;
+use rustc_attr_ir::{ConstStability, StabilityLevel, find_attr};
 use rustc_errors::{Diag, ErrorGuaranteed};
-use rustc_hir::attrs::lang_items::LangItem;
+use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
-use rustc_hir::{self as hir, find_attr};
 use rustc_index::bit_set::DenseBitSet;
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
-use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{self, Ty, TypeVisitableExt};
 use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::{MaybeStorageLive, always_storage_live_locals};
-use rustc_span::{Span, Symbol, sym};
+use rustc_span::{Span, Symbol, span_bug, sym};
 use rustc_trait_selection::traits::{
     Obligation, ObligationCause, ObligationCauseCode, ObligationCtxt,
 };
@@ -176,7 +176,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
         let secondary_errors = mem::take(&mut self.secondary_errors);
         if self.error_emitted.is_none() {
             for error in secondary_errors {
-                self.error_emitted = Some(error.emit());
+                self.error_emitted = Some(error.emit_err());
             }
         } else {
             assert!(self.tcx.dcx().has_errors().is_some());
@@ -277,8 +277,8 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
 
         match op.importance() {
             ops::DiagImportance::Primary => {
-                let reported = err.emit();
-                self.error_emitted = Some(reported);
+                let guar = err.emit_err();
+                self.error_emitted = Some(guar);
             }
 
             ops::DiagImportance::Secondary => {
@@ -428,7 +428,7 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
     /// Check the const stability of the given item (fn or trait).
     fn check_callee_stability(&mut self, def_id: DefId) {
         match self.tcx.lookup_const_stability(def_id) {
-            Some(hir::ConstStability { level: hir::StabilityLevel::Stable { .. }, .. }) => {
+            Some(ConstStability { level: StabilityLevel::Stable { .. }, .. }) => {
                 // All good.
             }
             None => {
@@ -444,8 +444,8 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
                     });
                 }
             }
-            Some(hir::ConstStability {
-                level: hir::StabilityLevel::Unstable { implied_by: implied_feature, issue, .. },
+            Some(ConstStability {
+                level: StabilityLevel::Unstable { implied_by: implied_feature, issue, .. },
                 feature,
                 ..
             }) => {
@@ -859,8 +859,8 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                                 });
                             }
                         }
-                        Some(hir::ConstStability {
-                            level: hir::StabilityLevel::Unstable { .. },
+                        Some(ConstStability {
+                            level: StabilityLevel::Unstable { .. },
                             feature,
                             ..
                         }) => {
@@ -879,10 +879,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                                 const_stable_indirect,
                             });
                         }
-                        Some(hir::ConstStability {
-                            level: hir::StabilityLevel::Stable { .. },
-                            ..
-                        }) => {
+                        Some(ConstStability { level: StabilityLevel::Stable { .. }, .. }) => {
                             // All good. Note that a `#[rustc_const_stable]` intrinsic (meaning it
                             // can be *directly* invoked from stable const code) does not always
                             // have the `#[rustc_intrinsic_const_stable_indirect]` attribute (which controls

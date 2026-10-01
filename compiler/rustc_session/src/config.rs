@@ -1754,7 +1754,7 @@ fn parse_jobs_all(
                 check_upper_limit(frontend, opt_name);
                 frontend
             }
-            None => jobs.flatten(),
+            None => None, // default to 1 thread irrespectively of `jobs` for now
         },
     };
     let backend = match matches.opt_str("jobs-backend") {
@@ -1866,7 +1866,7 @@ pub fn build_target_config(
             {
                 err.help(format!("did you mean `{suggestion}`?"));
             }
-            err.emit()
+            err.emit_fatal()
         }
     }
 }
@@ -2571,7 +2571,7 @@ pub fn parse_externs(
     let mut externs: BTreeMap<String, ExternEntry> = BTreeMap::new();
     for arg in matches.opt_strs("extern") {
         let ExternOpt { crate_name: name, path, options } =
-            split_extern_opt(early_dcx, unstable_opts, &arg).unwrap_or_else(|e| e.emit());
+            split_extern_opt(early_dcx, unstable_opts, &arg).unwrap_or_else(|e| e.emit_fatal());
 
         let entry = externs.entry(name.to_owned());
 

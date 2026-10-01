@@ -1581,7 +1581,6 @@
 <core::fmt::DebugAsHex as core::cmp::PartialEq>::eq
 <core::fmt::DebugAsHex as core::fmt::Debug>::fmt
 <core::fmt::Error as core::clone::Clone>::clone
-<core::fmt::Error as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::Error as core::cmp::Ord>::cmp
 <core::fmt::Error as core::cmp::PartialEq>::eq
 <core::fmt::Error as core::cmp::PartialOrd>::partial_cmp
@@ -1825,11 +1824,11 @@
 <core::num::error::TryFromIntError as core::convert::From<!>>::from
 <core::num::error::TryFromIntError as core::fmt::Debug>::fmt
 <core::num::error::TryFromIntError as core::fmt::Display>::fmt
-<core::num::imp::bignum::Big32x40 as core::clone::Clone>::clone
-<core::num::imp::bignum::Big32x40 as core::cmp::Ord>::cmp
-<core::num::imp::bignum::Big32x40 as core::cmp::PartialEq>::eq
-<core::num::imp::bignum::Big32x40 as core::cmp::PartialOrd>::partial_cmp
-<core::num::imp::bignum::Big32x40 as core::fmt::Debug>::fmt
+<core::num::imp::bignum::Big64x20 as core::clone::Clone>::clone
+<core::num::imp::bignum::Big64x20 as core::cmp::Ord>::cmp
+<core::num::imp::bignum::Big64x20 as core::cmp::PartialEq>::eq
+<core::num::imp::bignum::Big64x20 as core::cmp::PartialOrd>::partial_cmp
+<core::num::imp::bignum::Big64x20 as core::fmt::Debug>::fmt
 <core::num::imp::bignum::tests::Big8x3 as core::clone::Clone>::clone
 <core::num::imp::bignum::tests::Big8x3 as core::cmp::Ord>::cmp
 <core::num::imp::bignum::tests::Big8x3 as core::cmp::PartialEq>::eq
@@ -1974,6 +1973,12 @@
 <core::num::niche_types::UsizeNoHighBit as core::cmp::PartialOrd>::partial_cmp
 <core::num::niche_types::UsizeNoHighBit as core::fmt::Debug>::fmt
 <core::num::niche_types::UsizeNoHighBit as core::hash::Hash>::hash
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::clone::Clone>::clone
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::cmp::Ord>::cmp
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::cmp::PartialEq>::eq
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::cmp::PartialOrd>::partial_cmp
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::fmt::Debug>::fmt
+<core::num::niche_types::UsizeNoHighBitMinusOne as core::hash::Hash>::hash
 <core::num::nonzero::NonZero<T> as core::clone::Clone>::clone
 <core::num::nonzero::NonZero<T> as core::cmp::PartialEq>::eq
 <core::num::nonzero::NonZero<T> as core::cmp::PartialEq>::ne
@@ -3392,7 +3397,6 @@
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index
 <core::ops::range::RangeFrom<usize> as core::slice::index::SliceIndex<[T]>>::index_mut
 <core::ops::range::RangeFull as core::clone::Clone>::clone
-<core::ops::range::RangeFull as core::cmp::Eq>::assert_fields_are_eq
 <core::ops::range::RangeFull as core::cmp::PartialEq>::eq
 <core::ops::range::RangeFull as core::default::Default>::default
 <core::ops::range::RangeFull as core::fmt::Debug>::fmt
@@ -6883,7 +6887,6 @@ core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator f
 core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::try_rfold
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::advance_by
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::count
-core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::last
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::next
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::nth
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::size_hint
@@ -7052,6 +7055,7 @@ core::num::<impl i128>::swap_bytes
 core::num::<impl i128>::to_le
 core::num::<impl i128>::to_le_bytes
 core::num::<impl i128>::to_ne_bytes
+core::num::<impl i128>::unbounded_shr
 core::num::<impl i128>::unchecked_add::precondition_check
 core::num::<impl i128>::unchecked_cast::precondition_check
 core::num::<impl i128>::unchecked_div_exact::precondition_check
@@ -7115,6 +7119,7 @@ core::num::<impl i16>::swap_bytes
 core::num::<impl i16>::to_le
 core::num::<impl i16>::to_le_bytes
 core::num::<impl i16>::to_ne_bytes
+core::num::<impl i16>::unbounded_shr
 core::num::<impl i16>::unchecked_add::precondition_check
 core::num::<impl i16>::unchecked_cast::precondition_check
 core::num::<impl i16>::unchecked_div_exact::precondition_check
@@ -7178,6 +7183,7 @@ core::num::<impl i32>::swap_bytes
 core::num::<impl i32>::to_le
 core::num::<impl i32>::to_le_bytes
 core::num::<impl i32>::to_ne_bytes
+core::num::<impl i32>::unbounded_shr
 core::num::<impl i32>::unchecked_add::precondition_check
 core::num::<impl i32>::unchecked_cast::precondition_check
 core::num::<impl i32>::unchecked_div_exact::precondition_check
@@ -7241,6 +7247,7 @@ core::num::<impl i64>::swap_bytes
 core::num::<impl i64>::to_le
 core::num::<impl i64>::to_le_bytes
 core::num::<impl i64>::to_ne_bytes
+core::num::<impl i64>::unbounded_shr
 core::num::<impl i64>::unchecked_add::precondition_check
 core::num::<impl i64>::unchecked_cast::precondition_check
 core::num::<impl i64>::unchecked_div_exact::precondition_check
@@ -7304,6 +7311,7 @@ core::num::<impl i8>::swap_bytes
 core::num::<impl i8>::to_le
 core::num::<impl i8>::to_le_bytes
 core::num::<impl i8>::to_ne_bytes
+core::num::<impl i8>::unbounded_shr
 core::num::<impl i8>::unchecked_add::precondition_check
 core::num::<impl i8>::unchecked_cast::precondition_check
 core::num::<impl i8>::unchecked_div_exact::precondition_check
@@ -7367,6 +7375,7 @@ core::num::<impl isize>::swap_bytes
 core::num::<impl isize>::to_le
 core::num::<impl isize>::to_le_bytes
 core::num::<impl isize>::to_ne_bytes
+core::num::<impl isize>::unbounded_shr
 core::num::<impl isize>::unchecked_add::precondition_check
 core::num::<impl isize>::unchecked_cast::precondition_check
 core::num::<impl isize>::unchecked_div_exact::precondition_check
@@ -7442,6 +7451,7 @@ core::num::<impl u128>::to_le_bytes
 core::num::<impl u128>::to_ne_bytes
 core::num::<impl u128>::trailing_zeros
 core::num::<impl u128>::unbounded_shl
+core::num::<impl u128>::unbounded_shr
 core::num::<impl u128>::unchecked_add
 core::num::<impl u128>::unchecked_add::precondition_check
 core::num::<impl u128>::unchecked_cast::precondition_check
@@ -7521,6 +7531,7 @@ core::num::<impl u16>::to_le_bytes
 core::num::<impl u16>::to_ne_bytes
 core::num::<impl u16>::trailing_zeros
 core::num::<impl u16>::unbounded_shl
+core::num::<impl u16>::unbounded_shr
 core::num::<impl u16>::unchecked_add
 core::num::<impl u16>::unchecked_add::precondition_check
 core::num::<impl u16>::unchecked_cast::precondition_check
@@ -7599,6 +7610,7 @@ core::num::<impl u32>::to_le_bytes
 core::num::<impl u32>::to_ne_bytes
 core::num::<impl u32>::trailing_zeros
 core::num::<impl u32>::unbounded_shl
+core::num::<impl u32>::unbounded_shr
 core::num::<impl u32>::unchecked_add
 core::num::<impl u32>::unchecked_add::precondition_check
 core::num::<impl u32>::unchecked_cast::precondition_check
@@ -7677,6 +7689,7 @@ core::num::<impl u64>::to_le_bytes
 core::num::<impl u64>::to_ne_bytes
 core::num::<impl u64>::trailing_zeros
 core::num::<impl u64>::unbounded_shl
+core::num::<impl u64>::unbounded_shr
 core::num::<impl u64>::unchecked_add
 core::num::<impl u64>::unchecked_add::precondition_check
 core::num::<impl u64>::unchecked_cast::precondition_check
@@ -7765,6 +7778,7 @@ core::num::<impl u8>::to_le_bytes
 core::num::<impl u8>::to_ne_bytes
 core::num::<impl u8>::trailing_zeros
 core::num::<impl u8>::unbounded_shl
+core::num::<impl u8>::unbounded_shr
 core::num::<impl u8>::unchecked_add
 core::num::<impl u8>::unchecked_add::precondition_check
 core::num::<impl u8>::unchecked_cast::precondition_check
@@ -7845,6 +7859,7 @@ core::num::<impl usize>::to_le_bytes
 core::num::<impl usize>::to_ne_bytes
 core::num::<impl usize>::trailing_zeros
 core::num::<impl usize>::unbounded_shl
+core::num::<impl usize>::unbounded_shr
 core::num::<impl usize>::unchecked_add
 core::num::<impl usize>::unchecked_add::precondition_check
 core::num::<impl usize>::unchecked_cast::precondition_check
@@ -7877,17 +7892,17 @@ core::num::from_ascii_bytes_radix_panic
 core::num::from_ascii_bytes_radix_panic::do_panic
 core::num::from_ascii_bytes_radix_panic::do_panic::compiletime
 core::num::from_ascii_bytes_radix_panic::do_panic::runtime
-core::num::imp::bignum::Big32x40::add
-core::num::imp::bignum::Big32x40::digits
-core::num::imp::bignum::Big32x40::div_rem_small
-core::num::imp::bignum::Big32x40::from_small
-core::num::imp::bignum::Big32x40::from_u64
-core::num::imp::bignum::Big32x40::is_zero
-core::num::imp::bignum::Big32x40::mul_digits
-core::num::imp::bignum::Big32x40::mul_digits::mul_inner
-core::num::imp::bignum::Big32x40::mul_pow2
-core::num::imp::bignum::Big32x40::mul_small
-core::num::imp::bignum::Big32x40::sub
+core::num::imp::bignum::Big64x20::add
+core::num::imp::bignum::Big64x20::digits
+core::num::imp::bignum::Big64x20::div_rem_small
+core::num::imp::bignum::Big64x20::from_small
+core::num::imp::bignum::Big64x20::from_u64
+core::num::imp::bignum::Big64x20::is_zero
+core::num::imp::bignum::Big64x20::mul_digits
+core::num::imp::bignum::Big64x20::mul_digits::mul_inner
+core::num::imp::bignum::Big64x20::mul_pow2
+core::num::imp::bignum::Big64x20::mul_small
+core::num::imp::bignum::Big64x20::sub
 core::num::imp::bignum::tests::Big8x3::add
 core::num::imp::bignum::tests::Big8x3::digits
 core::num::imp::bignum::tests::Big8x3::div_rem_small
@@ -8004,6 +8019,9 @@ core::num::niche_types::U64NotAllOnes::new_unchecked
 core::num::niche_types::UsizeNoHighBit::as_inner
 core::num::niche_types::UsizeNoHighBit::new
 core::num::niche_types::UsizeNoHighBit::new_unchecked
+core::num::niche_types::UsizeNoHighBitMinusOne::as_inner
+core::num::niche_types::UsizeNoHighBitMinusOne::new
+core::num::niche_types::UsizeNoHighBitMinusOne::new_unchecked
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u128>> for u128>::div
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u16>> for u16>::div
 core::num::nonzero::<impl core::ops::arith::Div<core::num::nonzero::NonZero<u32>> for u32>::div

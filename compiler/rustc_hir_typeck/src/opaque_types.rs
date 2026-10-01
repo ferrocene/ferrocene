@@ -1,10 +1,10 @@
 use rustc_hir::def::DefKind;
 use rustc_infer::traits::ObligationCause;
-use rustc_middle::bug;
 use rustc_middle::ty::{
     self, DefiningScopeKind, DefinitionSiteHiddenType, OpaqueTypeKey, ProvisionalHiddenType,
     TypeVisitableExt, Unnormalized,
 };
+use rustc_span::bug;
 use rustc_trait_selection::error_reporting::infer::need_type_info::TypeAnnotationNeeded;
 use rustc_trait_selection::opaque_types::{
     NonDefiningUseReason, opaque_type_has_defining_use_args, report_item_does_not_constrain_error,
@@ -202,7 +202,7 @@ impl<'tcx> FnCtxt<'_, 'tcx> {
                             // hint that the ambiguity is in an opaque's hidden type rather than an
                             // ordinary local inference failure.
                             .with_note("cannot infer type of hidden type of opaque")
-                            .emit()
+                            .emit_err()
                     }
                 }
             };

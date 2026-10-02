@@ -85,10 +85,9 @@ Language changes in Rust 1.99.0
 
 - `Infer anonymous lifetimes in the types of associated consts as 'static <https://github.com/rust-lang/rust/pull/156508>`_
 
-  Removed paragraphs:
+  Removed paragraph: :p:`fls_37udexenqv3p`
 
-  - :p:`fls_sA4Lqc5o6cX3`
-  - :p:`fls_37udexenqv3p`
+  Changed paragraph: :p:`fls_sA4Lqc5o6cX3`
 
 FLS maintenance
 ---------------

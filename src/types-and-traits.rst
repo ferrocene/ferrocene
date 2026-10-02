@@ -3231,6 +3231,11 @@ introduced by the innermost :t:`construct` containing the elided :t:`lifetime`.
 It is a static error to elide a :t:`lifetime` in a position where no
 :t:`lifetime elision` rules are active.
 
+:dp:`fls_sA4Lqc5o6cX3`
+:t:`[Lifetime]s` cannot be implicitly elided on :t:`[impl trait type]s`.
+If no :t:`lifetime bound` is present, the :t:`impl trait type` is not considered
+to be bound by any :t:`lifetime`.
+
 .. _fls_HEtHxXBcg7JA:
 
 Function Lifetime Elision

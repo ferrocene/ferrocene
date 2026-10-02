@@ -160,6 +160,7 @@ details.partial-annotation summary::after {
 }
 
 .functions .line-untested .region-untested {
+	color: var(--var-tested);
     background-color: var(--var-region-untested-bg);
     border-radius: 2px;
 }

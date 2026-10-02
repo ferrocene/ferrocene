@@ -218,11 +218,17 @@ fn generate_function(
                                 },
                                 LineCoverageStatus::Untested => span class="line line-untested" data-filename=(filename) data-linenum=(linenum) {
                                     @for (chunk, tested) in line_runs(line, function.regions.get(linenum)) {
-                                        @if tested {
-                                            (chunk)
-                                        } @else {
-                                            span class="region-untested" { (chunk) }
-                                        }
+                                        @let (leading, content) = {
+                                            let content = chunk.trim_start();
+                                            let leading_len = chunk.len() - content.len();
+                                            chunk.split_at(leading_len)
+                                        };
+                                        (leading)
+                                         @if tested {
+                                            span class="region-tested" { (content) }
+                                         } @else {
+                                            span class="region-untested" { (content) }
+                                         }
                                     }
                                     "\n"
                                 },

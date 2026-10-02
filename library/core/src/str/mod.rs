@@ -522,12 +522,11 @@ impl str {
     /// let bytes = "bors".as_bytes();
     /// assert_eq!(b"bors", bytes);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "str_as_bytes", since = "1.39.0")]
     #[must_use]
     #[inline(always)]
-    #[allow(unused_attributes)]
-    #[ferrocene::prevalidated]
     pub const fn as_bytes(&self) -> &[u8] {
         // SAFETY: const sound because we transmute two types with the same layout
         unsafe { mem::transmute(self) }
@@ -2574,8 +2573,6 @@ impl str {
     /// # Examples
     ///
     /// ```
-    /// #![feature(trim_prefix_suffix)]
-    ///
     /// // Prefix present - removes it
     /// assert_eq!("foo:bar".trim_prefix("foo:"), "bar");
     /// assert_eq!("foofoo".trim_prefix("foo"), "foo");
@@ -2588,7 +2585,7 @@ impl str {
     /// ```
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
-    #[unstable(feature = "trim_prefix_suffix", issue = "142312")]
+    #[stable(feature = "trim_prefix_suffix", since = "CURRENT_RUSTC_VERSION")]
     pub fn trim_prefix<P: Pattern>(&self, prefix: P) -> &str {
         prefix.strip_prefix_of(self).unwrap_or(self)
     }
@@ -2611,8 +2608,6 @@ impl str {
     /// # Examples
     ///
     /// ```
-    /// #![feature(trim_prefix_suffix)]
-    ///
     /// // Suffix present - removes it
     /// assert_eq!("bar:foo".trim_suffix(":foo"), "bar");
     /// assert_eq!("foofoo".trim_suffix("foo"), "foo");
@@ -2625,7 +2620,7 @@ impl str {
     /// ```
     #[must_use = "this returns the remaining substring as a new slice, \
                   without modifying the original"]
-    #[unstable(feature = "trim_prefix_suffix", issue = "142312")]
+    #[stable(feature = "trim_prefix_suffix", since = "CURRENT_RUSTC_VERSION")]
     pub fn trim_suffix<P: Pattern>(&self, suffix: P) -> &str
     where
         for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
@@ -2948,7 +2943,7 @@ impl str {
     /// Converts this string to its ASCII upper case equivalent in-place.
     ///
     /// ASCII letters 'a' to 'z' are mapped to 'A' to 'Z',
-    /// but non-ASCII letters are unchanged.
+    /// but all other characters are unchanged.
     ///
     /// To return a new uppercased value without modifying the existing one, use
     /// [`to_ascii_uppercase()`].
@@ -2976,7 +2971,7 @@ impl str {
     /// Converts this string to its ASCII lower case equivalent in-place.
     ///
     /// ASCII letters 'A' to 'Z' are mapped to 'a' to 'z',
-    /// but non-ASCII letters are unchanged.
+    /// but all other characters are unchanged.
     ///
     /// To return a new lowercased value without modifying the existing one, use
     /// [`to_ascii_lowercase()`].

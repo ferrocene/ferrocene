@@ -9,12 +9,13 @@ use std::sync::atomic::Ordering;
 
 use hir::def_id::{LocalDefIdMap, LocalDefIdSet};
 use rustc_abi::FieldIdx;
+use rustc_attr_ir::find_attr;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_errors::{ErrorGuaranteed, MultiSpan};
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModId};
 use rustc_hir::intravisit::{self, Visitor};
-use rustc_hir::{self as hir, ForeignItemId, ItemId, Node, PatKind, QPath, find_attr};
+use rustc_hir::{self as hir, ForeignItemId, ItemId, Node, PatKind, QPath};
 use rustc_lint_defs::builtin::{DEAD_CODE, DEAD_CODE_PUB_IN_BINARY};
 use rustc_lint_defs::{self as lint, Lint, StableLintExpectationId};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
@@ -22,8 +23,7 @@ use rustc_middle::middle::dead_code::{DeadCodeLivenessSnapshot, DeadCodeLiveness
 use rustc_middle::middle::privacy::Level;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, AssocTag, TyCtxt};
-use rustc_middle::{bug, span_bug};
-use rustc_span::{Symbol, kw};
+use rustc_span::{Symbol, bug, kw, span_bug};
 use rustc_structures::CrateType;
 
 use crate::diagnostics::{
@@ -1164,6 +1164,51 @@ impl<'tcx> DeadVisitor<'tcx> {
         (level_spec.level(), level_spec.lint_id())
     }
 
+    fn fulfill_dead_code_expectations(&self, def_id: LocalDefId, include: bool) {
+        let fulfill_if_expected = |node: DefId| {
+            // Only consider local, dead symbols where lint level carries an expectation
+            if let Some(node) = node.as_local()
+                && !self.live_symbols.contains(&node)
+                && let (_, Some(expectation)) = self.def_lint_level_plus(node)
+            {
+                // Same mechanism as LintContext::fulfill_expectation.
+                self.tcx.dcx().fulfill_expectation(expectation);
+            }
+        };
+
+        if include {
+            fulfill_if_expected(def_id.to_def_id());
+        }
+
+        match self.tcx.def_kind(def_id) {
+            DefKind::Struct | DefKind::Union | DefKind::Enum => {
+                let adt = self.tcx.adt_def(def_id);
+                for variant in adt.variants() {
+                    if variant.def_id != def_id.to_def_id() {
+                        fulfill_if_expected(variant.def_id);
+                    }
+                    for field in &variant.fields {
+                        fulfill_if_expected(field.did);
+                    }
+                }
+            }
+            DefKind::Variant => {
+                let parent_enum = self.tcx.local_parent(def_id);
+                let variant = self.tcx.adt_def(parent_enum).variant_with_id(def_id.to_def_id());
+                //Check to see if fields carry expectation
+                for field in &variant.fields {
+                    fulfill_if_expected(field.did);
+                }
+            }
+            DefKind::Trait => {
+                for &assoc_def_id in self.tcx.associated_item_def_ids(def_id) {
+                    fulfill_if_expected(assoc_def_id);
+                }
+            }
+            _ => {}
+        }
+    }
+
     fn dead_code_pub_in_binary_note(&self) -> Option<DeadCodePubInBinaryNote> {
         self.target_lint.name.eq(DEAD_CODE_PUB_IN_BINARY.name).then_some(DeadCodePubInBinaryNote)
     }
@@ -1470,10 +1515,12 @@ fn lint_dead_codes<'tcx>(
         if !live_symbols.contains(&item.owner_id.def_id) {
             let parent = tcx.local_parent(item.owner_id.def_id);
             if parent != module.to_local_def_id() && !live_symbols.contains(&parent) {
-                // We already have diagnosed something.
+                // We already have diagnosed something, but check parent's field for #[expect]
+                visitor.fulfill_dead_code_expectations(item.owner_id.def_id, true);
                 continue;
             }
             visitor.check_definition(item.owner_id.def_id);
+            visitor.fulfill_dead_code_expectations(item.owner_id.def_id, false);
             continue;
         }
 
@@ -1487,6 +1534,7 @@ fn lint_dead_codes<'tcx>(
                     // Record to group diagnostics.
                     let level_plus = visitor.def_lint_level_plus(def_id);
                     dead_variants.push(DeadItem { def_id, name: variant.name, level_plus });
+                    visitor.fulfill_dead_code_expectations(def_id, false);
                     continue;
                 }
 

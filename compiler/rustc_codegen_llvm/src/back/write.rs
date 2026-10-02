@@ -34,6 +34,7 @@ use crate::back::profiling::{
 use crate::builder::SBuilder;
 use crate::builder::gpu_offload::scalar_width;
 use crate::common::AsCCharPtr;
+use crate::context::SimpleCx;
 use crate::diagnostics::{
     CopyBitcode, FromLlvmDiag, FromLlvmOptimizationDiag, LlvmError, ParseTargetMachineConfig,
     UnsupportedCompression, WithLlvmError, WriteBytecode,
@@ -41,7 +42,7 @@ use crate::diagnostics::{
 use crate::llvm::diagnostic::OptimizationDiagnosticKind::*;
 use crate::llvm::{self, DiagnosticInfo};
 use crate::type_::llvm_type_ptr;
-use crate::{LlvmCodegenBackend, ModuleLlvm, SimpleCx, attributes, base, common, llvm_util};
+use crate::{LlvmCodegenBackend, ModuleLlvm, attributes, base, common, llvm_util};
 
 pub(crate) fn llvm_err<'a>(dcx: DiagCtxtHandle<'_>, err: LlvmError<'a>) -> ! {
     match llvm::last_error() {
@@ -102,11 +103,7 @@ fn write_output_file<'ll>(
 
 pub(crate) fn create_informational_target_machine(sess: &Session) -> OwnedTargetMachine {
     let config = TargetMachineFactoryConfig { split_dwarf_file: None, output_obj_file: None };
-    // Can't use query system here quite yet because this function is invoked before the query
-    // system/tcx is set up.
-    let features = llvm_util::global_llvm_features(sess, /* for_cfg */ false);
-
-    target_machine_factory(sess, config::OptLevel::No, &features)(sess.dcx(), config)
+    target_machine_factory(sess, config::OptLevel::No)(sess.dcx(), config)
 }
 
 pub(crate) fn create_target_machine(tcx: TyCtxt<'_>, mod_name: &str) -> OwnedTargetMachine {
@@ -124,11 +121,7 @@ pub(crate) fn create_target_machine(tcx: TyCtxt<'_>, mod_name: &str) -> OwnedTar
         Some(tcx.output_filenames(()).temp_path_for_cgu(OutputType::Object, mod_name));
     let config = TargetMachineFactoryConfig { split_dwarf_file, output_obj_file };
 
-    target_machine_factory(
-        tcx.sess,
-        tcx.backend_optimization_level(()),
-        tcx.global_backend_features(()),
-    )(tcx.dcx(), config)
+    target_machine_factory(tcx.sess, tcx.backend_optimization_level(()))(tcx.dcx(), config)
 }
 
 fn to_llvm_opt_settings(cfg: config::OptLevel) -> (llvm::CodeGenOptLevel, llvm::CodeGenOptSize) {
@@ -190,7 +183,6 @@ fn to_llvm_float_abi(float_abi: Option<FloatAbi>) -> llvm::FloatAbi {
 pub(crate) fn target_machine_factory(
     sess: &Session,
     optlvl: config::OptLevel,
-    target_features: &[String],
 ) -> TargetMachineFactoryFn<LlvmCodegenBackend> {
     // Self-profile timer for creating a _factory_.
     let _prof_timer = sess.prof.generic_activity("target_machine_factory");
@@ -211,7 +203,7 @@ pub(crate) fn target_machine_factory(
 
     let triple = SmallCStr::new(&versioned_llvm_target(sess));
     let cpu = SmallCStr::new(llvm_util::target_cpu(sess));
-    let features = CString::new(target_features.join(",")).unwrap();
+    let features = CString::new(sess.global_backend_features.join(",")).unwrap();
     let abi = SmallCStr::new(sess.target.llvm_abiname.desc());
     let trap_unreachable =
         sess.opts.unstable_opts.trap_unreachable.unwrap_or(sess.target.trap_unreachable);
@@ -249,7 +241,7 @@ pub(crate) fn target_machine_factory(
         }
     };
 
-    let use_wasm_eh = wants_wasm_eh(sess);
+    let use_wasm_eh = wants_wasm_eh(&sess.target);
 
     let large_data_threshold = sess.opts.unstable_opts.large_data_threshold.unwrap_or(0);
 
@@ -426,7 +418,7 @@ fn report_inline_asm(
     };
     let level = match level {
         llvm::DiagnosticLevel::Error => Level::Error,
-        llvm::DiagnosticLevel::Warning => Level::Warning,
+        llvm::DiagnosticLevel::Warning => Level::Warning(None),
         llvm::DiagnosticLevel::Note | llvm::DiagnosticLevel::Remark => Level::Note,
     };
     let msg = msg.trim_prefix("error: ").to_string();
@@ -833,9 +825,7 @@ pub(crate) unsafe fn llvm_optimize(
 
     // This assumes that we previously compiled our kernels for a gpu target, which created a
     // `device.bin` artifact. The user is supposed to provide us with a path to this artifact, we
-    // don't need any other artifacts from the previous run. We will embed this artifact into our
-    // LLVM-IR host module, to create a `host.o` ObjectFile, which we will write to disk.
-    // The last, not yet automated steps uses the `clang-linker-wrapper` to process `host.o`.
+    // don't need any other artifacts from the previous run.
     if !cgcx.target_is_like_gpu && is_final_stage {
         if let Some(device_path) = config
             .offload
@@ -854,38 +844,7 @@ pub(crate) unsafe fn llvm_optimize(
             } else if !device_pathbuf.exists() {
                 dcx.emit_err(crate::diagnostics::OffloadNonexistingPath);
             }
-            let host_path = cgcx.output_filenames.path(OutputType::Object);
-            let host_dir = host_path.parent().unwrap();
-            let out_obj = host_dir.join("host.o");
             let device_bin_c = path_to_c_string(device_pathbuf.as_path());
-
-            // 2) Finalize host: lib.bc + device.bin -> host.o (host TM)
-            // We create a full clone of our LLVM host module, since we will embed the device IR
-            // into it, and this might break caching or incremental compilation otherwise.
-            let ok = unsafe {
-                llvm::RustOffloadWrapper::get_instance().llvm_rust_offload_embed_buffer_in_module(
-                    module.module_llvm.llmod(),
-                    device_bin_c.as_c_str(),
-                )
-            };
-            if !ok {
-                dcx.emit_err(crate::diagnostics::OffloadEmbedFailed);
-            }
-            write_output_file(
-                dcx,
-                module.module_llvm.tm.raw(),
-                config.no_builtins,
-                module.module_llvm.llmod(),
-                &out_obj,
-                None,
-                llvm::FileType::ObjectFile,
-                prof,
-                true,
-            );
-            // We ignore cgcx.save_temps here and unconditionally always keep our `device.bin` artifact.
-            // Otherwise, recompiling the host code would fail since we deleted that device artifact
-            // in the previous host compilation, which would be confusing at best.
-
             let ok = unsafe {
                 llvm::RustOffloadWrapper::get_instance().llvm_rust_offload_wrap_images(
                     module.module_llvm.llmod(),

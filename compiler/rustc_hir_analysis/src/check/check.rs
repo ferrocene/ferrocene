@@ -2,12 +2,12 @@ use std::cell::LazyCell;
 use std::ops::ControlFlow;
 
 use rustc_abi::{ExternAbi, FieldIdx, MAX_SIMD_LANES, ScalableElt};
+use rustc_attr_ir::ReprAttr::ReprPacked;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
 use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level, MultiSpan};
 use rustc_hir as hir;
-use rustc_hir::attrs::ReprAttr::ReprPacked;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::{Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
@@ -19,6 +19,7 @@ use rustc_macros::Diagnostic;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
+use rustc_middle::ty::consts::ConstExt;
 use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::layout::LayoutError;
 use rustc_middle::ty::util::Discr;
@@ -43,7 +44,7 @@ use crate::check::wfcheck::{
 use crate::collect::ItemCtxt;
 use crate::diagnostics;
 
-fn add_abi_diag_help<G>(abi: ExternAbi, diag: &mut Diag<'_, G>) {
+fn add_abi_diag_help(abi: ExternAbi, diag: &mut Diag<'_>) {
     if let ExternAbi::Cdecl { unwind } = abi {
         let c_abi = ExternAbi::C { unwind };
         diag.help(format!("use `extern {c_abi}` instead",));
@@ -62,8 +63,8 @@ pub fn check_abi(tcx: TyCtxt<'_>, hir_id: hir::HirId, span: Span, abi: ExternAbi
         abi: ExternAbi,
     }
 
-    impl<'a> Diagnostic<'a, ()> for UnsupportedCallingConventions {
-        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+    impl<'a> Diagnostic<'a> for UnsupportedCallingConventions {
+        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
             let Self { abi } = self;
             let mut lint = Diag::new(
                 dcx,
@@ -557,7 +558,7 @@ fn sanity_check_found_hidden_type<'tcx>(
     } else {
         let span = tcx.def_span(key.def_id);
         let other = ty::ProvisionalHiddenType { ty: hidden_ty, span };
-        Err(ty.build_mismatch_error(&other, tcx)?.emit())
+        Err(ty.build_mismatch_error(&other, tcx)?.emit_err())
     }
 }
 
@@ -775,9 +776,23 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(),
                 if has_default {
                     // need to store default and type of default
                     let ct = tcx.const_param_default(param.def_id).skip_binder();
-                    if let ty::ConstKind::Alias(_, alias_const) = ct.kind()
-                        && let Some(def_id) = alias_const.kind.opt_def_id()
-                    {
+                    if let ty::ConstKind::Alias(_, alias_const) = ct.kind() {
+                        let def_id = match alias_const.kind {
+                            ty::AliasConstKind::Projection { def_id } => def_id,
+                            ty::AliasConstKind::InherentSelf { def_id } => {
+                                // NOTE: typically, InherentSelf is illegal to pass to type_of,
+                                // because the generic args are incorrect (type_of expects impl-form
+                                // arguments). However, we are just checking ensure_ok().type_of(),
+                                // we are not instantiating the result, so it's OK here.
+                                def_id
+                            }
+                            ty::AliasConstKind::InherentImpl { .. } => span_bug!(
+                                tcx.def_span(param.def_id),
+                                "const_param_default should return an unnormalized constant, which should always be InherentSelf, not InherentImpl"
+                            ),
+                            ty::AliasConstKind::Free { def_id } => def_id,
+                            ty::AliasConstKind::Anon { def_id } => def_id,
+                        };
                         tcx.ensure_ok().type_of(def_id);
                     }
                 }
@@ -961,8 +976,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(),
                     tcx.require_lang_item(LangItem::Sized, ty_span),
                 );
                 check_where_clauses(wfcx, def_id);
-                wfcheck::check_const_item(wfcx, def_id, ty);
-                Ok(())
+                wfcheck::check_const_item(wfcx, def_id, ty)
             }));
 
             // Only `Node::Item` and `Node::ForeignItem` still have HIR based
@@ -1593,6 +1607,8 @@ fn check_scalable_vector(tcx: TyCtxt<'_>, span: Span, def_id: LocalDefId, scalab
             // bools
             match element_ty.kind() {
                 ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Bool => (),
+                // We need to treat a `bfloat` (`f16b`) as a primitive scalar
+                ty::Adt(def, _) if tcx.is_lang_item(def.did(), LangItem::F16B) => (),
                 _ => {
                     let mut err = tcx.dcx().struct_span_err(
                         span,
@@ -2047,7 +2063,7 @@ fn detect_discriminant_duplicate<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>)
     let mut i = 0;
     while i < discrs.len() {
         let var_i_idx = discrs[i].0;
-        let mut error: Option<Diag<'_, _>> = None;
+        let mut error: Option<Diag<'_>> = None;
 
         let mut o = i + 1;
         while o < discrs.len() {
@@ -2291,7 +2307,7 @@ fn opaque_type_cycle_error(tcx: TyCtxt<'_>, opaque_def_id: LocalDefId) -> ErrorG
     if !label {
         err.span_label(span, "cannot resolve opaque type");
     }
-    err.emit()
+    err.emit_err()
 }
 
 pub(super) fn check_coroutine_obligations(

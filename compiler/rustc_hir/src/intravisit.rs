@@ -68,7 +68,7 @@ use rustc_ast::Label;
 use rustc_ast::visit::{VisitorResult, try_visit, visit_opt, walk_list};
 use rustc_attr_ir::Attribute;
 use rustc_hir_id::HirId;
-use rustc_span::def_id::LocalDefId;
+use rustc_span::def_id::{LocalDefId, LocalModId};
 use rustc_span::{Ident, Span, Symbol};
 
 use crate::hir::*;
@@ -311,7 +311,7 @@ pub trait Visitor<'v>: Sized {
     fn visit_ident(&mut self, ident: Ident) -> Self::Result {
         walk_ident(self, ident)
     }
-    fn visit_mod(&mut self, m: &'v Mod<'v>, _s: Span, _n: HirId) -> Self::Result {
+    fn visit_mod(&mut self, m: &'v Mod<'v>, _s: Span, _id: LocalModId) -> Self::Result {
         walk_mod(self, m)
     }
     fn visit_foreign_item(&mut self, i: &'v ForeignItem<'v>) -> Self::Result {
@@ -421,8 +421,13 @@ pub trait Visitor<'v>: Sized {
     ) -> Self::Result {
         walk_fn(self, fk, fd, b, id)
     }
-    fn visit_use(&mut self, path: &'v UsePath<'v>, hir_id: HirId) -> Self::Result {
-        walk_use(self, path, hir_id)
+    fn visit_use(
+        &mut self,
+        tree: &'v UseTree<'v>,
+        hir_id: HirId,
+        _def_id: LocalDefId,
+    ) -> Self::Result {
+        walk_use(self, tree, hir_id)
     }
     fn visit_trait_item(&mut self, ti: &'v TraitItem<'v>) -> Self::Result {
         walk_trait_item(self, ti)
@@ -550,12 +555,8 @@ pub fn walk_item<'v, V: Visitor<'v>>(visitor: &mut V, item: &'v Item<'v>) -> V::
             visit_opt!(visitor, visit_name, orig_name);
             try_visit!(visitor.visit_ident(ident));
         }
-        ItemKind::Use(ref path, kind) => {
-            try_visit!(visitor.visit_use(path, item.hir_id()));
-            match kind {
-                UseKind::Single(ident) => try_visit!(visitor.visit_ident(ident)),
-                UseKind::Glob | UseKind::ListStem => {}
-            }
+        ItemKind::Use(ref tree) => {
+            try_visit!(visitor.visit_use(tree, item.hir_id(), item.owner_id.def_id));
         }
         ItemKind::Static(_, ident, ref typ, body) => {
             try_visit!(visitor.visit_ident(ident));
@@ -583,7 +584,11 @@ pub fn walk_item<'v, V: Visitor<'v>>(visitor: &mut V, item: &'v Item<'v>) -> V::
         }
         ItemKind::Mod(ident, ref module) => {
             try_visit!(visitor.visit_ident(ident));
-            try_visit!(visitor.visit_mod(module, item.span, item.hir_id()));
+            try_visit!(visitor.visit_mod(
+                module,
+                item.span,
+                LocalModId::new_unchecked(item.owner_id.def_id)
+            ));
         }
         ItemKind::ForeignMod { abi: _, items } => {
             walk_list!(visitor, visit_foreign_item_ref, items);
@@ -1264,12 +1269,24 @@ pub fn walk_fn_kind<'v, V: Visitor<'v>>(visitor: &mut V, function_kind: FnKind<'
 
 pub fn walk_use<'v, V: Visitor<'v>>(
     visitor: &mut V,
-    path: &'v UsePath<'v>,
+    tree: &'v UseTree<'v>,
     hir_id: HirId,
 ) -> V::Result {
-    let UsePath { segments, ref res, span } = *path;
+    visitor.visit_id(hir_id);
+    let UseTree { prefix, kind } = *tree;
+    let UsePath { segments, ref res, span } = *prefix;
     for res in res.present_items() {
         try_visit!(visitor.visit_path(&Path { segments, res, span }, hir_id));
+    }
+
+    match kind {
+        UseKind::Single(ident) => try_visit!(visitor.visit_ident(ident)),
+        UseKind::Glob => {}
+        UseKind::Nested { items } => {
+            for (tree, id, def_id) in items {
+                try_visit!(visitor.visit_use(tree, *id, *def_id));
+            }
+        }
     }
     V::Result::output()
 }

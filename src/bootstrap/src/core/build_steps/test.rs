@@ -2085,6 +2085,12 @@ test!(BuildStd {
     default: false
 });
 
+test!(AssemblyGcc {
+    path: "tests/assembly-gcc",
+    mode: CompiletestMode::Assembly,
+    suite: "assembly-gcc",
+    default: true
+});
 test!(AssemblyLlvm {
     path: "tests/assembly-llvm",
     mode: CompiletestMode::Assembly,
@@ -3749,7 +3755,13 @@ impl CommandLineStep for Crate {
             // Avoid panicking because we are not executing the Cargo we prepared.
             cargo.into_cmd().mark_as_executed();
         } else {
-            let description = crate_description(&self.crates);
+            let mut description = crate_description(&self.crates);
+            if builder.kind == Kind::Miri {
+                if !description.is_empty() {
+                    description.push(' ');
+                }
+                description.push_str("in Miri");
+            }
             run_cargo_test(
                 cargo,
                 &[],

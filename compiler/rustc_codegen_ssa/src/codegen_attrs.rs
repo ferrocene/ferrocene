@@ -8,7 +8,6 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_lint_defs::builtin::{INLINE_NO_SANITIZE, RTSAN_NONBLOCKING_ASYNC};
 use rustc_macros::Diagnostic;
-use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
     Validated, ValidatedStatus, item_is_validated,
 };
@@ -18,7 +17,7 @@ use rustc_middle::middle::codegen_fn_attrs::{
 use rustc_middle::mono::Visibility;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self as ty, TyCtxt};
-use rustc_span::Span;
+use rustc_span::{Span, bug};
 use rustc_target::spec::Os;
 
 use crate::diagnostics;
@@ -496,7 +495,7 @@ fn check_result(
     }
 
     if let Some(features) = check_tied_features(
-        tcx.sess,
+        &tcx.sess.target,
         &codegen_fn_attrs
             .target_features
             .iter()
@@ -506,13 +505,11 @@ fn check_result(
         let span = find_attr!(tcx, did, TargetFeature{attr_span: span, ..} => *span)
             .unwrap_or_else(|| tcx.def_span(did));
 
-        tcx.dcx()
-            .create_err(diagnostics::TargetFeatureDisableOrEnable {
-                features,
-                span: Some(span),
-                missing_features: Some(diagnostics::MissingFeatures),
-            })
-            .emit();
+        tcx.dcx().emit_err(diagnostics::TargetFeatureDisableOrEnable {
+            features,
+            span: Some(span),
+            missing_features: Some(diagnostics::MissingFeatures),
+        });
     }
 }
 

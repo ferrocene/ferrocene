@@ -10,7 +10,6 @@ use rustc_infer::infer::TyCtxtInferExt;
 use rustc_lint_defs::builtin::{
     BINDINGS_WITH_VARIANT_NAME, IRREFUTABLE_LET_PATTERNS, UNREACHABLE_PATTERNS,
 };
-use rustc_middle::bug;
 use rustc_middle::thir::visit::Visitor;
 use rustc_middle::thir::*;
 use rustc_middle::ty::print::with_no_trimmed_paths;
@@ -22,7 +21,7 @@ use rustc_pattern_analysis::rustc::{
 };
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::hygiene::DesugaringKind;
-use rustc_span::{Ident, Span};
+use rustc_span::{Ident, Span, bug};
 use rustc_trait_selection::infer::InferCtxtExt;
 use tracing::instrument;
 
@@ -679,10 +678,13 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
 
         if let Some(def_id) = is_const_pat_that_looks_like_binding(self.tcx, pat) {
             let span = self.tcx.def_span(def_id);
-            let variable = self.tcx.item_name(def_id).to_string();
+            let name = self.tcx.item_name(def_id);
             // When we encounter a constant as the binding name, point at the `const` definition.
-            interpreted_as_const = Some(InterpretedAsConst { span, variable: variable.clone() });
-            interpreted_as_const_sugg = Some(InterpretedAsConstSugg { span: pat.span, variable });
+            interpreted_as_const =
+                Some(InterpretedAsConst { span, variable: name.to_ident_string() });
+            // The suggested name is suffixed, so it is never a keyword and never needs `r#`.
+            interpreted_as_const_sugg =
+                Some(InterpretedAsConstSugg { span: pat.span, variable: name.to_string() });
         } else if let PatKind::Constant { .. } = pat.kind
             && let Ok(snippet) = self.tcx.sess.source_map().span_to_snippet(pat.span)
         {
@@ -1063,7 +1065,7 @@ fn find_fallback_pattern_typo<'tcx>(
             if let DefKind::Use = cx.tcx.def_kind(item.owner_id) {
                 // Look for consts being re-exported.
                 let item = cx.tcx.hir_expect_item(item.owner_id.def_id);
-                let hir::ItemKind::Use(path, _) = item.kind else {
+                let hir::ItemKind::Use(hir::UseTree { prefix: path, .. }) = item.kind else {
                     continue;
                 };
                 if let Some(value_ns) = path.res.value_ns
@@ -1230,10 +1232,13 @@ fn is_const_pat_that_looks_like_binding<'tcx>(tcx: TyCtxt<'tcx>, pat: &Pat<'tcx>
     // The pattern must be a named constant, and the name that appears in
     // the pattern's source text must resemble a plain identifier without any
     // `::` namespace separators or other non-identifier characters.
-    if let Some(def_id) = try { pat.extra.as_deref()?.expanded_const? }
-        && tcx.def_kind(def_id) == DefKind::Const
+    if let ty::AliasConstKind::Free { def_id } = pat.extra.as_deref()?.expanded_const?
         && let Ok(snippet) = tcx.sess.source_map().span_to_snippet(pat.span)
-        && snippet.chars().all(|c| c.is_alphanumeric() || c == '_')
+        && snippet
+            .strip_prefix("r#")
+            .unwrap_or(&snippet)
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_')
     {
         Some(def_id)
     } else {
@@ -1290,7 +1295,7 @@ fn report_non_exhaustive_match<'p, 'tcx>(
         report_adt_defined_here(cx.tcx, scrut_ty, &witnesses, true)
     {
         let mut multi_span = MultiSpan::from_span(adt_def_span);
-        multi_span.push_span_label(adt_def_span, "");
+        multi_span.push_span_context(adt_def_span);
         for Variant { span } in variants {
             multi_span.push_span_label(span, "not covered");
         }
@@ -1471,7 +1476,7 @@ fn report_non_exhaustive_match<'p, 'tcx>(
     } else {
         err.help(msg);
     }
-    err.emit()
+    err.emit_err()
 }
 
 fn joined_uncovered_patterns<'p, 'tcx>(

@@ -186,8 +186,10 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "iter_advance_by", issue = "77404")]
-    #[rustc_non_const_trait_method]
-    fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
+    fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>
+    where
+        Self::Item: [const] Destruct,
+    {
         for i in 0..n {
             if self.next_back().is_none() {
                 // SAFETY: `i` is always less than `n`.
@@ -241,8 +243,10 @@ pub const trait DoubleEndedIterator: [const] Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iter_nth_back", since = "1.37.0")]
-    #[rustc_non_const_trait_method]
-    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item>
+    where
+        Self::Item: [const] Destruct,
+    {
         if self.advance_back_by(n).is_err() {
             return None;
         }

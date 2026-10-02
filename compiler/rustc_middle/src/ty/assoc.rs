@@ -4,7 +4,7 @@ use rustc_hir::def::{DefKind, Namespace};
 use rustc_hir::def_id::DefId;
 use rustc_macros::{Decodable, Encodable, StableHash};
 use rustc_span::def_id::ModId;
-use rustc_span::{ErrorGuaranteed, Ident, Symbol};
+use rustc_span::{ErrorGuaranteed, Ident, Symbol, bug};
 
 use super::{TyCtxt, Visibility};
 use crate::ty;
@@ -143,7 +143,7 @@ impl AssocItem {
         match self.kind {
             ty::AssocKind::Type { .. } => true,
             ty::AssocKind::Const { .. } => {
-                tcx.features().generic_const_args() || tcx.is_direct_const(self.def_id)
+                tcx.features().gca_const_items() || tcx.is_direct_const(self.def_id)
             }
             ty::AssocKind::Fn { .. } => false,
         }

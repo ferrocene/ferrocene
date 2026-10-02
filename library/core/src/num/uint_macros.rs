@@ -2367,6 +2367,7 @@ macro_rules! uint_impl {
         ///     running >>= 1;
         /// }
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[rustc_const_stable(feature = "unbounded_shifts", since = "1.87.0")]
         #[must_use = "this returns the result of the operation, \

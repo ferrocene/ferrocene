@@ -2,22 +2,19 @@
 
 use std::ops::ControlFlow;
 
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::sso::SsoHashSet;
 use rustc_errors::ErrorGuaranteed;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::DefineOpaqueTypes;
-use rustc_infer::infer::resolve::DeepRegionResolver;
 use rustc_infer::traits::{ObligationCauseCode, PredicateObligations};
 use rustc_middle::traits::select::OverflowError;
 use rustc_middle::traits::{BuiltinImplSource, ImplSource, ImplSourceUserDefinedData};
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{
-    self, FieldInfo, Term, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingMode, Unnormalized,
-    Upcast,
+    self, FieldInfo, Term, Ty, TyCtxt, TypeVisitableExt, TypingMode, Unnormalized, Upcast,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::sym;
+use rustc_span::{bug, span_bug, sym};
 use tracing::{debug, instrument};
 
 use super::{
@@ -740,7 +737,7 @@ fn project<'cx, 'tcx>(
                     )
                 } else {
                     let violations = tcx.dyn_compatibility_violations(def_id);
-                    report_dyn_incompatibility(tcx, span, None, def_id, &violations).emit()
+                    report_dyn_incompatibility(tcx, span, None, def_id, &violations).emit_err()
                 };
                 return Ok(Projected::Progress(Progress::error_for_term(
                     tcx,
@@ -1326,7 +1323,7 @@ fn confirm_candidate<'cx, 'tcx>(
     if let Ok(Projected::Progress(progress)) = &mut result
         && progress.term.has_infer_regions()
     {
-        progress.term = progress.term.fold_with(&mut DeepRegionResolver::new(selcx.infcx));
+        progress.term = selcx.infcx.deeply_resolve_via_unification_table(progress.term);
     }
 
     result

@@ -9,6 +9,10 @@ use rustc_ast::{
     join_path_idents,
 };
 use rustc_ast_pretty::pprust;
+use rustc_attr_ir::diagnostic::{CustomDiagnostic, Directive, FormatArgs};
+use rustc_attr_ir::{
+    Attribute, AttributeKind, CfgEntry, Stability, StabilityLevel, StrippedCfgItem, find_attr,
+};
 use rustc_attr_parsing::AttributeParser;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
@@ -18,17 +22,14 @@ use rustc_errors::{
     pluralize, struct_span_code_err,
 };
 use rustc_feature::BUILTIN_ATTRIBUTES;
-use rustc_hir::attrs::diagnostic::{CustomDiagnostic, Directive, FormatArgs};
-use rustc_hir::attrs::{AttributeKind, CfgEntry, StrippedCfgItem};
+use rustc_hir::PrimTy;
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, MacroKinds, NonMacroAttrKind, PerNS};
 use rustc_hir::def_id::{CRATE_DEF_ID, DefId};
-use rustc_hir::{Attribute, PrimTy, Stability, StabilityLevel, find_attr};
 use rustc_lint_defs::builtin::{
     ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES,
     AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
-use rustc_middle::bug;
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_session::Session;
 use rustc_session::utils::was_invoked_from_cargo;
@@ -38,7 +39,7 @@ use rustc_span::edition::Edition;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::source_map::SourceMap;
 use rustc_span::{
-    BytePos, Ident, RemapPathScopeComponents, Span, Spanned, Symbol, SyntaxContext, kw, sym,
+    BytePos, Ident, RemapPathScopeComponents, Span, Spanned, Symbol, SyntaxContext, bug, kw, sym,
 };
 use thin_vec::{ThinVec, thin_vec};
 use tracing::{debug, instrument};
@@ -327,7 +328,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             }
         }
 
-        let guar = diag.emit();
+        let guar = diag.emit_err();
         if glob_error {
             self.glob_error = Some(guar);
         }
@@ -358,7 +359,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             if let Some(ambiguity_warning) = ambiguity_error.warning {
                 let node_id = match ambiguity_error.b1.0.kind {
                     DeclKind::Import { import, .. } => import.root_id,
-                    DeclKind::Def(_) => CRATE_NODE_ID,
+                    DeclKind::Def(..) => CRATE_NODE_ID,
                 };
 
                 let lint = match ambiguity_warning {
@@ -573,6 +574,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         err.emit();
+
+        if ns == TypeNS {
+            // Duplicated types wreak havoc on other errors, like impls selecting the wrong
+            // type causing wrong number of generic params and other assorted number of
+            // irrelevant nonsense, so avoid advancing to the next compiler stage.
+            self.raise_fatal_after_resolve = true;
+        }
         self.name_already_seen.insert(name, span);
     }
 
@@ -788,7 +796,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         span: Span,
         resolution_error: ResolutionError<'ra>,
     ) -> ErrorGuaranteed {
-        self.into_struct_error(span, resolution_error).emit()
+        self.into_struct_error(span, resolution_error).emit_err()
     }
 
     pub(crate) fn into_struct_error(
@@ -1180,8 +1188,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
                 err
             }
-            ResolutionError::CannotCaptureDynamicEnvironmentInFnItem => {
-                self.dcx().create_err(diagnostics::CannotCaptureDynamicEnvironmentInFnItem { span })
+            ResolutionError::CannotCaptureDynamicEnvironmentInFnItem { suggest_closure } => {
+                self.dcx().create_err(diagnostics::CannotCaptureDynamicEnvironmentInFnItem {
+                    span,
+                    suggest_closure,
+                })
             }
             ResolutionError::AttemptToUseNonConstantValueInConstant {
                 ident,
@@ -1322,7 +1333,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     name,
                     param_kind: is_type,
                     help: self.tcx.sess.is_nightly_build()
-                        && !self.tcx.features().min_generic_const_args(),
+                        && !self.tcx.features().gca_min_const_items(),
                     is_gca,
                     help_gca: is_gca,
                     help_suggest_gca: self.tcx.sess.is_nightly_build() && !is_gca,
@@ -1461,7 +1472,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 self.dcx().create_err(diagnostics::ModuleOnly(span))
             }
         }
-        .emit()
+        .emit_err()
     }
 
     pub(crate) fn def_path_str(&self, mut def_id: DefId) -> String {
@@ -2467,7 +2478,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     /// If the binding refers to a tuple struct constructor with fields,
     /// returns the span of its fields.
     fn ctor_fields_span(&self, decl: Decl<'_>) -> Option<Span> {
-        let DeclKind::Def(Res::Def(DefKind::Ctor(CtorOf::Struct, CtorKind::Fn), ctor_def_id)) =
+        let DeclKind::Def(Res::Def(DefKind::Ctor(CtorOf::Struct, CtorKind::Fn), ctor_def_id), _) =
             decl.kind
         else {
             return None;
@@ -2737,7 +2748,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
             match binding.kind {
                 DeclKind::Import { source_decl, import, .. } => {
-                    let through_reexport = !matches!(source_decl.kind, DeclKind::Def(_));
+                    let through_reexport = !matches!(source_decl.kind, DeclKind::Def(..));
                     let uses_relative_path = import
                         .module_path
                         .first()
@@ -2812,7 +2823,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         sugg_paths.push((path, through_reexport));
                     }
                 }
-                DeclKind::Def(_) => {}
+                DeclKind::Def(..) => {}
             }
             let first = binding == first_binding;
             let def_span = self.tcx.sess.source_map().guess_head_span(binding.span);
@@ -2873,7 +2884,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 break;
             }
         }
-
         err.emit();
     }
 

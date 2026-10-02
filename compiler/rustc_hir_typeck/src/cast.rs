@@ -44,8 +44,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{
     self, Ty, TyCtxt, TypeAndMut, TypeVisitableExt, Unnormalized, VariantDef, elaborate,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::{DUMMY_SP, Span, sym};
+use rustc_span::{DUMMY_SP, Span, bug, span_bug, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{self, ObligationCtxt, TraitEngine};
 use tracing::{debug, instrument};
@@ -734,7 +733,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                 err.span_help(self.expr_span, "consider using a box or reference as appropriate");
             }
         }
-        err.emit()
+        err.emit_err()
     }
 
     fn trivial_cast_lint(&self, fcx: &FnCtxt<'a, 'tcx>) {

@@ -8,10 +8,10 @@ use std::fmt::{self, Display};
 use std::ops::ControlFlow;
 
 use hir::def::DefKind;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_errors::Diag;
 use rustc_hir as hir;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::BoundRegionConversionTime::{self, HigherRankedType};
 use rustc_infer::infer::DefineOpaqueTypes;
@@ -19,7 +19,6 @@ use rustc_infer::infer::at::ToTrace;
 use rustc_infer::infer::relate::TypeRelation;
 use rustc_infer::traits::{ImplSource, PredicateObligations, TraitObligation};
 use rustc_macros::{TypeFoldable, TypeVisitable};
-use rustc_middle::bug;
 use rustc_middle::dep_graph::{DepKind, DepNodeIndex};
 pub use rustc_middle::traits::select::*;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
@@ -31,6 +30,7 @@ use rustc_middle::ty::{
     Unnormalized, Upcast, elaborate, may_use_unstable_feature,
 };
 use rustc_next_trait_solver::solve::AliasBoundKind;
+use rustc_span::bug;
 use tracing::{debug, instrument, trace};
 
 use self::EvaluationResult::*;
@@ -63,7 +63,7 @@ pub enum IntercrateAmbiguityCause<'tcx> {
 impl<'tcx> IntercrateAmbiguityCause<'tcx> {
     /// Emits notes when the overlap is caused by complex intercrate ambiguities.
     /// See #23980 for details.
-    pub fn add_intercrate_ambiguity_hint<G>(&self, err: &mut Diag<'_, G>) {
+    pub fn add_intercrate_ambiguity_hint(&self, err: &mut Diag<'_>) {
         err.note(self.intercrate_ambiguity_hint());
     }
 
@@ -1209,7 +1209,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         // terms of `Fn` etc, but we could probably make this more
         // precise still.
         //
-        // FIXME(min_generic_const_args): Consider consts as well?
+        // FIXME(gca_min_const_items): Consider consts as well?
         let unbound_input_types =
             stack.fresh_trait_pred.skip_binder().trait_ref.args.types().any(|ty| ty.is_fresh());
 
@@ -3082,16 +3082,16 @@ impl<'tcx> ProvisionalEvaluationCache<'tcx> {
 
     /// Invoked when the node with dfn `dfn` does not get a successful
     /// result. This will clear out any provisional cache entries
-    /// that were added since `dfn` was created. This is because the
-    /// provisional entries are things which must assume that the
-    /// things on the stack at the time of their creation succeeded --
-    /// since the failing node is presently at the top of the stack,
-    /// these provisional entries must either depend on it or some
-    /// ancestor of it.
+    /// originating from nodes visited before this node (`from_dfn < dfn`).
+    /// This is because the provisional entries are things which must
+    /// assume that the things on the stack at the time of their creation
+    /// succeeded -- since the failing node is presently at the top of
+    /// the stack, these provisional entries must either depend on it or
+    /// some ancestor of it.
     fn on_failure(&self, dfn: usize) {
         debug!(?dfn, "on_failure");
         self.map.borrow_mut().retain(|key, eval| {
-            if !eval.from_dfn >= dfn {
+            if eval.from_dfn < dfn {
                 debug!("on_failure: removing {:?}", key);
                 false
             } else {

@@ -11,7 +11,6 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_index::Idx;
 use rustc_index::bit_set::DenseBitSet;
-use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
 use rustc_middle::mir::visit::*;
 use rustc_middle::mir::*;
@@ -19,7 +18,7 @@ use rustc_middle::ty::{
     self, Instance, InstanceKind, ShimKind, Ty, TyCtxt, TypeFlags, TypeVisitableExt, Unnormalized,
 };
 use rustc_session::config::{DebugInfo, OptLevel};
-use rustc_span::Spanned;
+use rustc_span::{Spanned, bug};
 use tracing::{debug, instrument, trace, trace_span};
 
 use crate::cost_checker::{CostChecker, is_call_like};
@@ -887,24 +886,13 @@ fn inline_call<'tcx, I: Inliner<'tcx>>(
     // Place could result in two different locations if `f`
     // writes to `i`. To prevent this we need to create a temporary
     // borrow of the place and pass the destination as `*temp` instead.
-    fn dest_needs_borrow(place: Place<'_>) -> bool {
-        for elem in place.projection.iter() {
-            match elem {
-                ProjectionElem::Deref | ProjectionElem::Index(_) => return true,
-                _ => {}
-            }
-        }
-
-        false
-    }
-
-    let dest = if dest_needs_borrow(destination) {
+    //
+    // This must be a raw pointer: a mutable reference could be invalidated by
+    // reading the arguments later, and would be invalid if the destination type
+    // is uninhabited.
+    let dest = if !destination.is_stable_offset() {
         trace!("creating temp for return destination");
-        let dest = Rvalue::Ref(
-            tcx.lifetimes.re_erased,
-            BorrowKind::Mut { kind: MutBorrowKind::Default },
-            destination,
-        );
+        let dest = Rvalue::RawPtr(RawPtrKind::Mut, destination);
         let dest_ty = dest.ty(caller_body, tcx);
         let temp = Place::from(new_call_temp(caller_body, callsite, dest_ty, return_block));
         caller_body[callsite.block].statements.push(Statement::new(

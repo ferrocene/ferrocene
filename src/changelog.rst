@@ -65,6 +65,12 @@ Language changes in Rust 1.99.0
 
 - `Stabilize passing 128-bit integers via vector registers with 'asm!' on x86 <https://github.com/rust-lang/rust/pull/159525>`_
 
+  Changed paragraphs:
+
+  - :p:`fls_tubmavru8wvn`
+  - :p:`fls_b1xi3u9k4pdl`
+  - :p:`fls_i9ds6724tv20`
+
 - `Macros that expand to a semicolon now produce a warning lint even when the macro comes from another crate <https://github.com/rust-lang/rust/issues/160029>`_
 
   - Lints are outside the scope of the FLS

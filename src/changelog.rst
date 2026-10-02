@@ -38,6 +38,8 @@ Language changes in Rust 1.99.0
 
 - `Coerce from inference variables to trait objects if the inference variable is related via subtyping to a type that is known to be 'Sized' <https://github.com/rust-lang/rust/pull/157820>`_
 
+  - This adjusts interaction with an unstable language feature, and unstable features are outside the scope of FLS.
+
 - `Stabilize '#[my_macro] mod foo;' <https://github.com/rust-lang/rust/pull/157857>`_
 
   New paragraphs:

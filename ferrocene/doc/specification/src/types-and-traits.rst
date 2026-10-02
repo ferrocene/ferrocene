@@ -3231,11 +3231,6 @@ introduced by the innermost :t:`construct` containing the elided :t:`lifetime`.
 It is a static error to elide a :t:`lifetime` in a position where no
 :t:`lifetime elision` rules are active.
 
-:dp:`fls_sA4Lqc5o6cX3`
-:t:`[Lifetime]s` cannot be implicitly elided within :t:`[impl trait type]s`.
-If no :t:`lifetime bound` is present, the :t:`impl trait type` is not considered
-to be bound by any :t:`lifetime`.
-
 .. _fls_HEtHxXBcg7JA:
 
 Function Lifetime Elision
@@ -3337,10 +3332,6 @@ the :t:`type ascription` of :t:`[constant]s` and :t:`[static]s`.
 An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
 :t:`type specification` of a :t:`constant` or :t:`static` is inferred to be the
 ``'static'`` lifetime.
-
-:dp:`fls_37udexenqv3p`
-The :t:`lifetime` of an :t:`associated implementation constant` shall not be
-:t:`elided`.
 
 :dp:`fls_xi86he5vvill`
 The :t:`lifetime` of an :t:`associated trait constant` shall not be :t:`elided`.

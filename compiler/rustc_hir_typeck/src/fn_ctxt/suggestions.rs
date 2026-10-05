@@ -5,9 +5,9 @@ use core::iter;
 use hir::def_id::LocalDefId;
 use itertools::Itertools;
 use rustc_ast::util::parser::ExprPrecedence;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::packed::Pu128;
 use rustc_errors::{Applicability, Diag, MultiSpan, listify, msg};
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::{
@@ -1027,7 +1027,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         .segments
                         .last()
                         .and_then(|seg| seg.args)
-                        .map_or(false, |args| !args.constraints.is_empty())
+                        .is_some_and(|args| !args.constraints.is_empty())
                 {
                     // Use the path to get the trait name string
                     let trait_name = trait_ref
@@ -1467,7 +1467,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &hir::Expr<'_>,
     ) -> bool {
         let sp = self.tcx.sess.source_map().start_point(expr.span).with_parent(None);
-        if let Some(sp) = self.tcx.sess.psess.ambiguous_block_expr_parse.borrow().get(&sp) {
+        if let Some(sp) =
+            self.tcx.sess.psess.complete_stmt_exprs_before_bin_op_lookalike.borrow().get(&sp)
+        {
             // `{ 42 } &&x` (#61475) or `{ 42 } && if x { 1 } else { 0 }`
             err.subdiagnostic(ExprParenthesesNeeded::surrounding(*sp));
             true

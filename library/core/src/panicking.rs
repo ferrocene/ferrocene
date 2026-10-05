@@ -63,8 +63,16 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
         "The `immediate-abort` behavior is not certified, we only support `abort`."
     )]
     if cfg!(panic = "immediate-abort") {
+<<<<<<< ferrocene/main
         super::intrinsics::abort()
     };
+||||||| fd986958500
+        super::intrinsics::abort()
+    }
+=======
+        super::intrinsics::abort_immediate()
+    }
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
     // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
     // that gets resolved to the `#[panic_handler]` function.
@@ -105,7 +113,7 @@ pub const fn panic_nounwind_fmt(fmt: fmt::Arguments<'_>, _force_no_backtrace: bo
             panic_fmt(fmt)
         } else #[track_caller] {
             if cfg!(panic = "immediate-abort") {
-                super::intrinsics::abort()
+                super::intrinsics::abort_immediate()
             }
 
             // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
@@ -282,7 +290,7 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
         "The `immediate-abort` behavior is not certified, we only support `abort`."
     )]
     if cfg!(panic = "immediate-abort") {
-        super::intrinsics::abort()
+        super::intrinsics::abort_immediate()
     }
     panic!("index out of bounds: the len is {len} but the index is {index}")
 }
@@ -296,7 +304,7 @@ fn panic_bounds_check(index: usize, len: usize) -> ! {
 #[ferrocene::prevalidated]
 fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
     if cfg!(panic = "immediate-abort") {
-        super::intrinsics::abort()
+        super::intrinsics::abort_immediate()
     }
 
     panic_nounwind_fmt(
@@ -316,7 +324,7 @@ fn panic_misaligned_pointer_dereference(required: usize, found: usize) -> ! {
 #[ferrocene::prevalidated]
 fn panic_null_pointer_dereference() -> ! {
     if cfg!(panic = "immediate-abort") {
-        super::intrinsics::abort()
+        super::intrinsics::abort_immediate()
     }
 
     panic_nounwind_fmt(
@@ -332,7 +340,7 @@ fn panic_null_pointer_dereference() -> ! {
 #[rustc_nounwind] // `CheckNull` MIR pass requires this function to never unwind
 fn panic_null_reference_constructed() -> ! {
     if cfg!(panic = "immediate-abort") {
-        super::intrinsics::abort()
+        super::intrinsics::abort_immediate()
     }
 
     panic_nounwind_fmt(format_args!("null reference produced"), /* force_no_backtrace */ false)
@@ -345,7 +353,7 @@ fn panic_null_reference_constructed() -> ! {
 #[rustc_nounwind] // `CheckEnums` MIR pass requires this function to never unwind
 fn panic_invalid_enum_construction(source: u128) -> ! {
     if cfg!(panic = "immediate-abort") {
-        super::intrinsics::abort()
+        super::intrinsics::abort_immediate()
     }
 
     panic_nounwind_fmt(

@@ -852,9 +852,9 @@ impl<T, E> Result<T, E> {
     /// Returns the provided default (if [`Err`]), or
     /// applies a function to the contained value (if [`Ok`]).
     ///
-    /// Arguments passed to `map_or` are eagerly evaluated; if you are passing
+    /// The `default` argument passed to `map_or` is eagerly evaluated; if you are passing
     /// the result of a function call, it is recommended to use [`map_or_else`],
-    /// which is lazily evaluated.
+    /// which lazily evaluates `default`.
     ///
     /// [`map_or_else`]: Result::map_or_else
     ///
@@ -1368,8 +1368,6 @@ impl<T, E> Result<T, E> {
     /// # Examples
     ///
     /// ```
-    /// # #![feature(unwrap_infallible)]
-    ///
     /// fn only_good_news() -> Result<String, !> {
     ///     Ok("this is fine".into())
     /// }
@@ -1377,7 +1375,7 @@ impl<T, E> Result<T, E> {
     /// let s: String = only_good_news().into_ok();
     /// println!("{s}");
     /// ```
-    #[unstable(feature = "unwrap_infallible", issue = "61695")]
+    #[stable(feature = "unwrap_infallible", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
@@ -1405,8 +1403,6 @@ impl<T, E> Result<T, E> {
     /// # Examples
     ///
     /// ```
-    /// # #![feature(unwrap_infallible)]
-    ///
     /// fn only_bad_news() -> Result<!, String> {
     ///     Err("Oops, it failed".into())
     /// }
@@ -1414,7 +1410,7 @@ impl<T, E> Result<T, E> {
     /// let error: String = only_bad_news().into_err();
     /// println!("{error}");
     /// ```
-    #[unstable(feature = "unwrap_infallible", issue = "61695")]
+    #[stable(feature = "unwrap_infallible", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]

@@ -36,12 +36,36 @@ cfg_select! {
 
 use netc as c;
 
+// Similarly to reads (see READ_LIMIT), the `send` syscall on most platforms
+// takes a `size_t` length, but returns an `ssize_t` of bytes written. So the
+// actual maximum number of bytes we can send in one call is SSIZE_MAX.
+//
+// On Apple targets however, apparently the 64-bit libc is either buggy or
+// intentionally showing odd behavior by rejecting send calls with a size
+// larger than INT_MAX. So cap the send size to INT_MAX.
+//
+// Meanwhile on QNX, reads/writes/sends larger than INT_MAX return the wrong
+// number of bytes written (eg, writing 2^31 bytes returns (2^64 - 2^31) instead
+// of the correct byte count).
+//
+// On Windows, the relevant syscall takes an `i32` (unlike for read/write!),
+// so we need to clamp to i32::MAX.
 const MAX_SEND_LEN: usize =
+<<<<<<< ferrocene/main
     if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
         c_int::MAX as usize
     } else {
         <wrlen_t>::MAX as usize
     };
+||||||| fd986958500
+    if cfg!(target_vendor = "apple") { c_int::MAX as usize } else { <wrlen_t>::MAX as usize };
+=======
+    cfg_select! {
+        any(target_vendor = "apple", target_os = "nto", target_os = "qnx") => c_int::MAX as usize,
+        target_os = "windows" => i32::MAX as usize,
+        _ => libc::ssize_t::MAX as usize,
+    };
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 cfg_select! {
     any(
@@ -721,8 +745,6 @@ impl UdpSocket {
         self.inner.peek_from(buf)
     }
 
-    // `MAX_SEND_LEN` is `usize::MAX` off Apple/Windows, where the guard is a no-op.
-    #[allow(clippy::absurd_extreme_comparisons)]
     pub fn send_to(&self, buf: &[u8], dst: &SocketAddr) -> io::Result<usize> {
         if buf.len() > MAX_SEND_LEN {
             return Err(io::Error::from_raw_os_error(c::EMSGSIZE));
@@ -876,8 +898,6 @@ impl UdpSocket {
         self.inner.peek(buf)
     }
 
-    // `MAX_SEND_LEN` is `usize::MAX` off Apple/Windows, where the guard is a no-op.
-    #[allow(clippy::absurd_extreme_comparisons)]
     pub fn send(&self, buf: &[u8]) -> io::Result<usize> {
         if buf.len() > MAX_SEND_LEN {
             return Err(io::Error::from_raw_os_error(c::EMSGSIZE));

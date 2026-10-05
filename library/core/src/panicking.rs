@@ -59,9 +59,6 @@ compile_error!(
 #[rustc_const_stable_indirect] // must follow stable const rules since it is exposed to stable
 #[ferrocene::prevalidated]
 pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
-    #[ferrocene::annotation(
-        "The `immediate-abort` behavior is not certified, we only support `abort`."
-    )]
     if cfg!(panic = "immediate-abort") {
         super::intrinsics::abort_immediate()
     }

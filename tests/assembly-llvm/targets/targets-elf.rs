@@ -854,10 +854,6 @@
 //@ [xtensa_esp32s3_espidf] compile-flags: --target xtensa-esp32s3-espidf
 //@ [xtensa_esp32s3_espidf] needs-llvm-components: xtensa
 
-<<<<<<< ferrocene/main
-// xtensa support requires a more recent LLVM.
-//@ min-llvm-version: 22
-
 // Ferrocene-specific targets
 
 //@ revisions: i386_lynx_lynxos178
@@ -882,12 +878,6 @@
 //@ [aarch64_rhivos2_linux_gnu] compile-flags: --target aarch64-rhivos2-linux-gnu
 //@ [aarch64_rhivos2_linux_gnu] needs-llvm-components: aarch64
 
-||||||| fd986958500
-// xtensa support requires a more recent LLVM.
-//@ min-llvm-version: 22
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 // Sanity-check that each target can produce assembly code.
 
 #![feature(no_core, lang_items)]

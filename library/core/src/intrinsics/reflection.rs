@@ -34,6 +34,7 @@ pub fn type_id_type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type;
 /// data is opaque and cannot be inspected directly.
 ///
 /// The stabilized version of this intrinsic is the [PartialEq] impl for [`core::any::TypeId`].
+#[ferrocene::prevalidated]
 #[rustc_nounwind]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]

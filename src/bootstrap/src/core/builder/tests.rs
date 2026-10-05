@@ -1024,14 +1024,15 @@ mod snapshot {
         [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -1040,117 +1041,6 @@ mod snapshot {
     }
 
     #[test]
-<<<<<<< ferrocene/main
-    // Ferrocene addition: we skip this test as it is currently failing. We don't ship the rustc
-    // docs so ignoring this test is OK.
-    #[ignore]
-    fn dist_compiler_docs() {
-        let ctx = TestCtx::new();
-        insta::assert_snapshot!(
-            ctx.config("dist")
-                .path("rustc-docs")
-                .args(&["--set", "build.compiler-docs=true"])
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [doc] book (book) <host>
-        [doc] book/first-edition (book) <host>
-        [doc] book/second-edition (book) <host>
-        [doc] book/2018-edition (book) <host>
-        [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
-        [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [doc] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [doc] rustc 1 <host> -> Rustdoc 2 <host>
-        [doc] rustc 1 <host> -> Rustfmt 2 <host>
-        [build] rustc 1 <host> -> error-index 2 <host>
-        [doc] rustc 1 <host> -> error-index 2 <host>
-        [doc] nomicon (book) <host>
-        [doc] rustc 1 <host> -> reference (book) 2 <host>
-        [doc] rustdoc (book) <host>
-        [doc] rust-by-example (book) <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [doc] rustc (book) <host>
-        [doc] rustc 1 <host> -> Cargo 2 <host>
-        [doc] cargo (book) <host>
-        [doc] rustc 1 <host> -> Clippy 2 <host>
-        [doc] clippy (book) <host>
-        [doc] rustc 1 <host> -> Miri 2 <host>
-        [doc] embedded-book (book) <host>
-        [doc] edition-guide (book) <host>
-        [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        "
-        );
-    }
-
-    #[test]
-||||||| fd986958500
-    fn dist_compiler_docs() {
-        let ctx = TestCtx::new();
-        insta::assert_snapshot!(
-            ctx.config("dist")
-                .path("rustc-docs")
-                .args(&["--set", "build.compiler-docs=true"])
-                .render_steps(), @r"
-        [build] llvm <host>
-        [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 1 <host> -> std 1 <host>
-        [build] rustc 0 <host> -> UnstableBookGen 1 <host>
-        [build] rustc 0 <host> -> Rustbook 1 <host>
-        [doc] unstable-book (book) <host>
-        [doc] book (book) <host>
-        [doc] book/first-edition (book) <host>
-        [doc] book/second-edition (book) <host>
-        [doc] book/2018-edition (book) <host>
-        [build] rustdoc 1 <host>
-        [doc] rustc 1 <host> -> standalone 2 <host>
-        [doc] rustc 1 <host> -> std 1 <host> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
-        [doc] rustc 1 <host> -> rustc 2 <host>
-        [build] rustc 1 <host> -> rustc 2 <host>
-        [doc] rustc 1 <host> -> Rustdoc 2 <host>
-        [doc] rustc 1 <host> -> Rustfmt 2 <host>
-        [build] rustc 1 <host> -> error-index 2 <host>
-        [doc] rustc 1 <host> -> error-index 2 <host>
-        [doc] nomicon (book) <host>
-        [doc] rustc 1 <host> -> reference (book) 2 <host>
-        [doc] rustdoc (book) <host>
-        [doc] rust-by-example (book) <host>
-        [build] rustc 0 <host> -> LintDocs 1 <host>
-        [doc] rustc (book) <host>
-        [doc] rustc 1 <host> -> Cargo 2 <host>
-        [doc] cargo (book) <host>
-        [doc] rustc 1 <host> -> Clippy 2 <host>
-        [doc] clippy (book) <host>
-        [doc] rustc 1 <host> -> Miri 2 <host>
-        [doc] embedded-book (book) <host>
-        [doc] edition-guide (book) <host>
-        [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> releases 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
-        [build] rustc 0 <host> -> RustInstaller 1 <host>
-        "
-        );
-    }
-
-    #[test]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn dist_extended() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1228,14 +1118,15 @@ mod snapshot {
         [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -1310,17 +1201,18 @@ mod snapshot {
         [doc] clippy (book) <host>
         [doc] clippy (book) <target1>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] embedded-book (book) <host>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <host>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -1395,20 +1287,22 @@ mod snapshot {
         [doc] rustc 1 <host> -> Clippy 2 <target1>
         [doc] clippy (book) <host>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] rustc 1 <host> -> Miri 2 <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <target1>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Tidy 2 <target1>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -1498,23 +1392,25 @@ mod snapshot {
         [doc] clippy (book) <host>
         [doc] clippy (book) <target1>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] rustc 1 <host> -> Miri 2 <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <target1>
         [doc] embedded-book (book) <host>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <host>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <host>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Tidy 2 <target1>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -1622,14 +1518,15 @@ mod snapshot {
         [doc] rustc 1 <host> -> Clippy 2 <target1>
         [doc] clippy (book) <target1>
         [doc] rustc 1 <host> -> Miri 2 <target1>
+        [doc] rustc 1 <host> -> Tidy 2 <target1>
+        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
+        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
+        [doc] rustc 1 <host> -> Compiletest 2 <target1>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <target1>
         [doc] embedded-book (book) <target1>
         [doc] edition-guide (book) <target1>
         [doc] style-guide (book) <target1>
-        [doc] rustc 1 <host> -> Tidy 2 <target1>
-        [doc] rustc 1 <host> -> Bootstrap 2 <target1>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <target1>
-        [doc] rustc 1 <host> -> BuildHelper 2 <target1>
-        [doc] rustc 1 <host> -> Compiletest 2 <target1>
         [build] rustc 1 <host> -> rustc 2 <host>
         [build] rustc 1 <host> -> WasmComponentLd 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
@@ -1766,14 +1663,15 @@ mod snapshot {
         [doc] rustc 1 <host> -> Clippy 2 <host>
         [doc] clippy (book) <host>
         [doc] rustc 1 <host> -> Miri 2 <host>
+        [doc] rustc 1 <host> -> Tidy 2 <host>
+        [doc] rustc 1 <host> -> Bootstrap 2 <host>
+        [doc] rustc 1 <host> -> BuildHelper 2 <host>
+        [doc] rustc 1 <host> -> Compiletest 2 <host>
+        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
+        [doc] rustc 1 <host> -> CompilerWithTools 2 <host>
         [doc] embedded-book (book) <host>
         [doc] edition-guide (book) <host>
         [doc] style-guide (book) <host>
-        [doc] rustc 1 <host> -> Tidy 2 <host>
-        [doc] rustc 1 <host> -> Bootstrap 2 <host>
-        [doc] rustc 1 <host> -> RunMakeSupport 2 <host>
-        [doc] rustc 1 <host> -> BuildHelper 2 <host>
-        [doc] rustc 1 <host> -> Compiletest 2 <host>
         [build] rustc 0 <host> -> Compiletest 1 <host>
         [build] rustc 0 <host> -> FerroceneTraceabilityMatrix 1 <host>
         [build] rustc 2 <host> -> std 2 <host>
@@ -3115,14 +3013,15 @@ mod snapshot {
         [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Clippy 2 <x86_64-unknown-linux-gnu>
         [doc] clippy (book) <x86_64-unknown-linux-gnu>
         [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Miri 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Tidy 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Bootstrap 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> BuildHelper 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Compiletest 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> RunMakeSupport 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> CompilerWithTools 2 <x86_64-unknown-linux-gnu>
         [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
         [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
         [doc] style-guide (book) <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Tidy 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Bootstrap 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> RunMakeSupport 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> BuildHelper 2 <x86_64-unknown-linux-gnu>
-        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> Compiletest 2 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> Compiletest 1 <x86_64-unknown-linux-gnu>
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneTraceabilityMatrix 1 <x86_64-unknown-linux-gnu>
         ");

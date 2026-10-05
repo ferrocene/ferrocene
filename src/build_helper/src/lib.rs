@@ -11,21 +11,13 @@ pub mod stage0_parser;
 pub mod targets;
 pub mod util;
 
-<<<<<<< ferrocene/main
 // Ferrocene addition
 pub mod diff;
 #[cfg(feature = "metrics")]
 pub mod symbol_report;
 
-/// The default set of crates for opt-dist to collect LLVM profiles.
-pub const LLVM_PGO_CRATES: &[&str] = &[
-||||||| fd986958500
-/// The default set of crates for opt-dist to collect LLVM profiles.
-pub const LLVM_PGO_CRATES: &[&str] = &[
-=======
 /// The default set of crates for opt-dist to collect backend (LLVM, Cranelift) profiles.
 pub const BACKEND_PGO_CRATES: &[&str] = &[
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     "syn-2.0.101",
     "cargo-0.87.1",
     "serde-1.0.219",

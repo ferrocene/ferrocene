@@ -51,21 +51,11 @@ use netc as c;
 // On Windows, the relevant syscall takes an `i32` (unlike for read/write!),
 // so we need to clamp to i32::MAX.
 const MAX_SEND_LEN: usize =
-<<<<<<< ferrocene/main
-    if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
-        c_int::MAX as usize
-    } else {
-        <wrlen_t>::MAX as usize
-    };
-||||||| fd986958500
-    if cfg!(target_vendor = "apple") { c_int::MAX as usize } else { <wrlen_t>::MAX as usize };
-=======
     cfg_select! {
         any(target_vendor = "apple", target_os = "nto", target_os = "qnx") => c_int::MAX as usize,
         target_os = "windows" => i32::MAX as usize,
         _ => libc::ssize_t::MAX as usize,
     };
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 cfg_select! {
     any(

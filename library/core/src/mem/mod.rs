@@ -1726,17 +1726,9 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 /// ```
 ///
 /// [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-#[stable(feature = "mem_conjure_zst", since = "CURRENT_RUSTC_VERSION")]
-#[rustc_const_stable(feature = "mem_conjure_zst", since = "CURRENT_RUSTC_VERSION")]
-||||||| fd986958500
-#[stable(feature = "mem_conjure_zst", since = "CURRENT_RUSTC_VERSION")]
-#[rustc_const_stable(feature = "mem_conjure_zst", since = "CURRENT_RUSTC_VERSION")]
-=======
 #[stable(feature = "mem_conjure_zst", since = "1.100.0")]
 #[rustc_const_stable(feature = "mem_conjure_zst", since = "1.100.0")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[rustc_allow_const_fn_unstable(const_type_name)] // type_name() called only at run time
 pub const unsafe fn conjure_zst<T>() -> T {
     const_assert!(

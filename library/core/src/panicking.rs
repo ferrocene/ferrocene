@@ -63,16 +63,8 @@ pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {
         "The `immediate-abort` behavior is not certified, we only support `abort`."
     )]
     if cfg!(panic = "immediate-abort") {
-<<<<<<< ferrocene/main
-        super::intrinsics::abort()
-    };
-||||||| fd986958500
-        super::intrinsics::abort()
-    }
-=======
         super::intrinsics::abort_immediate()
     }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
     // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call
     // that gets resolved to the `#[panic_handler]` function.

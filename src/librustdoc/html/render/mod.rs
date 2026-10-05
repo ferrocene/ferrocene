@@ -59,13 +59,7 @@ use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_hir::Mutability;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdSet};
-<<<<<<< ferrocene/main
-use rustc_hir::{ConstStability, Mutability, StabilityLevel, StableSince};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
-||||||| fd986958500
-use rustc_hir::{ConstStability, Mutability, StabilityLevel, StableSince};
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 use rustc_middle::ty::print::PrintTraitRefExt;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::DUMMY_SP;

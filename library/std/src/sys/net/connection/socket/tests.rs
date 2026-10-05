@@ -18,17 +18,6 @@ fn no_lookup_host_duplicates() {
     );
 }
 
-<<<<<<< ferrocene/main
-// #115325: on Apple, `send` rejects a length > `c_int::MAX` with `EINVAL`, so
-// the clamp must not regress to the unbounded `wrlen_t::MAX`.
-//
-// On QNX, reads/writes larger than INT_MAX bytes return an incorrect count of
-// bytes written, as if the length is cast to a C int and back to a `usize`.
-// So similarly, we need to ensure each individual send is limited to `c_int::MAX`.
-||||||| fd986958500
-// #115325: on Apple, `send` rejects a length > `c_int::MAX` with `EINVAL`, so
-// the clamp must not regress to the unbounded `wrlen_t::MAX`.
-=======
 // On non-Windows platforms, the maximum valid length to pass into `send` is
 // not the same as the maximum of the *type* used for the length. Ensure that
 // the proper maximum is used, and that we do not regress to simply clamping to
@@ -44,20 +33,8 @@ fn no_lookup_host_duplicates() {
 //
 // On other platforms, `send` takes a `size_t` and returns an `ssize_t`, so
 // sends larger then `ssize_t::MAX` will (maybe silently) return bad lengths.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[test]
 fn max_send_len_within_platform_limit() {
-<<<<<<< ferrocene/main
-    if cfg!(any(target_vendor = "apple", target_os = "nto", target_os = "qnx")) {
-        assert_eq!(MAX_SEND_LEN, c_int::MAX as usize);
-    } else {
-        assert_eq!(MAX_SEND_LEN, <wrlen_t>::MAX as usize);
-||||||| fd986958500
-    if cfg!(target_vendor = "apple") {
-        assert_eq!(MAX_SEND_LEN, c_int::MAX as usize);
-    } else {
-        assert_eq!(MAX_SEND_LEN, <wrlen_t>::MAX as usize);
-=======
     cfg_select! {
         any(target_vendor = "apple", target_os = "nto", target_os = "qnx") => {
             assert_eq!(MAX_SEND_LEN, c_int::MAX as usize);
@@ -68,6 +45,5 @@ fn max_send_len_within_platform_limit() {
         _ => {
             assert_eq!(MAX_SEND_LEN, libc::ssize_t::MAX as usize);
         }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     }
 }

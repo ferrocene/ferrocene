@@ -40,16 +40,12 @@ const W_CORE: () = core::panic!(MSG);
 
 const W2_CORE: () = core::panic!("{}", MSG);
 //~^ ERROR evaluation panicked
-<<<<<<< ferrocene/main
+
+const ABORT: () = core::process::abort_immediate();
+//~^ ERROR the program aborted execution
 
 // ferrocene-annotations: fls_k02nt1m5fq1z
 // Panic
 //
 // ferrocene-annotations: fls_zjoamsr3dbqk
 // Diverging Expressions
-||||||| fd986958500
-=======
-
-const ABORT: () = core::process::abort_immediate();
-//~^ ERROR the program aborted execution
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

@@ -47,14 +47,7 @@
 #![feature(core_io_borrowed_buf)]
 #![feature(core_private_bignum)]
 #![feature(core_private_diy_float)]
-<<<<<<< ferrocene/main
-#![feature(cstr_display)]
-||||||| fd986958500
-#![feature(cstr_display)]
 #![feature(debug_closure_helpers)]
-=======
-#![feature(debug_closure_helpers)]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![feature(dec2flt)]
 #![feature(duration_constants)]
 #![feature(duration_constructors)]
@@ -157,7 +150,6 @@
 #![feature(c_void_variant)]
 #![feature(const_raw_ptr_comparison)]
 #![feature(control_flow_into_value)]
-#![feature(debug_closure_helpers)]
 #![feature(duration_millis_float)]
 #![feature(maybe_uninit_as_bytes)]
 #![feature(option_reduce)]

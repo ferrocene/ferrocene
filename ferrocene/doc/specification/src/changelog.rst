@@ -32,7 +32,25 @@ Language changes in Rust 1.99.0
 
 - `Stabilize C-variadic function definitions <https://github.com/rust-lang/rust/pull/155697>`_
 
-  - TODO: Fill in once the semantics has stabilized.
+  - Removed paragraph: :p:`fls_juob30rst11r`
+
+  - Changed paragraph: :p:`fls_v24ino4hix3m`
+
+  - New paragraphs:
+
+    - :p:`fls_gHhCHlxtxCGU`
+    - :p:`fls_srbY4Ilm0u2E`
+    - :p:`fls_pquTAwmZENdh`
+    - :p:`fls_MoJFg4StLGwF`
+    - :p:`fls_cNcLhlgFbpcb`
+
+  - New section: :ref:`fls_mtPH3Q90xNwE`
+
+  - Moved paragraphs:
+
+    - :p:`fls_B0SMXRqQMS1E`
+    - :p:`fls_o4uSLPo00KUg`
+    - :p:`fls_icdzs1mjh0n4`
 
 - `Trait methods are now resolved on an adjusted never type (producing a FCW) <https://github.com/rust-lang/rust/pull/156047>`_
 

@@ -15,7 +15,8 @@ if [[ ! -z "${INSTALL_LLVM}" ]]; then
     sudo apt install -y \
         llvm-22-tools \
         llvm-22-dev \
-        libpolly-22-dev
+        libpolly-22-dev \
+        libz3-dev
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
 fi

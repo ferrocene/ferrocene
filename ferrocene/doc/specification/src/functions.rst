@@ -246,6 +246,12 @@ A :t:`variadic function` that is also an :t:`external block function` shall spec
 :dp:`fls_srbY4Ilm0u2E`
 A :t:`C-variadic function` is a :t:`variadic function` with :t:`ABI` ``extern "C"`` or ``extern "C-unwind"``.
 
+:dp:`fls_88A3TSNtfaZw`
+An :t:`external function` can only be a :t:`variadic function` if it is a :t:`C-variadic function` or if it has :t:`attribute` :c:`naked`.
+
+:dp:`fls_HBKQqxo8QM2x`
+A function that has :t:`attribute` :c:`naked` can only be a :t:`variadic function` if its :t:`ABI` is among those listed in :p:`fls_icdzs1mjh0n4`.
+
 :dp:`fls_pquTAwmZENdh`
 A :t:`C-variadic function` shall be an :t:`unsafe function` when the :t:`C-variadic function` has a :t:`function body` or when the :t:`C-variadic function` appears within a :t:`trait` declaration.
 

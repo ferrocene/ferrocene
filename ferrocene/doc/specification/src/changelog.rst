@@ -87,6 +87,11 @@ Language changes in Rust 1.99.0
 
 - `Stabilize the ability to use '#[unsafe(naked)' functions to define C-variadic functions '#![feature(c_variadic_naked_functions)]' <https://github.com/rust-lang/rust/pull/159746>`_
 
+  New paragraphs:
+
+  - :p:`fls_88A3TSNtfaZw`
+  - :p:`fls_HBKQqxo8QM2x`
+
 - `Warn if an invalid 'doc' attribute is used on a macro invocation <https://github.com/rust-lang/rust/pull/161003>`_
 
   - Diagnostics are outside the scope of the FLS

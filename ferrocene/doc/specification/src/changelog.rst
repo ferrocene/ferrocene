@@ -109,6 +109,8 @@ FLS maintenance
 
 - Further restrict what a variadic function is, changing paragraph :p:`fls_icdzs1mjh0n4`.
 
+- Clarify distinction between :t:`[external function]s` and :t:`[external block function]s`.
+
 - Remove the term "indirection", and associated derivatives
 
   Changed glossary entries:

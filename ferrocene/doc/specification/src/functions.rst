@@ -211,7 +211,7 @@ A :t:`variadic part` shall be specified as the last :t:`function parameter`.
 The :t:`type` of a :t:`variadic part` is :std:`core::ffi::VaList`.
 
 :dp:`fls_o4uSLPo00KUg`
-A :t:`variadic function` is an :t:`external block function` or a :t:`external function` that specifies a :t:`variadic part`.
+A :dt:`variadic function` is an :t:`external block function` or a :t:`external function` that specifies a :t:`variadic part`.
 
 :dp:`fls_icdzs1mjh0n4`
 A :t:`variadic function` shall specify one of the following :t:`[ABI]s`:

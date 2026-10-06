@@ -130,6 +130,8 @@ the :t:`constant`.
 Pointers
 --------
 
+.. informational-section::
+
 .. rubric:: Legality Rules
 
 :dp:`fls_jriT46yWgIR0`

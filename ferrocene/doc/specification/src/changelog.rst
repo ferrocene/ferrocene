@@ -102,6 +102,8 @@ FLS maintenance
 
 - Fix definition of "trait bound", changing paragraph  :p:`fls_knut10hoz6wc`.
 
+- Further restrict what a variadic function is, changing paragraph :p:`fls_icdzs1mjh0n4`.
+
 - Remove the term "indirection", and associated derivatives
 
   Changed glossary entries:

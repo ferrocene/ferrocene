@@ -1684,7 +1684,7 @@ commands:
           name: Fetch QNX800 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
+            ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-vc2-deployment.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
           steps:

@@ -4,6 +4,10 @@
 //@ needs-sanitizer-cfi
 //@ ignore-backends: gcc
 
+// Ferrocene addition: This test requires UBSan, which is not currently
+// built for RHIVOS2
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 use run_make_support::{run, run_fail, rustc};
 
 fn main() {

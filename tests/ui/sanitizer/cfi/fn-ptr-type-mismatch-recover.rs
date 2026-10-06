@@ -19,6 +19,10 @@
 //@ [cfi-minimal-runtime] compile-flags: -Z sanitizer-cfi-minimal-runtime=true
 //@ run-pass
 
+// Ferrocene addition: This test requires UBSan, which is not currently
+// built for RHIVOS2
+//@ ignore-aarch64-rhivos2-linux-gnu
+
 use std::hint::black_box;
 use std::mem;
 

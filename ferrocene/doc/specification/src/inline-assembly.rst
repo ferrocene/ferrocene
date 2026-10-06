@@ -814,17 +814,17 @@ depend on the architecture and the target feature in effect, as follows:
      - x86
      - ``xmm_reg``
      - ``sse``
-     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`
+     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`, :c:`i128`
    * - :dp:`fls_b1xi3u9k4pdl`
      - x86
      - ``ymm_reg``
      - ``avx``
-     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`
+     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`, :c:`i128`
    * - :dp:`fls_i9ds6724tv20`
      - x86
      - ``zmm_reg``
      - ``avx512f``
-     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`
+     - :c:`i32`, :c:`f32`, :c:`i64`, :c:`f64`, :c:`i128`
    * - :dp:`fls_trldyekxxlzx`
      - x86-32
      - ``reg``

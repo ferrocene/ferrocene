@@ -79,7 +79,7 @@ Use the following sentence pattern for multiple sections::
     - :ref:`fls_section_id`
     - :ref:`fls_section_id`
 
-``<Action>`` must denote either ``Moved``, ``New``, or ``Removed``.
+``<Action>`` must denote either ``Changed``, ``Moved``, ``New``, or ``Removed``.
 
 Syntax
 ~~~~~~

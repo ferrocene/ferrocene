@@ -420,6 +420,9 @@ The sole parameter of the :t:`macro implementation function` captures
 the :t:`token` stream produced from the related :s:`EnumDeclaration`,
 :s:`StructDeclaration`, or :s:`UnionDeclaration`.
 
+:dp:`fls_TFDKS0Nl3Rwh`
+The :t:`token` stream captured by the :t:`function parameter` of the :t:`macro implementation function` of a :t:`derive macro` excludes the contents of the :t:`source file` of any :t:`outline module` declared within the related :t:`abstract data type`, and is produced without loading that :t:`source file`.
+
 :dp:`fls_H5ipqqlH3pJh`
 A :t:`derive macro` adds all its declared :t:`[derive helper attribute]s` into
 the :t:`derive helper attribute` scope of the :t:`abstract data type` the
@@ -496,6 +499,9 @@ empty.
 The second :t:`function parameter` of the :t:`macro implementation function`
 captures the :t:`token` stream produced from the related :t:`item`, including
 all :t:`[outer attribute]s` that apply to that :t:`item`.
+
+:dp:`fls_yJma4E9orknX`
+The :t:`token` stream captured by the second :t:`function parameter` of the :t:`macro implementation function` of an :t:`attribute macro` excludes the contents of the :t:`source file` of any :t:`outline module` that is, or is declared within, the related :t:`item`, and is produced without loading that :t:`source file`.
 
 .. rubric:: Examples
 
@@ -598,6 +604,9 @@ See :p:`fls_4vjbkm4ceymk` for the declaration of
 
    #[output_and_return_item]
    fn attribute_macro_invoker() {}
+
+   #[output_and_return_item]
+   mod outline;
 
 .. _fls_wjldgtio5o75:
 

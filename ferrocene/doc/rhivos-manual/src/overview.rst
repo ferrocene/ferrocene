@@ -5,7 +5,7 @@ Overview
 ========
 
 This Manual describes the use of Ferrocene |ferrocene_version|, the |iso_26262_ref|,
-|iec_61508_ref|, and |iec_62304_ref| qualified version of the Rust toolchain on RHIVOS.
+|iec_61508_ref|, and |iec_62304_ref| qualified version of the Rust toolchain on Red Hat In-Vehicle Operating System 2 (RHIVOS 2).
 Ferrocene is based on ``rustc``, ``cargo``, and ``rustdoc`` version |rust_version|.
 
 This Manual assumes familiarity with rustc and the Rust language, and outlines

@@ -1,0 +1,68 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+Ferrocene 26.11.0
+=================
+
+New features
+------------
+
+* The ``[ferrocene::prevalidated]`` attribute can now be applied to modules, traits, and ``impl``
+  blocks. This marks all contained functions as validated, avoiding the need to annotate each
+  function individually.
+
+* Added a new ``[ferrocene::requires_validation]`` attribute, which can be applied to trait methods
+  to require all implementations to be validated.
+
+* Two new targets are now supported and qualified for safety critical use:
+
+  * :target-with-tuple:`thumbv8m.main-none-eabi`
+  * :target-with-tuple:`thumbv8m.main-none-eabihf`
+
+
+Documentation changes
+---------------------
+
+* Documentation now includes docs for the crates which make up ``rustc`` itself, including
+  documentation on the ``ferrocene::prevalidated`` lint (as ``rustc_lint::ferrocene``)
+
+* Documentation for the certified subset of ``core`` has been folded into the standard library
+  documentation. Certified functions are labelled appropriately.
+
+
+Bug fixes
+---------
+
+* Fixed a diagnostics issue where calls to private, non-generic functions within libraries were not
+  checked by the pre-monomorphization pass of the ``[ferrocene::unvalidated]`` lint.
+
+  This was not a safety issue; any diagnostics would simply be delayed until compiling an
+  application which (transitively) depends on the library in question, at which point the calls
+  would be checked by the post-monomorphization lint pass.
+
+* Raise an error if attempting to use any non-LLVM code generation backend, as only the LLVM backend
+  is qualified for use with Ferrocene
+
+* Raise an error if using an external linker which does not support the ``-fuse-ld=...`` flag,
+  rather than silently failing
+
+
+Fixed known problems
+--------------------
+
+A list of fixed known problems in this release can be found on the
+`Ferrocene 26.11 Known Problems <https://problems.ferrocene.dev/versions/26.11.html>`_
+page.
+
+
+Rust changes
+------------
+
+This release includes the following changes introduced by the upstream Rust
+project. Note that this changelog is maintained by upstream. The target support
+changes described here describe Rust's support levels, and have no correlation
+to the targets and platforms supported by Ferrocene.
+
+.. rust-changelog::
+    :from: 1.98.0
+    :to: 1.99.1

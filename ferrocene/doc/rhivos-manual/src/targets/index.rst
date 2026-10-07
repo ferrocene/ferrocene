@@ -34,7 +34,7 @@ Qualified Red Hat In-Vehicle Operating System targets
      - ``aarch64-rhivos2-linux-gnu``
      - Cross-compilation
      - Full
-     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets Red Hat In-Vehicle Operating System 2 automotive Linux. As per the RHIVOS2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using the :ref:`aarch64-unknown-linux-gnu` host compiler.
+     - This is a variant of the generic :target:`aarch64-unknown-linux-gnu` target that specifically targets Red Hat In-Vehicle Operating System 2 automotive Linux (RHIVOS 2). As per the RHIVOS 2 guidelines, qualified use requires compilation on the matching host platform RedHat Enterprise Linux 10 using the :ref:`aarch64-unknown-linux-gnu` host compiler.
 
 
 Unsupported targets

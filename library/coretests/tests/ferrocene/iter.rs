@@ -844,6 +844,14 @@ fn test_range_iter_nth_back() {
     assert_eq!(None, core::range::Range::from(StepWrapper(1)..StepWrapper(10)).into_iter().nth_back(usize::MAX));
 }
 
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back`.
+#[test]
+fn test_range_inclusive_iter_nth_back() {
+    assert_eq!(Some(StepWrapper(9)), core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(1));
+    assert_eq!(None, core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(10));
+    assert_eq!(None, core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(usize::MAX));
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

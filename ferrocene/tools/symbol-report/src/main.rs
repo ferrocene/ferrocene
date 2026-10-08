@@ -15,7 +15,6 @@ use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
-use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{AttrId, Attribute, HirId};
 use rustc_interface::interface::Compiler;
@@ -133,18 +132,12 @@ fn main() {
     std::process::exit(exit_code);
 }
 
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
+use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
-        match tcx.def_kind(def) {
-            DefKind::Mod | DefKind::Struct | DefKind::Enum | DefKind::Union => continue,
-            _ => {}
-        }
-
-        match item_is_validated(tcx, def.into()) {
-            ValidatedStatus::Validated { annotation: Some(_) } => {}
-            _ => continue,
+        if !tcx.def_kind(def).is_fn_like() || !item_is_validated(tcx, def.into()).needs_test() {
+            continue;
         }
 
         let qualified_name = get_qualified_name(tcx, def);

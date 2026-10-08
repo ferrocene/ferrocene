@@ -28,6 +28,7 @@ use crate::ferrocene::{InstantiateResult, LintState, UnvalidatedImplCause, Use, 
 pub(super) struct LintThir<'thir, 'tcx> {
     thir: &'thir Thir<'tcx>,
     linter: LintState<'tcx>,
+    /// NOTE: may be different from `linter.item`
     owner: OwnerId,
 }
 
@@ -213,7 +214,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
 /// Used to check whether a `const` or `static` has a function pointer callable at runtime.
 ///
 /// c.f. Ty::contains_closure
-fn contains_unknown_fn<'tcx>(ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
+pub(crate) fn contains_unknown_fn<'tcx>(ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
     struct ContainsUnknownFnVisitor;
 
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ContainsUnknownFnVisitor {

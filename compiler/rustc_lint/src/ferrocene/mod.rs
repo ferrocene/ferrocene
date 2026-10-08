@@ -180,20 +180,10 @@ mod thir;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
-<<<<<<< HEAD
-use rustc_hir::{HirId, Item};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-||||||| parent of 11dfb660c12 (Backport ferrocene/ferrocene#2545)
-use rustc_hir::{HirId, Item};
-use rustc_lint_defs::{declare_lint_pass, declare_tool_lint};
-use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-=======
 use rustc_hir::{HirId, Item, TraitFn, TraitItem, TraitItemKind};
-use rustc_lint_defs::{declare_lint_pass, declare_tool_lint};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
     ValidatedStatus, has_requires_validation_attribute, item_is_validated,
 };
->>>>>>> 11dfb660c12 (Backport ferrocene/ferrocene#2545)
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_session::{declare_lint_pass, declare_tool_lint};

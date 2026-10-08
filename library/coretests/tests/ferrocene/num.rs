@@ -202,6 +202,10 @@ macro_rules! test_uint_checked_pow {
                 assert_eq!(<$T>::checked_pow(2, 5), Some(32));
                 assert_eq!(<$T>::checked_pow(0, 0), Some(1));
                 assert_eq!(<$T>::checked_pow(<$T>::MAX, 2), None);
+                // Black box required here
+                let base = std::hint::black_box(3 as $T);
+                let exp = std::hint::black_box(5u32);
+                assert_eq!(base.checked_pow(exp), Some(243 as $T));
             }
         )*
     };

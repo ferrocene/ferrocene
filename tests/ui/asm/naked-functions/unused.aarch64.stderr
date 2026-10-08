@@ -1,66 +1,66 @@
 error: unused variable: `a`
-  --> $DIR/unused.rs:23:32
+  --> $DIR/unused.rs:24:32
    |
 LL |     pub extern "C" fn function(a: usize, b: usize) -> usize {
    |                                ^ help: if this is intentional, prefix it with an underscore: `_a`
    |
 note: the lint level is defined here
-  --> $DIR/unused.rs:11:9
+  --> $DIR/unused.rs:12:9
    |
 LL | #![deny(unused)]
    |         ^^^^^^
    = note: `#[deny(unused_variables)]` implied by `#[deny(unused)]`
 
 error: unused variable: `b`
-  --> $DIR/unused.rs:23:42
+  --> $DIR/unused.rs:24:42
    |
 LL |     pub extern "C" fn function(a: usize, b: usize) -> usize {
    |                                          ^ help: if this is intentional, prefix it with an underscore: `_b`
 
 error: unused variable: `a`
-  --> $DIR/unused.rs:34:38
+  --> $DIR/unused.rs:35:38
    |
 LL |         pub extern "C" fn associated(a: usize, b: usize) -> usize {
    |                                      ^ help: if this is intentional, prefix it with an underscore: `_a`
 
 error: unused variable: `b`
-  --> $DIR/unused.rs:34:48
+  --> $DIR/unused.rs:35:48
    |
 LL |         pub extern "C" fn associated(a: usize, b: usize) -> usize {
    |                                                ^ help: if this is intentional, prefix it with an underscore: `_b`
 
 error: unused variable: `a`
-  --> $DIR/unused.rs:42:41
+  --> $DIR/unused.rs:43:41
    |
 LL |         pub extern "C" fn method(&self, a: usize, b: usize) -> usize {
    |                                         ^ help: if this is intentional, prefix it with an underscore: `_a`
 
 error: unused variable: `b`
-  --> $DIR/unused.rs:42:51
+  --> $DIR/unused.rs:43:51
    |
 LL |         pub extern "C" fn method(&self, a: usize, b: usize) -> usize {
    |                                                   ^ help: if this is intentional, prefix it with an underscore: `_b`
 
 error: unused variable: `a`
-  --> $DIR/unused.rs:52:40
+  --> $DIR/unused.rs:53:40
    |
 LL |         extern "C" fn trait_associated(a: usize, b: usize) -> usize {
    |                                        ^ help: if this is intentional, prefix it with an underscore: `_a`
 
 error: unused variable: `b`
-  --> $DIR/unused.rs:52:50
+  --> $DIR/unused.rs:53:50
    |
 LL |         extern "C" fn trait_associated(a: usize, b: usize) -> usize {
    |                                                  ^ help: if this is intentional, prefix it with an underscore: `_b`
 
 error: unused variable: `a`
-  --> $DIR/unused.rs:60:43
+  --> $DIR/unused.rs:61:43
    |
 LL |         extern "C" fn trait_method(&self, a: usize, b: usize) -> usize {
    |                                           ^ help: if this is intentional, prefix it with an underscore: `_a`
 
 error: unused variable: `b`
-  --> $DIR/unused.rs:60:53
+  --> $DIR/unused.rs:61:53
    |
 LL |         extern "C" fn trait_method(&self, a: usize, b: usize) -> usize {
    |                                                     ^ help: if this is intentional, prefix it with an underscore: `_b`

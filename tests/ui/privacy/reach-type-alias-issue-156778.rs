@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 #![feature(checked_type_aliases)]
 

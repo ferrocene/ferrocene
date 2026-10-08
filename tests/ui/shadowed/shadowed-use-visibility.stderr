@@ -17,7 +17,7 @@ LL | mod foo {
 help: consider importing this function instead
    |
 LL -     use crate::foo::bar::f as g;
-LL +     use foo::f as g;
+LL +     use crate::foo::f as g;
    |
 
 error[E0603]: module import `f` is private

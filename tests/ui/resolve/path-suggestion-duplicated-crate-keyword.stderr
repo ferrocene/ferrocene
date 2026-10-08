@@ -10,7 +10,7 @@ LL |                 let _x = crate::unix::linux::system::Y;
    |                                 ++++++
 help: consider importing this module
    |
-LL +             use unix::linux::system;
+LL +             use crate::unix::linux::system;
    |
 help: if you import `system`, refer to it directly
    |

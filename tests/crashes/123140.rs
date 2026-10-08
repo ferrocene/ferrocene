@@ -1,4 +1,5 @@
 //@ known-bug: #123140
+//@ edition: 2015
 trait Project {
     const SELF: Self;
 }

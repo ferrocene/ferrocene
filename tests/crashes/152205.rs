@@ -1,4 +1,6 @@
 //@ known-bug: #152205
+//@ edition: 2015
+
 #![deny(rust_2021_incompatible_closure_captures)]
 struct Foo;
 struct S;

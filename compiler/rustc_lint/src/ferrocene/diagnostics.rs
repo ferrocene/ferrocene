@@ -4,18 +4,10 @@
 use rustc_attr_ir::lang_items::LangItem;
 use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::HirId;
-<<<<<<< HEAD
-use rustc_hir::def_id::DefId;
-||||||| parent of f44322bdc5e (Backport ferrocene/ferrocene#2545)
-use rustc_hir::attrs::LangItem;
-use rustc_hir::def_id::DefId;
-=======
-use rustc_hir::attrs::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::has_requires_validation_attribute;
 use rustc_middle::ty::TyCtxt;
->>>>>>> f44322bdc5e (Backport ferrocene/ferrocene#2545)
 use rustc_span::{STDLIB_STABLE_CRATES, Span};
 use tracing::debug;
 

@@ -15,6 +15,7 @@ pub struct Validated {
 }
 
 const VALIDATED_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::prevalidated];
+const REQUIRES_VALIDATION_ATTR: &[Symbol; 2] = &[sym::ferrocene, sym::requires_validation];
 
 #[derive(Debug)]
 pub enum ValidatedStatus {
@@ -131,14 +132,14 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
         return ValidatedStatus::Validated { annotation: None, inherited: false };
     }
 
+    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
+        return annotation;
+    }
+
     if let Some(local) = owner.as_local()
         && let Some(status) = implied_validation(tcx, local)
     {
         return status;
-    }
-
-    if let Some(annotation) = any_parent_is_validated(tcx, owner) {
-        return annotation;
     }
 
     // HACK: `feature(delegation)` is horribly buggy and causes infinite cycles within the query
@@ -187,4 +188,9 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
 
         current = tcx.parent(current);
     }
+}
+
+/// Check if this item is marked with `#[ferrocene::requires_validation]`.
+pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
+    tcx.get_attrs_by_path(def_id, REQUIRES_VALIDATION_ATTR).next().map(|attr| attr.span())
 }

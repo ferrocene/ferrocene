@@ -21,3 +21,25 @@ fn panic_info() {
     let msg = info.message();
     assert_eq!(format!("{msg:?}"), txt);
 }
+
+// Covers `core::cell::panic_already_borrowed::do_panic`
+#[test]
+#[should_panic(expected = "RefCell already borrowed")]
+fn test_const_panic_do_panic() {
+    use std::cell::RefCell;
+
+    let c = RefCell::new(5);
+    let _m = c.borrow();
+
+    let _b = c.borrow_mut(); // this causes a panic
+}
+
+// Covers `core::char::methods::encode_utf8_raw::do_panic`
+#[test]
+#[should_panic(expected = "encode_utf8")]
+fn test_runtime_const_panic() {
+    let code = std::hint::black_box('ß' as u32);
+    let mut buf = [0; 1];
+
+    let _ = std::char::encode_utf8_raw(code, &mut buf);
+}

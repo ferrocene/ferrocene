@@ -1,5 +1,5 @@
 //@ aux-build: external-mut-restriction.rs
-//@ edition: 2018..
+//@ edition: 2018
 #![feature(mut_restriction)]
 
 extern crate external_mut_restriction as external;

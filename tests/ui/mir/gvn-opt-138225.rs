@@ -1,4 +1,5 @@
 //! Regression test for <https://github.com/rust-lang/rust/issues/138225>
+//@ edition: 2015
 
 pub struct A {
     name: NestedOption<Option<String>>,

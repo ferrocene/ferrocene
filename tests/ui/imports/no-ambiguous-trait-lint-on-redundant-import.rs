@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ check-pass
 // The AMBIGUOUS_GLOB_IMPORTED_TRAITS lint is reported on uses of traits that are
 // ambiguously glob imported. This test checks that we don't report this lint

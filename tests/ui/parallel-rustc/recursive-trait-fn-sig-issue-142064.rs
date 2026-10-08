@@ -1,4 +1,5 @@
 // Test for #142064, internal error: entered unreachable code
+//@ edition: 2015
 
 #![crate_type = "rlib"]
 trait A { fn foo() -> A; }

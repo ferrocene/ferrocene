@@ -1,3 +1,4 @@
+//@ edition: 2015
 // Regression test for ICE from issue #153366.
 
 #![feature(unboxed_closures)]

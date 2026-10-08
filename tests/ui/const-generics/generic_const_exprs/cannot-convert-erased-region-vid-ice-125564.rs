@@ -1,5 +1,5 @@
 //! Regression test for <https://github.com/rust-lang/rust/issues/125564>.
-
+//@ edition: 2015
 //@ incremental
 
 #![allow(incomplete_features)]

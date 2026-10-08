@@ -1,5 +1,6 @@
 use rustc_hir::attrs::CoverageAttrKind;
-use rustc_hir::find_attr;
+use rustc_hir::def::DefKind;
+use rustc_hir::{Constness, find_attr};
 use rustc_index::bit_set::DenseBitSet;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::coverage::{BasicCoverageBlock, CoverageIdsInfo, CoverageKind, MappingKind};
@@ -41,6 +42,21 @@ fn is_eligible_for_coverage(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
     if !tcx.coverage_attr_on(def_id) {
         trace!("InstrumentCoverage skipped for {def_id:?} (`#[coverage(off)]`)");
         return false;
+    }
+
+    // Ferrocene addition: Do not generate coverage records for "always-const" intrinsics
+    //
+    // An always-const intrinsic is one which should always resolve to a definite value at
+    // compile time, and so should never be called at runtime. This is enforced by a check in
+    // `compute_symbol_name` in `compiler/rustc_symbol_mangling/src/lib.rs`.
+    //
+    // Because these intrinsics are never used at runtime, `prepare_covfun_records_for_unused_functions`
+    // will detect them as unused functions and try to generate dummy coverage records, which will
+    // trip the above check. To avoid this, skip generating coverage for these intrinsics.
+    if let DefKind::Fn | DefKind::AssocFn = tcx.def_kind(def_id) {
+        if tcx.constness(def_id) == (Constness::Const { always: true }) {
+            return false;
+        }
     }
 
     true

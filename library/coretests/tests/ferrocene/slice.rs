@@ -339,3 +339,36 @@ fn test_eq_ignore_ascii_case_chunks() {
     let y = b"ABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESSABSENTMINDEDNESS01";
     assert!(!x.eq_ignore_ascii_case(y));
 }
+
+// Covers `core::slice::<impl [T]>::as_chunks_mut`
+// From `core::slice::<impl [T]>::as_chunks_mut` doctest
+#[test]
+fn test_slice_as_chunks_mut() {
+    let v = &mut [0, 0, 0, 0, 0];
+    let mut count = 1;
+
+    let (chunks, remainder) = v.as_chunks_mut();
+    remainder[0] = 9;
+    for chunk in chunks {
+        *chunk = [count; 2];
+        count += 1;
+    }
+    assert_eq!(v, &[1, 1, 2, 2, 9]);
+}
+
+// Covers `core::slice::<impl [T]>::as_chunks_mut`
+// From `core::slice::<impl [T]>::as_chunks_unchecked_mut` doctest
+#[test]
+fn test_slice_as_chunks_unchecked_mut() {
+    let slice: &mut [char] = &mut ['l', 'o', 'r', 'e', 'm', '!'];
+    let chunks: &mut [[char; 1]] =
+        // SAFETY: 1-element chunks never have remainder
+        unsafe { slice.as_chunks_unchecked_mut() };
+    chunks[0] = ['L'];
+    assert_eq!(chunks, &[['L'], ['o'], ['r'], ['e'], ['m'], ['!']]);
+    let chunks: &mut [[char; 3]] =
+        // SAFETY: The slice length (6) is a multiple of 3
+        unsafe { slice.as_chunks_unchecked_mut() };
+    chunks[1] = ['a', 'x', '?'];
+    assert_eq!(slice, &['L', 'o', 'r', 'a', 'x', '?']);
+}

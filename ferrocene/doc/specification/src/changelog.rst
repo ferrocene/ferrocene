@@ -19,6 +19,158 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.99.0
+-------------------------------
+
+- `Add allow-by-default 'raw_borrows_via_references' lint that checks for references that decay immediately into raw borrows <https://github.com/rust-lang/rust/pull/138230>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Extend 'unconditional_panic' lint to function calls that panic when the chunks/windows size is zero <https://github.com/rust-lang/rust/pull/153563>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Stabilize C-variadic function definitions <https://github.com/rust-lang/rust/pull/155697>`_
+
+- `Trait methods are now resolved on an adjusted never type (producing a FCW) <https://github.com/rust-lang/rust/pull/156047>`_
+
+  - Bug fix in the compiler without a corresponding language change.
+
+- `Coerce from inference variables to trait objects if the inference variable is related via subtyping to a type that is known to be 'Sized' <https://github.com/rust-lang/rust/pull/157820>`_
+
+  - This adjusts interaction with an unstable language feature, and unstable features are outside the scope of FLS.
+
+- `Stabilize '#[my_macro] mod foo;' <https://github.com/rust-lang/rust/pull/157857>`_
+
+  New paragraphs:
+
+  - :p:`fls_TFDKS0Nl3Rwh`
+  - :p:`fls_yJma4E9orknX`
+
+- `Fix the 'overflowing_literals' lint with repeated negation <https://github.com/rust-lang/rust/pull/158302>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Add POSIX symbols to the 'invalid_runtime_symbol_definitions' and 'suspicious_runtime_symbol_definitions' lints <https://github.com/rust-lang/rust/pull/158522>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Lint unused '#[path]' attributes on inline modules <https://github.com/rust-lang/rust/pull/158835>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Enable 'unreachable_cfg_select_predicates' lint as part of 'unused' lint group <https://github.com/rust-lang/rust/pull/159179>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Stabilize passing 128-bit integers via vector registers with 'asm!' on x86 <https://github.com/rust-lang/rust/pull/159525>`_
+
+  Changed paragraphs:
+
+  - :p:`fls_tubmavru8wvn`
+  - :p:`fls_b1xi3u9k4pdl`
+  - :p:`fls_i9ds6724tv20`
+
+- `Macros that expand to a semicolon now produce a warning lint even when the macro comes from another crate <https://github.com/rust-lang/rust/issues/160029>`_
+
+  - Lints are outside the scope of the FLS
+
+- `Explicitly document that some allocations are allowed to grow in-place (but none are allowed to shrink) <https://github.com/rust-lang/rust/pull/159729>`_
+
+  - Details of conforming tools are outside the scope of the FLS
+
+- `We now guarantee that the contents of an UnsafeCell can be accessed without going through 'get' <https://github.com/rust-lang/rust/pull/159730>`_
+
+  - The Rust Standard Library is outside the scope of the FLS.
+
+- `Stabilize the ability to use '#[unsafe(naked)' functions to define C-variadic functions '#![feature(c_variadic_naked_functions)]' <https://github.com/rust-lang/rust/pull/159746>`_
+
+- `Warn if an invalid 'doc' attribute is used on a macro invocation <https://github.com/rust-lang/rust/pull/161003>`_
+
+  - Diagnostics are outside the scope of the FLS
+
+- `Infer anonymous lifetimes in the types of associated consts as 'static <https://github.com/rust-lang/rust/pull/156508>`_
+
+  Removed paragraph: :p:`fls_37udexenqv3p`
+
+  Changed paragraph: :p:`fls_sA4Lqc5o6cX3`
+
+FLS maintenance
+---------------
+
+- Fix definition of "trait bound", changing paragraph  :p:`fls_knut10hoz6wc`.
+
+- Remove the term "indirection", and associated derivatives
+
+  Changed glossary entries:
+
+  - :t:`dangling`
+  - :t:`fat pointer type`
+  - :t:`function pointer type`
+  - :t:`pointer type`
+  - :t:`raw pointer type`
+  - :t:`reference type`
+  - :t:`thin pointer type`
+
+  Removed glossary entries:
+
+  - indirection type
+
+  Changed paragraphs:
+
+  - :p:`fls_jrohsv7hx7yw`
+  - :p:`fls_3qI8FXMsyk0f`
+  - :p:`fls_rpbhr0xukbx9`
+  - :p:`fls_twhq24s8kchh`
+  - :p:`fls_15zdiqsm1q3p`
+  - :p:`fls_ozYgHEHFTT5c`
+
+  Moved paragraphs:
+
+  - :p:`fls_1kg1mknf4yx7`
+  - :p:`fls_v2wrytr3t04h`
+  - :p:`fls_5dd7icjcl3nt`
+  - :p:`fls_B0SMXRqQMS1E`
+  - :p:`fls_hbn1l42xmr3h`
+  - :p:`fls_g1iYVw7upBnH`
+  - :p:`fls_8gpvNJfVlyaD`
+  - :p:`fls_KcI6yK0P8Onn`
+  - :p:`fls_52thmi9hnoks`
+  - :p:`fls_bYWfGDAQcWfA`
+  - :p:`fls_c2Guy3fPYaUV`
+  - :p:`fls_hrum767l6dte`
+  - :p:`fls_k6ues2936pjq`
+  - :p:`fls_csdjfwczlzfd`
+  - :p:`fls_ezh8aq6fmdvz`
+  - :p:`fls_jriT46yWgIR0`
+  - :p:`fls_VWUlxTy0QF9d`
+  - :p:`fls_kaPNJ7iIHPro`
+  - :p:`fls_5MkKtNL9oCsL`
+  - :p:`fls_1NJhTBN1D2qv`
+  - :p:`fls_wnJmQYT7iKQf`
+  - :p:`fls_ffh8mAkebORJ`
+  - :p:`fls_c3DaCLQEBpYQ`
+
+  New paragraphs:
+
+  - :p:`fls_Im7miUSS87xs`
+  - :p:`fls_aQgOFrzAhdsC`
+
+  Changed sections:
+
+  - :ref:`fls_3i4ou0dq64ny`
+
+  Moved sections:
+
+  - :ref:`fls_xztr1kebz8bo`
+  - :ref:`fls_Dqk4eIvxHloY`
+
+  New sections:
+
+  - :ref:`fls_xOuhiItK1hK0`
+  - :ref:`fls_qPWQnNXH52R3`
+  - :ref:`fls_phgP8YIwpXpi`
+
 Language changes in Rust 1.98.0
 -------------------------------
 
@@ -119,7 +271,7 @@ Language changes in Rust 1.95.0
 
   - :t:`let binding`
 
-  Changed existing paragraphs:
+  Changed paragraphs:
 
   - :p:`fls_72JHo343O7jp`
   - :p:`fls_6bwTtGKb7ba7`

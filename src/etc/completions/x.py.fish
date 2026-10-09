@@ -439,6 +439,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand test" -l run -d 'whether to ex
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand test" -l coverage-crate -d 'Library crate(s) to include in the coverage report (defaults to `core`). May be passed multiple times to report on more than one crate' -r
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-cortex-r5f\t'',2021-specific-cortex-m4\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
@@ -499,6 +500,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand t" -l run -d 'whether to execu
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l verbose-run-make-subprocess-output -d 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l test-codegen-backend -d 'Use a different codegen backend when running tests' -r
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l coverage -d 'generate coverage for tests' -r -f -a "{library\t''}"
+complete -c x.py -n "__fish_x.py_using_subcommand t" -l coverage-crate -d 'Library crate(s) to include in the coverage report (defaults to `core`). May be passed multiple times to report on more than one crate' -r
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l test-variant -d 'Choose the test variant to use for this execution' -r -f -a "{2021\t'',2021-cortex-a53\t'',2021-specific-cortex-a53\t'',2021-neoverse-v1\t'',2021-cortex-m4\t'',2021-cortex-r5f\t'',2021-specific-cortex-m4\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand t" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
@@ -739,6 +741,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand install" -l skip-stage0-valida
 complete -c x.py -n "__fish_x.py_using_subcommand install" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x.py -n "__fish_x.py_using_subcommand install" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l args -d 'arguments for the tool' -r
+complete -c x.py -n "__fish_x.py_using_subcommand run" -l coverage-crate -d 'Library crate(s) to include in the coverage report (defaults to `core`). Only used by the `ferrocene-coverage-report` alias' -r
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l build -d 'host target of the stage0 compiler' -r -f
@@ -777,6 +780,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand run" -l skip-stage0-validation
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l skip-std-check-if-no-download-rustc -d 'Skip checking the standard library if `rust.download-rustc` isn\'t available. This is mostly for RA as building the stage1 compiler to check the library tree on each code change might be too much for some computers'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c x.py -n "__fish_x.py_using_subcommand r" -l args -d 'arguments for the tool' -r
+complete -c x.py -n "__fish_x.py_using_subcommand r" -l coverage-crate -d 'Library crate(s) to include in the coverage report (defaults to `core`). Only used by the `ferrocene-coverage-report` alias' -r
 complete -c x.py -n "__fish_x.py_using_subcommand r" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand r" -l build-dir -d 'Build directory, overrides `build.build-dir` in `bootstrap.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand r" -l build -d 'host target of the stage0 compiler' -r -f

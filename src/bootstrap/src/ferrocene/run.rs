@@ -112,18 +112,23 @@ impl CommandLineStep for TraceabilityMatrix {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols {
     pub(super) build_compiler: Compiler,
     pub(super) target: TargetSelection,
+    pub(super) crates: Vec<String>,
 }
 
 impl CertifiedCoreSymbols {
-    pub(super) fn new(builder: &Builder<'_>, target: TargetSelection) -> Self {
+    pub(super) fn new(
+        builder: &Builder<'_>,
+        target: TargetSelection,
+        crates: Vec<String>,
+    ) -> Self {
         // We need at least stage 1 so that our compiler knows about .certified targets.
         let stage = builder.top_stage.max(1);
         let build_compiler = builder.compiler(stage, builder.config.host_target);
-        CertifiedCoreSymbols { build_compiler, target }
+        CertifiedCoreSymbols { build_compiler, target, crates }
     }
 }
 
@@ -135,7 +140,7 @@ impl Step for CertifiedCoreSymbols {
             panic!("generating the core symbol report requires `rust.debug-assertions-std=true`");
         }
 
-        let CertifiedCoreSymbols { build_compiler, target } = self;
+        let CertifiedCoreSymbols { build_compiler, target, crates } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
         // c.f. check::std
@@ -223,7 +228,8 @@ impl CommandLineStep for CoverageReport {
             CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
         let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
 
-        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target));
+        let crates = builder.config.cmd.ferrocene_coverage_crates();
+        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target, crates));
 
         builder.ensure(CoverageReport {
             certified_target: run.target,

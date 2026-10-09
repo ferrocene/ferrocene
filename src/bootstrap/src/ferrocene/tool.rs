@@ -81,7 +81,7 @@ impl CommandLineStep for SelfTest {
 pub(crate) struct SymbolReport {
     pub(crate) target_compiler: Compiler,
 }
-pub(super) const SYMBOL_PATH: &str = "ferrocene/tools/symbol-report";
+const SYMBOL_PATH: &str = "ferrocene/tools/symbol-report";
 
 impl CommandLineStep for SymbolReport {
     type Output = PathBuf;

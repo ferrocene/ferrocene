@@ -87,9 +87,6 @@
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
 //
-// Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
-// of conflicts we have when merging main.
-//
 // Library features:
 // tidy-alphabetical-start
 #![feature(allocator_ext)]

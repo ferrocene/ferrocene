@@ -230,6 +230,9 @@
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs
 // from other crates, but since this can only appear for lang items, it doesn't seem worth fixing.
 #![feature(intra_doc_pointers)]
+//
+// Ferrocene addition:
+#![warn(ferrocene::unvalidated)]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

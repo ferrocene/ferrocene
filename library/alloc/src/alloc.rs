@@ -148,6 +148,7 @@ unsafe impl core::alloc::StaticAllocator for Global {}
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 pub unsafe fn alloc(layout: Layout) -> *mut u8 {
     // SAFETY: Upheld by caller.
     unsafe {

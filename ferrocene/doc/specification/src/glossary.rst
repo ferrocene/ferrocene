@@ -713,6 +713,11 @@ with an implicit 0x00 byte appended to it.
 
 See :s:`CStringLiteral`.
 
+C-variadic function
+^^^^^^^^^^^^^^^^^^^
+
+A :dt:`C-variadic function` is a :t:`variadic function` with :t:`ABI` ``extern "C"`` or ``extern "C-unwind"``.
+
 Call conformance
 ^^^^^^^^^^^^^^^^
 
@@ -1070,9 +1075,7 @@ the tool compiling the :t:`crate`.
 dangling
 ^^^^^^^^
 
-A :t:`value` of an :t:`indirection type` is :dt:`dangling` if it is either
-:c:`null` or not all of the bytes at the referred memory location are part of
-the same allocation.
+A :t:`pointer` is :dt:`dangling` if it is either :c:`null` or not all of the bytes at the referred memory location are part of the same allocation.
 
 data race
 ^^^^^^^^^
@@ -1489,21 +1492,24 @@ See :s:`ExpressionWithoutBlock`.
 external block
 ^^^^^^^^^^^^^^
 
-An :dt:`external block` is a :t:`construct` that provides the declarations of
-foreign :t:`[function]s` as unchecked imports.
+An :dt:`external block` is a :t:`construct` that provides the declarations of :t:`[external block function]s` and :t:`[external static]s` as unchecked imports.
 
 See :s:`ExternalBlock`.
+
+external block function
+^^^^^^^^^^^^^^^^^^^^^^^
+
+An :dt:`external block function` is a :t:`function` declared within an :t:`external block`.
 
 external function
 ^^^^^^^^^^^^^^^^^
 
-An :dt:`external function` is an unchecked import of a foreign :t:`function`.
+An :dt:`external function` is a :t:`function` subject to :t:`function qualifier` ``extern``.
 
 external function item type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An :dt:`external function item type` is a :t:`function item type` where the
-related :t:`function` is an :t:`external function`.
+An :dt:`external function item type` is a :t:`function item type` where the related :t:`function` is an :t:`external block function`.
 
 external static
 ^^^^^^^^^^^^^^^
@@ -1530,7 +1536,7 @@ A :dt:`fat pointer` is a :t:`value` of a :t:`fat pointer type`.
 fat pointer type
 ^^^^^^^^^^^^^^^^
 
-A :dt:`fat pointer type` is an :t:`indirection type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
+A :dt:`fat pointer type` is a :t:`pointer type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
 
 FFI
 ^^^
@@ -1641,9 +1647,7 @@ See :s:`ForLoopExpression`.
 Foreign Function Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`,
-:t:`external block`, :t:`[external function]s`, linkage, and :t:`type`
-:t:`layout` to interface a Rust program with foreign code.
+:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`, :t:`external block`, :t:`[external block function]s`, linkage, and :t:`type` :t:`layout` to interface a Rust program with foreign code.
 
 fragment specifier
 ^^^^^^^^^^^^^^^^^^
@@ -1699,8 +1703,7 @@ See :s:`FunctionParameter`.
 function pointer type
 ^^^^^^^^^^^^^^^^^^^^^
 
-A :dt:`function pointer type` is an :t:`indirection type` that refers to a
-:t:`function`.
+A :dt:`function pointer type` is a :t:`type` that refers to a :t:`function`.
 
 See :s:`FunctionPointerTypeSpecification`.
 
@@ -2191,12 +2194,6 @@ An :dt:`indexing operand` is an :t:`operand` which specifies the index for the
 :t:`indexed operand` being indexed into by an :t:`index expression`.
 
 See :s:`IndexingOperand`.
-
-indirection type
-^^^^^^^^^^^^^^^^
-
-An :dt:`indirection type` is a :t:`type` whose :t:`[value]s` refer to memory
-locations.
 
 inert attribute
 ^^^^^^^^^^^^^^^
@@ -3420,7 +3417,7 @@ A :dt:`pointer` is a :t:`value` of a :t:`pointer type`.
 pointer type
 ^^^^^^^^^^^^
 
-A :dt:`pointer type` is either a :t:`raw pointer type` or a :t:`reference type`.
+A :dt:`pointer type` is a :t:`type` whose :t:`[value]s` refer to memory locations.
 
 positional register argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3678,8 +3675,7 @@ A :dt:`raw pointer` is a :t:`value` of a :t:`raw pointer type`.
 raw pointer type
 ^^^^^^^^^^^^^^^^
 
-A :dt:`raw pointer type` is an :t:`indirection type` without safety and
-liveness guarantees.
+A :dt:`raw pointer type` is a :t:`pointer type` without safety and liveness guarantees.
 
 See :s:`RawPointerTypeSpecification`.
 
@@ -3776,7 +3772,7 @@ See :s:`ReferencePattern`.
 reference type
 ^^^^^^^^^^^^^^
 
-A :dt:`reference type` is an :t:`indirection type` with :t:`ownership`.
+A :dt:`reference type` is a :t:`pointer type` with :t:`ownership`.
 
 See :s:`ReferenceTypeSpecification`.
 
@@ -4512,8 +4508,7 @@ A :dt:`thin pointer` is a :t:`value` of a :t:`thin pointer type`.
 thin pointer type
 ^^^^^^^^^^^^^^^^^
 
-A :dt:`thin pointer type` is an :t:`indirection type` that refers to a
-:t:`fixed sized type`.
+A :dt:`thin pointer type` is a :t:`pointer type` that refers to a :t:`fixed sized type`.
 
 token matching
 ^^^^^^^^^^^^^^
@@ -4548,8 +4543,7 @@ See :s:`TraitBody`.
 trait bound
 ^^^^^^^^^^^
 
-A :dt:`trait bound` is a :t:`bound` that imposes a constraint on the
-:t:`[trait]s` of :t:`[generic parameter]s`.
+A :dt:`trait bound` is a :t:`bound` that uses a :t:`[trait]` to impose a constraint.
 
 See :s:`TraitBound`.
 
@@ -5149,11 +5143,15 @@ variable
 A :dt:`variable` is a placeholder for a :t:`value` that is allocated on the
 stack.
 
+variadic function
+^^^^^^^^^^^^^^^^^
+
+A :t:`variadic function` is an :t:`external block function` or a :t:`external function` that specifies a :t:`variadic part`.
+
 variadic part
 ^^^^^^^^^^^^^
 
-A :dt:`variadic part` indicates the presence of :t:`C`-like optional
-parameters.
+A :dt:`variadic part` indicates the presence of :t:`C`-like optional parameters.
 
 See :s:`VariadicPart`.
 

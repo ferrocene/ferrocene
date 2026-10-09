@@ -817,13 +817,10 @@ When applied to an :t:`associated trait function`, :t:`attribute`
 .. rubric:: Undefined Behavior
 
 :dp:`fls_vkz8t751gfhk`
-It is undefined behavior when :t:`attribute` :c:`track_caller` applies to an
-:t:`external function` but does not apply to all linked :t:`[implementation]s`.
+It is undefined behavior when :t:`attribute` :c:`track_caller` applies to an :t:`external block function` but does not apply to all linked :t:`[implementation]s`.
 
 :dp:`fls_ddg0u5lej74x`
-It is undefined behavior when :t:`attribute` :c:`track_caller` is applied to
-an :t:`exported function` but the :t:`external function` it links to is missing
-the :t:`attribute`.
+It is undefined behavior when :t:`attribute` :c:`track_caller` is applied to an :t:`exported function` but the :t:`external block function` it links to is missing the :t:`attribute`.
 
 .. rubric:: Examples
 
@@ -1290,9 +1287,7 @@ When :t:`attribute` :c:`link` appears with ``raw-dylib`` as the native library
 kind, the supplied name must include the file extension.
 
 :dp:`fls_rcERq1PfKPJI`
-When :t:`attribute` :c:`link` appears with ``raw-dylib`` as the native library
-kind, the :t:`[external function]s` and :t:`[external static]s` of the related
-:t:`external block` shall not be subject to :t:`attribute` :c:`no_mangle`.
+When :t:`attribute` :c:`link` appears with ``raw-dylib`` as the native library kind, the :t:`[external block function]s` and :t:`[external static]s` of the related :t:`external block` shall not be subject to :t:`attribute` :c:`no_mangle`.
 
 .. rubric:: Examples
 
@@ -1316,17 +1311,13 @@ Attribute ``link_name``
 .. rubric:: Legality Rules
 
 :dp:`fls_g09jhukl0ez2`
-:t:`Attribute` :c:`link_name` shall apply to :t:`[external function]s` and
-:t:`[external static]s`.
+:t:`Attribute` :c:`link_name` shall apply to :t:`[external block function]s` and :t:`[external static]s`.
 
 :dp:`fls_d00wni4edi8f`
-:t:`Attribute` :dc:`link_name` shall specify the linking symbol of the related
-:t:`external function` or :t:`external static`.
+:t:`Attribute` :dc:`link_name` shall specify the linking symbol of the related :t:`external block function` or :t:`external static`.
 
 :dp:`fls_0Athv8KFA5FO`
-:t:`Attribute` :c:`link_name` shall not be applied to :t:`[external function]s`
-and :t:`[external static]s` that are annotated with :t:`Attribute`
-:c:`link_ordinal`.
+:t:`Attribute` :c:`link_name` shall not be applied to :t:`[external block function]s` and :t:`[external static]s` that are annotated with :t:`Attribute` :c:`link_ordinal`.
 
 .. rubric:: Examples
 
@@ -1335,6 +1326,39 @@ and :t:`[external static]s` that are annotated with :t:`Attribute`
    extern {
        #[link_name = "linking_symbol"]
        pub fn rust_name() {}
+   }
+
+.. _fls_Obik2w9gvhLN:
+
+Attribute ``link_ordinal``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   LinkOrdinalContent ::=
+       $$link_ordinal$$ $$($$ DecimalLiteral $$)$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_fuv29BIqcawW`
+:t:`Attribute` :c:`link_ordinal` shall apply to :t:`[external block function]s` and :t:`[external static]s`.
+
+:dp:`fls_qh5sXG4znAXa`
+The related :t:`external block` of the :t:`[external block function]` or :t:`[external static]` shall be subject to :t:`attribute` :c:`link` with ``raw-dylib`` as the native library kind.
+
+:dp:`fls_ASnJJiXWGlKI`
+:t:`Attribute` :dc:`link_ordinal` shall specify the linking symbol of the related :t:`external block function` or :t:`external static` by ordinal number.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   #[link(name = "lib.dll", kind = "raw-dylib")]
+   extern "system" {
+       #[link_ordinal(16)]
+       fn function();
    }
 
 .. _fls_hffpo88r61rh:
@@ -1365,43 +1389,6 @@ symbol of the related :t:`function` or :t:`static` will be placed.
 
    #[link_section = ".example_section"]
    pub static THE_ANSWER: u32 = 42;
-
-.. _fls_Obik2w9gvhLN:
-
-Attribute ``link_ordinal``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. rubric:: Syntax
-
-.. syntax::
-
-   LinkOrdinalContent ::=
-       $$link_ordinal$$ $$($$ DecimalLiteral $$)$$
-
-.. rubric:: Legality Rules
-
-:dp:`fls_fuv29BIqcawW`
-:t:`Attribute` :c:`link_ordinal` shall apply to :t:`[external function]s` and
-:t:`[external static]s`.
-
-:dp:`fls_qh5sXG4znAXa`
-The related :t:`extern block` of the :t:`[external function]` or
-:t:`[external static]` shall be subject to :t:`attribute` :c:`link` with
-``raw-dylib`` as the native library kind.
-
-:dp:`fls_ASnJJiXWGlKI`
-:t:`Attribute` :dc:`link_ordinal` shall specify the linking symbol of the
-related :t:`external function` or :t:`external static` by ordinal number.
-
-.. rubric:: Examples
-
-.. code-block:: rust
-
-   #[link(name = "lib.dll", kind = "raw-dylib")]
-   extern "system" {
-       #[link_ordinal(16)]
-       fn function();
-   }
 
 .. _fls_ch9nkxkloozv:
 

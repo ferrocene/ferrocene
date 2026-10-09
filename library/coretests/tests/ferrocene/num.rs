@@ -885,3 +885,47 @@ fn test_saturating_mul() {
     assert_eq!(i32::saturating_mul(2 as i32, 4), 8 as i32, "i32",);
     assert_eq!(i8::saturating_mul(2 as i8, 4), 8 as i8, "i8",);
 }
+
+// Cover
+//  * core::num::<impl i8>::from_ascii_bytes_radix
+//  * core::num::<impl i16>::from_ascii_bytes_radix
+//  * core::num::<impl i32>::from_ascii_bytes_radix
+//  * core::num::<impl i64>::from_ascii_bytes_radix
+//  * core::num::<impl i128>::from_ascii_bytes_radix
+//  * core::num::<impl u8>::from_ascii_bytes_radix
+//  * core::num::<impl u16>::from_ascii_bytes_radix
+//  * core::num::<impl u32>::from_ascii_bytes_radix
+//  * core::num::<impl u64>::from_ascii_bytes_radix
+//  * core::num::<impl u128>::from_ascii_bytes_radix
+#[test]
+fn test_num_from_ascii_bytes_radix() {
+    assert_eq!(u8::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u8::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u16::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u16::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u32::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u32::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u64::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u64::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u128::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u128::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i8::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i8::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i16::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i16::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i32::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i32::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i64::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i64::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i128::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i128::from_ascii_bytes_radix(b"1 ", 10).is_err());
+}

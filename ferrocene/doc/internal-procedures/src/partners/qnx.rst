@@ -201,12 +201,26 @@ Create a deployment containing Linux and Windows toolchains:
         -deployLicense $LICENSE_KEY \
         -installationDeployAs qnx/qnx710-472-deployment
 
-Finally, create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
+Create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
 
     cd $HOME
     tar -cv --dereference -I 'zstd -T0' -f qnx/qnx710-472-deployment.tar.zst -C qnx/qnx710-472-deployment/ qnx710-472
+
+.. note::
+
+    If the existing license isn't expired yet, do a test run uploading to a test location, then
+    edit the CI workflows to refer to ``test-qnx710-472-deployment.tar.zst`` instead:
+
+    .. code-block::
+
+        aws s3 cp qnx/qnx710-472-deployment.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/test-qnx710-472-deployment.tar.zst
+
+Finally, upload the archive to the production location:
+
+.. code-block::
+
     aws s3 cp qnx/qnx710-472-deployment.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst
 
 On CI/CD hosts we use a Python script to setup the toolchain:

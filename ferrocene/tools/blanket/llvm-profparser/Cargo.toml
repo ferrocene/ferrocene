@@ -1,0 +1,58 @@
+# Vendored copy of `llvm_profparser` 0.10.0 from crates.io.
+#
+# This file started as a copy of the upstream Cargo.toml.orig, with the `[[bench]]`
+# sections and dev-dependencies dropped since `benches/` and `tests/` aren't vendored.
+
+[package]
+name = "llvm_profparser"
+version = "0.10.0"
+authors = ["xd009642 <danielmckenna93@gmail.com>"]
+description = "Parsing and interpretation of llvm coverage profiles and generated data"
+repository = "https://github.com/xd009642/llvm-profparser"
+edition = "2018"
+readme = "README.md"
+license = "Apache-2.0"
+categories = ["encoding"]
+keywords = ["coverage", "llvm"]
+rust-version = "1.80.0"
+
+[features]
+default = ["cli", "__llvm_20"]
+cli = ["clap", "tracing-subscriber"]
+
+__llvm_11 = []
+__llvm_12 = []
+__llvm_13 = []
+__llvm_14 = []
+__llvm_15 = []
+__llvm_16 = []
+__llvm_17 = []
+__llvm_18 = []
+__llvm_19 = []
+__llvm_20 = []
+__llvm_21 = []
+
+[dependencies]
+anyhow = "1.0.65"
+flate2 = "1.0"
+indexmap = "~1.8"
+leb128 = "0.2.4"
+md5 = "0.8"
+nom = "7.0.0"
+object = "0.26.0"
+rustc-hash = "2.1"
+clap = { version = "4", features = ["derive"], optional = true }
+thiserror = "1.0.30"
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.16", optional = true }
+
+[[bin]]
+name = "profparser"
+required-features = ["cli"]
+
+[[bin]]
+name = "cov"
+required-features = ["cli"]
+
+[lints.rust]
+unexpected_cfgs = { level = "allow" }

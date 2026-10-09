@@ -42,7 +42,7 @@ pub struct ShowCommand {
     /// Pair of paths for a remapping to allow loading files after move. Comma separated in the
     /// order `source,dest`
     #[arg(long = "path-equivalence")]
-    path_remapping: Option<PathRemapping>,
+    path_remapping: Option<String>,
     // #[structopt(long = "rustdoc-json", short = "j")]
     // rustdoc_json: PathBuf,
     #[arg(long = "report", short = 'r')]
@@ -334,11 +334,18 @@ impl ShowCommand {
         };
         let mapping = CoverageMapping::new(&self.objects, &instr_prof, false)?;
         let mut report = mapping.generate_report()?;
-        if let Some(remapping) = self.path_remapping.as_ref() {
+        let remapping = self
+            .path_remapping
+            .as_ref()
+            .map(|s| s.parse::<PathRemapping>())
+            .transpose()
+            .map_err(|e| anyhow::anyhow!("invalid --path-equivalence value: {e:?}"))?;
+        if let Some(remapping) = remapping.as_ref() {
             report.apply_remapping(remapping);
         }
 
-        let mut coverage = rustc_driver::coverage(self, &report)?;
+        let mut coverage =
+            rustc_driver::coverage(self, &report, self.path_remapping.as_deref())?;
         coverage.sort_by(|f1, f2| f1.source_name.cmp(&f2.source_name));
         let coverage = coverage;
 

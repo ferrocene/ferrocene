@@ -516,6 +516,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--verbose-run-make-subprocess-output', '--verbose-run-make-subprocess-output', [CompletionResultType]::ParameterName, 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)')
             [CompletionResult]::new('--test-codegen-backend', '--test-codegen-backend', [CompletionResultType]::ParameterName, 'Use a different codegen backend when running tests')
             [CompletionResult]::new('--coverage', '--coverage', [CompletionResultType]::ParameterName, 'generate coverage for tests')
+            [CompletionResult]::new('--coverage-crate', '--coverage-crate', [CompletionResultType]::ParameterName, 'Library crate(s) to include in the coverage report (defaults to `core`). May be passed multiple times to report on more than one crate')
             [CompletionResult]::new('--test-variant', '--test-variant', [CompletionResultType]::ParameterName, 'Choose the test variant to use for this execution')
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
@@ -584,6 +585,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--verbose-run-make-subprocess-output', '--verbose-run-make-subprocess-output', [CompletionResultType]::ParameterName, 'whether to show verbose subprocess output for run-make tests; set to false to suppress output for passing tests (e.g. for cg_clif with --no-capture)')
             [CompletionResult]::new('--test-codegen-backend', '--test-codegen-backend', [CompletionResultType]::ParameterName, 'Use a different codegen backend when running tests')
             [CompletionResult]::new('--coverage', '--coverage', [CompletionResultType]::ParameterName, 'generate coverage for tests')
+            [CompletionResult]::new('--coverage-crate', '--coverage-crate', [CompletionResultType]::ParameterName, 'Library crate(s) to include in the coverage report (defaults to `core`). May be passed multiple times to report on more than one crate')
             [CompletionResult]::new('--test-variant', '--test-variant', [CompletionResultType]::ParameterName, 'Choose the test variant to use for this execution')
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
@@ -872,6 +874,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
         }
         'x.py;run' {
             [CompletionResult]::new('--args', '--args', [CompletionResultType]::ParameterName, 'arguments for the tool')
+            [CompletionResult]::new('--coverage-crate', '--coverage-crate', [CompletionResultType]::ParameterName, 'Library crate(s) to include in the coverage report (defaults to `core`). Only used by the `ferrocene-coverage-report` alias')
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
             [CompletionResult]::new('--build', '--build', [CompletionResultType]::ParameterName, 'host target of the stage0 compiler')
@@ -918,6 +921,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
         }
         'x.py;r' {
             [CompletionResult]::new('--args', '--args', [CompletionResultType]::ParameterName, 'arguments for the tool')
+            [CompletionResult]::new('--coverage-crate', '--coverage-crate', [CompletionResultType]::ParameterName, 'Library crate(s) to include in the coverage report (defaults to `core`). Only used by the `ferrocene-coverage-report` alias')
             [CompletionResult]::new('--config', '--config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', '--build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `bootstrap.toml`')
             [CompletionResult]::new('--build', '--build', [CompletionResultType]::ParameterName, 'host target of the stage0 compiler')

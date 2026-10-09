@@ -112,18 +112,23 @@ impl CommandLineStep for TraceabilityMatrix {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CertifiedCoreSymbols {
     pub(super) build_compiler: Compiler,
     pub(super) target: TargetSelection,
+    pub(super) crates: Vec<String>,
 }
 
 impl CertifiedCoreSymbols {
-    pub(super) fn new(builder: &Builder<'_>, target: TargetSelection) -> Self {
+    pub(super) fn new(
+        builder: &Builder<'_>,
+        target: TargetSelection,
+        crates: Vec<String>,
+    ) -> Self {
         // We need at least stage 1 so that our compiler knows about .certified targets.
         let stage = builder.top_stage.max(1);
         let build_compiler = builder.compiler(stage, builder.config.host_target);
-        CertifiedCoreSymbols { build_compiler, target }
+        CertifiedCoreSymbols { build_compiler, target, crates }
     }
 }
 
@@ -135,7 +140,7 @@ impl Step for CertifiedCoreSymbols {
             panic!("generating the core symbol report requires `rust.debug-assertions-std=true`");
         }
 
-        let CertifiedCoreSymbols { build_compiler, target } = self;
+        let CertifiedCoreSymbols { build_compiler, target, crates } = self;
         let symbol_report = builder.ensure(SymbolReport { target_compiler: build_compiler });
 
         // c.f. check::std
@@ -147,12 +152,37 @@ impl Step for CertifiedCoreSymbols {
             target,
             Kind::SymbolReport,
         );
-        let crates = vec!["core".to_owned()]; // currently, only core is certified
         std_cargo(builder, target, &mut cargo, &crates);
         cargo.env("RUSTC_REAL", symbol_report);
-        let report =
-            builder.cargo_out(build_compiler, Mode::Std, target).join("symbol-report.json");
+        // Tell `symbol-report` which of the crates compiled in this cargo run
+        // it should actually report on.
+        //
+        // doing this through an env variable because `symbol-report` is called
+        // by Cargo and not directly.
+        cargo.env("SYMBOL_REPORT_CRATES", crates.join(","));
+
+        let cargo_out_dir = builder.cargo_out(build_compiler, Mode::Std, target);
+        let report = cargo_out_dir.join("symbol-report.json");
+        // Cargo builds each crate separately in its own process, and we merge
+        // the reports from multiple processes on a filesystem. But because
+        // Cargo reuses build artefacts the file may have report data from
+        // previous symbol-report runs. So we clean it.
+        if report.exists() {
+            builder.remove(&report);
+        }
         cargo.env("SYMBOL_REPORT_OUT", &report);
+        // We rebuild all crates listed in `SYMBOL_REPORT_CRATES` so that
+        // the mangled item names across all target crates are consistent.
+        // Other crates, like their dependencies that we don't report on
+        // (like `compiler-builtins`) we leave as-is, and let Cargo reuse
+        // their artifacts from previous runs.
+        let build_dir = cargo_out_dir.join("build");
+        for crate_name in &crates {
+            let dir = build_dir.join(crate_name);
+            if dir.exists() {
+                builder.remove_dir(&dir);
+            }
+        }
 
         let _guard = builder.msg(
             Kind::Run,
@@ -223,7 +253,8 @@ impl CommandLineStep for CoverageReport {
             CoverageState { compiler: build_compiler, target: run.target, coverage_for: for_ };
         let instrumented_binaries = code_coverage::instrumented_binaries(builder, &paths, &state);
 
-        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target));
+        let crates = builder.config.cmd.ferrocene_coverage_crates();
+        let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, run.target, crates));
 
         builder.ensure(CoverageReport {
             certified_target: run.target,

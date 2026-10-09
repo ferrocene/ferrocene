@@ -35,8 +35,8 @@ impl CommandLineStep for CertifiedCoreSymbols {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(&format!("Testing {TRACKED_FILE}"));
         let target = TargetSelection::from_user("x86_64-unknown-linux-gnu");
-        let actual_symbol_report_path =
-            builder.ensure(run::CertifiedCoreSymbols::new(builder, target));
+        let actual_symbol_report_path = builder
+            .ensure(run::CertifiedCoreSymbols::new(builder, target, vec!["core".to_owned()]));
 
         if builder.config.dry_run() {
             return;

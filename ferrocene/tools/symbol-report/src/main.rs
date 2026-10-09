@@ -1,5 +1,6 @@
 #![feature(rustc_private)]
 
+extern crate rustc_attr_ir;
 extern crate rustc_driver;
 extern crate rustc_hir;
 extern crate rustc_interface;
@@ -14,9 +15,10 @@ use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
+use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{AttrId, Attribute, HirId};
+use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
@@ -82,7 +84,7 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
         rustc_hir::intravisit::walk_expr(self, expr)
     }
 
-    fn visit_attribute(&mut self, attr: &'v rustc_hir::Attribute) -> Self::Result {
+    fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
         if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
             if !self.visited_attrs.contains(&attr.id()) {
                 eprintln!("Unused annotation at {:?}", attr.span());
@@ -122,7 +124,7 @@ fn main() {
     rustc_driver::init_rustc_env_logger(&handler);
     let exit_code = rustc_driver::catch_with_exit_code(move || {
         let args: Vec<String> = std::env::args().collect();
-        rustc_driver::run_compiler(&args, &mut LoadCoreSymbols)
+        rustc_driver::compiler_entrypoint(&args, &mut LoadCoreSymbols)
     });
     let exit_code = if exit_code == ExitCode::SUCCESS {
         rustc_driver::EXIT_SUCCESS

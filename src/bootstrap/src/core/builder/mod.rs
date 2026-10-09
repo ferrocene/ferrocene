@@ -1004,6 +1004,7 @@ impl<'a> Builder<'a> {
                 doc::CargoBook,
                 doc::Clippy,
                 doc::ClippyBook,
+                doc::CompilerWithTools,
                 doc::Miri,
                 doc::EmbeddedBook,
                 doc::EditionGuide,

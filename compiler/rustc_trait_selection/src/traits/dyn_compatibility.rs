@@ -526,10 +526,10 @@ fn virtual_call_violations_for_method<'tcx>(
             {
                 // If we have `self: &'a Ty`, get `'a`, so that we can suggest `&'a self`.
                 let lt = match sig.decl.inputs[0].kind {
-                    hir::TyKind::Ref(lt, _) if lt.ident.name == kw::UnderscoreLifetime => {
+                    hir::TyKind::Ref(lt, ..) if lt.ident.name == kw::UnderscoreLifetime => {
                         sym::empty
                     }
-                    hir::TyKind::Ref(lt, _) => lt.ident.name,
+                    hir::TyKind::Ref(lt, ..) => lt.ident.name,
                     _ => sym::empty,
                 };
                 // Get the `Span` for all of `self: Ty`, not just `Ty`.
@@ -748,6 +748,15 @@ fn receiver_is_dispatchable<'tcx>(
         });
         let trait_predicate = ty::TraitRef::new_from_args(tcx, trait_def_id, args);
         clauses.push(trait_predicate.upcast(tcx));
+
+        // U satisfies `Trait`'s where-bounds.
+        clauses.extend(
+            tcx.clauses_of(trait_def_id)
+                .instantiate(tcx, args)
+                .clauses
+                .into_iter()
+                .map(Unnormalized::skip_norm_wip),
+        );
 
         let meta_sized_predicate = {
             let meta_sized_did = tcx.require_lang_item(LangItem::MetaSized, DUMMY_SP);

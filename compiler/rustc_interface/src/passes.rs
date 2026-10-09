@@ -6,6 +6,7 @@ use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
 use rustc_ast as ast;
+use rustc_attr_ir::{Attribute, AttributeKind, find_attr};
 use rustc_attr_parsing::{AttributeParser, ShouldEmit};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::{CompiledModules, CrateInfo};
@@ -21,10 +22,8 @@ use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level};
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
-use rustc_hir::{Attribute, find_attr};
 use rustc_incremental::setup_dep_graph;
 use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_store};
 use rustc_metadata::EncodedMetadata;
@@ -434,7 +433,7 @@ fn early_lint_checks(tcx: TyCtxt<'_>, (): ()) {
     // Gate identifiers containing invalid Unicode codepoints that were recovered during lexing.
     sess.psess.bad_unicode_identifiers.with_lock(|identifiers| {
         for (ident, mut spans) in identifiers.drain(..) {
-            spans.sort();
+            spans.sort_by_key(|span| span.lo_hi());
             if ident == sym::ferris {
                 enum FerrisFix {
                     SnakeCase,
@@ -907,6 +906,7 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     rustc_borrowck::provide(&mut providers.queries);
     rustc_incremental::provide(providers);
     rustc_mir_build::provide(providers);
+    rustc_mir_dataflow::provide(providers);
     rustc_mir_transform::provide(providers);
     rustc_monomorphize::provide(providers);
     rustc_privacy::provide(&mut providers.queries);
@@ -1116,6 +1116,8 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
     // This is needed since the `hir_id_validator::check_crate` call above is not guaranteed
     // to use `hir_crate_items`.
     tcx.ensure_done().hir_crate_items(());
+
+    tcx.untracked().definitions.write().commit_end_of_determinism();
 
     rustc_passes::delegation::check_glob_and_list_delegations_target_expr(tcx);
 
@@ -1421,7 +1423,7 @@ pub(crate) fn parse_crate_name(
     attrs: &[ast::Attribute],
     emit_errors: ShouldEmit,
 ) -> Option<(Symbol, Span)> {
-    let rustc_hir::Attribute::Parsed(AttributeKind::CrateName { name, name_span, .. }) =
+    let Attribute::Parsed(AttributeKind::CrateName { name, name_span, .. }) =
         AttributeParser::parse_limited_sym_should_emit(
             sess,
             attrs,

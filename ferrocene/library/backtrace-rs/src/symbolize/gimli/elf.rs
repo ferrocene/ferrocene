@@ -268,7 +268,7 @@ impl<'a> Object<'a> {
         if data.read_bytes(8).ok()?.0 != b"ZLIB\0\0\0\0" {
             return None;
         }
-        let size = usize::try_from(data.read::<object::U32Bytes<_>>().ok()?.get(BigEndian)).ok()?;
+        let size = usize::try_from(data.read::<object::U32<_>>().ok()?.get(BigEndian)).ok()?;
         let buf = stash.allocate(size);
         decompress_zlib(data.0, buf)?;
         Some(buf)

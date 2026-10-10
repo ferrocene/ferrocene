@@ -214,7 +214,7 @@ its interactions with its external environment. The following are defined as
 external interactions:
 
 * :dp:`fls_gu3331rmv2ho`
-  Any call to an :t:`external function`,
+  Any call to an :t:`external block function`,
 
 * :dp:`fls_AR8ZIYlDRSNs`
   Any interaction with an :t:`external static`,

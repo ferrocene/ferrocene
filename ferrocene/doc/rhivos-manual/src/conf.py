@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(os.path.abspath("../../qualification-report/exts"))
 
-project = "RHIVOS Manual"
+project = "Red Hat In-Vehicle Operating System Manual"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
@@ -26,8 +26,8 @@ autosectionlabel_prefix_document = True
 ferrocene_id = "RM"
 
 html_theme = "ferrocene"
-html_title = "RHIVOS Manual"
-html_short_title = "RHIVOS Manual"
+html_title = "Red Hat In-Vehicle Operating System Manual"
+html_short_title = "Red Hat In-Vehicle Operating System Manual"
 
 # Do not generate the index pages. We don't need them, and they cause
 # linkchecker to fail due to them including *all* glossary entries, including

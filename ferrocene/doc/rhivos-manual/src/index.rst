@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-RHIVOS Manual
-=============
+Red Hat In-Vehicle Operating System Manual
+==========================================
 
 .. toctree::
    :numbered:

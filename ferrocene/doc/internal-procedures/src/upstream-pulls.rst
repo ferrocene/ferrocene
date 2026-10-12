@@ -142,6 +142,15 @@ After having fixed the conflicts, verify with ``./x test tidy``.
 Commit your changes, push them to the branch,
 and ask for a code review from another member of the team.
 
+Reviewing merge resolutions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Reviewers are not expected to read all multi-thousand lines of diff in an upstream pull.
+These changes have already been reviewed by upstream, and are tested by CI on merge; reviewing them would be duplicate effort.
+
+Reviewers *are* expected to review any commits created since the "pull new changes" automation merge commit.
+For example, the mergiraf conflict resolution, stage0 update, and any conflict resolution by the developer assigned to the PR must all be reviewed.
+
 Tidy check failures
 -------------------
 

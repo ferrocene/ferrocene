@@ -3640,6 +3640,9 @@ impl CommandLineStep for Crate {
 
         if let Some(coverage_for) = builder.config.cmd.ferrocene_coverage_for() {
             if coverage_for == FerroceneCoverageFor::Library {
+                // We don't build profiler_builtins from source in this `test` Step, because when download-rustc is enabled, we may have
+                // overridden `build_compiler` to something else, and we'd get an incompatible version of `profiler_builtins`.
+                // Rather than trying to duplicate the logic we had when building `core`, just smuggle the proper path through a RefCell.
                 let profiler = builder.profiler_runtime.borrow();
                 let profiler = profiler.as_ref().expect("missing profiler_builtins");
                 instrument_coverage(builder, &mut cargo, &profiler);

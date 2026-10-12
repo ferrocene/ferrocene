@@ -1,0 +1,70 @@
+error: `#[ferrocene::prevalidated]` cannot be applied to a method without a default body
+  --> $DIR/requires-validation-placement.rs:9:5
+   |
+LL |     #[ferrocene::prevalidated]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     fn prevalidated_no_body(&self);
+   |        -------------------- this method has no body to validate
+   |
+   = help: use `#[ferrocene::requires_validation]` instead to require all implementations of this method to be validated
+
+error: `#[ferrocene::requires_validation]` on a method with a default body requires `#[ferrocene::prevalidated]` as well
+  --> $DIR/requires-validation-placement.rs:22:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     fn requires_validation_yes_body(&self) {}
+   |        ---------------------------- this default body is not validated, but implementations inherit it
+   |
+   = help: add `#[ferrocene::prevalidated]` to validate the default body
+
+error: associated constants that are no function pointer cannot be marked `#[ferrocene::requires_validation]`
+  --> $DIR/requires-validation-placement.rs:28:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     const ASSOCIATED_CONST_NO_FN_PTR: u8;
+   |           -------------------------- this const is marked `#[ferrocene::requires_validation]`, but is no function pointer
+   |
+   = help: remove `#[ferrocene::requires_validation]`
+
+error: `#[ferrocene::requires_validation]` on an associated constant with a default value requires `#[ferrocene::prevalidated]` as well
+  --> $DIR/requires-validation-placement.rs:34:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     const ASSOCIATED_CONST_YES_FN_PTR: fn() -> u8 = || 0;
+   |           --------------------------- this default value is not validated, but implementations inherit it
+   |
+   = help: add `#[ferrocene::prevalidated]` to validate the default value
+
+error: `#[ferrocene::requires_validation]` cannot be applied to a function
+  --> $DIR/requires-validation-placement.rs:45:1
+   |
+LL | #[ferrocene::requires_validation]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[ferrocene::requires_validation]` can only be applied to associated trait items
+
+error: `#[ferrocene::requires_validation]` cannot be applied to a method
+  --> $DIR/requires-validation-placement.rs:53:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[ferrocene::requires_validation]` can only be applied to associated trait items
+
+error: `#[ferrocene::requires_validation]` cannot be applied to an associated constant
+  --> $DIR/requires-validation-placement.rs:58:5
+   |
+LL |     #[ferrocene::requires_validation]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[ferrocene::requires_validation]` can only be applied to associated trait items
+
+error: aborting due to 7 previous errors
+

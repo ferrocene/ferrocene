@@ -83,8 +83,8 @@ function main() {
     }
     for (elem of document.querySelectorAll(".line")) {
         elem.addEventListener("click", async event => {
-            let filename = event.target.dataset.filename;
-            let linenum = event.target.dataset.linenum;
+            let filename = event.currentTarget.dataset.filename;
+            let linenum = event.currentTarget.dataset.linenum;
             await navigator.clipboard.writeText(`${filename}:${linenum}`);
         });
     }

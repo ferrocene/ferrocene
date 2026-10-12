@@ -488,6 +488,8 @@ target | std | host | notes
 `armv7r-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
 `thumbv7em-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
+`thumbv8m.main-ferrocene.facade-eabi` | ✓ | ✓ | Internal target for tests
+`thumbv8m.main-ferrocene.facade-eabihf` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets
 [the AMD GPU]: https://llvm.org/docs/AMDGPUUsage.html#processors

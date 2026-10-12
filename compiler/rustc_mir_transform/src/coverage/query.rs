@@ -1,13 +1,6 @@
 use rustc_hir::attrs::CoverageAttrKind;
 use rustc_hir::def::DefKind;
-<<<<<<< HEAD
 use rustc_hir::{self as hir, find_attr};
-use rustc_hir::{Constness, find_attr};
-||||||| parent of 3be1b013555 (Backport ferrocene/ferrocene#2565)
-use rustc_hir::{Constness, find_attr};
-=======
-use rustc_hir::{self as hir, find_attr};
->>>>>>> 3be1b013555 (Backport ferrocene/ferrocene#2565)
 use rustc_index::bit_set::DenseBitSet;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir::coverage::{BasicCoverageBlock, CoverageIdsInfo, CoverageKind, MappingKind};

@@ -418,14 +418,8 @@ pub trait Extend<T> {
 
     /// Extends a collection with exactly one element.
     #[unstable(feature = "extend_one", issue = "72631")]
-<<<<<<< ferrocene/release/1.100
     #[ferrocene::prevalidated]
-    fn extend_one(&mut self, item: A) {
-||||||| d9dd0703ba3
-    fn extend_one(&mut self, item: A) {
-=======
     fn extend_one(&mut self, item: T) {
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         self.extend(Some(item));
     }
 
@@ -451,14 +445,8 @@ pub trait Extend<T> {
     // This method is for internal usage only. It is only on the trait because of specialization's limitations.
     #[unstable(feature = "extend_one_unchecked", issue = "none")]
     #[doc(hidden)]
-<<<<<<< ferrocene/release/1.100
     #[ferrocene::prevalidated]
-    unsafe fn extend_one_unchecked(&mut self, item: A)
-||||||| d9dd0703ba3
-    unsafe fn extend_one_unchecked(&mut self, item: A)
-=======
     unsafe fn extend_one_unchecked(&mut self, item: T)
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     where
         Self: Sized,
     {

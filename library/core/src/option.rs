@@ -2958,14 +2958,8 @@ const impl<T> ops::Try for Option<T> {
 // https://github.com/rust-lang/rust/issues/99940
 const impl<T> ops::FromResidual<Option<!>> for Option<T> {
     #[inline]
-<<<<<<< ferrocene/release/1.100
     #[ferrocene::prevalidated]
-    fn from_residual(residual: Option<convert::Infallible>) -> Self {
-||||||| d9dd0703ba3
-    fn from_residual(residual: Option<convert::Infallible>) -> Self {
-=======
     fn from_residual(residual: Option<!>) -> Self {
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         match residual {
             None => None,
         }

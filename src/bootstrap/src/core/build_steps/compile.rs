@@ -34,11 +34,10 @@ use crate::core::config::toml::target::DefaultLinuxLinkerOverride;
 use crate::core::config::{
     Allocator, CompilerBuiltins, DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection,
 };
-use crate::core::session::{CLang, DependencyType, FileType, GitRepo, Mode};
+use crate::core::session::{CLang, DependencyType, FileType, Mode};
 use crate::ferrocene::code_coverage::instrument_coverage;
 use crate::ferrocene::secret_sauce::SecretSauceArtifacts;
 use crate::ferrocene::test_variants::{TestCondition, TestVariant};
-use crate::core::session::{CLang, DependencyType, FileType, Mode};
 use crate::utils::build_stamp;
 use crate::utils::build_stamp::BuildStamp;
 use crate::utils::exec::command;

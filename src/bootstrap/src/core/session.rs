@@ -381,8 +381,9 @@ impl Session {
         }
 
         // Ferrocene addition
-        let ferrocene_version = std::fs::read_to_string(src.join("ferrocene").join("version"))
-            .expect("failed to read ferrocene/version");
+        let ferrocene_version =
+            std::fs::read_to_string(config.src.join("ferrocene").join("version"))
+                .expect("failed to read ferrocene/version");
         let ferrocene_version = ferrocene_version.trim();
 
         let mut sess = Session {

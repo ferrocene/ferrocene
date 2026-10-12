@@ -2237,14 +2237,8 @@ const impl<T, E> ops::Try for Result<T, E> {
 const impl<T, E, F: [const] From<E>> ops::FromResidual<Result<!, E>> for Result<T, F> {
     #[inline]
     #[track_caller]
-<<<<<<< ferrocene/release/1.100
     #[ferrocene::prevalidated]
-    fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
-||||||| d9dd0703ba3
-    fn from_residual(residual: Result<convert::Infallible, E>) -> Self {
-=======
     fn from_residual(residual: Result<!, E>) -> Self {
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         match residual {
             Err(e) => Err(From::from(e)),
         }

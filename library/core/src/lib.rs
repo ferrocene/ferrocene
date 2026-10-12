@@ -109,15 +109,7 @@
 // not-alphabetical-end
 //
 // Language features:
-<<<<<<< ferrocene/release/1.100
 // not-alphabetical-start
-#![feature(abi_unadjusted)]
-||||||| d9dd0703ba3
-// tidy-alphabetical-start
-#![feature(abi_unadjusted)]
-=======
-// tidy-alphabetical-start
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 #![feature(adt_const_params)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]

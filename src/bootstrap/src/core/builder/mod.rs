@@ -729,6 +729,7 @@ impl Kind {
             | Kind::Setup
             | Kind::Vendor
             | Kind::Perf => false,
+            Kind::Sign | Kind::SymbolReport => true, // for Ferrocene
         }
     }
 }

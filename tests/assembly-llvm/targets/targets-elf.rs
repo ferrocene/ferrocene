@@ -868,6 +868,12 @@
 //@ revisions: thumbv7em_ferrocene_facade_eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] compile-flags: --target thumbv7em-ferrocene.facade-eabihf
 //@ [thumbv7em_ferrocene_facade_eabihf] needs-llvm-components: arm
+//@ revisions: thumbv8m_main_ferrocene_facade_eabi
+//@ [thumbv8m_main_ferrocene_facade_eabi] compile-flags: --target thumbv8m.main-ferrocene.facade-eabi
+//@ [thumbv8m_main_ferrocene_facade_eabi] needs-llvm-components: arm
+//@ revisions: thumbv8m_main_ferrocene_facade_eabihf
+//@ [thumbv8m_main_ferrocene_facade_eabihf] compile-flags: --target thumbv8m.main-ferrocene.facade-eabihf
+//@ [thumbv8m_main_ferrocene_facade_eabihf] needs-llvm-components: arm
 //@ revisions: aarch64_rhivos2_linux_gnu
 //@ [aarch64_rhivos2_linux_gnu] compile-flags: --target aarch64-rhivos2-linux-gnu
 //@ [aarch64_rhivos2_linux_gnu] needs-llvm-components: aarch64

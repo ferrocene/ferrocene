@@ -50,6 +50,8 @@ pub enum TestVariantName {
     Ed2021NeoverseV1,
     #[clap(name = "2021-cortex-m4")]
     Ed2021CortexM4,
+    #[clap(name = "2021-cortex-m33")]
+    Ed2021CortexM33,
     #[clap(name = "2021-cortex-r5f")]
     Ed2021CortexR5F,
     #[clap(name = "2021-specific-cortex-m4")]
@@ -79,6 +81,9 @@ impl TestVariantName {
             Self::Ed2021CortexM4 => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m4"))
             }
+            Self::Ed2021CortexM33 => {
+                TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-m33"))
+            }
             Self::Ed2021CortexR5F => {
                 TestVariantBase::new().edition(Edition("2015")).qemu_cpu(QemuCpu("cortex-r5f"))
             }
@@ -95,6 +100,9 @@ impl TestVariantName {
             "aarch64-unknown-ferrocene.facade" => Self::Ed2021CortexA53,
             "thumbv7em-ferrocene.facade-eabi" | "thumbv7em-ferrocene.facade-eabihf" => {
                 Self::Ed2021CortexM4
+            }
+            "thumbv8m.main-ferrocene.facade-eabi" | "thumbv8m.main-ferrocene.facade-eabihf" => {
+                Self::Ed2021CortexM33
             }
             _ => Self::Ed2021,
         }

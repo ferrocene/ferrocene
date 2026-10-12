@@ -104,6 +104,14 @@ if [[ "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.thumbv7em-none-eabihf.cxx=clang
     add --set target.thumbv7em-none-eabihf.ar=llvm-ar
 
+    add --set 'target."thumbv8m.main-none-eabi".cc=clang'
+    add --set 'target."thumbv8m.main-none-eabi".cxx=clang'
+    add --set 'target."thumbv8m.main-none-eabi".ar=llvm-ar'
+
+    add --set 'target."thumbv8m.main-none-eabihf".cc=clang'
+    add --set 'target."thumbv8m.main-none-eabihf".cxx=clang'
+    add --set 'target."thumbv8m.main-none-eabihf".ar=llvm-ar'
+
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang
     add --set target.wasm32-unknown-unknown.ar=lld-ar
@@ -145,6 +153,8 @@ add --set 'target."s390x-unknown-linux-gnu".cc=s390x-linux-gnu-gcc'
 add --set 'target."s390x-unknown-linux-gnu".cxx=s390x-linux-gnu-g++'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabi".cc=arm-none-eabi-gcc'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabihf".cc=arm-none-eabi-gcc'
 
 # musl toolchains use the architecture, also we need to set the `musl-root`
 add --set target.x86_64-unknown-linux-musl.musl-root=/usr/local/x86_64-linux-musl/
@@ -164,6 +174,8 @@ add --set 'target."aarch64v8r-unknown-ferrocene.facade".profiler=true'
 add --set 'target."armv7r-ferrocene.facade-eabihf".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabi".profiler=true'
 add --set 'target."thumbv7em-ferrocene.facade-eabihf".profiler=true'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabi".profiler=true'
+add --set 'target."thumbv8m.main-ferrocene.facade-eabihf".profiler=true'
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

@@ -137,6 +137,7 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-thumbv7em-ferrocene.facade-eabi", // Ferrocene addition
     "ignore-thumbv7em-ferrocene.facade-eabihf", // Ferrocene addition
     "ignore-thumbv8m.base-none-eabi",
+    "ignore-thumbv8m.main", // Ferrocene addition
     "ignore-thumbv8m.main-none-eabi",
     "ignore-tvos",
     "ignore-uefi",

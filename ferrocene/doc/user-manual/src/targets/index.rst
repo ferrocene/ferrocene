@@ -108,6 +108,18 @@ qualified upon request.
      - Bare-metal
      - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
 
+   * - :ref:`thumbv8m.main-none-eabi`
+     - ``thumbv8m.main-none-eabi``
+     - Cross-compilation
+     - Bare-metal
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
+   * - :ref:`thumbv8m.main-none-eabihf`
+     - ``thumbv8m.main-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - Only qualified when cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
    * - :ref:`x86_64-unknown-linux-gnu`
      - ``x86_64-unknown-linux-gnu``
      - Host platform
@@ -225,18 +237,6 @@ Supported targets can often be qualified or quality managed upon request.
 
    * - :target:`thumbv8m.base-none-eabi`
      - ``thumbv8m.base-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv8m.main-none-eabi`
-     - ``thumbv8m.main-none-eabi``
-     - Cross-compilation
-     - Bare-metal
-     - \-
-
-   * - :target:`thumbv8m.main-none-eabihf`
-     - ``thumbv8m.main-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-

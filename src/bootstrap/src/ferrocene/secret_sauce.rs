@@ -11,7 +11,7 @@ use crate::core::config::FerroceneSecretSauce;
 // Remove the "/try" after the PR on secret sauce repo is merged.
 static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-mirrors/coretest-secret-sauce";
 
-const DATE_COMMIT: &str = "20260216/58b207b";
+const DATE_COMMIT: &str = "20261007/4466108";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SecretSauceArtifacts {

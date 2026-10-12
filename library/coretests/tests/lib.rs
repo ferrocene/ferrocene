@@ -279,7 +279,11 @@ fn check_that_qemu_cpu_was_set() {
         }
     } else if cfg!(target_arch = "arm") {
         if cfg!(target_feature = "mclass") {
-            assert_eq!("cortex-m4", qemu_cpu);
+            if cfg!(target_feature = "v8m.main") {
+                assert_eq!("cortex-m33", qemu_cpu);
+            } else {
+                assert_eq!("cortex-m4", qemu_cpu);
+            }
         } else if cfg!(target_feature = "rclass") {
             assert_eq!("cortex-r5f", qemu_cpu);
         } else {

@@ -1,3 +1,5 @@
+//@ ignore-thumbv8m.main this target does support the ABI and that is tested in
+// `tests/ui/explicit-tail-calls/unsupported-abi/cmse-nonsecure-call.rs`
 // gate-test-abi_cmse_nonsecure_call
 fn main() {
     let non_secure_function = unsafe {

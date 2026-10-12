@@ -49,6 +49,18 @@ as well as environments listed in target specific documentation:
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`thumbv8m.main-none-eabi`
+     - ``core``
+     - ``alloc``
+     -
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`thumbv8m.main-none-eabihf`
+     - ``core``
+     - ``alloc``
+     -
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
      - ``core``
      - ``alloc``, ``std``, ``test``

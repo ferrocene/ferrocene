@@ -37,6 +37,7 @@ function retry {
         echo "Attempt $n/$max failed. Waiting $delay second(s) before retrying."
         sleep $delay
         ((n++))
+        echo "Attempt $n/$max:"
       else
         echo "The command has failed after $n attempts."
         return 1

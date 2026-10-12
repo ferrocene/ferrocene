@@ -19,23 +19,23 @@ IGNORE_FILES = [
 def main():
     # if `CI` is set, do a check rather than overwriting
     check_only = os.getenv("CI") is not None
-    run(["rustfmt", "-V"])
+    run(["rustfmt", "+nightly", "-V"])
 
     fmt_files = []
     for dir in FMT_DIRS:
         fmt_files.extend(iglob(f"{dir}/**/*.rs", recursive=True))
 
     for file in fmt_files:
-        if file in IGNORE_FILES:
+        if Path(file).as_posix() in IGNORE_FILES:
             continue
         fmt_one(Path(file), check_only)
 
     # Run once from workspace root to get everything that wasn't handled as an
     # individual file.
     if check_only:
-        run(["cargo", "fmt", "--check"])
+        run(["cargo", "+nightly", "fmt", "--check"])
     else:
-        run(["cargo", "fmt"])
+        run(["cargo", "+nightly", "fmt"])
 
     for file in iglob("libc-test/semver/*.txt"):
         check_semver_file(Path(file))
@@ -112,7 +112,7 @@ def fmt_one(fpath: Path, check_only: bool):
 
     # Invoke rustfmt passing via stdin/stdout so we don't need to write the file. Exits
     # on failure.
-    cmd = ["rustfmt", "--config-path=.rustfmt.toml"]
+    cmd = ["rustfmt", "+nightly", "--config-path=.rustfmt.toml"]
     if check_only:
         res = check_output(cmd + ["--check"], input=text)
 

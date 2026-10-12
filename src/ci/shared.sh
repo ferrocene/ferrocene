@@ -7,18 +7,36 @@
 
 export MIRRORS_BASE="https://ci-mirrors.rust-lang.org/rustc"
 
-# See https://unix.stackexchange.com/questions/82598
+# Try a command up to 7 times, with randomized exponential backoff between
+# attempts.
+#
+# The backoff sequence is {1-5, 1-10, 1-20, ..., 1-160} seconds, allowing an
+# average of 160 seconds (just over 2.5 minutes) and a worst case of 315 seconds
+# (just over 5 minutes) before giving up.
+#
+# Due to shell arithmetic limitations, we always wait for a whole number of
+# seconds between retries, but each integer in the above ranges (inclusive)
+# is equally likely.
+#
+# See https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+# for analysis; this follows the "Full Jitter" method mentioned there, with
+# the small difference that we always wait at least 1 second between tries.
+#
 # Duplicated in docker/scripts/shared.sh
 function retry {
   echo "Attempting with retry:" "$@"
   local n=1
-  local max=5
+  local base=5
+  local max=7
   while true; do
     "$@" && break || {
       if [[ $n -lt $max ]]; then
-        sleep $n  # don't retry immediately
+        # $RANDOM returns a random integer in [0, 32767],
+        # so remap to a random integer in [1, base * 2^(n - 1)]
+        local delay=$(( 1 + $RANDOM * $base * 2**($n - 1) / 32768 ))
+        echo "Attempt $n/$max failed. Waiting $delay second(s) before retrying."
+        sleep $delay
         ((n++))
-        echo "Command failed. Attempt $n/$max:"
       else
         echo "The command has failed after $n attempts."
         return 1

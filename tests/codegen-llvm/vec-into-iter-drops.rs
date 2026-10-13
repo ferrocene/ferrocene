@@ -1,4 +1,5 @@
 //@ compile-flags: -Copt-level=3
+//@ edition: 2015
 // Test that we can avoid generating an element dropping loop when `vec::IntoIter` is consumed.
 #![crate_type = "lib"]
 

@@ -13,15 +13,15 @@ use std::{iter, slice};
 use itertools::{Either, Itertools};
 use rustc_abi::ExternAbi;
 use rustc_ast::join_path_syms;
+use rustc_attr_ir::{ConstStability, StabilityLevel, StableSince};
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, MacroKinds};
 use rustc_hir::def_id::{DefId, LOCAL_CRATE};
-use rustc_hir::{ConstStability, StabilityLevel, StableSince};
 use rustc_metadata::creader::CStore;
 use rustc_middle::ty::{self, Ty, TyCtxt, TypingMode};
 use rustc_span::symbol::kw;
-use rustc_span::{Ident, Symbol};
+use rustc_span::{Ident, Symbol, sym};
 use tracing::{debug, trace};
 
 use super::url_parts_builder::UrlPartsBuilder;
@@ -537,11 +537,25 @@ fn generate_item_def_id_path(
                 && !def_id.is_local()
                 && def_id.krate != original_def_id.krate;
         } else {
+            // This hack is because primitive types are only documented in `core` and `std`.
+            // However, with `#[rustc_allow_incoherent_impl]`, a lot of primitive methods are
+            // implemented in `core`. Some of them are documented in `core` (like `[]::sort`) while
+            // others aren't (like `[]::to_vec`). So in case we're not documenting `core`, we link
+            // to `std`.
+            if !of_trait && crate_name != sym::core {
+                if ![sym::alloc, sym::std].contains(&crate_name) {
+                    // We cannot link to this primitive's associated item as it's not part of
+                    // `core`, `alloc` or `std` so returning early.
+                    return Err(HrefError::UnnamableItem);
+                }
+                maybe_have_impl_not_in_def_crate = true;
+            }
             prim = PrimitiveType::from_ty(ty);
         }
     }
 
     let (shortty, fqp) = if let Some(prim) = prim {
+        let crate_name = if maybe_have_impl_not_in_def_crate { sym::std } else { crate_name };
         (ItemType::Primitive, vec![crate_name, prim.as_sym()])
     } else {
         (
@@ -754,11 +768,15 @@ pub(crate) fn href_with_root_path(
             false,
         ),
         None => {
-            // Associated items are handled differently with "jump to def". The anchor is generated
+            // Associated items are handled differently with "jump to def": the anchor is generated
             // directly here whereas for intra-doc links, we have some extra computation being
             // performed there.
-            let def_id_to_get = if root_path.is_some() { original_did } else { did };
-            if let Some(&(ref fqp, shortty)) = cache.external_paths.get(&def_id_to_get) {
+            //
+            // So if `root_path` is `Some()` and it's an associated item, we enter to enter the
+            // `else` branch to have the anchor generated here directly.
+            if (root_path.is_none() || original_did == did)
+                && let Some(&(ref fqp, shortty)) = cache.external_paths.get(&did)
+            {
                 let module_fqp = to_module_fqp(shortty, fqp);
                 let (parts, is_absolute) = url_parts(cache, did, module_fqp, relative_to)?;
                 (fqp.as_slice(), shortty, parts, is_absolute)

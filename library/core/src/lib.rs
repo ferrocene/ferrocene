@@ -135,7 +135,6 @@
 #![feature(final_associated_functions)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
-#![feature(funnel_shifts)]
 #![feature(impl_restriction)]
 #![feature(intra_doc_pointers)]
 #![feature(intrinsics)]

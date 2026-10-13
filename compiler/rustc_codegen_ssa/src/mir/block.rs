@@ -7,9 +7,9 @@ use rustc_abi::{
 };
 use rustc_ast as ast;
 use rustc_ast::{InlineAsmOptions, InlineAsmTemplatePiece};
+use rustc_attr_ir::AttributeKind;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::packed::Pu128;
-use rustc_hir::attrs::AttributeKind;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_lint_defs::builtin::TAIL_CALL_TRACK_CALLER;
 use rustc_middle::mir::interpret::{CTFE_ALLOC_SALT, Scalar};
 use rustc_middle::mir::{self, AssertKind, InlineAsmMacro, SwitchTargets, UnwindTerminateReason};
@@ -140,7 +140,7 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
         bx: &mut Bx,
         target: mir::BasicBlock,
         mergeable_succ: bool,
-        attributes: &[AttributeKind],
+        loop_hint_attrs: &[AttributeKind],
     ) -> MergingSucc {
         let (needs_landing_pad, is_cleanupret) = self.llbb_characteristics(fx, target);
         if mergeable_succ && !needs_landing_pad && !is_cleanupret {
@@ -156,7 +156,7 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
                 // to a trampoline.
                 bx.cleanup_ret(self.funclet(fx).unwrap(), Some(lltarget));
             } else {
-                bx.br_with_attrs(lltarget, attributes);
+                bx.br_with_attrs(lltarget, loop_hint_attrs);
             }
             MergingSucc::False
         }
@@ -199,7 +199,7 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
                     "compiler_builtins call to diverging function {:?} replaced with abort",
                     instance.def_id()
                 );
-                bx.abort();
+                bx.abort_immediate();
                 bx.unreachable();
                 return MergingSucc::False;
             }
@@ -587,7 +587,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             // so we should make sure that we never actually do.
             // We play it safe by using a well-defined `abort`, but we could go for immediate UB
             // if that turns out to be helpful.
-            bx.abort();
+            bx.abort_immediate();
             // `abort` does not terminate the block, so we still need to generate
             // an `unreachable` terminator after it.
             bx.unreachable();
@@ -1099,7 +1099,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                                 }
                                 // Also we need to terminate the block to avoid an LLVM assertion,
                                 // even though we're not going to actually use the IR.
-                                bx.abort();
+                                bx.abort_immediate();
                                 return MergingSucc::False;
                             }
                             IntrinsicResult::Fallback(instance) => {
@@ -1677,7 +1677,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             }
 
             mir::TerminatorKind::Goto { target } => {
-                helper.funclet_br(self, bx, target, mergeable_succ(), &terminator.attributes)
+                helper.funclet_br(self, bx, target, mergeable_succ(), &terminator.loop_hint_attrs)
             }
 
             mir::TerminatorKind::SwitchInt { ref discr, ref targets } => {
@@ -2398,7 +2398,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         let (fn_abi, fn_ptr, instance) =
             common::build_langcall(&bx, self.mir.span, reason.lang_item());
         if is_call_from_compiler_builtins_to_upstream_monomorphization(bx.tcx(), instance) {
-            bx.abort();
+            bx.abort_immediate();
         } else {
             let fn_ty = bx.fn_decl_backend_type(fn_abi);
 

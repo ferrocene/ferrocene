@@ -243,17 +243,18 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let suggest_remove_comma =
-            if self.token == token::Comma && self.look_ahead(1, |t| t.is_ident()) {
-                if recover {
-                    self.bump();
-                    recovered_ident = self.ident_or_err(false).ok();
-                };
-
-                Some(SuggRemoveComma { span: bad_token.span })
-            } else {
-                None
+        let suggest_remove_comma = if self.token == token::Comma
+            && let Some(ident) = self.look_ahead(1, Token::ident)
+        {
+            if recover {
+                self.bump();
+                recovered_ident = Some(ident);
             };
+
+            Some(SuggRemoveComma { span: bad_token.span })
+        } else {
+            None
+        };
 
         let help_cannot_start_number = self.is_lit_bad_ident().map(|(len, valid_portion)| {
             let (invalid, valid) = self.token.span.split_at(len as u32);
@@ -1561,8 +1562,8 @@ impl<'a> Parser<'a> {
         self.bump(); // `+`
         let _bounds = self.parse_generic_bounds()?;
         let sub = match &ty.kind {
-            TyKind::Ref(_lifetime, mut_ty) => {
-                let lo = mut_ty.ty.span.shrink_to_lo();
+            TyKind::Ref(_lifetime, inner_ty, _) => {
+                let lo = inner_ty.span.shrink_to_lo();
                 let hi = self.prev_token.span.shrink_to_hi();
                 BadTypePlusSub::AddParen { suggestion: AddParen { lo, hi } }
             }
@@ -2235,7 +2236,7 @@ impl<'a> Parser<'a> {
         };
         let mut err = self.dcx().struct_span_err(span, msg);
         let sp = self.psess.source_map().start_point(self.token.span);
-        if let Some(sp) = self.psess.ambiguous_block_expr_parse.borrow().get(&sp) {
+        if let Some(sp) = self.psess.complete_stmt_exprs_before_bin_op_lookalike.borrow().get(&sp) {
             err.subdiagnostic(ExprParenthesesNeeded::surrounding(*sp));
         }
         err.span_label(span, "expected expression");
@@ -2284,6 +2285,44 @@ impl<'a> Parser<'a> {
                 seen_inputs.insert(ident);
             }
         }
+    }
+
+    /// Handle encountering a lifetime in a generic argument list that is not
+    /// followed by a `,` or `>`.
+    /// We emit an error and check if the lifetime is followed by a type
+    /// in, e.g. `Foo<'a T>`.
+    /// In this case, it is likely the user meant either `Foo<&'a T>` or `Foo<'a, T>`.
+    /// We give both suggestions, then emit an error. Note that we do not try to recover,
+    /// since we cannot know which of the two suggestions is correct and emitting either
+    /// of the two types could cause confusing errors further on.
+    pub(super) fn handle_lifetime_arg_preceding_type(&mut self, span: Span) -> PResult<'a, ()> {
+        let snapshot = self.create_snapshot_for_diagnostic();
+        let (mutbl, ty) = self.parse_ref_ty_no_leading_ampersand();
+        self.restore_snapshot(snapshot);
+        if ty.is_none() {
+            // The lifetime is not followed by a type, do nothing.
+            return Ok(());
+        }
+        // If we find `'a mut T`, suggesting to add a comma is wrong.
+        let suggest_comma = mutbl.is_not();
+        // Add `>` to the list of expected tokens.
+        self.check(exp!(Gt));
+        let mut err = self.unexpected().unwrap_err();
+        err.span_suggestion_verbose(
+            span.shrink_to_lo(),
+            "you might have meant to write a reference type here",
+            "&",
+            Applicability::MaybeIncorrect,
+        );
+        if suggest_comma {
+            err.span_suggestion_verbose(
+                span.shrink_to_hi(),
+                "use a comma to separate type parameters",
+                ",",
+                Applicability::MaybeIncorrect,
+            );
+        }
+        Err(err)
     }
 
     /// Handle encountering a symbol in a generic argument list that is not a `,` or `>`. In this

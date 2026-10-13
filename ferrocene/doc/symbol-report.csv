@@ -1405,6 +1405,8 @@
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::traits::collect::IntoIterator>::into_iter
+<I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>::spec_advance_back_by
+<I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>::spec_advance_back_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <T as core::array::SpecArrayClone>::clone
@@ -6778,10 +6780,10 @@ core::intrinsics::maximum_number_nsz_f32
 core::intrinsics::minimum_number_nsz_f32
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
+core::intrinsics::reflection::type_id_eq
 core::intrinsics::rotate_left
 core::intrinsics::rotate_right
 core::intrinsics::select_unpredictable
-core::intrinsics::type_id_eq
 core::intrinsics::typed_swap_nonoverlapping
 core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
@@ -6906,6 +6908,7 @@ core::iter::traits::collect::Extend::extend_one
 core::iter::traits::collect::Extend::extend_one_unchecked
 core::iter::traits::collect::Extend::extend_reserve
 core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by
+core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy::spec_advance_back_by
 core::iter::traits::double_ended::DoubleEndedIterator::nth_back
 core::iter::traits::double_ended::DoubleEndedIterator::rfind
 core::iter::traits::double_ended::DoubleEndedIterator::rfind::check

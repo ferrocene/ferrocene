@@ -3539,11 +3539,6 @@ fn prepare_cargo_test(
         cargo.arg("-p").arg(krate);
     }
 
-    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
-    if !builder.config.verbose_tests {
-        cargo.arg("--quiet");
-    }
-
     // The tests are going to run with the *target* libraries, so we need to
     // ensure that those libraries show up in the LD_LIBRARY_PATH equivalent.
     //
@@ -3559,12 +3554,21 @@ fn prepare_cargo_test(
     }
 
     if builder.remote_tested(target) {
-        cargo.env(
-            format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)),
-            format!("{} run 0", builder.tool_exe(Tool::RemoteTestClient).display()),
-        );
+        let runner = format!("{} run 0", builder.tool_exe(Tool::RemoteTestClient).display());
+        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), &runner);
+
+        // Workaround for rust-lang/cargo#17529
+        cargo.arg("--config").arg(format!("target.\"{}\".runner = {:?}", target.triple, runner));
     } else if let Some(tool) = builder.runner(target) {
-        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), tool);
+        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), &tool);
+
+        // Workaround for rust-lang/cargo#17529
+        cargo.arg("--config").arg(format!("target.\"{}\".runner = {:?}", target.triple, tool));
+    }
+
+    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
+    if !builder.config.verbose_tests {
+        cargo.arg("--quiet");
     }
 
     cargo
@@ -4758,20 +4762,25 @@ impl CommandLineStep for CodegenGCC {
 
         let gcc = builder.ensure(Gcc { target_pair: GccTargetPair::for_native_build(target) });
 
+        if builder.config.rustc_debug_assertions {
+            eprintln!(
+                "WARNING: cg_gcc tests will likely fail when debug assertions are enabled for rustc"
+            );
+        }
+
+        // We need to run the cg_gcc tests with the compiler which it links against, not with
+        // the build compiler.
+        let target_compiler = compilers.target_compiler();
+
         builder.ensure(
-            compile::Std::new(compilers.build_compiler(), target)
+            compile::Std::new(target_compiler, target)
                 .extra_rust_args(&["-Csymbol-mangling-version=v0", "-Cpanic=abort"]),
         );
 
-        let _guard = builder.msg_test(
-            "rustc_codegen_gcc",
-            compilers.target(),
-            compilers.target_compiler().stage,
-        );
-
+        let _guard = builder.msg_test("rustc_codegen_gcc", target, target_compiler.stage);
         let mut cargo = builder::Cargo::new(
             builder,
-            compilers.build_compiler(),
+            target_compiler,
             Mode::Codegen, // Must be codegen to ensure dlopen on compiled dylibs works
             SourceType::InTree,
             target,

@@ -3097,7 +3097,7 @@ _x() {
             return 0
             ;;
         x__perf__benchmark)
-            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help <benchmark-id> [PATHS]... [ARGS]..."
+            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --database-path --frontend-threads --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help <benchmark-id> [PATHS]... [ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -3117,6 +3117,14 @@ _x() {
                     ;;
                 --profiles)
                     COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
+                    return 0
+                    ;;
+                --database-path)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --frontend-threads)
+                    COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3295,7 +3303,7 @@ _x() {
             return 0
             ;;
         x__perf__cachegrind)
-            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
+            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --database-path --frontend-threads --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -3315,6 +3323,14 @@ _x() {
                     ;;
                 --profiles)
                     COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
+                    return 0
+                    ;;
+                --database-path)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --frontend-threads)
+                    COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3493,12 +3509,16 @@ _x() {
             return 0
             ;;
         x__perf__compare)
-            opts="-v -q -i -j -h --verbose --quiet --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help <BASE> <MODIFIED> [PATHS]... [ARGS]..."
+            opts="-v -q -i -j -h --database-path --verbose --quiet --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help <BASE> <MODIFIED> [PATHS]... [ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --database-path)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 --config)
                     local oldifs
                     if [ -n "${IFS+x}" ]; then
@@ -3679,7 +3699,7 @@ _x() {
             return 0
             ;;
         x__perf__eprintln)
-            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
+            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --database-path --frontend-threads --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -3699,6 +3719,14 @@ _x() {
                     ;;
                 --profiles)
                     COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
+                    return 0
+                    ;;
+                --database-path)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --frontend-threads)
+                    COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3877,7 +3905,7 @@ _x() {
             return 0
             ;;
         x__perf__samply)
-            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
+            opts="-v -q -i -j -h --include --exclude --scenarios --profiles --database-path --frontend-threads --verbose --quiet --incremental --config --build-dir --build --host --target --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --json-output --compile-time-deps --color --bypass-bootstrap-lock --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --ci --skip-std-check-if-no-download-rustc --help [PATHS]... [ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -3897,6 +3925,14 @@ _x() {
                     ;;
                 --profiles)
                     COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
+                    return 0
+                    ;;
+                --database-path)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --frontend-threads)
+                    COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
                 --config)

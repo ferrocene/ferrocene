@@ -3120,7 +3120,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         })
     }
 
-    /// `def_id` is a const item used in the type system. Checks if that's OK.
+    /// `alias_const` is a const item used in the type system. Checks if that's OK.
     fn check_const_item_in_type_system(
         &self,
         alias_const: ty::AliasConstKind<'tcx>,
@@ -3195,12 +3195,12 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let result_ty = match &hir_ty.kind {
             hir::TyKind::InferDelegation(infer) => self.lower_delegation_ty(*infer),
             hir::TyKind::Slice(ty) => Ty::new_slice(tcx, self.lower_ty(ty)),
-            hir::TyKind::Ptr(mt) => Ty::new_ptr(tcx, self.lower_ty(mt.ty), mt.mutbl),
-            hir::TyKind::Ref(region, mt) => {
+            hir::TyKind::Ptr(ty, mutbl) => Ty::new_ptr(tcx, self.lower_ty(ty), *mutbl),
+            hir::TyKind::Ref(region, ty, mutbl) => {
                 let r = self.lower_lifetime(region, RegionInferReason::Reference);
                 debug!(?r);
-                let t = self.lower_ty(mt.ty);
-                Ty::new_ref(tcx, r, t, mt.mutbl)
+                let t = self.lower_ty(ty);
+                Ty::new_ref(tcx, r, t, *mutbl)
             }
             hir::TyKind::Never => tcx.types.never,
             hir::TyKind::Tup(fields) => {

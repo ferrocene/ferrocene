@@ -3539,11 +3539,6 @@ fn prepare_cargo_test(
         cargo.arg("-p").arg(krate);
     }
 
-    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
-    if !builder.config.verbose_tests {
-        cargo.arg("--quiet");
-    }
-
     // The tests are going to run with the *target* libraries, so we need to
     // ensure that those libraries show up in the LD_LIBRARY_PATH equivalent.
     //
@@ -3559,12 +3554,21 @@ fn prepare_cargo_test(
     }
 
     if builder.remote_tested(target) {
-        cargo.env(
-            format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)),
-            format!("{} run 0", builder.tool_exe(Tool::RemoteTestClient).display()),
-        );
+        let runner = format!("{} run 0", builder.tool_exe(Tool::RemoteTestClient).display());
+        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), &runner);
+
+        // Workaround for rust-lang/cargo#17529
+        cargo.arg("--config").arg(format!("target.\"{}\".runner = {:?}", target.triple, runner));
     } else if let Some(tool) = builder.runner(target) {
-        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), tool);
+        cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), &tool);
+
+        // Workaround for rust-lang/cargo#17529
+        cargo.arg("--config").arg(format!("target.\"{}\".runner = {:?}", target.triple, tool));
+    }
+
+    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
+    if !builder.config.verbose_tests {
+        cargo.arg("--quiet");
     }
 
     cargo

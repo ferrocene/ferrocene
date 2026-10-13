@@ -17,12 +17,12 @@ use crate::lang_items::{SolverAdtLangItem, SolverProjectionLangItem, SolverTrait
 use crate::relate::Relate;
 use crate::search_graph::RequiredDepth;
 use crate::solve::{
-    AccessedOpaques, CanonicalInput, Certainty, ExternalConstraintsData, QueryResult, inspect,
+    AccessedOpaques, CanonicalInputData, Certainty, ExternalConstraintsData, QueryResult, inspect,
 };
 use crate::visit::{Flags, TypeVisitable};
 use crate::{
-    self as ty, BoundRegion, BoundVar, CanonicalParamEnvCache, DebruijnIndex, Region, RegionKind,
-    TraitRef, search_graph,
+    self as ty, AliasTermKind, BoundRegion, BoundVar, CanonicalParamEnvCache, DebruijnIndex,
+    Region, RegionKind, TraitRef, search_graph,
 };
 
 /// The central trait in the shared abstraction layer, specifying all implementation-specific
@@ -275,10 +275,18 @@ pub trait Interner:
     type AdtDef: AdtDef<Self>;
     fn adt_def(self, adt_def_id: Self::AdtId) -> Self::AdtDef;
 
-    fn alias_const_kind_from_def_id(self, def_id: Self::DefId) -> ty::AliasConstKind<Self>;
+    fn alias_const_kind_from_def_id(
+        self,
+        def_id: Self::DefId,
+        inherent_args: ty::AliasConstInherentArgsKind,
+    ) -> ty::AliasConstKind<Self>;
 
     // FIXME: remove in favor of explicit construction
-    fn alias_term_kind_from_def_id(self, def_id: Self::DefId) -> ty::AliasTermKind<Self>;
+    fn alias_term_kind_from_def_id(
+        self,
+        def_id: Self::DefId,
+        inherent_args: ty::AliasConstInherentArgsKind,
+    ) -> ty::AliasTermKind<Self>;
 
     fn trait_ref_and_own_args_for_alias(
         self,
@@ -293,9 +301,18 @@ pub trait Interner:
         I: Iterator<Item = T>,
         T: CollectAndApply<Self::GenericArg, Self::GenericArgs>;
 
-    fn check_args_compatible(self, def_id: Self::DefId, args: Self::GenericArgs) -> bool;
+    fn check_alias_term_args_compatible(
+        self,
+        term_kind: AliasTermKind<Self>,
+        args: Self::GenericArgs,
+    ) -> bool;
 
     fn debug_assert_args_compatible(self, def_id: Self::DefId, args: Self::GenericArgs);
+    fn debug_assert_alias_term_args_compatible(
+        self,
+        term_kind: AliasTermKind<Self>,
+        args: Self::GenericArgs,
+    );
 
     /// Assert that the args from an `ExistentialTraitRef` or `ExistentialProjection`
     /// are compatible with the `DefId`.
@@ -499,7 +516,7 @@ pub trait Interner:
     fn mk_probe(self, probe: inspect::Probe<Self>) -> Self::Probe;
     fn evaluate_root_goal_for_proof_tree_raw(
         self,
-        canonical_goal: CanonicalInput<Self>,
+        canonical_goal: Self::CanonicalInput,
         root_depth: usize,
     ) -> (QueryResult<Self>, Self::Probe, RequiredDepth);
 
@@ -520,6 +537,9 @@ pub trait Interner:
     ) -> Region<Self>;
 
     fn intern_canonical_bound(self, var: BoundVar) -> Region<Self>;
+
+    type CanonicalInput: Copy + Debug + Hash + Eq + Deref<Target = CanonicalInputData<Self>>;
+    fn mk_canonical_input(self, data: CanonicalInputData<Self>) -> Self::CanonicalInput;
 }
 
 macro_rules! declare_lift_into {
@@ -711,7 +731,7 @@ impl<T, R, E> CollectAndApply<T, R> for Result<T, E> {
 }
 
 impl<I: Interner> search_graph::Cx for I {
-    type Input = CanonicalInput<I>;
+    type Input = I::CanonicalInput;
     type Result = (QueryResult<I>, AccessedOpaques<I>);
     type AmbiguityKind = Certainty;
 

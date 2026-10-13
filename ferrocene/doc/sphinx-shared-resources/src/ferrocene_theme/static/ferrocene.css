@@ -788,3 +788,7 @@ pre.spec-syntax .spec-syntax-literal {
 .ferrocene-cli-title em {
     font-weight: 400;
 }
+
+#ferrocene-26-08-0 > p:first-of-type {
+	display: none;
+}

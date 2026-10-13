@@ -440,8 +440,32 @@ fn test_parse_int_error_zero_display_fmt() {
 // covers `<core::num::error::TryFromIntError as core::fmt::Display>::fmt`
 #[test]
 #[should_panic = "number too large to fit in target type"]
-fn test_try_from_int_error_display_fmt() {
+fn test_try_from_int_error_display_fmt_pos_overflow() {
     if let Err(e) = u8::try_from(256u16) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number too small to fit in target type"]
+fn test_try_from_int_error_display_fmt_neg_overflow() {
+    if let Err(e) = u8::try_from(i8::MIN) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number would be zero for non-zero type"]
+fn test_try_from_int_error_display_fmt_zero() {
+    if let Err(e) = core::num::NonZero::<u32>::try_from(0) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number is not a power of two"]
+fn test_try_from_int_error_display_fmt_not_power_of_two() {
+    if let Err(e) = core::mem::Alignment::try_from(7) {
         panic!("{e}")
     }
 }

@@ -1,4 +1,5 @@
 //@ incremental
+//@ edition: 2015
 // Need to disable optimizations to ensure consistent output across all CI runners.
 //@ compile-flags: -Copt-level=0
 

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags:-Zmir-opt-level=0 -O
 
 #![deny(dead_code)]

@@ -3,6 +3,7 @@
 // ends up with any spans in its LLVM bitecode, so LLVM is able to skip
 // re-building any modules which import 'inlined_fn'
 
+//@ edition: 2015
 //@ revisions: bpass1 bpass2 bpass3
 //@ compile-flags: -Z query-dep-graph -O
 //@ ignore-backends: gcc

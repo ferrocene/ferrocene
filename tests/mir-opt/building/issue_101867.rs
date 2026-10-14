@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Zmir-opt-level=0
 //@ skip-filecheck
 // EMIT_MIR issue_101867.main.built.after.mir

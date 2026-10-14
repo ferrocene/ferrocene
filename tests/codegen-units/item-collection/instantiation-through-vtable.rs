@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags:-Clink-dead-code -Zmir-opt-level=0
 
 #![deny(dead_code)]

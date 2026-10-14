@@ -1,7 +1,7 @@
 #![attr = Feature([mut_restriction#0, unsafe_fields#0])]
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 //@ pretty-compare-only
 //@ pretty-mode:hir
 //@ pp-exact:hir-mut-restriction.pp

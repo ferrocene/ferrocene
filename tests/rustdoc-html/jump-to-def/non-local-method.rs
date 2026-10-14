@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ compile-flags: -Zunstable-options --generate-link-to-definition
 
 #![crate_name = "foo"]
@@ -24,7 +25,7 @@ pub fn bar() {
     //@ has - '//a[@href="{{channel}}/alloc/boxed/struct.Box.html"]' 'Box'
     //@ has - '//a[@href="{{channel}}/alloc/boxed/struct.Box.html#method.new"]' 'new'
     let _ = Box::new(0);
-    //@ has - '//a[@href="#49"]' 'local_private'
+    //@ has - '//a[@href="#50"]' 'local_private'
     local_private();
 }
 

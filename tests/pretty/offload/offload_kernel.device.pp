@@ -1,5 +1,4 @@
 #![feature(prelude_import)]
-#![no_std]
 //@ only-nightly
 //@ revisions: host device
 
@@ -13,7 +12,7 @@
 #![feature(gpu_offload)]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 use std::offload::offload_kernel;
 

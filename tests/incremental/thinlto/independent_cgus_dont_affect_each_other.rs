@@ -1,6 +1,7 @@
 // This test checks that a change in a CGU does not invalidate an unrelated CGU
 // during incremental ThinLTO.
 
+//@ edition: 2015
 //@ revisions: bpass1 bpass2 bpass3
 //@ compile-flags: -Z query-dep-graph -O
 //@ ignore-backends: gcc

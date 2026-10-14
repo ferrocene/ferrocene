@@ -1,6 +1,7 @@
 // Tests inlining of diverging calls.
 //
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
+//@ edition: 2015
 //@ compile-flags: -Zinline-mir-hint-threshold=1000 -C debuginfo=full
 #![crate_type = "lib"]
 

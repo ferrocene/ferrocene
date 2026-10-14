@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ revisions: bpass
 
 #![feature(fn_delegation)]

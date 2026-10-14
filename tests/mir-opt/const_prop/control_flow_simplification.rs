@@ -1,4 +1,5 @@
 // EMIT_MIR_FOR_EACH_PANIC_STRATEGY
+//@ edition: 2015
 //@ test-mir-pass: GVN
 //@ compile-flags: -Zmir-opt-level=1
 

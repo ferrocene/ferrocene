@@ -6,7 +6,7 @@
 #![attr = Feature([fn_delegation#0])]
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 mod free_to_trait {
     trait Trait<'a, XX, Y, T = (), const N: usize = 2> {

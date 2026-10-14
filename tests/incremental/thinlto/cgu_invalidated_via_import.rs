@@ -2,6 +2,7 @@
 // via ThinLTO and that imported thing changes while the definition of the CGU
 // stays untouched.
 
+//@ edition: 2015
 //@ revisions: bpass1 bpass2 bpass3
 //@ compile-flags: -Z query-dep-graph -O
 //@ ignore-backends: gcc

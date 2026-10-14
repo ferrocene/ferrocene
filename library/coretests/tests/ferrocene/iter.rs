@@ -901,6 +901,13 @@ fn test_range_iter_advance_next_back() {
     assert_eq!(Some(StepWrapper(9)), range.into_iter().next_back());
 }
 
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::advance_by`
+#[test]
+fn test_range_iter_advance_advance_by() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Ok(()), range.into_iter().advance_by(1));
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

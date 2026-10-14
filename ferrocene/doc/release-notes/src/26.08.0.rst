@@ -1,13 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-:upcoming-release:
-
-Ferrocene 26.08
-===============
-
-This page contains the changes to be introduced in the upcoming Ferrocene
-release.
+Ferrocene 26.08.0
+=================
 
 New features
 ------------
@@ -29,4 +24,4 @@ to the targets and platforms supported by Ferrocene.
 
 .. rust-changelog::
     :from: 1.96.0
-    :to: 1.97.0
+    :to: 1.97.1

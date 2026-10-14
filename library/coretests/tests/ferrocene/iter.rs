@@ -880,6 +880,13 @@ fn test_range_inclusive_iter_nth() {
     assert_eq!(Some(StepWrapper(6)), range.into_iter().nth(5));
 }
 
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::size_hint`.
+#[test]
+fn test_range_inclusive_iter_size_hint() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!((10, Some(10)), range.into_iter().size_hint());
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

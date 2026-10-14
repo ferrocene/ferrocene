@@ -887,6 +887,13 @@ fn test_range_inclusive_iter_size_hint() {
     assert_eq!((10, Some(10)), range.into_iter().size_hint());
 }
 
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by`.
+#[test]
+fn test_range_iter_advance_back_by() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Ok(()), range.into_iter().advance_back_by(1));
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

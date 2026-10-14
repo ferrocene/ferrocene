@@ -132,8 +132,8 @@ pub fn codegen_backend_stamp(
     backend: &CodegenBackendKind,
 ) -> BuildStamp {
     // Ferrocene addition
-    if *backend == CodegenBackendKind::Gcc {
-        eprintln!("error: Ferrocene does not support the gcc codegen backend");
+    if *backend != CodegenBackendKind::Llvm {
+        eprintln!("error: Ferrocene only supports LLVM for codegen, not {}", backend.name());
         helpers::exit_process(1);
     }
 

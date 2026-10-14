@@ -17,9 +17,6 @@ expression: test --skip=tests --skip=library --skip=tidyselftest
 [Test] test::Tidy
     targets: [x86_64-unknown-linux-gnu]
     - Set({src/tools/tidy})
-[Test] test::CodegenCranelift
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({compiler/rustc_codegen_cranelift})
 [Test] test::CodegenGCC
     targets: [x86_64-unknown-linux-gnu]
     - Set({compiler/rustc_codegen_gcc})

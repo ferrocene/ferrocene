@@ -894,6 +894,13 @@ fn test_range_iter_advance_back_by() {
     assert_eq!(Ok(()), range.into_iter().advance_back_by(1));
 }
 
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back`.
+#[test]
+fn test_range_iter_advance_next_back() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(9)), range.into_iter().next_back());
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

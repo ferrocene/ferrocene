@@ -915,6 +915,13 @@ fn test_range_iter_advance_count() {
     assert_eq!(9, range.into_iter().count());
 }
 
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::last`
+#[test]
+fn test_range_iter_last() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(9)), range.into_iter().last());
+}
+
 // covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
 #[test]
 fn test_spec_nth_for_range_inclusive_iter() {

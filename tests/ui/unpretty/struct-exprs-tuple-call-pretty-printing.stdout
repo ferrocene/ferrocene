@@ -1,5 +1,6 @@
 //@ compile-flags: -Zunpretty=hir
 //@ check-pass
+//@ edition: 2015
 
 #![expect(incomplete_features)]
 #![allow(dead_code)]
@@ -7,7 +8,7 @@
 adt_const_params#0])]
 extern crate std;
 #[attr = PreludeImport]
-use std::prelude::rust_2021::*;
+use ::std::prelude::rust_2015::*;
 
 use std::marker::ConstParamTy;
 

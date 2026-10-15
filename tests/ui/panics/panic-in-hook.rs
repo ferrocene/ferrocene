@@ -1,5 +1,5 @@
 // Checks what happens when panicking inside the panic hook.
-
+//@ edition: 2015
 //@ run-crash
 //@ exec-env:RUST_BACKTRACE=0
 //@ check-run-results

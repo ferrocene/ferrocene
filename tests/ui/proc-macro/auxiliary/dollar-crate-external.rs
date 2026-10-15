@@ -1,3 +1,4 @@
+//@ edition: 2015
 pub type S = u8;
 
 #[macro_export]

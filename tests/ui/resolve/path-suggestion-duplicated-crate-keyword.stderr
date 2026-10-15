@@ -1,5 +1,5 @@
 error[E0433]: cannot find `linux` in the crate root
-  --> $DIR/path-suggestion-duplicated-crate-keyword.rs:10:33
+  --> $DIR/path-suggestion-duplicated-crate-keyword.rs:11:33
    |
 LL |                 let _x = crate::linux::system::Y;
    |                                 ^^^^^ unresolved import
@@ -10,7 +10,7 @@ LL |                 let _x = crate::unix::linux::system::Y;
    |                                 ++++++
 help: consider importing this module
    |
-LL +             use crate::unix::linux::system;
+LL +             use unix::linux::system;
    |
 help: if you import `system`, refer to it directly
    |

@@ -2,6 +2,7 @@
 //!
 //! The compiler used to suggest `crate::crate::unix::linux::system::Y`
 //! (duplicating the `crate` keyword) instead of `crate::unix::linux::system::Y`.
+//@ edition: 2015
 
 pub mod unix {
     pub mod linux {

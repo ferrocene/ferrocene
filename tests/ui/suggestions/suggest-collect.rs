@@ -1,3 +1,4 @@
+//@ edition: 2015
 fn main() {
     let _x: String = "hello".chars().map(|c| c);
     //~^ ERROR mismatched types

@@ -1,4 +1,5 @@
 //@ aux-build: issue-114682-3-extern.rs
+//@ edition: 2015
 // https://github.com/rust-lang/rust/pull/114682#issuecomment-1880625909
 
 extern crate issue_114682_3_extern;

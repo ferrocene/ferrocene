@@ -221,6 +221,19 @@ fn test_builder_debug_map() {
     assert_eq!(format!("{:?}", Foo { a: 1, b: 2 }), "{\'hello: 1\': \'there: 2\'}");
 }
 
+// Covers `core::fmt::builders::DebugTuple::<'a, 'b>::field_with`
+#[test]
+fn test_builder_debug_tuple_field_with() {
+    struct Foo(u32);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_tuple("Foo").field_with(|f| write!(f, "hello: {:?}", self.0)).finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo(1)), "Foo(hello: 1)");
+}
 
 // Covers `core::fmt::builders::from_fn`
 #[test]

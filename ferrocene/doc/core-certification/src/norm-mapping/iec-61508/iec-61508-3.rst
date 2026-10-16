@@ -110,7 +110,7 @@ Covered by :ref:`safety-plan/project-setup:responsibility split`.
 7.4.2.2-6
 ~~~~~~~~~
 
-Covered by :ref:`safety-plan/requirements:doc-comments in the core library`.
+Covered by :ref:`safety-plan/requirements:doc-comments in the certified libraries`.
 
 7.4.2.7
 ~~~~~~~
@@ -207,7 +207,7 @@ Objective met.
 7.7.2.5-6
 ~~~~~~~~~
 
-Covered by :ref:`safety-plan/testing-plan:coretests`.
+Covered by :ref:`safety-plan/testing-plan:unit tests`.
 
 7.7.2.7-9
 ~~~~~~~~~

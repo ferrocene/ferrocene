@@ -4,11 +4,13 @@
 Tool safety assessments
 =======================
 
-All offline tools we use to develop the core library are listed below. The compiler is T3, all other tools are T2 or T1.
+All offline tools we use to develop the certified libraries are listed below. The compiler is T3, all other tools are T2 or T1.
 
-There are no online tools used to develop the core library.
+There are no online tools used to develop the certified libraries.
 
-For each tool there is a description of the usage of the tool for the core library, the version of the tool used as well as a safety assessment.
+.. Is the allocator that potentially relies on the operating system an online tool?
+
+For each tool there is a description of the usage of the tool for the certified libraries, the version of the tool used as well as a safety assessment.
 
 Code coverage
 -------------
@@ -93,18 +95,21 @@ Version
 Usage
 ~~~~~
 
-The qualified Ferrocene compiler is used to build the core library, which gives high confidence in its quality.
+The qualified Ferrocene compiler is used to build the certified libraries, which gives high confidence in its quality.
 
 Nightly features
 """"""""""""""""
 
-The core library relies on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
+The certified libraries rely on a few so-called "nightly features" of the compiler. Regular users of Ferrocene are not allowed to use them, therefore they are not part of the compiler qualification.
 This is because they are either "experimental" or "internal”. They do work well, but they can change between compiler versions and do not fall under the usual Rust stability guarantees.
-This is not a problem for the core library, because ``rustc`` and the core library are developed, built, and tested together.
+This is not a problem for the certified libraries, because ``rustc`` and the certified libraries are developed, built, and tested together.
 
-Nightly features are activated by setting the ``RUSTC_BOOTSTRAP`` environment variable when executing ``rustc``.
+Nightly features on the stable release channel are activated by setting the ``RUSTC_BOOTSTRAP`` environment variable when executing ``rustc``.
 
-Nightly features used by the core library are listed as ``#![feature(name_of_the_feature)]`` in ``library/core/src/lib.rs``.
+Nightly features used by the certified libraries are listed as ``#![feature(name_of_the_feature)]`` in:
+
+* ``library/core/src/lib.rs``, or
+* ``library/alloc/src/lib.rs``.
 
 Nightly features are tested by the ``compiletest`` test suite, by tests that activate that feature explicitly.
 As an example, most tests in ``tests/ui/lang-items/`` directory test ``#![feature(lang_items)]``.
@@ -114,20 +119,22 @@ As an example, most tests in ``tests/ui/lang-items/`` directory test ``#![featur
 Nightly flags
 """""""""""""
 
-The core library also relies on various normally unqualified flags of the compiler.
-These are only for the use of core; Ferrocene customers must still adhere to the permitted flags in :doc:`safety-manual:rustc/options`.
+The certified libraries also rely on various normally unqualified flags of the compiler.
+These are only for the use of the certified libraries; Ferrocene customers must still adhere to the permitted flags in :doc:`safety-manual:rustc/options`.
 Like nightly features, these flags work well but are experimental, internal, or simply have not yet been qualified.
-This is not a problem for the core library, because ``rustc`` and the core library are developed, built, and tested together.
+This is not a problem for the certified libraries, because ``rustc`` and the certified libraries are developed, built, and tested together.
 
-The flags used for core are enabled by passing them to the compiler when the core library is being built.
+The flags used for the certified libraries are enabled by passing them to the compiler when the certified libraries are being built.
 
-The flags used for core are directly tested by the ``compiletest`` test suite, by tests that pass that flag explicitly.
-Flags are also indirectly tested each time the core library is used, and the core library is used extensively by the compiler in all test suites.
+The flags used for the certified libraries are directly tested by the ``compiletest`` test suite, by tests that pass that flag explicitly.
+Flags are also indirectly tested each time the certified libraries are used, and the certified libraries are used extensively by the compiler in all test suites.
 
 Compiler built-in functions
 """""""""""""""""""""""""""
 
-There are functions in the core library that are "compiler built-in”. That means they are not implemented in the core library codebase but in the compiler codebase.
+.. Most compiler built-in functions are on core. There is one in std and none in alloc.
+
+There are functions in the certified core library that are "compiler built-in”. That means they are not implemented in the core library codebase but in the compiler codebase.
 
 They fall in two categories:
 
@@ -185,10 +192,10 @@ Version
 Usage
 ~~~~~
 
-Upstream already has very good coding practices for the core library, which are enforced by the ``tidy`` test suite.
-The ``tidy`` test suite executes rustc and clippy lints to enforce consistency in semantics and ``rustfmt`` to enforce consistency in syntax.
+Upstream already has very good coding practices for the certified libraries, which are enforced by the ``tidy`` test suite.
+The ``tidy`` test suite executes ``rustc`` and ``clippy`` lints to enforce consistency in semantics and ``rustfmt`` to enforce consistency in syntax.
 
-It does not make sense for us to come up with a separate coding standard and try to force it upon the upstream core library.
+It does not make sense for us to come up with a separate coding standard and try to force it upon the upstream libraries.
 If we would start to come up with new rules from our coding standard we would have to work against upstream and either convince them to refactor their code without a clear benefit for them or we would have to carry a big changeset which has a big potential to introduce bugs.
 
 Safety Assessment
@@ -229,7 +236,7 @@ Version
 Usage
 ~~~~~
 
-The libtest test runner compiles all tests specified in the coretests test suite into an executable that executes the tests and reports if the test results are as expected.
+The libtest test runner compiles all tests specified in the unit test suites into executables that execute the tests and report if the test results are as expected.
 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
@@ -271,7 +278,7 @@ Version
 Usage
 ~~~~~
 
-The bootstrap build orchestrator compiles the compiler, core library, test runner, and test suites.
+The bootstrap build orchestrator compiles the compiler, certified libraries, test runner, and test suites.
 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
@@ -289,18 +296,23 @@ However, Ferrocene has custom modifications to bootstrap that are not used anywh
 Failure modes
 """""""""""""
 
-- Test/dist mismatch: The core library is tested in a configuration that does not match the distributed code.
-   - Risk: All tests pass, but the distributed code would have failed the tests.
-   - Mitigation: Package exactly the code that was tested.
-- Incorrect configuration: The core library is built in a configuration that does not match the safety plan.
-   - Risk: Some certified code calls uncertified code.
-   - Mitigation: Building for a subset target automatically sets configuration flags that ensure all certified code only calls certified code.
-                 Tests and coverage collection run on the qualified target equivalent to the subset target.
-- Missing build flags: The core library is built without flags required by the safety plan, such as ``-Cpanic=abort``.
+- Test/dist mismatch: The certified libraries are tested in a configuration that does not match the distributed code.
 
-  - Risk: The core library uses unwinding panics at runtime, which are not certified.
-  - Mitigation: The tests for the core library, when instrumented for coverage, give a compilation error if the ``panic = "abort"`` conditional compilation option is unset.
-- Unqualified flags: The core library is built with extra flags that are not qualified, such as `-Z inline-mir`.
+  - Risk: All tests pass, but the distributed code would have failed the tests.
+  - Mitigation: Package exactly the code that was tested.
+
+- Incorrect configuration: The certified libraries are built in a configuration that does not match the safety plan.
+
+  - Risk: Some certified code calls uncertified code.
+  - Mitigation: Building for a subset target automatically sets configuration flags that ensure all certified code only calls certified code.
+    Tests and coverage collection run on the qualified target equivalent to the subset target.
+
+- Missing build flags: The certified libraries are built without flags required by the safety plan, such as ``-Cpanic=abort``.
+
+  - Risk: The certified libraries uses unwinding panics at runtime, which are not certified.
+  - Mitigation: The tests for the certified libraries, when instrumented for coverage, give a compilation error if the ``panic = "abort"`` conditional compilation option is unset.
+
+- Unqualified flags: The certified libraries are built with extra flags that are not qualified, such as `-Z inline-mir`.
 
   - Risk: Unqualified compiler flags introduce errors. For example, MIR inlining introduces a codegen bug.
   - Mitigation: Refer to :ref:`nightly-flags`.
@@ -323,8 +335,8 @@ Version
 Usage
 ~~~~~
 
-The CircleCI job orchestrator instructs the ``bootstrap`` build system to build, test, and package the core library.
-It schedules "jobs" that execute in a constrained order, saves the results of the tests, and uploads the generated artifacts for the core library.
+The CircleCI job orchestrator instructs the ``bootstrap`` build system to build, test, and package the certified libraries.
+It schedules "jobs" that execute in a constrained order, saves the results of the tests, and uploads the generated artifacts for the certified libraries.
 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
@@ -333,7 +345,7 @@ Safety Assessment
 - ISO 26262 Tool Classification: TCL2
 - Level of reliance: High, ensures all tests are run.
 
-CircleCI itself is used extensively by many different open-source projects.
+CircleCI itself is used extensively by many different closed and open-source projects.
 However, our custom execution plan for CircleCI is unique to Ferrocene.
 
 See the description of :ref:`circleci` in the qualification docs for more information.
@@ -341,16 +353,18 @@ See the description of :ref:`circleci` in the qualification docs for more inform
 Failure modes
 """""""""""""
 
-- Missing test job: A test job fails or is not run, but the core library is distributed to customers anyway.
-   - Risk: Customers run untested code.
-   - Mitigation: All "distribution" CI jobs depend on test jobs.
-                 If a test job fails, the distribution job never runs.
+- Missing test job: A test job fails or is not run, but the certified libraries are distributed to customers anyway.
+
+  - Risk: Customers run untested code.
+  - Mitigation: All "distribution" CI jobs depend on test jobs.
+    If a test job fails, the distribution job never runs.
+
 - Missing test suite: A test suite is never run in any test job.
 
   - Risk: Not all test suites in the safety plan are run.
   - Mitigation: The ``ferrocene/ci/split-tasks.py`` script chooses which suites are run in which job.
-                This script has an exhaustive list of all test suites required by our safety plan,
-                and ensures each suite is run in at least one job.
+    This script has an exhaustive list of all test suites required by our safety plan,
+    and ensures each suite is run in at least one job.
 
 Emulator
 --------
@@ -370,7 +384,7 @@ Version
 Usage
 ~~~~~
 
-The provided binaries (eg. ``qemu-aarch64``) are used to test the produced core library on the target architecture.
+The provided binaries (eg. ``qemu-aarch64``) are used to test the produced certified libraries on the target architecture.
 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
@@ -385,11 +399,13 @@ Failure modes
 """""""""""""
 
 - False-positive: A test fails that would succeed on real hardware
-   - Risk: Lost time invested.
-   - Mitigation: Attempt to reproduce on real hardware.
+
+  - Risk: Lost time invested.
+  - Mitigation: Attempt to reproduce on real hardware.
 - False-negative: A test passes that would fail on real hardware
-   - Risk: Code which produces unexpected results on real hardware is certified.
-   - Mitigation: Report issue upstream.
+
+  - Risk: Code which produces unexpected results on real hardware is certified.
+  - Mitigation: Report issue upstream.
 
 Version control system
 ----------------------
@@ -426,11 +442,14 @@ Failure modes
 """""""""""""
 
 - False-positive: Introduce changes that were not made
-   - Risk: Erroneous code, documentation, configuration
-   - Mitigation: Code review.
+
+  - Risk: Erroneous code, documentation, configuration
+  - Mitigation: Code review.
+
 - False-negative: Do not track changes that were made
-   - Risk: Lose time invested.
-   - Mitigation: Code review.
+
+  - Risk: Lose time invested.
+  - Mitigation: Code review.
 
 ``rustdoc``
 -----------

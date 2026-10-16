@@ -7,11 +7,11 @@ Programming language
 Compiler
 --------
 
-The certified core library is being built with the safety qualified Ferrocene compiler. It is qualified for the same safety standards as the core library, see :doc:`evaluation-plan:index`.
+The certified libraries are being built with the safety qualified Ferrocene compiler. The compiler is qualified for the same safety standards as the certified libraries, see :doc:`evaluation-plan:index`.
 
 The Ferrocene compiler uses Rust as defined by the Ferrocene language specification.
 
-The Ferrocene compiler performs thorough control flow and data flow analysis. The data flow analysis is usually referred to as "Borrow Checker" and is one of the core features of Rust. One example for the outstanding control flow analysis is that rustc detects when some variants of an enum are not handled and throws a hard error.
+The Ferrocene compiler performs thorough control flow and data flow analysis. The data flow analysis is usually referred to as "Borrow Checker" and is one of the central features of Rust. One example for the outstanding control flow analysis is that rustc detects when some variants of an enum are not handled and throws a hard error.
 
 Rust
 ----
@@ -29,9 +29,11 @@ Characteristics of Rust:
 - all fields and methods of a data structure are private by default and must be made public explicitly
 - functions in Rust can only be called through one interface (i.e. no overloading)
 
-Rust is well matched to the needs of the Rust core library.
+Rust is well matched to the needs of the certified Rust libraries.
 
 Heap allocations
 ----------------
 
 While Rust supports heap allocation, it is not used in the core library, which is enforced by core being ``no_std``.
+
+.. TODO: talk about alloc

@@ -151,3 +151,10 @@ fn test_maximum_number_nsz_f32() {
     // else
     assert_eq!(1.0_f32, core::intrinsics::maximum_number_nsz_f32(0.0_f32, 1.0_f32));
 }
+
+// Cover `core::intrinsics::fabs`
+#[test]
+fn test_fabs() {
+    let input = core::hint::black_box(-0.0_f32);
+    assert_eq!(input.abs().to_bits(), 0.0_f32.to_bits());
+}

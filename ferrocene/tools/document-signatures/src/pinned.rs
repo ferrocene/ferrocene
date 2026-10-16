@@ -63,7 +63,7 @@ impl Pinned {
         eprintln!("running: {tar_cmd:?}");
         let status = tar_cmd.status()?;
         if !status.success() {
-            anyhow::bail!("failed to invoke tar to create content tarball");
+            anyhow::bail!("failed to create {}", saved_tarfile.path().display(),);
         }
 
         let mut hasher = Sha256::new();
@@ -99,7 +99,7 @@ impl Pinned {
 
     fn generate_random_data(&self, into: &mut String) -> Result<(), Error> {
         let mut random_data = [0; 64];
-        getrandom::getrandom(&mut random_data)?;
+        getrandom::getrandom(&mut random_data).context("failed to generate random data (?)")?;
         base64::engine::general_purpose::STANDARD_NO_PAD.encode_string(&random_data, into);
         Ok(())
     }

@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ build-pass
 //@ compile-flags: -Zunpretty=hir
 

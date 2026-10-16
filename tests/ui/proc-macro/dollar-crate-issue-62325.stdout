@@ -57,54 +57,54 @@ PRINT-ATTR INPUT (DISPLAY): struct B(identity! ($crate :: S));
 PRINT-ATTR INPUT (DEBUG): TokenStream [
     Ident {
         ident: "struct",
-        span: $DIR/auxiliary/dollar-crate-external.rs:21:5: 21:11 (#12),
+        span: $DIR/auxiliary/dollar-crate-external.rs:22:5: 22:11 (#12),
     },
     Ident {
         ident: "B",
-        span: $DIR/auxiliary/dollar-crate-external.rs:21:12: 21:13 (#12),
+        span: $DIR/auxiliary/dollar-crate-external.rs:22:12: 22:13 (#12),
     },
     Group {
         delimiter: Parenthesis,
         stream: TokenStream [
             Ident {
                 ident: "identity",
-                span: $DIR/auxiliary/dollar-crate-external.rs:21:14: 21:22 (#12),
+                span: $DIR/auxiliary/dollar-crate-external.rs:22:14: 22:22 (#12),
             },
             Punct {
                 ch: '!',
                 spacing: Alone,
-                span: $DIR/auxiliary/dollar-crate-external.rs:21:22: 21:23 (#12),
+                span: $DIR/auxiliary/dollar-crate-external.rs:22:22: 22:23 (#12),
             },
             Group {
                 delimiter: Parenthesis,
                 stream: TokenStream [
                     Ident {
                         ident: "$crate",
-                        span: $DIR/auxiliary/dollar-crate-external.rs:21:24: 21:30 (#12),
+                        span: $DIR/auxiliary/dollar-crate-external.rs:22:24: 22:30 (#12),
                     },
                     Punct {
                         ch: ':',
                         spacing: Joint,
-                        span: $DIR/auxiliary/dollar-crate-external.rs:21:30: 21:31 (#12),
+                        span: $DIR/auxiliary/dollar-crate-external.rs:22:30: 22:31 (#12),
                     },
                     Punct {
                         ch: ':',
                         spacing: Alone,
-                        span: $DIR/auxiliary/dollar-crate-external.rs:21:31: 21:32 (#12),
+                        span: $DIR/auxiliary/dollar-crate-external.rs:22:31: 22:32 (#12),
                     },
                     Ident {
                         ident: "S",
-                        span: $DIR/auxiliary/dollar-crate-external.rs:21:32: 21:33 (#12),
+                        span: $DIR/auxiliary/dollar-crate-external.rs:22:32: 22:33 (#12),
                     },
                 ],
-                span: $DIR/auxiliary/dollar-crate-external.rs:21:23: 21:34 (#12),
+                span: $DIR/auxiliary/dollar-crate-external.rs:22:23: 22:34 (#12),
             },
         ],
-        span: $DIR/auxiliary/dollar-crate-external.rs:21:13: 21:35 (#12),
+        span: $DIR/auxiliary/dollar-crate-external.rs:22:13: 22:35 (#12),
     },
     Punct {
         ch: ';',
         spacing: Alone,
-        span: $DIR/auxiliary/dollar-crate-external.rs:21:35: 21:36 (#12),
+        span: $DIR/auxiliary/dollar-crate-external.rs:22:35: 22:36 (#12),
     },
 ]

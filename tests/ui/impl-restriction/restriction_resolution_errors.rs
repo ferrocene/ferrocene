@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build: external-impl-restriction.rs
 #![feature(impl_restriction)]
 

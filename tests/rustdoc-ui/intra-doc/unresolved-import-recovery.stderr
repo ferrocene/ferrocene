@@ -1,13 +1,10 @@
-error[E0433]: cannot find module or crate `unresolved_crate` in the crate root
+error[E0433]: cannot find module or crate `unresolved_crate` in this scope
   --> $DIR/unresolved-import-recovery.rs:3:5
    |
 LL | use unresolved_crate::module::Name;
    |     ^^^^^^^^^^^^^^^^ use of unresolved module or unlinked crate `unresolved_crate`
    |
-help: you might be missing a crate named `unresolved_crate`, add it to your project and import it in your code
-   |
-LL + extern crate unresolved_crate;
-   |
+   = help: you might be missing a crate named `unresolved_crate`
 
 error: aborting due to 1 previous error
 

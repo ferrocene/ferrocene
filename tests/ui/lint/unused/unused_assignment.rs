@@ -6,6 +6,7 @@
 //
 // Regression test for https://github.com/rust-lang/rust/issues/151514
 //
+//@ edition: 2015
 //@ check-pass
 //@ proc-macro: unused_assignment_proc_macro.rs
 #![warn(unused)]

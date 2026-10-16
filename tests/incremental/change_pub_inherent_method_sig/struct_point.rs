@@ -1,5 +1,6 @@
 // Test where we change the *signature* of a public, inherent method.
 
+//@ edition: 2015
 //@ revisions: bpass1 bpass2
 //@ compile-flags: -Z query-dep-graph
 //@ ignore-backends: gcc

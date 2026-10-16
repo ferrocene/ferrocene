@@ -1,5 +1,5 @@
 error[E0364]: `S` is private, and cannot be re-exported
-  --> $DIR/private-from-decl-macro.rs:18:13
+  --> $DIR/private-from-decl-macro.rs:19:13
    |
 LL |         use crate::m::*;
    |             ^^^^^^^^^^^
@@ -8,7 +8,7 @@ LL |     crate::m::mac_glob!();
    |     --------------------- in this macro invocation
    |
 note: consider marking `S` as `pub` in the imported module
-  --> $DIR/private-from-decl-macro.rs:18:13
+  --> $DIR/private-from-decl-macro.rs:19:13
    |
 LL |         use crate::m::*;
    |             ^^^^^^^^^^^
@@ -18,7 +18,7 @@ LL |     crate::m::mac_glob!();
    = note: this error originates in the macro `crate::m::mac_glob` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0423]: cannot find value `S` in this scope
-  --> $DIR/private-from-decl-macro.rs:28:17
+  --> $DIR/private-from-decl-macro.rs:29:17
    |
 LL |     pub struct S {}
    |     --------------- `S` defined here
@@ -28,7 +28,7 @@ LL |         let s = S;
    |
    = note: a struct named `S` exists in another namespace
 note: constant `m::S` exists but is inaccessible
-  --> $DIR/private-from-decl-macro.rs:10:5
+  --> $DIR/private-from-decl-macro.rs:11:5
    |
 LL |     const S: u8 = 0;
    |     ^^^^^^^^^^^^^^^^ not accessible

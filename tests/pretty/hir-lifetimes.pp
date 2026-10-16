@@ -7,7 +7,7 @@
 #![allow(unused)]
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 
 struct Foo<'a> {
     x: &'a u32,

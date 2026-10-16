@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(fn_delegation)]
 
 mod first_example {

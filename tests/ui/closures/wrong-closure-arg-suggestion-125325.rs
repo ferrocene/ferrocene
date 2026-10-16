@@ -1,3 +1,4 @@
+//@ edition: 2015
 //@ aux-build:wrong-closure-arg-suggestion-aux.rs
 
 // Regression test for #125325

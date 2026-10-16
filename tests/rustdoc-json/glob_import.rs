@@ -1,4 +1,5 @@
 // This is a regression test for <https://github.com/rust-lang/rust/issues/98003>.
+//@ edition: 2015
 
 #![no_std]
 

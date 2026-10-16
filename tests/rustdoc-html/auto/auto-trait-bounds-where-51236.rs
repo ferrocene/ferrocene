@@ -1,4 +1,5 @@
 // https://github.com/rust-lang/rust/issues/51236
+//@ edition: 2015
 #![crate_name="foo"]
 
 use std::marker::PhantomData;

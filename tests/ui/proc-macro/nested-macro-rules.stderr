@@ -1,5 +1,5 @@
 warning: non-local `macro_rules!` definition, `#[macro_export]` macro should be written at top level module
-  --> $DIR/auxiliary/nested-macro-rules.rs:7:9
+  --> $DIR/auxiliary/nested-macro-rules.rs:8:9
    |
 LL |   macro_rules! outer_macro {
    |   ------------------------ in this expansion of `nested_macro_rules::outer_macro!`

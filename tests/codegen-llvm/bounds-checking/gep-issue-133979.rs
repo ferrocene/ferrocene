@@ -1,6 +1,6 @@
 //! Issue: <https://github.com/rust-lang/rust/issues/133979>
 //! Check that bounds checking are eliminated.
-
+//@ edition: 2015
 //@ compile-flags: -Copt-level=2
 
 #![crate_type = "lib"]

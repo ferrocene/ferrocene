@@ -1,6 +1,6 @@
 extern crate std;
 #[attr = PreludeImport]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 // Test to print lifetimes on HIR pretty-printing.
 
 //@ pretty-compare-only

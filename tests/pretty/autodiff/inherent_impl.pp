@@ -1,11 +1,10 @@
 #![feature(prelude_import)]
-#![no_std]
 //@ only-nightly
 
 #![feature(autodiff)]
 extern crate std;
 #[prelude_import]
-use ::std::prelude::rust_2015::*;
+use std::prelude::rust_2021::*;
 //@ pretty-mode:expanded
 //@ pretty-compare-only
 //@ pp-exact:inherent_impl.pp

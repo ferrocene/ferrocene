@@ -1,3 +1,4 @@
+//@ edition: 2015
 #![feature(diagnostic_on_unknown)]
 #![crate_type = "lib"]
 

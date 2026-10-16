@@ -118,6 +118,10 @@ EOF
 # already have the symlink
 RUN cd /ferrocene-buildroot/bin && ln --force -s gcc cc
 
+# get a modern version of tar that supports `--sort=name`.
+# this is required by `document-signatures`.
+COPY --from=ubuntu:20.04 /usr/bin/tar /ferrocene-buildroot/bin/tar
+
 FROM --platform=$TARGETPLATFORM ghcr.io/rust-lang/centos:7 AS base
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope

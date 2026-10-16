@@ -9,8 +9,8 @@ extern crate rustc_session;
 extern crate rustc_span;
 
 use std::collections::{BTreeSet, HashSet};
-use std::fs::File;
-use std::io;
+use std::fs::OpenOptions;
+use std::io::{self, Read, Seek, SeekFrom};
 use std::process::ExitCode;
 use std::sync::LazyLock;
 
@@ -126,16 +126,29 @@ impl Callbacks for LoadSymbols {
                 // So instead of making a brand new file we check if one exists
                 // already, load it, merge our report data into it, and store
                 // it again.
-                let mut report = std::fs::read_to_string(&p)
-                    .ok()
-                    .and_then(|existing| serde_json::from_str::<SymbolReport>(&existing).ok())
-                    .unwrap_or_else(SymbolReport::new);
+                let mut file = OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .create(true)
+                    .open(&p)
+                    .expect(&format!("could not open file {p}"));
+                if file.lock().is_err() {
+                    std::thread::sleep(std::time::Duration::from_millis(1000));
+                    file.lock().expect(&format!("could not lock file {p}"));
+                }
+
+                let mut existing = String::new();
+                file.read_to_string(&mut existing).expect(&format!("could not read file {p}"));
+                let mut report = serde_json::from_str::<SymbolReport>(&existing)
+                    .unwrap_or_else(|_| SymbolReport::new());
                 report.symbols.extend(vis.report.symbols);
                 for (filename, lines) in vis.report.annotations {
                     report.annotations.entry(filename).or_default().extend(lines);
                 }
-                let out = File::create(&p).expect(&format!("could not create file {p}"));
-                serde_json::to_writer(out, &report).expect("failed to serialize report");
+
+                file.set_len(0).expect(&format!("could not truncate file {p}"));
+                file.seek(SeekFrom::Start(0)).expect(&format!("could not seek file {p}"));
+                serde_json::to_writer(&file, &report).expect("failed to serialize report");
             }
             Err(_) => {
                 serde_json::to_writer(io::stdout(), &vis.report)

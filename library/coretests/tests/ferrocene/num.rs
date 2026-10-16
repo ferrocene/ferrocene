@@ -914,10 +914,8 @@ fn test_float_exp_single_digit_with_precision() {
 #[test]
 fn test_digits_to_exp_str_without_actual_fraction() {
     use core::mem::MaybeUninit;
-    use core::num::imp::{
-        fmt::Part,
-        flt2dec::{self, Sign},
-    };
+    use core::num::imp::flt2dec::{self, Sign};
+    use core::num::imp::fmt::Part;
 
     let mut buf = [MaybeUninit::uninit(); 2];
     let mut parts = [MaybeUninit::uninit(); 6];
@@ -937,12 +935,6 @@ fn test_digits_to_exp_str_without_actual_fraction() {
 
     assert_eq!(
         formatted.parts,
-        &[
-            Part::Copy(b"1"),
-            Part::Copy(b"."),
-            Part::Zero(1),
-            Part::Copy(b"e"),
-            Part::Num(0),
-        ],
+        &[Part::Copy(b"1"), Part::Copy(b"."), Part::Zero(1), Part::Copy(b"e"), Part::Num(0),],
     );
 }

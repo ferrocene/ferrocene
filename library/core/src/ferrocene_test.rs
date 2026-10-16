@@ -48,9 +48,7 @@ pub fn test_index_range_slice_index_panic_mut() {
 pub fn test_index_range_try_rfold() {
     let mut iter = IndexRange::zero_to(5);
 
-    let folded = iter.try_rfold(0, |_acc, i| {
-        if i == 3 { None } else { Some(i) }
-    });
+    let folded = iter.try_rfold(0, |_acc, i| if i == 3 { None } else { Some(i) });
 
     assert_eq!(folded, None);
 }

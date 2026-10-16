@@ -1,6 +1,5 @@
 use core::fmt::{self, Write};
 
-
 // Errors when a given input was provided that equals `error_on`.
 struct ErrorTriggerWriter<'a> {
     error_on: &'a str,
@@ -63,8 +62,6 @@ impl<'a> std::fmt::Write for ErrorSuffixWriter<'a> {
         }
     }
 }
-
-
 
 // Covers `core::fmt::rt::Argument::<'_>::as_u16`
 #[test]
@@ -187,20 +184,14 @@ fn test_formatter_write_formatted_parts_try_branches() {
 
     // Cover `self.buf.write_str(formatted.sign)?;`
     {
-        let mut writer = ErrorTriggerWriter {
-            error_on: "-",
-            allow_times: 0,
-        };
+        let mut writer = ErrorTriggerWriter { error_on: "-", allow_times: 0 };
         let mut f = fmt::Formatter::new(&mut writer, fmt::FormattingOptions::new());
         assert!(fmt::Display::fmt(&-1.0_f64, &mut f).is_err());
     }
 
     // Cover `self.buf.write_str(ZEROES)?;`
     {
-        let mut writer = ErrorTriggerWriter {
-            error_on: &"0".repeat(64),
-            allow_times: 0,
-        };
+        let mut writer = ErrorTriggerWriter { error_on: &"0".repeat(64), allow_times: 0 };
         let mut options = fmt::FormattingOptions::new();
         options.precision(Some(65));
         let mut f = fmt::Formatter::new(&mut writer, options);
@@ -209,10 +200,7 @@ fn test_formatter_write_formatted_parts_try_branches() {
 
     // Cover `self.buf.write_str(&ZEROES[..nzeroes])?;`
     {
-        let mut writer = ErrorTriggerWriter {
-            error_on: "0",
-            allow_times: 0,
-        };
+        let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
         let mut options = fmt::FormattingOptions::new();
         options.precision(Some(1));
         let mut f = fmt::Formatter::new(&mut writer, options);
@@ -221,10 +209,7 @@ fn test_formatter_write_formatted_parts_try_branches() {
 
     // Cover `write_bytes(self.buf, &s[..len])?;`
     {
-        let mut writer = ErrorTriggerWriter {
-            error_on: "0",
-            allow_times: 0,
-        };
+        let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
         let mut f = fmt::Formatter::new(&mut writer, fmt::FormattingOptions::new());
         assert!(fmt::LowerExp::fmt(&1.0_f64, &mut f).is_err());
     }
@@ -689,44 +674,27 @@ fn test_panic_info_fmt_results() {
     let args = format_args!("hello, world!");
     let info = core::ferrocene_test::create_panic_info(&args);
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "panicked at ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "panicked at ", allow_times: 0 };
     assert!(write!(writer, "{}", info).is_err());
 
-    let mut writer = ErrorSuffixWriter {
-        suffix: "library/core/src/ferrocene_test.rs",
-        allow_times: 0,
-    };
+    let mut writer =
+        ErrorSuffixWriter { suffix: "library/core/src/ferrocene_test.rs", allow_times: 0 };
     assert!(write!(writer, "{}", info).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ":\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ":\n", allow_times: 0 };
     assert!(write!(writer, "{}", info).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "hello, world!",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "hello, world!", allow_times: 0 };
     assert!(write!(writer, "{}", info).is_err());
 }
 
 // Covers <char as core::fmt::Debug>::fmt
 #[test]
 fn test_char_debug_fmt_errors() {
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\'",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\'", allow_times: 0 };
     assert!(write!(writer, "{:?}", 'c').is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "c",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "c", allow_times: 0 };
     assert!(write!(writer, "{:?}", 'c').is_err());
 }
 
@@ -741,37 +709,22 @@ fn test_pad_adapter_fmt_write_str_errors() {
     }
     impl fmt::Debug for DemoStruct {
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-            fmt.debug_struct("DemoStruct")
-               .field("demo", &self.demo)
-               .finish_non_exhaustive() // Show that some other field(s) exist.
+            fmt.debug_struct("DemoStruct").field("demo", &self.demo).finish_non_exhaustive() // Show that some other field(s) exist.
         }
     }
     let demo = DemoStruct { demo: "demo1\ndemo2", hidden: "Whoops" };
-    let mut writer = ErrorTriggerWriter {
-        error_on: "    ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "    ", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "demo1",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "demo1", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "demo2",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "demo2", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 }
-
 
 // Covers `<core::fmt::builders::PadAdapter<'_, '_> as core::fmt::Write>::write_char`
 #[test]
@@ -780,28 +733,16 @@ fn test_pad_adapter_fmt_write_char_errors() {
     #[derive(Debug)]
     struct DemoStruct(char, char);
     let demo = DemoStruct('x', 'w');
-    let mut writer = ErrorTriggerWriter {
-        error_on: "    ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "    ", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "x",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "x", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "w",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "w", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "    ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "    ", allow_times: 0 };
     assert!(write!(writer, "{:#?}", demo).is_err());
 }
 
@@ -815,52 +756,28 @@ fn test_bytestr_fmt_errors() {
     buf.push(255);
     let specimen = ByteString(buf);
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "仙",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "仙", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\"",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\"", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "1",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "1", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\0",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\0", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\x01",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\x01", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\"",
-        allow_times: 1,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\"", allow_times: 1 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\xff",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\xff", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -869,22 +786,13 @@ fn test_bytestr_fmt_errors() {
 fn test_range_fmt_errors() {
     let specimen = 1..10;
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "1",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "1", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "10",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -893,16 +801,10 @@ fn test_range_fmt_errors() {
 fn test_range_to_fmt_errors() {
     let specimen = ..10;
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "10",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -911,31 +813,18 @@ fn test_range_to_fmt_errors() {
 fn test_range_inclusive_fmt_errors() {
     let specimen = 0..=10;
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..=",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..=", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "10",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     let mut specimen = 10..=10;
     specimen.next();
-    let mut writer = ErrorTriggerWriter {
-        error_on: " (exhausted)",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " (exhausted)", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -944,16 +833,10 @@ fn test_range_inclusive_fmt_errors() {
 fn test_range_to_inclusive_fmt_errors() {
     let specimen = ..=10;
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..=",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..=", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "10",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -962,18 +845,11 @@ fn test_range_to_inclusive_fmt_errors() {
 fn test_range_from_fmt_errors() {
     let specimen = 10..;
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "10",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
-
 }
 
 // Covers errors in:
@@ -984,29 +860,16 @@ fn test_bignum_fmt_errors() {
     use core::num::imp::bignum::Big32x40;
     let specimen = Big32x40::from_u64(0xffffffffffffffff);
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0x",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0x", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "ffffffff",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "ffffffff", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-
-    let mut writer = ErrorTriggerWriter {
-        error_on: "_",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "_", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "ffffffff",
-        allow_times: 1,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "ffffffff", allow_times: 1 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -1015,22 +878,13 @@ fn test_bignum_fmt_errors() {
 fn test_formatter_pad_errors() {
     let specimen = "hello";
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: " ",
-        allow_times: 4,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " ", allow_times: 4 };
     assert!(write!(writer, "{:<10}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "hello",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "hello", allow_times: 0 };
     assert!(write!(writer, "{:>10}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: " ",
-        allow_times: 3,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " ", allow_times: 3 };
     assert!(write!(writer, "{:>10}", specimen).is_err());
 }
 
@@ -1045,31 +899,19 @@ fn test_formatter_pad_formatted_parts_errors() {
     options.sign(Some(core::fmt::Sign::Plus));
     options.align(Some(core::fmt::Alignment::Right));
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "+",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "+", allow_times: 0 };
     let mut f = fmt::Formatter::new(&mut writer, options);
     assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0",
-        allow_times: 10,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 10 };
     let mut f = fmt::Formatter::new(&mut writer, options);
     assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ".",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ".", allow_times: 0 };
     let mut f = fmt::Formatter::new(&mut writer, options);
     assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "456",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "456", allow_times: 0 };
     let mut f = fmt::Formatter::new(&mut writer, options);
     assert!(fmt::Display::fmt(&123.456, &mut f).is_err());
 }
@@ -1083,53 +925,28 @@ fn test_escape_ascii_fmt_errors() {
     escaped.next();
     escaped.next_back();
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "t",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "t", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\'",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\'", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\n", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\\"",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\\"", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "abc",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "abc", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "x",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "x", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "9",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "9", allow_times: 0 };
     assert!(write!(writer, "{}", escaped).is_err());
 }
 
@@ -1138,48 +955,26 @@ fn test_escape_ascii_fmt_errors() {
 fn test_duration_fmt_errors() {
     use std::time::Duration;
     let specimen = Duration::new(5, 0);
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
     assert!(write!(writer, "{:0<50?}", specimen).is_err()); // L1542
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "+",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "+", allow_times: 0 };
     assert!(write!(writer, "{:+?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: " ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " ", allow_times: 0 };
     assert!(write!(writer, "{:^15?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "5",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "5", allow_times: 0 };
     assert!(write!(writer, "{:0<50?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "s",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "s", allow_times: 0 };
     assert!(write!(writer, "{:0<50?}", specimen).is_err());
 
-
-    let mut writer = ErrorTriggerWriter {
-        error_on: ".",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ".", allow_times: 0 };
     assert!(write!(writer, "{:.20?}", specimen).is_err());
 
     let max_round_up_specimen = Duration::new(u64::MAX, 999_999_999);
-    let mut writer = ErrorTriggerWriter {
-        error_on: "18446744073709551616",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "18446744073709551616", allow_times: 0 };
     assert!(write!(writer, "{:.1?}", max_round_up_specimen).is_err());
 }
 
@@ -1187,16 +982,10 @@ fn test_duration_fmt_errors() {
 #[test]
 fn test_str_fmt_errors() {
     let specimen = "hello\t";
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\"",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\"", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\t",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\t", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
 
@@ -1205,22 +994,13 @@ fn test_str_fmt_errors() {
 fn test_chars_fmt_errors() {
     let specimen = "hello".chars();
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "Chars(",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "Chars(", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "h",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "h", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ")",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ")", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
 
@@ -1229,7 +1009,9 @@ fn test_chars_fmt_errors() {
 fn test_pad_integral_errors() {
     // Taken from the `pad_integral` doctest
     use std::fmt;
-    struct Foo { nb: i32 }
+    struct Foo {
+        nb: i32,
+    }
 
     impl fmt::Display for Foo {
         fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1242,46 +1024,25 @@ fn test_pad_integral_errors() {
 
     let specimen = Foo { nb: -5 };
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
     assert!(write!(writer, "{:0>#8}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "-",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "-", allow_times: 0 };
     assert!(write!(writer, "{:0>#8}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "Foo ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "Foo ", allow_times: 0 };
     assert!(write!(writer, "{:0>#8}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "5",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "5", allow_times: 0 };
     assert!(write!(writer, "{:0>#8}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "5",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "5", allow_times: 0 };
     assert!(write!(writer, "{:016}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "0",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "0", allow_times: 0 };
     assert!(write!(writer, "{:016}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "Foo ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "Foo ", allow_times: 0 };
     assert!(write!(writer, "{:#016}", specimen).is_err());
 }
 
@@ -1306,18 +1067,11 @@ fn test_debug_set_finish_non_exhaustive_try_branches() {
             // Print at most two elements, abbreviate the rest
             let mut f = fmt.debug_set();
             let f = f.entries(self.0.iter().take(2));
-            if self.0.len() > 2 {
-                f.finish_non_exhaustive()
-            } else {
-                f.finish()
-            }
+            if self.0.len() > 2 { f.finish_non_exhaustive() } else { f.finish() }
         }
     }
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", Foo(vec![1, 2, 3, 4])).is_err());
 }
 
@@ -1333,18 +1087,11 @@ fn test_debug_list_finish_non_exhaustive_try_branches() {
             // Print at most two elements, abbreviate the rest
             let mut f = fmt.debug_list();
             let f = f.entries(self.0.iter().take(2));
-            if self.0.len() > 2 {
-                f.finish_non_exhaustive()
-            } else {
-                f.finish()
-            }
+            if self.0.len() > 2 { f.finish_non_exhaustive() } else { f.finish() }
         }
     }
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", Foo(vec![1, 2, 3, 4])).is_err());
 }
 
@@ -1364,69 +1111,38 @@ fn test_debug_map_finish_non_exhaustive_try_branches() {
             // Print at most two elements, abbreviate the rest
             let mut f = fmt.debug_map();
             let f = f.entries(self.0.iter().take(2).map(|&(ref k, ref v)| (k, v)));
-            if self.0.len() > 2 {
-                f.finish_non_exhaustive()
-            } else {
-                f.finish()
-            }
+            if self.0.len() > 2 { f.finish_non_exhaustive() } else { f.finish() }
         }
     }
 
     let specimen = Foo(vec![('a', 1), ('b', 2), ('c', 3), ('d', 4)]);
 
     // finish_non_exhaustive
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "a",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "a", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "1",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "1", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ", ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ", ", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ": ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ": ", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ": ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ": ", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ",\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ",\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 
@@ -1443,52 +1159,35 @@ fn test_debug_tuple_try_branches() {
 
     impl fmt::Debug for Droop {
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-            fmt.debug_tuple("Droop")
-               .field(&self.0)
-               .field(&self.1)
-               .finish_non_exhaustive() // Show that some other field(s) exist.
+            fmt.debug_tuple("Droop").field(&self.0).field(&self.1).finish_non_exhaustive() // Show that some other field(s) exist.
         }
     }
 
     let specimen = Droop(10, 20, "secret!".to_owned());
 
     // finish_non_exhaustive: writer.write_str("..\n")?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "..\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "..\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     // field_with: self.fmt.write_str("(\n")?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "(\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "(\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     let multi_specimen = Droop(10, 20, "secret!".to_owned());
 
     // field_with: self.fmt.write_str(prefix)?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: ", ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ", ", allow_times: 0 };
     assert!(write!(writer, "{:?}", multi_specimen).is_err());
 
     struct Floop(i32);
 
     impl fmt::Debug for Floop {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            f.debug_tuple("")
-                .field(&self.0)
-                .finish()
+            f.debug_tuple("").field(&self.0).finish()
         }
     }
 
-    let mut writer = ErrorTriggerWriter {
-        error_on: ",",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ",", allow_times: 0 };
 
     assert!(write!(writer, "{:?}", Floop(10)).is_err());
 }
@@ -1500,44 +1199,29 @@ fn test_debug_struct_field_with_try_branches() {
     #[allow(dead_code)]
     struct Fields {
         one: u64,
-        two: u64
+        two: u64,
     }
 
     let specimen = Fields { one: 1, two: 2 };
 
     // self.fmt.write_str(" {\n")?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: " {\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " {\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     // writer.write_str(": ")?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: ": ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ": ", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     // self.fmt.write_str(prefix)?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: " { ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: " { ", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
     // self.fmt.write_str(name)?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "one",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "one", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 
     // self.fmt.write_str(": ")?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: ": ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ": ", allow_times: 0 };
     assert!(write!(writer, "{:?}", specimen).is_err());
 }
 
@@ -1553,31 +1237,19 @@ fn test_debug_inner_entry_with_try_branches() {
     }
 
     // self.fmt.write_str("\n")?
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", [Entry]).is_err());
 
     // The entry formatter itself: entry_fmt(&mut writer)?
-    let mut writer = ErrorTriggerWriter {
-        error_on: "Entry",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "Entry", allow_times: 0 };
     assert!(write!(writer, "{:#?}", [Entry]).is_err());
 
     // writer.write_str(",\n")?
-    let mut writer = ErrorTriggerWriter {
-        error_on: ",\n",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ",\n", allow_times: 0 };
     assert!(write!(writer, "{:#?}", [Entry]).is_err());
 
     // self.fmt.write_str(", ")?
-    let mut writer = ErrorTriggerWriter {
-        error_on: ", ",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: ", ", allow_times: 0 };
     assert!(write!(writer, "{:?}", [Entry, Entry]).is_err());
 }
 
@@ -1585,45 +1257,27 @@ fn test_debug_inner_entry_with_try_branches() {
 #[test]
 fn test_debug_lossy_try_branches() {
     // f.write_char('"')?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\"",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\"", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"hello".utf8_chunks().debug()).is_err());
 
     // f.write_str(&valid[from..i])?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "abc",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "abc", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"abc\n".utf8_chunks().debug()).is_err());
 
     // f.write_char(c)?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"\n".utf8_chunks().debug()).is_err());
 
     // f.write_str(&valid[from..])?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\x",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\x", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"\xFF".utf8_chunks().debug()).is_err());
 
     // f.write_str(&valid[from..])?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "abc",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "abc", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"\nabc".utf8_chunks().debug()).is_err());
 
     // write!(f, "\\x{:02X}", b)?;
-    let mut writer = ErrorTriggerWriter {
-        error_on: "\\x",
-        allow_times: 0,
-    };
+    let mut writer = ErrorTriggerWriter { error_on: "\\x", allow_times: 0 };
     assert!(write!(writer, "{:?}", b"\xFF".utf8_chunks().debug()).is_err());
 }
 

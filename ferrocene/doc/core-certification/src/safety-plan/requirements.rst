@@ -39,14 +39,14 @@ See `the heapless documentation <https://docs.rs/heapless/latest/heapless/>`_ as
 
 Read more about doc comments here: `<https://doc.rust-lang.org/rust-by-example/meta/doc.html>`_.
 
-Doc-comments in the core library
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Doc-comments in the certified libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The core library makes heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments where applicable. The Ferrocene compiler automatically enforces that all publicly exposed functions in the core library have a doc-comment through the ``missing_docs`` lint.
+The certified libraries make heavy use of those doc-comments. Modules contain doc-comments that describe the functionality and structure in that module. Functions contain doc-comments that include a description of the behaviour, usage examples and safety comments where applicable. The Ferrocene compiler automatically enforces that all publicly exposed functions in the certified libraries have a doc-comment through the ``missing_docs`` lint.
 
-The doc-comments of both modules and functions are compiled, together with the function signatures, into the core library API docs.
+The doc-comments of both modules and functions are compiled, together with the function signatures, into the library API docs.
 
-Overall the doc-comments in the core library are very extensive, very high-quality and a lot of work has been and continues to be put into them.
+Overall the doc-comments in the certified libraries are very extensive, very high-quality and a lot of work has been and continues to be put into them.
 
 That's why we want to rely on them for multiple purposes of the certification.
 
@@ -65,9 +65,9 @@ Doc-comments used as requirements must:
 Architecture and software design
 --------------------------------
 
-The core library does not need a software architecture, due to its small size.
+The certified libraries do not need a software architecture, due to being used out of context.
 
-The core library uses the doc-comments of the modules as their module design.
+The certified libraries use the doc-comments of the modules as their module design.
 
 Doc-comments used as module design must:
 
@@ -89,7 +89,7 @@ Tracing requirements to tests
 Requirement identifier
 ----------------------
 
-Each function has one doc-comment aka. one requirement. The module path of a function is unique, which is ensured by the compiler, and can therefore be used as an identifier for that requirement. Doc comments might change between versions, so to ensure uniqueness across versions, that requirement id is the combination of the version of Ferrocene and the module path of the function.
+Each function has one doc-comment aka. one requirement. The module path of a function is unique, which is ensured by the compiler, and can therefore be used as an identifier for that requirement. Doc-comments might change between versions, so to ensure uniqueness across versions, the requirement id is the combination of the version of Ferrocene and the module path of the function.
 
 Requirement status
 ------------------
@@ -116,13 +116,6 @@ Only public functions that are part of the certified subset must have an associa
 Assumed Requirements
 --------------------
 
-The ``core`` library API docs state:
+The certified libraries are developed as general purpose libraries suitable to cater many different use cases. Therefore very few assumptions about the target platform and application are made that are not technically necessary to support the target. We test all our assumptions by running the test suites on each qualified target.
 
-  The Rust Core Library is the dependency-free[^1] foundation of The Rust Standard Library. It is the portable glue between the language and its libraries, defining the intrinsic and primitive building blocks of all Rust code. It links to no upstream libraries, no system libraries, and no libc.
-
-  The core library is minimal: it isn't even aware of heap allocation, nor does it provide concurrency or I/O. These things require platform integration, and this library is platform-agnostic.
-
-The Rust ``core`` library is developed as a general purpose library suitable to cater many different use cases. Therefore very few assumptions about the target platform and application are made that are not technically necessary to support the target. We test all our
-assumptions by running the test suite on each qualified target.
-
-All assumptions on how the core library is to be used are stated in the :doc:`user-manual:core/index` and must be strictly followed by users.
+All assumptions on how the certified libraries are to be used are stated in the :doc:`user-manual:core/index` and must be strictly followed by users.

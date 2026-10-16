@@ -7,17 +7,16 @@ Project Setup
 Release cadence
 ---------------
 
-Due to the use of internal apis, the core library versions are only compatible with one matching Ferrocene release. The core library will be recertified for every Ferrocene release. That is approximately every three months.
+Due to the use of internal apis, the certified libraries are only compatible with one matching Ferrocene release. The libraries will be recertified for every Ferrocene release. That is approximately every three months.
 
-The first Ferrocene release to include the certified core library is "Ferrocene 25.11.0".
-Ferrocene has distributed an uncertified version of the core library since the first Ferrocene release.
+Ferrocene has distributed uncertified versions of those libraries since the first Ferrocene release.
 
 Release notes
 -------------
 
-Changes to the certified core library are included in the :doc:`release-notes:index`.
+Changes to the certified libraries are included in the :doc:`release-notes:index`.
 
-When new releases of the certified core library, which are released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
+When new releases of the certified libraries, which are released with Ferrocene, include new functionality such as an expanded subset, this will be covered in the release notes.
 
 Roles and responsibilities
 --------------------------
@@ -29,7 +28,7 @@ The "Technical Lead" is responsible for making or approving technical decisions,
 Lifecycle Phases Overview
 -------------------------
 
-1. Changes to the core library are pulled from the Upstream Rust project, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
+1. Changes to the certified libraries are pulled from the Upstream Rust project, as part of daily upstream pulls (see :doc:`internal-procedures:upstream-pulls`).
 2. On a regular cadence, latest before the release, the changes are examined and it is ensured the certification requirements are upheld.
 
 The requirements are:
@@ -38,7 +37,8 @@ The requirements are:
 - Every public function of the certified subset has a requirement with sufficient quality
 - The certified code adheres to the coding standard
 - The certified subset is tested with 100% statement coverage.
-    - There are a few lines that cannot be covered by automatic tests. These are annotated with an explanation.
+
+  - There are a few lines that cannot be covered by automatic tests. These are annotated with ``ferrocene::annotation`` including an explanation.
 
 ISO 26262
 ~~~~~~~~~
@@ -55,7 +55,7 @@ V-Model
 
 We diverge from the V-Model, because we are certifying an existing project, not developing the code from scratch.
 
-To explain it in V-model-terms: The Rust project, who is maintaining the upstream core library, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
+To explain it in V-model-terms: The Rust project, who is maintaining the upstream libraries, performs the requirement specification, the software architecture, the software design, the module design and the coding. Ferrous Systems consumes the output of those activities from upstream and performs module testing, integration testing, and validation testing on the code received from upstream pull requests.
 
 Responsibility split
 --------------------
@@ -63,7 +63,7 @@ Responsibility split
 Upstream
 ~~~~~~~~
 
-The upstream Rust project is responsible for developing the core library.
+The upstream Rust project is responsible for developing the libraries.
 
 All upstream Rust code is reviewed by a documented team of appointed Rust experts and heavily tested before being merged. Changes are reviewed by an expert who was not involved in the change. Test results and review evidence are public.
 
@@ -72,12 +72,12 @@ See :ref:`history:contributing to upstream` for more details on the upstream dev
 Ferrous Systems
 ~~~~~~~~~~~~~~~
 
-Ferrous Systems monitors code changes and performs verification activities to prove that the core library can be used in safety critical applications up to the specified safety level.
+Ferrous Systems monitors code changes and performs verification activities to prove that the libraries can be used in safety critical applications up to the specified safety level.
 
 Customer
 ~~~~~~~~
 
-Integration into hardware and into a broader system must be performed by the user of the core library.
+Integration into hardware and into a broader system must be performed by the user of the libraries.
 
 Configuration
 -------------
@@ -86,7 +86,7 @@ All testing infrastructure, including offline support tools, and related configu
 
 Infrastructure of Ferrocene is detailed in :doc:`qualification-plan:infrastructure`.
 
-A record of all packages used by the build and test environment of each version of Ferrocene, including the core library, is contained in the ``ferrocene-src`` component, which contains:
+A record of all packages used by the build and test environment of each version of Ferrocene, including the certified libraries, is contained in the ``ferrocene-src`` component, which contains:
 
 * The root directory contains the entire Ferrocene source.
 * The ``vendor/rust`` folder contains a copy of the source of each Rust dependency for Ferrocene in a format suitable for use with ``x.py``.

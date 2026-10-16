@@ -4,7 +4,12 @@
 Certification scope
 ===================
 
-The core library shall be suitable to be used in safety applications according to following safety standards up to the specified safety level:
+The following certified libraries shall be suitable to be used in safety applications according to following safety standards up to the specified safety level:
+
+**Certified Libraries:**
+
+* ``core``
+* ``alloc``
 
 .. list-table::
    :align: left
@@ -25,19 +30,19 @@ This assessment targets a full compliance statement to the standards above, as f
 Certified version
 -----------------
 
-The certified version of the core library is |rust_version|.
+The certified versions of all libraries is |rust_version|.
 
 Certified subset
 ----------------
 
-The certification does not cover the entirety of the core library, but instead a subset. This is to reduce the effort of the certification.
+The certification does not cover the entirety of all the libraries, but instead a subset of each. This is to reduce the effort of the certification.
 
 The subset included in the safety certification is defined and documented in the :doc:`Safety Manual <safety-manual:core/subset>`.
 
 Systematic capabilities
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-All public functions of the certified subset are considered "software safety functions" and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
+All public functions of the certified subsets are considered "software safety functions" and are going to be certified for all safety standards up to the safety level specified. That means our customers can use all of those functions for use cases up to the highest safety level specified. Since we consider all of them safety relevant we do not consider independence.
 
 The systematic capability of these functions is based on:
 

@@ -1236,9 +1236,7 @@ fn test_chain_iterator_nth_try() {
 #[test]
 fn test_skip_iterator_try_rfold() {
     let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
-    let folded = iter.try_rfold(0, |_acc, _x| {
-        None
-    });
+    let folded = iter.try_rfold(0, |_acc, _x| None);
     assert_eq!(folded, None);
 
     let mut iter = [1, 2, 3, 4, 5].iter().skip(2);
@@ -1272,9 +1270,8 @@ fn test_range_inclusive_iterator_spec_try_fold() {
     assert_eq!(folded, None);
 
     // covers `f(accum, self.start.clone())?`.
-    let folded = iter.try_fold(StepWrapper(0), |_acc, x| {
-        if x == StepWrapper(5) { None } else { Some(x) }
-    });
+    let folded =
+        iter.try_fold(StepWrapper(0), |_acc, x| if x == StepWrapper(5) { None } else { Some(x) });
     assert_eq!(folded, None);
 }
 

@@ -1,5 +1,5 @@
 pub fn test_private_fn_adapters() {
-    use crate::str::{UnsafeBytesToStr, LinesMap, IsWhitespace, IsNotEmpty, IsAsciiWhitespace};
+    use crate::str::{IsAsciiWhitespace, IsNotEmpty, IsWhitespace, LinesMap, UnsafeBytesToStr};
 
     assert!(IsAsciiWhitespace.call_once((&b' ',)));
     assert!(!IsAsciiWhitespace.call_once((&b'a',)));

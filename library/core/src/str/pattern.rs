@@ -444,13 +444,15 @@ unsafe impl<'a> Searcher<'a> for CharSearcher<'a> {
         loop {
             // get the haystack after the last character found
             let bytes = {
-                #[ferrocene::annotation("\
+                #[ferrocene::annotation(
+                    "\
                     `CharSearcher` is only constructed in `impl Pattern for char` in `library/core/src/str/pattern.rs`. \
                     During construction, 0 <= finger <= finger_back = haystack.len. \
                     Each loop a successful `memchr`'s result advances `finger` or returns `None`, which returns. \
                     Thus, there are no possible scenarios where the `?` operator is triggered without violating `CharSearcher` invariants. \
                     An internal test is not possible due to the complexities of `core` and the private fields of the type. \
-                ")]
+                "
+                )]
                 self.haystack.as_bytes().get(self.finger..self.finger_back)?
             };
             // the last byte of the utf8 encoded needle

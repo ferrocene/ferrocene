@@ -83,8 +83,8 @@ impl Env {
 // missing recommends the user to install tar with Homebrew.
 // We also do this on other platforms, since BusyBox tar also doesn't support `--sort=name`.
 fn find_tar_binary() -> Result<&'static str, Error> {
-    use std::process::Command;
     use std::io::BufRead;
+    use std::process::Command;
 
     for name in ["tar", "gtar", "/usr/bin/tar"] {
         let Ok(output) = Command::new(name).arg("--version").output() else { continue };

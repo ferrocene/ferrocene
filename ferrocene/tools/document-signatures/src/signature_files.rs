@@ -28,7 +28,11 @@ impl<'env> SignatureFiles<'env> {
         let signature_toml_path = document.join("signature").join("signature.toml");
 
         let signature_toml = if signature_toml_path.exists() {
-            toml::from_slice(&std::fs::read(&signature_toml_path).context("failed to read signature/signature.toml")?).context("invalid toml")?
+            toml::from_slice(
+                &std::fs::read(&signature_toml_path)
+                    .context("failed to read signature/signature.toml")?,
+            )
+            .context("invalid toml")?
         } else {
             Signature { files: BTreeMap::new() }
         };

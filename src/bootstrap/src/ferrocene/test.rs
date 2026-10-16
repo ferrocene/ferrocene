@@ -9,7 +9,7 @@ use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
 use crate::core::config::TargetSelection;
 use crate::core::session::Mode;
-use crate::ferrocene::sign::{error_when_signatures_are_ignored, validate_config};
+use crate::ferrocene::sign::validate_config;
 use crate::utils::exec::BootstrapCommand;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]

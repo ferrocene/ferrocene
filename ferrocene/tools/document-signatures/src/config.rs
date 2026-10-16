@@ -25,9 +25,7 @@ impl Config {
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
                 anyhow::bail!("missing configuration file: {}", path.display());
             }
-            Err(err) => {
-                return Err(err).context("failed to read signature/config.toml").into()
-            },
+            Err(err) => return Err(err).context("failed to read signature/config.toml").into(),
         };
         Ok(toml::from_slice(&content)?)
     }

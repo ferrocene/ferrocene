@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use std::{io::{BufWriter, ErrorKind, Seek as _, Write as _}, path::Path};
+use std::io::{BufWriter, ErrorKind, Seek as _, Write as _};
+use std::path::Path;
 
 use anyhow::{Context as _, Result};
 use tempfile::NamedTempFile;
 
-pub(crate) fn write_atomic<F>(dst: &Path, f: F ) -> Result<()>
-where F: FnOnce(&mut BufWriter<NamedTempFile>) -> Result<()> {
+pub(crate) fn write_atomic<F>(dst: &Path, f: F) -> Result<()>
+where
+    F: FnOnce(&mut BufWriter<NamedTempFile>) -> Result<()>,
+{
     let parent = dst.parent().unwrap();
     std::fs::create_dir_all(parent)?;
 

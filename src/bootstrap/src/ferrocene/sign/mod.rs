@@ -161,7 +161,9 @@ pub(crate) fn validate_config(builder: &Builder<'_>, requires_test_outcomes: boo
         panic!("document signatures are ignored");
     }
 
-    if requires_test_outcomes && matches!(builder.config.ferrocene_test_outcomes, FerroceneTestOutcomes::Disabled) {
+    if requires_test_outcomes
+        && matches!(builder.config.ferrocene_test_outcomes, FerroceneTestOutcomes::Disabled)
+    {
         eprintln!("You're trying to {action} when test outcomes are disabled.");
         eprintln!("The signed documents will NOT be valid.");
         eprintln!();

@@ -18,9 +18,8 @@ use crate::core::session::FileType;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::{git, t};
-use crate::{Compiler, FileType, t};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -353,7 +352,7 @@ impl<P: CommandLineStep + IsSphinxBook> Step for SphinxBook<P> {
             } else {
                 // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
                 // to show in the docs.
-                cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
+                cmd.env("FERROCENE_DEFAULT_HOST", builder.sess.host_target.triple);
             }
         }
         // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
@@ -1031,10 +1030,7 @@ fn relative_path(base: &Path, path: &Path, dry_run: bool) -> PathBuf {
 /// Extract the version of a submodule from `git submodule status`.
 ///
 /// [None] if there is no entry for the requested `submodule_path`.
-fn get_submodule_version(
-    submodule_path: &str,
-    builder: &Builder<'_>,
-) -> Option<String> {
+fn get_submodule_version(submodule_path: &str, builder: &Builder<'_>) -> Option<String> {
     builder.require_submodule(submodule_path, None);
     let submodule_status = git(None).args(["submodule", "status"]).run_capture(builder).stdout();
     submodule_status.lines().find_map(|line| parse_submodule_line(line, submodule_path))

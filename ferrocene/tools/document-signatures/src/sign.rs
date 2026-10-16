@@ -30,11 +30,18 @@ pub(crate) fn sign(
     force: bool,
     env: &Env,
 ) -> Result<(), Error> {
-    let config = Config::load(source_dir).context(format!("failed to load config from {source_dir:?}"))?;
-    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir).context(format!("failed to generate pinned tarball to {output_dir:?}"))?;
-    let mut signature_files = SignatureFiles::load(source_dir, env).context(format!("failed to load signature files from {source_dir:?}"))?;
+    let config =
+        Config::load(source_dir).context(format!("failed to load config from {source_dir:?}"))?;
+    let (pinned, saved_tarfile) = Pinned::generate(env, output_dir)
+        .context(format!("failed to generate pinned tarball to {output_dir:?}"))?;
+    let mut signature_files = SignatureFiles::load(source_dir, env)
+        .context(format!("failed to load signature files from {source_dir:?}"))?;
 
-    let should_regenerate_pinned = if let Some(existing_raw) = signature_files.read("pinned.toml").context(format!("pinned.toml was not present in {source_dir:?}/signatures.toml"))? {
+    let should_regenerate_pinned = if let Some(existing_raw) =
+        signature_files
+            .read("pinned.toml")
+            .context(format!("pinned.toml was not present in {source_dir:?}/signatures.toml"))?
+    {
         // The raw contents of pinned.toml are not reproducible, since they intentionally contain
         // random data. If we were to always regenerate the pinned.toml file, old signatures would
         // invalidate as the random data would change. Instead, we only regenerate pinned.toml if
@@ -66,7 +73,8 @@ pub(crate) fn sign(
     }
 
     if should_regenerate_pinned {
-        regenerate_pinned(&mut signature_files, pinned).context("failed to regenerate pinned.toml")?;
+        regenerate_pinned(&mut signature_files, pinned)
+            .context("failed to regenerate pinned.toml")?;
     }
 
     let (role_name, contents) = if env.allow_dev_signing {
@@ -77,12 +85,15 @@ pub(crate) fn sign(
         let contents = b"todo";
         (role_name.to_owned(), Vec::from(contents))
     } else {
-        generate_and_load_cosign_bundle(&signature_files, env, &config).context("failed to generate cosign bundle")?
+        generate_and_load_cosign_bundle(&signature_files, env, &config)
+            .context("failed to generate cosign bundle")?
     };
 
     let tarfile_contents = std::fs::read(&saved_tarfile)?;
     signature_files.write("stable-archive.tar.gz", &tarfile_contents)?;
-    signature_files.write(&format!("{role_name}.cosign-bundle"), &contents).context("failed to persist cosign bundle")?;
+    signature_files
+        .write(&format!("{role_name}.cosign-bundle"), &contents)
+        .context("failed to persist cosign bundle")?;
     Ok(())
 }
 

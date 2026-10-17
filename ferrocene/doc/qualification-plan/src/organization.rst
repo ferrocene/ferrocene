@@ -17,23 +17,20 @@ Leadership roles
    * - Safety Manager
      - Florian Gilcher
 
-   * - Product Manager
-     - Alexander Senier
-
-   * - Project Manager
-     - Alexander Senier
-
    * - Technical Lead
-     - Ana Hobden
+     - Alexander Senier
 
    * - Compiler Lead
-     - Jynn Nelson
+     - Rachel Barker
+
+   * - Tooling Lead
+     - Ana Hobden
 
    * - Certification Lead
      - Johann Hemmann
 
    * - Release Lead
-     - Ana Hobden
+     - Rachel Barker
 
    * - ISO 9001 Quality Manager
      - Sina Krause

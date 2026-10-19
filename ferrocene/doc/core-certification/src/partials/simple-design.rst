@@ -1,5 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-The core library has a very simple design. It is a library of independent functions with no internal state management.
+The certified libraries has a simple design. They are libraries of independent functions with no internal state management.
+
+.. TODO: Is the allocator internal state management?
+
 Each module provides functions and data structures around a single well-defined topic. All modules have a doc-comment describing the design and contents of the module.

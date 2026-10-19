@@ -106,7 +106,7 @@ Due to a bug in the QNX C toolchain, gathering code coverage on QNX 7.1 and QNX 
      - ``aarch64-unknown-qnx``
      - ``aarch64-unknown-none``
 
-Instead coverage is measured on the target specified in the "Coverage on" column. Those targets are sufficiently similar to ensure sufficient coverage on the QNX targets as well.
+Instead coverage is measured on the target specified in the "Coverage on" column. Using the alternative target is valid because neither the ``core``, nor the ``alloc`` library contains code that it specific to QNX targets (verified by the absence of `target_os = "nto"` and `target_os = "qnx"`). The ``std`` library contains code that is specific to QNX, which is okay because the ``std`` library is out of scope for the current certification.
 
 Tidy test suite
 ~~~~~~~~~~~~~~~

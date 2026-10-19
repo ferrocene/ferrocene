@@ -346,6 +346,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn deallocate_impl_runtime(ptr: NonNull<u8>, layout: Layout) {
@@ -470,6 +471,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::deallocate`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -536,6 +538,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -592,6 +595,7 @@ const unsafe impl Allocator for Global {
         self.alloc_impl(layout, true)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {

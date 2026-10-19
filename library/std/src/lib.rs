@@ -443,6 +443,7 @@
 //
 // Ferrocene added lints/features:
 #![feature(coverage_attribute)]
+#![warn(ferrocene::unvalidated)]
 //
 #![default_lib_allocator]
 // Removed features

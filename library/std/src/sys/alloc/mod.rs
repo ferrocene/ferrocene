@@ -46,6 +46,7 @@ const MIN_ALIGN: usize = if cfg!(any(
     panic!("add a value for MIN_ALIGN")
 };
 
+#[ferrocene::prevalidated]
 #[allow(dead_code)]
 unsafe fn realloc_fallback(ptr: *mut u8, old_layout: Layout, new_size: usize) -> *mut u8 {
     // SAFETY: Docs for GlobalAlloc::realloc require this to be valid

@@ -68,6 +68,7 @@ pub unsafe fn dealloc(ptr: *mut u8, _layout: Layout) {
     unsafe { libc::free(ptr as *mut libc::c_void) }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 pub unsafe fn realloc(ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
     if layout.align() <= MIN_ALIGN && layout.align() <= new_size {

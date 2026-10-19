@@ -722,6 +722,7 @@ extern "C" {
     #[cfg_attr(target_os = "aix", link_name = "vec_malloc")]
     #[ferrocene::prevalidated]
     pub fn malloc(size: size_t) -> *mut c_void;
+    #[ferrocene::prevalidated]
     pub fn realloc(p: *mut c_void, size: size_t) -> *mut c_void;
     #[ferrocene::prevalidated]
     pub fn free(p: *mut c_void);

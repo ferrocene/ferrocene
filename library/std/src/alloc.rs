@@ -175,6 +175,7 @@ impl System {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn grow_impl(
         &self,
@@ -249,6 +250,7 @@ unsafe impl Allocator for System {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn grow(
         &self,
@@ -260,6 +262,7 @@ unsafe impl Allocator for System {
         unsafe { self.grow_impl(ptr, old_layout, new_layout, false) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn grow_zeroed(
         &self,

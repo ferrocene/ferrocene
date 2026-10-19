@@ -274,6 +274,7 @@ unsafe impl Allocator for System {
         unsafe { self.grow_impl(ptr, old_layout, new_layout, true) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn shrink(
         &self,

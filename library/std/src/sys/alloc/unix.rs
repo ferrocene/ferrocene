@@ -62,6 +62,7 @@ pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
     }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 pub unsafe fn dealloc(ptr: *mut u8, _layout: Layout) {
     unsafe { libc::free(ptr as *mut libc::c_void) }

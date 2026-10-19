@@ -240,6 +240,7 @@ unsafe impl Allocator for System {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
         if layout.size() != 0 {
             // SAFETY: `layout` is non-zero in size,

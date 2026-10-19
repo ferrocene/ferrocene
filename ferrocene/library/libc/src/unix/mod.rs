@@ -723,6 +723,7 @@ extern "C" {
     #[ferrocene::prevalidated]
     pub fn malloc(size: size_t) -> *mut c_void;
     pub fn realloc(p: *mut c_void, size: size_t) -> *mut c_void;
+    #[ferrocene::prevalidated]
     pub fn free(p: *mut c_void);
     pub fn abort() -> !;
     pub fn exit(status: c_int) -> !;

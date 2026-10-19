@@ -22,6 +22,7 @@ mod runtime_symbols {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub unsafe fn alloc(layout: Layout) -> *mut u8 {
     // jemalloc provides alignment less than MIN_ALIGN for small allocations.
     // So only rely on MIN_ALIGN if size >= align.
@@ -47,6 +48,7 @@ pub unsafe fn alloc(layout: Layout) -> *mut u8 {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
     // See the comment above in `alloc` for why this check looks the way it does.
     if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
@@ -86,6 +88,7 @@ cfg_select! {
     _ => {
         #[inline]
         #[cfg_attr(target_os = "vxworks", allow(unused_unsafe))]
+        #[ferrocene::prevalidated]
         unsafe fn aligned_malloc(layout: &Layout) -> *mut u8 {
             let mut out = ptr::null_mut();
             // We prefer posix_memalign over aligned_alloc since it is more widely available, and

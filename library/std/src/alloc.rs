@@ -161,6 +161,7 @@ unsafe impl core::alloc::StaticAllocator for System {}
 
 impl System {
     #[inline]
+    #[ferrocene::prevalidated]
     fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
         match layout.size() {
             0 => Ok(layout.dangling_ptr().cast_slice(0)),
@@ -227,11 +228,13 @@ impl System {
 #[stable(feature = "allocator_api", since = "1.100.0")]
 unsafe impl Allocator for System {
     #[inline]
+    #[ferrocene::prevalidated]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, false)
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, true)
     }

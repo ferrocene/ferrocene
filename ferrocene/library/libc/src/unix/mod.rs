@@ -717,8 +717,10 @@ extern "C" {
     pub fn strtoul(s: *const c_char, endp: *mut *mut c_char, base: c_int) -> c_ulong;
     pub fn strtoull(s: *const c_char, endp: *mut *mut c_char, base: c_int) -> c_ulonglong;
     #[cfg_attr(target_os = "aix", link_name = "vec_calloc")]
+    #[ferrocene::prevalidated]
     pub fn calloc(nobj: size_t, size: size_t) -> *mut c_void;
     #[cfg_attr(target_os = "aix", link_name = "vec_malloc")]
+    #[ferrocene::prevalidated]
     pub fn malloc(size: size_t) -> *mut c_void;
     pub fn realloc(p: *mut c_void, size: size_t) -> *mut c_void;
     pub fn free(p: *mut c_void);
@@ -1129,6 +1131,7 @@ extern "C" {
     pub fn lseek(fd: c_int, offset: off_t, whence: c_int) -> off_t;
     pub fn pathconf(path: *const c_char, name: c_int) -> c_long;
     pub fn pipe(fds: *mut c_int) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn posix_memalign(memptr: *mut *mut c_void, align: size_t, size: size_t) -> c_int;
     pub fn aligned_alloc(alignment: size_t, size: size_t) -> *mut c_void;
     #[cfg_attr(

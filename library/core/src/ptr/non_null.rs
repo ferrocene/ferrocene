@@ -101,6 +101,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn without_provenance(addr: NonZero<usize>) -> Self {
         // SAFETY: we know `addr` is non-zero and all nonzero integers are valid raw pointers.
         unsafe { transmute(addr) }
@@ -279,6 +280,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -1362,6 +1364,7 @@ impl<T> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
+    #[ferrocene::prevalidated]
     pub const fn cast_slice(self, len: usize) -> NonNull<[T]> {
         NonNull::slice_from_raw_parts(self, len)
     }
@@ -1405,6 +1408,7 @@ impl<T> NonNull<[T]> {
     #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> Self {
         // SAFETY: `data` is a `NonNull` pointer which is necessarily non-null
         unsafe { Self::new_unchecked(data.as_ptr().cast_slice(len)) }

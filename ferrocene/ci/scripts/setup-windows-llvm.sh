@@ -10,6 +10,11 @@ IFS=$'\n\t'
 parent=$(cd $(dirname $0) && pwd)
 source "$parent/../../../src/ci/shared.sh"
 
+# Install packages
+# Each package is handled in a separate `choco` invocation, because it seems that
+# `choco install -y ...` returns success as long as *at least one* package was installed,
+# even if others failed.
+
 retry choco install -y llvm
 
 # Followed: https://docs.chocolatey.org/en-us/guides/create/recompile-packages/#how-to-internalizerecompile-an-existing-package-manually

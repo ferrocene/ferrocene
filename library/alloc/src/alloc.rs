@@ -364,6 +364,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn grow_impl_runtime(
@@ -484,6 +485,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -551,6 +553,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -603,6 +606,7 @@ const unsafe impl Allocator for Global {
         unsafe { self.deallocate_impl(ptr, layout) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn grow(
@@ -615,6 +619,7 @@ const unsafe impl Allocator for Global {
         unsafe { self.grow_impl(ptr, old_layout, new_layout, false) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn grow_zeroed(

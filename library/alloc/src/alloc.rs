@@ -314,6 +314,7 @@ unsafe fn realloc_nonnull(ptr: NonNull<u8>, layout: Layout, new_size: usize) -> 
 ///     dealloc(ptr, layout);
 /// }
 /// ```
+#[ferrocene::prevalidated]
 #[stable(feature = "global_alloc", since = "1.28.0")]
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
@@ -330,6 +331,7 @@ pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
 }
 
 impl Global {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn alloc_impl_runtime(layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
@@ -455,6 +457,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::allocate`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -513,6 +516,7 @@ impl Global {
         )
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -574,12 +578,14 @@ impl Global {
 #[stable(feature = "allocator_api", since = "1.100.0")]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 const unsafe impl Allocator for Global {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, false)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {

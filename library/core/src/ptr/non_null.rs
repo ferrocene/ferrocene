@@ -1117,6 +1117,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,

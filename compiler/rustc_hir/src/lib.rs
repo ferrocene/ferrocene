@@ -3,7 +3,6 @@
 //! [rustc dev guide]: https://rustc-dev-guide.rust-lang.org/hir.html
 
 // tidy-alphabetical-start
-#![cfg_attr(bootstrap, feature(never_type))]
 #![feature(associated_type_defaults)]
 #![feature(closure_track_caller)]
 #![feature(const_default)]
@@ -28,12 +27,6 @@ mod target_impls;
 
 #[doc(no_inline)]
 pub use hir::*;
-// FIXME: Remove this use tree, replace by `rustc_attr_ir` imports
-#[doc(hidden)]
-pub use rustc_attr_ir::{
-    self as attrs, Attribute, ConstStability, DefaultBodyStability, Stability, StabilityLevel,
-    StableSince, find_attr, target::Target,
-};
 pub use rustc_hir_id::*;
 pub use rustc_span::def_id;
 

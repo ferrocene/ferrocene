@@ -283,7 +283,6 @@ impl<ScopeId> StrippedCfgItem<ScopeId> {
 #[derive(StableHash, PrintAttribute)]
 pub enum Linkage {
     AvailableExternally,
-    Common,
     ExternalWeak,
     External,
     Internal,
@@ -592,6 +591,8 @@ pub enum RustcDumpLayoutKind {
 
 #[derive(Clone, Debug, StableHash, Encodable, Decodable, PrintAttribute, PartialEq, Eq)]
 pub enum RustcMirKind {
+    PrettyLiveLocals,
+    PrettyTransitiveLiveLocals,
     PeekMaybeInit,
     PeekMaybeUninit,
     PeekLiveness,

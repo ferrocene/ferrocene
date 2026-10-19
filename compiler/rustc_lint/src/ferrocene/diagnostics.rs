@@ -1,9 +1,9 @@
 //! ## Recommended reading
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
+use rustc_attr_ir::LangItem;
 use rustc_errors::{Diag, MultiSpan};
 use rustc_hir::HirId;
-use rustc_hir::attrs::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::has_requires_validation_attribute;

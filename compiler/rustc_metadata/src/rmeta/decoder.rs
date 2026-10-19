@@ -189,7 +189,7 @@ pub(super) trait LazyDecoder: BlobDecoder {
         self.read_lazy_offset_then(|pos| LazyArray::from_position_and_num_elems(pos, len))
     }
 
-    fn read_lazy_table<I, T>(&mut self, width: usize, len: usize) -> LazyTable<I, T> {
+    fn read_lazy_table<Ie, Id, T>(&mut self, width: usize, len: usize) -> LazyTable<Ie, Id, T> {
         self.read_lazy_offset_then(|pos| LazyTable::from_position_and_encoded_size(pos, width, len))
     }
 
@@ -667,7 +667,7 @@ impl<D: LazyDecoder, T> Decodable<D> for LazyArray<T> {
     }
 }
 
-impl<I: Idx, D: LazyDecoder, T> Decodable<D> for LazyTable<I, T> {
+impl<Ie: Idx, Id: Idx, D: LazyDecoder, T> Decodable<D> for LazyTable<Ie, Id, T> {
     fn decode(decoder: &mut D) -> Self {
         let width = decoder.read_usize();
         let len = decoder.read_usize();
@@ -1544,10 +1544,12 @@ impl CrateMetadata {
 
     fn get_proc_macro_quoted_span(&self, tcx: TyCtxt<'_>, index: usize) -> Span {
         self.root
-            .tables
+            .proc_macro_data
+            .as_ref()
+            .expect("missing proc macro data")
             .proc_macro_quoted_spans
             .get(self, index)
-            .unwrap_or_else(|| panic!("Missing proc macro quoted span: {index:?}"))
+            .unwrap_or_else(|| panic!("missing proc macro quoted span: {index:?}"))
             .decode((self, tcx))
     }
 

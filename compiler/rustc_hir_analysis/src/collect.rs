@@ -240,7 +240,7 @@ fn bad_placeholder<'cx, 'tcx>(
 ) -> Diag<'cx> {
     let kind = if kind.ends_with('s') { format!("{kind}es") } else { format!("{kind}s") };
 
-    spans.sort();
+    spans.sort_by_key(|span| span.lo_hi());
     cx.dcx().create_err(diagnostics::PlaceholderNotAllowedItemSignatures { spans, kind })
 }
 
@@ -1803,7 +1803,7 @@ fn anon_const_kind<'tcx>(tcx: TyCtxt<'tcx>, def: LocalDefId) -> ty::AnonConstKin
             debug_assert_matches!(const_arg.kind, hir::ConstArgKind::Anon(hir::AnonConst { def_id, .. }) if *def_id == def);
             if tcx.features().generic_const_exprs() {
                 ty::AnonConstKind::GCE
-            } else if tcx.features().gca_min_const_items() {
+            } else if tcx.features().gca() {
                 ty::AnonConstKind::MCG
             } else if let hir::Node::Expr(hir::Expr {
                 kind: hir::ExprKind::Repeat(_, repeat_count),

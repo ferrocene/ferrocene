@@ -22,7 +22,7 @@ use rustc_fs_util::{link_or_copy, path_to_c_string};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::Session;
 use rustc_session::config::{self, Lto, OutputType, Passes, SplitDwarfKind, SwitchWithOptPath};
-use rustc_span::{BytePos, InnerSpan, Pos, RemapPathScopeComponents, SpanData, SyntaxContext};
+use rustc_span::{BytePos, DUMMY_SP, InnerSpan, Pos, RemapPathScopeComponents};
 use rustc_target::spec::{CodeModel, FloatAbi, RelocModel, SanitizerSet, SplitDebuginfo, TlsModel};
 use tracing::{debug, trace};
 
@@ -72,17 +72,14 @@ fn write_output_file<'ll>(
         std::ptr::null()
     };
     let result = unsafe {
-        let pm = llvm::LLVMCreatePassManager();
-        llvm::LLVMAddAnalysisPasses(target, pm);
-        llvm::LLVMRustAddLibraryInfo(target, pm, m, no_builtins);
         llvm::LLVMRustWriteOutputFile(
             target,
-            pm,
             m,
             output_c.as_ptr(),
             dwo_output_ptr,
             file_type,
             verify_llvm_ir,
+            no_builtins,
         )
     };
 
@@ -406,15 +403,12 @@ fn report_inline_asm(
     // In LTO build we may get srcloc values from other crates which are invalid
     // since they use a different source map. To be safe we just suppress these
     // in LTO builds.
-    let span = if cookie == 0 || matches!(cgcx.lto, Lto::Fat | Lto::Thin) {
-        SpanData::default()
+    let (lo, hi) = if cookie == 0 || matches!(cgcx.lto, Lto::Fat | Lto::Thin) {
+        (DUMMY_SP.lo(), DUMMY_SP.hi())
     } else {
-        SpanData {
-            lo: BytePos::from_u32(cookie as u32),
-            hi: BytePos::from_u32((cookie >> 32) as u32),
-            ctxt: SyntaxContext::root(),
-            parent: None,
-        }
+        let lo = BytePos::from_u32(cookie as u32);
+        let hi = BytePos::from_u32((cookie >> 32) as u32);
+        (lo, hi)
     };
     let level = match level {
         llvm::DiagnosticLevel::Error => Level::Error,
@@ -422,7 +416,7 @@ fn report_inline_asm(
         llvm::DiagnosticLevel::Note | llvm::DiagnosticLevel::Remark => Level::Note,
     };
     let msg = msg.trim_prefix("error: ").to_string();
-    InlineAsmError { span, msg, level, source }
+    InlineAsmError { lo, hi, msg, level, source }
 }
 
 unsafe extern "C" fn diagnostic_handler(info: &DiagnosticInfo, user: *mut c_void) {

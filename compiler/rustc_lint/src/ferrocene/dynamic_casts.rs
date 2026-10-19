@@ -1,7 +1,7 @@
 use std::ops::ControlFlow;
 
 use rustc_abi::{FieldIdx, VariantIdx};
-use rustc_hir::attrs::LangItem;
+use rustc_attr_ir::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::traits::{
     ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,

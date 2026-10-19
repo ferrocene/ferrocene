@@ -10,7 +10,7 @@
 
 use std::ops::ControlFlow;
 
-use rustc_hir::attrs::LangItem;
+use rustc_attr_ir::LangItem;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{HirId, OwnerId};
 use rustc_middle::thir::visit::Visitor as _;

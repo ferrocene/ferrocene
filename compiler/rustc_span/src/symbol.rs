@@ -218,6 +218,7 @@ symbols! {
         Eq,
         Equal,
         Err,
+        ExitCode,
         Expected,
         ExternC,
         ExternRust,
@@ -325,6 +326,7 @@ symbols! {
         SelfTy,
         Send,
         SeqCst,
+        ShouldPanic,
         Sized,
         Slice,
         SliceIndex,
@@ -341,6 +343,7 @@ symbols! {
         Sync,
         SyncUnsafeCell,
         Target,
+        TestType,
         This,
         TokenStream,
         Transmute,
@@ -367,6 +370,8 @@ symbols! {
         __H,
         __S,
         __awaitee,
+        __ensures_checker,
+        __ret,
         __try_var,
         _t,
         _task_context,
@@ -393,6 +398,7 @@ symbols! {
         abi_vectorcall,
         abi_x86_interrupt,
         abort,
+        abort_immediate,
         add,
         add_assign,
         add_with_overflow,
@@ -666,7 +672,6 @@ symbols! {
         cold_path,
         collapse_debuginfo,
         column,
-        common,
         compare_bytes,
         compare_exchange,
         compare_exchange_weak,
@@ -997,6 +1002,7 @@ symbols! {
         fields,
         file,
         final_associated_functions,
+        float_mul_add_relaxed,
         float_to_int_unchecked,
         floorf16,
         floorf32,
@@ -1029,6 +1035,7 @@ symbols! {
         forall,
         forbid,
         force_target_feature,
+        forced_keywords,
         forget,
         format_args,
         format_args_capture,
@@ -1068,6 +1075,7 @@ symbols! {
         future_trait,
         fxsr,
         gca,
+        gca_adts,
         gca_const_items,
         gca_macroless_args,
         gca_macroless_items,
@@ -1126,6 +1134,7 @@ symbols! {
         i128,
         i128_type,
         ident,
+        ident_from_str_and_span,
         if_let,
         if_let_guard,
         if_let_rescope,
@@ -1169,7 +1178,6 @@ symbols! {
         integer_max,
         integer_min,
         integral,
-        internal,
         internal_eq_trait_method_impls,
         internal_features,
         interrupt,
@@ -1395,6 +1403,8 @@ symbols! {
         more_qualified_paths,
         more_struct_aliases,
         movbe_target_feature,
+        movdir64b_target_feature,
+        movdiri_target_feature,
         move_expr,
         move_ref_pattern,
         move_size_limit,
@@ -1891,6 +1901,8 @@ symbols! {
         rustc_peek_maybe_init,
         rustc_peek_maybe_uninit,
         rustc_preserve_ub_checks,
+        rustc_pretty_live_locals,
+        rustc_pretty_transitive_live_locals,
         rustc_private,
         rustc_proc_macro_decls,
         rustc_promotable,
@@ -2218,8 +2230,13 @@ symbols! {
         type_id_function_ptr,
         type_id_generics,
         type_id_is_signed,
+        type_id_non_exhaustive,
         type_id_points_mutably,
         type_id_points_to,
+        type_id_size_of,
+        type_id_type_of,
+        type_id_variant_name,
+        type_id_variant_non_exhaustive,
         type_id_variants,
         type_id_vtable,
         type_info,
@@ -2231,7 +2248,6 @@ symbols! {
         type_length_limit,
         type_macros,
         type_name,
-        type_of,
         type_privacy_lints,
         typed_swap_nonoverlapping,
         u8,
@@ -2360,9 +2376,6 @@ symbols! {
         var,
         variadic,
         variant_count,
-        variant_name,
-        variant_non_exhaustive,
-        variants,
         vec,
         vector,
         verbatim,
@@ -2507,6 +2520,7 @@ impl Ident {
     }
 
     /// Maps a string and a span to an identifier.
+    #[rustc_diagnostic_item = "ident_from_str_and_span"]
     pub fn from_str_and_span(string: &str, span: Span) -> Ident {
         Ident::new(Symbol::intern(string), span)
     }
@@ -2586,6 +2600,7 @@ impl fmt::Display for Ident {
 pub enum IdentPrintMode {
     Normal,
     RawIdent,
+    ForcedKeywordIdent,
     RawLifetime,
 }
 
@@ -2644,6 +2659,10 @@ impl fmt::Display for IdentPrinter {
             IdentPrintMode::Normal => self.symbol,
             IdentPrintMode::RawIdent => {
                 f.write_str("r#")?;
+                self.symbol
+            }
+            IdentPrintMode::ForcedKeywordIdent => {
+                f.write_str("k#")?;
                 self.symbol
             }
             IdentPrintMode::RawLifetime => {

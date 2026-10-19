@@ -580,7 +580,6 @@ checksum = "145052bdd345b87320e369255277e3fb5152762ad123a901ef5c262dd38fe8d2"
 dependencies = [
  "iana-time-zone",
  "num-traits",
- "serde",
  "windows-link 0.2.1",
 ]
 
@@ -642,7 +641,7 @@ version = "4.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2ce8604710f6733aa641a2b3731eaa1e8b3d9973d5e3565da11800813f997a9"
 dependencies = [
- "heck 0.5.0",
+ "heck",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -656,7 +655,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "clippy"
-version = "0.1.100"
+version = "0.1.101"
 dependencies = [
  "anstream 0.6.21",
  "askama",
@@ -697,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.100"
+version = "0.1.101"
 dependencies = [
  "arrayvec",
  "clippy_utils",
@@ -708,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.100"
+version = "0.1.101"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.23.1",
@@ -738,7 +737,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.100"
+version = "0.1.101"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -782,7 +781,6 @@ dependencies = [
  "build_helper",
  "serde",
  "serde_json",
- "spdx-rs",
 ]
 
 [[package]]
@@ -1152,7 +1150,7 @@ checksum = "a0afaad2b26fa326569eb264b1363e8ae3357618c43982b3f285f0774ce76b69"
 
 [[package]]
 name = "declare_clippy_lint"
-version = "0.1.100"
+version = "0.1.101"
 
 [[package]]
 name = "derive-where"
@@ -1699,12 +1697,6 @@ dependencies = [
  "serde",
  "serde_core",
 ]
-
-[[package]]
-name = "heck"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "heck"
@@ -2580,8 +2572,10 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "socket2",
  "tempfile",
  "ui_test",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3667,6 +3661,7 @@ dependencies = [
 name = "rustc_ast_lowering"
 version = "0.0.0"
 dependencies = [
+ "bitflags",
  "rustc_abi",
  "rustc_ast",
  "rustc_attr_ir",
@@ -3775,6 +3770,7 @@ dependencies = [
  "itertools",
  "polonius-engine",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_graphviz",
@@ -4222,6 +4218,7 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4307,6 +4304,7 @@ dependencies = [
  "rustc_ast_lowering",
  "rustc_ast_passes",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_borrowck",
  "rustc_builtin_macros",
@@ -4330,6 +4328,7 @@ dependencies = [
  "rustc_metadata",
  "rustc_middle",
  "rustc_mir_build",
+ "rustc_mir_dataflow",
  "rustc_mir_transform",
  "rustc_monomorphize",
  "rustc_parse",
@@ -4455,6 +4454,7 @@ dependencies = [
  "rustc_expand",
  "rustc_feature",
  "rustc_fs_util",
+ "rustc_hashes",
  "rustc_hir",
  "rustc_hir_pretty",
  "rustc_index",
@@ -4518,6 +4518,7 @@ dependencies = [
  "rustc_apfloat",
  "rustc_arena",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4560,6 +4561,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_const_eval",
  "rustc_data_structures",
  "rustc_errors",
@@ -4744,6 +4746,7 @@ name = "rustc_public_bridge"
 version = "0.0.0"
 dependencies = [
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_crate_store",
  "rustc_data_structures",
  "rustc_hir",
@@ -4808,6 +4811,7 @@ dependencies = [
  "bitflags",
  "libc",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_hir",
  "rustc_middle",
@@ -4860,7 +4864,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "blake3",
- "derive-where",
  "indexmap",
  "itoa",
  "md-5",
@@ -5505,12 +5508,12 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
 name = "socket2"
-version = "0.6.1"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17129e116933cf371d018bb80ae557e889637989d8638274fb25622827b03881"
+checksum = "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4"
 dependencies = [
  "libc",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5522,35 +5525,6 @@ dependencies = [
  "anyhow",
  "bstr",
  "color-eyre",
-]
-
-[[package]]
-name = "spdx-expression"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53d7ac03c67c572d85049d6db815e20a4a19b41b3d5cca732ac582342021ad77"
-dependencies = [
- "nom",
- "serde",
- "thiserror 1.0.69",
- "tracing",
-]
-
-[[package]]
-name = "spdx-rs"
-version = "0.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "990870190ec8d8c64ba66e4a6746243d6e57d99353991e0e6092334833f429b1"
-dependencies = [
- "chrono",
- "log",
- "nom",
- "serde",
- "spdx-expression",
- "strum",
- "strum_macros",
- "thiserror 1.0.69",
- "uuid",
 ]
 
 [[package]]
@@ -5625,36 +5599,6 @@ name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
-
-[[package]]
-name = "strum"
-version = "0.24.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "063e6045c0e62079840579a7e47a355ae92f60eb74daaf156fb1e84ba164e63f"
-
-[[package]]
-name = "strum_macros"
-version = "0.24.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e385be0d24f186b4ce2f9982191e7101bb737312ad61c1f2f984f34bcf85d59"
-dependencies = [
- "heck 0.4.1",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "syn"
-version = "1.0.109"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-ident",
-]
 
 [[package]]
 name = "syn"
@@ -7148,7 +7092,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea61de684c3ea68cb082b7a88508a8b27fcc8b797d738bfc99a82facf1d752dc"
 dependencies = [
  "anyhow",
- "heck 0.5.0",
+ "heck",
  "wit-parser 0.244.0",
 ]
 
@@ -7168,7 +7112,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7c566e0f4b284dd6561c786d9cb0142da491f46a9fbed79ea69cdad5db17f21"
 dependencies = [
  "anyhow",
- "heck 0.5.0",
+ "heck",
  "indexmap",
  "prettyplease",
  "syn 2.0.117",

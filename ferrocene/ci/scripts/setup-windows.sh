@@ -42,6 +42,6 @@ fi
 
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
-choco install -y cmake.portable ninja
+retry choco install -y cmake.portable ninja
 
-choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
+retry choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA

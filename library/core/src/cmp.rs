@@ -2345,6 +2345,7 @@ mod impls {
     macro_rules! min_max_impl {
         (char) => {
             #[inline]
+            #[ferrocene::prevalidated]
             fn min(self, other: Self) -> Self {
                 let c = u32::min(self as u32, other as u32);
                 // SAFETY: it's one of the inputs
@@ -2352,6 +2353,7 @@ mod impls {
             }
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn max(self, other: Self) -> Self {
                 let c = u32::max(self as u32, other as u32);
                 // SAFETY: it's one of the inputs
@@ -2360,11 +2362,13 @@ mod impls {
         };
         ($t:ident) => {
             #[inline]
+            #[ferrocene::prevalidated]
             fn min(self, other: Self) -> Self {
                 crate::intrinsics::integer_min(self, other)
             }
 
             #[inline]
+            #[ferrocene::prevalidated]
             fn max(self, other: Self) -> Self {
                 crate::intrinsics::integer_max(self, other)
             }

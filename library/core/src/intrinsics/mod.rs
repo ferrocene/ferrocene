@@ -1708,6 +1708,7 @@ pub const fn frem_algebraic<T: bounds::FloatPrimitive>(a: T, b: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn integer_min<T: [const] bounds::IntegerPrimitive>(a: T, b: T) -> T {
     if a < b { a } else { b }
 }
@@ -1722,6 +1723,7 @@ pub const fn integer_min<T: [const] bounds::IntegerPrimitive>(a: T, b: T) -> T {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const fn integer_max<T: [const] bounds::IntegerPrimitive>(a: T, b: T) -> T {
     if a < b { b } else { a }
 }

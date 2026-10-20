@@ -38,14 +38,14 @@ fn main() {
     let testcases_path = source_root().join("tests/run-make/symbol-report/testcases/");
 
     for result in std::fs::read_dir(&testcases_path).unwrap() {
-        let dir_entry = result.unwrap();
-        let file_type = dir_entry.file_type().unwrap();
+        let path = result.unwrap().path();
+        let name = path.file_name().expect("directory name must exist");
         // Traverse each directory inside the testcase folder.
-        if file_type.is_dir() {
+        if path.is_dir() {
             // The path to the input source file for this testcase.
-            let input_path = dir_entry.path().join("input.rs");
+            let input_path = path.join("input.rs");
             // The path to the expected symbol report JSON file for this testcase.
-            let expected_path = dir_entry.path().join("expected.json");
+            let expected_path = path.join("expected.json");
 
             // Create a new command with the symbol-report binary and set all the environment
             // variables that a regular rustc command would have.
@@ -62,6 +62,8 @@ fn main() {
                 .arg(input_path)
                 .arg("--emit=metadata")
                 .arg("--crate-type=lib")
+                .arg(format!("--crate-name={}", name.display()))
+                .env("SYMBOL_REPORT_CRATES", &name)
                 .run()
                 .stdout_utf8();
             let mut actual_report: SymbolReport = serde_json::from_str(&stdout).unwrap();
@@ -79,6 +81,8 @@ fn main() {
             // Parse the expected file as a symbol report.
             let expected_text = std::fs::read_to_string(expected_path).unwrap();
             let expected_report: SymbolReport = serde_json::from_str(&expected_text).unwrap();
+
+            actual_report.symbols.iter_mut().for_each(|sym| sym.linkage_name = "".into());
 
             // Assert that both reports are equal.
             assert_eq!(expected_report, actual_report);

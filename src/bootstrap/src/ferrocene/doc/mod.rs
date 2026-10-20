@@ -351,7 +351,7 @@ impl<P: CommandLineStep + IsSphinxBook> Step for SphinxBook<P> {
             } else {
                 // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host
                 // to show in the docs.
-                cmd.env("FERROCENE_DEFAULT_HOST", builder.sess.host_target.triple);
+                cmd.env("FERROCENE_DEFAULT_HOST", builder.build.host_target.triple);
             }
         }
         // NOTE: we need this even when test-outcomes are disabled, otherwise we don't have a host

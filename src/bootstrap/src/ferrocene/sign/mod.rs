@@ -12,20 +12,8 @@ use std::path::{Path, PathBuf};
 
 use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
-<<<<<<< HEAD
 use crate::core::builder::Kind;
-use crate::core::config::{self, TargetSelection};
-||||||| parent of 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
-use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
-use crate::core::config::flags::Subcommand;
-use crate::core::config::{self, TargetSelection};
-use crate::core::session::Mode;
-=======
-use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun, Step};
-use crate::core::config::flags::Subcommand;
 use crate::core::config::{self, FerroceneTestOutcomes, TargetSelection};
-use crate::core::session::Mode;
->>>>>>> 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::utils::exec::BootstrapCommand;

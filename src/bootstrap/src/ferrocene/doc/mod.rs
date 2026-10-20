@@ -16,17 +16,9 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::ferrocene::uv_command;
-<<<<<<< HEAD
-use crate::utils::exec::{BootstrapCommand, ExecutionContext};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::git;
 use crate::{Compiler, FileType, t};
-||||||| parent of 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
-use crate::utils::exec::{BootstrapCommand, ExecutionContext};
-use crate::utils::helpers::{git, t};
-=======
-use crate::utils::exec::BootstrapCommand;
-use crate::utils::helpers::{git, t};
->>>>>>> 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;

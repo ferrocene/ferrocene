@@ -8,15 +8,7 @@ use crate::builder::{Builder, CommandLineStep, RunConfig, ShouldRun};
 use crate::core::build_steps::test::failed_tests::SetupFailedTestsFile;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
-<<<<<<< HEAD
-use crate::ferrocene::sign::error_when_signatures_are_ignored;
-||||||| parent of 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
-use crate::core::session::Mode;
-use crate::ferrocene::sign::error_when_signatures_are_ignored;
-=======
-use crate::core::session::Mode;
 use crate::ferrocene::sign::validate_config;
->>>>>>> 0eee3e3d131 (Backport ferrocene/ferrocene#2636)
 use crate::utils::exec::BootstrapCommand;
 use crate::{Kind, Mode};
 

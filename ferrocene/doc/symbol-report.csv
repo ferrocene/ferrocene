@@ -970,6 +970,8 @@
 <&mut T as core::fmt::UpperHex>::fmt
 <&mut T as core::ops::deref::Deref>::deref
 <&mut T as core::ops::deref::DerefMut>::deref_mut
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>
+<&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>
 <&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
 <&mut W as core::fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt
 <&mut W as core::fmt::Write>::write_char
@@ -1405,8 +1407,12 @@
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::adapters::filter::SpecAssumeCount>::assume_count_le_upper_bound
 <I as core::iter::traits::collect::IntoIterator>::into_iter
+<I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>
+<I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>
 <I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>::spec_advance_back_by
 <I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>::spec_advance_back_by
+<I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>
+<I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <T as core::array::SpecArrayClone>::clone
@@ -1510,6 +1516,7 @@
 <core::ascii::ascii_char::AsciiChar as core::cmp::PartialOrd>::partial_cmp
 <core::ascii::ascii_char::AsciiChar as core::default::Default>::default
 <core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt
+<core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt::HEX_DIGITS
 <core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt::backslash
 <core::ascii::ascii_char::AsciiChar as core::fmt::Display>::fmt
 <core::ascii::ascii_char::AsciiChar as core::hash::Hash>::hash
@@ -1609,6 +1616,7 @@
 <core::fmt::builders::PadAdapterState as core::default::Default>::default
 <core::fmt::rt::Argument<'a> as core::clone::Clone>::clone
 <core::fmt::rt::ArgumentType<'a> as core::clone::Clone>::clone
+<core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>
 <core::hint::select_unpredictable::DropOnPanic<T> as core::ops::drop::Drop>::drop
 <core::intrinsics::AtomicOrdering as core::cmp::PartialEq>::eq
 <core::intrinsics::AtomicOrdering as core::fmt::Debug>::fmt
@@ -3502,6 +3510,7 @@
 <core::panic::panic_info::PanicMessage<'_> as core::fmt::Debug>::fmt
 <core::panic::panic_info::PanicMessage<'_> as core::fmt::Display>::fmt
 <core::panicking::AssertKind as core::fmt::Debug>::fmt
+<core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>
 <core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
 <core::ptr::metadata::DynMetadata<Dyn> as core::clone::Clone>::clone
 <core::ptr::metadata::DynMetadata<Dyn> as core::fmt::Debug>::fmt
@@ -3689,6 +3698,7 @@
 <core::str::iter::Chars<'a> as core::clone::Clone>::clone
 <core::str::iter::Chars<'a> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::advance_by
+<core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::advance_by::CHUNK_SIZE
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::count
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::last
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::next
@@ -3704,6 +3714,7 @@
 <core::str::lossy::Utf8Chunks<'_> as core::fmt::Debug>::fmt
 <core::str::lossy::Utf8Chunks<'a> as core::clone::Clone>::clone
 <core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next
+<core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next::TAG_CONT_U8
 <core::str::lossy::Utf8Chunks<'a> as core::iter::traits::iterator::Iterator>::next::safe_get
 <core::str::pattern::ByteNeedle as core::clone::Clone>::clone
 <core::str::pattern::ByteNeedle as core::fmt::Debug>::fmt
@@ -5804,6 +5815,7 @@ core::char::methods::<impl char>::is_private_use
 core::char::methods::<impl char>::is_whitespace
 core::char::methods::<impl char>::len_utf8
 core::char::methods::<impl char>::to_digit
+core::char::methods::<impl char>::to_digit::TO_UPPERCASE_MASK
 core::char::methods::encode_utf16_raw::do_panic
 core::char::methods::encode_utf16_raw::do_panic::compiletime
 core::char::methods::encode_utf16_raw::do_panic::runtime
@@ -6362,6 +6374,7 @@ core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::next
 core::escape::EscapeIterInner::<N, core::escape::MaybeEscaped>::printable
 core::escape::backslash
 core::escape::escape_ascii
+core::escape::escape_ascii::LOOKUP
 core::escape::escape_unicode
 core::escape::hex_escape
 core::escape::verbatim
@@ -6416,6 +6429,7 @@ core::ffi::c_str::CStr::to_bytes_with_nul
 core::ffi::c_str::strlen
 core::ffi::c_str::strlen::compiletime
 core::ffi::c_str::strlen::runtime
+core::ffi::c_str::strlen::runtime
 core::ffi::c_str::strlen::runtime::strlen
 core::fmt::Arguments::<'a>::as_statically_known_str
 core::fmt::Arguments::<'a>::as_str
@@ -6463,6 +6477,7 @@ core::fmt::Formatter::<'a>::with_options
 core::fmt::Formatter::<'a>::wrap_buf
 core::fmt::Formatter::<'a>::write_fmt
 core::fmt::Formatter::<'a>::write_formatted_parts
+core::fmt::Formatter::<'a>::write_formatted_parts::ZEROES
 core::fmt::Formatter::<'a>::write_formatted_parts::write_bytes
 core::fmt::Formatter::<'a>::write_str
 core::fmt::FormattingOptions::align
@@ -6487,6 +6502,7 @@ core::fmt::PostPadding::new
 core::fmt::PostPadding::write
 core::fmt::Write::write_char
 core::fmt::Write::write_fmt
+core::fmt::Write::write_fmt::SpecWriteFmt
 core::fmt::Write::write_fmt::SpecWriteFmt::spec_write_fmt
 core::fmt::builders::DebugInner::<'a, 'b>::entry
 core::fmt::builders::DebugInner::<'a, 'b>::entry_with
@@ -6554,11 +6570,29 @@ core::fmt::num::<impl core::fmt::Binary for i64>::fmt
 core::fmt::num::<impl core::fmt::Binary for i8>::fmt
 core::fmt::num::<impl core::fmt::Binary for isize>::fmt
 core::fmt::num::<impl core::fmt::Binary for u128>::fmt
+core::fmt::num::<impl core::fmt::Binary for u128>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for u128>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for u128>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Binary for u16>::fmt
+core::fmt::num::<impl core::fmt::Binary for u16>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for u16>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for u16>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Binary for u32>::fmt
+core::fmt::num::<impl core::fmt::Binary for u32>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for u32>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for u32>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Binary for u64>::fmt
+core::fmt::num::<impl core::fmt::Binary for u64>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for u64>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for u64>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Binary for u8>::fmt
+core::fmt::num::<impl core::fmt::Binary for u8>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for u8>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for u8>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Binary for usize>::fmt
+core::fmt::num::<impl core::fmt::Binary for usize>::fmt::BASE
+core::fmt::num::<impl core::fmt::Binary for usize>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Binary for usize>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Debug for i128>::fmt
 core::fmt::num::<impl core::fmt::Debug for i16>::fmt
 core::fmt::num::<impl core::fmt::Debug for i32>::fmt
@@ -6582,11 +6616,29 @@ core::fmt::num::<impl core::fmt::LowerHex for i64>::fmt
 core::fmt::num::<impl core::fmt::LowerHex for i8>::fmt
 core::fmt::num::<impl core::fmt::LowerHex for isize>::fmt
 core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for u128>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for u16>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for u32>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for u64>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for u8>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt
+core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt::BASE
+core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::LowerHex for usize>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for i128>::fmt
 core::fmt::num::<impl core::fmt::Octal for i16>::fmt
 core::fmt::num::<impl core::fmt::Octal for i32>::fmt
@@ -6594,11 +6646,29 @@ core::fmt::num::<impl core::fmt::Octal for i64>::fmt
 core::fmt::num::<impl core::fmt::Octal for i8>::fmt
 core::fmt::num::<impl core::fmt::Octal for isize>::fmt
 core::fmt::num::<impl core::fmt::Octal for u128>::fmt
+core::fmt::num::<impl core::fmt::Octal for u128>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for u128>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for u128>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for u16>::fmt
+core::fmt::num::<impl core::fmt::Octal for u16>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for u16>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for u16>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for u32>::fmt
+core::fmt::num::<impl core::fmt::Octal for u32>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for u32>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for u32>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for u64>::fmt
+core::fmt::num::<impl core::fmt::Octal for u64>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for u64>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for u64>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for u8>::fmt
+core::fmt::num::<impl core::fmt::Octal for u8>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for u8>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for u8>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::Octal for usize>::fmt
+core::fmt::num::<impl core::fmt::Octal for usize>::fmt::BASE
+core::fmt::num::<impl core::fmt::Octal for usize>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::Octal for usize>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperExp for i128>::fmt
 core::fmt::num::<impl core::fmt::UpperExp for u128>::fmt
 core::fmt::num::<impl core::fmt::UpperHex for i128>::fmt
@@ -6608,28 +6678,62 @@ core::fmt::num::<impl core::fmt::UpperHex for i64>::fmt
 core::fmt::num::<impl core::fmt::UpperHex for i8>::fmt
 core::fmt::num::<impl core::fmt::UpperHex for isize>::fmt
 core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for u128>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for u16>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for u32>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for u64>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for u8>::fmt::MAX_DIG_N
 core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt
+core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt::BASE
+core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt::DIG_TAB
+core::fmt::num::<impl core::fmt::UpperHex for usize>::fmt::MAX_DIG_N
 core::fmt::num::<impl i128>::format_into
 core::fmt::num::<impl u128>::_fmt
 core::fmt::num::<impl u128>::_fmt_inner
 core::fmt::num::<impl u128>::format_into
 core::fmt::num::div_rem_1e16
+core::fmt::num::div_rem_1e16::D
+core::fmt::num::div_rem_1e16::M_HIGH
+core::fmt::num::div_rem_1e16::SH_POST
 core::fmt::num::enc_16lsd
 core::fmt::num::exp_u128
+core::fmt::num::exp_u128::MAX_COEF_LEN
+core::fmt::num::exp_u128::MAX_DEC_N
+core::fmt::num::exp_u128::MAX_TEXT_LEN
 core::fmt::num::imp::<impl core::fmt::Display for i16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i16>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for i32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i32>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for i64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i64>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for i8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for i8>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for isize>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for isize>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for u16>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u16>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for u32>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u32>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for u64>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u64>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for u8>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for u8>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::Display for usize>::fmt
+core::fmt::num::imp::<impl core::fmt::Display for usize>::fmt::MAX_DEC_N
 core::fmt::num::imp::<impl core::fmt::LowerExp for i16>::fmt
 core::fmt::num::imp::<impl core::fmt::LowerExp for i32>::fmt
 core::fmt::num::imp::<impl core::fmt::LowerExp for i64>::fmt
@@ -6671,6 +6775,9 @@ core::fmt::num::imp::<impl usize>::_fmt
 core::fmt::num::imp::<impl usize>::_fmt_inner
 core::fmt::num::imp::<impl usize>::format_into
 core::fmt::num::imp::exp_u64
+core::fmt::num::imp::exp_u64::MAX_COEF_LEN
+core::fmt::num::imp::exp_u64::MAX_DEC_N
+core::fmt::num::imp::exp_u64::MAX_TEXT_LEN
 core::fmt::num::slice_buffer_to_str
 core::fmt::num::write_quad
 core::fmt::num_buffer::NumBuffer::<T>::new
@@ -6773,6 +6880,7 @@ core::intrinsics::fallback::wide_mul_u128
 core::intrinsics::fallback::wide_mul_u128::from_low_high
 core::intrinsics::fallback::wide_mul_u128::scalar_mul
 core::intrinsics::fallback::wide_mul_u128::to_low_high
+core::intrinsics::fallback::wide_mul_u128::to_low_high::MASK
 core::intrinsics::integer_max
 core::intrinsics::integer_min
 core::intrinsics::is_val_statically_known
@@ -6909,6 +7017,7 @@ core::iter::traits::collect::Extend::extend_one
 core::iter::traits::collect::Extend::extend_one_unchecked
 core::iter::traits::collect::Extend::extend_reserve
 core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by
+core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy
 core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy::spec_advance_back_by
 core::iter::traits::double_ended::DoubleEndedIterator::nth_back
 core::iter::traits::double_ended::DoubleEndedIterator::rfind
@@ -6918,6 +7027,7 @@ core::iter::traits::double_ended::DoubleEndedIterator::try_rfold
 core::iter::traits::exact_size::ExactSizeIterator::is_empty
 core::iter::traits::exact_size::ExactSizeIterator::len
 core::iter::traits::iterator::Iterator::advance_by
+core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy
 core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy::spec_advance_by
 core::iter::traits::iterator::Iterator::all
 core::iter::traits::iterator::Iterator::all::check
@@ -7033,6 +7143,9 @@ core::num::<impl i128>::count_ones
 core::num::<impl i128>::count_zeros
 core::num::<impl i128>::from_ascii_bytes_radix
 core::num::<impl i128>::from_ascii_bytes_radix_impl
+core::num::<impl i128>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl i128>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl i128>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl i128>::from_le
 core::num::<impl i128>::from_le_bytes
 core::num::<impl i128>::from_ne_bytes
@@ -7097,6 +7210,9 @@ core::num::<impl i16>::count_ones
 core::num::<impl i16>::count_zeros
 core::num::<impl i16>::from_ascii_bytes_radix
 core::num::<impl i16>::from_ascii_bytes_radix_impl
+core::num::<impl i16>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl i16>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl i16>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl i16>::from_le
 core::num::<impl i16>::from_le_bytes
 core::num::<impl i16>::from_ne_bytes
@@ -7161,6 +7277,9 @@ core::num::<impl i32>::count_ones
 core::num::<impl i32>::count_zeros
 core::num::<impl i32>::from_ascii_bytes_radix
 core::num::<impl i32>::from_ascii_bytes_radix_impl
+core::num::<impl i32>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl i32>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl i32>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl i32>::from_le
 core::num::<impl i32>::from_le_bytes
 core::num::<impl i32>::from_ne_bytes
@@ -7225,6 +7344,9 @@ core::num::<impl i64>::count_ones
 core::num::<impl i64>::count_zeros
 core::num::<impl i64>::from_ascii_bytes_radix
 core::num::<impl i64>::from_ascii_bytes_radix_impl
+core::num::<impl i64>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl i64>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl i64>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl i64>::from_le
 core::num::<impl i64>::from_le_bytes
 core::num::<impl i64>::from_ne_bytes
@@ -7289,6 +7411,9 @@ core::num::<impl i8>::count_ones
 core::num::<impl i8>::count_zeros
 core::num::<impl i8>::from_ascii_bytes_radix
 core::num::<impl i8>::from_ascii_bytes_radix_impl
+core::num::<impl i8>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl i8>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl i8>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl i8>::from_le
 core::num::<impl i8>::from_le_bytes
 core::num::<impl i8>::from_ne_bytes
@@ -7353,6 +7478,9 @@ core::num::<impl isize>::count_ones
 core::num::<impl isize>::count_zeros
 core::num::<impl isize>::from_ascii_bytes_radix
 core::num::<impl isize>::from_ascii_bytes_radix_impl
+core::num::<impl isize>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl isize>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl isize>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl isize>::from_le
 core::num::<impl isize>::from_le_bytes
 core::num::<impl isize>::from_ne_bytes
@@ -7420,6 +7548,9 @@ core::num::<impl u128>::count_zeros
 core::num::<impl u128>::div_ceil
 core::num::<impl u128>::from_ascii_bytes_radix
 core::num::<impl u128>::from_ascii_bytes_radix_impl
+core::num::<impl u128>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl u128>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl u128>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl u128>::from_be
 core::num::<impl u128>::from_be_bytes
 core::num::<impl u128>::from_le
@@ -7499,6 +7630,9 @@ core::num::<impl u16>::count_zeros
 core::num::<impl u16>::div_ceil
 core::num::<impl u16>::from_ascii_bytes_radix
 core::num::<impl u16>::from_ascii_bytes_radix_impl
+core::num::<impl u16>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl u16>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl u16>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl u16>::from_be
 core::num::<impl u16>::from_be_bytes
 core::num::<impl u16>::from_le
@@ -7579,6 +7713,9 @@ core::num::<impl u32>::count_zeros
 core::num::<impl u32>::div_ceil
 core::num::<impl u32>::from_ascii_bytes_radix
 core::num::<impl u32>::from_ascii_bytes_radix_impl
+core::num::<impl u32>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl u32>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl u32>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl u32>::from_be
 core::num::<impl u32>::from_be_bytes
 core::num::<impl u32>::from_le
@@ -7658,6 +7795,9 @@ core::num::<impl u64>::count_zeros
 core::num::<impl u64>::div_ceil
 core::num::<impl u64>::from_ascii_bytes_radix
 core::num::<impl u64>::from_ascii_bytes_radix_impl
+core::num::<impl u64>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl u64>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl u64>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl u64>::from_be
 core::num::<impl u64>::from_be_bytes
 core::num::<impl u64>::from_le
@@ -7740,6 +7880,9 @@ core::num::<impl u8>::eq_ignore_ascii_case
 core::num::<impl u8>::escape_ascii
 core::num::<impl u8>::from_ascii_bytes_radix
 core::num::<impl u8>::from_ascii_bytes_radix_impl
+core::num::<impl u8>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl u8>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl u8>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl u8>::from_be
 core::num::<impl u8>::from_be_bytes
 core::num::<impl u8>::from_le
@@ -7826,6 +7969,9 @@ core::num::<impl usize>::count_zeros
 core::num::<impl usize>::div_ceil
 core::num::<impl usize>::from_ascii_bytes_radix
 core::num::<impl usize>::from_ascii_bytes_radix_impl
+core::num::<impl usize>::from_ascii_bytes_radix_impl::run_checked_loop
+core::num::<impl usize>::from_ascii_bytes_radix_impl::run_no_check_loop
+core::num::<impl usize>::from_ascii_bytes_radix_impl::unwrap_or_PIE
 core::num::<impl usize>::from_be
 core::num::<impl usize>::from_be_bytes
 core::num::<impl usize>::from_le
@@ -7936,11 +8082,21 @@ core::num::imp::flt2dec::strategy::dragon::mul_pow10
 core::num::imp::flt2dec::strategy::grisu::cached_power
 core::num::imp::flt2dec::strategy::grisu::format_exact
 core::num::imp::flt2dec::strategy::grisu::format_exact_opt
+core::num::imp::flt2dec::strategy::grisu::format_exact_opt::POW10_UP_TO_9
 core::num::imp::flt2dec::strategy::grisu::format_exact_opt::possibly_round
 core::num::imp::flt2dec::strategy::grisu::format_shortest
 core::num::imp::flt2dec::strategy::grisu::format_shortest_opt
 core::num::imp::flt2dec::strategy::grisu::format_shortest_opt::round_and_weed
 core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X1
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X2
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X3
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X4
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X5
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X6
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X7
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X8
+core::num::imp::flt2dec::strategy::grisu::max_pow10_no_more_than::X9
 core::num::imp::flt2dec::to_exact_exp_str
 core::num::imp::flt2dec::to_exact_fixed_str
 core::num::imp::flt2dec::to_shortest_exp_str
@@ -7948,6 +8104,10 @@ core::num::imp::flt2dec::to_shortest_str
 core::num::imp::fmt::Formatted::<'a>::len
 core::num::imp::fmt::Part::<'a>::len
 core::num::imp::int_log10::less_than_5
+core::num::imp::int_log10::less_than_5::C1
+core::num::imp::int_log10::less_than_5::C2
+core::num::imp::int_log10::less_than_5::C3
+core::num::imp::int_log10::less_than_5::C4
 core::num::imp::int_log10::panic_for_nonpositive_argument
 core::num::imp::int_log10::u128
 core::num::imp::int_log10::u128_impl
@@ -7959,6 +8119,8 @@ core::num::imp::int_log10::u64
 core::num::imp::int_log10::u64_impl
 core::num::imp::int_log10::u8
 core::num::imp::int_log10::u8_impl
+core::num::imp::int_log10::u8_impl::C1
+core::num::imp::int_log10::u8_impl::C2
 core::num::imp::int_log10::usize
 core::num::imp::overflow_panic::pow
 core::num::imp::traits::FloatExt::integer_decode
@@ -8200,12 +8362,14 @@ core::panicking::panic_const::panic_const_shr_overflow
 core::panicking::panic_const::panic_const_sub_overflow
 core::panicking::panic_display
 core::panicking::panic_fmt
+core::panicking::panic_fmt
 core::panicking::panic_fmt::panic_impl
 core::panicking::panic_in_cleanup
 core::panicking::panic_misaligned_pointer_dereference
 core::panicking::panic_nounwind
 core::panicking::panic_nounwind_fmt
 core::panicking::panic_nounwind_fmt::compiletime
+core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
@@ -8214,6 +8378,8 @@ core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
 core::ptr::align_offset::mod_inv
+core::ptr::align_offset::mod_inv::INV_TABLE_MOD
+core::ptr::align_offset::mod_inv::INV_TABLE_MOD_16
 core::ptr::const_ptr::<impl *const T>::add
 core::ptr::const_ptr::<impl *const T>::add::precondition_check
 core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap
@@ -8345,8 +8511,10 @@ core::ptr::swap_nonoverlapping::compiletime
 core::ptr::swap_nonoverlapping::precondition_check
 core::ptr::swap_nonoverlapping::runtime
 core::ptr::swap_nonoverlapping_bytes
+core::ptr::swap_nonoverlapping_bytes::CHUNK_SIZE
 core::ptr::swap_nonoverlapping_bytes::swap_nonoverlapping_chunks
 core::ptr::swap_nonoverlapping_bytes::swap_nonoverlapping_short
+core::ptr::swap_nonoverlapping_bytes::swap_nonoverlapping_short::swap_prefix
 core::ptr::swap_nonoverlapping_const
 core::ptr::without_provenance
 core::ptr::without_provenance_mut
@@ -8454,12 +8622,16 @@ core::slice::<impl [T]>::swap_unchecked::precondition_check
 core::slice::<impl [T]>::windows
 core::slice::<impl core::default::Default for &mut [T]>::default
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case
+core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case::CHUNK_SIZE
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_chunks::eq_ignore_ascii_inner
 core::slice::ascii::<impl [u8]>::eq_ignore_ascii_case_simple
 core::slice::ascii::<impl [u8]>::escape_ascii
 core::slice::ascii::<impl [u8]>::is_ascii
 core::slice::ascii::is_ascii
+core::slice::ascii::is_ascii::NONASCII_MASK
+core::slice::ascii::is_ascii::SIMD_MIN_LEN
+core::slice::ascii::is_ascii::USIZE_SIZE
 core::slice::ascii::is_ascii::compiletime
 core::slice::ascii::is_ascii::runtime
 core::slice::ascii::is_ascii_simple
@@ -8569,9 +8741,15 @@ core::str::converts::from_utf8_unchecked
 core::str::converts::from_utf8_unchecked_mut
 core::str::count::char_count_general_case
 core::str::count::contains_non_continuation_byte
+core::str::count::contains_non_continuation_byte::LSB
 core::str::count::count_chars
 core::str::count::do_count_chars
+core::str::count::do_count_chars::CHUNK_SIZE
+core::str::count::do_count_chars::_
+core::str::count::do_count_chars::_
 core::str::count::sum_bytes_in_usize
+core::str::count::sum_bytes_in_usize::LSB_SHORTS
+core::str::count::sum_bytes_in_usize::SKIP_BYTES
 core::str::error::Utf8Error::error_len
 core::str::error::Utf8Error::valid_up_to
 core::str::iter::CharIndices::<'a>::as_str
@@ -8633,7 +8811,10 @@ core::str::validations::contains_nonascii
 core::str::validations::next_code_point
 core::str::validations::next_code_point_reverse
 core::str::validations::run_utf8_validation
+core::str::validations::run_utf8_validation::USIZE_BYTES
 core::str::validations::run_utf8_validation::compiletime
+core::str::validations::run_utf8_validation::err
+core::str::validations::run_utf8_validation::next
 core::str::validations::run_utf8_validation::runtime
 core::str::validations::utf8_acc_cont_byte
 core::str::validations::utf8_char_width
@@ -8933,6 +9114,7 @@ core::time::Duration::from_micros
 core::time::Duration::from_millis
 core::time::Duration::from_mins
 core::time::Duration::from_nanos
+core::time::Duration::from_nanos::NANOS_PER_SEC
 core::time::Duration::from_secs
 core::time::Duration::from_secs_f32
 core::time::Duration::from_weeks
@@ -8942,6 +9124,9 @@ core::time::Duration::subsec_micros
 core::time::Duration::subsec_millis
 core::time::Duration::subsec_nanos
 core::time::Duration::try_from_secs_f32
+core::time::Duration::try_from_secs_f32::EXP_MASK
+core::time::Duration::try_from_secs_f32::MANT_MASK
+core::time::Duration::try_from_secs_f32::MIN_EXP
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::eq
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::ne
 core::tuple::<impl core::cmp::PartialEq for (B, A, Z, Y, X, W, V, U, T)>::eq

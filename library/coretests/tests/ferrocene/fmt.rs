@@ -822,7 +822,14 @@ fn test_range_inclusive_fmt_errors() {
     let mut writer = ErrorTriggerWriter { error_on: "10", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
+    // Check that "exhausted" flag is *not* set when the range becomes empty
     let mut specimen = 10..=10;
+    specimen.next();
+    let mut writer = ErrorTriggerWriter { error_on: " (exhausted)", allow_times: 0 };
+    assert!(write!(writer, "{:#?}", specimen).is_ok());
+
+    // Check that "exhausted" flag *is* set when the range overflows
+    let mut specimen = 255u8..=255u8;
     specimen.next();
     let mut writer = ErrorTriggerWriter { error_on: " (exhausted)", allow_times: 0 };
     assert!(write!(writer, "{:#?}", specimen).is_err());

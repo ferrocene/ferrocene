@@ -17,7 +17,6 @@ use std::sync::LazyLock;
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
-use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
 use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
@@ -183,19 +182,7 @@ use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 
 fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tcx> {
     for def in tcx.hir_crate_items(()).definitions() {
-        // A simple `tcx.def_kind(def).is_fn_like()` is not enough here
-        // because it would skip over functions that are generated via macro
-        // expansion.
-        // So, instead we skip over items that are definitely NOT function-like:
-        // modules, structs, enums, etc.
-        match tcx.def_kind(def) {
-            DefKind::Mod | DefKind::Struct | DefKind::Enum | DefKind::Union | DefKind::Use => {
-                continue;
-            }
-            _ => {}
-        }
-
-        if !item_is_validated(tcx, def.into()).needs_test() {
+        if !tcx.def_kind(def).is_fn_like() || !item_is_validated(tcx, def.into()).needs_test() {
             continue;
         }
 

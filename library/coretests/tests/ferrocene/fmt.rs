@@ -863,8 +863,7 @@ fn test_range_from_fmt_errors() {
 // * <core::num::imp::bignum::Big32x40 as core::fmt::Debug>::fmt
 // * <core::num::imp::bignum::tests::Big8x3 as core::fmt::Debug>::fmt
 #[test]
-#[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
-fn test_bignum_fmt_errors_32bit() {
+fn test_bignum_fmt_errors() {
     use core::num::imp::bignum::Big32x40;
 
     // Test value which fits into a single digit
@@ -892,41 +891,6 @@ fn test_bignum_fmt_errors_32bit() {
     assert!(write!(writer, "{:#?}", specimen).is_err());
 
     let mut writer = ErrorTriggerWriter { error_on: "ffffffff", allow_times: 1 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-}
-
-#[test]
-#[cfg(target_pointer_width = "64")]
-fn test_bignum_fmt_errors_64bit() {
-    use core::num::imp::bignum::Big64x20;
-
-    // Test value which fits into a single digit
-    let mut specimen = Big64x20::from_u64(0xffffffffffffffff);
-
-    let mut writer = ErrorTriggerWriter { error_on: "0x", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-
-    let mut writer = ErrorTriggerWriter { error_on: "ffffffffffffffff", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-
-    let mut writer = ErrorTriggerWriter { error_on: "_", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_ok());
-
-    // Test value which is split across two digits
-    // Because `Big64x20` does not have a `from_u128` method, we have to construct the value we want
-    // by multiplying the previous value by 2^64 + 1.
-    specimen.mul_digits(&[1, 1]);
-
-    let mut writer = ErrorTriggerWriter { error_on: "0x", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-
-    let mut writer = ErrorTriggerWriter { error_on: "ffffffffffffffff", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-
-    let mut writer = ErrorTriggerWriter { error_on: "_", allow_times: 0 };
-    assert!(write!(writer, "{:#?}", specimen).is_err());
-
-    let mut writer = ErrorTriggerWriter { error_on: "ffffffffffffffff", allow_times: 1 };
     assert!(write!(writer, "{:#?}", specimen).is_err());
 }
 

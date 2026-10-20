@@ -37,20 +37,3 @@ pub struct Function {
     pub end_line: usize,
     pub linkage_name: String,
 }
-
-impl From<SerdeFunction> for Function {
-    fn from(SerdeFunction(qualified_name, filename, start_line, end_line): SerdeFunction) -> Self {
-        Self { qualified_name, filename, start_line, end_line, linkage_name: String::new() }
-    }
-}
-
-/// A single certified function, identified by its span
-#[derive(Clone, serde_derive::Deserialize, serde_derive::Serialize)]
-#[serde(from = "Function")]
-pub struct SerdeFunction(String, String, usize, usize);
-
-impl From<Function> for SerdeFunction {
-    fn from(func: Function) -> Self {
-        Self(func.qualified_name, func.filename, func.start_line, func.end_line)
-    }
-}

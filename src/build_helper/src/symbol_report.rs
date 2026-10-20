@@ -35,11 +35,12 @@ pub struct Function {
     pub filename: String,
     pub start_line: usize,
     pub end_line: usize,
+    pub linkage_name: String,
 }
 
 impl From<SerdeFunction> for Function {
     fn from(SerdeFunction(qualified_name, filename, start_line, end_line): SerdeFunction) -> Self {
-        Self { qualified_name, filename, start_line, end_line }
+        Self { qualified_name, filename, start_line, end_line, linkage_name: String::new() }
     }
 }
 

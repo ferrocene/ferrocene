@@ -197,8 +197,6 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Bar {
@@ -221,12 +219,27 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     ///     r#"Bar { bar: 0x0000000a, another: "Hello World" }"#,
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn field_with<F>(&mut self, name: &str, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn field_with<F>(&mut self, name: &str, value_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn field_with(
+        &mut self,
+        name: &str,
+        value_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.field(name, &DebugOnce(Cell::new(Some(value_fmt))))
     }
 
@@ -425,8 +438,6 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Foo(i32, String);
@@ -446,12 +457,26 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     ///     r#"Foo(0x0000000a, "Hello World")"#,
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn field_with<F>(&mut self, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn field_with<F>(&mut self, value_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn field_with(
+        &mut self,
+        value_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.field(&DebugOnce(Cell::new(Some(value_fmt))))
     }
 
@@ -575,11 +600,20 @@ impl<'a, 'b: 'a> DebugInner<'a, 'b> {
         self.has_fields = true;
     }
 
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
     fn entry_with<F>(&mut self, entry_fmt: F)
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    fn entry_with<F>(&mut self, entry_fmt: F)
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    fn entry_with(&mut self, entry_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result) {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.entry(&DebugOnce(Cell::new(Some(entry_fmt))));
     }
 
@@ -667,8 +701,6 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Foo(Vec<i32>, Vec<u32>);
@@ -688,12 +720,26 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     ///     "{[10, 11], {12, 13}}",
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn entry_with(
+        &mut self,
+        entry_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.inner.entry_with(entry_fmt);
         self
     }
@@ -891,8 +937,6 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Foo(Vec<i32>, Vec<u32>);
@@ -912,12 +956,26 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     ///     "[[10, 11], {12, 13}]",
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn entry_with<F>(&mut self, entry_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn entry_with(
+        &mut self,
+        entry_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.inner.entry_with(entry_fmt);
         self
     }
@@ -1117,8 +1175,9 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///
     /// # Panics
     ///
-    /// `key` must be called before `value` and each call to `key` must be followed
-    /// by a corresponding call to `value`. Otherwise this method will panic.
+    /// `key` or `key_with` must be called before `value` or `value_with`, and each
+    /// `key` call must be followed by a corresponding `value` call. Otherwise this
+    /// method will panic.
     ///
     /// # Examples
     ///
@@ -1179,11 +1238,15 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// This method is equivalent to [`DebugMap::key`], but formats the
     /// key using a provided closure rather than by calling [`Debug::fmt`].
     ///
+    /// # Panics
+    ///
+    /// `key` or `key_with` must be called before `value` or `value_with`, and each
+    /// `key` call must be followed by a corresponding `value` call. Otherwise this
+    /// method will panic.
+    ///
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Foo(Vec<(String, i32)>);
@@ -1206,12 +1269,26 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///     r#"{entry A: 0x0000000a, entry B: 0x0000000b}"#,
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn key_with<F>(&mut self, key_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn key_with(
+        &mut self,
+        key_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.key(&DebugOnce(Cell::new(Some(key_fmt))))
     }
 
@@ -1223,8 +1300,9 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///
     /// # Panics
     ///
-    /// `key` must be called before `value` and each call to `key` must be followed
-    /// by a corresponding call to `value`. Otherwise this method will panic.
+    /// `key` or `key_with` must be called before `value` or `value_with`, and each
+    /// `key` call must be followed by a corresponding `value` call. Otherwise this
+    /// method will panic.
     ///
     /// # Examples
     ///
@@ -1274,11 +1352,15 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     /// This method is equivalent to [`DebugMap::value`], but formats the
     /// value using a provided closure rather than by calling [`Debug::fmt`].
     ///
+    /// # Panics
+    ///
+    /// `key` or `key_with` must be called before `value` or `value_with`, and each
+    /// `key` call must be followed by a corresponding `value` call. Otherwise this
+    /// method will panic.
+    ///
     /// # Examples
     ///
     /// ```
-    /// #![feature(debug_closure_helpers)]
-    ///
     /// use std::fmt;
     ///
     /// struct Foo(Vec<(String, i32)>);
@@ -1301,12 +1383,26 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///     r#"{entry A: 0x0000000a, entry B: 0x0000000b}"#,
     /// );
     /// ```
+<<<<<<< ferrocene/main
     #[unstable(feature = "debug_closure_helpers", issue = "117729")]
     #[ferrocene::prevalidated]
     pub fn value_with<F>(&mut self, value_fmt: F) -> &mut Self
     where
         F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
     {
+||||||| 260f1acad9d
+    #[unstable(feature = "debug_closure_helpers", issue = "117729")]
+    pub fn value_with<F>(&mut self, value_fmt: F) -> &mut Self
+    where
+        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    {
+=======
+    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
+    pub fn value_with(
+        &mut self,
+        value_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
+    ) -> &mut Self {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         self.value(&DebugOnce(Cell::new(Some(value_fmt))))
     }
 
@@ -1407,8 +1503,9 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///
     /// # Panics
     ///
-    /// `key` must be called before `value` and each call to `key` must be followed
-    /// by a corresponding call to `value`. Otherwise this method will panic.
+    /// `key` or `key_with` must be called before `value` or `value_with`, and each
+    /// `key` call must be followed by a corresponding `value` call. Otherwise this
+    /// method will panic.
     ///
     /// # Examples
     ///

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ known-bug: #131886
 //@ compile-flags: -Zvalidate-mir
 #![feature(type_alias_impl_trait)]

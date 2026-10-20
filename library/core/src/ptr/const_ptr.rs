@@ -59,8 +59,6 @@ impl<T: PointeeSized> *const T {
     /// # Examples
     ///
     /// ```rust
-    /// #![feature(pointer_try_cast_aligned)]
-    ///
     /// let x = 0u64;
     ///
     /// let aligned: *const u64 = &x;
@@ -69,7 +67,7 @@ impl<T: PointeeSized> *const T {
     /// assert!(aligned.try_cast_aligned::<u32>().is_some());
     /// assert!(unaligned.try_cast_aligned::<u32>().is_none());
     /// ```
-    #[unstable(feature = "pointer_try_cast_aligned", issue = "141221")]
+    #[stable(feature = "pointer_try_cast_aligned", since = "CURRENT_RUSTC_VERSION")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]

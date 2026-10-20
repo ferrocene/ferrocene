@@ -137,11 +137,8 @@ pub mod unknown_revision;
 pub mod unstable_book;
 pub mod walk;
 pub mod x_version;
-<<<<<<< ferrocene/main
 // Ferrocene addition
 pub mod ferrocene_targets;
-||||||| 260f1acad9d
-=======
 
 pub struct Semaphore {
     sem: std::sync::Mutex<usize>,
@@ -178,4 +175,3 @@ impl Drop for Guard<'_> {
         self.sem.release();
     }
 }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

@@ -16,7 +16,7 @@ Only use certified subset
 
 Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
-The user shall only use the certified subset of the core library.
+The user shall only use the certified subset of the certified libraries.
 The certified subset is documented by annotations in the `Certified standard library API docs <../../index.html#library-apis>`_.
 Compliance must be proven by following :ref:`core/subset:Compliance with subset`.
 
@@ -27,7 +27,7 @@ Only use stable functions
 
 Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
-The user shall not use experimental functions in the certified subset of the core library.
+The user shall not use experimental functions in the certified subset of the certified libraries.
 
 Verify macro correctness
 ------------------------
@@ -70,4 +70,13 @@ Use matching version of the core library and rustc
 
 .. id::  CORE_CSTR_0040_MATCHING_VERSION
 
-The user shall verify that the version of the core library and the version of rustc used to compile code match. This is ensured by following the :doc:`Installation Procedures <../procedures>`.
+The user shall verify that the versions of the certified libraries and the version of rustc used to compile code match. This is ensured by following the :doc:`Installation Procedures <../procedures>`.
+
+Verify global allocator correctness
+--------------------------------------------------
+
+.. id::  CORE_CSTR_0050_GLOBAL_ALLOCATOR
+
+The user shall verify that the configured glocal allocator is correct.
+
+TODO: Link to where it is explained what correct means.

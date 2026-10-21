@@ -8,22 +8,22 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
-use std::collections::BTreeSet;
-use std::fs::File;
-use std::io::{self, Write};
+use std::collections::{BTreeSet, HashSet};
+use std::fs::OpenOptions;
+use std::io::{self, Read, Seek, SeekFrom};
 use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
-use rustc_hir::def_id::LocalDefId;
+use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
 use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
-use rustc_middle::ty::TyCtxt;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
 };
+use rustc_middle::ty::{Instance, TyCtxt};
 use rustc_session::EarlyDiagCtxt;
 use rustc_session::config::ErrorOutputType;
 use rustc_span::{Span, Symbol};
@@ -93,17 +93,21 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     }
 }
 
-struct LoadCoreSymbols;
+struct LoadSymbols {
+    /// Names of the crates we want a symbol report for.
+    /// Their dependencies are not listed.
+    target_crates: HashSet<String>,
+}
 
-impl Callbacks for LoadCoreSymbols {
+impl Callbacks for LoadSymbols {
     fn after_expansion(&mut self, _: &Compiler, tcx: TyCtxt<'_>) -> Compilation {
-        // NOTE: this can't be in main because it shouldn't execute when only running
-        // --print=file-names
-        let out = match std::env::var("SYMBOL_REPORT_OUT") {
-            Ok(p) => Box::new(File::create(&p).expect(&format!("could not create file {p}")))
-                as Box<dyn Write + Send>,
-            Err(_) => Box::new(io::stdout()) as _,
-        };
+        let crate_name = tcx.crate_name(LOCAL_CRATE).to_string();
+        if !self.target_crates.contains(&crate_name) {
+            // Not one of the crates we build a report for, meaning that
+            // it's a dependency. We still need to compile it to produce
+            // `.rmeta` files for the compiler.
+            return Compilation::Continue;
+        }
 
         let vis = Vis::new(tcx);
         let mut vis = extract_all_functions(tcx, vis);
@@ -113,8 +117,45 @@ impl Callbacks for LoadCoreSymbols {
         // This allows us to detect unused annotations.
         tcx.hir_walk_attributes(&mut vis);
 
-        serde_json::to_writer(out, &vis.report).expect("failed to serialize report");
-        Compilation::Stop
+        match std::env::var("SYMBOL_REPORT_OUT") {
+            Ok(p) => {
+                // When cargo builds multiple crates each gets it's own
+                // compiler process. At the end this process would only produce
+                // a report for a single crate.
+                // So instead of making a brand new file we check if one exists
+                // already, load it, merge our report data into it, and store
+                // it again.
+                let mut file = OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .create(true)
+                    .open(&p)
+                    .expect(&format!("could not open file {p}"));
+                if file.lock().is_err() {
+                    std::thread::sleep(std::time::Duration::from_millis(1000));
+                    file.lock().expect(&format!("could not lock file {p}"));
+                }
+
+                let mut existing = String::new();
+                file.read_to_string(&mut existing).expect(&format!("could not read file {p}"));
+                let mut report = serde_json::from_str::<SymbolReport>(&existing)
+                    .unwrap_or_else(|_| SymbolReport::new());
+                report.symbols.extend(vis.report.symbols);
+                for (filename, lines) in vis.report.annotations {
+                    report.annotations.entry(filename).or_default().extend(lines);
+                }
+
+                file.set_len(0).expect(&format!("could not truncate file {p}"));
+                file.seek(SeekFrom::Start(0)).expect(&format!("could not seek file {p}"));
+                serde_json::to_writer(&file, &report).expect("failed to serialize report");
+            }
+            Err(_) => {
+                serde_json::to_writer(io::stdout(), &vis.report)
+                    .expect("failed to serialize report");
+            }
+        }
+
+        Compilation::Continue
     }
 }
 
@@ -122,9 +163,12 @@ fn main() {
     rustc_driver::install_ice_hook("https://github.com/ferrocene/ferrocene/issues/new", |_| ());
     let handler = EarlyDiagCtxt::new(ErrorOutputType::default());
     rustc_driver::init_rustc_env_logger(&handler);
+    let target_crates: HashSet<String> = std::env::var("SYMBOL_REPORT_CRATES")
+        .map(|v| v.split(',').map(str::to_owned).collect())
+        .unwrap_or_default();
     let exit_code = rustc_driver::catch_with_exit_code(move || {
         let args: Vec<String> = std::env::args().collect();
-        rustc_driver::compiler_entrypoint(&args, &mut LoadCoreSymbols)
+        rustc_driver::compiler_entrypoint(&args, &mut LoadSymbols { target_crates })
     });
     let exit_code = if exit_code == ExitCode::SUCCESS {
         rustc_driver::EXIT_SUCCESS
@@ -161,10 +205,32 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
             start_line = start_line.min(span_start_line);
         }
 
-        vis.report.symbols.push(Function { qualified_name, filename, start_line, end_line });
+        let linkage_name = get_linkage_name(tcx, def);
+
+        vis.report.symbols.push(Function {
+            qualified_name,
+            filename,
+            start_line,
+            end_line,
+            linkage_name,
+        });
     }
 
     vis
+}
+
+/// Returns the mangled linkage (symbol) name for a compiled monomorphic item.
+/// For generic items, and for items that aren't a function/closure to begin with (a `use` or a
+/// local `macro_rules!` can end up "needing a test" by inheriting validation from their
+/// surrounding function, but neither has a linkage name to compute), returns an empty string.
+/// Later when a generic item is used by a dependent binary the compiler will
+/// produce a new monomorphized item with a new name.
+fn get_linkage_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {
+    if !tcx.def_kind(def).is_fn_like() || tcx.generics_of(def.to_def_id()).count() != 0 {
+        return String::new();
+    }
+    let instance = Instance::mono(tcx, def.to_def_id());
+    tcx.symbol_name(instance).name.to_string()
 }
 
 fn get_qualified_name(tcx: TyCtxt<'_>, def: LocalDefId) -> String {

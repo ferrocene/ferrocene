@@ -477,6 +477,10 @@ pub enum Subcommand {
         /// generate coverage for tests
         #[arg(long)]
         coverage: Option<FerroceneCoverageFor>,
+        /// Library crate(s) to include in the coverage report (defaults to `core`). May be
+        /// passed multiple times to report on more than one crate.
+        #[arg(long)]
+        coverage_crate: Vec<String>,
         /// Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification
         /// documents to ensure there is enough granularity for the test outcomes report.
         #[arg(long)]
@@ -555,6 +559,10 @@ pub enum Subcommand {
         #[arg(long)]
         /// update all files of failing tests
         bless: bool,
+        /// Library crate(s) to include in the coverage report (defaults to `core`). Only used by
+        /// the `ferrocene-coverage-report` alias.
+        #[arg(long)]
+        coverage_crate: Vec<String>,
     },
     /// Set up the environment for development
     #[command(long_about = format!(
@@ -730,6 +738,17 @@ impl Subcommand {
             Subcommand::Test { coverage, .. } => coverage,
             _ => None,
         }
+    }
+
+    /// Library crate(s) the coverage report should be generated for, defaulting to `core` if
+    /// none were explicitly passed via `--coverage-crate`.
+    pub fn ferrocene_coverage_crates(&self) -> Vec<String> {
+        let crates = match self {
+            Subcommand::Test { coverage_crate, .. } => coverage_crate.clone(),
+            Subcommand::Run { coverage_crate, .. } => coverage_crate.clone(),
+            _ => Vec::new(),
+        };
+        if crates.is_empty() { vec!["core".to_owned()] } else { crates }
     }
 
     pub fn run(&self) -> Option<&str> {

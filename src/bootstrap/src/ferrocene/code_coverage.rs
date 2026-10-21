@@ -205,8 +205,9 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
     cmd.arg("merge").arg("--sparse").arg("-o").arg(&paths.profdata_file).arg(&paths.profraw_dir);
     cmd.fail_fast().run(builder);
 
-    builder.info("Listing symbols for the certified libcore subset");
-    let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, state.target));
+    builder.info("Listing symbols for the certified library subset");
+    let crates = builder.config.cmd.ferrocene_coverage_crates();
+    let symbol_report = builder.ensure(CertifiedCoreSymbols::new(builder, state.target, crates));
 
     let instrumented_binaries = instrumented_binaries(builder, &paths, &state);
 

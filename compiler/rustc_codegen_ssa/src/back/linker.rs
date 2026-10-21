@@ -721,7 +721,10 @@ impl<'a> Linker for GccLinker<'a> {
         //
         // Though it may be worth to try to revert those changes upstream, since
         // the overhead of the initialization should be minor.
-        self.link_or_cc_args(&["-u", "__llvm_profile_runtime"]);
+        // `-u` is a linker flag and although modern GCC accept it, for maximum portability is
+        // better to pass it behind `-Wl` when the linker is GCC-like (not plain LD)
+        let flag = if self.is_ld { "-u" } else { "-Wl,-u" };
+        self.link_or_cc_args(&[flag, "__llvm_profile_runtime"]);
     }
 
     fn enable_profiling(&mut self) {

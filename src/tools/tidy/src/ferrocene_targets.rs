@@ -282,7 +282,7 @@ fn check_qualification_scopes(
                 let Some(line) = lines.next() else { continue };
                 let Some(certified) = strip_prefixes(line, &["-"]) else { continue };
 
-                const CERTIFIED: &str = "``core``";
+                const CERTIFIED: &str = "``core``, ``alloc``";
                 if certified != CERTIFIED {
                     check.error(format!("{target} is missing certified {CERTIFIED} library"));
                 }
@@ -295,9 +295,9 @@ fn check_qualification_scopes(
                 let Some(line) = lines.next() else { continue };
                 let Some(qualified) = strip_prefixes(line, &["-"]) else { continue };
 
-                const BARE_METAL_UNCERTIFIED: &str = "``alloc``";
+                const BARE_METAL_UNCERTIFIED: &str = "";
                 const BARE_METAL_QUALIFIED: &str = "";
-                const FULL_UNCERTIFIED: &str = "``alloc``, ``std``, ``test``";
+                const FULL_UNCERTIFIED: &str = "``std``, ``test``";
                 const FULL_QUALIFIED: &str = "``proc_macro``";
 
                 let std = if uncertified == BARE_METAL_UNCERTIFIED

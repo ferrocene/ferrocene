@@ -51,6 +51,9 @@ impl<'tcx> LintState<'tcx> {
             None if Some(dst_trait.def_id()) == tcx.lang_items().fn_ptr_trait() => None,
             // FIXME: feature(unboxed_closures)
             None if source.is_adt() => None,
+            // This is a generic argument (`T: Fn*`) casted into a `dyn Fn*` trait object; the
+            // post-mono pass will check the validity of actual instances.
+            None if matches!(source.kind(), ty::Param(..)) => None,
             // Don't remove this panic. If you do so before adding `check_dyn_trait_coercion` to
             // the post-mono pass, it will fail to catch real uses of unvalidated items in
             // non-degenerate programs.
@@ -231,6 +234,11 @@ impl<'tcx> LintState<'tcx> {
             //   - It was passed as an argument, which is ok by 3).
             //   - It is a global const/static, so we catch it in `NamedConst`/`StaticRef` above.
             ty::FnPtr(..) => None,
+            // This happens when a generic argument bounded by one of the `Fn*` trait is coerced to
+            // a `dyn Fn*` trait object within a generic function. In the context of the
+            // generic function, it is unknown whether the the argument is a validated function or
+            // not so we defer to the post-mono pass by returning a `None` here
+            ty::Param(..) => None,
             other => span_bug!(span, "unsupported call kind {other:?}"),
         }
     }

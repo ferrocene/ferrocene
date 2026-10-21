@@ -1,0 +1,53 @@
+diff --git a/compiler-rt/lib/profile/InstrProfilingPlatformLinux.c b/compiler-rt/lib/profile/InstrProfilingPlatformLinux.c
+index 7a22be6bb5861..f06036dbb6da2 100644
+--- a/compiler-rt/lib/profile/InstrProfilingPlatformLinux.c
++++ b/compiler-rt/lib/profile/InstrProfilingPlatformLinux.c
+@@ -23,13 +23,20 @@
+ #if defined(__linux__) || defined(__FreeBSD__) || defined(__Fuchsia__) ||      \
+     (defined(__sun__) && defined(__svr4__)) || defined(__NetBSD__) ||          \
+     defined(_AIX) || defined(__wasm__) || defined(__HAIKU__) ||                \
+-    (defined(COMPILER_RT_PROFILE_BAREMETAL) && !defined(__NVPTX__))
++    (defined(COMPILER_RT_PROFILE_BAREMETAL) && !defined(__NVPTX__)) ||         \
++    defined(__qnx__)  // Ferrocene addition: use Linux impl on QNX
+ 
+ #if !defined(_AIX) && !defined(__wasm__) &&                                    \
+     !defined(COMPILER_RT_PROFILE_BAREMETAL)
+ // Includes for non-baremetal ELF targets, used to output build IDs.
++// Ferrocene addition: headers are in a different location on QNX
++#if defined(__qnx__)
++#include <sys/elf.h>
++#include <sys/link.h>
++#else
+ #include <elf.h>
+ #include <link.h>
++#endif
+ #include <stdlib.h>
+ #include <string.h>
+ #endif
+diff --git a/compiler-rt/lib/profile/InstrProfilingPlatformOther.c b/compiler-rt/lib/profile/InstrProfilingPlatformOther.c
+index 205bba1060c3b..ab8b8b76710e2 100644
+--- a/compiler-rt/lib/profile/InstrProfilingPlatformOther.c
++++ b/compiler-rt/lib/profile/InstrProfilingPlatformOther.c
+@@ -17,6 +17,7 @@
+      !defined(__Fuchsia__) && !(defined(__sun__) && defined(__svr4__)) &&      \
+      !defined(__NetBSD__) && !defined(_WIN32) && !defined(_AIX) &&             \
+      !defined(__wasm__) && !defined(__HAIKU__) &&                              \
++     !defined(__qnx__) && /* Ferrocene addition: QNX will use Linux impl */    \
+      !defined(COMPILER_RT_PROFILE_BAREMETAL)) ||                               \
+     defined(__NVPTX__)
+ 
+diff --git a/compiler-rt/lib/profile/InstrProfilingUtil.c b/compiler-rt/lib/profile/InstrProfilingUtil.c
+index a9d9df813764b..223d30b1ebf0f 100644
+--- a/compiler-rt/lib/profile/InstrProfilingUtil.c
++++ b/compiler-rt/lib/profile/InstrProfilingUtil.c
+@@ -500,6 +500,10 @@ COMPILER_RT_VISIBILITY int lprofReleaseMemoryPagesToOS(uintptr_t Begin,
+     return _zx_vmar_op_range(_zx_vmar_root_self(), ZX_VMAR_OP_DECOMMIT,
+                              (zx_vaddr_t)BeginAligned,
+                              EndAligned - BeginAligned, NULL, 0);
++    // Ferrocene addition: no `madvise` on QNX; use `posix_madvise`
++#elif defined(__qnx__)
++    return posix_madvise((void *)BeginAligned, EndAligned - BeginAligned,
++                   POSIX_MADV_DONTNEED);
+ #else
+     return madvise((void *)BeginAligned, EndAligned - BeginAligned,
+                    MADV_DONTNEED);

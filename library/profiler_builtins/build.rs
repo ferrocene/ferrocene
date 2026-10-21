@@ -99,6 +99,27 @@ fn main() {
     println!("cargo::rerun-if-changed={}", include.display());
     cfg.include(include);
 
+    // Ferrocene addition: apply patch to add QNX support to compiler-rt
+    if target_os == "qnx" || target_os == "nto" {
+        use std::process::Command;
+
+        cfg.define("__qnx__", None);
+
+        // current_dir: /library/profiler_builtins
+        // ignore the error as the patch may have already been applied
+        _ = Command::new("git")
+            .args(["apply", "../../ferrocene/patches/compiler-rt-qnx-codecov.patch"])
+            .current_dir("../../src/llvm-project")
+            .status();
+
+        // sanity check that the patch was applied
+        let src = std::fs::read_to_string(
+            "../../src/llvm-project/compiler-rt/lib/profile/InstrProfilingPlatformLinux.c",
+        )
+        .expect("could not read compiler-rt source");
+        assert!(src.contains("__qnx__"));
+    }
+
     // ferrocene addition: facades needs header files not included by default by the
     // bare metal (*-none-*-gcc) compiler
     if let Some(include) = env::var_os("FERROCENE_FACADE_INCLUDE_FOR_PROFILER") {

@@ -152,7 +152,6 @@
 #![feature(duration_millis_float)]
 #![feature(maybe_uninit_as_bytes)]
 #![feature(option_reduce)]
-#![feature(pointer_try_cast_aligned)]
 #![feature(range_into_bounds)]
 #![feature(slice_iter_mut_as_mut_slice)]
 #![feature(str_as_str)]

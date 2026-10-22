@@ -845,20 +845,120 @@ fn test_spec_nth_back_for_range() {
     assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth_back(usize::MAX));
 }
 
-// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next`.
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back`.
 #[test]
-fn test_spec_next_for_range_inclusive() {
-    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next());
-    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(2)).next());
-    assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next());
+fn test_range_iter_nth_back() {
+    assert_eq!(Some(StepWrapper(8)), core::range::Range::from(StepWrapper(1)..StepWrapper(10)).into_iter().nth_back(1));
+    assert_eq!(None, core::range::Range::from(StepWrapper(1)..StepWrapper(10)).into_iter().nth_back(10));
+    assert_eq!(None, core::range::Range::from(StepWrapper(1)..StepWrapper(10)).into_iter().nth_back(usize::MAX));
 }
 
-// covers `<core::ops::range::RangeInclusive<A> as core::iter::range::RangeInclusiveIteratorImpl>::spec_next_back`.
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::nth_back`.
 #[test]
-fn test_spec_next_back_for_range_inclusive() {
-    assert_eq!(Some(StepWrapper(1)), (StepWrapper(1)..=StepWrapper(1)).next_back());
-    assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..=StepWrapper(2)).next_back());
-    assert_eq!(None, (StepWrapper(2)..=StepWrapper(1)).next_back());
+fn test_range_inclusive_iter_nth_back() {
+    assert_eq!(Some(StepWrapper(9)), core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(1));
+    assert_eq!(None, core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(10));
+    assert_eq!(None, core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10)).into_iter().nth_back(usize::MAX));
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::count`.
+#[test]
+fn test_range_inclusive_iter_count() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!(10, range.into_iter().count());
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::count`.
+#[test]
+fn test_range_inclusive_iter_last() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!(Some(StepWrapper(10)), range.into_iter().last());
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::next`.
+#[test]
+fn test_range_inclusive_iter_next() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!(Some(StepWrapper(1)), range.into_iter().next());
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::nth`.
+#[test]
+fn test_range_inclusive_iter_nth() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!(Some(StepWrapper(6)), range.into_iter().nth(5));
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::iterator::Iterator>::size_hint`.
+#[test]
+fn test_range_inclusive_iter_size_hint() {
+    let range = core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(10));
+    assert_eq!((10, Some(10)), range.into_iter().size_hint());
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::advance_back_by`.
+#[test]
+fn test_range_iter_advance_back_by() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Ok(()), range.into_iter().advance_back_by(1));
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back`.
+#[test]
+fn test_range_iter_advance_next_back() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(9)), range.into_iter().next_back());
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::advance_by`
+#[test]
+fn test_range_iter_advance_advance_by() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Ok(()), range.into_iter().advance_by(1));
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::count`
+#[test]
+fn test_range_iter_advance_count() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(9, range.into_iter().count());
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::last`
+#[test]
+fn test_range_iter_last() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(9)), range.into_iter().last());
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::next`
+#[test]
+fn test_range_iter_next() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(1)), range.into_iter().next());
+}
+
+// covers `<core::range::iter::RangeIter<A> as core::iter::traits::iterator::Iterator>::nth`
+#[test]
+fn test_range_iter_nth() {
+    let range = core::range::Range::from(StepWrapper(1)..StepWrapper(10));
+    assert_eq!(Some(StepWrapper(6)), range.into_iter().nth(5));
+}
+
+// covers `<core::ops::range::Range<A> as core::iter::range::RangeIteratorImpl>::spec_nth`.
+#[test]
+fn test_spec_nth_for_range_inclusive_iter() {
+    assert_eq!(Some(StepWrapper(2)), (StepWrapper(1)..StepWrapper(10)).nth(1));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(10));
+    assert_eq!(None, (StepWrapper(1)..StepWrapper(10)).nth(usize::MAX));
+}
+
+// covers `<core::range::iter::RangeInclusiveIter<A> as core::iter::traits::double_ended::DoubleEndedIterator>::next_back`.
+#[test]
+fn test_range_inclusive_iter_next_back() {
+    assert_eq!(Some(StepWrapper(1)), core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(1)).into_iter().next_back());
+    assert_eq!(Some(StepWrapper(2)), core::range::RangeInclusive::from(StepWrapper(1)..=StepWrapper(2)).into_iter().next_back());
+    assert_eq!(None, core::range::RangeInclusive::from(StepWrapper(2)..=StepWrapper(1)).into_iter().next_back());
 }
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]

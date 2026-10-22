@@ -3755,6 +3755,10 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::prevalidated]
+#[ferrocene::annotation("\
+    The LLVM backend emits `llvm.fabs` instead of this function, thus cannot be directly covered. \
+    A `test_fabs` in `library/coretests/tests/ferrocene/intrinsics.rs` exercises the actual function. \
+")]
 pub const fn fabs<T: const bounds::FloatPrimitive>(x: T) -> T {
     T::from_bits(x.to_bits() & !T::SIGN_MASK)
 }

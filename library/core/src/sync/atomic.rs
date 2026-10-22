@@ -3454,7 +3454,6 @@ macro_rules! atomic_int {
                 note = "renamed to `try_update` for consistency",
                 suggestion = "try_update"
             )]
-            #[ferrocene::prevalidated]
             pub fn fetch_update<F>(&self,
                                    set_order: Ordering,
                                    fetch_order: Ordering,

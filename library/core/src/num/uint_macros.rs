@@ -3689,6 +3689,11 @@ macro_rules! uint_impl {
         #[rustc_inherit_overflow_checks]
         pub const fn pow(self, exp: u32) -> Self {
             if intrinsics::overflow_checks() {
+                #[ferrocene::annotation("\
+                    Ferrocene certification only covers Rust's default release mode flags,
+                    which do not include overflow checks. Therefore it is impossible to hit
+                    this branch. In addition, `strict_pow` is fully covered by other tests.
+                ")]
                 self.strict_pow(exp)
             } else {
                 self.wrapping_pow(exp)

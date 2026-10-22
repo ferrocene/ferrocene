@@ -15,16 +15,8 @@ use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_driver::{Callbacks, Compilation};
-<<<<<<< HEAD
-use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{AttrId, Attribute, HirId};
-||||||| parent of 409798659e9 (Backport ferrocene/ferrocene#2617)
-use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{AttrId, HirId};
-=======
 use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
-use rustc_hir::{AttrId, HirId};
->>>>>>> 409798659e9 (Backport ferrocene/ferrocene#2617)
+use rustc_hir::{AttrId, Attribute, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
@@ -174,13 +166,7 @@ fn main() {
         .unwrap_or_default();
     let exit_code = rustc_driver::catch_with_exit_code(move || {
         let args: Vec<String> = std::env::args().collect();
-<<<<<<< HEAD
-        rustc_driver::run_compiler(&args, &mut LoadCoreSymbols)
-||||||| parent of 409798659e9 (Backport ferrocene/ferrocene#2617)
-        rustc_driver::compiler_entrypoint(&args, &mut LoadCoreSymbols)
-=======
-        rustc_driver::compiler_entrypoint(&args, &mut LoadSymbols { target_crates })
->>>>>>> 409798659e9 (Backport ferrocene/ferrocene#2617)
+        rustc_driver::run_compiler(&args, &mut LoadSymbols { target_crates })
     });
     let exit_code = if exit_code == ExitCode::SUCCESS {
         rustc_driver::EXIT_SUCCESS

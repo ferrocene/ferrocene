@@ -6,8 +6,8 @@ use std::ffi::OsStr;
 use clap::Parser;
 use xz2::read::XzDecoder;
 
-#[test]
-fn works() -> Result<(), anyhow::Error> {
+#[tokio::test]
+async fn works() -> Result<(), anyhow::Error> {
     let temp_dir = tempfile::tempdir()?;
     let temp_dir = temp_dir.path().to_str().unwrap();
 
@@ -36,9 +36,9 @@ fn works() -> Result<(), anyhow::Error> {
         "--ferrocene-component",
         "foo",
     ];
-    generate_tarball::CommandLine::parse_from(args.into_iter().map(OsStr::new)).run()?;
+    generate_tarball::CommandLine::parse_from(args.into_iter().map(OsStr::new)).run().await?;
 
-    let file = std::fs::File::open(&format!(
+    let file = std::fs::File::open(format!(
         "{temp_dir}/dist/ferrocene-gen-tarball-test-1.72.0-dev-x86_64-unknown-linux-gnu.tar.xz"
     ))?;
 

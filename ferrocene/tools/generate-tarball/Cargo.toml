@@ -14,7 +14,7 @@ walkdir = "2"
 xz2 = "0.1.4"
 criticaltrust = { version = "0.5.1", features = ["aws-kms"] }
 sha2 = "0.10.7"
-tokio = { version = "1.29.1", features = ["rt-multi-thread", "rt"] }
+tokio = { version = "1.29.1", features = ["rt-multi-thread", "rt", "macros"] }
 serde_json = "1.0.99"
 
 [dependencies.aws-config]

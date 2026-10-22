@@ -202,6 +202,7 @@ impl Layout {
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[must_use = "this returns the minimum alignment, without modifying the layout"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn alignment(&self) -> Alignment {
         self.align
     }

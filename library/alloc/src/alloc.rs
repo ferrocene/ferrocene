@@ -148,6 +148,7 @@ unsafe impl core::alloc::StaticAllocator for Global {}
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 pub unsafe fn alloc(layout: Layout) -> *mut u8 {
     // SAFETY: Upheld by caller.
     unsafe {
@@ -192,6 +193,7 @@ pub unsafe fn alloc(layout: Layout) -> *mut u8 {
 #[stable(feature = "global_alloc", since = "1.28.0")]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 pub unsafe fn dealloc(ptr: *mut u8, layout: Layout) {
     // SAFETY: Upheld by caller.
     unsafe { dealloc_nonnull(NonNull::new_unchecked(ptr), layout) }
@@ -200,6 +202,7 @@ pub unsafe fn dealloc(ptr: *mut u8, layout: Layout) {
 /// Same as [`dealloc`] but when you already have a non-null pointer
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 unsafe fn dealloc_nonnull(ptr: NonNull<u8>, layout: Layout) {
     // SAFETY: Upheld by caller.
     unsafe { __rust_dealloc(ptr, layout.size(), layout.alignment()) }
@@ -247,6 +250,7 @@ unsafe fn dealloc_nonnull(ptr: NonNull<u8>, layout: Layout) {
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 pub unsafe fn realloc(ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
     // SAFETY: Upheld by caller.
     unsafe { realloc_nonnull(NonNull::new_unchecked(ptr), layout, new_size) }
@@ -255,6 +259,7 @@ pub unsafe fn realloc(ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 
 /// Same as [`realloc`] but when you already have a non-null pointer
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 unsafe fn realloc_nonnull(ptr: NonNull<u8>, layout: Layout, new_size: usize) -> *mut u8 {
     // SAFETY: Upheld by caller.
     unsafe { __rust_realloc(ptr, layout.size(), layout.alignment(), new_size) }

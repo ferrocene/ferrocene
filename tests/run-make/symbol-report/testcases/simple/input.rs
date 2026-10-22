@@ -1,4 +1,4 @@
 #[ferrocene::prevalidated]
 pub fn foo() {
-    1 + 1;
+    let _ = 1 + 1;
 }

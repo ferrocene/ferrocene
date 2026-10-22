@@ -67,7 +67,10 @@ Doc-tests are the code snippets in doc-comments. The doc-tests for the certified
 Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
-In order to gather code coverage information, an additional test run of the unit test suites is performed for each qualified target.
+In order to gather code coverage information, an additional test run of the unit test suites is performed
+on the ``x86_64-unknown-linux-gnu`` and ``aarch64-unknown-none`` targets.
+
+Code coverage is only measured on a limited set of platforms and not all qualified platforms. This is sufficient because the certified subsets mostly only contains platform-independent code. The little platform dependent code is reviewed to not significantly impact code coverage results.
 
 It is ensured that both the instrumented and not instrumented unit test suite runs succeed. This ensures that coverage instrumentation does not introduce any correctness issues.
 
@@ -83,30 +86,6 @@ Manual test coverage
 
 If a line cannot be covered by automated tests it will be marked with a ``#[ferrocene::annotation(REASON)]`` attribute stating the reason.
 This annotation will be displayed in the generated HTML report.
-
-QNX
-"""
-
-Due to a bug in the QNX C toolchain, gathering code coverage on QNX 7.1 and QNX 8 targets is not possible:
-
-.. list-table::
-   :align: left
-   :header-rows: 1
-
-   * -
-     - QNX 7.1
-     - QNX 8
-     - Coverage on
-   * - **x86**
-     - ``x86_64-pc-nto-qnx710``
-     - ``x86_64-pc-qnx``
-     - ``x86_64-unknown-linux-gnu``
-   * - **aarch64**
-     - ``aarch64-unknown-nto-qnx710``
-     - ``aarch64-unknown-qnx``
-     - ``aarch64-unknown-none``
-
-Instead coverage is measured on the target specified in the "Coverage on" column. Using the alternative target is valid because neither the ``core``, nor the ``alloc`` library contains code that it specific to QNX targets (verified by the absence of `target_os = "nto"` and `target_os = "qnx"`). The ``std`` library contains code that is specific to QNX, which is okay because the ``std`` library is out of scope for the current certification.
 
 Tidy test suite
 ~~~~~~~~~~~~~~~

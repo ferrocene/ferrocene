@@ -1680,7 +1680,7 @@ fn brute_force_rotate_test_1() {
 }
 
 #[test]
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
 #[cfg_attr(miri, ignore)] // Miri is too slow
 #[cfg_attr(ferrocene_coverage, ignore = "test too slow with coverage enabled")]
 fn select_nth_unstable() {

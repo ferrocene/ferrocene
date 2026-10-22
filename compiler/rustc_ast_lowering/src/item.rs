@@ -1216,7 +1216,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         params: &'hir [hir::Param<'hir>],
         value: hir::Expr<'hir>,
     ) -> hir::BodyId {
-        let body = hir::Body { params, value: self.arena.alloc(value) };
+        let body = hir::Body { params, value };
         let id = body.id();
         assert_eq!(id.hir_id.owner, self.curr_owner.owner_id());
         self.curr_owner.bodies.push((id.hir_id.local_id, self.arena.alloc(body)));
@@ -2003,7 +2003,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let predicates = self.arena.alloc_from_iter(
             body.predicates
                 .iter()
-                .flat_map(|w| &w.predicates)
                 .map(|predicate| self.lower_where_predicate(predicate, &[], &mut dedup_map)),
         );
         hir::TestBinderBody { foralls, exists, constraints, predicates }
@@ -2083,6 +2082,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     items.iter().map(|item| self.lower_test_binder_constraint(item)),
                 ),
             },
+            TestBinderConstraint::Ambiguity { span } => {
+                hir::TestBinderConstraint::Ambiguity { span: self.lower_span(*span) }
+            }
             TestBinderConstraint::Lifetime { lhs, rhs } => {
                 let lhs = self.lower_lifetime(lhs, LifetimeSource::Other, lhs.ident.into());
                 let rhs = self.lower_lifetime(rhs, LifetimeSource::OutlivesBound, rhs.ident.into());
@@ -2122,7 +2124,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         );
 
         hir::TestBinderBoundTypeConstraint {
-            span: *span,
+            span: self.lower_span(*span),
             hir_id: self.lower_node_id(*node_id),
             params: generics.params,
             lhs,

@@ -22,6 +22,9 @@ dependencies = [
 [tool.uv]
 exclude-newer = "7 days"
 
+[tool.uv.exclude-newer-package]
+certifi = false
+
 [tool.uv.sources]
 ferrocene-sphinx-shared-resources = { workspace = true }
 

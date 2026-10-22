@@ -213,25 +213,6 @@ s! {
         spare: Padding<[u64; 3]>,
     }
 
-    #[cfg(target_os = "qnx")]
-    pub struct qtime_entry {
-        pub cycles_per_sec: u64,
-        pub nsec_tod_adjust: u64, // volatile
-        pub nsec_inc: u32,
-        pub boot_time: u32,
-        pub adjust: _clockadjust,
-        pub timer_period: u32,
-        pub timer_scale: i32,
-        pub intr: i32,
-        pub epoch: u32,
-        pub flags: u32,
-        pub rr_interval_mul: u32,
-        pub timer_load_max: u64,
-        pub boot_cc: u64,
-        pub tick_period_cc: u64,
-        spare: [u64; 3],
-    }
-
     pub struct _sched_info {
         pub priority_min: c_int,
         pub priority_max: c_int,

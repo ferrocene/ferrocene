@@ -588,21 +588,6 @@ s! {
         __reserved1: Padding<crate::uintptr_t>,
     }
 
-    // FIXME(1.0): This should not implement `PartialEq`
-    #[cfg(target_os = "qnx")]
-    #[allow(unpredictable_function_pointer_comparisons)]
-    pub struct _thread_attr {
-        pub __flags: c_int,
-        pub __stacksize: size_t,
-        pub __stackaddr: *mut c_void,
-        __reserved0: crate::uintptr_t,
-        pub __policy: c_int,
-        pub __param: crate::__sched_param,
-        pub __guardsize: c_uint,
-        pub __prealloc: c_uint,
-        __reserved1: crate::uintptr_t,
-    }
-
     pub struct _sync_attr {
         pub __protocol: c_int,
         pub __flags: c_int,

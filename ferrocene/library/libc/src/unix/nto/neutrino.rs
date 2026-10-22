@@ -280,16 +280,8 @@ s_no_extra_traits! {
         pub smp: syspage_entry_info,
         pub pminfo: syspage_entry_info,
         pub old_mdriver: syspage_entry_info,
-<<<<<<< ferrocene/de756d740087d457c42876e420be8abed4b1f8cf
-        spare0: [u32; 1],
-        __reserved: Padding<[u64; 20]>, // anonymous union with architecture dependent structs
-||||||| ef0906e2082
-        spare0: [u32; 1],
-        __reserved: Padding<[u8; 160]>, // anonymous union with architecture dependent structs
-=======
         spare0: Padding<[u32; 1]>,
         __reserved: Padding<[u64; 20]>, // anonymous union with architecture dependent structs
->>>>>>> 25ac28daaf7e382b317cc5d36176f9e7dee9b399
         pub new_asinfo: syspage_array_info,
         pub new_cpuinfo: syspage_array_info,
         pub new_cacheattr: syspage_array_info,

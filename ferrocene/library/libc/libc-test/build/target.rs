@@ -262,6 +262,10 @@ impl Target {
         self.os == "nto"
     }
 
+    pub fn qnx(&self) -> bool {
+        self.os == "qnx"
+    }
+
     pub fn openbsd(&self) -> bool {
         self.os == "openbsd"
     }

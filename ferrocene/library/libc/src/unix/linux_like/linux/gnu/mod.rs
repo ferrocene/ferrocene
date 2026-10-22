@@ -433,12 +433,7 @@ s! {
 s_no_extra_traits! {
     // linux/if_ether.h
 
-<<<<<<< ferrocene/de756d740087d457c42876e420be8abed4b1f8cf
-||||||| ef0906e2082
-    #[repr(C, packed)]
-=======
     #[repr(packed)]
->>>>>>> 25ac28daaf7e382b317cc5d36176f9e7dee9b399
     pub struct ethhdr {
         pub h_dest: [c_uchar; crate::ETH_ALEN as usize],
         pub h_source: [c_uchar; crate::ETH_ALEN as usize],

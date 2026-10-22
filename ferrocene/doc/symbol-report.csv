@@ -5655,7 +5655,16 @@
 <usize as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut::precondition_check
 <usize as core::slice::index::SliceIndex<[T]>>::index
 <usize as core::slice::index::SliceIndex<[T]>>::index_mut
+alloc::alloc::alloc
+alloc::alloc::dealloc
+alloc::alloc::dealloc_nonnull
+alloc::alloc::realloc
+alloc::alloc::realloc_nonnull
+alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
+alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
+alloc::vec::Vec::<T, A>::set_len::precondition_check
 core::alloc::layout::Layout::align
+core::alloc::layout::Layout::alignment
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
 core::alloc::layout::Layout::from_size_alignment_unchecked

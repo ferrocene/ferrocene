@@ -111,9 +111,9 @@ s! {
         pub st_rdev: crate::dev_t,
         pub st_uid: crate::uid_t,
         pub st_gid: crate::gid_t,
-        pub __old_st_mtime: crate::_Time32t,
-        pub __old_st_atime: crate::_Time32t,
-        pub __old_st_ctime: crate::_Time32t,
+        __old_st_mtime: crate::_Time32t,
+        __old_st_atime: crate::_Time32t,
+        __old_st_ctime: crate::_Time32t,
         pub st_mode: mode_t,
         pub st_nlink: crate::nlink_t,
         pub st_blocksize: crate::blksize_t,
@@ -284,7 +284,7 @@ s! {
         pub gl_pathv: *mut *mut c_char,
         pub gl_offs: size_t,
         pub gl_flags: c_int,
-        pub gl_errfunc: Option<extern "C" fn(*const c_char, c_int) -> c_int>,
+        pub gl_errfunc: Option<unsafe extern "C" fn(*const c_char, c_int) -> c_int>,
 
         __unused1: Padding<*mut c_void>,
         __unused2: Padding<*mut c_void>,
@@ -511,7 +511,7 @@ s! {
         pub f_basetype: [c_char; 16],
         pub f_flag: c_ulong,
         pub f_namemax: c_ulong,
-        f_filler: [c_uint; 21],
+        f_filler: Padding<[c_uint; 21]>,
     }
 
     pub struct aiocb {
@@ -570,7 +570,7 @@ s! {
         pub __param: crate::__sched_param,
         pub __guardsize: c_uint,
         pub __prealloc: c_uint,
-        __spare: [c_int; 2],
+        __spare: Padding<[c_int; 2]>,
     }
 
     // FIXME(1.0): This should not implement `PartialEq`
@@ -580,12 +580,12 @@ s! {
         pub __flags: c_int,
         pub __stacksize: size_t,
         pub __stackaddr: *mut c_void,
-        __reserved0: crate::uintptr_t,
+        __reserved0: Padding<crate::uintptr_t>,
         pub __policy: c_int,
         pub __param: crate::__sched_param,
         pub __guardsize: c_uint,
         pub __prealloc: c_uint,
-        __reserved1: crate::uintptr_t,
+        __reserved1: Padding<crate::uintptr_t>,
     }
 
     pub struct _sync_attr {
@@ -771,7 +771,7 @@ s_no_extra_traits! {
     // form would be bogus and it would potentially change the size of the data type. On QNX SDP 8, this
     // got fixed and both C and C++ are using the same definition.
     pub struct max_align_t {
-        _ll: crate::c_longlong,
+        _ll: c_longlong,
         _ld: i128,
     }
 }
@@ -2363,21 +2363,28 @@ f! {
     pub unsafe fn FD_CLR(fd: c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
         let size = size_of_val(&(*set).fds_bits[0]) * 8;
-        (*set).fds_bits[fd / size] &= !(1 << (fd % size));
-        return;
+        let Some(slot) = (*set).fds_bits.get_mut(fd / size) else {
+            panic!("fd {fd} out of range: valid fds are 0..FD_SETSIZE (0..{FD_SETSIZE})");
+        };
+        *slot &= !(1 << (fd % size));
     }
 
     pub unsafe fn FD_ISSET(fd: c_int, set: *const fd_set) -> bool {
         let fd = fd as usize;
         let size = size_of_val(&(*set).fds_bits[0]) * 8;
-        return ((*set).fds_bits[fd / size] & (1 << (fd % size))) != 0;
+        let Some(slot) = (*set).fds_bits.get(fd / size) else {
+            panic!("fd {fd} out of range: valid fds are 0..FD_SETSIZE (0..{FD_SETSIZE})");
+        };
+        (*slot & (1 << (fd % size))) != 0
     }
 
     pub unsafe fn FD_SET(fd: c_int, set: *mut fd_set) -> () {
         let fd = fd as usize;
         let size = size_of_val(&(*set).fds_bits[0]) * 8;
-        (*set).fds_bits[fd / size] |= 1 << (fd % size);
-        return;
+        let Some(slot) = (*set).fds_bits.get_mut(fd / size) else {
+            panic!("fd {fd} out of range: valid fds are 0..FD_SETSIZE (0..{FD_SETSIZE})");
+        };
+        *slot |= 1 << (fd % size);
     }
 
     pub unsafe fn FD_ZERO(set: *mut fd_set) -> () {
@@ -2413,9 +2420,7 @@ f! {
         let ngrps = if ngrps > 0 { ngrps - 1 } else { 0 };
         size_of::<sockcred>() + size_of::<crate::gid_t>() * ngrps
     }
-}
 
-safe_f! {
     pub const safe fn WIFSTOPPED(status: c_int) -> bool {
         (status & 0xff) == 0x7f
     }

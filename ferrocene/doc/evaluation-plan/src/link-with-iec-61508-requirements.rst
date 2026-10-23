@@ -10,6 +10,12 @@ Link with IEC 61508 Requirements
 #. Planning of usage
 #. Qualification of a software tool
 
+[|en_50716_ref|] covers the same topic in Clause 6.7 ("Support tools and
+languages"), which also distinguishes the selection and planning of the usage of
+a tool from its qualification. The documents listed below are used for
+[|en_50716_ref|] in the same way, the clause-by-clause mapping is provided in the
+:doc:`Qualification Plan - EN 50716 requirements <qualification-plan:standards/en-50716>`.
+
 In order to respect these steps, we'll manage five documents for this tool
 qualification:
 

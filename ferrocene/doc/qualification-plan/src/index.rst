@@ -31,6 +31,7 @@ Ferrocene in accordance to the standards above.
 
    standards/iso-26262
    standards/iec-61508
+   standards/en-50716
    standards/iec-62304
 
 .. appendices::

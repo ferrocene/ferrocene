@@ -396,12 +396,12 @@ The user has the responsibility to determine whether this level, or a better one
 applicable.
 
 
-IEC 61508 Tool Classification
------------------------------
+IEC 61508 / EN 50716 Tool Classification
+----------------------------------------
 
 Ferrocene provides a development environment capable of compiling and linking
 programs for the target architecture to conform with industrial [|iec_61508_ref|]
-class T3.
+and railway [|en_50716_ref|] class T3.
 
 IEC 62304 Tool Classification
 -----------------------------

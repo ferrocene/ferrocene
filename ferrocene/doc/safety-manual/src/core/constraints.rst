@@ -78,3 +78,11 @@ Use matching version of the core library and rustc
 .. id::  CORE_CSTR_0040_MATCHING_VERSION
 
 The user shall verify that the versions of the certified libraries and the version of rustc used to compile code match. This is ensured by following the :doc:`Installation Procedures <../procedures>`.
+
+Compile with static linking only
+--------------------------------
+
+.. id::  CORE_CSTR_0080_LINK_STATIC
+
+The user shall always link certified libraries statically into applications.
+This can be achieved by providing the ``-C prefer-dynamic=no`` option to ``rustc``.

@@ -30,6 +30,8 @@ When the flag is passed, the component to measure will be instrumented, and all
 test suites will gather coverage metrics. Finally, an HTML report will be
 generated, and its URL will appear at the end.
 
+The specific crate to generate coverage for can be specified with ``--coverage-crate``, which can be passed multiple times and defaults to ``core``.
+
 Gathering standard library coverage
 -----------------------------------
 
@@ -37,14 +39,13 @@ To gather the standard library coverage, we recommend this command:
 
 .. code-block::
 
-   ./x test --tests --coverage=library library/core
-
-.. note::
-
-   Right now, only the ``core`` crate's coverage will be displayed in the
-   report, as the other crates are ignored in
-   ``src/bootstrap/src/ferrocene/code_coverage.rs``.
-
+   ./x test \
+       library/core library/alloc \
+       --tests \
+       --coverage=library \
+       --coverage-crate=core \
+       --coverage-crate=alloc \
+       --coverage-crate=std
 .. note::
 
    Doctests are currently not supported when gathering the coverage of the

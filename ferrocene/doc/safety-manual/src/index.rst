@@ -33,7 +33,7 @@ scope, in accordance to the standards above.
 
 .. toctree::
    :maxdepth: 2
-   :caption: core library
+   :caption: certified libraries
    :numbered:
 
    core/usage

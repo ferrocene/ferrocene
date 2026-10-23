@@ -164,6 +164,12 @@ pub macro const_panic {
         #[inline(always)] // inline the wrapper
         #[track_caller]
         #[ferrocene::prevalidated]
+        #[ferrocene::annotation("\
+            Due to a tooling bug, this shows as uncovered on some platforms.
+            The individual branches of the `const_eval_select!()` are tested by
+            `test_const_panic_do_panic` and `test_runtime_const_panic` in
+            `library/coretests/tests/ferrocene/panic.rs`.
+        ")]
         const fn do_panic($($arg: $ty),*) -> ! {
             $crate::intrinsics::const_eval_select!(
                 @capture { $($arg: $ty = $arg),* } -> !:

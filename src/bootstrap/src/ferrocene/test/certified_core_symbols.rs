@@ -38,7 +38,7 @@ impl CommandLineStep for CertifiedCoreSymbols {
         let actual_symbol_report_path = builder.ensure(run::CertifiedCoreSymbols::new(
             builder,
             target,
-            vec!["core".to_owned()],
+            vec!["core".into(), "alloc".into()],
         ));
 
         if builder.config.dry_run() {

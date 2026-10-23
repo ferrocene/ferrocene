@@ -34,6 +34,8 @@ Rust is well matched to the needs of the certified Rust libraries.
 Heap allocations
 ----------------
 
-While Rust supports heap allocation, it is not used in the core library, which is enforced by core being ``no_std``.
+The ``core`` library does not use heap allocations which is enforced by ``core`` being ``no_std`` and not specifying ``extern alloc``.
 
-.. TODO: talk about alloc
+The ``alloc`` library defines interfaces, data structures and functions that use heap allocations. But no allocator implementation is supplied, but must be supplied by the user.
+
+The ``std`` library supplies allocator implementations, but ``std`` is currently out of scope of the certification.

@@ -77,6 +77,4 @@ Verify global allocator correctness
 
 .. id::  CORE_CSTR_0050_GLOBAL_ALLOCATOR
 
-The user shall verify that the configured glocal allocator is correct.
-
-TODO: Link to where it is explained what correct means.
+The user shall verify that the configured global allocator is implemented as specified by the documentation of the trait and methods of ``core::alloc::GlobalAlloc`` (`docs <../../core/alloc/trait.GlobalAlloc.html>`_).

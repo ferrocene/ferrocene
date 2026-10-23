@@ -8400,6 +8400,7 @@ core::result::Result::<T, E>::unwrap_or_else
 core::result::Result::<T, E>::unwrap_unchecked
 core::result::Result::<core::option::Option<T>, E>::transpose
 core::result::unwrap_failed
+core::result::unwrap_failed::unwrap_failed_inner
 core::slice::<impl [T]>::align_to
 core::slice::<impl [T]>::align_to_mut
 core::slice::<impl [T]>::align_to_offsets

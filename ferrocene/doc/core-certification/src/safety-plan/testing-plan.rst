@@ -68,7 +68,7 @@ Code coverage tests
 ~~~~~~~~~~~~~~~~~~~
 
 In order to gather code coverage information, an additional test run of the unit test suites is performed
-on the ``x86_64-unknown-linux-gnu`` and ``aarch64-unknown-none`` targets.
+on the ``x86_64-unknown-linux-gnu`` target.
 
 Code coverage is only measured on a limited set of platforms and not all qualified platforms. This is sufficient because the certified subsets mostly only contains platform-independent code. The little platform dependent code is reviewed to not significantly impact code coverage results.
 

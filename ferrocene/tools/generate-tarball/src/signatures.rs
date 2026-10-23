@@ -16,7 +16,6 @@ use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
 use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
 use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
-use tokio::runtime::Runtime;
 
 pub(crate) struct SignatureContext<'a> {
     pub(crate) component: &'a str,
@@ -26,26 +25,22 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) managed_prefixes: &'a [String],
 }
 
-pub(crate) fn sign_manifest_with_aws_kms(
+pub(crate) async fn sign_manifest_with_aws_kms(
     ctx: &SignatureContext<'_>,
     key_arn: &str,
 ) -> Result<(), Error> {
-    let tokio = Runtime::new()?;
-    let aws_config = tokio.block_on(
-        aws_config::from_env()
-            .retry_config(RetryConfig::adaptive())
-            .timeout_config(
-                TimeoutConfig::builder().connect_timeout(Duration::from_secs(10)).build(),
-            )
-            .load(),
-    );
+    let aws_config = aws_config::from_env()
+        .retry_config(RetryConfig::adaptive())
+        .timeout_config(TimeoutConfig::builder().connect_timeout(Duration::from_secs(10)).build())
+        .load()
+        .await;
     let kms_client = aws_sdk_kms::Client::new(&aws_config);
 
-    let key = AwsKmsKeyPair::new(key_arn, tokio.handle().clone(), kms_client, KeyRole::Packages)?;
-    sign_manifest(ctx, &key)
+    let key = AwsKmsKeyPair::new(key_arn, kms_client, KeyRole::Packages).await?;
+    sign_manifest(ctx, &key).await
 }
 
-fn sign_manifest(ctx: &SignatureContext<'_>, key_pair: &dyn KeyPair) -> Result<(), Error> {
+async fn sign_manifest(ctx: &SignatureContext<'_>, key_pair: &impl KeyPair) -> Result<(), Error> {
     let mut package = Package {
         product: "ferrocene".into(),
         package: ctx.component.into(),
@@ -61,12 +56,12 @@ fn sign_manifest(ctx: &SignatureContext<'_>, key_pair: &dyn KeyPair) -> Result<(
     package.files.sort_by_cached_key(|file| file.path.clone());
 
     let mut signed = SignedPayload::new(&package)?;
-    signed.add_signature(key_pair)?;
+    signed.add_signature(key_pair).await?;
 
     let dest_dir = ctx.package_dir.join("share").join("criticaltrust").join("ferrocene");
     std::fs::create_dir_all(&dest_dir)?;
     std::fs::write(
-        &dest_dir.join(format!("{}.json", ctx.component)),
+        dest_dir.join(format!("{}.json", ctx.component)),
         &serde_json::to_vec_pretty(&PackageManifest { version: ManifestVersion::<1>, signed })?,
     )?;
 
@@ -131,8 +126,8 @@ mod tests {
     // This insta snapshot is complex and brittle to maintain on Windows
     // Windows does not have file modes, and filters don't provide a reliable way to
     // remap Windows paths to Linux and back.
-    #[test]
-    fn test_sign_manifest() -> Result<(), Error> {
+    #[tokio::test]
+    async fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
 
         let create_file = |path, contents, mode| {
@@ -156,7 +151,7 @@ mod tests {
         create_file("bin/rustc", b"hello world", 0o755)?;
 
         // First generate the signature file
-        let (key, keychain) = generate_key_and_keychain(KeyRole::Packages)?;
+        let (key, keychain) = generate_key_and_keychain(KeyRole::Packages).await?;
         sign_manifest(
             &SignatureContext {
                 component: "demo-package",
@@ -166,7 +161,8 @@ mod tests {
                 managed_prefixes: &["lib/rustlib/x86_64-unknown-linux-gnu/lib/".into()],
             },
             &key,
-        )?;
+        )
+        .await?;
 
         // Then deserialize it and verify the signature is correct.
         let deserialized: PackageManifest = serde_json::from_slice(&std::fs::read(
@@ -187,7 +183,9 @@ mod tests {
         Ok(())
     }
 
-    fn generate_key_and_keychain(role: KeyRole) -> Result<(EphemeralKeyPair, Keychain), Error> {
+    async fn generate_key_and_keychain(
+        role: KeyRole,
+    ) -> Result<(EphemeralKeyPair, Keychain), Error> {
         const ALGORITHM: KeyAlgorithm = KeyAlgorithm::EcdsaP256Sha256Asn1SpkiDer;
 
         let root_key = EphemeralKeyPair::generate(ALGORITHM, KeyRole::Root, None)?;
@@ -195,7 +193,7 @@ mod tests {
 
         let key = EphemeralKeyPair::generate(ALGORITHM, role, None)?;
         let mut signed = SignedPayload::new(key.public())?;
-        signed.add_signature(&root_key)?;
+        signed.add_signature(&root_key).await?;
 
         keychain.load(&signed)?;
 

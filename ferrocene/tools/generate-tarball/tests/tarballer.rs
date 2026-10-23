@@ -8,15 +8,15 @@ use std::path::Path;
 use clap::Parser;
 use walkdir::WalkDir;
 
-#[test]
-fn works() -> Result<(), anyhow::Error> {
+#[tokio::test]
+async fn works() -> Result<(), anyhow::Error> {
     let temp_dir = tempfile::tempdir()?;
     let temp_dir = temp_dir.path().to_str().unwrap();
 
     let test_data = format!("{}/test_data", env!("CARGO_MANIFEST_DIR"));
     let data_dir = format!("{test_data}/foo-package/x86_64-unknown-linux-gnu",);
 
-    create_dir_all(&format!("{temp_dir}/work/image"))?;
+    create_dir_all(format!("{temp_dir}/work/image"))?;
     copy_recursive(
         format!("{data_dir}/image").as_ref(),
         format!("{temp_dir}/work/image").as_ref(),
@@ -34,7 +34,7 @@ fn works() -> Result<(), anyhow::Error> {
         "--compression-profile",
         "fast",
     ];
-    generate_tarball::CommandLine::parse_from(args.into_iter().map(OsStr::new)).run()
+    generate_tarball::CommandLine::parse_from(args.into_iter().map(OsStr::new)).run().await
 }
 
 fn copy_recursive(src: &Path, dst: &Path) -> anyhow::Result<()> {

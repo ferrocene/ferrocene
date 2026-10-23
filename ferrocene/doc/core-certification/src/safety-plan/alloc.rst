@@ -20,12 +20,7 @@ Below you can see a diagram of all allocator traits and types and how they inter
 .. mermaid:: ./alloc-traits-types.mmd
     :zoom:
 
-compiler-builtins
-+++++++++++++++++
+compiler-builtins dependency
+++++++++++++++++++++++++++++
 
-The ``alloc`` library depends on the ``compiler-builtins`` library.
-
-``compiler-builtins`` provides external symbols that the compiler expects to be available when building Rust projects, typically software routines for basic operations that do not have hardware support.
-It is largely a port of LLVM's [`compiler-rt`].
-
-``compiler-builtins`` is considered an implementation detail of ``alloc`` and not certified as a stand-alone library.
+The ``alloc`` library depends on the ``compiler-builtins`` library. But ``compiler-builtins`` is not used by the certified subset of ``alloc`` and therefore excluded from the certification.

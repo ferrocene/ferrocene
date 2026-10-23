@@ -80,6 +80,7 @@ mod c_str2;
 mod collections;
 mod const_fns;
 mod cow_str;
+mod ferrocene;
 mod fmt;
 mod heap;
 mod io;

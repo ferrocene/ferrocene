@@ -87,9 +87,6 @@
 #![deny(ffi_unwind_calls)]
 #![warn(unreachable_pub)]
 //
-// Ferrocene addition: We removed the tidy directives for alphabetical ordering to reduce the number
-// of conflicts we have when merging main.
-//
 // Library features:
 // tidy-alphabetical-start
 #![feature(allocator_api)]
@@ -233,6 +230,9 @@
 // that the feature-gate isn't enabled. Ideally, it wouldn't check for the feature gate for docs
 // from other crates, but since this can only appear for lang items, it doesn't seem worth fixing.
 #![feature(intra_doc_pointers)]
+//
+// Ferrocene addition:
+#![warn(ferrocene::unvalidated)]
 
 // Module with internal macros used by other modules (needs to be included before other modules).
 #[macro_use]

@@ -3637,6 +3637,18 @@ fn prepare_cargo_test(
         helpers::add_dylib_path(dylib_paths, &mut cargo);
     }
 
+    add_cargo_target_runner(&mut cargo, target, builder);
+
+    cargo
+}
+
+/// Tells cargo how to execute binaries built for `target`, e.g. under an emulator or on a remote
+/// device.
+fn add_cargo_target_runner(
+    cargo: &mut BootstrapCommand,
+    target: TargetSelection,
+    builder: &Builder<'_>,
+) {
     if builder.remote_tested(target) {
         let runner = format!("{} run 0", builder.tool_exe(Tool::RemoteTestClient).display());
         cargo.env(format!("CARGO_TARGET_{}_RUNNER", envify(&target.triple)), &runner);
@@ -3654,8 +3666,6 @@ fn prepare_cargo_test(
     if !builder.config.verbose_tests {
         cargo.arg("--quiet");
     }
-
-    cargo
 }
 
 /// Runs `cargo test` for standard library crates.
@@ -4922,7 +4932,7 @@ pub struct TestFloatParse {
 
 impl CommandLineStep for TestFloatParse {
     type Output = ();
-    const IS_HOST: bool = true;
+    const IS_HOST: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         run.path("src/tools/test-float-parse")
@@ -4933,8 +4943,15 @@ impl CommandLineStep for TestFloatParse {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Self {
-            build_compiler: get_compiler_to_test(run.builder, run.target),
+        let builder = run.builder;
+
+        // Other targets usually run under an emulator, which is too slow to do by default.
+        if run.target != run.build_triple() && !builder.was_invoked_explicitly::<Self>(Kind::Test) {
+            return;
+        }
+
+        builder.ensure(Self {
+            build_compiler: builder.compiler(builder.top_stage, run.build_triple()),
             target: run.target,
         });
     }
@@ -4946,6 +4963,8 @@ impl CommandLineStep for TestFloatParse {
         // Build the standard library that will be tested, and a stdlib for host code
         builder.std(build_compiler, target);
         builder.std(build_compiler, builder.host_target);
+        // Start the emulator or remote test server, if the tests need one.
+        builder.ensure(RemoteCopyLibs { build_compiler, target });
         let record_failed_tests = builder.ensure(SetupFailedTestsFile);
 
         // Run any unit tests in the crate
@@ -4988,7 +5007,13 @@ impl CommandLineStep for TestFloatParse {
             cargo_run.args(["--", "--skip-huge"]);
         }
 
-        cargo_run.into_cmd().run(builder);
+        let mut cargo_run = cargo_run.into_cmd();
+        add_cargo_target_runner(&mut cargo_run, target, builder);
+        cargo_run.run(builder);
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::test("test-float-parse", self.target))
     }
 }
 

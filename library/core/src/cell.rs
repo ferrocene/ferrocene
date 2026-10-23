@@ -312,8 +312,14 @@ pub use once::OnceCell;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[repr(transparent)]
 #[rustc_pub_transparent]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 pub struct Cell<T: ?Sized> {
+||||||| 0e75b0b0e6f
+pub struct Cell<T: ?Sized> {
+=======
+pub struct Cell<#[rustc_assert_variance(invariant)] T: ?Sized> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     value: UnsafeCell<T>,
 }
 
@@ -855,8 +861,14 @@ impl<T: CloneFromCell> Cell<T> {
 /// See the [module-level documentation](self) for more.
 #[rustc_diagnostic_item = "RefCell"]
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 pub struct RefCell<T: ?Sized> {
+||||||| 0e75b0b0e6f
+pub struct RefCell<T: ?Sized> {
+=======
+pub struct RefCell<#[rustc_assert_variance(invariant)] T: ?Sized> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     borrow: Cell<BorrowCounter>,
     // Stores the location of the earliest currently active borrow.
     // This gets updated whenever we go from having zero borrows
@@ -2342,8 +2354,14 @@ impl<T: ?Sized + fmt::Display> fmt::Display for RefMut<'_, T> {
 #[stable(feature = "rust1", since = "1.0.0")]
 #[repr(transparent)]
 #[rustc_pub_transparent]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 pub struct UnsafeCell<T: ?Sized> {
+||||||| 0e75b0b0e6f
+pub struct UnsafeCell<T: ?Sized> {
+=======
+pub struct UnsafeCell<#[rustc_assert_variance(invariant)] T: ?Sized> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     value: T,
 }
 
@@ -2643,8 +2661,14 @@ impl<T: DispatchFromDyn<U>, U> DispatchFromDyn<UnsafeCell<U>> for UnsafeCell<T> 
 #[repr(transparent)]
 #[rustc_diagnostic_item = "SyncUnsafeCell"]
 #[rustc_pub_transparent]
+<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
 pub struct SyncUnsafeCell<T: ?Sized> {
+||||||| 0e75b0b0e6f
+pub struct SyncUnsafeCell<T: ?Sized> {
+=======
+pub struct SyncUnsafeCell<#[rustc_assert_variance(invariant)] T: ?Sized> {
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     value: UnsafeCell<T>,
 }
 

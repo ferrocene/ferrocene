@@ -4,9 +4,18 @@
 //
 // - `foo.rs` is a cdylib.
 // - `load_and_unload.rs` is a binary that loads and unloads the cdylib.
+//
+// This test is ignored on musl hosts because musl's dlclose is a no-op and
+// therefore destructors won't run when the library is unloaded.
+// See https://wiki.musl-libc.org/functional-differences-from-glibc.html#Unloading-libraries
 
 //@ ignore-cross-compile
+<<<<<<< ferrocene/main
 //@ ignore-test Please check what this test does
+||||||| 0e75b0b0e6f
+=======
+//@ ignore-musl
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 use run_make_support::{diff, run_with_args, rustc};
 

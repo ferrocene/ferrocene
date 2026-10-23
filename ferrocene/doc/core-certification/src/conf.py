@@ -10,6 +10,7 @@ extensions = [
     "ferrocene_qualification",
     "ferrocene_toctrees",
     "sphinx.ext.autosectionlabel",
+    "sphinxcontrib.mermaid",
 ]
 
 # autosectionlabel unique names settings
@@ -25,6 +26,8 @@ html_short_title = "Library Certifications"
 # linkchecker to fail due to them including *all* glossary entries, including
 # entries that were removed by autoglossary.
 html_use_index = False
+
+mermaid_version = "12.2.0"
 
 suppress_warnings = [
     "autosectionlabel.*",

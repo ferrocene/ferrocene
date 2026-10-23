@@ -19,6 +19,7 @@ Library Certifications
    safety-plan/tools
    safety-plan/failure-analysis
    safety-plan/programming-language
+   safety-plan/alloc
 
 .. toctree::
    :numbered:

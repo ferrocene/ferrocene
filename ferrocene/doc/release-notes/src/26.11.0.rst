@@ -24,7 +24,7 @@ Documentation changes
 ---------------------
 
 * Documentation now includes docs for the crates which make up ``rustc`` itself, including
-  documentation on the ``ferrocene::prevalidated`` lint (as ``rustc_lint::ferrocene``)
+  documentation on the ``ferrocene::prevalidated`` lint (as ``rustc_lint::ferrocene``).
 
 * Documentation for the certified subset of ``core`` has been folded into the standard library
   documentation. Certified functions are labelled appropriately.
@@ -41,10 +41,10 @@ Bug fixes
   would be checked by the post-monomorphization lint pass.
 
 * Raise an error if attempting to use any non-LLVM code generation backend, as only the LLVM backend
-  is qualified for use with Ferrocene
+  is qualified for use with Ferrocene.
 
 * Raise an error if using an external linker which does not support the ``-fuse-ld=...`` flag,
-  rather than silently failing
+  rather than silently failing.
 
 
 Fixed known problems

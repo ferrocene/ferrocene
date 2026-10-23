@@ -141,7 +141,7 @@ project board, they must be appropriately scoped, and (for major changes)
 they must detail acceptance criteria.
 
 The ticket shall detail which parts of Ferrocene are expected to be impacted.
-That could be for example be rustc, the core library, the qualification documentation etc.
+That could be for example rustc, the core library, the qualification documentation etc.
 Also it shall detail which tests have to be added.
 
 Large tickets must be broken down into smaller, independent tickets. A ticket

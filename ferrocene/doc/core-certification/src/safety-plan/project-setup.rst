@@ -9,7 +9,8 @@ Release cadence
 
 Due to the use of internal apis, the certified libraries are only compatible with one matching Ferrocene release. The libraries will be recertified for every Ferrocene release. That is approximately every three months.
 
-Ferrocene has distributed uncertified versions of those libraries since the first Ferrocene release.
+Ferrocene has distributed the Rust standard libraries since the first Ferrocene release, initially without a certified subset.
+Certification for a subset of the ``core`` library began in Ferrocene ``25.11.0``, and of the ``alloc`` library in Ferrocene ``26.11.0``.
 
 Release notes
 -------------

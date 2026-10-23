@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-project = "Ferrocene Library Certifications"
+project = "Ferrocene Library Certification"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
@@ -19,8 +19,8 @@ autosectionlabel_prefix_document = True
 ferrocene_id = "FLC"
 
 html_theme = "ferrocene"
-html_title = "Ferrocene Library Certifications"
-html_short_title = "Library Certifications"
+html_title = "Ferrocene Library Certification"
+html_short_title = "Library Certification"
 
 # Do not generate the index pages. We don't need them, and they cause
 # linkchecker to fail due to them including *all* glossary entries, including

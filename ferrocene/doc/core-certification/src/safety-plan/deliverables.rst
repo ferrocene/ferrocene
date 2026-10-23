@@ -10,7 +10,7 @@ Product Documentation
 ---------------------
 
 - :doc:`user-manual:index`
-- The `Library API docs <../../../index.html#library-apis>`_, which include
+- The `Certified standard library API docs <../../../index.html#library-apis>`_, which include
 
   - Requirements (the function doc-comments)
   - Software Design (the module doc-comments)
@@ -29,4 +29,4 @@ Functional Safety Documentation
 Binaries in the delivery
 ------------------------
 
-The `rust-std-<TARGET>.tar.xz` archives contain the precompiled libraries for each qualified target.
+The `rust-std-<TARGET>.tar.xz` archives contain the precompiled certified libraries for each qualified target.

@@ -10,6 +10,7 @@ use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_span::{DUMMY_SP, Span, Symbol};
 use rustc_type_ir::lang_items::{SolverAdtLangItem, SolverProjectionLangItem, SolverTraitLangItem};
+use rustc_type_ir::solve::CanonicalInputData;
 use rustc_type_ir::{
     BoundVar, CollectAndApply, DebruijnIndex, Interner, TypeFoldable, Unnormalized, VisitorResult,
     search_graph, try_visit,
@@ -204,11 +205,22 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.adt_def(adt_def_id)
     }
 
-    fn alias_const_kind_from_def_id(self, def_id: Self::DefId) -> ty::AliasConstKind<'tcx> {
+    fn alias_const_kind_from_def_id(
+        self,
+        def_id: Self::DefId,
+        inherent_args: ty::AliasConstInherentArgsKind,
+    ) -> ty::AliasConstKind<'tcx> {
         match self.def_kind(def_id) {
             DefKind::AssocConst { .. } => {
                 if let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id)) {
-                    ty::AliasConstKind::Inherent { def_id }
+                    match inherent_args {
+                        ty::AliasConstInherentArgsKind::WithSelf => {
+                            ty::AliasConstKind::InherentSelf { def_id }
+                        }
+                        ty::AliasConstInherentArgsKind::Impl => {
+                            ty::AliasConstKind::InherentImpl { def_id }
+                        }
+                    }
                 } else {
                     ty::AliasConstKind::Projection { def_id }
                 }
@@ -221,7 +233,11 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         }
     }
 
-    fn alias_term_kind_from_def_id(self, def_id: DefId) -> ty::AliasTermKind<'tcx> {
+    fn alias_term_kind_from_def_id(
+        self,
+        def_id: DefId,
+        inherent_args: ty::AliasConstInherentArgsKind,
+    ) -> ty::AliasTermKind<'tcx> {
         match self.def_kind(def_id) {
             DefKind::AssocTy => {
                 if let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id)) {
@@ -232,7 +248,14 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
             }
             DefKind::AssocConst { .. } => {
                 if let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id)) {
-                    ty::AliasTermKind::InherentConst { def_id }
+                    match inherent_args {
+                        ty::AliasConstInherentArgsKind::WithSelf => {
+                            ty::AliasTermKind::InherentConstSelf { def_id }
+                        }
+                        ty::AliasConstInherentArgsKind::Impl => {
+                            ty::AliasTermKind::InherentConstImpl { def_id }
+                        }
+                    }
                 } else {
                     ty::AliasTermKind::ProjectionConst { def_id }
                 }
@@ -271,12 +294,24 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.mk_args_from_iter(args)
     }
 
-    fn check_args_compatible(self, def_id: DefId, args: ty::GenericArgsRef<'tcx>) -> bool {
-        self.check_args_compatible(def_id, args)
+    fn check_alias_term_args_compatible(
+        self,
+        kind: ty::AliasTermKind<'tcx>,
+        args: ty::GenericArgsRef<'tcx>,
+    ) -> bool {
+        self.check_alias_term_args_compatible(kind, args)
     }
 
     fn debug_assert_args_compatible(self, def_id: DefId, args: ty::GenericArgsRef<'tcx>) {
         self.debug_assert_args_compatible(def_id, args);
+    }
+
+    fn debug_assert_alias_term_args_compatible(
+        self,
+        kind: ty::AliasTermKind<'tcx>,
+        args: ty::GenericArgsRef<'tcx>,
+    ) {
+        self.debug_assert_alias_term_args_compatible(kind, args);
     }
 
     /// Assert that the args from an `ExistentialTraitRef` or `ExistentialProjection`
@@ -663,6 +698,10 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type Probe = &'tcx inspect::Probe<TyCtxt<'tcx>>;
     fn mk_probe(self, probe: inspect::Probe<Self>) -> &'tcx inspect::Probe<TyCtxt<'tcx>> {
         self.arena.alloc(probe)
+    }
+    type CanonicalInput = CanonicalInput<'tcx>;
+    fn mk_canonical_input(self, data: CanonicalInputData<Self>) -> CanonicalInput<'tcx> {
+        self.intern_canonical_input(data)
     }
     fn evaluate_root_goal_for_proof_tree_raw(
         self,

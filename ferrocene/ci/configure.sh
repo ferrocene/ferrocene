@@ -77,6 +77,9 @@ add --disable-manage-submodules
 # In our setup we generate coverage reports in the docs job, not in the tests jobs.
 add --set ferrocene.generate-coverage-report-after-tests=false
 
+# Disable debuginfo remapping, because it causes a ton of problems
+add --set rust.remap-debuginfo=false
+
 # Set the target used for the build itself (build system, initial compiler
 # stages, etc). This depends on the OS used in CI.
 #

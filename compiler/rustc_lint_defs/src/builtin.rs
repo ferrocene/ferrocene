@@ -823,7 +823,7 @@ declare_lint! {
     ///
     /// ### Example
     ///
-    /// ```rust
+    /// ```rust,compile_fail
     /// #![deny(dead_code_pub_in_binary)]
     ///
     /// pub fn unused_pub_fn() {}
@@ -1132,9 +1132,9 @@ declare_lint! {
     ///
     /// ### Example
     ///
-    /// ```rust
+    /// ```rust,compile_fail
     /// #![deny(warnings)]
-    /// fn foo() {}
+    /// struct non_standard_name;
     /// ```
     ///
     /// {{produces}}
@@ -3657,7 +3657,7 @@ declare_lint! {
     Allow,
     "identifiers that will be parsed as a prefix in Rust 2021",
     @future_incompatible = FutureIncompatibleInfo {
-        reason: fcw!(EditionError 2021 "reserving-syntax"),
+        reason: fcw!(EditionSemanticsChange 2021 "reserving-syntax"),
     };
     crate_level_only
 }
@@ -5533,10 +5533,10 @@ declare_lint! {
     ///
     /// ```rust,ignore (requires x86)
     /// #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    /// #![feature(link_llvm_intrinsics, abi_unadjusted)]
+    /// #![feature(link_llvm_intrinsics)]
     /// #![deny(deprecated_llvm_intrinsic)]
     ///
-    /// unsafe extern "unadjusted" {
+    /// unsafe extern "llvm-intrinsic" {
     ///     #[link_name = "llvm.x86.addcarryx.u32"]
     ///     fn foo(a: u8, b: u32, c: u32, d: &mut u32) -> u8;
     /// }

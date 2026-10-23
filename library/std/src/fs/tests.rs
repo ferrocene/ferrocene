@@ -685,7 +685,7 @@ fn set_get_permissions_nofollows_symlink() {
             target_os = "netbsd",
             target_os = "dragonfly",
             target_os = "nto",
-            target_os = "qnx",
+            target_os = "qnx"
         ) => {
             assert_eq!(result.unwrap(), ());
 

@@ -3629,10 +3629,10 @@
 <core::str::BytesIsNotEmpty as core::ops::function::Fn<(&'a &'b [u8],)>>::call
 <core::str::BytesIsNotEmpty as core::ops::function::FnMut<(&'a &'b [u8],)>>::call_mut
 <core::str::BytesIsNotEmpty as core::ops::function::FnOnce<(&'a &'b [u8],)>>::call_once
-<core::str::CharEscapeDebugContinue as core::clone::Clone>::clone
-<core::str::CharEscapeDebugContinue as core::ops::function::Fn<(char,)>>::call
-<core::str::CharEscapeDebugContinue as core::ops::function::FnMut<(char,)>>::call_mut
-<core::str::CharEscapeDebugContinue as core::ops::function::FnOnce<(char,)>>::call_once
+<core::str::CharEscapeDebug as core::clone::Clone>::clone
+<core::str::CharEscapeDebug as core::ops::function::Fn<(char,)>>::call
+<core::str::CharEscapeDebug as core::ops::function::FnMut<(char,)>>::call_mut
+<core::str::CharEscapeDebug as core::ops::function::FnOnce<(char,)>>::call_once
 <core::str::CharEscapeDefault as core::clone::Clone>::clone
 <core::str::CharEscapeDefault as core::ops::function::Fn<(char,)>>::call
 <core::str::CharEscapeDefault as core::ops::function::FnMut<(char,)>>::call_mut
@@ -5872,54 +5872,80 @@ core::cmp::impls::<impl core::cmp::Ord for char>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for char>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for char>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for char>::cmp
+core::cmp::impls::<impl core::cmp::Ord for char>::max
+core::cmp::impls::<impl core::cmp::Ord for char>::min
 core::cmp::impls::<impl core::cmp::Ord for i128>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for i128>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for i128>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for i128>::cmp
+core::cmp::impls::<impl core::cmp::Ord for i128>::max
+core::cmp::impls::<impl core::cmp::Ord for i128>::min
 core::cmp::impls::<impl core::cmp::Ord for i16>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for i16>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for i16>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for i16>::cmp
+core::cmp::impls::<impl core::cmp::Ord for i16>::max
+core::cmp::impls::<impl core::cmp::Ord for i16>::min
 core::cmp::impls::<impl core::cmp::Ord for i32>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for i32>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for i32>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for i32>::cmp
+core::cmp::impls::<impl core::cmp::Ord for i32>::max
+core::cmp::impls::<impl core::cmp::Ord for i32>::min
 core::cmp::impls::<impl core::cmp::Ord for i64>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for i64>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for i64>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for i64>::cmp
+core::cmp::impls::<impl core::cmp::Ord for i64>::max
+core::cmp::impls::<impl core::cmp::Ord for i64>::min
 core::cmp::impls::<impl core::cmp::Ord for i8>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for i8>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for i8>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for i8>::cmp
+core::cmp::impls::<impl core::cmp::Ord for i8>::max
+core::cmp::impls::<impl core::cmp::Ord for i8>::min
 core::cmp::impls::<impl core::cmp::Ord for isize>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for isize>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for isize>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for isize>::cmp
+core::cmp::impls::<impl core::cmp::Ord for isize>::max
+core::cmp::impls::<impl core::cmp::Ord for isize>::min
 core::cmp::impls::<impl core::cmp::Ord for u128>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for u128>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for u128>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for u128>::cmp
+core::cmp::impls::<impl core::cmp::Ord for u128>::max
+core::cmp::impls::<impl core::cmp::Ord for u128>::min
 core::cmp::impls::<impl core::cmp::Ord for u16>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for u16>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for u16>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for u16>::cmp
+core::cmp::impls::<impl core::cmp::Ord for u16>::max
+core::cmp::impls::<impl core::cmp::Ord for u16>::min
 core::cmp::impls::<impl core::cmp::Ord for u32>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for u32>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for u32>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for u32>::cmp
+core::cmp::impls::<impl core::cmp::Ord for u32>::max
+core::cmp::impls::<impl core::cmp::Ord for u32>::min
 core::cmp::impls::<impl core::cmp::Ord for u64>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for u64>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for u64>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for u64>::cmp
+core::cmp::impls::<impl core::cmp::Ord for u64>::max
+core::cmp::impls::<impl core::cmp::Ord for u64>::min
 core::cmp::impls::<impl core::cmp::Ord for u8>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for u8>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for u8>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for u8>::cmp
+core::cmp::impls::<impl core::cmp::Ord for u8>::max
+core::cmp::impls::<impl core::cmp::Ord for u8>::min
 core::cmp::impls::<impl core::cmp::Ord for usize>::clamp::do_panic
 core::cmp::impls::<impl core::cmp::Ord for usize>::clamp::do_panic::compiletime
 core::cmp::impls::<impl core::cmp::Ord for usize>::clamp::do_panic::runtime
 core::cmp::impls::<impl core::cmp::Ord for usize>::cmp
+core::cmp::impls::<impl core::cmp::Ord for usize>::max
+core::cmp::impls::<impl core::cmp::Ord for usize>::min
 core::cmp::impls::<impl core::cmp::PartialEq for !>::eq
 core::cmp::impls::<impl core::cmp::PartialEq for ()>::eq
 core::cmp::impls::<impl core::cmp::PartialEq for ()>::ne
@@ -6748,6 +6774,8 @@ core::intrinsics::fallback::wide_mul_u128
 core::intrinsics::fallback::wide_mul_u128::from_low_high
 core::intrinsics::fallback::wide_mul_u128::scalar_mul
 core::intrinsics::fallback::wide_mul_u128::to_low_high
+core::intrinsics::integer_max
+core::intrinsics::integer_min
 core::intrinsics::is_val_statically_known
 core::intrinsics::likely
 core::intrinsics::maximum_number_nsz_f32

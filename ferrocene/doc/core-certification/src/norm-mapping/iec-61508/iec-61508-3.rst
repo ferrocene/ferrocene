@@ -8,7 +8,7 @@ IEC 61508-3
 ~
 
 1. The :doc:`core-certification:safety-plan/scope` specifies and justifies the SIL.
-2. The core library certification excludes the requirement of having an architecture.
+2. The certified library certification excludes the requirement of having an architecture.
 
    .. include:: ../../partials/simple-design.rst
 
@@ -73,7 +73,7 @@ N/A
 
 .. include:: ../../partials/simple-design.rst
 
-All functions included in the subset are certified SIL2.
+All functions in all certified libraries are deemed to be of the same SIL.
 
 7.2.2.5
 ~~~~~~~
@@ -83,7 +83,7 @@ All functions included in the subset are certified SIL2.
 7.2.2.6-9
 ~~~~~~~~~
 
-N/A; the core library is a pure software library. Hardware constraints should be taken into consideration when integrating the certified core library into a hardware environment.
+N/A; the certified libraries are pure software libraries. Hardware constraints should be taken into consideration when integrating the certified libraries into a hardware environment.
 
 7.2.2.11
 ~~~~~~~~
@@ -95,7 +95,7 @@ N/A;
 7.2.2.12-13
 ~~~~~~~~~~~
 
-N/A; the core library does not use, and therefore does not configure, any pre-existing software.
+N/A; the certified libraries do not use, and therefore do not configure, any pre-existing software.
 
 7.3.2.1-5
 ~~~~~~~~~
@@ -120,7 +120,7 @@ Covered by :ref:`safety-plan/requirements:doc-comments in the certified librarie
 7.4.2.8-11
 ~~~~~~~~~~
 
-All functions in the certified core library are deemed to be of the same SIL.
+All functions in all certified libraries are deemed to be of the same SIL.
 
 7.4.2.12-14
 ~~~~~~~~~~~

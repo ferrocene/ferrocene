@@ -28,6 +28,8 @@ Characteristics of Rust:
 - explicit type conversions (``.into`` or ``as``), except for convenience (e.g. `& &mut T` to `&T`) or method dispatch
 - all fields and methods of a data structure are private by default and must be made public explicitly
 - functions in Rust can only be called through one interface (i.e. no overloading)
+- Usage of raw pointers is discouraged and limited in safe Rust
+- Functions with many parameters are discouraged (`clippy::too_many_arguments <https://clippy.rust-lang.org/main/index.html?search=too_many#too_many_arguments>`_)
 
 Rust is well matched to the needs of the certified Rust libraries.
 
@@ -39,3 +41,8 @@ The ``core`` library does not use heap allocations which is enforced by ``core``
 The ``alloc`` library defines interfaces, data structures and functions that use heap allocations. But no allocator implementation is supplied, but must be supplied by the user.
 
 The ``std`` library supplies allocator implementations, but ``std`` is currently out of scope of the certification.
+
+Recursion limit
+---------------
+
+By default Rust has a recursion limit of 128. It can be configured with the `recursion_limit attribute <https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute>`_.

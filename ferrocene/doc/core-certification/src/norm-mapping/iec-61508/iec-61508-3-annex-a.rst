@@ -23,7 +23,7 @@ Table A.2
 8
 "
 
-N/A; the certified libraries does not use external software elements.
+N/A; the certified libraries do not use external software elements.
 
 11a
 """

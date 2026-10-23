@@ -57,6 +57,6 @@ See 5.4.2.
 5.4.3
 -----
 
-The Rust project has extensive measures (lints and tests) in place to assure quality and consistency of the codebase. The certified core library uses the same implicit standards as are ensured in the upstream codebase, to minimize divergence. Increased divergence from upstream leads to a higher maintenance burden and is a source of potential bugs.
+The Rust project has extensive measures (lints and tests) in place to assure quality and consistency of the codebase. The certified libraries use the same implicit standards as are ensured in the upstream codebase, to minimize divergence. Increased divergence from upstream leads to a higher maintenance burden and is a source of potential bugs.
 
-As such, the certified core library does not have a coding standard.
+As such, the certified libraries does not have a coding standard.

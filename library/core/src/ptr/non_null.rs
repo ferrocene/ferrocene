@@ -101,6 +101,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn without_provenance(addr: NonZero<usize>) -> Self {
         // SAFETY: we know `addr` is non-zero and all nonzero integers are valid raw pointers.
         unsafe { transmute(addr) }
@@ -279,6 +280,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -1115,6 +1117,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[stable(feature = "non_null_convenience", since = "1.80.0")]
     #[rustc_const_stable(feature = "const_ptr_write", since = "1.83.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn write_bytes(self, val: u8, count: usize)
     where
         T: Sized,
@@ -1362,6 +1365,7 @@ impl<T> NonNull<T> {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_cast_slice", issue = "149103")]
+    #[ferrocene::prevalidated]
     pub const fn cast_slice(self, len: usize) -> NonNull<[T]> {
         NonNull::slice_from_raw_parts(self, len)
     }
@@ -1405,6 +1409,7 @@ impl<T> NonNull<[T]> {
     #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> Self {
         // SAFETY: `data` is a `NonNull` pointer which is necessarily non-null
         unsafe { Self::new_unchecked(data.as_ptr().cast_slice(len)) }
@@ -1465,6 +1470,7 @@ impl<T> NonNull<[T]> {
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
+    #[ferrocene::prevalidated]
     pub const fn as_non_null_ptr(self) -> NonNull<T> {
         self.cast()
     }
@@ -1484,6 +1490,7 @@ impl<T> NonNull<[T]> {
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
     #[rustc_never_returns_null_ptr]
+    #[ferrocene::prevalidated]
     pub const fn as_mut_ptr(self) -> *mut T {
         self.as_non_null_ptr().as_ptr()
     }

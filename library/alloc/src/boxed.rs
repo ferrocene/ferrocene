@@ -312,6 +312,7 @@ pub struct Box<
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(no_global_oom_handling))]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+#[ferrocene::prevalidated]
 const fn box_new_uninit(layout: Layout) -> *mut u8 {
     if layout.size() == 0 {
         return layout.dangling_ptr().as_ptr();
@@ -355,6 +356,7 @@ impl<T> Box<T> {
     #[must_use]
     #[rustc_diagnostic_item = "box_new"]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[ferrocene::prevalidated]
     pub fn new(x: T) -> Self {
         // This is `Box::new_uninit` but inlined to avoid build time regressions.
         let ptr = box_new_uninit(<T as SizedTypeProperties>::LAYOUT) as *mut T;

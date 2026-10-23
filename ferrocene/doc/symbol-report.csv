@@ -1437,6 +1437,7 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_ref
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice
 <[u8] as core::slice::specialize::SpecFill<u8>>::spec_fill
+<alloc::alloc::Global as core::alloc::Allocator>::allocate
 <bool as core::default::Default>::default
 <bool as core::fmt::Debug>::fmt
 <bool as core::fmt::Display>::fmt
@@ -5655,16 +5656,26 @@
 <usize as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut::precondition_check
 <usize as core::slice::index::SliceIndex<[T]>>::index
 <usize as core::slice::index::SliceIndex<[T]>>::index_mut
+alloc::alloc::Global::alloc_impl
+alloc::alloc::Global::alloc_impl_const
+alloc::alloc::Global::alloc_impl_runtime
 alloc::alloc::alloc
+alloc::alloc::alloc_zeroed
 alloc::alloc::dealloc
 alloc::alloc::dealloc_nonnull
+alloc::alloc::handle_alloc_error
+alloc::alloc::handle_alloc_error::ct_error
+alloc::alloc::handle_alloc_error::rt_error
 alloc::alloc::realloc
 alloc::alloc::realloc_nonnull
+alloc::boxed::Box::<T>::new
+alloc::boxed::box_new_uninit
 alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::set_len::precondition_check
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::alignment
+core::alloc::layout::Layout::dangling_ptr
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
 core::alloc::layout::Layout::from_size_alignment_unchecked
@@ -6769,6 +6780,7 @@ core::intrinsics::assume
 core::intrinsics::carrying_mul_add
 core::intrinsics::carryless_mul
 core::intrinsics::cold_path
+core::intrinsics::const_allocate
 core::intrinsics::const_make_global
 core::intrinsics::contract_check_ensures::compiletime
 core::intrinsics::contract_check_ensures::runtime
@@ -8328,14 +8340,21 @@ core::ptr::non_null::NonNull::<T>::as_ptr
 core::ptr::non_null::NonNull::<T>::as_ref
 core::ptr::non_null::NonNull::<T>::cast
 core::ptr::non_null::NonNull::<T>::cast_array
+core::ptr::non_null::NonNull::<T>::cast_slice
 core::ptr::non_null::NonNull::<T>::from_mut
 core::ptr::non_null::NonNull::<T>::from_ref
+core::ptr::non_null::NonNull::<T>::new
 core::ptr::non_null::NonNull::<T>::new_unchecked
 core::ptr::non_null::NonNull::<T>::new_unchecked::precondition_check
 core::ptr::non_null::NonNull::<T>::offset
 core::ptr::non_null::NonNull::<T>::offset_from_unsigned
 core::ptr::non_null::NonNull::<T>::read
 core::ptr::non_null::NonNull::<T>::sub
+core::ptr::non_null::NonNull::<T>::without_provenance
+core::ptr::non_null::NonNull::<T>::write_bytes
+core::ptr::non_null::NonNull::<[T]>::as_mut_ptr
+core::ptr::non_null::NonNull::<[T]>::as_non_null_ptr
+core::ptr::non_null::NonNull::<[T]>::slice_from_raw_parts
 core::ptr::null
 core::ptr::null_mut
 core::ptr::read

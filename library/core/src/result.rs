@@ -1912,24 +1912,17 @@ impl<T, E> Result<Result<T, E>, E> {
 #[rustc_no_mir_inline]
 #[cold]
 #[track_caller]
-<<<<<<< ferrocene/main
 #[ferrocene::prevalidated]
-fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
-    panic!("{msg}: {error:?}");
-||||||| 0e75b0b0e6f
-fn unwrap_failed(msg: &str, error: &dyn fmt::Debug) -> ! {
-    panic!("{msg}: {error:?}");
-=======
 fn unwrap_failed<T: fmt::Debug>(msg: &str, error: T) -> ! {
     // Do the actual formatting with a `&dyn Debug` to reduce code size.
     #[inline(never)]
     #[cold]
     #[track_caller]
+    #[ferrocene::prevalidated]
     fn unwrap_failed_inner(msg: &str, error: &dyn fmt::Debug) -> ! {
         panic!("{msg}: {error:?}")
     }
     unwrap_failed_inner(msg, &error)
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 // This is a separate function to avoid constructing a `dyn Debug`

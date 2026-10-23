@@ -3623,6 +3623,15 @@ fn prepare_cargo_test(
         cargo.arg("-p").arg(krate);
     }
 
+    // Ferrocene change: moved here because the workaround for rust-lang/cargo#17529
+    // must come before `cargo.arg("--")`
+    add_cargo_target_runner(&mut cargo, target, builder);
+
+    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
+    if !builder.config.verbose_tests {
+        cargo.arg("--quiet");
+    }
+
     // The tests are going to run with the *target* libraries, so we need to
     // ensure that those libraries show up in the LD_LIBRARY_PATH equivalent.
     //
@@ -3636,8 +3645,6 @@ fn prepare_cargo_test(
         dylib_paths.push(builder.sysroot_target_libdir(compiler, target));
         helpers::add_dylib_path(dylib_paths, &mut cargo);
     }
-
-    add_cargo_target_runner(&mut cargo, target, builder);
 
     cargo
 }
@@ -3660,11 +3667,6 @@ fn add_cargo_target_runner(
 
         // Workaround for rust-lang/cargo#17529
         cargo.arg("--config").arg(format!("target.\"{}\".runner = {:?}", target.triple, tool));
-    }
-
-    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
-    if !builder.config.verbose_tests {
-        cargo.arg("--quiet");
     }
 }
 

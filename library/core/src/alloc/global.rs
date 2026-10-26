@@ -258,6 +258,7 @@ pub unsafe trait GlobalAlloc {
     ///
     /// [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html
     #[stable(feature = "global_alloc", since = "1.28.0")]
+    #[ferrocene::prevalidated]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
         let size = layout.size();
         // SAFETY: the safety contract for `alloc` must be upheld by the caller.
@@ -328,6 +329,7 @@ pub unsafe trait GlobalAlloc {
     ///
     /// [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html
     #[stable(feature = "global_alloc", since = "1.28.0")]
+    #[ferrocene::prevalidated]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
         let alignment = layout.alignment();
         // SAFETY: the caller must ensure that the `new_size` does not overflow

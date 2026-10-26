@@ -1010,3 +1010,51 @@ fn test_num_from_ascii_bytes_radix() {
     assert_eq!(i128::from_ascii_bytes_radix(b"A", 16), Ok(10));
     assert!(i128::from_ascii_bytes_radix(b"1 ", 10).is_err());
 }
+
+// Test `core::num::<impl T>::strict_pow` for unsigned integer types
+#[test]
+fn test_num_unsigned_strict_pow_success() {
+    assert!(u8::strict_pow(2, 7) == 128u8);
+    assert!(u16::strict_pow(2, 15) == 32768u16);
+    assert!(u32::strict_pow(2, 31) == 2147483648u32);
+    assert!(u64::strict_pow(2, 63) == 9223372036854775808u64);
+    assert!(u128::strict_pow(2, 127) == 170141183460469231731687303715884105728u128);
+
+    // Note: Ferrocene does not support platforms with 16-bit `usize`
+
+    #[cfg(target_pointer_width = "32")]
+    assert!(usize::strict_pow(2, 31) == 2147483648usize);
+
+    #[cfg(target_pointer_width = "64")]
+    assert!(usize::strict_pow(2, 63) == 9223372036854775808usize);
+}
+
+macro_rules! test_num_unsigned_strict_pow_overflow {
+    ($($T:ty => ($fn:ident, $power:expr),)*) => {
+        $(
+            #[test]
+            #[should_panic = "attempt to exponentiate with overflow"]
+            fn $fn() {
+                let _ = <$T>::strict_pow(2, $power);
+            }
+        )*
+    };
+}
+
+test_num_unsigned_strict_pow_overflow! {
+    u8 => (test_num_unsigned_strict_pow_overflow_u8, 8),
+    u16 => (test_num_unsigned_strict_pow_overflow_u16, 16),
+    u32 => (test_num_unsigned_strict_pow_overflow_u32, 32),
+    u64 => (test_num_unsigned_strict_pow_overflow_u64, 64),
+    u128 => (test_num_unsigned_strict_pow_overflow_u128, 128),
+}
+
+#[cfg(target_pointer_width = "32")]
+test_num_unsigned_strict_pow_overflow! {
+    usize => (test_num_unsigned_strict_pow_overflow_usize, 32),
+}
+
+#[cfg(target_pointer_width = "64")]
+test_num_unsigned_strict_pow_overflow! {
+    usize => (test_num_unsigned_strict_pow_overflow_usize, 64),
+}

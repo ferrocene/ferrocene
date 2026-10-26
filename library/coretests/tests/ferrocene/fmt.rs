@@ -332,7 +332,10 @@ fn test_builder_debug_set_entry_with() {
 // * core::fmt::builders::DebugMap::<'a, 'b>::value_with
 #[test]
 fn test_builder_debug_map() {
-    struct Foo { a: usize, b: usize }
+    struct Foo {
+        a: usize,
+        b: usize,
+    }
 
     impl fmt::Debug for Foo {
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {

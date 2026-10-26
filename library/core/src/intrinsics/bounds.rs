@@ -58,19 +58,19 @@ unsafe impl FloatPrimitive for f16 {
     const SIGN_MASK: Self::UInt = f16::SIGN_MASK;
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f16::<impl f16>::to_bits` with no other conversions. \
-        Since `core::f16::<impl f16>::to_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f16::<impl f16>::to_bits` with no other conversions. \
+        Since `core::f16::<impl f16>::to_bits` is covered, this function can be considered validated."
+    )]
     fn to_bits(self) -> Self::UInt {
         f16::to_bits(self)
     }
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f16::<impl f16>::from_bits` with no other conversions. \
-        Since `core::f16::<impl f16>::from_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f16::<impl f16>::from_bits` with no other conversions. \
+        Since `core::f16::<impl f16>::from_bits` is covered, this function can be considered validated."
+    )]
     fn from_bits(bits: Self::UInt) -> Self {
         f16::from_bits(bits)
     }
@@ -81,19 +81,19 @@ unsafe impl FloatPrimitive for f32 {
     const SIGN_MASK: Self::UInt = f32::SIGN_MASK;
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f32::<impl f32>::to_bits` with no other conversions. \
-        Since `core::f32::<impl f32>::to_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f32::<impl f32>::to_bits` with no other conversions. \
+        Since `core::f32::<impl f32>::to_bits` is covered, this function can be considered validated."
+    )]
     fn to_bits(self) -> Self::UInt {
         f32::to_bits(self)
     }
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f32::<impl f32>::from_bits` with no other conversions. \
-        Since `core::f32::<impl f32>::from_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f32::<impl f32>::from_bits` with no other conversions. \
+        Since `core::f32::<impl f32>::from_bits` is covered, this function can be considered validated."
+    )]
     fn from_bits(bits: Self::UInt) -> Self {
         f32::from_bits(bits)
     }
@@ -104,19 +104,19 @@ unsafe impl FloatPrimitive for f64 {
     const SIGN_MASK: Self::UInt = f64::SIGN_MASK;
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f64::<impl f64>::to_bits` with no other conversions. \
-        Since `core::f64::<impl f64>::to_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f64::<impl f64>::to_bits` with no other conversions. \
+        Since `core::f64::<impl f64>::to_bits` is covered, this function can be considered validated."
+    )]
     fn to_bits(self) -> Self::UInt {
         f64::to_bits(self)
     }
     #[inline]
     #[ferrocene::prevalidated]
-    #[ferrocene::annotation("\
-        This function directly calls `core::f64::<impl f64>::from_bits` with no other conversions. \
-        Since `core::f64::<impl f64>::from_bits` is covered, this function can be considered validated. \
-    ")]
+    #[ferrocene::annotation(
+        "This function directly calls `core::f64::<impl f64>::from_bits` with no other conversions. \
+        Since `core::f64::<impl f64>::from_bits` is covered, this function can be considered validated."
+    )]
     fn from_bits(bits: Self::UInt) -> Self {
         f64::from_bits(bits)
     }

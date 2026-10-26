@@ -7,6 +7,13 @@ Ferrocene 26.11.0
 New features
 ------------
 
+* Ferrocene is now certified for railway usage, under the EN 50716 standard
+
+* The certified library subset has been expanded to include a subset of ``alloc``, allowing the use
+  of dynamic memory allocation in certified applications. Users must bring their own certified
+  allocator, and only the basic ``alloc``, ``realloc`` and ``dealloc`` functions are supported in
+  this release.
+
 * The ``[ferrocene::prevalidated]`` attribute can now be applied to modules, traits, and ``impl``
   blocks. This marks all contained functions as validated, avoiding the need to annotate each
   function individually.
@@ -20,31 +27,41 @@ New features
   * :target-with-tuple:`thumbv8m.main-none-eabihf`
 
 
-Documentation changes
----------------------
+Changes
+-------
 
 * Documentation now includes docs for the crates which make up ``rustc`` itself, including
   documentation on the ``ferrocene::prevalidated`` lint (as ``rustc_lint::ferrocene``).
 
 * Documentation for the certified subset of ``core`` has been folded into the standard library
-  documentation. Certified functions are labelled appropriately.
+  documentation. Now Ferrocene provides a single, complete copy of the Rust standard library
+  documentation, with certified functions labelled inline.
+
+* ``Atomic::<T>::fetch_update`` has been renamed to ``Atomic::<T>::try_update`` by upstream Rust,
+  with the old name being deprecated as of Rust 1.99.0. Accordingly, ``fetch_update`` has been
+  removed from the certified subset. There is no semantic change, so users can simply replace
+  any calls to ``fetch_update`` with ``try_update``.
 
 
 Bug fixes
 ---------
 
 * Fixed a diagnostics issue where calls to private, non-generic functions within libraries were not
-  checked by the pre-monomorphization pass of the ``[ferrocene::unvalidated]`` lint.
+  checked by the early (pre-monomorphization) pass of the ``[ferrocene::unvalidated]`` lint
+  while compiling the library itself.
 
-  This was not a safety issue; any diagnostics would simply be delayed until compiling an
-  application which (transitively) depends on the library in question, at which point the calls
-  would be checked by the post-monomorphization lint pass.
+  This was not a safety issue; any diagnostics were simply delayed until compiling an application
+  which (transitively) depends on the library in question, at which point the calls would be checked
+  by the late (post-monomorphization) lint pass.
 
-* Raise an error if attempting to use any non-LLVM code generation backend, as only the LLVM backend
-  is qualified for use with Ferrocene.
+* Raise errors in two situations which could potentially lead to a non-qualified compiler
+  configuration:
 
-* Raise an error if using an external linker which does not support the ``-fuse-ld=...`` flag,
-  rather than silently failing.
+  * Attempting to use any code generation backend other than LLVM; only the LLVM backend is
+    qualified for use with Ferrocene
+
+  * Using an external linker which does not support the ``-fuse-ld=...`` flag; previously this
+    flag was silently dropped if the linker did not support it.
 
 
 Fixed known problems

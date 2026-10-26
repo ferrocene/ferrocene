@@ -65,7 +65,7 @@ def handle_merge_conflict(pr_name, target_branch):
     )
     unmerged = set(file.split()[1] for file in unmerged)
 
-    print(f"\nERROR: Encountered a merge conflict backporting {pr_name}")
+    print(f"\nERROR: Encountered a merge conflict porting {pr_name}")
 
     if unmerged_solveable:
         print("\nINFO: attempting to auto-solve conflicts with mergiraf")
@@ -117,6 +117,12 @@ def main():
         help="Commit mergiraf changes in a separate commit, rather than"
         " keeping them around for inspection",
     )
+    parser.add_argument(
+        "--forward",
+        action="store_true",
+        help="Perform a forwardport instead of a backport. The logic is the same, this"
+        " only changes the commit message",
+    )
     parser.add_argument("pr_number", help="The PR to backport")
     args = parser.parse_args()
     global VERBOSE
@@ -126,12 +132,16 @@ def main():
     if args.force:
         FORCE = True
 
+    forward = args.forward
     pr_number = args.pr_number
     if args.rust:
         repository = RUST_REPOSITORY
     else:
         repository = DEFAULT_REPOSITORY
     pr_name = f"{repository}#{pr_number}"
+
+    direction = "forward" if forward else "back"
+    directionCap = "Forward" if forward else "Back"
 
     if git_output("diff", "--name-only", "--cached") != "":
         print(
@@ -176,14 +186,14 @@ def main():
     formatted_commits = " ".join(commits)
 
     commit_message = f"""
-Backport {pr_name}
+{directionCap}port {pr_name}
 
 {metadata['title']}
 
 {metadata['body']}{formatted_coauthors}
 
-Ferrocene-backport-of: {pr_name}
-Ferrocene-backported-commits: {formatted_commits}"""
+Ferrocene-{direction}port-of: {pr_name}
+Ferrocene-{direction}ported-commits: {formatted_commits}"""
 
     # Save where we currently are.
     # We can't unconditionally use `rev-parse HEAD` because that won't update the target
@@ -192,7 +202,9 @@ Ferrocene-backported-commits: {formatted_commits}"""
     if target_branch == "HEAD":
         target_branch = git_output("rev-parse", "HEAD").rstrip()
 
-    print(f"INFO: backporting {pr_name} to {target_branch} (please do not CTRL-C)\n")
+    print(
+        f"INFO: {direction}porting {pr_name} to {target_branch} (please do not CTRL-C)\n"
+    )
 
     # Avoid modifying the current branch ref when we run `git reset`.
     git("checkout", "--quiet", "--detach", "HEAD")

@@ -59,9 +59,6 @@ expression: test --skip=coverage-map
 [Test] test::Pretty
     targets: [x86_64-unknown-linux-gnu]
     - Suite(tests/pretty)
-[Test] test::CodegenCranelift
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({compiler/rustc_codegen_cranelift})
 [Test] test::CodegenGCC
     targets: [x86_64-unknown-linux-gnu]
     - Set({compiler/rustc_codegen_gcc})

@@ -599,14 +599,14 @@ mod snapshot {
     #[test]
     fn build_compiler_codegen_backend() {
         let ctx = TestCtx::new();
+        // Ferrocene modification: We do not support the cranelift backend, so do not build it
         insta::assert_snapshot!(
             ctx
                 .config("build")
-                .args(&["--set", "rust.codegen-backends=['llvm', 'cranelift']"])
+                .args(&["--set", "rust.codegen-backends=['llvm']"])
                 .render_steps(), @r"
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
-        [build] rustc 0 <host> -> rustc_codegen_cranelift 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [build] rustdoc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
@@ -1610,6 +1610,8 @@ mod snapshot {
     /// Enable dist cranelift tarball by default with `x dist` if cranelift is enabled in
     /// `rust.codegen-backends`.
     #[test]
+    // Ferrocene modification: We do not support the cranelift backend, so this should error out
+    #[should_panic]
     fn dist_cranelift_by_default() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
@@ -1809,7 +1811,6 @@ mod snapshot {
         [check] rustc 1 <host> -> rustc 2 <target1> (78 crates)
         [check] rustc 1 <host> -> rustc 2 <target1>
         [check] rustc 1 <host> -> Rustdoc 2 <target1>
-        [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <target1>
         [check] rustc 1 <host> -> Clippy 2 <target1>
         [check] rustc 1 <host> -> Miri 2 <target1>
         [check] rustc 1 <host> -> CargoMiri 2 <target1>
@@ -1963,6 +1964,8 @@ mod snapshot {
     }
 
     #[test]
+    // Ferrocene modification: We do not support the cranelift backend, so this should error out
+    #[should_panic]
     fn check_codegen() {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(

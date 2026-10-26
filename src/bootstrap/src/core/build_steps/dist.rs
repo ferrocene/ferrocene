@@ -1674,15 +1674,10 @@ impl CommandLineStep for CraneliftCodegenBackend {
         run.alias("rustc_codegen_cranelift")
     }
 
-    fn is_default_step(builder: &Builder<'_>) -> bool {
-        // We only want to build the cranelift backend in `x dist` if the backend was enabled
-        // in rust.codegen-backends.
-        // Sadly, we don't have access to the actual target for which we're disting clif here..
-        // So we just use the host target.
-        builder
-            .config
-            .enabled_codegen_backends(builder.host_target)
-            .contains(&CodegenBackendKind::Cranelift)
+    fn is_default_step(_builder: &Builder<'_>) -> bool {
+        // Ferrocene modification: We do not support the cranelift backend, so do not
+        // build it by default
+        false
     }
 
     fn make_run(run: RunConfig<'_>) {

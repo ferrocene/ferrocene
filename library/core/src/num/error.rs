@@ -22,6 +22,9 @@ impl TryFromIntError {
 impl fmt::Display for TryFromIntError {
     #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[ferrocene::annotation(
+            "This line cannot be covered because it is unreachable. Other variants are reached."
+        )]
         match self.0 {
             IntErrorKind::Empty | IntErrorKind::InvalidDigit => unreachable!(),
             IntErrorKind::PosOverflow => "number too large to fit in target type",

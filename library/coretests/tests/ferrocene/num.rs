@@ -202,6 +202,10 @@ macro_rules! test_uint_checked_pow {
                 assert_eq!(<$T>::checked_pow(2, 5), Some(32));
                 assert_eq!(<$T>::checked_pow(0, 0), Some(1));
                 assert_eq!(<$T>::checked_pow(<$T>::MAX, 2), None);
+                // Black box required here
+                let base = std::hint::black_box(3 as $T);
+                let exp = std::hint::black_box(5u32);
+                assert_eq!(base.checked_pow(exp), Some(243 as $T));
             }
         )*
     };
@@ -436,8 +440,32 @@ fn test_parse_int_error_zero_display_fmt() {
 // covers `<core::num::error::TryFromIntError as core::fmt::Display>::fmt`
 #[test]
 #[should_panic = "number too large to fit in target type"]
-fn test_try_from_int_error_display_fmt() {
+fn test_try_from_int_error_display_fmt_pos_overflow() {
     if let Err(e) = u8::try_from(256u16) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number too small to fit in target type"]
+fn test_try_from_int_error_display_fmt_neg_overflow() {
+    if let Err(e) = u8::try_from(i8::MIN) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number would be zero for non-zero type"]
+fn test_try_from_int_error_display_fmt_zero() {
+    if let Err(e) = core::num::NonZero::<u32>::try_from(0) {
+        panic!("{e}")
+    }
+}
+
+#[test]
+#[should_panic = "number is not a power of two"]
+fn test_try_from_int_error_display_fmt_not_power_of_two() {
+    if let Err(e) = core::mem::Alignment::try_from(7) {
         panic!("{e}")
     }
 }
@@ -937,4 +965,96 @@ fn test_digits_to_exp_str_without_actual_fraction() {
         formatted.parts,
         &[Part::Copy(b"1"), Part::Copy(b"."), Part::Zero(1), Part::Copy(b"e"), Part::Num(0),],
     );
+}
+
+// Cover
+//  * core::num::<impl i8>::from_ascii_bytes_radix
+//  * core::num::<impl i16>::from_ascii_bytes_radix
+//  * core::num::<impl i32>::from_ascii_bytes_radix
+//  * core::num::<impl i64>::from_ascii_bytes_radix
+//  * core::num::<impl i128>::from_ascii_bytes_radix
+//  * core::num::<impl u8>::from_ascii_bytes_radix
+//  * core::num::<impl u16>::from_ascii_bytes_radix
+//  * core::num::<impl u32>::from_ascii_bytes_radix
+//  * core::num::<impl u64>::from_ascii_bytes_radix
+//  * core::num::<impl u128>::from_ascii_bytes_radix
+#[test]
+fn test_num_from_ascii_bytes_radix() {
+    assert_eq!(u8::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u8::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u16::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u16::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u32::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u32::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u64::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u64::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(u128::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(u128::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i8::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i8::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i16::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i16::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i32::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i32::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i64::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i64::from_ascii_bytes_radix(b"1 ", 10).is_err());
+
+    assert_eq!(i128::from_ascii_bytes_radix(b"A", 16), Ok(10));
+    assert!(i128::from_ascii_bytes_radix(b"1 ", 10).is_err());
+}
+
+// Test `core::num::<impl T>::strict_pow` for unsigned integer types
+#[test]
+fn test_num_unsigned_strict_pow_success() {
+    assert!(u8::strict_pow(2, 7) == 128u8);
+    assert!(u16::strict_pow(2, 15) == 32768u16);
+    assert!(u32::strict_pow(2, 31) == 2147483648u32);
+    assert!(u64::strict_pow(2, 63) == 9223372036854775808u64);
+    assert!(u128::strict_pow(2, 127) == 170141183460469231731687303715884105728u128);
+
+    // Note: Ferrocene does not support platforms with 16-bit `usize`
+
+    #[cfg(target_pointer_width = "32")]
+    assert!(usize::strict_pow(2, 31) == 2147483648usize);
+
+    #[cfg(target_pointer_width = "64")]
+    assert!(usize::strict_pow(2, 63) == 9223372036854775808usize);
+}
+
+macro_rules! test_num_unsigned_strict_pow_overflow {
+    ($($T:ty => ($fn:ident, $power:expr),)*) => {
+        $(
+            #[test]
+            #[should_panic = "attempt to exponentiate with overflow"]
+            fn $fn() {
+                let _ = <$T>::strict_pow(2, $power);
+            }
+        )*
+    };
+}
+
+test_num_unsigned_strict_pow_overflow! {
+    u8 => (test_num_unsigned_strict_pow_overflow_u8, 8),
+    u16 => (test_num_unsigned_strict_pow_overflow_u16, 16),
+    u32 => (test_num_unsigned_strict_pow_overflow_u32, 32),
+    u64 => (test_num_unsigned_strict_pow_overflow_u64, 64),
+    u128 => (test_num_unsigned_strict_pow_overflow_u128, 128),
+}
+
+#[cfg(target_pointer_width = "32")]
+test_num_unsigned_strict_pow_overflow! {
+    usize => (test_num_unsigned_strict_pow_overflow_usize, 32),
+}
+
+#[cfg(target_pointer_width = "64")]
+test_num_unsigned_strict_pow_overflow! {
+    usize => (test_num_unsigned_strict_pow_overflow_usize, 64),
 }

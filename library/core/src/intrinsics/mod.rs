@@ -3747,6 +3747,11 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
 #[rustc_do_not_const_check] // use built-in impl to avoid const-checks in the fallback body.
+#[ferrocene::prevalidated]
+#[ferrocene::annotation(
+    "The LLVM backend emits `llvm.fabs` instead of this function, thus cannot be directly covered. \
+    A `test_fabs` in `library/coretests/tests/ferrocene/intrinsics.rs` exercises the actual function."
+)]
 pub const fn fabs<T: bounds::FloatPrimitive>(x: T) -> T {
     T::from_bits(x.to_bits() & !T::SIGN_MASK)
 }
@@ -3771,6 +3776,11 @@ pub const fn copysignf16(x: f16, y: f16) -> f16 {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[ferrocene::prevalidated]
+#[ferrocene::annotation(
+    "On many platforms, the LLVM backend emits `llvm.copysign` instead of using the fallback \
+    implementation in Rust, so the fallback cannot be covered. The `copysign` tests in \
+    `library/coretests/tests/num/floats.rs` check that this still gives the correct results."
+)]
 pub const fn copysignf32(x: f32, y: f32) -> f32 {
     f32::from_bits((x.to_bits() & !f32::SIGN_MASK) | (y.to_bits() & f32::SIGN_MASK))
 }
@@ -3783,6 +3793,11 @@ pub const fn copysignf32(x: f32, y: f32) -> f32 {
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[ferrocene::prevalidated]
+#[ferrocene::annotation(
+    "On many platforms, the LLVM backend emits `llvm.copysign` instead of using the fallback \
+    implementation in Rust, so the fallback cannot be covered. The `copysign` tests in \
+    `library/coretests/tests/num/floats.rs` check that this still gives the correct results."
+)]
 pub const fn copysignf64(x: f64, y: f64) -> f64 {
     f64::from_bits((x.to_bits() & !f64::SIGN_MASK) | (y.to_bits() & f64::SIGN_MASK))
 }

@@ -5668,6 +5668,8 @@ alloc::alloc::realloc_nonnull
 alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::set_len::precondition_check
+core::alloc::global::GlobalAlloc::alloc_zeroed
+core::alloc::global::GlobalAlloc::realloc
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::alignment
 core::alloc::layout::Layout::from_size_align_unchecked

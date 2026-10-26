@@ -327,6 +327,39 @@ fn test_builder_debug_set_entry_with() {
     assert_eq!(format!("{:?}", Foo(vec![1, 2, 3])), "{new entry: [1, 2, 3]}");
 }
 
+// Covers:
+// * core::fmt::builders::DebugMap::<'a, 'b>::key_with
+// * core::fmt::builders::DebugMap::<'a, 'b>::value_with
+#[test]
+fn test_builder_debug_map() {
+    struct Foo { a: usize, b: usize }
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_map()
+                .key_with(|f| write!(f, "\'hello: {:?}\'", self.a))
+                .value_with(|f| write!(f, "\'there: {:?}\'", self.b))
+                .finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo { a: 1, b: 2 }), "{\'hello: 1\': \'there: 2\'}");
+}
+
+// Covers `core::fmt::builders::DebugTuple::<'a, 'b>::field_with`
+#[test]
+fn test_builder_debug_tuple_field_with() {
+    struct Foo(u32);
+
+    impl fmt::Debug for Foo {
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.debug_tuple("Foo").field_with(|f| write!(f, "hello: {:?}", self.0)).finish()
+        }
+    }
+
+    assert_eq!(format!("{:?}", Foo(1)), "Foo(hello: 1)");
+}
+
 // Covers `core::fmt::builders::from_fn`
 #[test]
 fn test_builder_from_fn() {

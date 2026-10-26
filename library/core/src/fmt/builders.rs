@@ -76,6 +76,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0.take() {
             Some(value_fmt) => value_fmt(f),
+            #[ferrocene::annotation("Cannot be covered since it is not reachable from public API.")]
             None => panic!("formatting closure called more than once"),
         }
     }

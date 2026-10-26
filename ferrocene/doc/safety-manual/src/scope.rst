@@ -25,45 +25,45 @@ as well as environments listed in target specific documentation:
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`armv7r-none-eabihf`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabi`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv7em-none-eabihf`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv8m.main-none-eabi`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`thumbv8m.main-none-eabihf`
-     - ``core``
-     - ``alloc``
+     - ``core``, ``alloc``
+     -
      -
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
+     - ``core``, ``alloc``
+     - ``std``, ``test``
      - ``proc_macro``
 
 

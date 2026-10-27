@@ -24,6 +24,6 @@ This qualification is restricted to the following environment:
 
    * - :target:`aarch64-unknown-linux-gnu`
      - :target:`aarch64-rhivos2-linux-gnu`
-     - ``core``
-     - ``alloc``, ``std``, ``test``
+     - ``core``, ``alloc``
+     - ``std``, ``test``
      - ``proc_macro``

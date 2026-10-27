@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Core Library Certification
-==========================
+Library Certifications
+======================
 
 .. toctree::
    :numbered:
@@ -19,6 +19,7 @@ Core Library Certification
    safety-plan/tools
    safety-plan/failure-analysis
    safety-plan/programming-language
+   safety-plan/alloc
 
 .. toctree::
    :numbered:

@@ -12,6 +12,7 @@ dependencies = [
     "myst_parser ~= 4.0",
     "pyyaml ~= 6.0",
     "semver ~= 3.0",
+    "sphinxcontrib-mermaid>=2.1.1",
 
     # Internal dependencies:
     "ferrocene-sphinx-shared-resources",

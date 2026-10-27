@@ -27,13 +27,13 @@ There are also two variants of the standard library available:
   ``proc_macro`` built-in crates.
 
 .. note::
-  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core``
+  ``alloc``, ``std``, ``test``, and ``proc_macro``, and uncertified parts of ``core`` and ``alloc``
   are evaluated and tested within the scope of Ferrocene qualification for
   compiler use only. The use of these libraries by end-use code is outside the scope of the
   current Ferrocene qualification.
   It is the end-user responsibility to certify these libraries if they are used in their code.
 
-  A subset of ``core`` is certified against IEC 61508 (SIL 2) and ISO 26262 (ASIL B) on qualified targets;
+  A subset of ``core`` and ``alloc`` is certified against IEC 61508 (SIL 2) and ISO 26262 (ASIL B) on qualified targets;
   see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
 
 A summary of the assurances and support offered by target levels is summarized immediately below.

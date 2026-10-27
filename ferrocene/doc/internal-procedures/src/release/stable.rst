@@ -158,6 +158,8 @@ In the command above, ``path/to/the/component-report.pdf`` is the local path to 
 downloaded file, ``YYYY-MM-DD`` is the current date (**not** the version
 number), and ``YY.MM.N`` is the version number.
 
+.. FIXME(urhengulas): Rename ``core-technical-report`` to ``certified-libs-technical-report``
+
 Once the files are uploaded, open a new PR targeting the ``release/1.NN`` branch
 changing ``ferrocene/ci/configure.sh``. In that file, find the lines setting the
 ``compiler-technical-report-url`` and ``core-technical-report`` options, if

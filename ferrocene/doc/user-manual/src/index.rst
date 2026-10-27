@@ -46,7 +46,7 @@ Ferrocene User Manual
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: core library
+   :caption: certified libraries
 
    core/index
    core/requirements

@@ -1,0 +1,51 @@
+%% SPDX-License-Identifier: MIT OR Apache-2.0
+%% SPDX-FileCopyrightText: The Ferrocene Developers
+
+flowchart TD
+    subgraph core["mod core::alloc"]
+        A[trait Allocator*]
+        B[trait GlobalAllocator*]
+        C[trait GlobalAlloc]
+        D[trait StaticAllocator*]
+    end
+
+    subgraph alloc
+        E[struct alloc::Global]
+        F["fn alloc::{alloc, dealloc, realloc}"]
+    end
+
+    subgraph std
+        G[struct std::alloc::System]
+        H["mod std::sys::alloc::{alloc, dealloc, ...}"]
+        I["__rdl_alloc, __rdl_dealloc, __rdl_realloc, __rdl_alloc_zeroed"]
+        subgraph unix["std::sys::alloc::unix"]
+            J["libc::{malloc, calloc, free, realloc}"]
+        end
+        subgraph windows["std::sys::alloc::windows"]
+            K["heapapi::{HeapAlloc, HeapReAlloc, HeapFree}"]
+        end
+    end
+
+    subgraph builtin["compiler built-in"]
+        L["global allocator: __rust_alloc, __rust_dealloc, __rust_realloc, ..."]
+        M["#[global_allocator]"]
+    end
+
+    N["heap data structures,<br>e.g. alloc::boxed::Box, std::collections::HashMap"]
+
+    O[*unstable]:::note
+    classDef note fill:none,stroke-dasharray:4 4
+
+    %% Relationships
+    A -- super trait of --> D -- super trait of --> B
+    B -- blanket implementation for --> C
+    C -- must be implemented by --> M
+    E -- implements --> A
+    E -- is used by default in --> N
+    E & F -- call --> L
+    G -- implements --> B
+    G & I -- call --> H
+    H -- call --> J & K
+    L -- by default calls --> I
+    M -- registers custom global allocator --> L
+    N -- generic over* --> A

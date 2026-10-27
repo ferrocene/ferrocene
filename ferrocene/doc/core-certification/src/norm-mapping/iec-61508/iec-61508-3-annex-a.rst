@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
-   
+
 IEC 61508-3 Annex A
 -------------------
 
@@ -23,7 +23,7 @@ Table A.2
 8
 "
 
-N/A; the core library does not use external software elements.
+N/A; the certified libraries do not use external software elements.
 
 11a
 """
@@ -35,7 +35,7 @@ N/A
 13a
 """
 
-N/A; core is a library.
+N/A; the certified libraries are libraries.
 
 Table A.3
 ~~~~~~~~~
@@ -58,7 +58,7 @@ N/A
 4
 "
 
-The core library is highly modularized.
+The certified libraries is highly modularized.
 
 5
 "
@@ -67,7 +67,7 @@ N/A
 
 .. include:: ../../partials/implicit-coding-standard.rst
 
-As such, the certified core library does not have a coding standard.
+As such, the certified libraries do not have a coding standard.
 
 6
 "
@@ -77,7 +77,7 @@ Covered by :doc:`core-certification:safety-plan/programming-language`.
 7
 "
 
-N/A; the core library does not use external software elements.
+N/A; the certified libraries do not use external software elements.
 
 Table A.5
 ~~~~~~~~~
@@ -85,7 +85,7 @@ Table A.5
 2
 "
 
-N/A; core is a library.
+N/A; the certified libraries are libraries.
 
 3
 "
@@ -100,7 +100,7 @@ N/A; core is a library.
 8
 "
 
-Tests are managed and automated by the libtest tool. It compiles a test runner binary which executes all tests and collects and visualises all test results. Coretests is run by CI for every PR.
+Tests are managed and automated by the libtest tool. It compiles a test runner binary which executes all tests and collects and visualises all test results. All unit test suites are run by CI for every PR.
 
 Table A.6
 ~~~~~~~~~

@@ -8,9 +8,9 @@ ISO 26262 6-Method Tables
 Table 1	Topics to be covered by modelling and coding guidelines
 ---------------------------------------------------------------
 
-The Rust project has extensive measures (lints and tests) in place to assure quality and consistency of the codebase. The certified core library uses the same implicit standards as are ensured in the upstream codebase, to minimize divergence. Increased divergence from upstream leads to a higher maintenance burden and is a source of potential bugs.
+The Rust project has extensive measures (lints and tests) in place to assure quality and consistency of the codebase. The certified libraries use the same implicit standards as are ensured in the upstream codebase, to minimize divergence. Increased divergence from upstream leads to a higher maintenance burden and is a source of potential bugs.
 
-As such, the certified core library does not have a coding standard.
+As such, the certified libraries do not have a coding standard.
 
 Table 2	Notations for software architectural design
 ----------------------------------------------------
@@ -88,9 +88,9 @@ Table 8;Methods for deriving test cases for software unit testing
 
     No.;Methods;ASIL B;ASIL D;Justification;
     1a;Analysis of requirements ;++;++;Applied, requirements/specification is the source of the testing;
-    1b;Generation and analysis of equivalence classes;++;++;Partially applied, the test cases in coretests are crafted with a lot of care. Ferrous Systems did not do a full review to ensure boundary and extreme values are always tested. But achieving 100% line coverage will ensure all code paths have been executed and no untested code exists due to no test with a specific input.;
-    1c;Analysis of boundary values;++;++;Partially applied, the test cases in coretests are crafted with a lot of care. Ferrous Systems did not do a full review to ensure boundary and extreme values are always tested. But achieving 100% line coverage will ensure all code paths have been executed and no untested code exists due to no test with a specific input.;
-    1d;Error guessing based on knowledge or experience;\+;\+;Partially applied, the test cases in coretests are crafted with a lot of care, but not all functions include also error guessing;
+    1b;Generation and analysis of equivalence classes;++;++;Partially applied, the test cases in the unit test suites are crafted with a lot of care. Ferrous Systems did not do a full review to ensure boundary and extreme values are always tested. But achieving 100% line coverage will ensure all code paths have been executed and no untested code exists due to no test with a specific input.;
+    1c;Analysis of boundary values;++;++;Partially applied, the test cases in unit test suites are crafted with a lot of care. Ferrous Systems did not do a full review to ensure boundary and extreme values are always tested. But achieving 100% line coverage will ensure all code paths have been executed and no untested code exists due to no test with a specific input.;
+    1d;Error guessing based on knowledge or experience;\+;\+;Partially applied, the test cases in the unit test suites are crafted with a lot of care, but not all functions include also error guessing;
 
 Table 9 Structural coverage metrics at the software unit level
 --------------------------------------------------------------

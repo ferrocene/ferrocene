@@ -47,12 +47,12 @@ Covered by :ref:`Qualification Plan - Documentation Validation <qualification-pl
 5.2.7
 ~~~~~
 
-The core library certification documentation follows the structure of the other documents in the `Ferrocene documentation package <../../../../index.html>`_.
+The certified library certification documentation follows the structure of the other documents in the `Ferrocene documentation package <../../../../index.html>`_.
 
 5.2.8
 ~~~~~
 
-Processes from the Rustc qualification are used, unless specific needs for the core library certification require otherwise.
+Processes from the Rustc qualification are used, unless specific needs for the certified library certification require otherwise.
 
 5.2.9
 ~~~~~

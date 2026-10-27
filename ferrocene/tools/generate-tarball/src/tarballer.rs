@@ -123,12 +123,12 @@ fn append_path<W: Write>(
         if cfg!(windows) {
             // Windows doesn't really have a mode, so `tar` never marks files executable.
             // Use an extension whitelist to update files that usually should be so.
-            const EXECUTABLES: [&'static str; 4] = ["exe", "dll", "py", "sh"];
-            if let Some(ext) = src.extension().and_then(|s| s.to_str()) {
-                if EXECUTABLES.contains(&ext) {
-                    let mode = header.mode()?;
-                    header.set_mode(mode | 0o111);
-                }
+            const EXECUTABLES: [&str; 4] = ["exe", "dll", "py", "sh"];
+            if let Some(ext) = src.extension().and_then(|s| s.to_str())
+                && EXECUTABLES.contains(&ext)
+            {
+                let mode = header.mode()?;
+                header.set_mode(mode | 0o111);
             }
         }
         let file = open_file(src)?;
@@ -157,7 +157,7 @@ where
     for entry in WalkDir::new(&root) {
         let entry = entry?;
         let path = entry.path().strip_prefix(&root)?;
-        let path = path_to_str(&path)?;
+        let path = path_to_str(path)?;
         if path.is_empty() {
             // WalkDir will report the root path as well, but we strip it from the entries
             // so skip that empty path here

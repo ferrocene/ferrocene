@@ -11,3 +11,11 @@ dependencies = [
     "sphinx ~= 8.0",
     "sphinx-autobuild >= 0", # Doesn't use semver.
 ]
+
+# When updating with `uv lock --upgrade`, don't pull just-uploaded packages
+# This is a small mitigation against malicious package uploads
+[tool.uv]
+exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+certifi = false

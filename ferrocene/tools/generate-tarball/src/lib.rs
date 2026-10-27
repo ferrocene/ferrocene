@@ -19,11 +19,11 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-    pub fn run(self) -> anyhow::Result<()> {
+    pub async fn run(self) -> anyhow::Result<()> {
         match self.command {
             Subcommand::Combine => anyhow::bail!("the `combine` subcommand is not supported"),
             Subcommand::Generate(generator) => {
-                generator.run().context("failed to generate installer")
+                generator.run().await.context("failed to generate installer")
             }
             Subcommand::Script => anyhow::bail!("the `scripter` subcommand is not supported"),
             Subcommand::Tarball(tarballer) => {
@@ -34,6 +34,7 @@ impl CommandLine {
 }
 
 #[derive(clap::Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Subcommand {
     Generate(generator::Generator),
     Combine,

@@ -138,6 +138,8 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_derive",
+ "serde_json",
+ "similar",
 ]
 
 [[package]]
@@ -749,9 +751,18 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "rustls-pki-types"
 version = "1.11.0"
+||||||| parent of b8891e07e1e (Backport ferrocene/ferrocene#2644)
+name = "rustls-webpki"
+version = "0.103.14"
+=======
+name = "rustls-webpki"
+version = "0.103.16"
+>>>>>>> b8891e07e1e (Backport ferrocene/ferrocene#2644)
 source = "registry+https://github.com/rust-lang/crates.io-index"
+<<<<<<< HEAD
 checksum = "917ce264624a4b4db1c364dcc35bfca9ded014d0a958cd47ad3e960e988ea51c"
 
 [[package]]
@@ -759,6 +770,11 @@ name = "rustls-webpki"
 version = "0.102.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64ca1bc8749bd4cf37b5ce386cc146580777b4e8572c7b97baf22c83f444bee9"
+||||||| parent of b8891e07e1e (Backport ferrocene/ferrocene#2644)
+checksum = "0527518605e68109d875e248ea259b6758801cf165e4b2c2733ae3b51f12535a"
+=======
+checksum = "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281"
+>>>>>>> b8891e07e1e (Backport ferrocene/ferrocene#2644)
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -1021,9 +1037,21 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "webpki-roots"
+<<<<<<< HEAD
 version = "0.26.8"
+||||||| parent of b8891e07e1e (Backport ferrocene/ferrocene#2644)
+version = "1.0.9"
+=======
+version = "1.0.10"
+>>>>>>> b8891e07e1e (Backport ferrocene/ferrocene#2644)
 source = "registry+https://github.com/rust-lang/crates.io-index"
+<<<<<<< HEAD
 checksum = "2210b291f7ea53617fbafcc4939f10914214ec15aace5ba62293a668f322c5c9"
+||||||| parent of b8891e07e1e (Backport ferrocene/ferrocene#2644)
+checksum = "7dcd9d09a39985f5344844e66b0c530a33843579125f23e21e9f0f220850f22a"
+=======
+checksum = "1c1c8e20c8a38fc7d65abfe74eb7280e4aa667e8eec8bc84996d2874810748d9"
+>>>>>>> b8891e07e1e (Backport ferrocene/ferrocene#2644)
 dependencies = [
  "rustls-pki-types",
 ]

@@ -58,6 +58,7 @@ fn main() {
     local();
     xcrate();
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_8wnyln2nmg4y
 // Unsafe Blocks
@@ -118,3 +119,9 @@ fn main() {
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
+||||||| 8a9dd7abdf0
+=======
+
+//@ reference: items.union.common-storage
+//@ reference: items.union.init.result
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

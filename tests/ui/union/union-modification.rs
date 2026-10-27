@@ -32,6 +32,7 @@ pub fn main() {
     assert_eq!(unsafe { foo_holder.inner_foo.bar }, 4);
     drop(foo_holder);
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_fmdn7n7s413d
 // Union Types
@@ -71,3 +72,8 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_xcwfotmq2e5d
 // Field Resolution
+||||||| 8a9dd7abdf0
+=======
+
+//@ reference: items.union.fields.write-safety
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

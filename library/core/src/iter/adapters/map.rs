@@ -120,7 +120,12 @@ where
         self.iter.size_hint()
     }
 
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 8a9dd7abdf0
+=======
+    #[inline]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn try_fold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -130,7 +135,12 @@ where
         self.iter.try_fold(init, map_try_fold(&mut self.f, g))
     }
 
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 8a9dd7abdf0
+=======
+    #[inline]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,
@@ -160,7 +170,12 @@ where
         self.iter.next_back().map(&mut self.f)
     }
 
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 8a9dd7abdf0
+=======
+    #[inline]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn try_rfold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -170,7 +185,12 @@ where
         self.iter.try_rfold(init, map_try_fold(&mut self.f, g))
     }
 
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| 8a9dd7abdf0
+=======
+    #[inline]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn rfold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,

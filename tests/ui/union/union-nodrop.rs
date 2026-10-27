@@ -64,6 +64,7 @@ fn main() {
     assert!(needs_drop::<ActuallyDrop<u8>>());
     assert!(needs_drop::<ActuallyDrop<Box<u8>>>());
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_ixjc5jaamx84
 // Constants
@@ -85,3 +86,8 @@ fn main() {
 //
 // ferrocene-annotations: fls_afafmafz4hf2
 // Drop Order
+||||||| 8a9dd7abdf0
+=======
+
+//@ reference: items.union.drop
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

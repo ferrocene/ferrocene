@@ -14,7 +14,7 @@ Because procedural macros are only executed during compilation and not during ru
 
 It is the end-user responsibility to qualify procedural macros if they are used in their code.
 
-``proc-macro`` crates by default are linked to ``proc_macro`` and ``std``. They can be marked as ``no_std`` in order to not be linked to ``std`` but only to ``proc_macro`` and ``core``.
+``proc-macro`` crates by default are linked to ``proc_macro`` and ``std``. They can be marked as ``no_std`` in order to not be linked to ``std`` but only to ``proc_macro`` and ``core`` and optionally ``alloc``.
 
 The ``proc_macro`` compile-time library
 ---------------------------------------
@@ -55,7 +55,7 @@ The examples in this section assume the following directory structure:
 Building a simple ``proc-macro`` crate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To build a ``proc-macro`` crate which only depends on ``proc_macro`` and ``std`` (or ``core``), execute the following:
+To build a ``proc-macro`` crate which only depends on ``proc_macro`` and ``std`` (or ``core``/``alloc``), execute the following:
 
 .. code-block:: console
 

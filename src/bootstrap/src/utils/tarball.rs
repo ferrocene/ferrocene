@@ -473,7 +473,13 @@ impl<'a> Tarball<'a> {
             cmd.args(["--override-file-mtime", timestamp.trim()]);
         }
 
-        cmd.run(self.builder);
+        // Temporary:
+        //
+        // Sometimes the tarball generation fails because of slow DNS responses causing a timeout
+        // while fetching the signing key from AWS KMS. Ideally this should be fixed in the
+        // generate-tarball command itself, but for now allow retrying the whole command to make CI
+        // less flaky.
+        cmd.run_retry(self.builder);
 
         // Ensure there are no symbolic links in the tarball. In particular,
         // rustup-toolchain-install-master and most versions of Windows can't handle symbolic links.

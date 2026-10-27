@@ -39,6 +39,9 @@ CLONE_DIRECTORIES=(
 set -euo pipefail
 IFS=$'\n\t'
 
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
 git_llvm() {
     git -C "${MONOREPO_PATH}" $@
 }
@@ -60,7 +63,7 @@ git_llvm config remote.origin.partialCloneFilter blob:none
 git_llvm sparse-checkout init --cone
 git_llvm sparse-checkout set "${CLONE_DIRECTORIES[@]}"
 
-git_llvm fetch --depth=1 origin "${llvm_commit}"
+retry git_llvm fetch --depth=1 origin "${llvm_commit}"
 git_llvm checkout "${llvm_commit}"
 
 # Load the git repository we created in src/llvm-project as the submodule.

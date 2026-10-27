@@ -67,7 +67,7 @@ environment is correctly set.
 
 7. ``LLVM`` generates a static Rust library.
 
-8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the core library are used.
+8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the certified libraries are used.
 
 ``staticlib``
 ~~~~~~~~~~~~~
@@ -106,7 +106,7 @@ environment is correctly set.
 
 7. ``LLVM`` generates a C-compatible static library.
 
-8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the core library are used.
+8. (Optional): If the ``user`` is building a certified library, the ``user`` must verify that only certified functions from the certified libraries are used.
 
 Building an Executable
 ----------------------
@@ -151,7 +151,7 @@ set.
 
 9. The linker generates a Rust executable.
 
-10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
+10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the certified libraries are used.
 
 Linked to a static Rust library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -203,7 +203,7 @@ directories included by compiler argument ``-L``.
 
 10. The linker generates a Rust executable that links to a static Rust library.
 
-11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
+11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the certified libraries are used.
 
 Building Mixed-Language Programs
 --------------------------------
@@ -254,13 +254,13 @@ unique within the set of all directories included by compiler argument ``-L``.
 
 10. The linker generates a Rust executable that links to a C library.
 
-11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the core library are used.
+11. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the certified libraries are used.
 
 Building a procedural macro and using it in another crate
 ---------------------------------------------------------
 
 .. note::
-   
+
    The second part "Use the ``proc-macro`` crate" can be done for any crate type.
    It will be done on the example of an ``rlib``, but this can be adapted by changing the passed ``--crate-type``.
    For the purpose of analysing potential errors related to procedural macros, the crate type of the second part does not matter.
@@ -289,7 +289,7 @@ Building a procedural macro and using it in another crate
          --extern proc_macro
          <proc_macro_path>
          # <proc_macro_path> is the path to the root of the first compilation unit, as a positional argument.
-         # <name> is the name given to the proc-macro library 
+         # <name> is the name given to the proc-macro library
 
    2. ``rustc`` parses the command line arguments.
 
@@ -336,4 +336,4 @@ Building a procedural macro and using it in another crate
 
    9. ``LLVM`` generates a static Rust library.
 
-   10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the ``core`` library are used.
+   10. (Optional): If the ``user`` is building a certified executable, the ``user`` must verify that only certified functions from the certified libraries are used.

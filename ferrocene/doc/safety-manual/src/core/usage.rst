@@ -4,8 +4,8 @@
 Usage
 =====
 
-Use the certified core library exactly how you'd use the normal Rust core library,
+Use the certified libraries exactly how you'd use the normal Rust standard libraries,
 with the following additions and modifications:
 
-- Always take into account the safety constraints of all core library functions you are using.
+- Always take into account the safety constraints of all functions of the certified libraries you are using.
 - Follow the guidance in :doc:`Handling Unsafety </rustc/unsafety>`.

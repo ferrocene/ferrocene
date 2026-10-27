@@ -12,6 +12,7 @@ dependencies = [
     "myst_parser ~= 4.0",
     "pyyaml ~= 6.0",
     "semver ~= 3.0",
+    "sphinxcontrib-mermaid>=2.1.1",
 
     # Internal dependencies:
     "ferrocene-sphinx-shared-resources",
@@ -21,6 +22,9 @@ dependencies = [
 # This is a small mitigation against malicious package uploads
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+certifi = false
 
 [tool.uv.sources]
 ferrocene-sphinx-shared-resources = { workspace = true }

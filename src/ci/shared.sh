@@ -23,6 +23,9 @@ export MIRRORS_BASE="https://ci-mirrors.rust-lang.org/rustc"
 # the small difference that we always wait at least 1 second between tries.
 #
 # Duplicated in docker/scripts/shared.sh
+#
+# Ferrocene addition: Duplicated in BootstrapCommand::run_retry() in
+# src/bootstrap/src/utils/exec.rs
 function retry {
   echo "Attempting with retry:" "$@"
   local n=1

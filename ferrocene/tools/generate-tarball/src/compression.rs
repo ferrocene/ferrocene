@@ -151,7 +151,7 @@ impl Default for CompressionFormats {
 
 impl CompressionFormats {
     pub(crate) fn iter(&self) -> impl Iterator<Item = CompressionFormat> + '_ {
-        self.0.iter().map(|i| *i)
+        self.0.iter().copied()
     }
 }
 
@@ -171,6 +171,7 @@ pub(crate) struct CombinedEncoder {
 }
 
 impl CombinedEncoder {
+    #[allow(clippy::new_ret_no_self)]
     pub(crate) fn new(encoders: Vec<Box<dyn Encoder>>) -> Box<dyn Encoder> {
         Box::new(Self { encoders })
     }

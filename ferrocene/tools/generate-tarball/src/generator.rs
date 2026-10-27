@@ -89,7 +89,7 @@ pub struct Generator {
 
 impl Generator {
     /// Generates the actual installer tarball
-    pub fn run(self) -> Result<()> {
+    pub async fn run(self) -> Result<()> {
         let Self {
             // These arguments are emitted by the build step but they serve no purpose
             // for our tarball creation, so ignore them here as rejecting them will fail
@@ -129,10 +129,8 @@ impl Generator {
         // Copy the overlay.
         // We only preserve the `non_installed_overlay` on the `rust-dev` component.
         // The `builder-config` file present is required for the `download-ci-llvm` flag.
-        if component_name == "rust-dev" {
-            if !non_installed_overlay.is_empty() {
-                copy_recursive(non_installed_overlay.as_ref(), &package_dir)?;
-            }
+        if component_name == "rust-dev" && !non_installed_overlay.is_empty() {
+            copy_recursive(non_installed_overlay.as_ref(), &package_dir)?;
         }
 
         if let Some(key_arn) = ferrocene_signing_kms_key_arn {
@@ -151,7 +149,8 @@ impl Generator {
                     managed_prefixes: &ferrocene_managed_prefix,
                 },
                 &key_arn,
-            )?;
+            )
+            .await?;
         }
 
         // Make the tarballs

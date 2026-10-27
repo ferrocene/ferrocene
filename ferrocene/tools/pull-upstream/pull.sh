@@ -96,7 +96,7 @@ fi
 
 if [[ $# -ge 2 ]]; then
     # Allow not having the ref fetched locally (can happen from manual workflow_dispatch runs)
-    git fetch "$FERROCENE_REPO" "$2"
+    git fetch --no-recurse-submodules "$FERROCENE_REPO" "$2"
     current_commit="$(git rev-parse FETCH_HEAD)"
     branch_name="$2"
 else
@@ -125,7 +125,7 @@ if git rev-parse --quiet --verify "${TEMP_BRANCH}" > /dev/null; then
     git branch -D "${TEMP_BRANCH}"
 fi
 
-git fetch "${UPSTREAM_REPO}" "${upstream_branch}"
+git fetch --no-recurse-submodules "${UPSTREAM_REPO}" "${upstream_branch}"
 
 # Avoid creating extra-large PRs by limiting the amount of merge commits
 # included in automated pulls to ${MAX_MERGES_PER_DAY}.

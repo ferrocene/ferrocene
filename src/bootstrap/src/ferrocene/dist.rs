@@ -220,7 +220,7 @@ impl CommandLineStep for SourceTarball {
                 .arg(builder.src.join(project))
                 .env("UV_CACHE_DIR", &uv_cache_dir)
                 .env("UV_PROJECT_ENVIRONMENT", venv)
-                .run(&builder);
+                .run_retry(&builder);
         }
 
         // The docker images contain a `/ferrocene/packages` directory with listings of dependency

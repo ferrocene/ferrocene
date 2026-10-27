@@ -8372,8 +8372,10 @@ core::slice::<impl [T]>::align_to_offsets
 core::slice::<impl [T]>::align_to_offsets::gcd
 core::slice::<impl [T]>::as_array
 core::slice::<impl [T]>::as_chunks
+core::slice::<impl [T]>::as_chunks_mut
 core::slice::<impl [T]>::as_chunks_unchecked
 core::slice::<impl [T]>::as_chunks_unchecked::precondition_check
+core::slice::<impl [T]>::as_chunks_unchecked_mut
 core::slice::<impl [T]>::as_chunks_unchecked_mut::precondition_check
 core::slice::<impl [T]>::as_mut_array
 core::slice::<impl [T]>::as_mut_ptr

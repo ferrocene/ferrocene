@@ -1536,6 +1536,7 @@ impl<T> [T] {
     /// // let chunks: &[[_; 5]] = slice.as_chunks_unchecked_mut() // The slice length is not a multiple of 5
     /// // let chunks: &[[_; 0]] = slice.as_chunks_unchecked_mut() // Zero-length chunks are never allowed
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[inline]
@@ -1592,6 +1593,7 @@ impl<T> [T] {
     /// }
     /// assert_eq!(v, &[1, 1, 2, 2, 9]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[inline]

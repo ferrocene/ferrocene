@@ -392,6 +392,7 @@ F_ALLOCATEPERSIST
 F_BARRIERFSYNC
 F_FREEZE_FS
 F_FULLFSYNC
+F_GETNOSIGPIPE
 F_GETOWN
 F_GETPATH
 F_GETPATH_NOFIRMLINK
@@ -410,6 +411,7 @@ F_PUNCHHOLE
 F_RDADVISE
 F_RDAHEAD
 F_RDLCK
+F_SETNOSIGPIPE
 F_SETOWN
 F_SPECULATIVE_READ
 F_TEST
@@ -1875,6 +1877,10 @@ __PTHREAD_RWLOCKATTR_SIZE__
 __PTHREAD_RWLOCK_SIZE__
 __darwin_mcontext64
 __error
+_dyld_get_image_header
+_dyld_get_image_name
+_dyld_get_image_vmaddr_slide
+_dyld_image_count
 abs
 acct
 aio_cancel
@@ -2012,6 +2018,7 @@ if_freenameindex
 if_msghdr
 if_nameindex
 ifaddrs
+ifaliasreq
 ifconf
 ifkpi
 ifreq
@@ -2041,8 +2048,18 @@ lockf
 log2phys
 login_tty
 lutimes
+mach_absolute_time
 mach_error_string
 mach_error_t
+mach_header
+mach_header_64
+mach_host_self
+mach_port_t
+mach_task_self
+mach_task_self_
+mach_thread_self
+mach_timebase_info
+mach_timebase_info_data_t
 mach_vm_address_t
 mach_vm_offset_t
 mach_vm_size_t

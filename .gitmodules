@@ -46,3 +46,7 @@
 	path = src/tools/enzyme
 	url = https://github.com/rust-lang/enzyme.git
 	shallow = true
+[submodule "src/tpde"]
+	path = src/tpde
+	url = https://github.com/rust-lang/tpde.git
+	shallow = true

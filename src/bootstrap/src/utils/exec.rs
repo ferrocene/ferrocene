@@ -344,6 +344,67 @@ impl<'a> BootstrapCommand {
         exec_ctx.as_ref().run(self, OutputMode::Print, OutputMode::Print).is_success()
     }
 
+    // Ferrocene addition: Run a command which might fail because of network flakiness.
+    // This will retry the command up to 7 times, using randomized exponential backoff
+    // in between attempts.
+    //
+    // Duplicated in src/ci/shared.sh and src/ci/docker/scripts/shared.sh
+    //
+    // IMPORTANT: This function should only be used with commands which are idempotent
+    // and which can recover from failed intermediate state. It also cannot (currently)
+    // distinguish between failures due to network flakes and other failures, so "real"
+    // failures will cause the command to be retried all 7 times before giving up.
+    #[track_caller]
+    pub(crate) fn run_retry(&mut self, exec_ctx: impl AsRef<ExecutionContext>) -> bool {
+        let base = 5;
+        let max = 7;
+
+        // Only apply the original failure mode to the final attempt
+        let original_failure_behavior = self.failure_behavior;
+        self.failure_behavior = BehaviorOnFailure::Ignore;
+
+        for n in 1..=max {
+            if n > 1 {
+                println!("Attempt {}/{}:", n, max);
+            }
+
+            if n == max {
+                self.failure_behavior = original_failure_behavior;
+            }
+
+            let result = exec_ctx.as_ref().run(self, OutputMode::Print, OutputMode::Print);
+            if result.is_success() {
+                return true;
+            }
+
+            if n < max {
+                match getrandom::u32() {
+                    Ok(r) => {
+                        // Calculate a random delay in [1, base * 2^(n-1)] inclusive
+                        let scale = base << (n - 1);
+                        let delay = 1 + (scale as u64 * r as u64) >> 32;
+                        println!(
+                            "Attempt {}/{} failed. Waiting {} second(s) before retrying.",
+                            n, max, delay
+                        );
+
+                        std::thread::sleep(std::time::Duration::from_secs(delay));
+                    }
+                    Err(_) => {
+                        println!(
+                            "Attempt {}/{} failed. Cannot retry due to an error in random number generation.",
+                            n, max
+                        );
+                        return false;
+                    }
+                }
+            }
+        }
+
+        println!("The command has failed after {} attempts", max);
+        return false;
+    }
+
     /// Run the command, while capturing and returning all its output.
     #[track_caller]
     pub(crate) fn run_capture(&mut self, exec_ctx: impl AsRef<ExecutionContext>) -> CommandOutput {

@@ -69,7 +69,7 @@ Table 7 Methods for software unit verification
     1c;Inspection;++;++;Applied, via community process on contribution to upstream;
     1d;Semi-formal verification ;\+;++;Not applied, as there is no semi-formal notations/specification;
     1e;Formal verification;o;\+;Not applied, as there is no formal specification;
-    1f;Control flow analysis;\+;++;Applied, symbol review via compiler outpout (subsetting) ;
+    1f;Control flow analysis;\+;++;Applied, symbol review via compiler output (subsetting) ;
     1g;Data flow analysis;\+;++;Not applied, no internal data flow to analyse, no global states, all only via the clear interfaces;
     1h;Static code analysis;++;++;Applied, see core/safety-plan/testing-plan.html#rustc-lints;
     1i;Static analyses based on abstract interpretation;\+;\+;Not applied, 1h applied instead;

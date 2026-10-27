@@ -45,7 +45,7 @@ You can use one of 2 ways to ensure that the check is successful:
 These examples are for files created by Ferrocene Developers and not derived elsewhere.
 
 Were you to incorporate code from elsewhere, you will need to adjust the text accordingly,
-either in REUSE.toml (should you choose to use that apporach) or in the derived files themselves.
+either in REUSE.toml (should you choose to use that approach) or in the derived files themselves.
 
 An example of the latter:
 

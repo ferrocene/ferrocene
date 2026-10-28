@@ -410,8 +410,7 @@ IEC 61508 Tool Classification
 -----------------------------
 
 Ferrocene provides a development environment capable of compiling and linking
-programs for the target architecture to conform with industrial [|iec_61508_ref|]
-class T3.
+programs for the target architecture to conform with industrial [|iec_61508_ref|] class T3.
 
 IEC 62304 Tool Classification
 -----------------------------
@@ -419,3 +418,9 @@ IEC 62304 Tool Classification
 [|iec_62304_ref|] does not provide an own scheme to classify and qualify tools used in its context, but recommends the application
 of techniques and tools as defined in [|iec_61508_ref|]. Therefore, with the qualification of Ferrocene adhering to an IEC 61508 Tool Classification,
 Ferrocene can be used for development, release and maintenance of medical device software up to Class C.
+
+EN 50716 Tool Classification
+----------------------------
+
+Ferrocene provides a development environment capable of compiling and linking
+programs for the target architecture to conform with railway [|en_50716_ref|] class T3.

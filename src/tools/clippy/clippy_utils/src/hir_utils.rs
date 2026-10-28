@@ -15,7 +15,7 @@ use rustc_hir::{
     GenericParam, GenericParamKind, GenericParamSource, Generics, HirId, HirIdMap, InlineAsmOperand, ItemId, ItemKind,
     LetExpr, Lifetime, LifetimeKind, LifetimeParamKind, Node, ParamName, Pat, PatExpr, PatExprKind, PatField, PatKind,
     Path, PathSegment, PreciseCapturingArgKind, PrimTy, QPath, Stmt, StmtKind, StructTailExpr, TraitBoundModifiers, Ty,
-    TyFieldPath, TyKind, TyPat, TyPatKind, UseKind, WherePredicate, WherePredicateKind,
+    TyFieldPath, TyKind, TyPat, TyPatKind, UseKind, UseTree, WherePredicate, WherePredicateKind,
 };
 use rustc_lexer::{FrontmatterAllowed, TokenKind, tokenize};
 use rustc_lint::LateContext;
@@ -245,14 +245,7 @@ impl HirEqInterExpr<'_, '_, '_> {
             (ItemKind::TyAlias(l_ident, l_generics, l_ty), ItemKind::TyAlias(r_ident, r_generics, r_ty)) => {
                 l_ident.name == r_ident.name && self.eq_generics(l_generics, r_generics) && self.eq_ty(l_ty, r_ty)
             },
-            (ItemKind::Use(l_path, l_kind), ItemKind::Use(r_path, r_kind)) => {
-                self.eq_path_segments(l_path.segments, r_path.segments)
-                    && match (l_kind, r_kind) {
-                        (UseKind::Single(l_ident), UseKind::Single(r_ident)) => l_ident.name == r_ident.name,
-                        (UseKind::Glob, UseKind::Glob) | (UseKind::ListStem, UseKind::ListStem) => true,
-                        _ => false,
-                    }
-            },
+            (ItemKind::Use(ref l_tree), ItemKind::Use(ref r_tree)) => self.eq_use_tree(l_tree, r_tree),
             (ItemKind::Mod(l_ident, l_mod), ItemKind::Mod(r_ident, r_mod)) => {
                 l_ident.name == r_ident.name && over(l_mod.item_ids, r_mod.item_ids, |l, r| self.eq_item(*l, *r))
             },
@@ -262,6 +255,18 @@ impl HirEqInterExpr<'_, '_, '_> {
             self.local_items.insert(l.owner_id.to_def_id(), r.owner_id.to_def_id());
         }
         eq
+    }
+
+    fn eq_use_tree(&mut self, l_tree: &UseTree<'_>, r_tree: &UseTree<'_>) -> bool {
+        self.eq_path_segments(l_tree.prefix.segments, r_tree.prefix.segments)
+            && match (l_tree.kind, r_tree.kind) {
+                (UseKind::Single(l_ident), UseKind::Single(r_ident)) => l_ident.name == r_ident.name,
+                (UseKind::Glob, UseKind::Glob) => true,
+                (UseKind::Nested { items: l_items }, UseKind::Nested { items: r_items }) => {
+                    over(l_items, r_items, |(l, _, _), (r, _, _)| self.eq_use_tree(l, r))
+                },
+                _ => false,
+            }
     }
 
     fn eq_fn_sig(&mut self, left: &FnSig<'_>, right: &FnSig<'_>) -> bool {
@@ -837,7 +842,7 @@ impl HirEqInterExpr<'_, '_, '_> {
             (Res::Local(_), _) | (_, Res::Local(_)) => false,
             (Res::Def(l_kind, l), Res::Def(r_kind, r))
                 if l_kind == r_kind
-                    && let DefKind::Const { .. }
+                    && let DefKind::Const
                     | DefKind::Static { .. }
                     | DefKind::Fn
                     | DefKind::TyAlias
@@ -1112,7 +1117,7 @@ pub fn eq_expr_value(cx: &LateContext<'_>, ctxt: SyntaxContext, left: &Expr<'_>,
 /// item, in which case it is the last two
 fn generic_path_segments<'tcx>(segments: &'tcx [PathSegment<'tcx>]) -> Option<&'tcx [PathSegment<'tcx>]> {
     match segments.last()?.res {
-        Res::Def(DefKind::AssocConst { .. } | DefKind::AssocFn | DefKind::AssocTy, _) => {
+        Res::Def(DefKind::AssocConst | DefKind::AssocFn | DefKind::AssocTy, _) => {
             // <Ty as module::Trait<T>>::assoc::<U>
             //        ^^^^^^^^^^^^^^^^   ^^^^^^^^^^ segments: [module, Trait<T>, assoc<U>]
             Some(&segments[segments.len().checked_sub(2)?..])
@@ -1275,18 +1280,18 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                 for (op, _op_sp) in asm.operands {
                     match op {
                         InlineAsmOperand::In { reg, expr } => {
-                            reg.hash(&mut self.s);
+                            reg.as_target().hash(&mut self.s);
                             self.hash_expr(expr);
                         },
                         InlineAsmOperand::Out { reg, late, expr } => {
-                            reg.hash(&mut self.s);
+                            reg.as_target().hash(&mut self.s);
                             late.hash(&mut self.s);
                             if let Some(expr) = expr {
                                 self.hash_expr(expr);
                             }
                         },
                         InlineAsmOperand::InOut { reg, late, expr } => {
-                            reg.hash(&mut self.s);
+                            reg.as_target().hash(&mut self.s);
                             late.hash(&mut self.s);
                             self.hash_expr(expr);
                         },
@@ -1296,7 +1301,7 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                             in_expr,
                             out_expr,
                         } => {
-                            reg.hash(&mut self.s);
+                            reg.as_target().hash(&mut self.s);
                             late.hash(&mut self.s);
                             self.hash_expr(in_expr);
                             if let Some(out_expr) = out_expr {

@@ -7,6 +7,8 @@ use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs, TargetFeature,
 };
 use rustc_middle::ty::{self, Instance, TyCtxt};
+use rustc_sanitizers::ignorelist::SanitizerIgnoreList;
+use rustc_session::Session;
 use rustc_session::config::{
     BranchProtection, FunctionReturn, InstrumentMcount, InstrumentMcountOpts, OptLevel, PAuthKey,
     PacRet,
@@ -22,7 +24,7 @@ use crate::llvm::AttributePlace::Function;
 use crate::llvm::{
     self, AllocKindFlags, Attribute, AttributeKind, AttributePlace, MemoryEffects, Value,
 };
-use crate::{Session, attributes, llvm_util};
+use crate::{attributes, llvm_util};
 
 pub(crate) fn apply_to_llfn(llfn: &Value, idx: AttributePlace, attrs: &[&Attribute]) {
     if !attrs.is_empty() {
@@ -137,9 +139,24 @@ pub(crate) fn sanitize_attrs<'ll, 'tcx>(
     cx: &SimpleCx<'ll>,
     tcx: TyCtxt<'tcx>,
     sanitizer_fn_attr: SanitizerFnAttrs,
+    instance: Option<ty::Instance<'tcx>>,
+    sanitizer_ignorelist: Option<&SanitizerIgnoreList>,
 ) -> SmallVec<[&'ll Attribute; 4]> {
     let mut attrs = SmallVec::new();
-    let enabled = tcx.sess.sanitizers() - sanitizer_fn_attr.disabled;
+    let mut enabled = tcx.sess.sanitizers() - sanitizer_fn_attr.disabled;
+    if let Some(ignorelist) = sanitizer_ignorelist {
+        if let Some(instance) = instance {
+            let result = ignorelist.filter_instance_sanitizers(tcx, instance, enabled);
+            enabled = result.enabled;
+            if result.ignore_cfi {
+                attrs.push(llvm::CreateAttrString(cx.llcx, "no-sanitize-cfi"));
+            }
+            if result.ignore_kcfi {
+                attrs.push(llvm::CreateAttrString(cx.llcx, "no-sanitize-kcfi"));
+            }
+        }
+    }
+
     if enabled.contains(SanitizerSet::ADDRESS) || enabled.contains(SanitizerSet::KERNELADDRESS) {
         attrs.push(llvm::AttributeKind::SanitizeAddress.create_attr(cx.llcx));
     }
@@ -158,7 +175,7 @@ pub(crate) fn sanitize_attrs<'ll, 'tcx>(
     }
     if enabled.contains(SanitizerSet::MEMTAG) {
         // Check to make sure the mte target feature is actually enabled.
-        let features = tcx.global_backend_features(());
+        let features = &tcx.sess.global_backend_features;
         let mte_feature =
             features.iter().map(|s| &s[..]).rfind(|n| ["+mte", "-mte"].contains(&&n[..]));
         if let None | Some("-mte") = mte_feature {
@@ -425,7 +442,7 @@ pub(crate) fn target_features_attr<'ll, 'tcx>(
     tcx: TyCtxt<'tcx>,
     function_features: Vec<String>,
 ) -> Option<&'ll Attribute> {
-    let global_features = tcx.global_backend_features(()).iter().map(String::as_str);
+    let global_features = tcx.sess.global_backend_features.iter().map(String::as_str);
     let function_features = function_features.iter().map(String::as_str);
     let target_features =
         global_features.chain(function_features).intersperse(",").collect::<String>();
@@ -476,6 +493,7 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
     llfn: &'ll Value,
     codegen_fn_attrs: &CodegenFnAttrs,
     instance: Option<ty::Instance<'tcx>>,
+    sanitizer_ignorelist: Option<&SanitizerIgnoreList>,
 ) {
     let sess = tcx.sess;
     let mut to_add = SmallVec::<[_; 16]>::new();
@@ -537,7 +555,13 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
         // not used.
     } else {
         // Do not set sanitizer attributes for naked functions.
-        to_add.extend(sanitize_attrs(cx, tcx, codegen_fn_attrs.sanitizers));
+        to_add.extend(sanitize_attrs(
+            cx,
+            tcx,
+            codegen_fn_attrs.sanitizers,
+            instance,
+            sanitizer_ignorelist,
+        ));
 
         // For non-naked functions, set branch protection attributes on aarch64.
         if let Some(BranchProtection { bti, pac_ret, gcs }) = sess.branch_protection() {
@@ -649,7 +673,7 @@ pub(crate) fn llfn_attrs_from_instance<'ll, 'tcx>(
     let function_features = function_features
         .iter()
         // Convert to LLVMFeatures and filter out unavailable ones
-        .flat_map(|feat| llvm_util::to_llvm_features(sess, feat))
+        .flat_map(|feat| llvm_util::to_llvm_features(&sess.target, feat))
         // Convert LLVMFeatures & dependencies to +<feats>s
         .flat_map(|feat| feat.into_iter().map(|f| format!("+{f}")))
         .chain(codegen_fn_attrs.instruction_set.iter().map(|x| match x {

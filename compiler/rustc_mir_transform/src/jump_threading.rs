@@ -57,7 +57,6 @@ use rustc_const_eval::interpret::{ImmTy, Immediate, InterpCx, OpTy, Projectable}
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_index::IndexVec;
 use rustc_index::bit_set::{DenseBitSet, GrowableBitSet};
-use rustc_middle::bug;
 use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
@@ -65,7 +64,7 @@ use rustc_middle::ty::{self, ScalarInt, TyCtxt};
 use rustc_mir_dataflow::value_analysis::{
     Map, PlaceCollectionMode, PlaceIndex, TrackElem, ValueIndex,
 };
-use rustc_span::DUMMY_SP;
+use rustc_span::{DUMMY_SP, bug};
 use tracing::{debug, instrument, trace};
 
 use crate::PassPolicy;
@@ -76,18 +75,13 @@ pub(super) struct JumpThreading;
 const MAX_COST: u8 = 100;
 
 impl<'tcx> crate::MirPass<'tcx> for JumpThreading {
-    fn policy(&self, sess: &rustc_session::Session) -> PassPolicy {
-        let enabled_by_default = if sess.target.is_like_gpu {
-            // Jump threading can duplicate calls in control-flow.
-            // This leads to incorrect code when done for so called "convergent" operations on GPU
-            // targets, similar to how inline assembly cannot be duplicated on all targets.
-            // Conservatively prevent this by disabling the pass.
-            // See also issue #137086.
-            false
-        } else {
-            sess.mir_opt_level() >= 2
-        };
-        PassPolicy::optimization(enabled_by_default)
+    fn policy(&self, ctx: &crate::PassCtx<'_>) -> PassPolicy {
+        // Jump threading can duplicate calls in control-flow.
+        // This leads to incorrect code when done for so called "convergent" operations on GPU
+        // targets, similar to how inline assembly cannot be duplicated on all targets.
+        // Conservatively prevent this by disabling the pass.
+        // See also issue #137086.
+        PassPolicy::optional(ctx.mir_opt_level() >= 2 && !ctx.target.is_like_gpu)
     }
 
     #[instrument(skip_all level = "debug")]

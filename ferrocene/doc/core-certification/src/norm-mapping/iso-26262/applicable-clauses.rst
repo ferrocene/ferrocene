@@ -72,7 +72,7 @@ ISO 26262 Applicable clauses
    * - 6-7 SW Architectural Design
      - Yes
      -
-   * - 6-8 SW Unit Design and Implement
+   * - 6-8 SW Unit Design and Implementation
      - Yes
      -
    * - 6-9 SW Unit Verification

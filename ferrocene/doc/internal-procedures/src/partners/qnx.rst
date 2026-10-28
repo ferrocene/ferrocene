@@ -338,52 +338,65 @@ provided by QNX for our CI/CD.
 To create the deployment, first, ensure you are using a myQNX account with a
 **QNX Software Development Platform Subscription - Build Server License** deployed to it.
 
-Create a deployment containing Linux and Windows toolchains:
+Create deployments containing Linux and Windows toolchains:
 
 .. code-block::
 
     LICENSE_KEY="FILL_ME_IN"
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"
-    QNX_VERSION="8.0.0.00141T202311271501L"
-    QNX_WINDOWS_HOST_VERSION="0.0.1.02005T202411230033L"
-    QNX_LINUX_HOST_VERSION="0.0.1.00135T202311191043L"
 
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -activateLicenseKey $LICENSE_KEY
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -mirrorBaseline qnx800 \
-        -destination qnx/qnx800-141
+        -destination qnx/qnx-8.0.0-baseline
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-            -installBaseline com.qnx.qnx800/$QNX_VERSION \
-            -installPackage com.qnx.qnx800.host.win.x86_64=$QNX_WINDOWS_HOST_VERSION \
-            -installPackage com.qnx.qnx800.host.linux.x86_64=$QNX_LINUX_HOST_VERSION \
-            -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
-            -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
-            -installPackage com.qnx.qnx800.patchset805/8.0.5.00390T202606231321L \
-            -destination qnx/qnx800-141 \
-            -cleanInstall
+        -installBaseline com.qnx.qnx800/8.0.0.00141T202311271501L \
+        -installPackage com.qnx.qnx800.host.win.x86_64=0.0.1.02005T202411230033L \
+        -installPackage com.qnx.qnx800.host.linux.x86_64=0.0.1.00135T202311191043L \
+        -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
+        -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
+        -destination qnx/qnx-8.0.0 \
+        -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -deploySdpInstallation qnx/qnx800-141 \
+        -deploySdpInstallation qnx/qnx-8.0.0 \
         -deployLicense $LICENSE_KEY \
-        -installationDeployAs qnx/qnx800-141-deployment
+        -installationDeployAs qnx/qnx-8.0.0-deployment
 
-Finally, create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
+    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
+        -installBaseline com.qnx.qnx800/8.0.0.00141T202311271501L \
+        -installPackage com.qnx.qnx800.host.win.x86_64=0.0.1.02005T202411230033L \
+        -installPackage com.qnx.qnx800.host.linux.x86_64=0.0.1.00135T202311191043L \
+        -installPackage com.qnx.qnx800.target.qemuvirt/0.2.1.00087T202507241124L \
+        -installPackage com.qnx.qnx800.target.driver.virtio.devc/0.1.1.00011T202411230100L \
+        -installPackage com.qnx.qnx800.patchset805/8.0.5.00390T202606231321L \
+        -destination qnx/qnx-8.0.5 \
+        -cleanInstall
+    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
+        -deploySdpInstallation qnx/qnx-8.0.5 \
+        -deployLicense $LICENSE_KEY \
+        -installationDeployAs qnx/qnx-8.0.5-deployment
+
+Finally, create archives of the deployments (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
 
     cd $HOME
-    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx800-141-deployment.tar.zst -C qnx/qnx800-141-deployment/ qnx800-141
-    aws s3 cp qnx/qnx800-141-deployment.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst
+    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx-8.0.0.tar.zst -C qnx/qnx-8.0.0-deployment/ qnx-8.0.0
+    aws s3 cp qnx/qnx-8.0.0.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx-8.0.0.tar.zst
+
+    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx-8.0.5.tar.zst -C qnx/qnx-8.0.5-deployment/ qnx-8.0.5
+    aws s3 cp qnx/qnx-8.0.5.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx-8.0.5.tar.zst
 
 On CI/CD hosts we use a Python script to setup the toolchain:
 
 .. code-block::
 
     cd $HOME
-    ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst .
-    source qnx/qnx800-141/qnxsdp-env.sh
+    ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx-8.0.5.tar.zst .
+    source qnx/qnx-8.0.5/qnxsdp-env.sh
     qcc -v
 
 It's also possible to use ``tar`` directly, but it can be problematic on Windows hosts.
@@ -391,6 +404,6 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
 .. code-block::
 
     cd $HOME
-    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx800-141-deployment.tar.zst - | tar -x --zstd -f-
-    source qnx/qnx800-141/qnxsdp-env.sh
+    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx-8.0.5-deployment.tar.zst - | tar -x --zstd -f-
+    source qnx/qnx-8.0.5/qnxsdp-env.sh
     qcc -v

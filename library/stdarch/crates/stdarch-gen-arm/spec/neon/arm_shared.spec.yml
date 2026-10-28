@@ -163,6 +163,8 @@ intrinsics:
           - - a
             - b
 
+  # Ferrocene addition: Only mark vorrq_u8 as prevalidated; this is needed for
+  # `is_ascii_neon()` in core
   - name: "vorr{neon_type.no}"
     doc: "Vector bitwise or (immediate, inclusive)"
     arguments: ["a: {neon_type}", "b: {neon_type}"]
@@ -173,8 +175,26 @@ intrinsics:
       - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [orr]]}]]
       - *neon-not-arm-stable
       - *neon-cfg-arm-unstable
-      # Ferrocene addition
       - 'ferrocene::prevalidated'
+    safety: safe
+    types:
+      - uint8x16_t
+    compose:
+      - FnCall:
+          - simd_or
+          - - a
+            - b
+
+  - name: "vorr{neon_type.no}"
+    doc: "Vector bitwise or (immediate, inclusive)"
+    arguments: ["a: {neon_type}", "b: {neon_type}"]
+    return_type: "{neon_type}"
+    attr:
+      - *neon-v7
+      - FnCall: [cfg_attr, [*test-is-arm, {FnCall: [assert_instr, [vorr]]}]]
+      - FnCall: [cfg_attr, [*neon-target-aarch64-arm64ec, {FnCall: [assert_instr, [orr]]}]]
+      - *neon-not-arm-stable
+      - *neon-cfg-arm-unstable
     safety: safe
     types:
       - int8x8_t
@@ -184,7 +204,7 @@ intrinsics:
       - int32x2_t
       - int32x4_t
       - uint8x8_t
-      - uint8x16_t
+      #- uint8x16_t
       - uint16x4_t
       - uint16x8_t
       - uint32x2_t

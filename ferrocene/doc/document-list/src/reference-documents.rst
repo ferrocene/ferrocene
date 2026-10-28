@@ -12,6 +12,8 @@ Reference Documents
      - Version
    * - |iec_61508_doc|
      - |iec_61508_ref|
+   * - |en_50716_doc|
+     - |en_50716_ref|
    * - |iso_9001_doc|
      - |iso_9001_ref|
    * - |iso_26262_doc|

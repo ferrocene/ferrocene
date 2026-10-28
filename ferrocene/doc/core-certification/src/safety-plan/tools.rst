@@ -134,7 +134,7 @@ Compiler built-in functions
 
 .. Most compiler built-in functions are on core. There is one in std and none in alloc.
 
-There are functions in the certified core library that are "compiler built-in”. That means they are not implemented in the core library codebase but in the compiler codebase.
+There are some functions in the certified libraries which are "compiler built-in”. That means they are not implemented in the Rust standard library codebase but in the compiler codebase.
 
 They fall in two categories:
 

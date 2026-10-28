@@ -21,6 +21,10 @@ New features
 * Added a new ``[ferrocene::requires_validation]`` attribute, which can be applied to trait methods
   to require all implementations to be validated.
 
+* Added 2 functions to the certified subset
+    * `slice::as_chunks_mut`
+    * `slice::as_chunks_unchecked_mut`
+
 * Two new targets are now supported and qualified for safety critical use:
 
   * :target-with-tuple:`thumbv8m.main-none-eabi`

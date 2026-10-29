@@ -23,8 +23,8 @@ from more_itertools import peekable
 had_error = False
 
 
-def error(msg):
-    print("error:", msg)
+def error(*args):
+    print("error:", *args)
     global had_error
     had_error = True
 
@@ -68,9 +68,9 @@ test_changes = peekable(cmd_capture(diff_tests).splitlines())
 file = None
 lineno = 0
 changes: list[DiffKind, str] = []
-test_changemap = {}
-missing_annotations = {}
-annotations = {}
+test_changemap = []
+missing_annotations = []
+annotations = []
 
 Span = namedtuple("Span", ["file", "line"])
 
@@ -79,7 +79,7 @@ for line in test_changes:
         # Record the file we just finished parsing.
         if changes:
             assert file, "saw changes for unknown file"
-            test_changemap[file] = changes
+            test_changemap.append((file, changes))
         # Now parse the header for the new file.
         file, changes, lineno = line.split()[2], [], 0
         for _ in range(4):
@@ -95,14 +95,14 @@ for line in test_changes:
         span = Span(file, lineno)
         id = next(reversed(change.split(" ")))
         if id.startswith("um_rustc"):
-            annotations[id] = span, ""
+            annotations.append((span, id, ""))
             continue
         # Next line is the section name it corresponds to.
         section = test_changes.peek()
         if not ((section[0] == "+") and section[1:].lstrip().startswith("//")):
-            missing_annotations[span] = id
+            missing_annotations.append((span, id))
         else:
-            annotations[id] = span, section.split(" ", 1)[1]
+            annotations.append((span, id, section.split(" ", 1)[1]))
             next(test_changes)  # discard section
         continue
 
@@ -112,7 +112,7 @@ if missing_annotations:
     error(
         f"found {len(missing_annotations)} ferrocene-annotations not followed by section name!"
     )
-    for span, annotation in missing_annotations.items():
+    for span, annotation in missing_annotations:
         print("%s:%d" % span, annotation)
 
 
@@ -147,7 +147,7 @@ def validate_annotations():
             f"error: {matrix} not found. try running './x build traceaqbility-matrix'."
         )
 
-    for id, (span, name) in annotations.items():
+    for span, id, name in annotations:
         if id.startswith("um_rustc_"):
             if id not in cli_ids:
                 error("Unknown CLI spec id:", id)
@@ -155,8 +155,8 @@ def validate_annotations():
             error(f"Unknown section '{id}'!")
         elif name.lower() != sections[id].lower():
             error(
-                "Incorrect section name on %s:%d:" % span,
-                f"Expected '{sections[id]}', found '{name}'",
+                "Incorrect section name in %s:" % span.file,
+                f"{id}: Expected title '{sections[id]}', found '{name}'",
             )
 
 
@@ -236,7 +236,7 @@ for kind in ["A", "D", "R"]:
         print(f"{kind}\t{p}")
 
 print("\nPrinting all changed tests")
-for f, changes in test_changemap.items():
+for f, changes in test_changemap:
     print(f)
     print("\n".join(kind + change for kind, change in changes))
 

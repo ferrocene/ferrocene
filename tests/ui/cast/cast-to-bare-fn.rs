@@ -9,5 +9,5 @@ fn main() {
     y(x());
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

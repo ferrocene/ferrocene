@@ -9,7 +9,7 @@ extern "C" {
 fn main() {}
 
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
 //
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

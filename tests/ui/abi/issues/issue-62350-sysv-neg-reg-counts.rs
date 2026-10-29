@@ -42,3 +42,6 @@ fn test() {
 pub fn main() {
     test();
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Block Functions

@@ -33,7 +33,7 @@ fn main() {}
 // External Blocks
 //
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
 //
 // ferrocene-annotations: fls_jeoas4n6su4
 // Trait and Lifetime Bounds

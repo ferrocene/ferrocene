@@ -36,3 +36,6 @@ fn main() {
 
     assert_eq!(((&(C2 as u16), &C2, &C2, &C2), (C2 as u16, C2, C2, C2)), (d, d_));
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Block Functions

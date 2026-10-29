@@ -19,3 +19,6 @@ const extern "C" fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Block Functions

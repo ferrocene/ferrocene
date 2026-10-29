@@ -84,8 +84,5 @@ fn aapcs(f: extern "aapcs" fn(i32, ...)) {
     f(22, 44);
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
-//
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

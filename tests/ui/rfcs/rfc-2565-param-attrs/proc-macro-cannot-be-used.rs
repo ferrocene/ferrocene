@@ -73,7 +73,9 @@ fn main() {}
 // ferrocene-annotations: fls_l21tjqjkkaa0
 // Associated Items
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
 // ferrocene-annotations: fls_xztr1kebz8bo
 // Function Pointer Types
 // ferrocene-annotations: fls_tjyexqrx0fx5

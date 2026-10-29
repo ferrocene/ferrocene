@@ -8,6 +8,7 @@ ISO 26262 Applicable clauses
 .. list-table::
    :align: left
    :header-rows: 1
+   :widths: 10 10 20
 
    * - Clause
      - Applicable
@@ -15,10 +16,11 @@ ISO 26262 Applicable clauses
    * - 2-5 Overall Safety Management
      - Yes
      -
-   * - 2-6 Project Dependent Safety M.
+   * - 2-6 Project Dependent Safety Management
      - Yes
      -
-   * - 2-7 Production-Operation-Servi
+   * - | 2-7 Safety management regarding production,
+       | operation, service and decommissioning
      - Yes
      -
    * - 3-5 Item Definition
@@ -30,7 +32,7 @@ ISO 26262 Applicable clauses
    * - 3-7 Functional Safety Concept
      - No
      - SW SEooC, no Item level
-   * - 4-5 Product Development SYS Lev
+   * - 4-5 Product Development System Level
      - No
      - SW SEooC, no system level
    * - 4-6 Technical Safety Concept
@@ -42,58 +44,59 @@ ISO 26262 Applicable clauses
    * - 4-8 Safety Validation
      - No
      - SW SEooC, no system level
-   * - 5-5 Development on HW Level
+   * - 5-5 Development on Hardware Level
      - No
      - SW SEooC, no hardware level
-   * - 5-6 Spec of HW Safety Requirem.
+   * - 5-6 Spec of Hardware Safety Requirem.
      - No
      - SW SEooC, no hardware level
    * - 5-7 Hardware Design
      - No
      - SW SEooC, no hardware level
-   * - 5-8 Evaluation of HW Metrics
+   * - 5-8 Evaluation of Hardware Metrics
      - No
      - SW SEooC, no hardware level
    * - 5-9 Safety Goal Violations
      - No
      - SW SEooC, no hardware level
-   * - 5-10 HW Integration and Verifi.
+   * - 5-10 Hardware Integration and Verification
      - No
      - SW SEooC, no hardware level
    * - 5-C Architectural Metrics
      - No
      - SW SEooC, no hardware level
-   * - 6-5Product Development SW Level
+   * - 6-5 Product Development Software Level
      - Yes
      -
-   * - 6-6 SW Safety Requirements
+   * - 6-6 Software Safety Requirements
      - Yes
      -
-   * - 6-7 SW Architectural Design
+   * - 6-7 Software Architectural Design
      - Yes
      -
-   * - 6-8 SW Unit Design and Implementation
+   * - 6-8 Software Unit Design and Implementation
      - Yes
      -
-   * - 6-9 SW Unit Verification
+   * - 6-9 Software Unit Verification
      - Yes
      -
-   * - 6-10 SW Integration&Verificatio
+   * - 6-10 Software Integration and Verification
      - Yes
      -
-   * - 6-11 Testing of Embedded SW
+   * - 6-11 Testing of Embedded Software
      - Yes
      -
    * - 6-C Configurable Software
      - No
-     - .. include:: ../../partials/na-no-config.rst
-   * - 7-5 Planning for P, O, S, D
+     - .. include:: ../../partials/na-no-config-table.rst
+   * - | 7-5 Planning for production, operation,
+       | service and decommissioning
      - No
      - SW SEooC, no hardware level
    * - 7-6 Production
      - No
      - SW SEooC, no hardware level
-   * - 7-7 Operation, Service & Decom.
+   * - 7-7 Operation, Service & Decomisioning
      - Tailored
      - Only Field Monitoring and Safety instructions applicable
    * - 8-5 Interfaces
@@ -114,13 +117,13 @@ ISO 26262 Applicable clauses
    * - 8-10 Documentation Management
      - Yes
      -
-   * - 8-11 Use of Softwaretools
+   * - 8-11 Use of Software tools
      - Yes
      -
-   * - 8-12 Qualification of SW Compo 
+   * - 8-12 Qualification of Software Composition
      - No
      - Qualification not applied, handled as new development
-   * - 8-13 Evaluation of HW Elements
+   * - 8-13 Evaluation of Hardware Elements
      - No
      - SW SEooC, no hardware level
    * - 8-14 Proven in Use Argument
@@ -156,7 +159,7 @@ ISO 26262 Applicable clauses
    * - 12-8 Hazard Analysis and Risk A
      - No
      - No motorcycles in scope
-   * - 12-9 Vehicle Integration&Testing
+   * - 12-9 Vehicle Integration and Testing
      - No
      - No motorcycles in scope
    * - 12-10 Safety Validation

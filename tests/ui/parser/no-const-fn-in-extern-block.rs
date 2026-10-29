@@ -12,7 +12,7 @@ fn main() {}
 // External Blocks
 //
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
 //
 // ferrocene-annotations: fls_qcb1n9c0e5hz
 // Functions

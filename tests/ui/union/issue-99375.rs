@@ -28,8 +28,8 @@ fn main() {}
 // ferrocene-annotations: fls_9ucqbbd0s2yo
 // Struct Types
 //
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
 //
 // ferrocene-annotations: fls_7nv8ualeaqe3
 // Where Clauses

@@ -7,7 +7,7 @@ extern "C" {
 }
 
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
 //
 // ferrocene-annotations: fls_8jb3sjqamdpu
 // Program Entry Point

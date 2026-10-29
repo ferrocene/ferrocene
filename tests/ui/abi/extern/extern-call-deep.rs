@@ -25,3 +25,6 @@ pub fn main() {
     println!("result = {:?}", result);
     assert_eq!(result, 1000);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External block functions

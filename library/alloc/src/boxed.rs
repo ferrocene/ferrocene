@@ -235,7 +235,7 @@ pub use thin::ThinBox;
 // compiler or ICEs will happen.
 pub struct Box<
     T: ?Sized,
-    #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global,
+    #[stable(feature = "allocator_api", since = "1.100.0")] A: Allocator = Global,
 >(Unique<T>, A);
 
 /// Monomorphic function for allocating an uninit `Box`.
@@ -372,12 +372,12 @@ impl<T> Box<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// let five = Box::try_new(5)?;
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new(x: T) -> Result<Self, AllocError> {
         Self::try_new_in(x, Global)
@@ -389,7 +389,7 @@ impl<T> Box<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// let mut five = Box::<u32>::try_new_uninit()?;
     /// // Deferred initialization:
@@ -399,7 +399,7 @@ impl<T> Box<T> {
     /// assert_eq!(*five, 5);
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_uninit() -> Result<Box<mem::MaybeUninit<T>>, AllocError> {
         Box::try_new_uninit_in(Global)
@@ -414,7 +414,7 @@ impl<T> Box<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// let zero = Box::<u32>::try_new_zeroed()?;
     /// let zero = unsafe { zero.assume_init() };
@@ -424,7 +424,7 @@ impl<T> Box<T> {
     /// ```
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_zeroed() -> Result<Box<mem::MaybeUninit<T>>, AllocError> {
         Box::try_new_zeroed_in(Global)
@@ -439,20 +439,15 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::System;
     ///
     /// let five = Box::new_in(5, System);
     /// ```
     #[cfg(not(no_global_oom_handling))]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[must_use]
     #[inline]
-    pub fn new_in(x: T, alloc: A) -> Self
-    where
-        A: Allocator,
-    {
+    pub fn new_in(x: T, alloc: A) -> Self {
         let mut boxed = Self::new_uninit_in(alloc);
         boxed.write(x);
         // SAFETY: Initialised by the above.
@@ -467,19 +462,16 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
     /// let five = Box::try_new_in(5, System)?;
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
-    pub fn try_new_in(x: T, alloc: A) -> Result<Self, AllocError>
-    where
-        A: Allocator,
-    {
+    pub fn try_new_in(x: T, alloc: A) -> Result<Self, AllocError> {
         let mut boxed = Self::try_new_uninit_in(alloc)?;
         boxed.write(x);
         // SAFETY: Initialised by the above.
@@ -491,7 +483,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -502,13 +494,10 @@ impl<T, A: Allocator> Box<T, A> {
     ///
     /// assert_eq!(*five, 5)
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[cfg(not(no_global_oom_handling))]
     #[must_use]
-    pub fn new_uninit_in(alloc: A) -> Box<mem::MaybeUninit<T>, A>
-    where
-        A: Allocator,
-    {
+    pub fn new_uninit_in(alloc: A) -> Box<mem::MaybeUninit<T>, A> {
         let layout = Layout::new::<mem::MaybeUninit<T>>();
         // NOTE: Prefer match over unwrap_or_else since closure sometimes not inlineable.
         // That would make code size bigger.
@@ -524,7 +513,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -536,11 +525,8 @@ impl<T, A: Allocator> Box<T, A> {
     /// assert_eq!(*five, 5);
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
-    pub fn try_new_uninit_in(alloc: A) -> Result<Box<mem::MaybeUninit<T>, A>, AllocError>
-    where
-        A: Allocator,
-    {
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
+    pub fn try_new_uninit_in(alloc: A) -> Result<Box<mem::MaybeUninit<T>, A>, AllocError> {
         let ptr = if T::IS_ZST {
             NonNull::dangling()
         } else {
@@ -560,7 +546,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -571,13 +557,10 @@ impl<T, A: Allocator> Box<T, A> {
     /// ```
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[cfg(not(no_global_oom_handling))]
     #[must_use]
-    pub fn new_zeroed_in(alloc: A) -> Box<mem::MaybeUninit<T>, A>
-    where
-        A: Allocator,
-    {
+    pub fn new_zeroed_in(alloc: A) -> Box<mem::MaybeUninit<T>, A> {
         let layout = Layout::new::<mem::MaybeUninit<T>>();
         // NOTE: Prefer match over unwrap_or_else since closure sometimes not inlineable.
         // That would make code size bigger.
@@ -597,7 +580,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -609,11 +592,8 @@ impl<T, A: Allocator> Box<T, A> {
     /// ```
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
-    #[unstable(feature = "allocator_api", issue = "32838")]
-    pub fn try_new_zeroed_in(alloc: A) -> Result<Box<mem::MaybeUninit<T>, A>, AllocError>
-    where
-        A: Allocator,
-    {
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
+    pub fn try_new_zeroed_in(alloc: A) -> Result<Box<mem::MaybeUninit<T>, A>, AllocError> {
         let ptr = if T::IS_ZST {
             NonNull::dangling()
         } else {
@@ -635,13 +615,13 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     /// use std::alloc::System;
     ///
     /// let x = Box::pin_in(1, System);
     /// ```
     #[cfg(not(no_global_oom_handling))]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[must_use]
     #[inline(always)]
     pub fn pin_in(x: T, alloc: A) -> Pin<Self>
@@ -687,8 +667,6 @@ impl<T, A: Allocator> Box<T, A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(box_take)]
-    ///
     /// let c = Box::new(5);
     ///
     /// // take the value out of the box
@@ -699,7 +677,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// let c = Box::write(uninit, 6);
     /// assert_eq!(*c, 6);
     /// ```
-    #[unstable(feature = "box_take", issue = "147212")]
+    #[stable(feature = "box_take", since = "1.100.0")]
     pub fn take(boxed: Self) -> (T, Box<mem::MaybeUninit<T>, A>) {
         // SAFETY: Reading out an initialised value & leaving behind a
         // box with uninit contents.
@@ -727,17 +705,21 @@ impl<T, A: Allocator> Box<T, A> {
     /// assert_eq!(*new, 14);
     /// ```
     #[cfg(not(no_global_oom_handling))]
-    #[stable(feature = "smart_pointer_map", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "smart_pointer_map", since = "1.100.0")]
     pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> Box<U, A> {
         let (value, allocation) = Box::take(this);
         let (raw, alloc) = Box::into_non_null_with_allocator(allocation);
         if size_of::<T>() == size_of::<U>() && align_of::<T>() == align_of::<U>() {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: We checked that the memory requirements are the same for both types
+            // and `raw` is already a valid pointer for the requisite memory.
             let allocation = unsafe { Box::from_non_null_in(raw.cast::<MaybeUninit<U>>(), alloc) };
             Box::write(allocation, f(value))
         } else {
-            // ignore-tidy-undocumented-unsafe
-            unsafe { alloc.deallocate(raw.cast(), Layout::for_value(&value)) }
+            if size_of::<T>() != 0 {
+                // SAFETY: `raw` isn't dangling since it points to a non-zero-sized
+                // allocation and is never used again after this point.
+                unsafe { alloc.deallocate(raw.cast(), Layout::for_value(&value)) }
+            }
             Box::new_in(f(value), alloc)
         }
     }
@@ -774,12 +756,16 @@ impl<T, A: Allocator> Box<T, A> {
         let (raw, alloc) = Box::into_non_null_with_allocator(allocation);
         if size_of::<T>() == size_of::<R::Output>() && align_of::<T>() == align_of::<R::Output>() {
             let allocation =
-                // ignore-tidy-undocumented-unsafe
+                // SAFETY: We checked that the memory requirements are the same for both types
+                // and `raw` is already a valid pointer for the requisite memory.
                 unsafe { Box::from_non_null_in(raw.cast::<MaybeUninit<R::Output>>(), alloc) };
             try { Box::write(allocation, f(value)?) }
         } else {
-            // ignore-tidy-undocumented-unsafe
-            unsafe { alloc.deallocate(raw.cast(), Layout::for_value(&value)) }
+            if size_of::<T>() != 0 {
+                // SAFETY: `raw` isn't dangling since it points to a non-zero-sized
+                // allocation and is never used again after this point.
+                unsafe { alloc.deallocate(raw.cast(), Layout::for_value(&value)) }
+            }
             try { Box::new_in(f(value)?, alloc) }
         }
     }
@@ -813,13 +799,12 @@ impl<T: ?Sized + CloneToUninit> Box<T> {
     ///
     /// ```
     /// #![feature(clone_from_ref)]
-    /// #![feature(allocator_api)]
     ///
     /// let hello: Box<str> = Box::try_clone_from_ref("hello")?;
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
     #[unstable(feature = "clone_from_ref", issue = "149075")]
-    //#[unstable(feature = "allocator_api", issue = "32838")]
+    //#[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_clone_from_ref(src: &T) -> Result<Box<T>, AllocError> {
         Box::try_clone_from_ref_in(src, Global)
@@ -835,7 +820,6 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     ///
     /// ```
     /// #![feature(clone_from_ref)]
-    /// #![feature(allocator_api)]
     ///
     /// use std::alloc::System;
     ///
@@ -843,7 +827,7 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     /// ```
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "clone_from_ref", issue = "149075")]
-    //#[unstable(feature = "allocator_api", issue = "32838")]
+    //#[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[must_use]
     #[inline]
     pub fn clone_from_ref_in(src: &T, alloc: A) -> Box<T, A> {
@@ -862,7 +846,6 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     ///
     /// ```
     /// #![feature(clone_from_ref)]
-    /// #![feature(allocator_api)]
     ///
     /// use std::alloc::System;
     ///
@@ -870,7 +853,7 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
     #[unstable(feature = "clone_from_ref", issue = "149075")]
-    //#[unstable(feature = "allocator_api", issue = "32838")]
+    //#[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_clone_from_ref_in(src: &T, alloc: A) -> Result<Box<T, A>, AllocError> {
         struct DeallocDropGuard<'a, A: Allocator>(Layout, &'a A, NonNull<u8>);
@@ -924,7 +907,7 @@ impl<T> Box<[T]> {
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[must_use]
     pub fn new_uninit_slice(len: usize) -> Box<[mem::MaybeUninit<T>]> {
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `len` is exactly the capacity of this `RawVec`.
         unsafe { RawVec::with_capacity(len).into_box(len) }
     }
 
@@ -948,7 +931,7 @@ impl<T> Box<[T]> {
     #[stable(feature = "new_zeroed_alloc", since = "1.92.0")]
     #[must_use]
     pub fn new_zeroed_slice(len: usize) -> Box<[mem::MaybeUninit<T>]> {
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `len` is exactly the capacity of this `RawVec`.
         unsafe { RawVec::with_capacity_zeroed(len).into_box(len) }
     }
 
@@ -958,7 +941,7 @@ impl<T> Box<[T]> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// let mut values = Box::<[u32]>::try_new_uninit_slice(3)?;
     /// // Deferred initialization:
@@ -970,7 +953,7 @@ impl<T> Box<[T]> {
     /// assert_eq!(*values, [1, 2, 3]);
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_uninit_slice(len: usize) -> Result<Box<[mem::MaybeUninit<T>]>, AllocError> {
         let ptr = if T::IS_ZST || len == 0 {
@@ -982,7 +965,10 @@ impl<T> Box<[T]> {
             };
             Global.allocate(layout)?.cast()
         };
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `ptr` was just allocated with `Global` with the layout for an array of length
+        // `len`, and the layout creation would have failed if `len` overflowed an isize.
+        // `into_box` is sound to call since `len` corresponds to the length of the just-created
+        // `RawVec`.
         unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, Global).into_box(len)) }
     }
 
@@ -995,7 +981,7 @@ impl<T> Box<[T]> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// let values = Box::<[u32]>::try_new_zeroed_slice(3)?;
     /// let values = unsafe { values.assume_init() };
@@ -1005,7 +991,7 @@ impl<T> Box<[T]> {
     /// ```
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_zeroed_slice(len: usize) -> Result<Box<[mem::MaybeUninit<T>]>, AllocError> {
         let ptr = if T::IS_ZST || len == 0 {
@@ -1017,7 +1003,10 @@ impl<T> Box<[T]> {
             };
             Global.allocate_zeroed(layout)?.cast()
         };
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `ptr` was just allocated with `Global` with the layout for an array of length
+        // `len`, and the layout creation would have failed if `len` overflowed an isize.
+        // `into_box` is sound to call since `len` corresponds to the length of the just-created
+        // `RawVec`.
         unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, Global).into_box(len)) }
     }
 }
@@ -1028,7 +1017,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -1042,10 +1031,10 @@ impl<T, A: Allocator> Box<[T], A> {
     /// assert_eq!(*values, [1, 2, 3])
     /// ```
     #[cfg(not(no_global_oom_handling))]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[must_use]
     pub fn new_uninit_slice_in(len: usize, alloc: A) -> Box<[mem::MaybeUninit<T>], A> {
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `len` is exactly the capacity of this `RawVec`.
         unsafe { RawVec::with_capacity_in(len, alloc).into_box(len) }
     }
 
@@ -1058,7 +1047,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -1070,10 +1059,10 @@ impl<T, A: Allocator> Box<[T], A> {
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
     #[cfg(not(no_global_oom_handling))]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[must_use]
     pub fn new_zeroed_slice_in(len: usize, alloc: A) -> Box<[mem::MaybeUninit<T>], A> {
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `len` is exactly the capacity of this `RawVec`.
         unsafe { RawVec::with_capacity_zeroed_in(len, alloc).into_box(len) }
     }
 
@@ -1083,7 +1072,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -1097,7 +1086,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// assert_eq!(*values, [1, 2, 3]);
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_uninit_slice_in(
         len: usize,
@@ -1112,7 +1101,10 @@ impl<T, A: Allocator> Box<[T], A> {
             };
             alloc.allocate(layout)?.cast()
         };
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `ptr` was just allocated with `alloc` with the layout for an array of length
+        // `len`, and the layout creation would have failed if `len` overflowed an isize.
+        // `into_box` is sound to call since `len` corresponds to the length of the just-created
+        // `RawVec`.
         unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, alloc).into_box(len)) }
     }
 
@@ -1125,7 +1117,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
+    /// #![feature(allocator_ext)]
     ///
     /// use std::alloc::System;
     ///
@@ -1137,7 +1129,7 @@ impl<T, A: Allocator> Box<[T], A> {
     /// ```
     ///
     /// [zeroed]: mem::MaybeUninit::zeroed
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
     pub fn try_new_zeroed_slice_in(
         len: usize,
@@ -1152,7 +1144,10 @@ impl<T, A: Allocator> Box<[T], A> {
             };
             alloc.allocate_zeroed(layout)?.cast()
         };
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `ptr` was just allocated with `alloc` with the layout for an array of length
+        // `len`, and the layout creation would have failed if `len` overflowed an isize.
+        // `into_box` is sound to call since `len` corresponds to the length of the just-created
+        // `RawVec`.
         unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, alloc).into_box(len)) }
     }
 
@@ -1543,8 +1538,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Recreate a `Box` which was previously converted to a raw pointer
     /// using [`Box::into_raw_with_allocator`]:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::System;
     ///
     /// let x = Box::new_in(5, System);
@@ -1553,7 +1546,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// ```
     /// Manually create a `Box` from scratch by using the system allocator:
     /// ```
-    /// #![feature(allocator_api, slice_ptr_get)]
+    /// #![feature(slice_ptr_get)]
     ///
     /// use std::alloc::{Allocator, Layout, System};
     ///
@@ -1570,7 +1563,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [considerations for unsafe code]: self#considerations-for-unsafe-code
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub unsafe fn from_raw_in(raw: *mut T, alloc: A) -> Self {
         // SAFETY: Upheld by caller.
@@ -1601,8 +1594,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Recreate a `Box` which was previously converted to a `NonNull` pointer
     /// using [`Box::into_non_null_with_allocator`]:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::System;
     ///
     /// let x = Box::new_in(5, System);
@@ -1611,8 +1602,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// ```
     /// Manually create a `Box` from scratch by using the system allocator:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::{Allocator, Layout, System};
     ///
     /// unsafe {
@@ -1627,7 +1616,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [considerations for unsafe code]: self#considerations-for-unsafe-code
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub unsafe fn from_non_null_in(raw: NonNull<T>, alloc: A) -> Self {
         // SAFETY: guaranteed by the caller.
@@ -1654,8 +1643,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Converting the raw pointer back into a `Box` with [`Box::from_raw_in`]
     /// for automatic cleanup:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::System;
     ///
     /// let x = Box::new_in(String::from("Hello"), System);
@@ -1665,8 +1652,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Manual cleanup by explicitly running the destructor and deallocating
     /// the memory:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::{Allocator, Layout, System};
     /// use std::ptr::{self, NonNull};
     ///
@@ -1681,7 +1666,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     #[must_use = "losing the pointer will leak memory"]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline]
     pub const fn into_raw_with_allocator(b: Self) -> (*mut T, A) {
@@ -1718,8 +1703,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Converting the `NonNull` pointer back into a `Box` with
     /// [`Box::from_non_null_in`] for automatic cleanup:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::System;
     ///
     /// let x = Box::new_in(String::from("Hello"), System);
@@ -1729,8 +1712,6 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Manual cleanup by explicitly running the destructor and deallocating
     /// the memory:
     /// ```
-    /// #![feature(allocator_api)]
-    ///
     /// use std::alloc::{Allocator, Layout, System};
     ///
     /// let x = Box::new_in(String::from("Hello"), System);
@@ -1743,25 +1724,12 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     #[must_use = "losing the pointer will leak memory"]
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub fn into_non_null_with_allocator(b: Self) -> (NonNull<T>, A) {
         let (ptr, alloc) = Box::into_raw_with_allocator(b);
         // SAFETY: `Box` is guaranteed to be non-null.
         unsafe { (NonNull::new_unchecked(ptr), alloc) }
-    }
-
-    #[unstable(
-        feature = "ptr_internals",
-        issue = "none",
-        reason = "use `Box::leak(b).into()` or `Unique::from(Box::leak(b))` instead"
-    )]
-    #[inline]
-    #[doc(hidden)]
-    pub fn into_unique(b: Self) -> (Unique<T>, A) {
-        let (ptr, alloc) = Box::into_raw_with_allocator(b);
-        // SAFETY: Pointer is valid and unique.
-        unsafe { (Unique::from(&mut *ptr), alloc) }
     }
 
     /// Returns a raw mutable pointer to the `Box`'s contents.
@@ -1902,7 +1870,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     /// Note: this is an associated function, which means that you have
     /// to call it as `Box::allocator(&b)` instead of `b.allocator()`. This
     /// is so that there is no conflict with a method on the inner type.
-    #[unstable(feature = "allocator_api", issue = "32838")]
+    #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub fn allocator(b: &Self) -> &A {
         &b.1
@@ -2014,10 +1982,15 @@ unsafe impl<#[may_dangle] T: ?Sized, A: Allocator> Drop for Box<T, A> {
 
         let ptr = self.0;
 
-        // ignore-tidy-undocumented-unsafe
-        unsafe {
-            let layout = Layout::for_value_raw(ptr.as_ptr());
-            if layout.size() != 0 {
+        // SAFETY: The construction site of the unsized box had ensured for us that the
+        // allocation was made with a valid layout (the size does not overflow an isize,
+        // possibly because the size of the type is 0).
+        let layout = unsafe { Layout::for_value_raw(ptr.as_ptr()) };
+        if layout.size() != 0 {
+            // SAFETY: Any nonzero allocation would have been created with the allocator
+            // of this box and `layout` would fit that allocation. We also are the only ones
+            // responsible for doing this deallocation and know that the pointer must be valid.
+            unsafe {
                 self.1.deallocate(From::from(ptr.cast()), layout);
             }
         }
@@ -2503,7 +2476,7 @@ impl<F: ?Sized + Future + Unpin, A: Allocator> Future for Box<F, A> {
 }
 
 #[stable(feature = "box_error", since = "1.8.0")]
-impl<E: Error> Error for Box<E> {
+impl<E: Error, A: Allocator> Error for Box<E, A> {
     #[allow(deprecated)]
     fn cause(&self) -> Option<&dyn Error> {
         Error::cause(&**self)
@@ -2518,7 +2491,7 @@ impl<E: Error> Error for Box<E> {
     }
 }
 
-#[unstable(feature = "allocator_api", issue = "32838")]
+#[stable(feature = "allocator_api", since = "1.100.0")]
 unsafe impl<T: ?Sized + Allocator, A: Allocator> Allocator for Box<T, A> {
     #[inline]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
@@ -2567,5 +2540,13 @@ unsafe impl<T: ?Sized + Allocator, A: Allocator> Allocator for Box<T, A> {
     ) -> Result<NonNull<[u8]>, AllocError> {
         // SAFETY: the safety contract must be upheld by the caller
         unsafe { (**self).shrink(ptr, old_layout, new_layout) }
+    }
+}
+
+#[unstable(feature = "random", issue = "130703")]
+impl<R: core::random::Rng + ?Sized, A: Allocator> core::random::Rng for Box<R, A> {
+    #[inline]
+    fn fill_bytes(&mut self, bytes: &mut [u8]) {
+        (**self).fill_bytes(bytes)
     }
 }

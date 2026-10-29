@@ -11,7 +11,6 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_index::Idx;
 use rustc_index::bit_set::DenseBitSet;
-use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
 use rustc_middle::mir::visit::*;
 use rustc_middle::mir::*;
@@ -19,7 +18,7 @@ use rustc_middle::ty::{
     self, Instance, InstanceKind, ShimKind, Ty, TyCtxt, TypeFlags, TypeVisitableExt, Unnormalized,
 };
 use rustc_session::config::{DebugInfo, OptLevel};
-use rustc_span::Spanned;
+use rustc_span::{Spanned, bug};
 use tracing::{debug, instrument, trace, trace_span};
 
 use crate::cost_checker::{CostChecker, is_call_like};
@@ -45,18 +44,22 @@ struct CallSite<'tcx> {
 pub struct Inline;
 
 impl<'tcx> crate::MirPass<'tcx> for Inline {
-    fn policy(&self, sess: &rustc_session::Session) -> PassPolicy {
-        let enabled_by_default =
-            sess.opts.unstable_opts.inline_mir.unwrap_or_else(|| match sess.mir_opt_level() {
+    fn policy(&self, ctx: &crate::PassCtx<'_>) -> PassPolicy {
+        match ctx.opts.unstable_opts.inline_mir {
+            Some(enabled) => PassPolicy::optional(enabled),
+            None => PassPolicy::optional(match ctx.mir_opt_level() {
                 0 | 1 => false,
+                // Only inline for `-Copt-level >= 2`, and don't inline
+                // in incremental mode to increase incremental effectiveness.
+                // FIXME: This should be cleaned up to not rely on inspecting the global opt level.
                 2 => {
-                    (sess.opts.optimize == OptLevel::More
-                        || sess.opts.optimize == OptLevel::Aggressive)
-                        && sess.opts.incremental == None
+                    (ctx.opts.optimize == OptLevel::More
+                        || ctx.opts.optimize == OptLevel::Aggressive)
+                        && ctx.opts.incremental.is_none()
                 }
                 _ => true,
-            });
-        PassPolicy::optimization(enabled_by_default)
+            }),
+        }
     }
 
     fn run_pass(&self, tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
@@ -78,7 +81,7 @@ impl ForceInline {
 }
 
 impl<'tcx> crate::MirPass<'tcx> for ForceInline {
-    fn policy(&self, _sess: &rustc_session::Session) -> PassPolicy {
+    fn policy(&self, _ctx: &crate::PassCtx<'_>) -> PassPolicy {
         // Forced inlining is part of MIR semantics.
         PassPolicy::Required
     }
@@ -883,24 +886,13 @@ fn inline_call<'tcx, I: Inliner<'tcx>>(
     // Place could result in two different locations if `f`
     // writes to `i`. To prevent this we need to create a temporary
     // borrow of the place and pass the destination as `*temp` instead.
-    fn dest_needs_borrow(place: Place<'_>) -> bool {
-        for elem in place.projection.iter() {
-            match elem {
-                ProjectionElem::Deref | ProjectionElem::Index(_) => return true,
-                _ => {}
-            }
-        }
-
-        false
-    }
-
-    let dest = if dest_needs_borrow(destination) {
+    //
+    // This must be a raw pointer: a mutable reference could be invalidated by
+    // reading the arguments later, and would be invalid if the destination type
+    // is uninhabited.
+    let dest = if !destination.is_stable_offset() {
         trace!("creating temp for return destination");
-        let dest = Rvalue::Ref(
-            tcx.lifetimes.re_erased,
-            BorrowKind::Mut { kind: MutBorrowKind::Default },
-            destination,
-        );
+        let dest = Rvalue::RawPtr(RawPtrKind::Mut, destination);
         let dest_ty = dest.ty(caller_body, tcx);
         let temp = Place::from(new_call_temp(caller_body, callsite, dest_ty, return_block));
         caller_body[callsite.block].statements.push(Statement::new(

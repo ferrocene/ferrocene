@@ -4,10 +4,10 @@
 
 use rustc_abi::Size;
 use rustc_data_structures::fx::FxHashSet;
-use rustc_middle::bug;
 use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::*;
 use rustc_middle::ty::{self, TyCtxt};
+use rustc_span::bug;
 
 use crate::PassPolicy;
 use crate::patch::MirPatch;
@@ -15,9 +15,9 @@ use crate::patch::MirPatch;
 pub(super) struct UnreachablePropagation;
 
 impl crate::MirPass<'_> for UnreachablePropagation {
-    fn policy(&self, sess: &rustc_session::Session) -> PassPolicy {
+    fn policy(&self, ctx: &crate::PassCtx<'_>) -> PassPolicy {
         // Enable only under -Zmir-opt-level=2 as this can make programs less debuggable.
-        PassPolicy::optimization(sess.mir_opt_level() >= 2)
+        PassPolicy::optional(ctx.mir_opt_level() >= 2)
     }
 
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {

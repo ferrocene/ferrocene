@@ -241,9 +241,9 @@
 // Lints:
 #![warn(deprecated_in_future)]
 #![warn(missing_docs)]
+#![warn(unreachable_pub)]
 #![warn(missing_debug_implementations)]
 #![allow(explicit_outlives_requirements)]
-#![allow(unused_lifetimes)]
 #![allow(internal_features)]
 #![deny(implicit_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -337,7 +337,6 @@
 #![feature(cstr_display)]
 #![feature(cursor_split)]
 #![feature(derive_const)]
-#![feature(drop_guard)]
 #![feature(duration_constants)]
 #![feature(error_generic_member_access)]
 #![feature(error_iter)]
@@ -369,6 +368,7 @@
 #![feature(maybe_dangling)]
 #![feature(maybe_uninit_array_assume_init)]
 #![feature(maybe_uninit_fill)]
+#![feature(once_lazy_lock_get_unchecked)]
 #![feature(panic_can_unwind)]
 #![feature(panic_internals)]
 #![feature(pin_coerce_unsized_trait)]
@@ -400,7 +400,7 @@
 // Library features (alloc):
 // tidy-alphabetical-start
 #![feature(alloc_io)]
-#![feature(allocator_api)]
+#![feature(allocator_ext)]
 #![feature(buf_read_has_data_left)]
 #![feature(clone_from_ref)]
 #![feature(get_mut_unchecked)]
@@ -542,24 +542,24 @@ pub use core::future;
 #[stable(feature = "core_hint", since = "1.27.0")]
 pub use core::hint;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::i8;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::i16;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::i32;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::i64;
 #[stable(feature = "i128", since = "1.26.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::i128;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::intrinsics;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::isize;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::iter;
@@ -580,24 +580,24 @@ pub use core::range;
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use core::result;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::u8;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::u16;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::u32;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::u64;
 #[stable(feature = "i128", since = "1.26.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::u128;
 #[unstable(feature = "unsafe_binders", issue = "130516")]
 pub use core::unsafe_binder;
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future, clippy::legacy_numeric_constants)]
+#[allow(deprecated, clippy::legacy_numeric_constants)]
 pub use core::usize;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -643,6 +643,7 @@ pub mod hash;
 pub mod io;
 pub mod net;
 pub mod num;
+#[allow(unreachable_pub)]
 pub mod os;
 pub mod panic;
 #[unstable(feature = "pattern_type_macro", issue = "123646")]
@@ -715,9 +716,9 @@ pub mod arch {
     pub use std_detect::is_aarch64_feature_detected;
     #[unstable(feature = "stdarch_arm_feature_detection", issue = "111190")]
     pub use std_detect::is_arm_feature_detected;
-    #[unstable(feature = "is_loongarch_feature_detected", issue = "117425")]
+    #[stable(feature = "stdarch_loongarch_feature", since = "1.89.0")]
     pub use std_detect::is_loongarch_feature_detected;
-    #[unstable(feature = "is_riscv_feature_detected", issue = "111192")]
+    #[stable(feature = "riscv_ratified", since = "1.78.0")]
     pub use std_detect::is_riscv_feature_detected;
     #[stable(feature = "stdarch_s390x_feature_detection", since = "1.93.0")]
     pub use std_detect::is_s390x_feature_detected;
@@ -733,6 +734,7 @@ pub mod arch {
 #[stable(feature = "simd_x86", since = "1.27.0")]
 pub use std_detect::is_x86_feature_detected;
 
+#[allow(unreachable_pub)]
 mod sys;
 
 pub mod alloc;
@@ -740,8 +742,16 @@ pub mod alloc;
 // Private support modules
 mod panicking;
 
+<<<<<<< ferrocene/release/1.100
 #[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
 #[path = "../../../ferrocene/library/backtrace-rs/src/lib.rs"]
+||||||| fb9a3389fde
+#[path = "../../backtrace/src/lib.rs"]
+#[allow(dead_code, unused_attributes, implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
+=======
+#[path = "../../backtrace/src/lib.rs"]
+#[allow(implicit_provenance_casts, unsafe_op_in_unsafe_fn)]
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 #[allow(clippy::len_zero, clippy::needless_borrow, clippy::filter_map_next)] // FIXME
 mod backtrace_rs;
 
@@ -753,15 +763,20 @@ pub use core::cfg_select;
     reason = "`concat_bytes` is not stable enough for use and is subject to change"
 )]
 pub use core::concat_bytes;
+#[allow(clippy::useless_attribute)]
+#[expect(
+    ineffective_unstable_reexports,
+    reason = "accepted as stable after accidental stabilization in 1.96, see #154645"
+)]
 #[unstable(feature = "derive_macro_global_path", issue = "154645")]
 pub use core::derive;
+#[unstable(feature = "gca_min_const_items", issue = "132980")]
+pub use core::gca;
 #[stable(feature = "matches_macro", since = "1.42.0")]
-#[allow(deprecated, deprecated_in_future)]
 pub use core::matches;
 #[stable(feature = "core_primitive", since = "1.43.0")]
 pub use core::primitive;
 #[stable(feature = "todo_macro", since = "1.40.0")]
-#[allow(deprecated, deprecated_in_future)]
 pub use core::todo;
 // Re-export built-in macros defined through core.
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
@@ -772,7 +787,7 @@ pub use core::{
 };
 // Re-export macros defined in core.
 #[stable(feature = "rust1", since = "1.0.0")]
-#[allow(deprecated, deprecated_in_future)]
+#[expect(deprecated, reason = "`try! macro")]
 pub use core::{
     assert_eq, assert_ne, debug_assert, debug_assert_eq, debug_assert_ne, r#try, unimplemented,
     unreachable, write, writeln,

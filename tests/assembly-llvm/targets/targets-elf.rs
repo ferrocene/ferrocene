@@ -412,6 +412,9 @@
 //@ revisions: msp430_none_elf
 //@ [msp430_none_elf] compile-flags: --target msp430-none-elf
 //@ [msp430_none_elf] needs-llvm-components: msp430
+//@ revisions: powerpc64_sony_ps3
+//@ [powerpc64_sony_ps3] compile-flags: --target powerpc64-sony-ps3
+//@ [powerpc64_sony_ps3] needs-llvm-components: powerpc
 //@ revisions: powerpc64_unknown_freebsd
 //@ [powerpc64_unknown_freebsd] compile-flags: --target powerpc64-unknown-freebsd
 //@ [powerpc64_unknown_freebsd] needs-llvm-components: powerpc
@@ -826,6 +829,7 @@
 //@ revisions: riscv64gc_unknown_nuttx_elf
 //@ [riscv64gc_unknown_nuttx_elf] compile-flags: --target riscv64gc-unknown-nuttx-elf
 //@ [riscv64gc_unknown_nuttx_elf] needs-llvm-components: riscv
+<<<<<<< ferrocene/release/1.100
 // FIXME: disabled since it requires a custom LLVM until the upstream LLVM adds support for the target (https://github.com/espressif/llvm-project/issues/4)
 /*
     revisions: xtensa_esp32_none_elf
@@ -872,6 +876,52 @@
 //@ [aarch64_rhivos2_linux_gnu] compile-flags: --target aarch64-rhivos2-linux-gnu
 //@ [aarch64_rhivos2_linux_gnu] needs-llvm-components: aarch64
 
+||||||| fb9a3389fde
+// FIXME: disabled since it requires a custom LLVM until the upstream LLVM adds support for the target (https://github.com/espressif/llvm-project/issues/4)
+/*
+    revisions: xtensa_esp32_none_elf
+    [xtensa_esp32_none_elf] compile-flags: --target xtensa-esp32-none-elf
+    [xtensa_esp32_none_elf] needs-llvm-components: xtensa
+    revisions: xtensa_esp32_espidf
+    [xtensa_esp32_espidf] compile-flags: --target xtensa-esp32s2-espidf
+    [xtensa_esp32_espidf] needs-llvm-components: xtensa
+    revisions: xtensa_esp32s2_none_elf
+    [xtensa_esp32s2_none_elf] compile-flags: --target xtensa-esp32s2-none-elf
+    [xtensa_esp32s2_none_elf] needs-llvm-components: xtensa
+    revisions: xtensa_esp32s2_espidf
+    [xtensa_esp32s2_espidf] compile-flags: --target xtensa-esp32s2-espidf
+    [xtensa_esp32s2_espidf] needs-llvm-components: xtensa
+    revisions: xtensa_esp32s3_none_elf
+    [xtensa_esp32s3_none_elf] compile-flags: --target xtensa-esp32s3-none-elf
+    [xtensa_esp32s3_none_elf] needs-llvm-components: xtensa
+    revisions: xtensa_esp32s3_espidf
+    [xtensa_esp32s3_espidf] compile-flags: --target xtensa-esp32s3-espidf
+    [xtensa_esp32s3_espidf] needs-llvm-components: xtensa
+*/
+=======
+//@ revisions: xtensa_esp32_none_elf
+//@ [xtensa_esp32_none_elf] compile-flags: --target xtensa-esp32-none-elf
+//@ [xtensa_esp32_none_elf] needs-llvm-components: xtensa
+//@ revisions: xtensa_esp32_espidf
+//@ [xtensa_esp32_espidf] compile-flags: --target xtensa-esp32s2-espidf
+//@ [xtensa_esp32_espidf] needs-llvm-components: xtensa
+//@ revisions: xtensa_esp32s2_none_elf
+//@ [xtensa_esp32s2_none_elf] compile-flags: --target xtensa-esp32s2-none-elf
+//@ [xtensa_esp32s2_none_elf] needs-llvm-components: xtensa
+//@ revisions: xtensa_esp32s2_espidf
+//@ [xtensa_esp32s2_espidf] compile-flags: --target xtensa-esp32s2-espidf
+//@ [xtensa_esp32s2_espidf] needs-llvm-components: xtensa
+//@ revisions: xtensa_esp32s3_none_elf
+//@ [xtensa_esp32s3_none_elf] compile-flags: --target xtensa-esp32s3-none-elf
+//@ [xtensa_esp32s3_none_elf] needs-llvm-components: xtensa
+//@ revisions: xtensa_esp32s3_espidf
+//@ [xtensa_esp32s3_espidf] compile-flags: --target xtensa-esp32s3-espidf
+//@ [xtensa_esp32s3_espidf] needs-llvm-components: xtensa
+
+// xtensa support requires a more recent LLVM.
+//@ min-llvm-version: 22
+
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 // Sanity-check that each target can produce assembly code.
 
 #![feature(no_core, lang_items)]

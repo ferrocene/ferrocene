@@ -1,6 +1,5 @@
 use std::range::{RangeFrom, RangeToInclusive};
 
-use hir::def_id::DefId;
 use rustc_abi as abi;
 use rustc_abi::Integer::{I8, I32};
 use rustc_abi::Primitive::{self, Float, Int, Pointer};
@@ -9,11 +8,11 @@ use rustc_abi::{
     LayoutCalculatorError, LayoutData, Niche, ReprOptions, Scalar, Size, StructKind, TagEncoding,
     VariantIdx, Variants, WrappingRange,
 };
+use rustc_attr_ir::find_attr;
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_hashes::Hash64;
-use rustc_hir as hir;
-use rustc_hir::find_attr;
+use rustc_hir::def_id::DefId;
 use rustc_index::{Idx as _, IndexVec};
-use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::layout::{
@@ -25,7 +24,7 @@ use rustc_middle::ty::{
     TypeVisitableExt, Unnormalized,
 };
 use rustc_session::{DataTypeKind, FieldInfo, FieldKind, SizeKind, VariantInfo};
-use rustc_span::{Symbol, sym};
+use rustc_span::{Symbol, bug, sym};
 use rustc_structures::Limit;
 use tracing::{debug, instrument};
 
@@ -720,6 +719,18 @@ fn layout_of_uncached<'tcx>(
                 abi::Integer::discr_range_of_repr(tcx, ty, &def.repr(), min.start, max.last)
             };
 
+            // We shouldn't be computing the layout of discrs that fail typeck
+            if def.is_enum() {
+                for v in def.variants() {
+                    if let ty::VariantDiscr::Explicit(def_id) = v.discr
+                        && let Some(local_did) = def_id.as_local()
+                        && let Some(guar) = tcx.typeck(local_did).tainted_by_errors
+                    {
+                        return Err(error(cx, LayoutError::ReferencesError(guar)));
+                    }
+                }
+            }
+
             let discriminants_iter = || {
                 def.is_enum()
                     .then(|| def.discriminants(tcx).map(|(v, d)| (v, d.val)))
@@ -738,7 +749,7 @@ fn layout_of_uncached<'tcx>(
                         .is_sized(tcx, typing_env)
                 });
 
-            let layout = cx
+            let mut layout = cx
                 .calc
                 .layout_of_struct_or_enum(
                     &def.repr(),
@@ -803,6 +814,13 @@ fn layout_of_uncached<'tcx>(
                 if sized_tail < unsized_tail {
                     bug!("unsizing {ty:?} moved tail backwards!\n{layout:?}\n{unsized_layout:?}");
                 }
+            }
+
+            if tcx.is_lang_item(def.did(), LangItem::F16B) {
+                let bfloat = scalar_unit(Primitive::Float(abi::Float::F16B));
+                assert_eq!(layout.size, abi::Float::F16B.size());
+                layout.align = abi::Float::F16B.align(cx);
+                layout.backend_repr = BackendRepr::Scalar(bfloat);
             }
 
             tcx.mk_layout(layout)

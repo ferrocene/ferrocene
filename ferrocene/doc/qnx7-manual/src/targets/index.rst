@@ -7,13 +7,13 @@ Compilation targets overview
 Ferrocene has support for multiple compilation targets and host platforms.
 Targets are categorized into :doc:`levels of support <user-manual:targets/index>`.
 
-This page lists the current support status for QNX7 targets, and individual
-pages with more details are provided for QNX7 Qualified targets.
+This page lists the current support status for QNX 7 targets, and individual
+pages with more details are provided for QNX 7 Qualified targets.
 
 .. _qualified-targets:
 
-Qualified QNX7 targets
-----------------------
+Qualified QNX 7 targets
+-----------------------
 
 
 .. list-table::

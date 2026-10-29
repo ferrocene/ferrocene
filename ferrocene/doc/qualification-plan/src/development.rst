@@ -173,7 +173,7 @@ Dev Phase 3: Code Review
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 During this phase, the changes up to latest commit of a PR must receive an
-approval through GitHub Reviews or unambigious comment by an independent
+approval through GitHub Reviews or unambiguous comment by an independent
 Ferrocene Reviewer. In the case of a PR authored by multiple Ferrocene
 developers, individual developers may review each others changes, but cannot
 approve their own changes. There must be no outstanding request for changes.

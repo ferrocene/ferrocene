@@ -134,7 +134,7 @@ Compiler built-in functions
 
 .. Most compiler built-in functions are on core. There is one in std and none in alloc.
 
-There are functions in the certified core library that are "compiler built-in”. That means they are not implemented in the core library codebase but in the compiler codebase.
+There are some functions in the certified libraries which are "compiler built-in”. That means they are not implemented in the Rust standard library codebase but in the compiler codebase.
 
 They fall in two categories:
 
@@ -154,9 +154,9 @@ Intrinsics
 
 Intrinsics are "implementation details of ``core`` and should not be used outside of the standard library" (quote from the intrinsics module doc-comment).
 
-All instrinsic function are in the ``intrinsics`` module and its submodules.
+All intrinsic function are in the ``intrinsics`` module and its submodules.
 
-They are not availble in stable Rust and therefore cannot be used directly by customers.
+They are not available in stable Rust and therefore cannot be used directly by customers.
 
 At the time of writing there are 395 intrinsic function (``rg "fn" library/core/src/intrinsics``). Not all of them are certified.
 

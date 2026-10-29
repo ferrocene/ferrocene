@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(os.path.abspath("../../qualification-report/exts"))
 
-project = "QNX7 Manual"
+project = "QNX 7 Manual"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
@@ -26,8 +26,8 @@ autosectionlabel_prefix_document = True
 ferrocene_id = "QNXSM"
 
 html_theme = "ferrocene"
-html_title = "QNX7 Manual"
-html_short_title = "QNX7 Manual"
+html_title = "QNX 7 Manual"
+html_short_title = "QNX 7 Manual"
 
 # Do not generate the index pages. We don't need them, and they cause
 # linkchecker to fail due to them including *all* glossary entries, including

@@ -61,7 +61,7 @@ Rust Driver
      - YES
    * - .. id:: RUSTC_ERR_DRIVER_04
      - :id:`RUSTC_UC1_RLIB`, :id:`RUSTC_UC2_STATICLIB`, :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`, :id:`RUSTC_UC6_PROC_MACRO`
-     - Error diagnostics are not correctly emited
+     - Error diagnostics are not correctly emitted
      - Undefined behavior
      - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003` AND :id:`RUSTC_AVD_TEST_007`
      - NO
@@ -283,7 +283,7 @@ Linking
      - YES
    * - .. id:: RUSTC_ERR_LINK_28
      - :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`, :id:`RUSTC_UC6_PROC_MACRO`
-     - Error diagnostics not emmited
+     - Error diagnostics not emitted
      - Invalid or missing code not detected by user may be linked against subsequent stage
      - :id:`RUSTC_AVD_TEST_007`
      - NO
@@ -410,8 +410,7 @@ IEC 61508 Tool Classification
 -----------------------------
 
 Ferrocene provides a development environment capable of compiling and linking
-programs for the target architecture to conform with industrial [|iec_61508_ref|]
-class T3.
+programs for the target architecture to conform with industrial [|iec_61508_ref|] class T3.
 
 IEC 62304 Tool Classification
 -----------------------------
@@ -419,3 +418,9 @@ IEC 62304 Tool Classification
 [|iec_62304_ref|] does not provide an own scheme to classify and qualify tools used in its context, but recommends the application
 of techniques and tools as defined in [|iec_61508_ref|]. Therefore, with the qualification of Ferrocene adhering to an IEC 61508 Tool Classification,
 Ferrocene can be used for development, release and maintenance of medical device software up to Class C.
+
+EN 50716 Tool Classification
+----------------------------
+
+Ferrocene provides a development environment capable of compiling and linking
+programs for the target architecture to conform with railway [|en_50716_ref|] class T3.

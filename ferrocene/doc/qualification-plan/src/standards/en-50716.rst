@@ -1,0 +1,93 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+EN 50716 requirements
+=====================
+
+The following are the requirements of |en_50716_ref| Clause 6.7
+("Support tools and languages").
+
+.. list-table::
+   :header-rows: 1
+
+   * - Clause
+     - ``rustc``
+   * - 6.7.4.1
+     - | N/A: the selection of the tools for a specific project is an activity
+       | of the software lifecycle performed by the user. The information needed
+       | by the user to select ``rustc`` and to demonstrate its compatibility
+       | with the application (supported targets, host environments,
+       | availability over the lifetime) is provided in:
+       | :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
+       | :doc:`Safety Manual - rustc - Usage <safety-manual:rustc/usage>`
+   * - 6.7.4.2
+     - | :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
+       | :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
+   * - 6.7.4.3
+     - | :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
+       | :doc:`Safety Manual - rustc - Usage <safety-manual:rustc/usage>`
+       | :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
+       | :doc:`User Manual <user-manual:index>`
+       | :doc:`Safety Manual - rustc - Degraded environment <safety-manual:rustc/degraded-environment>`
+   * - 6.7.4.4
+     - See sub items below
+   * - 6.7.4.4.a
+     - | N/A: a history of successful use is not used as evidence for this
+       | qualification, method 6.7.4.4.b is applied.
+   * - 6.7.4.4.b
+     - | :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
+       | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+   * - 6.7.4.4.c
+     - N/A: tool diversity is not used as evidence for this qualification, method 6.7.4.4.b is applied.
+   * - 6.7.4.4.d
+     - N/A: tool is not developed according to a safety standard, method 6.7.4.4.b is applied.
+   * - 6.7.4.4.e
+     - | N/A: software is tested according to the users lifecycle, nevertheless method is not applied
+       | and instead method 6.7.4.4.b is applied.
+   * - 6.7.4.5
+     - See sub items below
+   * - 6.7.4.5.a
+     - | :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
+       | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+   * - 6.7.4.5.b
+     - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
+   * - 6.7.4.5.c
+     - | :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
+       | :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
+   * - 6.7.4.5.d
+     - | :doc:`Qualification Plan - Infrastructure <../infrastructure>`
+       | :doc:`Qualification Plan - Build and Testing Process <../ci>`
+   * - 6.7.4.5.e
+     - | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+       | :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
+   * - 6.7.4.5.f
+     - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+   * - 6.7.4.5.g
+     - | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+       | :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
+   * - 6.7.4.6
+     - Intentionally left blank in |en_50716_ref|
+   * - 6.7.4.7
+     - Intentionally left blank in |en_50716_ref|
+   * - 6.7.4.8
+     - Intentionally left blank in |en_50716_ref|
+   * - 6.7.4.9
+     - | N/A: the selection of the tools for a specific project is an activity
+       | of the software lifecycle performed by the user. The information needed
+       | by the user to select ``rustc`` and to demonstrate its compatibility
+       | with the application (supported targets, host environments,
+       | availability over the lifetime) is provided in:
+       | :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
+       | :doc:`Safety Manual - rustc - Usage <safety-manual:rustc/usage>`
+   * - 6.7.4.10
+     - N/A: configuration management including usage of justified versions only is a user responsibility.
+   * - 6.7.4.11
+     - See sub items below
+   * - 6.7.4.11.a
+     - N/A: compatibility with other tools is a user responsibility.
+   * - 6.7.4.11.b
+     - | :doc:`Qualification Plan - Build and Testing Process <../ci>`
+       | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
+       | :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
+   * - 6.7.4.12
+     - N/A: no additional requirements, all applicable clauses have been analyzed above.

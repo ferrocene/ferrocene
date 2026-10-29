@@ -72,8 +72,8 @@ Associated requirement ID: :id:`CORE_AVD_SUBSET_001`.
 
 The user shall always provide the ``-C panic=abort`` option to ``rustc``.
 
-Use matching version of the core library and rustc
---------------------------------------------------
+Use matching versions of the certified libraries and rustc
+----------------------------------------------------------
 
 .. id::  CORE_CSTR_0040_MATCHING_VERSION
 

@@ -13,7 +13,7 @@ note: `instantiation_reachable` is validated
   --> $DIR/post-mono-cross-crate.rs:19:8
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | pub fn instantiation_reachable() {
    |        ^^^^^^^^^^^^^^^^^^^^^^^
 LL |     uninstantiated_generic(Unvalidated);

@@ -65,7 +65,6 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
     // these handlers, e.g. by getting rid of now-redundant name checks.
 
     let handlers: Vec<NamedHandler> = vec![
-<<<<<<< ferrocene/main
         handler(FERROCENE_EXECUTE_IN_TEMP, |config, ln, props| {
             config.set_name_directive(
                 ln,
@@ -73,8 +72,6 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 &mut props.ferrocene_execute_in_temp,
             );
         }),
-||||||| 8a9dd7abdf0
-=======
         handler(ACT_AS_STABLE, |config, ln, props| {
             if ln.name == ACT_AS_STABLE {
                 if ![TestSuite::Ui, TestSuite::UiFullDeps].contains(&config.suite) {
@@ -92,7 +89,6 @@ fn make_directive_handlers_map() -> HashMap<&'static str, Handler> {
                 ));
             }
         }),
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         handler(ERROR_PATTERN, |config, ln, props| {
             config.push_name_value_directive(ln, ERROR_PATTERN, &mut props.error_patterns, |r| r);
         }),

@@ -10,7 +10,7 @@ note: `has_drop_reachable` is validated
   --> $DIR/explicit-drop.rs:18:8
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | pub fn has_drop_reachable() {
    |        ^^^^^^^^^^^^^^^^^^
 LL |

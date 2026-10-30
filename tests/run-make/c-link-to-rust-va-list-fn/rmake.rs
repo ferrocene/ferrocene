@@ -11,19 +11,13 @@
 // FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
 //@ ignore-backends: gcc
 
-<<<<<<< ferrocene/main
 // Ferrocene addition: Various compile and link errors on these platforms:
 // missing <assert.h>, missing libraries, and breakage when not using -fPIC
 //@ ignore-ferrocene.facade
 //@ ignore-nto
 //@ ignore-qnx
 
-use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
-||||||| 8a9dd7abdf0
-use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
-=======
 use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name, target};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 fn main() {
     rustc().edition("2021").input("checkrust.rs").run();

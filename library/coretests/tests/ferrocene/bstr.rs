@@ -1,4 +1,4 @@
-use core::bstr::ByteStr;
+use std::byte_str::ByteStr;
 use std::ops::DerefMut;
 
 // Covers `<core::bstr::ByteStr as core::ops::deref::DerefMut>::deref_mut`.

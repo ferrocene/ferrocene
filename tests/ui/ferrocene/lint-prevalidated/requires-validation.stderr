@@ -9,7 +9,7 @@ note: all implementations of `Trait::requires_validation_no_default` must be val
   --> $DIR/requires-validation.rs:11:8
    |
 LL |     #[ferrocene::requires_validation]
-   |     --------------------------------- required to be validated here
+   |       ------------------------------ required to be validated here
 LL |
 LL |     fn requires_validation_no_default(&self) -> u8;
    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -30,7 +30,7 @@ note: all implementations of `Trait::requires_validation_yes_default` must be va
   --> $DIR/requires-validation.rs:17:8
    |
 LL |     #[ferrocene::requires_validation]
-   |     --------------------------------- required to be validated here
+   |       ------------------------------ required to be validated here
 LL |
 LL |     fn requires_validation_yes_default(&self) -> u8 {
    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -46,7 +46,7 @@ note: all implementations of `Trait::ASSOC_CONST_1` must be validated
   --> $DIR/requires-validation.rs:24:11
    |
 LL |     #[ferrocene::requires_validation]
-   |     --------------------------------- required to be validated here
+   |       ------------------------------ required to be validated here
 LL |
 LL |     const ASSOC_CONST_1: fn() -> u8;
    |           ^^^^^^^^^^^^^
@@ -62,7 +62,7 @@ note: all implementations of `Trait::ASSOC_CONST_2` must be validated
   --> $DIR/requires-validation.rs:30:11
    |
 LL |     #[ferrocene::requires_validation]
-   |     --------------------------------- required to be validated here
+   |       ------------------------------ required to be validated here
 LL |
 LL |     const ASSOC_CONST_2: fn() -> u8 = || 0;
    |           ^^^^^^^^^^^^^

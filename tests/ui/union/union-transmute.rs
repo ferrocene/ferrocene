@@ -23,7 +23,6 @@ fn main() {
         assert_eq!(w.a, 0b1_11111111_00000000000000000000000);
     }
 }
-<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_8wnyln2nmg4y
 // Unsafe Blocks
@@ -42,10 +41,7 @@ fn main() {
 //
 // ferrocene-annotations: fls_xcwfotmq2e5d
 // Field Resolution
-||||||| 8a9dd7abdf0
-=======
 
 //@ reference: items.union.common-storage
 //@ reference: items.union.fields.intro
 //@ reference: type.union.access
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

@@ -785,7 +785,7 @@ fn test_pad_adapter_fmt_write_char_errors() {
 // Covers `<core::bstr::ByteStr as core::fmt::Debug>::fmt`'s try branches
 #[test]
 fn test_bytestr_fmt_errors() {
-    use std::bstr::ByteString;
+    use std::byte_str::ByteString;
     // The first characters are: 狐仙
     let mut buf = b"\xe6\x8b\x90\xe4\xbb\x99\n1\n2\03\x014".to_vec();
     buf.push(223); // xDFFF - Invalid

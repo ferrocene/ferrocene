@@ -47,6 +47,7 @@ pub fn main() {
     }
     let Foo { bar: _ } = foo;
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_fmdn7n7s413d
 // Union Types
@@ -83,3 +84,8 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_9kjpxri0axvg
 // Weak Keywords
+||||||| 8a9dd7abdf0
+=======
+
+//@ reference: items.union.pattern.safety
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

@@ -16,6 +16,7 @@ extern "C" {
 }
 
 fn main() {}
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_aibb2quva4mn
 // Attribute repr
@@ -28,3 +29,8 @@ fn main() {}
 //
 // ferrocene-annotations: fls_s4yt19sptl7d
 // External Statics
+||||||| 8a9dd7abdf0
+=======
+
+//@ reference: type.union.layout
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

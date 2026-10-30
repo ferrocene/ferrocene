@@ -224,7 +224,12 @@ pub(crate) struct TestProps {
 }
 
 mod directives {
+<<<<<<< ferrocene/main
     pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
+||||||| 8a9dd7abdf0
+=======
+    pub(crate) const ACT_AS_STABLE: &str = "act-as-stable";
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub(crate) const ERROR_PATTERN: &str = "error-pattern";
     pub(crate) const REGEX_ERROR_PATTERN: &str = "regex-error-pattern";
     pub(crate) const COMPILE_FLAGS: &str = "compile-flags";

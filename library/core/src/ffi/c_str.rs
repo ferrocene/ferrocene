@@ -176,7 +176,7 @@ impl fmt::Display for FromBytesUntilNulError {
 impl fmt::Debug for CStr {
     #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(crate::bstr::ByteStr::from_bytes(self.to_bytes()), f)
+        fmt::Debug::fmt(crate::byte_str::ByteStr::from_bytes(self.to_bytes()), f)
     }
 }
 
@@ -898,6 +898,6 @@ impl fmt::Debug for Display<'_> {
 #[stable(feature = "cstr_display", since = "CURRENT_RUSTC_VERSION")]
 impl fmt::Display for Display<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(crate::bstr::ByteStr::from_bytes(self.c_str.to_bytes()), f)
+        fmt::Display::fmt(crate::byte_str::ByteStr::from_bytes(self.c_str.to_bytes()), f)
     }
 }

@@ -125,6 +125,17 @@ impl<'a> ExtCtxt<'a> {
         self.ty(span, ast::TyKind::Ptr(self.ty_mt(ty, mutbl)))
     }
 
+    pub fn ty_unit(&self, span: Span) -> Box<ast::Ty> {
+        self.ty(span, ast::TyKind::Tup(ThinVec::new()))
+    }
+
+    pub fn ty_self(&self, span: Span) -> Box<ast::Ty> {
+        self.ty_path(self.path_ident(span, Ident::new(kw::SelfUpper, span)))
+    }
+    pub fn ty_self_ref(&self, span: Span) -> Box<ast::Ty> {
+        self.ty_ref(span, self.ty_self(span), None, ast::Mutability::Not)
+    }
+
     pub fn typaram(
         &self,
         span: Span,
@@ -309,6 +320,9 @@ impl<'a> ExtCtxt<'a> {
     }
     pub fn expr_self(&self, span: Span) -> Box<ast::Expr> {
         self.expr_ident(span, Ident::new(kw::SelfLower, span))
+    }
+    pub fn expr_ident_sym(&self, span: Span, sym: Symbol) -> Box<ast::Expr> {
+        self.expr_ident(span, Ident::new(sym, span))
     }
 
     pub fn expr_macro_call(&self, span: Span, call: Box<ast::MacCall>) -> Box<ast::Expr> {
@@ -720,7 +734,6 @@ impl<'a> ExtCtxt<'a> {
         ident: Ident,
         ty: Box<ast::Ty>,
         body: Option<Box<Expr>>,
-        kind: ast::ConstItemKind,
     ) -> Box<ast::Item> {
         let defaultness = ast::Defaultness::Implicit;
         self.item(
@@ -734,7 +747,6 @@ impl<'a> ExtCtxt<'a> {
                     generics: ast::Generics::default(),
                     ty,
                     body,
-                    kind,
                     define_opaque: None,
                 }
                 .into(),
@@ -766,5 +778,17 @@ impl<'a> ExtCtxt<'a> {
     pub fn attr_nested(&self, inner: AttrItem, span: Span) -> ast::Attribute {
         let g = &self.sess.psess.attr_id_generator;
         attr::mk_attr_from_item(g, inner, None, ast::AttrStyle::Outer, span)
+    }
+
+    pub fn empty_generics(&self, span: Span) -> ast::Generics {
+        ast::Generics {
+            params: ThinVec::new(),
+            where_clause: ast::WhereClause {
+                has_where_token: false,
+                predicates: ThinVec::new(),
+                span,
+            },
+            span,
+        }
     }
 }

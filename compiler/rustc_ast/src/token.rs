@@ -231,7 +231,9 @@ impl Lit {
     /// `Parser::eat_token_lit` (excluding unary negation).
     pub fn from_token(token: &Token) -> Option<Lit> {
         match token.uninterpolate().kind {
-            Ident(name, IdentIsRaw::No) if name.is_bool_lit() => Some(Lit::new(Bool, name, None)),
+            Ident(name, IdentKind::Normal) if name.is_bool_lit() => {
+                Some(Lit::new(Bool, name, None))
+            }
             Literal(token_lit) => Some(token_lit),
             OpenInvisible(InvisibleOrigin::MetaVar(
                 MetaVarKind::Literal | MetaVarKind::Expr { .. },
@@ -307,9 +309,14 @@ impl LitKind {
     }
 }
 
-pub fn ident_can_begin_expr(name: Symbol, span: Span, is_raw: IdentIsRaw) -> bool {
-    let ident_token = Token::new(Ident(name, is_raw), span);
+pub fn ident_can_begin_expr(name: Symbol, span: Span, kind: IdentKind) -> bool {
+    // WARNING: Take care when modifying this function! It will change the stable(!) set of
+    //          tokens that are allowed to match an `expr` nonterminal which is user observable.
 
+    let ident_token = Token::new(Ident(name, kind), span);
+
+    // FIXME: Remove `box` from this list given we officially no longer support box expressions
+    //        (#108471) (needs lang FCP as it affects stable macro matching behavior).
     !ident_token.is_reserved_ident()
         || ident_token.is_path_segment_keyword()
         || [
@@ -339,8 +346,11 @@ pub fn ident_can_begin_expr(name: Symbol, span: Span, is_raw: IdentIsRaw) -> boo
         .contains(&name)
 }
 
-fn ident_can_begin_type(name: Symbol, span: Span, is_raw: IdentIsRaw) -> bool {
-    let ident_token = Token::new(Ident(name, is_raw), span);
+fn ident_can_begin_type(name: Symbol, span: Span, kind: IdentKind) -> bool {
+    // WARNING: Take care when modifying this function! It will change the stable(!) set of
+    //          tokens that are allowed to match an `ty` nonterminal which is user observable.
+
+    let ident_token = Token::new(Ident(name, kind), span);
 
     !ident_token.is_reserved_ident()
         || ident_token.is_path_segment_keyword()
@@ -349,29 +359,23 @@ fn ident_can_begin_type(name: Symbol, span: Span, is_raw: IdentIsRaw) -> bool {
 }
 
 #[derive(PartialEq, Eq, Encodable, Decodable, Hash, Debug, Copy, Clone, StableHash)]
-pub enum IdentIsRaw {
-    No,
-    Yes,
+pub enum IdentKind {
+    Normal,
+    Raw,
 }
 
-impl IdentIsRaw {
+impl IdentKind {
     pub fn to_print_mode_ident(self) -> IdentPrintMode {
         match self {
-            IdentIsRaw::No => IdentPrintMode::Normal,
-            IdentIsRaw::Yes => IdentPrintMode::RawIdent,
+            IdentKind::Normal => IdentPrintMode::Normal,
+            IdentKind::Raw => IdentPrintMode::RawIdent,
         }
     }
     pub fn to_print_mode_lifetime(self) -> IdentPrintMode {
         match self {
-            IdentIsRaw::No => IdentPrintMode::Normal,
-            IdentIsRaw::Yes => IdentPrintMode::RawLifetime,
+            IdentKind::Normal => IdentPrintMode::Normal,
+            IdentKind::Raw => IdentPrintMode::RawLifetime,
         }
-    }
-}
-
-impl From<bool> for IdentIsRaw {
-    fn from(b: bool) -> Self {
-        if b { Self::Yes } else { Self::No }
     }
 }
 
@@ -499,22 +503,22 @@ pub enum TokenKind {
     /// It's recommended to use `Token::{ident,uninterpolate}` and
     /// `Parser::token_uninterpolated_span` to treat regular and interpolated
     /// identifiers in the same way.
-    Ident(Symbol, IdentIsRaw),
+    Ident(Symbol, IdentKind),
     /// This identifier (and its span) is the identifier passed to the
     /// declarative macro. The span in the surrounding `Token` is the span of
     /// the `ident` metavariable in the macro's RHS.
-    NtIdent(sp::Ident, IdentIsRaw),
+    NtIdent(sp::Ident, IdentKind),
 
     /// Lifetime identifier token.
     /// Do not forget about `NtLifetime` when you want to match on lifetime identifiers.
     /// It's recommended to use `Token::{ident,uninterpolate}` and
     /// `Parser::token_uninterpolated_span` to treat regular and interpolated
     /// identifiers in the same way.
-    Lifetime(Symbol, IdentIsRaw),
+    Lifetime(Symbol, IdentKind),
     /// This identifier (and its span) is the lifetime passed to the
     /// declarative macro. The span in the surrounding `Token` is the span of
     /// the `lifetime` metavariable in the macro's RHS.
-    NtLifetime(sp::Ident, IdentIsRaw),
+    NtLifetime(sp::Ident, IdentKind),
 
     /// A doc comment token.
     /// `Symbol` is the doc comment's data excluding its "quotes" (`///`, `/**`, etc)
@@ -635,7 +639,8 @@ impl Token {
 
     /// Recovers a `Token` from an `Ident`. This creates a raw identifier if necessary.
     pub fn from_ast_ident(ident: sp::Ident) -> Self {
-        Token::new(Ident(ident.name, ident.is_raw_guess().into()), ident.span)
+        let kind = if ident.is_raw_guess() { IdentKind::Raw } else { IdentKind::Normal };
+        Token::new(Ident(ident.name, kind), ident.span)
     }
 
     pub fn is_range_separator(&self) -> bool {
@@ -661,13 +666,13 @@ impl Token {
     }
 
     /// Returns `true` if the token can appear at the start of an expression.
-    ///
-    /// **NB**: Take care when modifying this function, since it will change
-    /// the stable set of tokens that are allowed to match an expr nonterminal.
     pub fn can_begin_expr(&self) -> bool {
+        // WARNING: Take care when modifying this function! It will change the stable(!) set of
+        //          tokens that are allowed to match an `expr` nonterminal which is user observable.
+
         match self.uninterpolate().kind {
-            Ident(name, is_raw)              =>
-                ident_can_begin_expr(name, self.span, is_raw), // value name or keyword
+            Ident(name, kind)                 =>
+                ident_can_begin_expr(name, self.span, kind), // value name or keyword
             OpenParen                         | // tuple
             OpenBrace                         | // block
             OpenBracket                       | // array
@@ -695,9 +700,10 @@ impl Token {
     }
 
     /// Returns `true` if the token can appear at the start of a pattern.
-    ///
-    /// Shamelessly borrowed from `can_begin_expr`.
     pub fn can_begin_pattern(&self, pat_kind: NtPatKind) -> bool {
+        // WARNING: Take care when modifying this function! It will change the stable(!) set of
+        //          tokens that are allowed to match an `pat` nonterminal which is user observable.
+
         match &self.uninterpolate().kind {
             // box, ref, mut, and other identifiers (can stricten)
             Ident(..) | NtIdent(..) |
@@ -727,9 +733,15 @@ impl Token {
 
     /// Returns `true` if the token can appear at the start of a type.
     pub fn can_begin_type(&self) -> bool {
+        // WARNING: Take care when modifying this function! It will change the stable(!) set of
+        //          tokens that are allowed to match an `ty` nonterminal which is user observable.
+
+        // FIXME: Arguably, `use` should be included in this list since it can begin bare trait
+        //        object types (consider `use<>+` and `use<T> + Trait` for example).
+
         match self.uninterpolate().kind {
-            Ident(name, is_raw) =>
-                ident_can_begin_type(name, self.span, is_raw), // type name or keyword
+            Ident(name, kind) =>
+                ident_can_begin_type(name, self.span, kind), // type name or keyword
             OpenParen          // tuple
             | OpenBracket      // array
             | Bang             // never
@@ -743,8 +755,6 @@ impl Token {
             OpenInvisible(InvisibleOrigin::MetaVar(MetaVarKind::Ty { .. } | MetaVarKind::Path)) => {
                 true
             }
-            // For anonymous structs or unions, which only appear in specific positions
-            // (type of struct fields or union fields), we don't consider them as regular types
             _ => false,
         }
     }
@@ -753,7 +763,7 @@ impl Token {
     pub fn can_begin_const_arg(&self) -> bool {
         match self.kind {
             OpenBrace | Literal(..) | Minus => true,
-            Ident(name, IdentIsRaw::No) if name.is_bool_lit() => true,
+            Ident(name, IdentKind::Normal) if name.is_bool_lit() => true,
             OpenInvisible(InvisibleOrigin::MetaVar(
                 MetaVarKind::Expr { .. } | MetaVarKind::Block | MetaVarKind::Literal,
             )) => true,
@@ -802,7 +812,7 @@ impl Token {
     pub fn can_begin_literal_maybe_minus(&self) -> bool {
         match self.uninterpolate().kind {
             Literal(..) | Minus => true,
-            Ident(name, IdentIsRaw::No) if name.is_bool_lit() => true,
+            Ident(name, IdentKind::Normal) if name.is_bool_lit() => true,
             OpenInvisible(InvisibleOrigin::MetaVar(mv_kind)) => match mv_kind {
                 MetaVarKind::Literal => true,
                 MetaVarKind::Expr { can_begin_literal_maybe_minus, .. } => {
@@ -832,9 +842,9 @@ impl Token {
     /// otherwise returns the original token.
     pub fn uninterpolate(&self) -> Cow<'_, Token> {
         match self.kind {
-            NtIdent(ident, is_raw) => Cow::Owned(Token::new(Ident(ident.name, is_raw), ident.span)),
-            NtLifetime(ident, is_raw) => {
-                Cow::Owned(Token::new(Lifetime(ident.name, is_raw), ident.span))
+            NtIdent(ident, kind) => Cow::Owned(Token::new(Ident(ident.name, kind), ident.span)),
+            NtLifetime(ident, kind) => {
+                Cow::Owned(Token::new(Lifetime(ident.name, kind), ident.span))
             }
             _ => Cow::Borrowed(self),
         }
@@ -842,22 +852,22 @@ impl Token {
 
     /// Returns an identifier if this token is an identifier.
     #[inline]
-    pub fn ident(&self) -> Option<(sp::Ident, IdentIsRaw)> {
+    pub fn ident(&self) -> Option<(sp::Ident, IdentKind)> {
         // We avoid using `Token::uninterpolate` here because it's slow.
         match self.kind {
-            Ident(name, is_raw) => Some((sp::Ident::new(name, self.span), is_raw)),
-            NtIdent(ident, is_raw) => Some((ident, is_raw)),
+            Ident(name, kind) => Some((sp::Ident::new(name, self.span), kind)),
+            NtIdent(ident, kind) => Some((ident, kind)),
             _ => None,
         }
     }
 
     /// Returns a lifetime identifier if this token is a lifetime.
     #[inline]
-    pub fn lifetime(&self) -> Option<(sp::Ident, IdentIsRaw)> {
+    pub fn lifetime(&self) -> Option<(sp::Ident, IdentKind)> {
         // We avoid using `Token::uninterpolate` here because it's slow.
         match self.kind {
-            Lifetime(name, is_raw) => Some((sp::Ident::new(name, self.span), is_raw)),
-            NtLifetime(ident, is_raw) => Some((ident, is_raw)),
+            Lifetime(name, kind) => Some((sp::Ident::new(name, self.span), kind)),
+            NtLifetime(ident, kind) => Some((ident, kind)),
             _ => None,
         }
     }
@@ -916,7 +926,7 @@ impl Token {
 
     /// Returns `true` if the token is a given keyword, `kw`.
     pub fn is_keyword(&self, kw: Symbol) -> bool {
-        self.is_non_raw_ident_where(|id| id.name == kw)
+        self.non_raw_ident().is_some_and(|id| id.name == kw)
     }
 
     /// Returns `true` if the token is a given keyword, `kw` or if `case` is `Insensitive` and this
@@ -924,44 +934,58 @@ impl Token {
     pub fn is_keyword_case(&self, kw: Symbol, case: Case) -> bool {
         self.is_keyword(kw)
             || (case == Case::Insensitive
-                && self.is_non_raw_ident_where(|id| {
+                && self.non_raw_ident().is_some_and(|id| {
                     // Do an ASCII case-insensitive match, because all keywords are ASCII.
                     id.name.as_str().eq_ignore_ascii_case(kw.as_str())
                 }))
     }
 
     pub fn is_path_segment_keyword(&self) -> bool {
-        self.is_non_raw_ident_where(sp::Ident::is_path_segment_keyword)
+        self.non_raw_ident().is_some_and(sp::Ident::is_path_segment_keyword)
     }
 
     /// Returns true for reserved identifiers used internally for elided lifetimes,
     /// unnamed method parameters, crate root module, error recovery etc.
     pub fn is_special_ident(&self) -> bool {
-        self.is_non_raw_ident_where(sp::Ident::is_special)
+        self.non_raw_ident().is_some_and(sp::Ident::is_special)
     }
 
     /// Returns `true` if the token is a keyword used in the language.
     pub fn is_used_keyword(&self) -> bool {
-        self.is_non_raw_ident_where(sp::Ident::is_used_keyword)
+        self.non_raw_ident().is_some_and(sp::Ident::is_used_keyword)
     }
 
     /// Returns `true` if the token is a keyword reserved for possible future use.
     pub fn is_unused_keyword(&self) -> bool {
-        self.is_non_raw_ident_where(sp::Ident::is_unused_keyword)
+        self.non_raw_ident().is_some_and(sp::Ident::is_unused_keyword)
     }
 
     /// Returns `true` if the token is either a special identifier or a keyword.
     pub fn is_reserved_ident(&self) -> bool {
-        self.is_non_raw_ident_where(sp::Ident::is_reserved)
+        self.non_raw_ident().is_some_and(sp::Ident::is_reserved)
     }
 
     pub fn is_non_reserved_ident(&self) -> bool {
-        self.ident().is_some_and(|(id, raw)| raw == IdentIsRaw::Yes || !sp::Ident::is_reserved(id))
+        self.non_reserved_ident().is_some()
+    }
+
+    pub fn non_reserved_ident(&self) -> Option<sp::Ident> {
+        self.ident()
+            .filter(|&(id, kind)| kind == IdentKind::Raw || !id.is_reserved())
+            .map(|(id, _)| id)
+    }
+
+    /// If this token is a non-raw identifier, return the identifier in question.
+    pub fn non_raw_ident(&self) -> Option<sp::Ident> {
+        match self.ident() {
+            Some((id, IdentKind::Normal)) => Some(id),
+            _ => None,
+        }
     }
 
     /// Returns `true` if the token is the identifier `true` or `false`.
     pub fn is_bool_lit(&self) -> bool {
-        self.is_non_raw_ident_where(|id| id.name.is_bool_lit())
+        self.non_raw_ident().is_some_and(|id| id.name.is_bool_lit())
     }
 
     pub fn is_numeric_lit(&self) -> bool {
@@ -974,14 +998,6 @@ impl Token {
     /// Returns `true` if the token is the integer literal.
     pub fn is_integer_lit(&self) -> bool {
         matches!(self.kind, Literal(Lit { kind: LitKind::Integer, .. }))
-    }
-
-    /// Returns `true` if the token is a non-raw identifier for which `pred` holds.
-    pub fn is_non_raw_ident_where(&self, pred: impl FnOnce(sp::Ident) -> bool) -> bool {
-        match self.ident() {
-            Some((id, IdentIsRaw::No)) => pred(id),
-            _ => false,
-        }
     }
 
     /// Is this an invisible open delimiter at the start of a token sequence
@@ -1057,8 +1073,8 @@ impl Token {
             (Colon, Colon) => PathSep,
             (Colon, _) => return None,
 
-            (SingleQuote, Ident(name, is_raw)) => {
-                Lifetime(Symbol::intern(&format!("'{name}")), *is_raw)
+            (SingleQuote, Ident(name, kind)) => {
+                Lifetime(Symbol::intern(&format!("'{name}")), *kind)
             }
             (SingleQuote, _) => return None,
 

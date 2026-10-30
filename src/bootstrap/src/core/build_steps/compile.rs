@@ -21,7 +21,7 @@ use tracing::span;
 
 use crate::core::backend::CodegenBackendKind;
 use crate::core::build_steps::gcc::{Gcc, GccOutput, GccTargetPair};
-use crate::core::build_steps::llvm::{LlvmFromCi, prebuilt_llvm_output};
+use crate::core::build_steps::llvm::{LlvmFromCi, LlvmKind, prebuilt_llvm_output};
 use crate::core::build_steps::tool::{RustcPrivateCompilers, SourceType, copy_lld_artifacts};
 use crate::core::build_steps::{dist, llvm};
 use crate::core::builder::{
@@ -541,15 +541,6 @@ fn copy_self_contained_objects(
             )
         });
 
-        // wasm32-wasip3 doesn't exist in wasi-libc yet, so instead use libs
-        // from the wasm32-wasip2 target. Once wasi-libc supports wasip3 this
-        // should be deleted and the native objects should be used.
-        let srcdir = if target == "wasm32-wasip3" {
-            assert!(!srcdir.exists(), "wasip3 support is in wasi-libc, this should be updated now");
-            builder.wasi_libdir(TargetSelection::from_user("wasm32-wasip2")).unwrap()
-        } else {
-            srcdir
-        };
         for &obj in &["libc.a", "crt1-command.o", "crt1-reactor.o"] {
             copy_and_stamp(
                 builder,
@@ -2349,7 +2340,7 @@ impl CommandLineStep for Assemble {
 
                     if !src_path.exists() {
                         // When using `download-ci-llvm`, some of the tools may not exist, so skip trying to copy them.
-                        if builder.config.llvm_ci_mode.download_from_ci() {
+                        if llvm_output.kind() == LlvmKind::DownloadedFromCi {
                             eprintln!("{} does not exist; skipping copy", src_path.display());
                             continue;
                         }
@@ -2677,7 +2668,8 @@ impl CommandLineStep for Assemble {
         }
 
         // In addition to `rust-lld` also install `wasm-component-ld` when
-        // is enabled. This is used by the `wasm32-wasip2` target of Rust.
+        // is enabled. This is used by targets that produce WebAssembly
+        // components in Rust such as `wasm32-wasip{2,3}`.
         if builder.tool_enabled("wasm-component-ld") {
             let wasm_component = builder.ensure(
                 crate::core::build_steps::tool::WasmComponentLd::for_use_by_compiler(

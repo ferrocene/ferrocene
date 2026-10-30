@@ -2,8 +2,7 @@
 
 use rustc_middle::mir::*;
 use rustc_middle::ty::{self, TyCtxt};
-use rustc_middle::{bug, span_bug};
-use rustc_span::sym;
+use rustc_span::{bug, span_bug, sym};
 
 use crate::{PassPolicy, take_array};
 
@@ -339,7 +338,7 @@ impl<'tcx> crate::MirPass<'tcx> for LowerIntrinsics {
         }
     }
 
-    fn policy(&self, _sess: &rustc_session::Session) -> PassPolicy {
+    fn policy(&self, _ctx: &crate::PassCtx<'_>) -> PassPolicy {
         // Implements intrinsic semantics by lowering intrinsic calls to ordinary MIR operations.
         PassPolicy::Required
     }

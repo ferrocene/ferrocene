@@ -1,7 +1,7 @@
 use std::cell::{Cell, RefCell};
 use std::cmp::max;
-use std::debug_assert_matches;
 use std::ops::Deref;
+use std::{assert_matches, debug_assert_matches};
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::sso::SsoHashSet;
@@ -24,12 +24,11 @@ use rustc_middle::ty::{
     self, AssocContainer, AssocItem, GenericArgs, GenericArgsRef, GenericParamDefKind, ParamEnvAnd,
     Ty, TyCtxt, TypeVisitableExt, Unnormalized, Upcast,
 };
-use rustc_middle::{bug, span_bug};
 use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::edit_distance::{
     edit_distance_with_substrings, find_best_match_for_name_with_substrings,
 };
-use rustc_span::{DUMMY_SP, Ident, Span, Symbol};
+use rustc_span::{DUMMY_SP, Ident, Span, Symbol, bug, span_bug};
 use rustc_trait_selection::error_reporting::infer::need_type_info::TypeAnnotationNeeded;
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::solve::Goal;
@@ -118,7 +117,7 @@ pub(crate) struct Candidate<'tcx> {
 pub(crate) enum CandidateKind<'tcx> {
     InherentImplCandidate { impl_def_id: DefId, receiver_steps: usize },
     ObjectCandidate(ty::PolyTraitRef<'tcx>),
-    TraitCandidate(ty::PolyTraitRef<'tcx>, bool /* lint_ambiguous */),
+    TraitCandidate { trait_ref: ty::PolyTraitRef<'tcx>, is_ambiguously_imported: bool },
     WhereClauseCandidate(ty::PolyTraitRef<'tcx>),
 }
 
@@ -239,7 +238,7 @@ pub(crate) struct Pick<'tcx> {
     /// Only applies for inherent impls.
     pub receiver_steps: Option<usize>,
 
-    /// Candidates that were shadowed by supertraits.
+    /// Candidates that were shadowed by subtraits.
     pub shadowed_candidates: Vec<ty::AssocItem>,
 }
 
@@ -247,10 +246,9 @@ pub(crate) struct Pick<'tcx> {
 pub(crate) enum PickKind<'tcx> {
     InherentImplPick,
     ObjectPick,
-    TraitPick(
-        // Is Ambiguously Imported
-        bool,
-    ),
+    TraitPick {
+        is_ambiguously_imported: bool,
+    },
     WhereClausePick(
         // Trait
         ty::PolyTraitRef<'tcx>,
@@ -525,8 +523,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     span,
                     MethodCallOnDivergingInferenceVariable,
                 );
-                let root_ty = Ty::new_var(self.tcx, ty_id);
-                self.demand_eqtype(span, root_ty, self.tcx.types.never);
+                self.demand_eqtype(span, ty, self.tcx.types.never);
             } else {
                 let guar = match *ty.kind() {
                     _ if let Some(guar) = self.tainted_by_errors() => guar,
@@ -557,7 +554,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         if raw_ptr_call {
                             err.span_label(span, "cannot call a method on a raw pointer with an unknown pointee type");
                         }
-                        err.emit()
+                        err.emit_err()
                     }
                     ty::Error(guar) => guar,
                     _ => bug!("unexpected bad final type in method autoderef"),
@@ -595,8 +592,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 ProbeScope::Single(def_id, self_ty_override) => {
                     let item = self.tcx.associated_item(def_id);
-                    // FIXME(fn_delegation): Delegation to inherent methods is not yet supported.
-                    assert_eq!(item.container, AssocContainer::Trait);
+                    assert_matches!(
+                        item.container,
+                        AssocContainer::Trait | AssocContainer::InherentImpl
+                    );
 
                     let trait_def_id = self.tcx.parent(def_id);
                     let trait_span = self.tcx.def_span(trait_def_id);
@@ -608,10 +607,19 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     probe_cx.push_candidate(
                         Candidate {
                             item,
-                            kind: CandidateKind::TraitCandidate(
-                                ty::Binder::dummy(trait_ref),
-                                false,
-                            ),
+                            kind: match item.container {
+                                AssocContainer::Trait => CandidateKind::TraitCandidate {
+                                    trait_ref: ty::Binder::dummy(trait_ref),
+                                    is_ambiguously_imported: false,
+                                },
+                                AssocContainer::InherentImpl => {
+                                    CandidateKind::InherentImplCandidate {
+                                        impl_def_id: self.tcx.parent(def_id),
+                                        receiver_steps: 0,
+                                    }
+                                }
+                                _ => unreachable!(),
+                            },
                             import_ids: &[],
                         },
                         false,
@@ -850,8 +858,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
         let is_accessible = if let Some(name) = self.method_name {
             let item = candidate.item;
             let container_id = item.container_id(self.tcx);
-            let def_scope =
-                self.tcx.adjust_ident_and_get_scope(name, container_id, self.body_def_id).1;
+            let def_scope = self.tcx.adjust_ident_and_get_scope(name, container_id, self.mod_id).1;
             item.visibility(self.tcx).is_accessible_from(def_scope, self.tcx)
         } else {
             true
@@ -1132,7 +1139,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
         &mut self,
         import_ids: &'tcx [LocalDefId],
         trait_def_id: DefId,
-        lint_ambiguous: bool,
+        is_ambiguously_imported: bool,
     ) {
         let trait_args = self.fresh_args_for_item(self.span, trait_def_id);
         let trait_ref = ty::TraitRef::new_from_args(self.tcx, trait_def_id, trait_args);
@@ -1154,7 +1161,10 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                             Candidate {
                                 item,
                                 import_ids,
-                                kind: TraitCandidate(bound_trait_ref, lint_ambiguous),
+                                kind: TraitCandidate {
+                                    trait_ref: bound_trait_ref,
+                                    is_ambiguously_imported,
+                                },
                             },
                             false,
                         );
@@ -1177,7 +1187,10 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                     Candidate {
                         item,
                         import_ids,
-                        kind: TraitCandidate(ty::Binder::dummy(trait_ref), lint_ambiguous),
+                        kind: TraitCandidate {
+                            trait_ref: ty::Binder::dummy(trait_ref),
+                            is_ambiguously_imported,
+                        },
                     },
                     false,
                 );
@@ -1862,8 +1875,8 @@ impl<'tcx> Pick<'tcx> {
             span: Span,
         }
 
-        impl<'a, 'b, 'tcx> Diagnostic<'a, ()> for ItemMaybeBeAddedToStd<'b, 'tcx> {
-            fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+        impl<'a, 'b, 'tcx> Diagnostic<'a> for ItemMaybeBeAddedToStd<'b, 'tcx> {
+            fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
                 let Self { this, tcx, span } = self;
                 let def_kind = this.item.as_def_kind();
                 let mut lint = Diag::new(
@@ -1947,7 +1960,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
             ObjectCandidate(_) | WhereClauseCandidate(_) => {
                 CandidateSource::Trait(candidate.item.container_id(self.tcx))
             }
-            TraitCandidate(trait_ref, _) => self.probe(|_| {
+            TraitCandidate { trait_ref, is_ambiguously_imported: _ } => self.probe(|_| {
                 let trait_ref = self.instantiate_binder_with_fresh_vars(
                     self.span,
                     BoundRegionConversionTime::FnCall,
@@ -1977,7 +1990,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
     fn candidate_source_from_pick(&self, pick: &Pick<'tcx>) -> CandidateSource {
         match pick.kind {
             InherentImplPick => CandidateSource::Impl(pick.item.container_id(self.tcx)),
-            ObjectPick | WhereClausePick(_) | TraitPick(_) => {
+            ObjectPick | WhereClausePick(_) | TraitPick { .. } => {
                 CandidateSource::Trait(pick.item.container_id(self.tcx))
             }
         }
@@ -2058,7 +2071,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                         impl_bounds,
                     ));
                 }
-                TraitCandidate(poly_trait_ref, _) => {
+                TraitCandidate { trait_ref: poly_trait_ref, is_ambiguously_imported: _ } => {
                     // Some trait methods are excluded for arrays before 2021.
                     // (`array.into_iter()` wants a slice iterator for compatibility.)
                     if let Some(method_name) = self.method_name {
@@ -2136,8 +2149,14 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                             for nested_obligation in candidate.nested_obligations() {
                                 if !self.infcx.predicate_may_hold(&nested_obligation) {
                                     possibly_unsatisfied_predicates.push((
-                                        self.resolve_vars_if_possible(nested_obligation.predicate),
-                                        Some(self.resolve_vars_if_possible(obligation.predicate)),
+                                        self.deeply_resolve_ignoring_regions(
+                                            nested_obligation.predicate,
+                                        ),
+                                        Some(
+                                            self.deeply_resolve_ignoring_regions(
+                                                obligation.predicate,
+                                            ),
+                                        ),
                                         Some(nested_obligation.cause),
                                     ));
                                 }
@@ -2184,34 +2203,13 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 }
             }
 
-            // See <https://github.com/rust-lang/trait-system-refactor-initiative/issues/134>.
-            //
-            // In the new solver, check the well-formedness of the return type.
-            // This emulates, in a way, the predicates that fall out of
-            // normalizing the return type in the old solver.
-            //
-            // FIXME(-Znext-solver): We alternatively could check the predicates of
-            // the method itself hold, but we intentionally do not do this in the old
-            // solver b/c of cycles, and doing it in the new solver would be stronger.
-            // This should be fixed in the future, since it likely leads to much better
-            // method winnowing.
-            if let Some(xform_ret_ty) = xform_ret_ty
-                && self.infcx.next_trait_solver()
-            {
-                ocx.register_obligation(traits::Obligation::new(
-                    self.tcx,
-                    cause.clone(),
-                    self.param_env,
-                    ty::ClauseKind::WellFormed(xform_ret_ty.into()),
-                ));
-            }
-
             // Evaluate those obligations to see if they might possibly hold.
             for error in ocx.try_evaluate_obligations() {
                 result = ProbeResult::NoMatch;
-                let nested_predicate = self.resolve_vars_if_possible(error.obligation.predicate);
+                let nested_predicate =
+                    self.deeply_resolve_ignoring_regions(error.obligation.predicate);
                 if let Some(trait_predicate) = trait_predicate
-                    && nested_predicate == self.resolve_vars_if_possible(trait_predicate)
+                    && nested_predicate == self.deeply_resolve_ignoring_regions(trait_predicate)
                 {
                     // Don't report possibly unsatisfied predicates if the root
                     // trait obligation from a `TraitCandidate` is unsatisfied.
@@ -2219,7 +2217,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                 } else {
                     possibly_unsatisfied_predicates.push((
                         nested_predicate,
-                        Some(self.resolve_vars_if_possible(error.root_obligation.predicate))
+                        Some(self.deeply_resolve_ignoring_regions(error.root_obligation.predicate))
                             .filter(|root_predicate| *root_predicate != nested_predicate),
                         Some(error.obligation.cause),
                     ));
@@ -2340,7 +2338,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                         return false;
                     }
 
-                    !self.resolve_vars_if_possible(self_ty).is_ty_var()
+                    !self.deeply_resolve_ignoring_regions(self_ty).is_ty_var()
                 });
                 if constrained_opaque {
                     debug!("opaque type has been constrained");
@@ -2383,18 +2381,22 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
             }
         }
 
-        // They are all the same, so if any of them is ambiguous, we report the pick as ambiguous.
-        let lint_ambiguous = probes.iter().any(|(p, _)| match p.kind {
-            TraitCandidate(_, lint) => lint,
-            _ => false,
+        // We try and find the ambiguous candidate in order to report the pick as ambiguous.
+        let ambiguous_candidate = probes.iter().find_map(|(p, _)| match p.kind {
+            TraitCandidate { is_ambiguously_imported: true, .. } => Some(p),
+            _ => None,
         });
+
+        // If there isn't any, then we just use the first probe.
+        let (is_ambiguously_imported, candidate) =
+            ambiguous_candidate.map(|c| (true, *c)).unwrap_or_else(|| (false, probes[0].0));
 
         // FIXME: check the return type here somehow.
         // If so, just use this trait and call it a day.
         Some(Pick {
-            item: probes[0].0.item,
-            kind: TraitPick(lint_ambiguous),
-            import_ids: probes[0].0.import_ids,
+            item: candidate.item,
+            kind: TraitPick { is_ambiguously_imported },
+            import_ids: candidate.import_ids,
             autoderefs: 0,
             autoref_or_ptr_adjustment: None,
             self_ty,
@@ -2468,14 +2470,14 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
             }
         }
 
-        let lint_ambiguous = match child_candidate.kind {
-            TraitCandidate(_, lint) => lint,
+        let is_ambiguously_imported = match child_candidate.kind {
+            TraitCandidate { is_ambiguously_imported, .. } => is_ambiguously_imported,
             _ => false,
         };
 
         Some(Pick {
             item: child_candidate.item,
-            kind: TraitPick(lint_ambiguous),
+            kind: TraitPick { is_ambiguously_imported },
             import_ids: child_candidate.import_ids,
             autoderefs: 0,
             autoref_or_ptr_adjustment: None,
@@ -2723,7 +2725,9 @@ impl<'tcx> Candidate<'tcx> {
             kind: match self.kind {
                 InherentImplCandidate { .. } => InherentImplPick,
                 ObjectCandidate(_) => ObjectPick,
-                TraitCandidate(_, lint_ambiguous) => TraitPick(lint_ambiguous),
+                TraitCandidate { is_ambiguously_imported, .. } => {
+                    TraitPick { is_ambiguously_imported }
+                }
                 WhereClauseCandidate(trait_ref) => {
                     // Only trait derived from where-clauses should
                     // appear here, so they should not contain any

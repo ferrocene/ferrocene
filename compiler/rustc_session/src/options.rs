@@ -94,13 +94,15 @@ mod target_modifier_consistency_check {
         l: &TargetModifier,
         r: Option<&TargetModifier>,
     ) -> bool {
-        let mut lparsed: SanitizerSet = sess.target.options.default_sanitizers;
+        let mut lparsed: SanitizerSet = SanitizerSet::empty();
         let lval = if l.value_name.is_empty() { None } else { Some(l.value_name.as_str()) };
         parse::parse_sanitizers(&mut lparsed, lval);
+        let lparsed = lparsed.combine_with_defaults(sess.target.options.default_sanitizers);
 
-        let mut rparsed: SanitizerSet = sess.target.options.default_sanitizers;
+        let mut rparsed: SanitizerSet = SanitizerSet::empty();
         let rval = r.filter(|v| !v.value_name.is_empty()).map(|v| v.value_name.as_str());
         parse::parse_sanitizers(&mut rparsed, rval);
+        let rparsed = rparsed.combine_with_defaults(sess.target.options.default_sanitizers);
 
         // Some sanitizers need to be target modifiers, and some do not.
         // For now, we should mark all sanitizers as target modifiers except for these:
@@ -2641,11 +2643,15 @@ options! {
     maximal_hir_to_mir_coverage: bool = (false, parse_bool, [TRACKED],
         "save as much information as possible about the correspondence between MIR and HIR \
         as source scopes (default: no)"),
+    #[rustc_lint_opt_deny_field_access("use `Session::merge_functions` instead of this field")]
     merge_functions: Option<MergeFunctions> = (None, parse_merge_functions, [TRACKED],
         "control the operation of the MergeFunctions LLVM pass, taking \
         the same values as the target option of the same name"),
     meta_stats: bool = (false, parse_bool, [UNTRACKED],
         "gather metadata statistics (default: no)"),
+    metadata_crate_hash: bool = (true, parse_bool, [TRACKED],
+        "compute the crate hash (SVH) from the encoded crate metadata; set to `no` to \
+         revert to computing it from the HIR (default: yes)"),
     metrics_dir: Option<PathBuf> = (None, parse_opt_pathbuf, [UNTRACKED],
         "the directory metrics emitted by rustc are dumped into (implicitly enables default set of metrics)"),
     min_function_alignment: Option<Align> = (None, parse_align, [TRACKED],
@@ -2811,6 +2817,8 @@ written to standard error output)"),
     #[rustc_lint_opt_deny_field_access("use `Session::sanitizers()` instead of this field")]
     sanitizer: SanitizerSet = (SanitizerSet::empty(), parse_sanitizers, [TRACKED] { TARGET_MODIFIER: Sanitizer },
         "use a sanitizer"),
+    sanitizer_ignorelist: Vec<String> = (vec![], parse_list, [TRACKED],
+        "list of files providing ignorelists for sanitizers"),
     sanitizer_cfi_canonical_jump_tables: Option<bool> = (Some(true), parse_opt_bool, [TRACKED],
         "enable canonical jump tables (default: yes)"),
     sanitizer_cfi_generalize_pointers: Option<bool> = (None, parse_opt_bool, [TRACKED],
@@ -2838,12 +2846,15 @@ written to standard error output)"),
         `instructions:u` (retired instructions, userspace-only)
         `instructions-minus-irqs:u` (subtracting hardware interrupt counts for extra accuracy)"
     ),
-    /// keep this in sync with the event filter names in librustc_data_structures/profiling.rs
+    /// keep this in sync with the event filter names and defaults in rustc_data_structures/src/profiling.rs
     self_profile_events: Option<Vec<String>> = (None, parse_opt_comma_list, [UNTRACKED],
         "specify the events recorded by the self profiler;
         for example: `-Z self-profile-events=default,query-keys`
-        all options: none, all, default, generic-activity, query-provider, query-cache-hit
-                     query-blocked, incr-cache-load, incr-result-hashing, query-keys, function-args, args, llvm, artifact-sizes"),
+        all option groups: none, all, default, args
+          `default` contains: generic-activity, query-provider, query-cache-hit-count, \
+                            query-blocked, incr-cache-load, incr-result-hashing, artifact-sizes
+             `args` contains: query-keys, function-args
+        remaining (ungrouped) options: query-cache-hit, llvm"),
     share_generics: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "make the current crate share its generic instantiations"),
     shell_argfiles: bool = (false, parse_bool, [UNTRACKED],

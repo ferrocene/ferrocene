@@ -8,6 +8,8 @@
 //@ ignore-sgx: (x86 machine code cannot be directly executed)
 //@ ignore-pauthtest: (it requires non-trivial compilation of c sources, and only supports dynamic
 //  linking, ignore the test).
+// FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
+//@ ignore-backends: gcc
 
 // Ferrocene addition: Various compile and link errors on these platforms:
 // missing <assert.h>, missing libraries, and breakage when not using -fPIC

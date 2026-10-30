@@ -2,16 +2,15 @@ use std::any::Any;
 use std::mem;
 use std::sync::Arc;
 
+use rustc_attr_ir::Deprecation;
 use rustc_crate_store::{CrateStore, ExternCrate};
 use rustc_data_structures::fx::FxHashMap;
-use rustc_hir::attrs::Deprecation;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LOCAL_CRATE};
 use rustc_hir::definitions::{DefKey, DefPath, DefPathHash};
 use rustc_middle::arena::ArenaAllocatable;
-use rustc_middle::bug;
-use rustc_middle::metadata::{AmbigModChild, ModChild};
 use rustc_middle::middle::exported_symbols::ExportedSymbol;
+use rustc_middle::middle::resolve::{AmbigModChild, ModChild};
 use rustc_middle::middle::stability::DeprecationEntry;
 use rustc_middle::queries::ExternProviders;
 use rustc_middle::query::LocalCrate;
@@ -22,7 +21,7 @@ use rustc_serialize::Decoder;
 use rustc_session::StableCrateId;
 use rustc_span::def_id::ModId;
 use rustc_span::hygiene::ExpnId;
-use rustc_span::{Span, Symbol, kw};
+use rustc_span::{Span, Symbol, bug, kw};
 
 use super::{Decodable, DecodeIterator};
 use crate::creader::{CStore, LoadedMacro};
@@ -377,12 +376,12 @@ provide! { tcx, def_id, other, cdata,
     }
     native_libraries => { cdata.get_native_libraries(tcx).collect() }
     foreign_modules => { cdata.get_foreign_modules(tcx).map(|m| (m.def_id, m)).collect() }
-    crate_hash => { cdata.root.header.hash }
+    crate_hash => { cdata.hash() }
     crate_host_hash => { cdata.host_hash }
     crate_name => { cdata.root.header.name }
     num_extern_def_ids => { cdata.num_def_ids() }
 
-    extra_filename => { cdata.root.extra_filename.clone() }
+    extra_filename => { tcx.arena.alloc_str(&cdata.unhashed.extra_filename) }
 
     traits => { tcx.arena.alloc_from_iter(cdata.get_traits(tcx)) }
     trait_impls_in_crate => { tcx.arena.alloc_from_iter(cdata.get_trait_impls(tcx)) }
@@ -402,6 +401,7 @@ provide! { tcx, def_id, other, cdata,
     defined_lang_items => { cdata.get_lang_items(tcx) }
     diagnostic_items => { cdata.get_diagnostic_items(tcx) }
     canonical_symbols => { cdata.get_canonical_symbols(tcx) }
+    fake_doc_items => { cdata.get_fake_doc_items(tcx) }
     missing_lang_items => { cdata.get_missing_lang_items(tcx) }
 
     missing_extern_crate_item => {
@@ -418,7 +418,9 @@ provide! { tcx, def_id, other, cdata,
     exported_non_generic_symbols => { cdata.exported_non_generic_symbols(tcx) }
     exported_generic_symbols => { cdata.exported_generic_symbols(tcx) }
 
-    crate_extern_paths => { cdata.source().paths().cloned().collect() }
+    crate_extern_paths => {
+        tcx.arena.alloc_from_iter(cdata.source().paths().map(|p| tcx.arena.alloc_path(p)))
+    }
     expn_that_defined => { cdata.get_expn_that_defined(tcx, def_id.index) }
     default_field => { cdata.get_default_field(tcx, def_id.index) }
     is_doc_hidden => { cdata.get_attr_flags(def_id.index).contains(AttrFlags::IS_DOC_HIDDEN) }

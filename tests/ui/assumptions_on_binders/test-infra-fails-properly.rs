@@ -60,10 +60,17 @@ core::test_binder_constraints! {
         } expect {
             or {
                 'c: 'b,
-                'c: 'c,
+                'b: 'c,
                 //~^ ERROR forall expect clause failed
             }
         }
+    }
+}
+
+core::test_binder_constraints! {
+    impl<'a, T> {
+        for<> T: 'a
+        //~^ ERROR bound type test binder constraint must be alias (it's a AliasTyOutlivesViaEnv)
     }
 }
 

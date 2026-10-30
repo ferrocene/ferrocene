@@ -7,6 +7,7 @@ use build_helper::stage0_parser::parse_stage0_file;
 use llvm::get_llvm_build_status;
 
 use super::*;
+use crate::core::build_steps::llvm::LlvmKind;
 use crate::core::config::Config;
 use crate::utils::cache::ExecutedStep;
 use crate::utils::helpers::get_host_target;
@@ -321,15 +322,14 @@ fn test_prebuilt_llvm_config_path_resolution() {
         "#,
     );
 
-    // CI-LLVM isn't always available; check if it's enabled before testing.
-    if config.llvm_ci_mode.download_from_ci() {
-        let sess = Session::new(config.clone());
-        let builder = Builder::new(&sess);
+    let sess = Session::new(config.clone());
+    let builder = Builder::new(&sess);
 
-        let actual = get_llvm_build_status(&builder, builder.config.host_target)
-            .llvm_output()
-            .llvm_config()
-            .to_path_buf();
+    let llvm = get_llvm_build_status(&builder, builder.config.host_target);
+    let llvm = llvm.llvm_output();
+    // CI-LLVM isn't always available; check if it's enabled before testing.
+    if llvm.kind() == LlvmKind::DownloadedFromCi {
+        let actual = llvm.llvm_config().to_path_buf();
         let expected = builder
             .out
             .join(builder.config.host_target)
@@ -1807,7 +1807,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx.config("check")
                 .path("compiler")
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -1833,7 +1833,7 @@ mod snapshot {
             ctx.config("check")
                 .path("compiler")
                 .stage(1)
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -1847,7 +1847,7 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
-        [check] rustc 1 <host> -> rustc 2 <host> (77 crates)
+        [check] rustc 1 <host> -> rustc 2 <host> (78 crates)
         ");
     }
 
@@ -1863,7 +1863,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [check] rustc 1 <host> -> std 1 <target1>
-        [check] rustc 1 <host> -> rustc 2 <target1> (77 crates)
+        [check] rustc 1 <host> -> rustc 2 <target1> (78 crates)
         [check] rustc 1 <host> -> rustc 2 <target1>
         [check] rustc 1 <host> -> Rustdoc 2 <target1>
         [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <target1>
@@ -1959,7 +1959,7 @@ mod snapshot {
             ctx.config("check")
                 .paths(&["library", "compiler"])
                 .args(&args)
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -2087,6 +2087,7 @@ mod snapshot {
         [test] compiletest-mir-opt 1 <host>
         [test] compiletest-codegen-llvm 1 <host>
         [test] compiletest-codegen-units 1 <host>
+        [test] compiletest-assembly-gcc 1 <host>
         [test] compiletest-assembly-llvm 1 <host>
         [test] compiletest-incremental 1 <host>
         [test] compiletest-debuginfo 1 <host>
@@ -2267,6 +2268,7 @@ mod snapshot {
         [test] compiletest-mir-opt 2 <host>
         [test] compiletest-codegen-llvm 2 <host>
         [test] compiletest-codegen-units 2 <host>
+        [test] compiletest-assembly-gcc 2 <host>
         [test] compiletest-assembly-llvm 2 <host>
         [test] compiletest-incremental 2 <host>
         [test] compiletest-debuginfo 2 <host>
@@ -2915,7 +2917,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("install")
-                .path("src")
+                .path("rust-src")
                 .args(&[
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.normalized_dir()),
@@ -2931,8 +2933,45 @@ mod snapshot {
                 .get_steps()
                 .render_with(RenderConfig {
                     normalize_host: false
+<<<<<<< ferrocene/release/1.100
                 }), @"
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
+||||||| fb9a3389fde
+                }), @r"
+        [build] llvm <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> UnstableBookGen 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> Rustbook 1 <x86_64-unknown-linux-gnu>
+        [doc] unstable-book (book) <x86_64-unknown-linux-gnu>
+        [doc] book (book) <x86_64-unknown-linux-gnu>
+        [doc] book/first-edition (book) <x86_64-unknown-linux-gnu>
+        [doc] book/second-edition (book) <x86_64-unknown-linux-gnu>
+        [doc] book/2018-edition (book) <x86_64-unknown-linux-gnu>
+        [build] rustdoc 1 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> standalone 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> std 1 <x86_64-unknown-linux-gnu> crates=[alloc,compiler_builtins,core,panic_abort,panic_unwind,proc_macro,rustc-std-workspace-core,std,std_detect,sysroot,test,unwind]
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> rustc 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> error-index 2 <x86_64-unknown-linux-gnu>
+        [doc] nomicon (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> reference (book) 2 <x86_64-unknown-linux-gnu>
+        [doc] rustdoc (book) <x86_64-unknown-linux-gnu>
+        [doc] rust-by-example (book) <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> LintDocs 1 <x86_64-unknown-linux-gnu>
+        [doc] rustc (book) <x86_64-unknown-linux-gnu>
+        [doc] cargo (book) <x86_64-unknown-linux-gnu>
+        [doc] clippy (book) <x86_64-unknown-linux-gnu>
+        [doc] embedded-book (book) <x86_64-unknown-linux-gnu>
+        [doc] edition-guide (book) <x86_64-unknown-linux-gnu>
+        [doc] style-guide (book) <x86_64-unknown-linux-gnu>
+        [doc] rustc 1 <x86_64-unknown-linux-gnu> -> releases 2 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+        [dist] docs <x86_64-unknown-linux-gnu>
+=======
+                }), @r"
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         [dist] src <>
         ");
     }
@@ -2942,7 +2981,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("install")
-                .path("src")
+                .path("rust-src")
                 .args(&[
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.normalized_dir()),
@@ -2959,8 +2998,19 @@ mod snapshot {
                 .get_steps()
                 .render_with(RenderConfig {
                     normalize_host: false
+<<<<<<< ferrocene/release/1.100
                 }), @"
         [build] rustc 0 <x86_64-unknown-linux-gnu> -> FerroceneGenerateTarball 1 <x86_64-unknown-linux-gnu>
+||||||| fb9a3389fde
+                }), @r"
+        [build] llvm <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> rustc 1 <x86_64-unknown-linux-gnu>
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+        [dist] docs <x86_64-unknown-linux-gnu>
+=======
+                }), @r"
+        [build] rustc 0 <x86_64-unknown-linux-gnu> -> RustInstaller 1 <x86_64-unknown-linux-gnu>
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         [dist] src <>
         ");
     }
@@ -3116,7 +3166,7 @@ mod snapshot {
     #[test]
     fn fix_compiler() {
         let ctx = TestCtx::new();
-        insta::assert_snapshot!(ctx.config("fix").path("compiler").render_steps(), @"[fix] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+        insta::assert_snapshot!(ctx.config("fix").path("compiler").render_steps(), @"[fix] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 }
 

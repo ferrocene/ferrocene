@@ -1,3 +1,4 @@
+use rustc_ast::attr::AttributeExt;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{
@@ -161,6 +162,20 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     }
 }
 
+// This was removed upstream, so was saved here since we still use it
+fn get_attrs_by_path<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    did: DefId,
+    attr: &[Symbol],
+) -> impl Iterator<Item = &'tcx rustc_attr_ir::Attribute> {
+    let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
+    if let Some(did) = did.as_local() {
+        tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
+    } else {
+        tcx.attrs_for_def(did).iter().filter(filter_fn)
+    }
+}
+
 /// Check if this item or any of its parents are validated.
 fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStatus> {
     let mut current = item;
@@ -175,9 +190,9 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
             _ => {}
         }
         // Check if the current item has an annotation
-        if let Some(attr) = tcx.get_attrs_by_path(current, VALIDATED_ATTR).next() {
+        if let Some(attr) = get_attrs_by_path(tcx, current, VALIDATED_ATTR).next() {
             return Some(ValidatedStatus::Validated {
-                annotation: Some(attr.span()),
+                annotation: attr.value_span(),
                 inherited: current != item,
             });
         }
@@ -192,5 +207,7 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
 
 /// Check if this item is marked with `#[ferrocene::requires_validation]`.
 pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
-    tcx.get_attrs_by_path(def_id, REQUIRES_VALIDATION_ATTR).next().map(|attr| attr.span())
+    get_attrs_by_path(tcx, def_id, REQUIRES_VALIDATION_ATTR)
+        .next()
+        .map(|attr| attr.value_span().unwrap())
 }

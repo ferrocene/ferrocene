@@ -10,13 +10,11 @@ LL |     f();
 note: `reachable_indirect` is validated
   --> $DIR/lint-levels-non-transitive.rs:19:8
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
-LL | #[allow(ferrocene::unvalidated)]
 LL | pub fn reachable_indirect() {
    |        ^^^^^^^^^^^^^^^^^^
 LL |     uninstantiated_generic_indirect(unvalidated);
    |     -------------------------------------------- generic function `uninstantiated_generic_indirect` instantiated by `reachable_indirect`
+   = note: main functions are assumed to be validated
 note: the lint level is defined here
   --> $DIR/lint-levels-non-transitive.rs:6:9
    |

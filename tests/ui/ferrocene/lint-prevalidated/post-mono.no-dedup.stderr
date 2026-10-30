@@ -10,12 +10,11 @@ LL |     x.clone();
 note: `instantiation_unreachable` is validated
   --> $DIR/post-mono.rs:75:4
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
 LL | fn instantiation_unreachable() {
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
 LL |     uninstantiated_generic(Unvalidated); // ok
    |     ----------------------------------- generic function `uninstantiated_generic` instantiated by `instantiation_unreachable`
+   = note: main functions are assumed to be validated
 note: the lint level is defined here
   --> $DIR/post-mono.rs:1:9
    |

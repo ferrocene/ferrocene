@@ -10,10 +10,9 @@ LL |     unvalidated();
 note: `prefetch_read_data` is validated
   --> $DIR/intrinsic-fallback-bodies.rs:12:10
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
 LL | const fn prefetch_read_data<T, const LOCALITY: i32>(_data: *const T) {
    |          ^^^^^^^^^^^^^^^^^^
+   = note: main functions are assumed to be validated
 note: the lint level is defined here
   --> $DIR/intrinsic-fallback-bodies.rs:3:9
    |
@@ -32,10 +31,9 @@ LL |     prefetch_read(&x, Locality::L3);
 note: `uses_unvalidated_intrinsic` is validated
   --> $DIR/intrinsic-fallback-bodies.rs:25:4
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
 LL | fn uses_unvalidated_intrinsic() {
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: main functions are assumed to be validated
 
 error: aborting due to 2 previous errors
 

@@ -10,10 +10,9 @@ LL | fn uncertified_coerce_with_certified_instantiation<F>(callback: &F) -> &dyn
 note: `usage` is validated
   --> $DIR/generic-argument-coerced-into-fn-trait-object.rs:7:8
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
 LL | pub fn usage() {
    |        ^^^^^
+   = note: main functions are assumed to be validated
 note: the lint level is defined here
   --> $DIR/generic-argument-coerced-into-fn-trait-object.rs:4:9
    |
@@ -55,10 +54,9 @@ LL | fn uncertified_coerce_with_certified_instantiation<F>(callback: &F) -> &dyn
 note: `usage` is validated
   --> $DIR/generic-argument-coerced-into-fn-trait-object.rs:7:8
    |
-LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
 LL | pub fn usage() {
    |        ^^^^^
+   = note: main functions are assumed to be validated
 
 warning: validated function calls an unvalidated function
   --> $DIR/generic-argument-coerced-into-fn-trait-object.rs:10:5

@@ -11,7 +11,7 @@ note: `A::b` is validated
   --> $DIR/thir-impl-item.rs:14:18
    |
 LL |     #[ferrocene::prevalidated]
-   |     -------------------------- marked as validated here
+   |       ----------------------- marked as validated here
 LL |     #[inline]
 LL |     pub const fn b(&self) -> u32 {
    |                  ^

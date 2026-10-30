@@ -11,7 +11,7 @@ note: `deduplication` is validated
   --> $DIR/duplicates.rs:34:4
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | fn deduplication() {
    |    ^^^^^^^^^^^^^
 note: the lint level is defined here

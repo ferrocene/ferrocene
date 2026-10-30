@@ -17,14 +17,21 @@
 //@ ignore-nto
 //@ ignore-qnx
 
-use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name};
+use run_make_support::{cc, extra_c_flags, run, rustc, static_lib_name, target};
 
 fn main() {
     rustc().edition("2021").input("checkrust.rs").run();
-    cc().input("test.c")
-        .input(static_lib_name("checkrust"))
-        .out_exe("test")
-        .args(extra_c_flags())
-        .run();
+    let mut cmd = cc();
+    cmd.input("test.c").input(static_lib_name("checkrust")).out_exe("test").args(extra_c_flags());
+
+    // Wasm targets with `-Cpanic=unwind` are a bit nonstandard right now and
+    // require some extra flags.
+    if target().contains("wasm")
+        && !rustc().arg("--print=cfg").run().stdout_utf8().contains("abort")
+    {
+        cmd.arg("-lunwind").arg("-fwasm-exceptions").arg("-Wl,--export-if-defined=cabi_realloc");
+    }
+    cmd.run();
+
     run("test");
 }

@@ -1578,47 +1578,31 @@ pub const trait PartialOrd<Rhs: PointeeSized = Self>:
         self.partial_cmp(other).is_some_and(Ordering::is_ge)
     }
 
-    /// If `self == other`, returns `ControlFlow::Continue(())`.
-    /// Otherwise, returns `ControlFlow::Break(self < other)`.
+    /// If `self == other`, returns `Continue(())`.
+    /// Otherwise, returns `Break(self < other)`, or equivalently `Break(self <= other)`.
+    /// The only difference when chaining `<` and `<=` is how an equality result is
+    /// interpreted at the end of the chain.
     ///
     /// This is useful for chaining together calls when implementing a lexical
     /// `PartialOrd::lt`, as it allows types (like primitives) which can cheaply
     /// check `==` and `<` separately to do rather than needing to calculate
     /// (then optimize out) the three-way `Ordering` result.
+    #[ferrocene::prevalidated]
     #[inline]
     // Added to improve the behaviour of tuples; not necessarily stabilization-track.
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    fn __chaining_lt(&self, other: &Rhs) -> ControlFlow<bool> {
+    fn __chaining_less(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_lt)
     }
 
-    /// Same as `__chaining_lt`, but for `<=` instead of `<`.
+    /// Same as `__chaining_less`, but for `>`/`>=` instead of `<`/`<=`.
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
     #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    fn __chaining_le(&self, other: &Rhs) -> ControlFlow<bool> {
-        default_chaining_impl(self, other, Ordering::is_le)
-    }
-
-    /// Same as `__chaining_lt`, but for `>` instead of `<`.
-    #[inline]
-    #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
-    #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    fn __chaining_gt(&self, other: &Rhs) -> ControlFlow<bool> {
+    fn __chaining_greater(&self, other: &Rhs) -> ControlFlow<bool> {
         default_chaining_impl(self, other, Ordering::is_gt)
-    }
-
-    /// Same as `__chaining_lt`, but for `>=` instead of `<`.
-    #[inline]
-    #[unstable(feature = "partial_ord_chaining_methods", issue = "none")]
-    #[doc(hidden)]
-    #[ferrocene::prevalidated]
-    fn __chaining_ge(&self, other: &Rhs) -> ControlFlow<bool> {
-        default_chaining_impl(self, other, Ordering::is_ge)
     }
 }
 
@@ -2261,29 +2245,19 @@ mod impls {
             // because if either is NAN the `==` test will fail so we end up in
             // the `Break` case and the comparison will correctly return `false`.
 
-            #[inline]
             #[ferrocene::prevalidated]
-            fn __chaining_lt(&self, other: &Self) -> ControlFlow<bool> {
+            #[inline]
+            fn __chaining_less(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
+                // We arbitrarily pick `<` here. Using `<=` gives the same result.
                 if lhs == rhs { Continue(()) } else { Break(lhs < rhs) }
             }
-            #[inline]
             #[ferrocene::prevalidated]
-            fn __chaining_le(&self, other: &Self) -> ControlFlow<bool> {
-                let (lhs, rhs) = (*self, *other);
-                if lhs == rhs { Continue(()) } else { Break(lhs <= rhs) }
-            }
             #[inline]
-            #[ferrocene::prevalidated]
-            fn __chaining_gt(&self, other: &Self) -> ControlFlow<bool> {
+            fn __chaining_greater(&self, other: &Self) -> ControlFlow<bool> {
                 let (lhs, rhs) = (*self, *other);
+                // We arbitrarily pick `>` here. Using `>=` gives the same result.
                 if lhs == rhs { Continue(()) } else { Break(lhs > rhs) }
-            }
-            #[inline]
-            #[ferrocene::prevalidated]
-            fn __chaining_ge(&self, other: &Self) -> ControlFlow<bool> {
-                let (lhs, rhs) = (*self, *other);
-                if lhs == rhs { Continue(()) } else { Break(lhs >= rhs) }
             }
         };
     }
@@ -2549,25 +2523,15 @@ mod impls {
         fn ge(&self, other: &&B) -> bool {
             PartialOrd::ge(*self, *other)
         }
-        #[inline]
         #[ferrocene::prevalidated]
-        fn __chaining_lt(&self, other: &&B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_lt(*self, *other)
+        #[inline]
+        fn __chaining_less(&self, other: &&B) -> ControlFlow<bool> {
+            PartialOrd::__chaining_less(*self, *other)
         }
-        #[inline]
         #[ferrocene::prevalidated]
-        fn __chaining_le(&self, other: &&B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_le(*self, *other)
-        }
         #[inline]
-        #[ferrocene::prevalidated]
-        fn __chaining_gt(&self, other: &&B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_gt(*self, *other)
-        }
-        #[inline]
-        #[ferrocene::prevalidated]
-        fn __chaining_ge(&self, other: &&B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_ge(*self, *other)
+        fn __chaining_greater(&self, other: &&B) -> ControlFlow<bool> {
+            PartialOrd::__chaining_greater(*self, *other)
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -2632,20 +2596,12 @@ mod impls {
             PartialOrd::ge(*self, *other)
         }
         #[inline]
-        fn __chaining_lt(&self, other: &&mut B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_lt(*self, *other)
+        fn __chaining_less(&self, other: &&mut B) -> ControlFlow<bool> {
+            PartialOrd::__chaining_less(*self, *other)
         }
         #[inline]
-        fn __chaining_le(&self, other: &&mut B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_le(*self, *other)
-        }
-        #[inline]
-        fn __chaining_gt(&self, other: &&mut B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_gt(*self, *other)
-        }
-        #[inline]
-        fn __chaining_ge(&self, other: &&mut B) -> ControlFlow<bool> {
-            PartialOrd::__chaining_ge(*self, *other)
+        fn __chaining_greater(&self, other: &&mut B) -> ControlFlow<bool> {
+            PartialOrd::__chaining_greater(*self, *other)
         }
     }
     #[stable(feature = "rust1", since = "1.0.0")]

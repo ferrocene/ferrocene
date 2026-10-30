@@ -85,3 +85,5 @@ fn main() {
 //
 // ferrocene-annotations: fls_afafmafz4hf2
 // Drop Order
+
+//@ reference: items.union.drop

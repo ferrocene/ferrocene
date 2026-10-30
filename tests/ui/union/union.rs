@@ -83,3 +83,5 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_9kjpxri0axvg
 // Weak Keywords
+
+//@ reference: items.union.pattern.safety

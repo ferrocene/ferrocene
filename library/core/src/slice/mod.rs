@@ -2576,7 +2576,6 @@ impl<T> [T] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(slice_split_once)]
     /// let s = [1, 2, 3, 2, 4];
     /// assert_eq!(s.split_once(|&x| x == 2), Some((
     ///     &[1][..],
@@ -2584,7 +2583,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.split_once(|&x| x == 0), None);
     /// ```
-    #[unstable(feature = "slice_split_once", issue = "112811")]
+    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub fn split_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
@@ -2605,7 +2604,6 @@ impl<T> [T] {
     /// # Examples
     ///
     /// ```
-    /// #![feature(slice_split_once)]
     /// let s = [1, 2, 3, 2, 4];
     /// assert_eq!(s.rsplit_once(|&x| x == 2), Some((
     ///     &[1, 2, 3][..],
@@ -2613,7 +2611,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.rsplit_once(|&x| x == 0), None);
     /// ```
-    #[unstable(feature = "slice_split_once", issue = "112811")]
+    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
@@ -5736,7 +5734,7 @@ const impl<T> Default for &mut [T] {
     }
 }
 
-#[unstable(feature = "slice_pattern", reason = "stopgap trait for slice patterns", issue = "56345")]
+#[unstable(feature = "slice_pattern", issue = "none", reason = "stopgap trait for slice patterns")]
 /// Patterns in slices - currently, only used by `strip_prefix` and `strip_suffix`.  At a future
 /// point, we hope to generalise `core::str::Pattern` (which at the time of writing is limited to
 /// `str`) to slices, and then this trait will be replaced or abolished.

@@ -1,6 +1,4 @@
 //@ run-pass
-//@ reference: items.union.common-storage
-//@ reference: type.union.access
 
 union U {
     a: (u8, u8),
@@ -43,3 +41,7 @@ fn main() {
 //
 // ferrocene-annotations: fls_xcwfotmq2e5d
 // Field Resolution
+
+//@ reference: items.union.common-storage
+//@ reference: items.union.fields.intro
+//@ reference: type.union.access

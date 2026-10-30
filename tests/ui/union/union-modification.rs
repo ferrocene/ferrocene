@@ -71,3 +71,5 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_xcwfotmq2e5d
 // Field Resolution
+
+//@ reference: items.union.fields.write-safety

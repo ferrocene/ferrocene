@@ -11,7 +11,7 @@ note: `<Validated as Drop>::drop` is validated
   --> $DIR/stable-lint-order.rs:20:8
    |
 LL |     #[ferrocene::prevalidated]
-   |     -------------------------- marked as validated here
+   |       ----------------------- marked as validated here
 LL |     fn drop(&mut self) {
    |        ^^^^
 LL |         call(unvalidated);

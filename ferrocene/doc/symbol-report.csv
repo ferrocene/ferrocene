@@ -1513,9 +1513,9 @@
 <core::ascii::ascii_char::AsciiChar as core::fmt::Debug>::fmt::backslash
 <core::ascii::ascii_char::AsciiChar as core::fmt::Display>::fmt
 <core::ascii::ascii_char::AsciiChar as core::hash::Hash>::hash
-<core::bstr::ByteStr as core::fmt::Debug>::fmt
-<core::bstr::ByteStr as core::ops::deref::Deref>::deref
-<core::bstr::ByteStr as core::ops::deref::DerefMut>::deref_mut
+<core::byte_str::ByteStr as core::fmt::Debug>::fmt
+<core::byte_str::ByteStr as core::ops::deref::Deref>::deref
+<core::byte_str::ByteStr as core::ops::deref::DerefMut>::deref_mut
 <core::cell::BorrowError as core::fmt::Debug>::fmt
 <core::cell::BorrowError as core::fmt::Display>::fmt
 <core::cell::BorrowMutError as core::fmt::Debug>::fmt
@@ -3693,9 +3693,14 @@
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::last
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::Chars<'a> as core::iter::traits::iterator::Iterator>::size_hint
+<core::str::iter::MatchIndices<'a, P> as core::iter::traits::iterator::Iterator>::next
+<core::str::iter::Matches<'a, P> as core::iter::traits::iterator::Iterator>::next
+<core::str::iter::Split<'a, P> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::SplitInclusive<'a, P> as core::fmt::Debug>::fmt
 <core::str::iter::SplitInclusive<'a, P> as core::iter::traits::iterator::Iterator>::next
 <core::str::iter::SplitInternal<'a, P> as core::fmt::Debug>::fmt
+<core::str::iter::SplitN<'a, P> as core::iter::traits::iterator::Iterator>::next
+<core::str::iter::SplitTerminator<'a, P> as core::iter::traits::iterator::Iterator>::next
 <core::str::lossy::Debug<'_> as core::fmt::Debug>::fmt
 <core::str::lossy::Utf8Chunk<'a> as core::clone::Clone>::clone
 <core::str::lossy::Utf8Chunk<'a> as core::cmp::Eq>::assert_fields_are_eq
@@ -5751,7 +5756,8 @@ core::bool::<impl bool>::ok_or
 core::bool::<impl bool>::ok_or_else
 core::bool::<impl bool>::then
 core::bool::<impl bool>::then_some
-core::bstr::ByteStr::from_bytes
+core::bool::<impl bool>::unchecked_disjoint_bitor::precondition_check
+core::byte_str::ByteStr::from_bytes
 core::cell::BorrowRef::<'b>::new
 core::cell::BorrowRefMut::<'b>::new
 core::cell::Cell::<T>::get
@@ -5862,10 +5868,8 @@ core::cmp::Ordering::is_ne
 core::cmp::Ordering::reverse
 core::cmp::Ordering::then
 core::cmp::PartialEq::ne
-core::cmp::PartialOrd::__chaining_ge
-core::cmp::PartialOrd::__chaining_gt
-core::cmp::PartialOrd::__chaining_le
-core::cmp::PartialOrd::__chaining_lt
+core::cmp::PartialOrd::__chaining_greater
+core::cmp::PartialOrd::__chaining_less
 core::cmp::PartialOrd::ge
 core::cmp::PartialOrd::gt
 core::cmp::PartialOrd::le
@@ -6003,172 +6007,134 @@ core::cmp::impls::<impl core::cmp::PartialEq<&mut B> for &mut A>::eq
 core::cmp::impls::<impl core::cmp::PartialEq<&mut B> for &mut A>::ne
 core::cmp::impls::<impl core::cmp::PartialOrd for !>::partial_cmp
 core::cmp::impls::<impl core::cmp::PartialOrd for ()>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for bool>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for bool>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for bool>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for bool>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for bool>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for bool>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for char>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for char>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for char>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for char>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for char>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for char>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for f128>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for f128>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for f128>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for f128>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for f128>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for f128>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for f16>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for f16>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for f16>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for f16>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for f16>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for f16>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for f32>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for f32>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for f32>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for f32>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for f32>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for f32>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for f64>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for f64>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for f64>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for f64>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for f64>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for f64>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for i128>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for i128>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for i128>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for i128>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for i128>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for i128>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for i16>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for i16>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for i16>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for i16>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for i16>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for i16>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for i32>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for i32>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for i32>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for i32>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for i32>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for i32>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for i64>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for i64>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for i64>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for i64>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for i64>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for i64>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for i8>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for i8>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for i8>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for i8>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for i8>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for i8>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for isize>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for isize>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for isize>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for isize>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for isize>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for isize>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for u128>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for u128>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for u128>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for u128>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for u128>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for u128>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for u16>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for u16>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for u16>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for u16>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for u16>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for u16>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for u32>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for u32>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for u32>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for u32>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for u32>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for u32>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for u64>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for u64>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for u64>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for u64>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for u64>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for u64>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for u8>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for u8>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for u8>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for u8>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for u8>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for u8>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd for usize>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd for usize>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd for usize>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd for usize>::le
 core::cmp::impls::<impl core::cmp::PartialOrd for usize>::lt
 core::cmp::impls::<impl core::cmp::PartialOrd for usize>::partial_cmp
-core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_ge
-core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_gt
-core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_le
-core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_lt
+core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_greater
+core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::__chaining_less
 core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::ge
 core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::gt
 core::cmp::impls::<impl core::cmp::PartialOrd<&B> for &A>::le
@@ -6436,6 +6402,7 @@ core::fmt::Arguments::<'a>::from_str_nonconst
 core::fmt::Arguments::<'a>::new
 core::fmt::Formatter::<'a>::align
 core::fmt::Formatter::<'a>::alternate
+core::fmt::Formatter::<'a>::debug_c_like_enum_write_str
 core::fmt::Formatter::<'a>::debug_list
 core::fmt::Formatter::<'a>::debug_lower_hex
 core::fmt::Formatter::<'a>::debug_map
@@ -7073,6 +7040,7 @@ core::num::<impl i128>::to_ne_bytes
 core::num::<impl i128>::unbounded_shr
 core::num::<impl i128>::unchecked_add::precondition_check
 core::num::<impl i128>::unchecked_cast::precondition_check
+core::num::<impl i128>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl i128>::unchecked_div_exact::precondition_check
 core::num::<impl i128>::unchecked_mul::precondition_check
 core::num::<impl i128>::unchecked_neg
@@ -7137,6 +7105,7 @@ core::num::<impl i16>::to_ne_bytes
 core::num::<impl i16>::unbounded_shr
 core::num::<impl i16>::unchecked_add::precondition_check
 core::num::<impl i16>::unchecked_cast::precondition_check
+core::num::<impl i16>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl i16>::unchecked_div_exact::precondition_check
 core::num::<impl i16>::unchecked_mul::precondition_check
 core::num::<impl i16>::unchecked_neg
@@ -7201,6 +7170,7 @@ core::num::<impl i32>::to_ne_bytes
 core::num::<impl i32>::unbounded_shr
 core::num::<impl i32>::unchecked_add::precondition_check
 core::num::<impl i32>::unchecked_cast::precondition_check
+core::num::<impl i32>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl i32>::unchecked_div_exact::precondition_check
 core::num::<impl i32>::unchecked_mul::precondition_check
 core::num::<impl i32>::unchecked_neg
@@ -7265,6 +7235,7 @@ core::num::<impl i64>::to_ne_bytes
 core::num::<impl i64>::unbounded_shr
 core::num::<impl i64>::unchecked_add::precondition_check
 core::num::<impl i64>::unchecked_cast::precondition_check
+core::num::<impl i64>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl i64>::unchecked_div_exact::precondition_check
 core::num::<impl i64>::unchecked_mul::precondition_check
 core::num::<impl i64>::unchecked_neg
@@ -7329,6 +7300,7 @@ core::num::<impl i8>::to_ne_bytes
 core::num::<impl i8>::unbounded_shr
 core::num::<impl i8>::unchecked_add::precondition_check
 core::num::<impl i8>::unchecked_cast::precondition_check
+core::num::<impl i8>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl i8>::unchecked_div_exact::precondition_check
 core::num::<impl i8>::unchecked_mul::precondition_check
 core::num::<impl i8>::unchecked_neg
@@ -7393,6 +7365,7 @@ core::num::<impl isize>::to_ne_bytes
 core::num::<impl isize>::unbounded_shr
 core::num::<impl isize>::unchecked_add::precondition_check
 core::num::<impl isize>::unchecked_cast::precondition_check
+core::num::<impl isize>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl isize>::unchecked_div_exact::precondition_check
 core::num::<impl isize>::unchecked_mul::precondition_check
 core::num::<impl isize>::unchecked_neg
@@ -8221,6 +8194,7 @@ core::panicking::panic_nounwind_fmt::runtime
 core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
+core::panicking::unreachable_default_msg
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
@@ -8572,6 +8546,7 @@ core::str::<impl str>::is_char_boundary
 core::str::<impl str>::is_empty
 core::str::<impl str>::len
 core::str::<impl str>::parse
+core::str::<impl str>::split
 core::str::<impl str>::split_inclusive
 core::str::<impl str>::starts_with
 core::str::<impl str>::strip_suffix
@@ -8591,8 +8566,12 @@ core::str::error::Utf8Error::valid_up_to
 core::str::iter::CharIndices::<'a>::as_str
 core::str::iter::CharIndices::<'a>::offset
 core::str::iter::Chars::<'a>::as_str
+core::str::iter::MatchIndicesInternal::<'a, P>::next
+core::str::iter::MatchesInternal::<'a, P>::next
 core::str::iter::SplitInternal::<'a, P>::get_end
+core::str::iter::SplitInternal::<'a, P>::next
 core::str::iter::SplitInternal::<'a, P>::next_inclusive
+core::str::iter::SplitNInternal::<'a, P>::next
 core::str::lossy::<impl [u8]>::utf8_chunks
 core::str::lossy::Utf8Chunk::<'a>::invalid
 core::str::lossy::Utf8Chunk::<'a>::valid

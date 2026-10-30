@@ -8,10 +8,14 @@
 // Ferrocene addition: This is currently broken on facade targets, as our CI's libc is too old
 //@ ignore-qemu
 
-use run_make_support::{bin_name, build_native_static_lib, env_var, run, rustc};
+use run_make_support::{bin_name, build_native_static_lib, env_var, run, rustc, target};
 
 fn main() {
     build_native_static_lib("test");
-    rustc().linker(&env_var("CC")).input("main.rs").run();
+    let mut cmd = rustc();
+    if !target().contains("wasm") {
+        cmd.linker(&env_var("CC"));
+    }
+    cmd.input("main.rs").run();
     run(&bin_name("main"));
 }

@@ -11,7 +11,7 @@ note: `instantiation_unreachable` is validated
   --> $DIR/post-mono.rs:75:4
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | fn instantiation_unreachable() {
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
 LL |     uninstantiated_generic(Unvalidated); // ok

@@ -483,3 +483,36 @@ fn assert_failed_inner(
         ),
     }
 }
+
+// panic!() without args expands to this, to generate slightly less code
+#[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
+#[cfg_attr(panic = "immediate-abort", inline)]
+#[track_caller]
+pub const fn panic_default_msg() -> ! {
+    panic("explicit panic")
+}
+
+// unreachable!() without args expands to this, to generate slightly less code
+#[ferrocene::prevalidated]
+#[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
+#[cfg_attr(panic = "immediate-abort", inline)]
+#[track_caller]
+pub const fn unreachable_default_msg() -> ! {
+    panic("internal error: entered unreachable code")
+}
+
+// unimplemented!() without args expands to this, to generate slightly less code
+#[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
+#[cfg_attr(panic = "immediate-abort", inline)]
+#[track_caller]
+pub const fn unimplemented_default_msg() -> ! {
+    panic("not implemented")
+}
+
+// todo!() without args expands to this, to generate slightly less code
+#[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
+#[cfg_attr(panic = "immediate-abort", inline)]
+#[track_caller]
+pub const fn todo_default_msg() -> ! {
+    panic("not yet implemented")
+}

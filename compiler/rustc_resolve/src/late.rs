@@ -219,6 +219,12 @@ pub(crate) enum RibKind<'ra> {
     /// We passed through a function, closure or coroutine signature. Disallow labels.
     FnOrCoroutine,
 
+    MoveExpr {
+        first_rib: usize,
+        move_expr_span: Span,
+        scope_span: Span,
+    },
+
     /// We passed through an item scope. Disallow upvars.
     Item(HasGenericParams, DefKind),
 
@@ -264,6 +270,7 @@ impl RibKind<'_> {
             RibKind::Normal
             | RibKind::Block(..)
             | RibKind::FnOrCoroutine
+            | RibKind::MoveExpr { .. }
             | RibKind::ConstantItem(..)
             | RibKind::Module(_)
             | RibKind::MacroDefinition(_)
@@ -840,6 +847,8 @@ struct LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
     /// The current set of local scopes for types and values.
     ribs: PerNS<Vec<Rib<'ra>>>,
 
+    move_expr_scopes: Vec<Option<(usize, Span)>>,
+
     /// Previous popped `rib`, only used for diagnostic.
     last_block_rib: Option<Rib<'ra>>,
 
@@ -901,7 +910,9 @@ impl<'ast, 'ra, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'ra, 'tc
         // Always report errors in items we just entered.
         let old_ignore = replace(&mut self.in_func_body, false);
         with_owner(self, item.id, |this| {
-            this.with_lifetime_rib(LifetimeRibKind::Item, |this| this.resolve_item(item))
+            this.with_move_expr_scope(None, |this| {
+                this.with_lifetime_rib(LifetimeRibKind::Item, |this| this.resolve_item(item))
+            })
         });
         self.in_func_body = old_ignore;
         self.diag_metadata.current_item = prev;
@@ -1617,6 +1628,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 type_ns: vec![Rib::new(start_rib_kind)],
                 macro_ns: vec![Rib::new(start_rib_kind)],
             },
+            move_expr_scopes: Vec::new(),
             last_block_rib: None,
             label_ribs: Vec::new(),
             lifetime_ribs: Vec::new(),
@@ -1726,6 +1738,39 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             self.ribs[TypeNS].pop().unwrap();
             self.ribs[ValueNS].pop().unwrap();
         }
+    }
+
+    fn with_move_expr_scope<T>(
+        &mut self,
+        scope_span: Option<Span>,
+        work: impl FnOnce(&mut Self) -> T,
+    ) -> T {
+        if !self.r.features.move_expr() {
+            return work(self);
+        }
+        let scope = scope_span.map(|span| (self.ribs[ValueNS].len(), span));
+        self.move_expr_scopes.push(scope);
+        let result = work(self);
+        self.move_expr_scopes.pop();
+        result
+    }
+
+    fn with_move_expr_initializer<T>(
+        &mut self,
+        move_expr_span: Span,
+        work: impl FnOnce(&mut Self) -> T,
+    ) -> T {
+        let Some(Some((first_rib, scope_span))) = self.move_expr_scopes.last().copied() else {
+            return work(self);
+        };
+        self.move_expr_scopes.pop();
+        let result = self.with_rib(
+            ValueNS,
+            RibKind::MoveExpr { first_rib, move_expr_span, scope_span },
+            work,
+        );
+        self.move_expr_scopes.push(Some((first_rib, scope_span)));
+        result
     }
 
     fn visit_generic_params(&mut self, params: &'ast [GenericParam], add_self_upper: bool) {
@@ -2919,9 +2964,14 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         let mut mod_inner_attrs_start = None;
         match item.kind {
             ItemKind::Mod(..) => {
-                // We only handle outer doc comments for modules here.
+                // We only handle outer attributes which can contain intra-doc links (doc comments
+                // and `deprecated`) for modules here.
                 let attrs = if let Some(pos) = item.attrs.iter().position(|a| {
                     a.doc_resolution_scope().is_some_and(|style| style == AttrStyle::Inner)
+                    || matches!(
+                        a.kind,
+                        AttrKind::Normal(ref n)
+                            if n.item.name() == Some(sym::deprecated) && a.style == AttrStyle::Inner)
                 }) {
                     mod_inner_attrs_start = Some(pos);
                     &item.attrs[..pos]
@@ -5121,6 +5171,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
     }
 
     /// Handles paths that may refer to associated items.
+    #[tracing::instrument(skip(self, source), level = "debug")]
     fn resolve_qpath(
         &mut self,
         qself: &Option<Box<QSelf>>,
@@ -5129,11 +5180,6 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         finalize: Finalize,
         source: PathSource<'_, 'ast, 'ra>,
     ) -> Result<Option<PartialRes>, Spanned<ResolutionError<'ra>>> {
-        debug!(
-            "resolve_qpath(qself={:?}, path={:?}, ns={:?}, finalize={:?})",
-            qself, path, ns, finalize,
-        );
-
         if let Some(qself) = qself {
             if qself.position == 0 {
                 // This is a case like `<T>::B`, where there is no
@@ -5533,6 +5579,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     self.resolve_expr(arg, None);
                 }
                 self.visit_path_segment(seg);
+                self.detect_missing_turbofish(&args);
             }
 
             ExprKind::Call(ref callee, ref arguments) => {
@@ -5554,6 +5601,7 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         self.resolve_expr(argument, None);
                     }
                 }
+                self.detect_missing_turbofish(&arguments);
             }
             ExprKind::FormatArgs(ref args) => {
                 for arg in args.arguments.all_args() {
@@ -5566,30 +5614,46 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             ExprKind::Type(ref _type_expr, ref _ty) => {
                 visit::walk_expr(self, expr);
             }
+            ExprKind::Move(..) => {
+                self.with_move_expr_initializer(expr.span, |this| visit::walk_expr(this, expr));
+            }
             // For closures, RibKind::FnOrCoroutine is added in visit_fn
             ExprKind::Closure(ast::Closure {
                 binder: ClosureBinder::For { ref generic_params, span },
+                fn_decl_span,
                 ..
             }) => {
-                self.with_generic_param_rib(
-                    generic_params,
-                    RibKind::Normal,
-                    expr.id,
-                    LifetimeBinderKind::Closure,
-                    span,
-                    |this| visit::walk_expr(this, expr),
-                );
+                self.with_move_expr_scope(Some(fn_decl_span), |this| {
+                    this.with_generic_param_rib(
+                        generic_params,
+                        RibKind::Normal,
+                        expr.id,
+                        LifetimeBinderKind::Closure,
+                        span,
+                        |this| visit::walk_expr(this, expr),
+                    );
+                });
             }
-            ExprKind::Closure(..) => visit::walk_expr(self, expr),
-            ExprKind::Gen(..) => {
-                self.with_label_rib(RibKind::FnOrCoroutine, |this| visit::walk_expr(this, expr));
+            ExprKind::Closure(ref closure) => {
+                self.with_move_expr_scope(Some(closure.fn_decl_span), |this| {
+                    visit::walk_expr(this, expr)
+                });
+            }
+            ExprKind::Gen(_, _, _, decl_span) => {
+                self.with_move_expr_scope(Some(decl_span), |this| {
+                    this.with_label_rib(RibKind::FnOrCoroutine, |this| {
+                        visit::walk_expr(this, expr)
+                    });
+                });
             }
             ExprKind::Repeat(ref elem, ref ct) => {
                 self.visit_expr(elem);
                 self.resolve_anon_const(ct, AnonConstKind::ConstArg(IsRepeatExpr::Yes));
             }
             ExprKind::ConstBlock(ref ct) => {
-                self.resolve_anon_const(ct, AnonConstKind::InlineConst);
+                self.with_move_expr_scope(None, |this| {
+                    this.resolve_anon_const(ct, AnonConstKind::InlineConst);
+                });
             }
             ExprKind::Index(ref elem, ref idx, _) => {
                 self.resolve_expr(elem, Some(expr));

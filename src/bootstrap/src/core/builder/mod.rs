@@ -829,6 +829,7 @@ impl<'a> Builder<'a> {
                 llvm::Enzyme,
                 llvm::RustOffload,
                 llvm::CrtBeginEnd,
+                llvm::Tpde,
                 crate::ferrocene::tool::SelfTest,
                 crate::ferrocene::tool::SymbolReport,
                 crate::ferrocene::tool::Blanket,
@@ -843,7 +844,7 @@ impl<'a> Builder<'a> {
                 tool::RustcPerf,
                 tool::WasmComponentLd,
                 tool::LldWrapper,
-                tool::RunMakeSupport,
+                tool::RunMakeSupport, // Ferrocene addition
             ),
             Kind::Clippy => describe!(
                 clippy::Std,
@@ -882,7 +883,6 @@ impl<'a> Builder<'a> {
                 check::Clippy,
                 check::Miri,
                 check::CargoMiri,
-                check::Priroda,
                 check::MiroptTestTools,
                 check::Rustfmt,
                 check::RustAnalyzer,

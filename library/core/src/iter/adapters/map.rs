@@ -121,6 +121,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn try_fold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -131,6 +132,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn fold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,
@@ -161,6 +163,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn try_rfold<Acc, G, R>(&mut self, init: Acc, g: G) -> R
     where
         Self: Sized,
@@ -171,6 +174,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn rfold<Acc, G>(self, init: Acc, g: G) -> Acc
     where
         G: FnMut(Acc, Self::Item) -> Acc,

@@ -69,10 +69,10 @@ mod type_of;
 
 use std::any::Any;
 use std::ffi::CString;
-use std::fs;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::{env, fs};
 
 #[cfg(feature = "master")]
 use gccjit::TargetInfo;
@@ -92,7 +92,9 @@ use rustc_errors::{DiagCtxt, DiagCtxtHandle};
 use rustc_middle::dep_graph::{WorkProduct, WorkProductMap};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::config::{OptLevel, OutputFilenames};
-use rustc_session::{CodegenBackendInit, EarlySession, IncrCompSession, Session};
+use rustc_session::{
+    BorrowedIncrCompSession, CodegenBackendInit, EarlySession, IncrCompSession, Session,
+};
 use rustc_span::{Symbol, sym};
 use rustc_target::spec::{RelocModel, TargetTuple};
 use tempfile::TempDir;
@@ -153,6 +155,14 @@ impl GccCodegenBackend {
     fn config(&self) -> &BackendConfig {
         self.config.as_ref().expect("target info not initialized")
     }
+
+    #[cfg(feature = "master")]
+    fn set_personality_function(&self, tcx: TyCtxt<'_>) {
+        let personality_symbol = rustc_symbol_mangling::eh_personality_symbol(tcx);
+        gccjit::set_global_personality_function_name(
+            &CString::new(personality_symbol).expect("symbol name shouldn't contain NUL"),
+        );
+    }
 }
 
 fn load_libgccjit_if_needed(libgccjit_target_lib_file: &Path) {
@@ -190,34 +200,47 @@ impl CodegenBackend for GccCodegenBackend {
                     lib_path.join(sess.target.llvm_target.as_ref()).join("libgccjit.so");
                 paths.push(llvm_target_path);
             }
+
             paths
         }
 
-        let global_backend_features = gcc_util::global_gcc_features(sess);
-
-        // We use all_paths() instead of only path() in case the path specified by --sysroot is
-        // invalid.
-        // This is the case for instance in Rust for Linux where they specify --sysroot=/dev/null.
-        'sysroot: for path in sess.opts.sysroot.all_paths() {
-            for libgccjit_target_lib_file in file_paths(path, sess) {
-                if let Ok(true) = fs::exists(&libgccjit_target_lib_file) {
-                    load_libgccjit_if_needed(&libgccjit_target_lib_file);
-                    break 'sysroot;
-                }
+        // If the user sets the CG_GCCJIT_LIBRARY_PATH environment variable, then we'll load the
+        // library from there or panic if we can't find or load it.
+        if let Ok(custom_path) = env::var("CG_GCCJIT_LIBRARY_PATH").as_deref() {
+            if let Ok(true) = fs::exists(custom_path) {
+                load_libgccjit_if_needed(&PathBuf::from(custom_path));
             }
-        }
 
-        if !gccjit::is_loaded() {
-            let mut paths = vec![];
-            for path in sess.opts.sysroot.all_paths() {
+            if !gccjit::is_loaded() {
+                panic!("Could not load gccjit from CG_GCCJIT_LIBRARY_PATH: {}", custom_path);
+            }
+        } else {
+            // We use all_paths() instead of only path() in case the path specified by --sysroot is
+            // invalid.
+            // This is the case for instance in Rust for Linux where they specify --sysroot=/dev/null.
+            'sysroot: for path in sess.opts.sysroot.all_paths() {
                 for libgccjit_target_lib_file in file_paths(path, sess) {
-                    paths.push(libgccjit_target_lib_file);
+                    if let Ok(true) = fs::exists(&libgccjit_target_lib_file) {
+                        load_libgccjit_if_needed(&libgccjit_target_lib_file);
+                        break 'sysroot;
+                    }
                 }
             }
 
-            paths.dedup();
-            panic!("Could not load libgccjit.so. Attempted paths: {:#?}", paths);
+            if !gccjit::is_loaded() {
+                let mut paths = vec![];
+
+                for path in sess.opts.sysroot.all_paths() {
+                    for libgccjit_target_lib_file in file_paths(path, sess) {
+                        paths.push(libgccjit_target_lib_file);
+                    }
+                }
+
+                paths.dedup();
+                panic!("Could not load libgccjit.so. Attempted paths: {:#?}", paths);
+            }
         }
+        let global_backend_features = gcc_util::global_gcc_features(sess);
 
         #[cfg(feature = "master")]
         {
@@ -230,13 +253,13 @@ impl CodegenBackend for GccCodegenBackend {
             if target_cpu != "generic" {
                 context.add_command_line_option(format!("-march={}", target_cpu));
             }
+            // libgccjit always passes -fPIC, which some targets reject (e.g. MIPS without -mabicalls).
+            gcc_util::add_pic_option(&context, sess.relocation_model());
 
             self.config = Some(BackendConfig {
                 target_info: Arc::new(IntoDynSyncSend(context.get_target_info())),
                 lto_supported: gccjit::is_lto_supported(),
             });
-
-            gccjit::set_global_personality_function_name(c"rust_eh_personality");
         }
 
         #[cfg(not(feature = "master"))]
@@ -245,6 +268,7 @@ impl CodegenBackend for GccCodegenBackend {
             let temp_file = temp_dir.keep().join("result.asm");
             let check_context = Context::default();
             check_context.set_print_errors_to_stderr(false);
+            gcc_util::add_pic_option(&check_context, sess.relocation_model());
             let _int128_ty = check_context.new_c_type(CType::UInt128t);
             // NOTE: we cannot just call compile() as this would require other files than libgccjit.so.
             check_context.compile_to_file(
@@ -272,6 +296,8 @@ impl CodegenBackend for GccCodegenBackend {
     }
 
     fn codegen_crate(&self, tcx: TyCtxt<'_>) -> Box<dyn Any> {
+        #[cfg(feature = "master")]
+        self.set_personality_function(tcx);
         Box::new(codegen_crate(self.clone(), tcx))
     }
 
@@ -403,6 +429,7 @@ impl WriteBackendMethods for GccCodegenBackend {
     fn run_thin_lto(
         _cgcx: &CodegenContext,
         _prof: &SelfProfilerRef,
+        _incr_comp_session: Option<&BorrowedIncrCompSession>,
         _dcx: DiagCtxtHandle<'_>,
         // FIXME(bjorn3): Limit LTO exports to these symbols
         _exported_symbols_for_lto: &[String],

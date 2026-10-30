@@ -28,6 +28,7 @@ impl<I> Cloned<I> {
 }
 
 #[ferrocene::prevalidated]
+#[inline]
 fn clone_try_fold<T: Clone, Acc, R>(mut f: impl FnMut(Acc, T) -> R) -> impl FnMut(Acc, &T) -> R {
     move |acc, elt| f(acc, elt.clone())
 }
@@ -51,6 +52,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn try_fold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -61,6 +63,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn fold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,
@@ -90,6 +93,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn try_rfold<B, F, R>(&mut self, init: B, f: F) -> R
     where
         Self: Sized,
@@ -100,6 +104,7 @@ where
     }
 
     #[ferrocene::prevalidated]
+    #[inline]
     fn rfold<Acc, F>(self, init: Acc, f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

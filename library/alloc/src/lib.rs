@@ -92,11 +92,12 @@
 #![feature(allocator_ext)]
 #![feature(array_into_iter_constructors)]
 #![feature(ascii_char)]
+#![feature(ascii_char_variants)]
 #![feature(async_fn_traits)]
 #![feature(async_iterator)]
 #![feature(borrowed_buf_init)]
-#![feature(bstr)]
-#![feature(bstr_internals)]
+#![feature(byte_str)]
+#![feature(byte_str_internals)]
 #![feature(can_vector)]
 #![feature(case_ignorable)]
 #![feature(cast_maybe_uninit)]
@@ -156,7 +157,7 @@
 #![feature(pattern)]
 #![feature(pin_coerce_unsized_trait)]
 #![feature(ptr_alignment_type)]
-#![feature(ptr_cast_slice)]
+#![feature(ptr_cast_array)]
 #![feature(ptr_metadata)]
 #![feature(random)]
 #![feature(raw_os_error_ty)]
@@ -260,8 +261,8 @@ pub mod alloc;
 // to allow code to have `use boxed::Box;` declarations.
 pub mod borrow;
 pub mod boxed;
-#[unstable(feature = "bstr", issue = "134915")]
-pub mod bstr;
+#[unstable(feature = "byte_str", issue = "134915")]
+pub mod byte_str;
 pub mod collections;
 #[cfg(all(not(no_rc), not(no_sync), not(no_global_oom_handling)))]
 pub mod ffi;

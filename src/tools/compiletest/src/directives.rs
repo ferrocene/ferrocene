@@ -225,6 +225,7 @@ pub(crate) struct TestProps {
 
 mod directives {
     pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
+    pub(crate) const ACT_AS_STABLE: &str = "act-as-stable";
     pub(crate) const ERROR_PATTERN: &str = "error-pattern";
     pub(crate) const REGEX_ERROR_PATTERN: &str = "regex-error-pattern";
     pub(crate) const COMPILE_FLAGS: &str = "compile-flags";

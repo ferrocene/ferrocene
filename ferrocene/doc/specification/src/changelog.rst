@@ -32,25 +32,115 @@ Language changes in Rust 1.99.0
 
 - `Stabilize C-variadic function definitions <https://github.com/rust-lang/rust/pull/155697>`_
 
-  - Removed paragraph: :p:`fls_juob30rst11r`
+  New sections:
 
-  - Changed paragraph: :p:`fls_v24ino4hix3m`
+  - :ref:`fls_mtPH3Q90xNwE`
 
-  - New paragraphs:
+  Moved sections:
 
-    - :p:`fls_gHhCHlxtxCGU`
-    - :p:`fls_srbY4Ilm0u2E`
-    - :p:`fls_pquTAwmZENdh`
-    - :p:`fls_MoJFg4StLGwF`
-    - :p:`fls_cNcLhlgFbpcb`
+  - :ref:`fls_hffpo88r61rh`
 
-  - New section: :ref:`fls_mtPH3Q90xNwE`
+  Changed sections:
 
-  - Moved paragraphs:
+  - :ref:`fls_yztwtek0y34v`
 
-    - :p:`fls_B0SMXRqQMS1E`
-    - :p:`fls_o4uSLPo00KUg`
-    - :p:`fls_icdzs1mjh0n4`
+  New syntax:
+
+  - :s:`FunctionParameterCore`
+  - :s:`FunctionPointerTypeParameterCore`
+
+  Changed syntax:
+
+  - :s:`FunctionParameter`
+  - :s:`FunctionPointerTypeParameter`
+  - :s:`FunctionPointerTypeParameterList`
+
+  Removed syntax:
+
+  - :s:`FunctionParameterPattern`
+  - :s:`FunctionParameterVariadicPart`
+
+  New paragraphs:
+
+  - :p:`fls_mDruvhyJnDEe`
+  - :p:`fls_thrgzVT7Nz7j`
+  - :p:`fls_yTbnDrxz1jfN`
+  - :p:`fls_xhWVYxPqnJ7h`
+  - :p:`fls_CcnCxJoQJGg1`
+  - :p:`fls_pquTAwmZENdh`
+  - :p:`fls_MoJFg4StLGwF`
+  - :p:`fls_cNcLhlgFbpcb`
+  - :p:`fls_gHhCHlxtxCGU`
+  - :p:`fls_6nQha8qMCr1K`
+  - :p:`fls_srbY4Ilm0u2E`
+  - :p:`fls_BbWdVLQPgopI`
+  - :p:`fls_KNUfWkJIwegC`
+
+  Moved paragraphs:
+
+  - :p:`fls_5loqzajiz34m`
+  - :p:`fls_cyxk12wuicml`
+  - :p:`fls_l88r9fj82650`
+  - :p:`fls_o4uSLPo00KUg`
+  - :p:`fls_icdzs1mjh0n4`
+  - :p:`fls_OR85NVifPwjr`
+  - :p:`fls_4s2IdfYDzPrX`
+  - :p:`fls_ZJJppPfiJRou`
+  - :p:`fls_jOyZh9ujWWHQ`
+  - :p:`fls_Xdr0bFwxhWiB`
+  - :p:`fls_DpTFEHZAABdD`
+  - :p:`fls_b7FTlWfnX2OI`
+  - :p:`fls_6urL6fZ5cpaA`
+  - :p:`fls_TMOzb6cYIOlH`
+  - :p:`fls_eHPWHrvs7ETl`
+  - :p:`fls_mjCrvmikm58M`
+  - :p:`fls_4EUb9zFatZ97`
+  - :p:`fls_4B4B5FIqAes9`
+
+  Changed paragraphs:
+
+  - :p:`fls_vkz8t751gfhk`
+  - :p:`fls_ddg0u5lej74x`
+  - :p:`fls_rcERq1PfKPJI`
+  - :p:`fls_g09jhukl0ez2`
+  - :p:`fls_d00wni4edi8f`
+  - :p:`fls_0Athv8KFA5FO`
+  - :p:`fls_djlglv2eaihl`
+  - :p:`fls_4dje9t5y2dia`
+  - :p:`fls_8ltVLtAfvy0m`
+  - :p:`fls_v24ino4hix3m`
+  - :p:`fls_qwchgvvnp0qe`
+  - :p:`fls_w00qi1gx204e`
+  - :p:`fls_m7tu4w4lk8v`
+  - :p:`fls_rdu4723vp0oo`
+  - :p:`fls_9div9yusw64h`
+  - :p:`fls_yfm0jh62oaxr`
+  - :p:`fls_nUADhgcfvvGC`
+  - :p:`fls_gu3331rmv2ho`
+  - :p:`fls_u8lifqig90gq`
+  - :p:`fls_sas3ahcshnrh`
+  - :p:`fls_gE9VC8JXrl1N`
+  - :p:`fls_pjil71kk0r25`
+
+  Removed paragraphs:
+
+  - :p:`fls_juob30rst11r`
+
+  New glossary entries:
+
+  - :t:`C-variadic function`
+  - :t:`external block function`
+  - :t:`naked function`
+  - :t:`variadic function`
+  - :t:`variadic parameter`
+
+  Changed clossary entries:
+
+  - :t:`external block`
+  - :t:`external function`
+  - :t:`external function item type`
+  - :t:`Foreign Function Interface`
+  - :t:`variadic part`
 
 - `Trait methods are now resolved on an adjusted never type (producing a FCW) <https://github.com/rust-lang/rust/pull/156047>`_
 
@@ -108,7 +198,6 @@ Language changes in Rust 1.99.0
   New paragraphs:
 
   - :p:`fls_88A3TSNtfaZw`
-  - :p:`fls_HBKQqxo8QM2x`
 
 - `Warn if an invalid 'doc' attribute is used on a macro invocation <https://github.com/rust-lang/rust/pull/161003>`_
 
@@ -1519,7 +1608,4 @@ language changes in Rust 1.77.0
 
   - New paragraph: :p:`fls_1s1UikGU5YQb`
 
-.. note:
-   This is a custom change for the FLS in the Ferrocene subtree.
-   Upstream FLS points to release notes of upstream.
-.. _release notes: ../release-notes/index.html
+.. _release notes: https://doc.rust-lang.org/releases.html

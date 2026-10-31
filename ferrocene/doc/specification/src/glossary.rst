@@ -3010,6 +3010,11 @@ mutable variable
 
 A :dt:`mutable variable` is a :t:`variable` whose :t:`value` can be modified.
 
+naked function
+^^^^^^^^^^^^^^
+
+A :dt:`naked function` is a :t:`function` subject to :t:`attribute` :c:`naked`.
+
 name
 ^^^^
 
@@ -5146,7 +5151,12 @@ stack.
 variadic function
 ^^^^^^^^^^^^^^^^^
 
-A :t:`variadic function` is an :t:`external block function` or a :t:`external function` that specifies a :t:`variadic part`.
+A :dt:`variadic function` is a :t:`function` that specifies a :t:`variadic parameter`.
+
+variadic parameter
+^^^^^^^^^^^^^^^^^^
+
+A :dt:`variadic parameter` is a :t:`function parameter` that specifies a :t:`variadic part`.
 
 variadic part
 ^^^^^^^^^^^^^

@@ -58,6 +58,8 @@ Library Certifications
    norm-mapping/iso-26262/iso-26262-8-9
    norm-mapping/iso-26262/iso-26262-8-10
    norm-mapping/iso-26262/iso-26262-8-11
+   norm-mapping/en-50716/en-50716
+   norm-mapping/en-50716/en-50716-annex-a
 
 .. appendices::
    :numbered:

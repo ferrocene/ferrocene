@@ -25,3 +25,4 @@ iec_62304_doc = "Medical device software - Software life cycle processes"
 
 en_50716_ref = "EN 50716:2023"
 en_50716_doc = "Railway Applications - Requirements for software development"
+en_50716_core_sil = "SIL 2"

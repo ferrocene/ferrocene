@@ -24,6 +24,9 @@ The following certified libraries shall be suitable to be used in safety applica
    * - |iso_26262_ref|
      - |iso_26262_core_asil|
      - SEooC SW Development; Tailored following the standard (-2/-6/-8) tailoring
+   * - |en_50716_ref|
+     - |en_50716_core_sil|
+     - Conformance shown for each requirement (4.5 of |en_50716_ref|); assessed by an independent Assessor (6.4 of |en_50716_ref|)
 
 This assessment targets a full compliance statement to the standards above, as far as it is applicable for a Software Safety Element out of Context.
 

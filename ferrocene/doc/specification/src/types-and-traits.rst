@@ -1048,6 +1048,9 @@ A :t:`function pointer type` is a :t:`type` that refers to a :t:`function`.
 :dp:`fls_5dd7icjcl3nt`
 An :t:`unsafe function pointer type` is a function pointer type subject to :t:`keyword` ``unsafe``.
 
+:dp:`fls_BbWdVLQPgopI`
+A :t:`function pointer type` that specifies a :t:`variadic part` shall only use the :t:`[ABI]s` permitted on a :t:`variadic <variadic function>` :t:`external block function`.
+
 :dp:`fls_g1iYVw7upBnH`
 The :t:`return type` of a :t:`function pointer type` is determined as follows:
 
@@ -1226,9 +1229,7 @@ An :t:`inferred type` shall not appear in the following positions:
   Within the :s:`ReturnType` of a :s:`FunctionDeclaration`,
 
 * :dp:`fls_gE9VC8JXrl1N`
-  Within the :s:`TypeAscription` of a :s:`ConstantDeclaration`, a
-  :s:`ConstantParameter`, a :s:`FunctionParameterPattern`, a
-  :s:`RecordStructField`, a :s:`StaticDeclaration`, or a :s:`TypedSelf`,
+  Within the :s:`TypeAscription` of a :s:`ConstantDeclaration`, a :s:`ConstantParameter`, a :s:`FunctionParameterCore`, a :s:`RecordStructField`, a :s:`StaticDeclaration`, or a :s:`TypedSelf`,
 
 * :dp:`fls_ybyQjFamI1Q5`
   Within the :s:`TypeSpecification` of a :s:`FunctionParameter`, an
@@ -2839,6 +2840,9 @@ A dispatchable :t:`function` is :t:`object safe` when:
 * :dp:`fls_j7nb34o87l1z`
   It lacks :t:`[generic parameter]s`, and
 
+* :dp:`fls_KNUfWkJIwegC`
+  It lacks a :t:`variadic parameter`, and
+
 * :dp:`fls_k1vc9vd8at92`
   Is a :t:`method` that does not use :c:`Self` in its :t:`function signature`
   except in the :t:`type` of its :t:`self parameter` or as the :t:`type` of a
@@ -3245,7 +3249,7 @@ that resolve to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
 An :dt:`input lifetime` is one of the following :t:`[lifetime]s`:
 
 * :dp:`fls_pjil71kk0r25`
-  Any :t:`lifetime` related to a :t:`function parameter`.
+  Any :t:`lifetime` related to a :t:`function parameter`, except the :t:`lifetime argument` of the :std:`core::ffi::VaList` :t:`type` of a :t:`variadic parameter`.
 
 * :dp:`fls_1jnn9bsb71k7`
   Any :t:`lifetime` related to a :t:`function pointer type parameter`.

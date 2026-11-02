@@ -863,6 +863,12 @@ Attribute ``naked``
 :dp:`fls_VUL2qySBvRqy`
 :t:`Attribute` :c:`naked` cannot be used together with :t:`attribute` :c:`track_caller`.
 
+:dp:`fls_mDruvhyJnDEe`
+A :t:`naked function` is a :t:`function` subject to :t:`attribute` :c:`naked`.
+
+:dp:`fls_thrgzVT7Nz7j`
+A :t:`naked function` that specifies a :t:`variadic part` shall only use the :t:`[ABI]s` permitted on a :t:`variadic <variadic function>` :t:`external block function`.
+
 .. rubric:: Undefined Behavior
 
 :dp:`fls_0tYMAQY1V55p`

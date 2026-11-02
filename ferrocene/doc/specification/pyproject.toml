@@ -6,7 +6,7 @@
 name = "fls"
 version = "0.0.0"
 
-requires-python = ">= 3.10"
+requires-python = "~=3.11.18"
 dependencies = [
     "sphinx ~= 8.0",
     "sphinx-autobuild >= 0", # Doesn't use semver.

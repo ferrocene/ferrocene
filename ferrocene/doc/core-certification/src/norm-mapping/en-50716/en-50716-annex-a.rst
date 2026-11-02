@@ -12,8 +12,8 @@ Table A.1 — Lifecycle issues and documentation (5.3)
 
 Covered by the table of documents in :ref:`section 5.3.2.4 of the EN 50716 norm mapping <norm-mapping/en-50716/en-50716:5.3.2.4>`.
 
-6, 8
-""""
+6
+"
 
 Covered by
 
@@ -25,8 +25,23 @@ Covered by
 
 Covered by :doc:`core-certification:safety-plan/testing-plan`.
 
-9, 10
-"""""
+8
+"
+
+Covered by
+
+- :doc:`core-certification:safety-plan/requirements`
+- `Certified standard library API docs <../../../../index.html#library-apis>`_
+
+9
+"
+
+N/A; no architecture and no separate design specification is written.
+
+.. include:: ../../partials/simple-design.rst
+
+10
+""
 
 N/A; no architecture and no separate design specification is written.
 
@@ -117,8 +132,8 @@ Written by the Assessor, see :ref:`safety-plan/project-setup:safety assessment`.
 Table A.2 — Software Requirements Specification (7.2)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1,3
-"""
+1
+"
 
 Not used; the requirements are written in natural language (doc-comments) together with the function signature, which is a formal and machine-checked description of the interface.
 
@@ -126,6 +141,11 @@ Not used; the requirements are written in natural language (doc-comments) togeth
 "
 
 Applied by the structure of doc-comments and the overall structure of the core library.
+
+3
+"
+
+Not used; the requirements are written in natural language (doc-comments) together with the function signature, which is a formal and machine-checked description of the interface.
 
 Table A.3 — Software architecture (7.3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,8 +155,8 @@ Table A.3 — Software architecture (7.3)
 
 Covered by :doc:`core-certification:safety-plan/programming-language` (memory safety, bounds checking, strong typing).
 
-2-4, 6-14, 16
-"""""""""""""
+2-4
+"""
 
 Not used; the certified libraries are single-channel software without recovery, reconfiguration or diversity. Detecting and handling failures of the enclosing system is the responsibility of the user of the certified libraries.
 
@@ -145,10 +165,20 @@ Not used; the certified libraries are single-channel software without recovery, 
 
 Applied by the language itself: out-of-range indexing, overflow and similar violations terminate in a documented panic, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`.
 
+6-14
+""""
+
+Not used; the certified libraries are single-channel software without recovery, reconfiguration or diversity. Detecting and handling failures of the enclosing system is the responsibility of the user of the certified libraries.
+
 15
 ""
 
 Covered by :doc:`core-certification:safety-plan/failure-analysis`.
+
+16
+""
+
+Not used; the certified libraries are single-channel software without recovery, reconfiguration or diversity. Detecting and handling failures of the enclosing system is the responsibility of the user of the certified libraries.
 
 17
 ""
@@ -191,8 +221,15 @@ Covered by
 
 Covered by :doc:`core-certification:safety-plan/programming-language` and :doc:`core-certification:safety-report/code-coverage`.
 
-7, 8
-""""
+7
+"
+
+Covered by :doc:`core-certification:safety-plan/programming-language`.
+
+The selected set is 2, 3, 4, 5, 7 and 8, which is an approved combination for |en_50716_core_sil| (requirement 2 of this table).
+
+8
+"
 
 Covered by :doc:`core-certification:safety-plan/programming-language`.
 
@@ -281,8 +318,8 @@ Intentionally left blank in the standard.
 Table A.9 — Software quality assurance (6.5)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1, 3
-""""
+1
+"
 
 Ferrous Systems is ISO 9001:2015 certified, see :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>` and :ref:`safety-plan/project-setup:internal procedures`.
 
@@ -290,6 +327,11 @@ Ferrous Systems is ISO 9001:2015 certified, see :doc:`Qualification Plan - Ferro
 "
 
 Not used as method 1 is already applied.
+
+3
+"
+
+Ferrous Systems is ISO 9001:2015 certified, see :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>` and :ref:`safety-plan/project-setup:internal procedures`.
 
 4
 "
@@ -334,12 +376,20 @@ N/A; the certified libraries are not configurable by application data.
 Table A.12 — Coding standards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1, 2
-""""
+1
+"
 
 .. include:: ../../partials/implicit-coding-standard.rst
 
 As such, the certified libraries do not have an additional coding standard of their own. The upstream style and consistency rules are enforced by the ``tidy`` test suite (``rustfmt``, ``clippy``, ``rustc`` lints), see :ref:`safety-plan/testing-plan:tidy test suite` and :ref:`safety-plan/testing-plan:rustc lints`.
+
+2
+"
+
+.. include:: ../../partials/implicit-coding-standard.rst
+
+As such, the certified libraries do not have an additional coding standard of their own. The upstream style and consistency rules are enforced by the ``tidy`` test suite (``rustfmt``, ``clippy``, ``rustc`` lints), see :ref:`safety-plan/testing-plan:tidy test suite` and :ref:`safety-plan/testing-plan:rustc lints`.
+
 
 3
 "
@@ -374,8 +424,13 @@ Not used; no error seeding is performed.
 
 Covered by :doc:`core-certification:safety-report/code-coverage`: test execution is measured against the code structure for every release.
 
-4, 5
-""""
+4
+"
+
+Not used; no cause consequence diagrams and no prototyping are used.
+
+5
+"
 
 Not used; no cause consequence diagrams and no prototyping are used.
 

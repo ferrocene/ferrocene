@@ -24,10 +24,10 @@ use rustc_middle::mir::{
     MirPhase, Operand, Place, ProjectionElem, Promoted, RuntimePhase, Rvalue, START_BLOCK,
     SourceInfo, Statement, StatementKind, TerminatorKind, WithRetag,
 };
+use rustc_middle::query;
 use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
 use rustc_middle::util::Providers;
-use rustc_middle::{bug, query, span_bug};
-use rustc_span::{DUMMY_SP, Spanned, sym};
+use rustc_span::{DUMMY_SP, Spanned, bug, span_bug, sym};
 use tracing::debug;
 
 #[macro_use]
@@ -35,7 +35,7 @@ mod pass_manager;
 
 use std::sync::LazyLock;
 
-use pass_manager::{self as pm, Lint, MirLint, MirPass, PassPolicy, WithMinOptLevel};
+use pass_manager::{self as pm, Lint, MirLint, MirPass, PassCtx, PassPolicy, WithMinOptLevel};
 
 mod check_pointers;
 mod cost_checker;
@@ -159,7 +159,6 @@ declare_passes! {
     mod instsimplify : InstSimplify { BeforeInline, AfterSimplifyCfg };
     mod jump_threading : JumpThreading;
     mod known_panics_lint : KnownPanicsLint;
-    mod large_enums : EnumSizeOpt;
     mod lint_and_remove_uninhabited : LintAndRemoveUninhabited;
     mod lower_intrinsics : LowerIntrinsics;
     mod lower_slice_len : LowerSliceLenCalls;
@@ -170,7 +169,7 @@ declare_passes! {
     mod prettify : ReorderBasicBlocks, ReorderLocals;
     mod promote_consts : PromoteTemps;
     mod ref_prop : ReferencePropagation;
-    pub mod remove_noop_landing_pads : RemoveNoopLandingPads;
+    mod remove_noop_landing_pads : RemoveNoopLandingPads;
     mod remove_place_mention : RemovePlaceMention;
     mod remove_storage_markers : RemoveStorageMarkers;
     mod remove_uninit_drops : RemoveUninitDrops;
@@ -216,6 +215,8 @@ pub fn provide(providers: &mut Providers) {
     ffi_unwind_calls::provide(&mut providers.queries);
     shim::provide(&mut providers.queries);
     cross_crate_inline::provide(&mut providers.queries);
+    providers.hooks.find_noop_landing_pads_for_instance =
+        remove_noop_landing_pads::find_noop_landing_pads_for_instance;
     providers.queries = query::Providers {
         mir_keys,
         mir_built,
@@ -446,10 +447,9 @@ fn mir_promoted(
         {
             tcx.mir_const_qualif(def)
         }
-        DefKind::AssocConst { .. }
-        | DefKind::Const { .. }
-        | DefKind::Static { .. }
-        | DefKind::AnonConst => tcx.mir_const_qualif(def),
+        DefKind::AssocConst | DefKind::Const | DefKind::Static { .. } | DefKind::AnonConst => {
+            tcx.mir_const_qualif(def)
+        }
         _ => ConstQualifs::default(),
     };
 
@@ -549,7 +549,7 @@ fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &
     let is_fn_like = tcx.def_kind(def).is_fn_like();
     if is_fn_like {
         // Do not compute the mir call graph without said call graph actually being used.
-        if pm::should_run_pass(tcx, &inline::Inline, pm::Optimizations::Allowed)
+        if pm::should_run_pass(&inline::Inline, &pm::PassCtx::for_body(tcx, def.to_def_id()))
             || inline::ForceInline::should_run_pass_for_callee(tcx, def.to_def_id())
         {
             tcx.ensure_done().mir_inliner_callees(ty::InstanceKind::Item(def.to_def_id()));
@@ -578,8 +578,8 @@ fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &
         DefKind::Fn
         | DefKind::AssocFn
         | DefKind::Static { .. }
-        | DefKind::Const { .. }
-        | DefKind::AssocConst { .. } => {
+        | DefKind::Const
+        | DefKind::AssocConst => {
             if let Err(guar) = tcx.ensure_result().check_well_formed(root) {
                 body.tainted_by_errors = Some(guar);
             }
@@ -763,7 +763,6 @@ pub(crate) fn run_optimization_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'
             &dest_prop::DestinationPropagation,
             &simplify::SimplifyLocals::Final,
             &multiple_return_terminators::MultipleReturnTerminators,
-            &large_enums::EnumSizeOpt { discrepancy: 128 },
             // Some cleanup necessary at least for LLVM and potentially other codegen backends.
             &add_call_guards::CriticalCallEdges,
             // Cleanup for human readability, off by default.

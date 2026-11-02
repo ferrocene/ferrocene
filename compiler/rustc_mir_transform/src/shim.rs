@@ -12,8 +12,7 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::{
     self, CoroutineArgs, CoroutineArgsExt, EarlyBinder, GenericArgs, Ty, TyCtxt, Unnormalized,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::{DUMMY_SP, Span, Spanned, dummy_spanned};
+use rustc_span::{DUMMY_SP, Span, Spanned, bug, dummy_spanned, span_bug};
 use tracing::{debug, instrument};
 
 use crate::deref_separator::deref_finder;
@@ -28,7 +27,7 @@ use crate::{
 mod async_destructor_ctor;
 
 pub(super) fn provide(providers: &mut Providers) {
-    providers.mir_shims = make_shim;
+    providers.mir_shims = |tcx, shim| tcx.arena.alloc(make_shim(tcx, shim));
 }
 
 fn make_shim<'tcx>(tcx: TyCtxt<'tcx>, shim: ty::ShimKind<'tcx>) -> Body<'tcx> {

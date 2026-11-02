@@ -53,7 +53,7 @@ Each KP file has the following format:
 
 * ``Detection``: A textual description of methods for detecting the KP.
 
-* ``Mitigation``: A textual description of methods for fixing detected occurences of a KP in code.
+* ``Mitigation``: A textual description of methods for fixing detected occurrences of a KP in code.
 
 In addition, the field ``Affected branches`` is available in the KP Manual. This field shows which branches the KP impacts.
 

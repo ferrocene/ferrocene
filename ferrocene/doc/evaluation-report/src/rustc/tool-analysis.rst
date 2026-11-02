@@ -61,7 +61,7 @@ Rust Driver
      - YES
    * - .. id:: RUSTC_ERR_DRIVER_04
      - :id:`RUSTC_UC1_RLIB`, :id:`RUSTC_UC2_STATICLIB`, :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`, :id:`RUSTC_UC6_PROC_MACRO`
-     - Error diagnostics are not correctly emited
+     - Error diagnostics are not correctly emitted
      - Undefined behavior
      - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003` AND :id:`RUSTC_AVD_TEST_007`
      - NO
@@ -283,7 +283,7 @@ Linking
      - YES
    * - .. id:: RUSTC_ERR_LINK_28
      - :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`, :id:`RUSTC_UC6_PROC_MACRO`
-     - Error diagnostics not emmited
+     - Error diagnostics not emitted
      - Invalid or missing code not detected by user may be linked against subsequent stage
      - :id:`RUSTC_AVD_TEST_007`
      - NO

@@ -14,7 +14,7 @@ There are two kinds of targets available:
 
 * **Host platform**: can be used by developers and build systems to compile
   Rust code from that platform, either targeting the same platform or
-  cross-compiling to a different one. Host platforms cannot neccessarily
+  cross-compiling to a different one. Host platforms cannot necessarily
   target other host platforms.
 
 * **Cross-compilation**: can only be used to cross-compile to the platform from

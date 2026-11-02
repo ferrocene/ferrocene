@@ -124,7 +124,7 @@ Backporting Changes
 -------------------
 
 As part of long-term support, Ferrocene customers may request that bug fixes
-are backported into stable relases. In addition, Ferrocene engineers may
+are backported into stable releases. In addition, Ferrocene engineers may
 identify patches that would need to be backported into a release.
 
 If a PR is identified as a candidate for backporting, a GitHub issue is

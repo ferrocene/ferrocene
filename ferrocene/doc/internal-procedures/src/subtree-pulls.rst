@@ -39,7 +39,7 @@ Reproducing failures
 ^^^^^^^^^^^^^^^^^^^^
 
 If CI fails to run, you can imitate its behavior locally by first installing
-`gh <https://cli.github.com/>`_ then running the following comands:
+`gh <https://cli.github.com/>`_ then running the following commands:
 
 .. warning::
 
@@ -106,7 +106,7 @@ You can also pass the name of a repository to only pull that specific repo::
    and implying that the repo should be hosted on GitHub.
 
 If merging fails for one of the subtrees, the script will stop and report which
-one failed as well as the conflicts that have occured.
+one failed as well as the conflicts that have occurred.
 
 After having manually fixed the conflicts, finish up the merge by doing the following::
 

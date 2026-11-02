@@ -6,6 +6,8 @@ Tool safety assessments
 
 All offline tools we use to develop the certified libraries are listed below. The compiler is T3, all other tools are T2 or T1.
 
+|iec_61508_ref| and |en_50716_ref| use the same tool classification (T1, T2, T3), therefore the class listed for each tool applies to both standards.
+
 There are no online tools used to develop the certified libraries.
 
 .. Is the allocator that potentially relies on the operating system an online tool?
@@ -134,7 +136,7 @@ Compiler built-in functions
 
 .. Most compiler built-in functions are on core. There is one in std and none in alloc.
 
-There are some functions in the certified libraries which are "compiler built-in”. That means they are not implemented in the Rust standard library codebase but in the compiler codebase.
+There are functions in the certified libraries which are "compiler built-in”. That means they are not implemented in the Rust standard library codebase but in the compiler codebase.
 
 They fall in two categories:
 

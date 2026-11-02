@@ -327,7 +327,7 @@ Certified libraries
      - YES
    * - .. id:: CORE_ERR_04
      - :id:`RUSTC_UC1_RLIB`, :id:`RUSTC_UC2_STATICLIB`, :id:`RUSTC_UC3_EXEC`, :id:`RUSTC_UC4_EXEC_RLIB`, :id:`RUSTC_UC5_EXEC_CLIB`
-     - Errornous global allocator
+     - Erroneous global allocator
      - Undefined behaviour in functions using the global allocator
      - :id:`CORE_AVD_GLOBAL_ALLOC_004`
      - YES

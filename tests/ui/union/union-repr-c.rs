@@ -28,3 +28,5 @@ fn main() {}
 //
 // ferrocene-annotations: fls_s4yt19sptl7d
 // External Statics
+
+//@ reference: type.union.layout

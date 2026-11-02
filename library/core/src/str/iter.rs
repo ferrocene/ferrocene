@@ -535,6 +535,7 @@ macro_rules! generate_pattern_iterators {
         impl<'a, P: Pattern> Iterator for $forward_iterator<'a, P> {
             type Item = $iterty;
 
+            #[ferrocene::prevalidated]
             #[inline]
             fn next(&mut self) -> Option<$iterty> {
                 self.0.next()
@@ -684,6 +685,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         None
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         if self.finished {
@@ -967,6 +969,7 @@ where
 }
 
 impl<'a, P: Pattern> SplitNInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         match self.count {
@@ -1087,6 +1090,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<(usize, &'a str)> {
         self.0
@@ -1142,6 +1146,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchesInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         // SAFETY: `Searcher` guarantees that `start` and `end` lie on unicode boundaries.
@@ -1622,6 +1627,18 @@ pub struct EscapeDebug<'a> {
 #[derive(Clone, Debug)]
 pub struct EscapeDefault<'a> {
     pub(super) inner: FlatMap<Chars<'a>, char_mod::EscapeDefault, CharEscapeDefault>,
+}
+
+impl<'a> EscapeDefault<'a> {
+    /// Disassembles the iterator into its internal state.
+    /// Used by alloc for an optimized to_string impl.
+    #[unstable(feature = "std_internals", issue = "none")]
+    pub fn into_parts(
+        self,
+    ) -> (Option<impl Iterator<Item = char>>, Option<Chars<'a>>, Option<impl Iterator<Item = char>>)
+    {
+        self.inner.into_parts()
+    }
 }
 
 /// The return type of [`str::escape_unicode`].

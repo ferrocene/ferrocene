@@ -127,6 +127,12 @@ impl FileType {
     }
 }
 
+impl ReadDir {
+    pub fn dir(&self) -> io::Result<Dir> {
+        self.0
+    }
+}
+
 impl fmt::Debug for ReadDir {
     fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0
@@ -476,6 +482,13 @@ impl fmt::Debug for File {
 impl Drop for File {
     fn drop(&mut self) {
         unsafe { vex_sdk::vexFileClose(self.fd.0) };
+    }
+}
+
+impl Drop for ReadDir {
+    fn drop(&mut self) {
+        // Dummy Drop so that `needs_drop::<ReadDir>()` is true independent of platform.
+        self.0
     }
 }
 

@@ -48,6 +48,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv8m.main-ferrocene.facade-eabi",
     "thumbv8m.main-ferrocene.facade-eabihf",
     // just a dummy comment so the list doesn't get onelined
+    "aarch64-unknown-qtee",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

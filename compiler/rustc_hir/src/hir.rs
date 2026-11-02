@@ -1960,7 +1960,7 @@ pub struct BodyId {
 #[derive(Debug, Clone, Copy, StableHash)]
 pub struct Body<'hir> {
     pub params: &'hir [Param<'hir>],
-    pub value: Expr<'hir>,
+    pub value: &'hir Expr<'hir>,
 }
 
 impl<'hir> Body<'hir> {
@@ -4533,6 +4533,7 @@ pub struct TestBinderBody<'hir> {
     pub span: Span,
     pub foralls: &'hir [TestBinderForall<'hir>],
     pub exists: &'hir [TestBinderExists<'hir>],
+    pub region_equalities: &'hir [(&'hir Lifetime, &'hir Lifetime)],
     /// Constraints to be inserted directly into constraint storage to be proven
     pub constraints: TestBinderConstraint<'hir>,
     /// Constraints declared using `where` syntax, used via `register_obligation`
@@ -5279,7 +5280,7 @@ mod size_asserts {
     use super::*;
     // tidy-alphabetical-start
     static_assert_size!(Block<'_>, 48);
-    static_assert_size!(Body<'_>, 80);
+    static_assert_size!(Body<'_>, 24);
     static_assert_size!(Expr<'_>, 64);
     static_assert_size!(ExprKind<'_>, 48);
     static_assert_size!(FnDecl<'_>, 40);

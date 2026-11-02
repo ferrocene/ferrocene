@@ -1,5 +1,6 @@
 #![feature(rustc_private)]
 
+extern crate rustc_ast;
 extern crate rustc_attr_ir;
 extern crate rustc_driver;
 extern crate rustc_hir;
@@ -15,9 +16,10 @@ use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
+use rustc_ast::attr::AttributeExt;
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
-use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
+use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::print::{
@@ -60,7 +62,8 @@ impl<'tcx> Vis<'tcx> {
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
-            self.visited_attrs.insert(attr.id());
+            let Attribute::Unparsed(attr_item) = attr else { unreachable!() };
+            self.visited_attrs.insert(attr_item.id.attr_id);
         }
     }
 }
@@ -86,8 +89,9 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
 
     fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
         if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
-            if !self.visited_attrs.contains(&attr.id()) {
-                eprintln!("Unused annotation at {:?}", attr.span());
+            let Attribute::Unparsed(attr) = attr else { unreachable!() };
+            if !self.visited_attrs.contains(&attr.id.attr_id) {
+                eprintln!("Unused annotation at {:?}", attr.span);
             }
         }
     }
@@ -198,10 +202,11 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         // here.
         if let Some(attr) = has_ferrocene_annotation(tcx, def) {
             vis.report.add_annotation(filename.clone(), start_line, end_line);
-            vis.visited_attrs.insert(attr.id());
+            let Attribute::Unparsed(attr) = attr else { unreachable!() };
+            vis.visited_attrs.insert(attr.id.attr_id);
             // Set the start line of the function as the minimum between the start line of the
             // function and the start of the annotation so it can be seen in the coverage report.
-            let (_, span_start_line, _) = vis.convert_span(attr.span());
+            let (_, span_start_line, _) = vis.convert_span(attr.span);
             start_line = start_line.min(span_start_line);
         }
 
@@ -254,6 +259,19 @@ fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usi
     (filename, start_line, end_line)
 }
 
+// This was removed upstream, so was saved here since we still use it
+fn get_attrs_by_path<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    did: DefId,
+    attr: &[Symbol],
+) -> impl Iterator<Item = &'tcx rustc_attr_ir::Attribute> {
+    let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
+    if let Some(did) = did.as_local() {
+        tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
+    } else {
+        tcx.attrs_for_def(did).iter().filter(filter_fn)
+    }
+}
 fn has_ferrocene_annotation(tcx: TyCtxt<'_>, def: LocalDefId) -> Option<&Attribute> {
-    tcx.get_attrs_by_path(def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
+    get_attrs_by_path(tcx, def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
 }

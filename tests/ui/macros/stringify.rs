@@ -1027,3 +1027,5 @@ fn test_punct() {
 // Token Matching
 //
 // ferrocene-annotations: um_rustc_test
+
+//@ reference: items.union.fieldless

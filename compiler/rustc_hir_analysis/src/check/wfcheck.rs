@@ -2199,7 +2199,7 @@ fn report_bivariance<'tcx>(
     );
 
     if !usage_spans.is_empty() {
-        // First, check if the ADT/LTA is (probably) cyclical. We say probably here, since we're
+        // First, check if the ADT is (probably) cyclical. We say probably here, since we're
         // not actually looking into substitutions, just walking through fields / the "RHS".
         // We don't recurse into the hidden types of opaques or anything else fancy.
         let item_def_id = item.owner_id.to_def_id();
@@ -2207,7 +2207,7 @@ fn report_bivariance<'tcx>(
             IsProbablyCyclical { tcx, item_def_id, seen: Default::default() }
                 .visit_def(item_def_id)
                 .is_break();
-        // If the ADT/LTA is cyclical, then if at least one usage of the type parameter or
+        // If the ADT is cyclical, then if at least one usage of the type parameter or
         // the `Self` alias is present in the, then it's probably a cyclical struct/ type
         // alias, and we should call those parameter usages recursive rather than just saying
         // they're unused...
@@ -2247,8 +2247,8 @@ fn report_bivariance<'tcx>(
     }
 }
 
-/// Detects cases where an ADT/LTA is trivially cyclical -- we want to detect this so
-/// we only mention that its parameters are used cyclically if the ADT/LTA is truly
+/// Detects cases where an ADT is trivially cyclical -- we want to detect this so
+/// we only mention that its parameters are used cyclically if the ADT is truly
 /// cyclical.
 ///
 /// Notably, we don't consider substitutions here, so this may have false positives.
@@ -2380,7 +2380,16 @@ impl<'tcx> WfCheckingCtxt<'_, 'tcx> {
 
     #[instrument(level = "debug", skip(self))]
     pub(super) fn check_test_binder_body(&self, body: TestBinderBody<'tcx>) {
-        let TestBinderBody { span, foralls, exists, constraints, predicates } = body;
+        let TestBinderBody { span, foralls, exists, region_equalities, constraints, predicates } =
+            body;
+        for (equality, span) in region_equalities {
+            let cause = traits::ObligationCause::misc(span, self.body_def_id);
+            self.infcx.register_region_eq_constraint(
+                equality,
+                ty::VisibleForLeakCheck::Yes,
+                &cause,
+            );
+        }
         if !predicates.is_empty() {
             for (predicate, span) in predicates {
                 let cause = traits::ObligationCause::misc(span, self.body_def_id);
@@ -2550,22 +2559,6 @@ impl<'tcx> WfCheckingCtxt<'_, 'tcx> {
         expected: &SolverRegionConstraint<'tcx>,
         actual: &SolverRegionConstraint<'tcx>,
     ) {
-        fn err<'tcx>(
-            tcx: TyCtxt<'tcx>,
-            expected_span: Span,
-            expected: impl std::fmt::Debug,
-            actual_span: Option<Span>,
-            actual: impl std::fmt::Debug,
-        ) {
-            let mut err = tcx.dcx().struct_span_err(expected_span, "forall expect clause failed");
-            if let Some(actual_span) = actual_span {
-                err.span_note(actual_span, "constraint from here");
-            }
-            err.note(format!("expected: {expected:#?}"));
-            err.note(format!("actual: {actual:#?}"));
-            err.emit();
-        }
-
         let span_of_and = |c: &And<_, _>| {
             c.0.iter().map(|leaf| leaf.span()).reduce(|span: Span, acc| acc.to(span))
         };
@@ -2575,64 +2568,68 @@ impl<'tcx> WfCheckingCtxt<'_, 'tcx> {
         };
 
         let check_leaf_constraint =
-            |expected: LeafRegionConstraint<_, _>, actual: LeafRegionConstraint<_, _>| {
+            |expected: &LeafRegionConstraint<_, _>, actual: &LeafRegionConstraint<_, _>| {
                 if let LeafRegionConstraint::AliasTyOutlivesViaEnv(expected, expected_span) =
                     expected
                     && let LeafRegionConstraint::AliasTyOutlivesViaEnv(actual, actual_span) = actual
                 {
-                    let expected_anon = self.tcx().anonymize_bound_vars(expected);
-                    let actual_anon = self.tcx().anonymize_bound_vars(actual);
-                    if expected_anon != actual_anon {
-                        let mut err = self
-                            .tcx()
-                            .dcx()
-                            .struct_span_err(expected_span, "forall expect clause failed");
-                        err.span_note(actual_span, "constraint from here");
-                        err.note(format!("expected: {expected:#?}"));
-                        err.note(format!("actual: {actual:#?}"));
-                        err.note(format!("expected_anon: {expected_anon:#?}"));
-                        err.note(format!("actual_anon: {actual_anon:#?}"));
-                        err.emit();
+                    let expected_anon = self.tcx().anonymize_bound_vars(expected.clone());
+                    let actual_anon = self.tcx().anonymize_bound_vars(actual.clone());
+                    if expected_anon == actual_anon {
+                        Ok(())
+                    } else {
+                        Err((Some(*expected_span), Some(*actual_span)))
                     }
-                } else if expected.clone().without_span() != actual.clone().without_span() {
-                    err(self.tcx(), expected.span(), expected, Some(actual.span()), actual);
+                } else {
+                    if expected.clone().without_span() == actual.clone().without_span() {
+                        Ok(())
+                    } else {
+                        Err((Some(expected.span()), Some(actual.span())))
+                    }
                 }
             };
 
-        let check_and_constraint = |expected: And<_, _>, actual: And<_, _>| {
+        let check_and_constraint = |expected: &And<_, _>, actual: &And<_, _>| {
             if expected.0.len() != actual.0.len() {
-                err(
-                    self.tcx(),
-                    span_of_and(&expected).unwrap_or(fallback_span),
-                    expected,
-                    span_of_and(&actual),
-                    actual,
-                )
+                Err((span_of_and(expected), span_of_and(actual)))
             } else {
-                for (expected, actual) in expected.0.into_iter().zip(actual.0.into_iter()) {
-                    check_leaf_constraint(expected, actual);
+                for (expected, actual) in expected.0.iter().zip(&actual.0) {
+                    check_leaf_constraint(expected, actual)?;
                 }
+                Ok(())
             }
         };
 
-        let check_or_constraint = |expected: Or<_, _>, actual: Or<_, _>| {
+        let check_or_constraint = |expected: &Or<_, _>, actual: &Or<_, _>| {
             if expected.0.len() != actual.0.len() {
-                err(
-                    self.tcx(),
-                    span_of_or(&expected).unwrap_or(fallback_span),
-                    expected,
-                    span_of_or(&actual),
-                    actual,
-                )
+                Err((span_of_or(expected), span_of_or(actual)))
             } else {
-                for (expected, actual) in expected.0.into_iter().zip(actual.0.into_iter()) {
-                    check_and_constraint(expected, actual);
+                for (expected, actual) in expected.0.iter().zip(&actual.0) {
+                    check_and_constraint(expected, actual)?;
                 }
+                Ok(())
             }
         };
 
-        check_or_constraint(expected.or_constraint.clone(), actual.or_constraint.clone());
-        check_and_constraint(expected.and_constraint.clone(), actual.and_constraint.clone());
+        let check = |expected: &SolverRegionConstraint<'tcx>,
+                     actual: &SolverRegionConstraint<'tcx>| {
+            check_or_constraint(&expected.or_constraint, &actual.or_constraint)?;
+            check_and_constraint(&expected.and_constraint, &actual.and_constraint)?;
+            Ok(())
+        };
+
+        if let Err((expected_span, actual_span)) = check(expected, actual) {
+            let mut err = self.tcx().dcx().struct_span_err(
+                expected_span.unwrap_or(fallback_span),
+                "forall expect clause failed",
+            );
+            if let Some(actual_span) = actual_span {
+                err.span_note(actual_span, "constraint from here");
+            }
+            err.note(format!("expected: {expected:#?}"));
+            err.note(format!("actual: {actual:#?}"));
+            err.emit();
+        }
     }
 
     #[instrument(level = "debug", skip(self))]
@@ -2812,6 +2809,7 @@ pub(crate) struct TestBinderBody<'tcx> {
     pub span: Span,
     pub foralls: Vec<TestBinderForall<'tcx>>,
     pub exists: Vec<TestBinderExists<'tcx>>,
+    pub region_equalities: Vec<(ty::RegionEqPredicate<'tcx>, Span)>,
     /// Constraints to be inserted directly into constraint storage to be proven
     pub constraints: SolverRegionConstraint<'tcx>,
     /// Constraints declared using `where` syntax, used via `register_obligation`

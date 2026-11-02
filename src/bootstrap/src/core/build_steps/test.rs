@@ -958,10 +958,11 @@ impl CommandLineStep for Priroda {
             Mode::ToolRustcPrivate,
             host,
             Kind::Test,
-            "src/tools/miri/priroda",
+            "src/tools/miri",
             SourceType::InTree,
-            &[],
+            &["priroda".into()],
         );
+        cargo.args(["--test", "priroda"]);
 
         cargo.add_rustc_lib_path(builder);
 
@@ -4371,9 +4372,6 @@ impl CommandLineStep for Bootstrap {
         let build_compiler = builder.compiler(0, host);
         let record_failed_tests = builder.ensure(SetupFailedTestsFile);
 
-        // Some tests require cargo submodule to be present.
-        builder.sess.require_submodule("src/tools/cargo", None);
-
         let mut cargo = tool::prepare_tool_cargo(
             builder,
             build_compiler,
@@ -4395,10 +4393,9 @@ impl CommandLineStep for Bootstrap {
             .env("RUSTC_BOOTSTRAP", "1");
 
         if builder.config.cmd.bless() {
-            // Tell `insta` to automatically bless any failing `.snap` files.
-            // Unlike compiletest blessing, the tests might still report failure.
-            // Does not bless inline snapshots.
-            cargo.env("INSTA_UPDATE", "always");
+            // Tell `expect-test` to automatically bless any failing `.snap` files
+            // and inline snapshots.
+            cargo.env("UPDATE_EXPECT", "1");
         }
 
         run_cargo_test(cargo, &[], &[], None, host, builder, record_failed_tests);

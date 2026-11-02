@@ -84,6 +84,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // `.await` operator.
             Some(DesugaringKind::Await) => return,
 
+            // Don't lint *within* contract attrs
+            Some(DesugaringKind::Contract) => return,
             _ => {}
         }
 
@@ -719,7 +721,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ty::TypingMode::Coherence
             | ty::TypingMode::Reflection
-            | ty::TypingMode::PostTypeckUntilBorrowck { .. }
+            | ty::TypingMode::PostTypeckThroughBorrowck { .. }
             | ty::TypingMode::PostBorrowck { .. }
             | ty::TypingMode::PostAnalysis
             | ty::TypingMode::Codegen => {

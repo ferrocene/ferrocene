@@ -39,15 +39,6 @@ cfg_select! {
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use libc::c_char;
-#[cfg(any(
-    all(target_os = "linux", not(target_env = "musl")),
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "hurd",
-    target_os = "illumos",
-    target_vendor = "apple",
-))]
-use libc::dirfd;
 use libc::{c_int, mode_t};
 
 use crate::ffi::{CStr, OsStr, OsString};
@@ -796,6 +787,39 @@ impl fmt::Debug for FilePermissions {
     }
 }
 
+impl ReadDir {
+    pub fn dir(&self) -> io::Result<Dir> {
+        let mut options = OpenOptions::new();
+        options.read(true);
+
+        cfg_select! {
+            // Some targets don't have `dirfd`. Open `Dir` based on path.
+            any(
+                target_os = "redox",
+                target_os = "espidf",
+                target_os = "horizon",
+                target_os = "vita",
+                target_os = "nto",
+                target_os = "qnx",
+                target_os = "vxworks",
+                target_os = "l4re",
+            ) => Dir::open(&self.inner.root, &options),
+            // Use `dirfd` where possible.
+            _ => {
+                let fd = unsafe { libc::dirfd(self.inner.dirp.0) };
+                // Make this FD into a directory handle. We don't actually drop it,
+                // so having an `OwnedFd` is fine.
+                let dir_handle =
+                    mem::ManuallyDrop::new(dir::Dir(unsafe { OwnedFd::from_raw_fd(fd) }));
+                // We don't want to expose `fd` or even the underlying file description
+                // as the directory stream has state attached to it. So we open a completely
+                // new file description based on this one.
+                dir_handle.open_dir(Path::new("."), &options)
+            }
+        }
+    }
+}
+
 impl fmt::Debug for ReadDir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // This will only be called from std::fs::ReadDir, which will add a "ReadDir()" frame.
@@ -990,12 +1014,10 @@ impl Drop for DirStream {
             target_os = "nto",
             target_os = "qnx",
             target_os = "vita",
-            target_os = "hurd",
             target_os = "espidf",
             target_os = "horizon",
             target_os = "vxworks",
             target_os = "rtems",
-            target_os = "nuttx",
         )))]
         {
             let fd = unsafe { libc::dirfd(self.0) };
@@ -1027,15 +1049,17 @@ impl DirEntry {
     pub fn metadata(&self) -> io::Result<FileAttr> {
         cfg_select! {
             // Use directory handle where possible
-            any(
-                all(target_os = "linux", not(target_env = "musl")),
-                target_os = "android",
-                target_os = "fuchsia",
-                target_os = "hurd",
-                target_os = "illumos",
-                target_vendor = "apple",
-            ) => {
-                let fd = cvt(unsafe { dirfd(self.dir.dirp.0) })?;
+            not(any(
+                target_os = "redox",
+                target_os = "nto",
+                target_os = "qnx",
+                target_os = "vita",
+                target_os = "espidf",
+                target_os = "horizon",
+                target_os = "vxworks",
+                target_os = "rtems",
+            )) => {
+                let fd = cvt(unsafe { libc::dirfd(self.dir.dirp.0) })?;
 
                 // Make this FD into a directory handle. We don't actually drop it,
                 // so having an `OwnedFd` is fine.
@@ -2555,6 +2579,9 @@ mod remove_dir_impl {
         }
     }
 
+    /// `parent_fd` being `None` indicates that this is the root where we start.
+    /// In that case, `path` will only be deleted if it is a directory.
+    /// When it is `Some`, this will delete anything.
     fn remove_dir_all_recursive(parent_fd: Option<RawFd>, path: &CStr) -> io::Result<()> {
         // try opening as directory
         let fd = match openat_nofollow_dironly(parent_fd, path) {
@@ -2566,7 +2593,8 @@ mod remove_dir_impl {
                     Some(parent_fd) => {
                         cvt(unsafe { unlinkat(parent_fd, path.as_ptr(), 0) }).map(drop)
                     }
-                    // ...unless this was supposed to be the deletion root directory
+                    // ...unless this was supposed to be the deletion root directory. We don't want
+                    // to delete a file at the root, so we just forward the error.
                     None => Err(err),
                 };
             }
@@ -2625,6 +2653,9 @@ mod remove_dir_impl {
         // into symlinks.
         let attr = lstat(p)?;
         if attr.file_type().is_symlink() {
+            // This would error in `remove_dir_all_recursive` as it is not a directory.
+            // We promise to delete directory symlinks, so use `unlink` to do that. On Unix, we
+            // inadvertently also delete symlinks to files.
             super::unlink(p)
         } else {
             remove_dir_all_recursive(None, p)

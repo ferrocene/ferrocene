@@ -118,3 +118,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
+
+//@ reference: items.union.common-storage
+//@ reference: items.union.init.result

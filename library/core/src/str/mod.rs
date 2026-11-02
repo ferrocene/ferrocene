@@ -1696,6 +1696,7 @@ impl str {
     /// Use [`split_whitespace`] for this behavior.
     ///
     /// [`split_whitespace`]: str::split_whitespace
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn split<P: Pattern>(&self, pat: P) -> Split<'_, P> {

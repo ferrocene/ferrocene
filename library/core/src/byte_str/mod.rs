@@ -95,17 +95,11 @@ impl ByteStr {
         self
     }
 
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "byte_str_internals", issue = "none")]
     #[inline]
-<<<<<<< ferrocene/main:library/core/src/bstr/mod.rs
-    #[rustc_const_unstable(feature = "bstr_internals", issue = "none")]
-    #[ferrocene::prevalidated]
-||||||| 8a9dd7abdf0:library/core/src/bstr/mod.rs
-    #[rustc_const_unstable(feature = "bstr_internals", issue = "none")]
-=======
     #[rustc_const_unstable(feature = "byte_str_internals", issue = "none")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream:library/core/src/byte_str/mod.rs
     pub const fn from_bytes(slice: &[u8]) -> &Self {
         // SAFETY: `ByteStr` is a transparent wrapper around `[u8]`, so we can turn a reference to
         // the wrapped type into a reference to the wrapper type.

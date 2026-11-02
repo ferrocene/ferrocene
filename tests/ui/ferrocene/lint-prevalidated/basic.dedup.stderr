@@ -13,7 +13,7 @@ note: `<Validated as ToString>::to_string` is validated
   --> $DIR/basic.rs:75:8
    |
 LL |     #[ferrocene::prevalidated]
-   |     -------------------------- marked as validated here
+   |       ----------------------- marked as validated here
 LL |     fn to_string(&self) -> String {
    |        ^^^^^^^^^
 note: the lint level is defined here
@@ -35,7 +35,7 @@ note: `CERTIFIED_CLOSURE_CONST::{closure#0}` is validated
   --> $DIR/basic.rs:93:39
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | const CERTIFIED_CLOSURE_CONST: fn() = || normal_def();
    |                                       ^^
 
@@ -52,7 +52,7 @@ note: `CERTIFIED_CLOSURE_STATIC::{closure#0}` is validated
   --> $DIR/basic.rs:95:41
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | static CERTIFIED_CLOSURE_STATIC: fn() = || normal_def();
    |                                         ^^
 
@@ -71,7 +71,7 @@ note: `CERTIFIED_DYN_CONST` is validated
   --> $DIR/basic.rs:97:7
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | const CERTIFIED_DYN_CONST: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |       ^^^^^^^^^^^^^^^^^^^
 
@@ -90,7 +90,7 @@ note: `CERTIFIED_DYN_STATIC` is validated
   --> $DIR/basic.rs:100:8
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | static CERTIFIED_DYN_STATIC: &'static (dyn Sync + PartialOrd<Unvalidated>) = &Unvalidated;
    |        ^^^^^^^^^^^^^^^^^^^^
 
@@ -107,7 +107,7 @@ note: `validated` is validated
   --> $DIR/basic.rs:104:4
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | fn validated() {
    |    ^^^^^^^^^
 

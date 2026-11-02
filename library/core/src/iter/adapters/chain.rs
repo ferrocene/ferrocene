@@ -100,12 +100,8 @@ where
         a_count + b_count
     }
 
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-||||||| 8a9dd7abdf0
-=======
     #[inline]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R
     where
         Self: Sized,
@@ -123,12 +119,8 @@ where
         try { acc }
     }
 
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-||||||| 8a9dd7abdf0
-=======
     #[inline]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn fold<Acc, F>(self, mut acc: Acc, mut f: F) -> Acc
     where
         F: FnMut(Acc, Self::Item) -> Acc,

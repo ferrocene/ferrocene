@@ -1001,7 +1001,6 @@ fn test_punct() {
     p!([ ,; ;, ** @@ $+$ >< <> ?? +== ], ",; ;, ** @@ $+$ >< <> ?? +==");
     p!([ :#!@|$=&*,+;*~? ], ":#!@|$=&*,+;*~?");
 }
-<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_xa7lp0zg1ol2
 // Declarative Macros
@@ -1028,8 +1027,5 @@ fn test_punct() {
 // Token Matching
 //
 // ferrocene-annotations: um_rustc_test
-||||||| 8a9dd7abdf0
-=======
 
 //@ reference: items.union.fieldless
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

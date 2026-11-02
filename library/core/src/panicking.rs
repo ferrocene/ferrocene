@@ -493,6 +493,7 @@ pub const fn panic_default_msg() -> ! {
 }
 
 // unreachable!() without args expands to this, to generate slightly less code
+#[ferrocene::prevalidated]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]

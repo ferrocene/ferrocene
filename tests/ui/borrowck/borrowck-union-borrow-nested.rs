@@ -29,16 +29,11 @@ fn main() {
 
 trait Fake { fn use_mut(&mut self) { } fn use_ref(&self) { }  }
 impl<T> Fake for T { }
-<<<<<<< ferrocene/main
 
-//
 // ferrocene-annotations: fls_fmdn7n7s413d
 // Union Type
 //
 // ferrocene-annotations: fls_9kjpxri0axvg
 // Weak Keywords
-||||||| 8a9dd7abdf0
-=======
 
 //@ reference: items.union.ref.borrow
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

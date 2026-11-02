@@ -535,6 +535,7 @@ macro_rules! generate_pattern_iterators {
         impl<'a, P: Pattern> Iterator for $forward_iterator<'a, P> {
             type Item = $iterty;
 
+            #[ferrocene::prevalidated]
             #[inline]
             fn next(&mut self) -> Option<$iterty> {
                 self.0.next()
@@ -684,6 +685,7 @@ impl<'a, P: Pattern> SplitInternal<'a, P> {
         None
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         if self.finished {
@@ -967,6 +969,7 @@ where
 }
 
 impl<'a, P: Pattern> SplitNInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         match self.count {
@@ -1087,6 +1090,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchIndicesInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<(usize, &'a str)> {
         self.0
@@ -1142,6 +1146,7 @@ where
 }
 
 impl<'a, P: Pattern> MatchesInternal<'a, P> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<&'a str> {
         // SAFETY: `Searcher` guarantees that `start` and `end` lie on unicode boundaries.

@@ -11,7 +11,7 @@ note: `reachable_indirect` is validated
   --> $DIR/lint-levels-non-transitive.rs:19:8
    |
 LL | #[ferrocene::prevalidated]
-   | -------------------------- marked as validated here
+   |   ----------------------- marked as validated here
 LL | #[allow(ferrocene::unvalidated)]
 LL | pub fn reachable_indirect() {
    |        ^^^^^^^^^^^^^^^^^^

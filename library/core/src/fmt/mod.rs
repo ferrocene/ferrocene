@@ -2710,6 +2710,7 @@ impl<'a> Formatter<'a> {
     /// Shrinks `derive(Debug)` code, for faster compilation and smaller binaries.
     /// For C-like enums with concatenated variant name strings.
     /// Names should be separated by space.
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "fmt_helpers_for_derive", issue = "none")]
     pub fn debug_c_like_enum_write_str<'b>(

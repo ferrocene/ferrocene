@@ -34,13 +34,6 @@ pub mod rfs {
     pub use crate::fs::*;
 }
 
-<<<<<<< ferrocene/main
-#[rustfmt::skip]
-// Ferrocene addition: This module is used inside the run-make tests for symbol-report.
-pub use build_helper::symbol_report;
-
-||||||| 8a9dd7abdf0
-=======
 /// Older version of the [`obj`] module. Prefer importing from there instead.
 pub mod symbols {
     pub use crate::obj::{
@@ -51,7 +44,10 @@ pub mod symbols {
     };
 }
 
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#[rustfmt::skip]
+// Ferrocene addition: This module is used inside the run-make tests for symbol-report.
+pub use build_helper::symbol_report;
+
 // Re-exports of third-party library crates.
 pub use bstr;
 pub use gimli;

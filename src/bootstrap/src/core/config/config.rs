@@ -351,7 +351,8 @@ pub(crate) struct Config {
     pub exec_ctx: ExecutionContext,
 
     pub wasm_proc_macros: bool,
-<<<<<<< ferrocene/main
+
+    pub wasm_panic_unwind_default: bool,
 
     // Ferrocene-specific configuration
     pub uv: Option<PathBuf>,
@@ -416,11 +417,6 @@ pub enum FerroceneSecretSauce {
     #[default]
     Download,
     Local(PathBuf),
-||||||| 8a9dd7abdf0
-=======
-
-    pub wasm_panic_unwind_default: bool,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 
 impl Config {

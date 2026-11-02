@@ -829,7 +829,7 @@ impl<'a> Builder<'a> {
                 llvm::Enzyme,
                 llvm::RustOffload,
                 llvm::CrtBeginEnd,
-<<<<<<< ferrocene/main
+                llvm::Tpde,
                 crate::ferrocene::tool::SelfTest,
                 crate::ferrocene::tool::SymbolReport,
                 crate::ferrocene::tool::Blanket,
@@ -837,24 +837,14 @@ impl<'a> Builder<'a> {
                 tool::FerroceneDocumentSignatures,
                 tool::FerroceneGenerateTarball,
                 tool::FerroceneTraceabilityMatrix,
-||||||| 8a9dd7abdf0
-=======
-                llvm::Tpde,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,
                 tool::LlvmBitcodeLinker,
                 tool::RustcPerf,
                 tool::WasmComponentLd,
-<<<<<<< ferrocene/main
                 tool::LldWrapper,
-                tool::RunMakeSupport,
-||||||| 8a9dd7abdf0
-                tool::LldWrapper
-=======
-                tool::LldWrapper,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+                tool::RunMakeSupport, // Ferrocene addition
             ),
             Kind::Clippy => describe!(
                 clippy::Std,
@@ -1085,7 +1075,6 @@ impl<'a> Builder<'a> {
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
                 dist::GccDev,
-<<<<<<< ferrocene/main
                 dist::Gcc,
                 crate::ferrocene::dist::Docs,
                 crate::ferrocene::dist::DocsDoctrees,
@@ -1097,11 +1086,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
                 crate::ferrocene::dist::sbom::Sbom,
-||||||| 8a9dd7abdf0
-                dist::Gcc
-=======
-                dist::Gcc,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             ),
             Kind::Install => describe!(
                 // Ferrocene annotation

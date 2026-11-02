@@ -46,6 +46,12 @@ ISO 26262
 
 The lifecycle is in accordance with ISO 26262-8:2018, Clause 10.
 
+EN 50716
+~~~~~~~~
+
+The lifecycle is in accordance with 5.3 of |en_50716_ref|.
+The plans required by 5.3.2.4 of |en_50716_ref| are distributed over the Ferrocene documentation as listed in :ref:`the EN 50716 norm mapping <norm-mapping/en-50716/en-50716:5.3.2.4>`, and the deviations from the ideal lifecycle of Table A.1 of |en_50716_ref| are documented in the V-Model section below.
+
 Internal procedures
 -------------------
 

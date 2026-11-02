@@ -29,8 +29,5 @@ pub unsafe extern "C" fn no_escape5(_: usize, mut ap0: &mut VaList, mut ap1: ...
     //~^ ERROR: lifetime may not live long enough
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
-//
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

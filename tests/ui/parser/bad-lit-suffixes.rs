@@ -52,7 +52,10 @@ impl S {
 // Byte String Literals
 //
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
+//
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
 //
 // ferrocene-annotations: fls_29tlg1vyqay2
 // Float Literals

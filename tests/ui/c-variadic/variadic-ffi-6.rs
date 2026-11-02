@@ -10,8 +10,5 @@ pub unsafe extern "C" fn use_normal_arg_lifetime(x: &usize, y: ...) -> &usize {
     x
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
-//
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

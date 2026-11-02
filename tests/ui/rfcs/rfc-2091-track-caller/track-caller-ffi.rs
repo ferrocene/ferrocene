@@ -53,6 +53,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
+//
 // ferrocene-annotations: fls_mvd7nz8k3wcy
 // Attribute no_mangle

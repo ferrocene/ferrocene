@@ -518,15 +518,15 @@ Covered by :ref:`safety-plan/tools:Tool safety assessments`.
 
 Covered by the following subsections.
 
-7.1.2.1
-~~~~~~~
-
-The documents of Table A.1 are listed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` and provided as described in :ref:`safety-plan/deliverables:Deliverables and documents`.
-
 7.1.1
 ~~~~~
 
 Covered by :ref:`safety-plan/project-setup:v-model`.
+
+7.1.2.1
+~~~~~~~
+
+The documents of Table A.1 are listed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` and provided as described in :ref:`safety-plan/deliverables:Deliverables and documents`.
 
 7.1.2.2
 ~~~~~~~

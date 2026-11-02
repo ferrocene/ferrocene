@@ -31,7 +31,7 @@ Covered by
 Covered by
 
 - `Certified standard library API docs <../../../../index.html#library-apis>`_
-- :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
+- :doc:`Code coverage reports <core-certification:safety-report/code-coverage>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 
 5.2.5

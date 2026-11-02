@@ -22,3 +22,6 @@ iso_9001_doc = "Quality management systems — Requirements"
 
 iec_62304_ref = "IEC 62304:2006 + AMD 1:2015"
 iec_62304_doc = "Medical device software - Software life cycle processes"
+
+en_50716_ref = "EN 50716:2023"
+en_50716_doc = "Railway Applications - Requirements for software development"

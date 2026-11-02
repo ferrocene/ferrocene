@@ -18,6 +18,7 @@ in accordance with the standards above.
    link-with-iso-26262-requirements
    link-with-iec-61508-requirements
    link-with-iec-62304-requirements
+   link-with-en-50716-requirements
    method
 
 .. appendices::

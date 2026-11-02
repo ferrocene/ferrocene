@@ -134,7 +134,10 @@ Abbreviated Terms
        Abstract Syntax Tree
 
    CI
-       Continuous Integraiton
+       Continuous Integration
+
+   EN
+       European Standard
 
    HIR
        High-Level Intermediate Representation

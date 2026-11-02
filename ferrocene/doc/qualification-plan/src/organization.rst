@@ -33,7 +33,7 @@ Leadership roles
      - Johann Hemmann
 
    * - Release Lead
-     - Ana Hobden
+     - Rachel Barker
 
    * - ISO 9001 Quality Manager
      - Sina Krause

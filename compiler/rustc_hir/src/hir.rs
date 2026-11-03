@@ -30,12 +30,12 @@ use rustc_span::{
     BytePos, DUMMY_SP, DesugaringKind, ErrorGuaranteed, Ident, LocalExpnId, Span, Spanned, Symbol,
     kw, sym,
 };
-use rustc_target::asm::InlineAsmRegOrRegClass;
+use rustc_target::asm;
 use tracing::debug;
 
 use crate::def::{CtorKind, DefKind, MacroKinds, PerNS, Res};
 use crate::def_id::{DefId, LocalDefIdMap};
-use crate::intravisit::{FnKind, VisitorExt};
+use crate::intravisit::FnKind;
 use crate::lints::DelayedLints;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, StableHash)]
@@ -416,21 +416,21 @@ impl<'hir> PathSegment<'hir> {
 #[derive(Clone, Copy, Debug, StableHash)]
 pub enum ConstItemRhs<'hir> {
     Body(BodyId),
-    TypeConst(&'hir ConstArg<'hir>),
+    Direct(&'hir ConstArg<'hir>),
 }
 
 impl<'hir> ConstItemRhs<'hir> {
     pub fn hir_id(&self) -> HirId {
         match self {
             ConstItemRhs::Body(body_id) => body_id.hir_id,
-            ConstItemRhs::TypeConst(ct_arg) => ct_arg.hir_id,
+            ConstItemRhs::Direct(ct_arg) => ct_arg.hir_id,
         }
     }
 
     pub fn span<'tcx>(&self, tcx: impl crate::intravisit::HirTyCtxt<'tcx>) -> Span {
         match self {
             ConstItemRhs::Body(body_id) => tcx.hir_body(*body_id).value.span,
-            ConstItemRhs::TypeConst(ct_arg) => ct_arg.span,
+            ConstItemRhs::Direct(ct_arg) => ct_arg.span,
         }
     }
 }
@@ -554,7 +554,7 @@ pub enum InferArgKind {
     /// determined during HIR ty lowering.
     TypeOrConst,
     /// An infer argument with unambiguous const syntax, e.g. S<{ _ }> or
-    /// S<direct_const_arg!(_)>. It can only be inferred to a const.
+    /// S<gca!(_)>. It can only be inferred to a const.
     Const,
 }
 
@@ -1404,6 +1404,16 @@ impl<'tcx> OwnerInfo<'tcx> {
     #[inline]
     pub fn node(&self) -> OwnerNode<'tcx> {
         self.nodes.node()
+    }
+
+    // A fingerprint that identifies the contents of the OwnerInfo.
+    // It only depends on `nodes` and `attrs` because `parenting` and `trait_map` are
+    // deterministically calculated from `nodes` and `attrs`.
+    #[inline]
+    pub fn fingerprint(&self) -> Fingerprint {
+        let body = self.nodes.opt_hash.expect("HIR hash requested without needs_hir_hash");
+        let attrs = self.attrs.opt_hash.expect("HIR hash requested without needs_hir_hash");
+        body.combine(attrs)
     }
 }
 
@@ -2293,7 +2303,7 @@ impl Expr<'_> {
 
             // Type ascription inherits its place expression kind from its
             // operand. See:
-            // https://github.com/rust-lang/rfcs/blob/master/text/0803-type-ascription.md#type-ascription-and-temporaries
+            // https://rust-lang.github.io/rfcs/0803-type-ascription.html#type-ascription-and-temporaries
             ExprKind::Type(ref e, _) => e.is_place_expr(allow_projections_from),
 
             // Unsafe binder cast preserves place-ness of the sub-expression.
@@ -3093,7 +3103,7 @@ pub enum ImplItemKind<'hir> {
 /// * the `G<Ty> = Ty` in `Trait<G<Ty> = Ty>`
 /// * the `A: Bound` in `Trait<A: Bound>`
 /// * the `RetTy` in `Trait(ArgTy, ArgTy) -> RetTy`
-/// * the `C = { Ct }` in `Trait<C = { Ct }>` (feature `min_generic_const_args`)
+/// * the `C = { Ct }` in `Trait<C = { Ct }>` (feature `gca_min_const_items`)
 /// * the `f(..): Bound` in `Trait<f(..): Bound>` (feature `return_type_notation`)
 #[derive(Debug, Clone, Copy, StableHash)]
 pub struct AssocItemConstraint<'hir> {
@@ -3611,6 +3621,44 @@ pub enum TyKind<'hir, Unambig = ()> {
     Infer(Unambig),
 }
 
+/// Stores explicit register name from source
+/// for diagnostics only.
+#[derive(Debug, Clone, Copy, StableHash)]
+pub enum InlineAsmRegOrRegClass {
+    Reg { reg: asm::InlineAsmReg, source_name: Option<Symbol> },
+    RegClass(asm::InlineAsmRegClass),
+}
+
+impl InlineAsmRegOrRegClass {
+    // For `rustc_mir_build` and `clippy_utils`
+    pub fn as_target(self) -> asm::InlineAsmRegOrRegClass {
+        match self {
+            Self::Reg { reg, .. } => asm::InlineAsmRegOrRegClass::Reg(reg),
+            Self::RegClass(reg_class) => asm::InlineAsmRegOrRegClass::RegClass(reg_class),
+        }
+    }
+
+    // For `rustc_ast_lowering`
+    pub fn reg_class(self) -> asm::InlineAsmRegClass {
+        self.as_target().reg_class()
+    }
+
+    // For `rustc_ast_lowering`
+    pub fn source_name(self) -> Option<Symbol> {
+        match self {
+            Self::Reg { source_name, .. } => source_name,
+            Self::RegClass(_) => None,
+        }
+    }
+}
+
+// For `rustc_hir_pretty`
+impl fmt::Display for InlineAsmRegOrRegClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.as_target().fmt(f)
+    }
+}
+
 #[derive(Debug, Clone, Copy, StableHash)]
 pub enum InlineAsmOperand<'hir> {
     In {
@@ -3665,7 +3713,7 @@ impl<'hir> InlineAsmOperand<'hir> {
     pub fn is_clobber(&self) -> bool {
         matches!(
             self,
-            InlineAsmOperand::Out { reg: InlineAsmRegOrRegClass::Reg(_), late: _, expr: None }
+            InlineAsmOperand::Out { reg: InlineAsmRegOrRegClass::Reg { .. }, expr: None, .. }
         )
     }
 }
@@ -4072,8 +4120,32 @@ pub struct Variant<'hir> {
     pub span: Span,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug, StableHash)]
-pub enum UseKind {
+#[derive(Copy, Clone, Debug, StableHash)]
+pub struct UseTree<'hir> {
+    pub prefix: &'hir UsePath<'hir>,
+    pub kind: UseKind<'hir>,
+}
+
+impl UseTree<'_> {
+    pub fn resolutions(&self) -> impl Iterator<Item = PerNS<Option<Res>>> {
+        Box::new(std::iter::iter!(|| {
+            match self.kind {
+                UseKind::Glob => yield self.prefix.res,
+                UseKind::Single(_) => yield self.prefix.res,
+                UseKind::Nested { items } => {
+                    for (item, _, _) in items {
+                        for res in item.resolutions() {
+                            yield res;
+                        }
+                    }
+                }
+            }
+        })())
+    }
+}
+
+#[derive(Copy, Clone, Debug, StableHash)]
+pub enum UseKind<'hir> {
     /// One import, e.g., `use foo::bar` or `use foo::bar as baz`.
     /// Also produced for each element of a list `use`, e.g.
     /// `use foo::{a, b}` lowers to `use foo::a; use foo::b;`.
@@ -4085,10 +4157,8 @@ pub enum UseKind {
     /// Glob import, e.g., `use foo::*`.
     Glob,
 
-    /// Degenerate list import, e.g., `use foo::{a, b}` produces
-    /// an additional `use foo::{}` for performing checks such as
-    /// unstable feature gating. May be removed in the future.
-    ListStem,
+    /// `use prefix::{...}`
+    Nested { items: &'hir [(UseTree<'hir>, HirId, LocalDefId)] },
 }
 
 /// References to traits in impls.
@@ -4267,7 +4337,7 @@ impl<'hir> Item<'hir> {
         expect_extern_crate, (Option<Symbol>, Ident),
             ItemKind::ExternCrate(s, ident), (*s, *ident);
 
-        expect_use, (&'hir UsePath<'hir>, UseKind), ItemKind::Use(p, uk), (p, *uk);
+        expect_use, UseTree<'hir>, ItemKind::Use(ut), *ut;
 
         expect_static, (Mutability, Ident, &'hir Ty<'hir>, BodyId),
             ItemKind::Static(mutbl, ident, ty, body), (*mutbl, *ident, ty, *body);
@@ -4467,7 +4537,10 @@ impl FnHeader {
 pub struct TestBinderBody<'hir> {
     pub foralls: &'hir [TestBinderForall<'hir>],
     pub exists: &'hir [TestBinderExists<'hir>],
+    /// Constraints to be inserted directly into constraint storage to be proven
     pub constraints: TestBinderConstraint<'hir>,
+    /// Constraints declared using `where` syntax, used via `register_obligation`
+    pub predicates: &'hir [WherePredicate<'hir>],
 }
 
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -4492,7 +4565,17 @@ pub enum TestBinderConstraint<'hir> {
     And { items: &'hir [TestBinderConstraint<'hir>] },
     Or { items: &'hir [TestBinderConstraint<'hir>] },
     Lifetime { lhs: &'hir Lifetime, rhs: &'hir Lifetime },
-    Type { lhs: &'hir Ty<'hir>, rhs: &'hir Lifetime },
+    PlaceholderOutlives { lhs: &'hir Ty<'hir>, rhs: &'hir Lifetime },
+    AliasOutlives { bound_type_constraint: &'hir TestBinderBoundTypeConstraint<'hir> },
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct TestBinderBoundTypeConstraint<'hir> {
+    pub span: Span,
+    pub hir_id: HirId,
+    pub params: &'hir [GenericParam<'hir>],
+    pub lhs: &'hir Ty<'hir>,
+    pub rhs: &'hir Lifetime,
 }
 
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -4507,7 +4590,7 @@ pub enum ItemKind<'hir> {
     /// or just
     ///
     /// `use foo::bar::baz;` (with `as baz` implicitly on the right).
-    Use(&'hir UsePath<'hir>, UseKind),
+    Use(UseTree<'hir>),
 
     /// A `static` item.
     Static(Mutability, Ident, &'hir Ty<'hir>, BodyId),
@@ -4602,7 +4685,7 @@ impl ItemKind<'_> {
     pub fn ident(&self) -> Option<Ident> {
         match *self {
             ItemKind::ExternCrate(_, ident)
-            | ItemKind::Use(_, UseKind::Single(ident))
+            | ItemKind::Use(UseTree { kind: UseKind::Single(ident), .. })
             | ItemKind::Static(_, ident, ..)
             | ItemKind::Const(ident, ..)
             | ItemKind::Fn { ident, .. }
@@ -4615,7 +4698,7 @@ impl ItemKind<'_> {
             | ItemKind::Trait { ident, .. }
             | ItemKind::TraitAlias(_, ident, ..) => Some(ident),
 
-            ItemKind::Use(_, UseKind::Glob | UseKind::ListStem)
+            ItemKind::Use(UseTree { kind: UseKind::Glob | UseKind::Nested { .. }, .. })
             | ItemKind::ForeignMod { .. }
             | ItemKind::GlobalAsm { .. }
             | ItemKind::Impl(_)
@@ -4872,6 +4955,7 @@ impl<'hir> From<OwnerNode<'hir>> for Node<'hir> {
 pub enum Node<'hir> {
     Param(&'hir Param<'hir>),
     Item(&'hir Item<'hir>),
+    NestedUseTree(&'hir UseTree<'hir>),
     ForeignItem(&'hir ForeignItem<'hir>),
     TraitItem(&'hir TraitItem<'hir>),
     ImplItem(&'hir ImplItem<'hir>),
@@ -4910,6 +4994,7 @@ pub enum Node<'hir> {
     PreciseCapturingNonLifetimeArg(&'hir PreciseCapturingNonLifetimeArg),
     TestBinderForall(&'hir TestBinderForall<'hir>),
     TestBinderExists(&'hir TestBinderExists<'hir>),
+    TestBinderBoundTypeConstraint(&'hir TestBinderBoundTypeConstraint<'hir>),
     // Created by query feeding
     Synthetic,
     Err(Span),
@@ -4936,6 +5021,7 @@ impl<'hir> Node<'hir> {
             Node::TraitItem(TraitItem { ident, .. })
             | Node::ImplItem(ImplItem { ident, .. })
             | Node::ForeignItem(ForeignItem { ident, .. })
+            | Node::NestedUseTree(UseTree { kind: UseKind::Single(ident), .. })
             | Node::Field(FieldDef { ident, .. })
             | Node::Variant(Variant { ident, .. })
             | Node::PathSegment(PathSegment { ident, .. }) => Some(*ident),
@@ -4963,10 +5049,12 @@ impl<'hir> Node<'hir> {
             | Node::Ty(..)
             | Node::TraitRef(..)
             | Node::OpaqueTy(..)
+            | Node::NestedUseTree(_)
             | Node::Infer(..)
             | Node::WherePredicate(..)
             | Node::TestBinderForall(..)
             | Node::TestBinderExists(..)
+            | Node::TestBinderBoundTypeConstraint(..)
             | Node::Synthetic
             | Node::Err(..) => None,
         }

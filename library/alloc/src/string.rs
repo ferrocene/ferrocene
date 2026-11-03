@@ -940,6 +940,10 @@ impl String {
     /// into a `String` with the [`from_raw_parts`] function, allowing
     /// the destructor to perform the cleanup.
     ///
+    /// If `capacity == 0`, then `pointer` may be dangling. Otherwise,
+    /// it will always be valid for reads and writes over `capacity`
+    /// bytes, and point to the start of the string.
+    ///
     /// [`from_raw_parts`]: String::from_raw_parts
     ///
     /// # Examples
@@ -2131,7 +2135,14 @@ impl String {
             "end of range should be a character boundary"
         );
 
-        // ignore-tidy-undocumented-unsafe
+        if replace_with.len() > checked_range.len() {
+            self.reserve(replace_with.len() - checked_range.len());
+        }
+        // SAFETY: We ensure that we're not replacing across a char boundary and
+        // that the new contents are valid UTF-8. The only potentially-unsound
+        // unwind from `splice` that would leave the string in an invalid state
+        // would be from an error growing the allocation, which we protect against
+        // by reserving it preemptively.
         unsafe { self.as_mut_vec() }.splice(checked_range, replace_with.bytes());
     }
 

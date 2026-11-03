@@ -11,9 +11,7 @@ FFI
 .. rubric:: Legality Rules
 
 :dp:`fls_djlglv2eaihl`
-:t:`Foreign Function Interface` or :t:`FFI` employs :t:`ABI`,
-:t:`[attribute]s`, :t:`[external block]s`, :t:`[external function]s`, linkage,
-and :t:`type` :t:`layout` to interface a Rust program with foreign code.
+:t:`Foreign Function Interface` or :t:`FFI` employs :t:`ABI`, :t:`[attribute]s`, :t:`[external block]s`, :t:`[external block function]s`, linkage, and :t:`type` :t:`layout` to interface a Rust program with foreign code.
 
 :dp:`fls_k1hiwghzxtfa`
 The following :t:`[attribute]s` affect :t:`FFI`:
@@ -177,11 +175,10 @@ External Blocks
 .. rubric:: Legality Rules
 
 :dp:`fls_4dje9t5y2dia`
-An :t:`external block` is a :t:`construct` that provides the declarations of
-:t:`[external function]s` and :t:`[external static]s` as unchecked imports.
+An :t:`external block` is a :t:`construct` that provides the declarations of :t:`[external block function]s` and :t:`[external static]s` as unchecked imports.
 
 :dp:`fls_8ltVLtAfvy0m`
-An :t:`unsafe external block` is an :t:`external block` subject to keyword ``unsafe``.
+An :t:`unsafe external block` is an :t:`external block` subject to :t:`keyword` ``unsafe``.
 
 :dp:`fls_Nz0l16hMxqTd`
 The :t:`ABI` of an :t:`external block` is determined as follows:
@@ -209,38 +206,31 @@ The :t:`ABI` of an :t:`external block` is determined as follows:
 
 .. _fls_yztwtek0y34v:
 
-External Functions
-------------------
+External Block Functions
+------------------------
 
 .. rubric:: Legality Rules
 
 :dp:`fls_v24ino4hix3m`
-An :t:`external function` is an unchecked import of a foreign :t:`function`.
-
-:dp:`fls_l88r9fj82650`
-An :t:`external function` shall be invoked from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with keyword ``safe``.
+An :t:`external block function` is a :t:`function` declared within an :t:`external block`.
 
 :dp:`fls_qwchgvvnp0qe`
-An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
+An :t:`external block function` shall not be subject to :t:`[function qualifier]s` ``async``, ``const``, and ``extern``.
 
 :dp:`fls_w00qi1gx204e`
-An :t:`external function` inherits the :t:`ABI` of its enclosing
-:t:`external block`.
+An :t:`external block function` inherits the :t:`ABI` of its enclosing :t:`external block`.
+
+:dp:`fls_l88r9fj82650`
+An :t:`external block function` shall be invoked from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with :t:`keyword` ``safe``.
 
 :dp:`fls_m7tu4w4lk8v`
-An :t:`external function` shall not specify a :s:`GenericParameterList`
-containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
+An :t:`external block function` shall not specify a :s:`GenericParameterList` containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
 
 :dp:`fls_rdu4723vp0oo`
-An :t:`external function` shall not specify a :s:`FunctionBody`.
+An :t:`external block function` shall not specify a :s:`FunctionBody`.
 
 :dp:`fls_9div9yusw64h`
-An :t:`external function` shall not specify :t:`[pattern]s` other than
-:t:`[identifier pattern]s` and :t:`[underscore pattern]s`.
-
-:dp:`fls_juob30rst11r`
-Only the last parameter :s:`FunctionParameter` of an :t:`external function` may
-specify a :s:`FunctionParameterVariadicPart`.
+An :t:`external block function` shall not specify :t:`[pattern]s` other than :t:`[identifier pattern]s` and :t:`[underscore pattern]s`.
 
 .. _fls_s4yt19sptl7d:
 
@@ -257,7 +247,7 @@ An :t:`external static` inherits the :t:`ABI` of its enclosing
 :t:`external block`.
 
 :dp:`fls_fo9with6xumo`
-An :t:`external static` shall be referenced from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with keyword ``safe``.
+An :t:`external static` shall be referenced from an :t:`unsafe context` unless it is defined in an :t:`unsafe external block` and subject to :s:`ItemSafety` with :t:`keyword` ``safe``.
 
 :dp:`fls_tr7purzcldn0`
 An :t:`external static` shall not specify a :t:`static initializer`.

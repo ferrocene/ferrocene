@@ -182,19 +182,9 @@ pub trait FunnelShift: Copy + 'static {
 
 macro_rules! impl_funnel_shifts {
     ($($type:ident),*) => {$(
-<<<<<<< ferrocene/main
-        #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        const impl FunnelShift for $type {
-            #[ferrocene::prevalidated]
-            #[cfg_attr(miri, track_caller)]
-||||||| 16d1ffac17a
-        #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        const impl FunnelShift for $type {
-            #[cfg_attr(miri, track_caller)]
-=======
         impl FunnelShift for $type {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             #[inline]
+            #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shl(self, right: Self, shift: u32) -> Self {
                 if shift == 0 {
                     self
@@ -215,14 +205,8 @@ macro_rules! impl_funnel_shifts {
                 }
             }
 
-<<<<<<< ferrocene/main
-            #[ferrocene::prevalidated]
-            #[cfg_attr(miri, track_caller)]
-||||||| 16d1ffac17a
-            #[cfg_attr(miri, track_caller)]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
             #[inline]
+            #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shr(self, right: Self, shift: u32) -> Self {
                 if shift == 0 {
                     right

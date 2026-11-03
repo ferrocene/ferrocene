@@ -172,19 +172,9 @@ expression: test --skip=tests
 [Test] test::TestFloatParse
     targets: [aarch64-unknown-linux-gnu]
     - Set({src/tools/test-float-parse})
-<<<<<<< ferrocene/main
-[Test] test::FerroceneCrateLibc
-    targets: [aarch64-unknown-linux-gnu]
-    - Set({ferrocene/library/libc})
-||||||| 16d1ffac17a
-[Test] test::IntrinsicTest
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({intrinsic-test})
-=======
 [Test] test::CompilerBuiltins
     targets: [aarch64-unknown-linux-gnu]
     - Set({compiler-builtins})
-[Test] test::IntrinsicTest
-    targets: [x86_64-unknown-linux-gnu]
-    - Set({intrinsic-test})
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+[Test] test::FerroceneCrateLibc
+    targets: [aarch64-unknown-linux-gnu]
+    - Set({ferrocene/library/libc})

@@ -1092,17 +1092,11 @@ impl<T> MaybeUninit<T> {
     /// assert_eq!(bytes, val.to_ne_bytes());
     /// ```
     #[unstable(feature = "maybe_uninit_as_bytes", issue = "93092")]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-    pub const fn as_bytes(&self) -> &[MaybeUninit<u8>] {
-||||||| 16d1ffac17a
-    pub const fn as_bytes(&self) -> &[MaybeUninit<u8>] {
-=======
     pub const fn as_bytes(&self) -> &[MaybeUninit<u8>]
     where
         T: Freeze,
     {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes
         unsafe {
             slice::from_raw_parts(self.as_ptr().cast::<MaybeUninit<u8>>(), super::size_of::<T>())

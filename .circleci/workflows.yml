@@ -174,21 +174,15 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-
-  x86_64-linux-dist-tools:
-    executor: *executor-x86_64-runner
-    resource_class: ferrocene/k8s-amd64-large
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
     steps:
       - ferrocene-job-dist:
           restore-from-job: x86_64-linux-build
+          # We need the whole LLVM clone to be able to include the full source
+          # code into the tarball we ship to customers.
+          llvm_subset: false
+
 
   x86_64-linux-dist-targets:
     executor: *executor-x86_64-runner
@@ -218,20 +212,6 @@ jobs:
       - ferrocene-job-dist:
           qnx8: true
           restore-from-job: x86_64-linux-build
-
-  x86_64-linux-dist-src:
-    executor: *executor-x86_64-runner
-    resource_class: ferrocene/k8s-amd64-medium
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-          # We need the whole LLVM clone to be able to include the full source
-          # code into the tarball we ship to customers.
-          llvm_subset: false
 
   linux-generic-test-container:
     executor: << parameters.executor >>
@@ -570,28 +550,8 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist rust-std
-    steps:
-      - when:
-          condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
-          steps:
-            - ferrocene-job-dist:
-                os: darwin
-                restore-from-job: aarch64-darwin-build
-      - run:
-          name: Empty step to make sure the job always has steps
-          command: echo
-
-  aarch64-darwin-dist-tools:
-    macos:
-      xcode: "26.6"
-    resource_class: m4pro.medium # 6 cores
-    environment:
-      FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
-      SCRIPT: |
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist rust-std
     steps:
       - when:
           condition: << pipeline.parameters.full-build-aarch64-darwin-host >>
@@ -1034,16 +994,10 @@ workflows:
       - x86_64-linux-dist:
           requires:
             - x86_64-linux-build
-      - x86_64-linux-dist-tools:
-          requires:
-            - x86_64-linux-build
       - x86_64-linux-dist-targets:
           requires:
             - x86_64-linux-build
       - x86_64-linux-dist-targets-qnx8:
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-dist-src:
           requires:
             - x86_64-linux-build
       - linux-generic-test-container:
@@ -1159,14 +1113,12 @@ workflows:
       - x86_64-linux-self-test:
           requires:
             - x86_64-linux-dist
-            - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
       - x86_64-linux-self-test-qnx8:
           requires:
             - x86_64-linux-dist
-            - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets-qnx8
             - aarch64-linux-dist
 
@@ -1395,9 +1347,6 @@ workflows:
       - aarch64-darwin-dist:
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-dist-tools:
-          requires:
-            - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
@@ -1419,7 +1368,6 @@ workflows:
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
-            - aarch64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
       - llvm--x86_64-pc-windows-msvc: {}
@@ -1442,7 +1390,6 @@ workflows:
       - finish-build:
           requires:
             - x86_64-linux-docs
-            - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-linux-self-test-qnx8

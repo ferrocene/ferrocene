@@ -429,7 +429,7 @@ declare_features! (
     (unstable, cfg_target_object_format, "1.97.0", Some(152586)),
     /// Allows `cfg(target_thread_local)`.
     (unstable, cfg_target_thread_local, "1.7.0", Some(29594)),
-    /// Allows the use of `#[cfg(ub_checks)` to check if UB checks are enabled.
+    /// Allows the use of `#[cfg(ub_checks)]` to check if UB checks are enabled.
     (unstable, cfg_ub_checks, "1.79.0", Some(123499)),
     /// Allow conditional compilation depending on rust version
     (unstable, cfg_version, "1.45.0", Some(64796)),
@@ -630,6 +630,9 @@ declare_features! (
     (unstable, macro_metavar_expr, "1.61.0", Some(83527)),
     /// Provides a way to concatenate identifiers using metavariable expressions.
     (unstable, macro_metavar_expr_concat, "1.81.0", Some(124225)),
+    /// Allows explicitly marking type aliases as unchecked / opting type aliases
+    /// out of being checked even if `checked_type_aliases` is enabled or they're a TAIT.
+    (unstable, marked_unchecked_type_aliases, "CURRENT_RUSTC_VERSION", Some(112792)),
     /// Allows `#[marker]` on certain traits allowing overlapping implementations.
     (unstable, marker_trait_attr, "1.30.0", Some(29864)),
     /// Allows additional const parameter types, such as [u8; 10] or user defined types.

@@ -79,6 +79,7 @@ mod traits;
 mod transmute;
 mod types;
 mod unit_bindings;
+mod unmarked_unchecked_type_aliases;
 mod unqualified_local_imports;
 pub mod unused;
 mod utils;
@@ -135,6 +136,7 @@ use traits::*;
 use transmute::CheckTransmutes;
 use types::*;
 use unit_bindings::*;
+use unmarked_unchecked_type_aliases::UnmarkedUncheckedTypeAliases;
 use unqualified_local_imports::*;
 use unused::must_use::*;
 use unused::*;
@@ -284,6 +286,7 @@ late_lint_methods!(
             TypeLimits: TypeLimits::new(),
             UngatedAsyncFnTrackCaller: UngatedAsyncFnTrackCaller,
             UnitBindings: UnitBindings,
+            UnmarkedUncheckedTypeAliases: UnmarkedUncheckedTypeAliases,
             UnqualifiedLocalImports: UnqualifiedLocalImports,
             // Depends on effective visibilities
             UnreachablePub: UnreachablePub,

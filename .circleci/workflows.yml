@@ -241,24 +241,6 @@ jobs:
       - ferrocene-job-test-container:
           restore-from-job: << parameters.restore_from_job >>
 
-  x86_64-linux-traceability-matrix:
-    executor: *executor-x86_64-runner
-    resource_class: ferrocene/k8s-amd64-small
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TEST_OUTCOMES_DIR: /tmp/test-outcomes
-      SCRIPT: |
-        ferrocene/ci/scripts/fetch-test-outcomes.sh
-        ./x.py run ferrocene/tools/traceability-matrix
-    steps:
-      - ferrocene/aws_oidc_auth
-      - ferrocene/checkout:
-          llvm_subset: true
-      - ferrocene/ci
-      - store_artifacts:
-          path: build/x86_64-unknown-linux-gnu/ferrocene/traceability-matrix.html
-          destination: reports
-
   x86_64-linux-library-coverage:
     executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
@@ -987,8 +969,6 @@ workflows:
             - aarch64-linux-test-library-compiletest
             - aarch64-linux-library-coverage
             - aarch64-linux-rhivos2-test-library-compiletest
-      - x86_64-linux-traceability-matrix:
-          requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
           requires:
             - x86_64-linux-build
@@ -1364,7 +1344,6 @@ workflows:
       - finish-build:
           requires:
             - x86_64-linux-docs
-            - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-linux-self-test-qnx8
             - x86_64-windows-self-test

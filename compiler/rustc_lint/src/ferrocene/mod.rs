@@ -138,8 +138,7 @@
 //!
 //! For our purposes, we care only about the instantiations of a function, not about any
 //! declarations in a trait. In order to instantiate a function, we need to know both its
-//! definition ([`DefId`]) and generic arguments
-//! ([`GenericArgsRef`]). We may also need to resolve type
+//! definition ([`DefId`]) and generic arguments ([`GenericArgs`]). We may also need to resolve type
 //! variables in scope. For example, in this program below, we cannot instantiate `inherent` unless
 //! we know the type of `T` from the impl:
 //! ```rust
@@ -199,7 +198,7 @@ use crate::{LateContext, LateLintPass};
 #[allow(unused_imports)]
 use rustc_middle::{
     mir::TerminatorKind,
-    ty::{GenericArgsRef, ParamEnv},
+    ty::{GenericArgs, ParamEnv},
 };
 
 impl<'tcx> LateLintPass<'tcx> for LintUnvalidated {

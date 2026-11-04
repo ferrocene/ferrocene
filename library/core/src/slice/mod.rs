@@ -2305,6 +2305,7 @@ impl<T> [T] {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn split<F>(&self, pred: F) -> Split<'_, T, F>
     where
         F: FnMut(&T) -> bool,
@@ -2650,6 +2651,7 @@ impl<T> [T] {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub fn contains(&self, x: &T) -> bool
     where
         T: PartialEq,

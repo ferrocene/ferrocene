@@ -658,6 +658,7 @@ impl str {
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn get<I: [const] SliceIndex<str>>(&self, i: I) -> Option<&I::Output> {
         i.get(self)
     }

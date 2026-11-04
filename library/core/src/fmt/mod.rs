@@ -2856,6 +2856,7 @@ impl<'a> Formatter<'a> {
 }
 
 /// Like `.split(' ')`, but doesn't bloat binary size
+#[ferrocene::prevalidated]
 fn split_str_by_space(s: &str) -> impl Iterator<Item = &str> {
     s.as_bytes()
         .split(|&b| b == b' ')

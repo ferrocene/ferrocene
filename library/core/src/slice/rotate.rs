@@ -50,6 +50,7 @@ pub(super) const unsafe fn ptr_rotate<T>(left: usize, mid: *mut T, right: usize)
 ///
 /// The specified range must be valid for reading and writing.
 #[inline]
+#[ferrocene::prevalidated]
 const unsafe fn ptr_rotate_dispatch<T>(left: usize, mid: *mut T, right: usize) {
     // `T` is not a zero-sized type, so it's okay to divide by its size.
     if !cfg!(feature = "optimize_for_size")

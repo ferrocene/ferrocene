@@ -182,7 +182,7 @@ impl<'thir, 'tcx: 'thir> LintThir<'thir, 'tcx> {
     fn try_instantiate(
         &self,
         def_id: DefId,
-        args: &'tcx GenericArgs<'tcx>,
+        args: GenericArgs<'tcx>,
         span: Span,
     ) -> InstantiateResult<'tcx> {
         let tcx = self.linter.tcx;

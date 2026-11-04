@@ -788,7 +788,7 @@ Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-p
 Covered by
 
 - :ref:`safety-plan/project-setup:configuration` (all source code is under configuration control before testing)
-- :doc:`core-certification:safety-plan/programming-language` (size and complexity: recursion limit, discouraged many-parameter functions)
+- :doc:`core-certification:safety-plan/programming-language` (size and complexity: compiler recursion limit, discouraged many-parameter functions)
 
 7.5.4.5-7
 ~~~~~~~~~

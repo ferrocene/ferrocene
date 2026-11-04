@@ -1,8 +1,6 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-:orphan:
-
 .. default-domain:: qualification
 
 In order to respect these steps, we'll manage five documents for this tool

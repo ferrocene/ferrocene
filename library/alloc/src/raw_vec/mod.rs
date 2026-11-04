@@ -6,7 +6,8 @@
 
 use core::marker::{Destruct, PhantomData};
 use core::mem::{Alignment, ManuallyDrop, MaybeUninit, SizedTypeProperties};
-use core::ptr::{self, NonNull, Unique};
+use core::panic::UnwindSafe;
+use core::ptr::{self, NonNull};
 use core::{cmp, hint};
 
 #[cfg(not(no_global_oom_handling))]
@@ -54,14 +55,16 @@ const unsafe fn new_cap<T>(cap: usize) -> Cap {
 /// involved. This type is excellent for building your own data structures like Vec and VecDeque.
 /// In particular:
 ///
-/// * Produces `Unique::dangling()` on zero-sized types.
-/// * Produces `Unique::dangling()` on zero-length allocations.
-/// * Avoids freeing `Unique::dangling()`.
+/// * Produces `NonNull::dangling()` on zero-sized types.
+/// * Produces `NonNull::dangling()` on zero-length allocations.
+/// * Avoids freeing `NonNull::dangling()`.
 /// * Catches all overflows in capacity computations (promotes them to "capacity overflow" panics).
 /// * Guards against 32-bit systems allocating more than `isize::MAX` bytes.
+/// * Provides niches for capacities greater than `isize::MAX`.
 /// * Guards against overflowing your length.
 /// * Calls `handle_alloc_error` for fallible allocations.
-/// * Contains a `ptr::Unique` and thus endows the user with all related benefits.
+/// * Implements `Send`, `Sync` and `UnwindSafe` iff `(T, A)` does.
+/// * Carries `PhantomData<T>` for auto trait and `may_dangle` correctness.
 /// * Uses the excess returned from the allocator to use the largest available capacity.
 ///
 /// This type does not in anyway inspect the memory that it manages. When dropped it *will*
@@ -85,7 +88,7 @@ pub(crate) struct RawVec<T, A: Allocator = Global> {
 /// as most operations don't need the actual type, just its layout.
 #[allow(missing_debug_implementations)]
 struct RawVecInner<A: Allocator = Global> {
-    ptr: Unique<u8>,
+    ptr: NonNull<u8>,
     /// Never used for ZSTs; it's `capacity()`'s responsibility to return usize::MAX in that case.
     ///
     /// # Safety
@@ -94,6 +97,11 @@ struct RawVecInner<A: Allocator = Global> {
     cap: Cap,
     alloc: A,
 }
+
+// FIXME: Consider moving these impls to `RawVec`, once #162850 is resolved.
+unsafe impl<A: Allocator + Send> Send for RawVecInner<A> {}
+unsafe impl<A: Allocator + Sync> Sync for RawVecInner<A> {}
+impl<A: Allocator + UnwindSafe> UnwindSafe for RawVecInner<A> {}
 
 impl<T> RawVec<T, Global> {
     /// Creates the biggest possible `RawVec` (on the system heap)
@@ -245,11 +253,17 @@ impl<T, A: Allocator> RawVec<T, A> {
         );
 
         let me = ManuallyDrop::new(self);
-        // ignore-tidy-undocumented-unsafe
-        unsafe {
-            let slice = me.ptr().cast::<MaybeUninit<T>>().cast_slice(len);
-            Box::from_raw_in(slice, ptr::read(&me.inner.alloc))
-        }
+        let slice = me.ptr().cast::<MaybeUninit<T>>().cast_slice(len);
+        // SAFETY: `slice` is a valid pointer for `len` `T`s, and the
+        // above `ManuallyDrop` ensures that the destructor of `me` which
+        // would free the allocation is never run. The caller upholds that
+        // `len` meets or exceeds the last requested capacity, ensuring that
+        // the layout generated when dropping the resulting `Box` fits the
+        // allocation the `RawVec` created.
+        //
+        // Moving the allocator out of `me.inner` is also sound since it is
+        // never accessed after this point.
+        unsafe { Box::from_raw_in(slice, ptr::read(&me.inner.alloc)) }
     }
 
     /// Reconstitutes a `RawVec` from a pointer, capacity, and allocator.
@@ -292,7 +306,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     }
 
     /// Gets a raw pointer to the start of the allocation. Note that this is
-    /// `Unique::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must
+    /// `NonNull::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must
     /// be careful.
     #[inline]
     pub(crate) const fn ptr(&self) -> *mut T {
@@ -438,7 +452,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
     fn with_capacity_in(capacity: usize, alloc: A, elem_layout: Layout) -> Self {
         match Self::try_allocate_in(capacity, AllocInit::Uninitialized, alloc, elem_layout) {
             Ok(this) => {
-                // ignore-tidy-undocumented-unsafe
+                // SAFETY: We already allocated at least `capacity`.
                 unsafe {
                     // Make it more obvious that a subsequent Vec::reserve(capacity) will not allocate.
                     hint::assert_unchecked(!this.needs_to_grow(0, capacity, elem_layout));
@@ -481,8 +495,9 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
         // matches the size requested. If that ever changes, the capacity
         // here should change to `ptr.len() / size_of::<T>()`.
         Ok(Self {
-            ptr: Unique::from(ptr.cast()),
-            // ignore-tidy-undocumented-unsafe
+            ptr: ptr.cast(),
+            // SAFETY: We return early if `T` is a ZST, and if `capacity` would
+            // overflow an isize layout creation would have returned early as well.
             cap: unsafe { Cap::new_unchecked(capacity) },
             alloc,
         })
@@ -554,7 +569,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
     ) -> Result<NonNull<[u8]>, TryReserveError> {
         let new_layout = layout_array(cap, elem_layout)?;
 
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: Upheld by caller.
         let memory = if let Some((ptr, old_layout)) = unsafe { self.current_memory(elem_layout) } {
             // FIXME(const-hack): switch to `debug_assert_eq`
             debug_assert!(old_layout.align() == new_layout.align());
@@ -575,7 +590,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
 impl<A: Allocator> RawVecInner<A> {
     #[inline]
     const fn new_in(alloc: A, align: Alignment) -> Self {
-        let ptr = Unique::from_non_null(NonNull::without_provenance(align.as_nonzero_usize()));
+        let ptr = NonNull::without_provenance(align.as_nonzero_usize());
         // `cap: 0` means "unallocated". zero-sized types are ignored.
         Self { ptr, cap: ZERO_CAP, alloc }
     }
@@ -601,13 +616,13 @@ impl<A: Allocator> RawVecInner<A> {
     #[inline]
     const unsafe fn from_raw_parts_in(ptr: *mut u8, cap: Cap, alloc: A) -> Self {
         // SAFETY: Upheld by caller.
-        Self { ptr: unsafe { Unique::new_unchecked(ptr) }, cap, alloc }
+        Self { ptr: unsafe { NonNull::new_unchecked(ptr) }, cap, alloc }
     }
 
     #[inline]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     const unsafe fn from_nonnull_in(ptr: NonNull<u8>, cap: Cap, alloc: A) -> Self {
-        Self { ptr: Unique::from(ptr), cap, alloc }
+        Self { ptr, cap, alloc }
     }
 
     #[inline]
@@ -617,7 +632,7 @@ impl<A: Allocator> RawVecInner<A> {
 
     #[inline]
     const fn non_null<T>(&self) -> NonNull<T> {
-        self.ptr.cast().as_non_null_ptr()
+        self.ptr.cast()
     }
 
     #[inline]
@@ -644,7 +659,7 @@ impl<A: Allocator> RawVecInner<A> {
             // and could hypothetically handle differences between stride and size, but this memory
             // has already been allocated so we know it can't overflow and currently Rust does not
             // support such types. So we can do better by skipping some checks and avoid an unwrap.
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: Upheld by caller, unless the element size is 0 which is checked against.
             unsafe {
                 let alloc_size = elem_layout.size().unchecked_mul(self.cap.as_inner());
                 let layout = Layout::from_size_align_unchecked(alloc_size, elem_layout.align());
@@ -678,7 +693,8 @@ impl<A: Allocator> RawVecInner<A> {
         }
 
         if self.needs_to_grow(len, additional, elem_layout) {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: `needs_to_grow` ensures that `len + additional` is greater than
+            // the current capacity, with the other preconditions upheld by our caller.
             unsafe {
                 do_reserve_and_handle(self, len, additional, elem_layout);
             }
@@ -701,7 +717,7 @@ impl<A: Allocator> RawVecInner<A> {
                 self.grow_amortized(len, additional, elem_layout)?;
             }
         }
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: If we've already grown, we will not need to again immediately after.
         unsafe {
             // Inform the optimizer that the reservation has succeeded or wasn't needed
             hint::assert_unchecked(!self.needs_to_grow(len, additional, elem_layout));
@@ -737,7 +753,7 @@ impl<A: Allocator> RawVecInner<A> {
                 self.grow_exact(len, additional, elem_layout)?;
             }
         }
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: If we've already grown, we will not need to again immediately after.
         unsafe {
             // Inform the optimizer that the reservation has succeeded or wasn't needed
             hint::assert_unchecked(!self.needs_to_grow(len, additional, elem_layout));
@@ -785,7 +801,7 @@ impl<A: Allocator> RawVecInner<A> {
         // Allocators currently return a `NonNull<[u8]>` whose length matches
         // the size requested. If that ever changes, the capacity here should
         // change to `ptr.len() / size_of::<T>()`.
-        self.ptr = Unique::from(ptr.cast());
+        self.ptr = ptr.cast();
         // SAFETY: Upheld by caller.
         self.cap = unsafe { Cap::new_unchecked(cap) };
     }
@@ -838,7 +854,8 @@ impl<A: Allocator> RawVecInner<A> {
     /// big for LLVM to be willing to inline.
     ///
     /// # Safety
-    /// `cap <= self.capacity()`
+    /// - `cap <= self.capacity()`
+    /// - `elem_layout` must be valid for `self`.
     unsafe fn shrink_unchecked(
         &mut self,
         cap: usize,
@@ -853,17 +870,18 @@ impl<A: Allocator> RawVecInner<A> {
         // for the T::IS_ZST case since current_memory() will have returned
         // None.
         if cap == 0 {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: T isn't a ZST if we're here and `ptr` is our pointer that `current_memory`
+            // ensures was allocated with `layout`.
             unsafe { self.alloc.deallocate(ptr, layout) };
-            self.ptr =
-                // ignore-tidy-undocumented-unsafe
-                unsafe { Unique::new_unchecked(ptr::without_provenance_mut(elem_layout.align())) };
+            self.ptr = NonNull::without_provenance(elem_layout.alignment().as_nonzero_usize());
             self.cap = ZERO_CAP;
         } else {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: `cap` is less than the previous capacity, which must have fit in an
+            // isize already for the non-ZST case. `shrink` is also sound to call since
+            // `current_memory` ensures `ptr` and `layout` are correct for the old allocation,
+            // while `new_layout` is computed with a smaller size than the old one per the
+            // requirement we instate on our callers.
             let ptr = unsafe {
-                // Layout cannot overflow here because it would have
-                // overflowed earlier when capacity was larger.
                 let new_size = elem_layout.size().unchecked_mul(cap);
                 let new_layout = Layout::from_size_align_unchecked(new_size, layout.align());
                 self.alloc

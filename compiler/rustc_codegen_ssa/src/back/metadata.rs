@@ -17,10 +17,17 @@ use rustc_data_structures::owned_slice::{OwnedSlice, try_slice_owned};
 use rustc_metadata::EncodedMetadata;
 use rustc_metadata::creader::MetadataLoader;
 use rustc_metadata::fs::METADATA_FILENAME;
-use rustc_middle::bug;
 use rustc_session::Session;
+<<<<<<< ferrocene/release/1.100
 use rustc_span::sym;
 use rustc_target::spec::{CfgAbi, Env, LlvmAbi, Os, RelocModel, Target, ef_avr_arch};
+||||||| fb9a3389fde
+use rustc_span::sym;
+use rustc_target::spec::{CfgAbi, LlvmAbi, Os, RelocModel, Target, ef_avr_arch};
+=======
+use rustc_span::{bug, sym};
+use rustc_target::spec::{CfgAbi, LlvmAbi, Os, RelocModel, Target, ef_avr_arch};
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 use tracing::debug;
 
 use super::apple;
@@ -129,13 +136,10 @@ pub(super) fn search_for_section<'a>(
 fn add_gnu_property_note(
     file: &mut write::Object<'static>,
     architecture: Architecture,
-    binary_format: BinaryFormat,
     endianness: Endianness,
 ) {
-    // check bti protection
-    if binary_format != BinaryFormat::Elf
-        || !matches!(architecture, Architecture::X86_64 | Architecture::Aarch64)
-    {
+    // Only X86_64 and Aarch64 require a GNU property note.
+    if !matches!(architecture, Architecture::X86_64 | Architecture::Aarch64) {
         return;
     }
 
@@ -253,6 +257,7 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
 
         file.set_mangling(original_mangling);
     }
+<<<<<<< ferrocene/release/1.100
     let e_flags = elf_e_flags(architecture, sess);
     // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
     let os_abi = elf_os_abi(sess);
@@ -267,6 +272,23 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
         add_gnu_property_note(&mut file, architecture, binary_format, endianness);
     }
     file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
+||||||| fb9a3389fde
+    let e_flags = elf_e_flags(architecture, sess);
+    // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
+    let os_abi = elf_os_abi(sess);
+    let abi_version = 0;
+    add_gnu_property_note(&mut file, architecture, binary_format, endianness);
+    file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
+=======
+    if binary_format == BinaryFormat::Elf {
+        let e_flags = elf_e_flags(architecture, sess);
+        // adapted from LLVM's `MCELFObjectTargetWriter::getOSABI`
+        let os_abi = elf_os_abi(sess);
+        let abi_version = 0;
+        add_gnu_property_note(&mut file, architecture, endianness);
+        file.flags = FileFlags::Elf { os_abi, abi_version, e_flags };
+    }
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     Some(file)
 }
 
@@ -390,7 +412,6 @@ pub(super) fn elf_e_flags(architecture: Architecture, sess: &Session) -> u32 {
             }
         }
         Architecture::PowerPc64 => {
-            const EF_PPC64_ABI_UNKNOWN: u32 = 0;
             const EF_PPC64_ABI_ELF_V1: u32 = 1;
             const EF_PPC64_ABI_ELF_V2: u32 = 2;
 
@@ -400,11 +421,7 @@ pub(super) fn elf_e_flags(architecture: Architecture, sess: &Session) -> u32 {
                 // which leads to broken binaries if ELFv1 is used for the object files.
                 LlvmAbi::ElfV1 => EF_PPC64_ABI_ELF_V1,
                 LlvmAbi::ElfV2 => EF_PPC64_ABI_ELF_V2,
-                _ if sess.target.options.binary_format.to_object() == BinaryFormat::Elf => {
-                    bug!("invalid ABI specified for this PPC64 ELF target");
-                }
-                // Fall back
-                _ => EF_PPC64_ABI_UNKNOWN,
+                _ => bug!("invalid ABI specified for this PPC64 ELF target"),
             }
         }
         Architecture::Sparc32Plus => elf::EF_SPARC_32PLUS,

@@ -258,7 +258,7 @@ The selected techniques of Table A.13 are documented in that table.
 4
 "
 
-Not used; no further metrics are measured. Size and complexity are limited by the language and the tooling, see :ref:`safety-plan/programming-language:recursion limit` and :ref:`safety-plan/testing-plan:rustc lints`.
+Not used; no further metrics are measured. Size and complexity of the source code are limited by the language and the tooling, see :ref:`safety-plan/programming-language:recursion limit` and :ref:`safety-plan/testing-plan:rustc lints`.
 
 5
 "
@@ -394,7 +394,7 @@ As such, the certified libraries do not have an additional coding standard of th
 3
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language` (recursion limit, functions with many parameters are discouraged). Requirement 1 of this table is applied: further modularization of some complex generic functions is not sensible.
+Covered by :doc:`core-certification:safety-plan/programming-language` (compiler recursion limit, functions with many parameters are discouraged). Requirement 1 of this table is applied: further modularization of some complex generic functions is not sensible.
 
 4
 "

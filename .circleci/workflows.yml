@@ -946,8 +946,6 @@ jobs:
       ferrocene_host:
         type: string
         default: x86_64-unknown-linux-gnu
-      restore_from_job:
-        type: string
       resource_class:
         type: string
         default: ferrocene/k8s-amd64-medium
@@ -975,17 +973,16 @@ jobs:
       RUSTDOCFLAGS: "--cfg=ferrocene_facade_secretsauce -Z unstable-options --test-args '--exclude-should-panic'"
       # This cannot be multiple steps since it all needs to be execute inside ferrocene/ci/run.sh
       SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
         echo "Building the remote testserver for << parameters.target >>"
         ./x build src/tools/remote-test-server --target "<< parameters.target >>" --stage "2"
         echo "Copying the remote testserver to the testrunner container"
          cp build/<< parameters.ferrocene_host >>/stage2-tools/<< parameters.target >>/release/remote-test-server /shared/testserver/remote-test-server
-        ./x.py test --stage=2 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test_variant >>
+        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test_variant >>
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:
           llvm_subset: true
-      - ferrocene/restore_from_job:
-          from_job: << parameters.restore_from_job >>
       - ferrocene/ci
 
 
@@ -1210,7 +1207,6 @@ workflows:
           qemu_arch: qemu-aarch64
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-a53
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1242,7 +1238,6 @@ workflows:
           qemu_arch: qemu-aarch64
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: neoverse-v1
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1274,7 +1269,6 @@ workflows:
           qemu_arch: qemu-aarch64
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: neoverse-v1
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1344,7 +1338,6 @@ workflows:
           qemu_arch: qemu-arm
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-r5f
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1376,7 +1369,6 @@ workflows:
           qemu_arch: qemu-arm
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-m4
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1425,7 +1417,6 @@ workflows:
           qemu_arch: qemu-arm
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-m4
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1474,7 +1465,6 @@ workflows:
           qemu_arch: qemu-arm
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-m33
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:
@@ -1506,7 +1496,6 @@ workflows:
           qemu_arch: qemu-arm
           qemu_version: << pipeline.parameters.qemu-version >>
           qemu_cpu: cortex-m33
-          restore_from_job: x86_64-linux-build
           test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           requires:

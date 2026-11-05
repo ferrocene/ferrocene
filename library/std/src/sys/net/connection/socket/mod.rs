@@ -244,7 +244,13 @@ unsafe fn socket_addr_from_c(
             })))
         }
         c::AF_INET6 => {
-            assert!(len >= size_of::<c::sockaddr_in6>());
+            let sin6_len = storage.cast::<u8>().read() as usize;
+            let expected = size_of::<c::sockaddr_in6>();
+            // on QNX7.1 io-sock, `libc::accept` does not set the `len` argument correctly (it
+            // writes `sizeof(c::sockaddr_in)` instead of `sizeof(c::sockaddr_in6)`). however,
+            // it does set the `storage.sin6_len` field correctly so use that field in the
+            // assertion
+            assert!(len >= expected || sin6_len >= expected);
             Ok(SocketAddr::V6(socket_addr_v6_from_c(unsafe {
                 *(storage as *const _ as *const c::sockaddr_in6)
             })))

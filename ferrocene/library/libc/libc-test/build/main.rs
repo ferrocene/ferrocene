@@ -20,6 +20,13 @@ fn do_cc(t: &Target) {
         if !exclude {
             let mut cmsg = cc::Build::new();
 
+            if t.nto_iosock() {
+                let qnx_target_val = env::var("QNX_TARGET")
+                    .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
+
+                cmsg.include(qnx_target_val + "/usr/include/io-sock");
+            }
+
             cmsg.file("src/cmsg.c");
 
             if t.solaris() || t.illumos() {

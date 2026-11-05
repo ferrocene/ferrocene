@@ -162,6 +162,7 @@
 #![feature(ptr_metadata)]
 #![feature(random)]
 #![feature(raw_os_error_ty)]
+#![feature(register_tool)]
 #![feature(rev_into_inner)]
 #![feature(seek_stream_len)]
 #![feature(set_ptr_value)]
@@ -203,6 +204,8 @@
 #![feature(coroutine_trait)]
 #![feature(decl_macro)]
 #![feature(dropck_eyepatch)]
+#![feature(f16)]
+#![feature(f128)]
 #![feature(fundamental)]
 #![feature(impl_restriction)]
 #![feature(intrinsics)]
@@ -219,8 +222,20 @@
 #![feature(unsized_fn_params)]
 #![feature(with_negative_coherence)]
 #![rustc_preserve_ub_checks]
+<<<<<<< ferrocene/main
 // not-alphabetical-end
 //
+||||||| 1c3a6506966
+// tidy-alphabetical-end
+//
+=======
+// tidy-alphabetical-end
+
+// tidy-alphabetical-start
+#![register_tool(lint)]
+// tidy-alphabetical-end
+
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 // Rustdoc features:
 #![feature(doc_cfg)]
 #![feature(doc_notable_trait)]

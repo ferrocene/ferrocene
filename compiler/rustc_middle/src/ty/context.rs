@@ -48,7 +48,8 @@ use rustc_structures::{CrateType, Limit};
 use rustc_type_ir::TyKind::*;
 pub use rustc_type_ir::lift::Lift;
 use rustc_type_ir::{
-    CollectAndApply, PlaceholderType, WithCachedTypeInfo, elaborate, search_graph,
+    CollectAndApply, IncludeSizedImplicitBounds, PlaceholderType, WithCachedTypeInfo, elaborate,
+    search_graph,
 };
 use tracing::{debug, instrument};
 
@@ -955,8 +956,24 @@ impl<'tcx> TyCtxt<'tcx> {
         self.default_traits().iter().any(|&default_trait| self.is_lang_item(def_id, default_trait))
     }
 
+    /// Returns true if a trait is an "implicit trait", which is a trait which is added
+    /// to bounds on generic types automatically by the compiler.
+    pub fn is_implicit_trait(
+        self,
+        def_id: DefId,
+        including_sized: IncludeSizedImplicitBounds,
+    ) -> bool {
+        self.is_default_trait(def_id)
+            // NOTE: add move and forget here later
+            || (matches!(including_sized, IncludeSizedImplicitBounds::Yes) && self.is_sizedness_trait(def_id))
+    }
+
     pub fn is_sizedness_trait(self, def_id: DefId) -> bool {
         matches!(self.as_lang_item(def_id), Some(LangItem::Sized | LangItem::MetaSized))
+    }
+
+    pub fn is_forget_trait(self, def_id: DefId) -> bool {
+        matches!(self.as_lang_item(def_id), Some(LangItem::Forget))
     }
 
     pub fn lift<T: Lift<TyCtxt<'tcx>>>(self, value: T) -> T::Lifted {
@@ -2872,6 +2889,10 @@ impl<'tcx> TyCtxt<'tcx> {
         self.sess.opts.unstable_opts.next_solver == NextSolverConfig::Globally
             && !self.sess.opts.unstable_opts.higher_ranked_assumptions
             && !self.features().generic_const_exprs()
+    }
+
+    pub fn next_solver_overflow_fcw_limit(self) -> Option<usize> {
+        self.sess.opts.unstable_opts.next_solver_overflow_fcw_limit
     }
 
     pub fn disable_trait_solver_fast_paths(self) -> bool {

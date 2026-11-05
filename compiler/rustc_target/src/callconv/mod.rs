@@ -436,7 +436,7 @@ impl<'a, Ty> ArgAbi<'a, Ty> {
             .set(ArgAttribute::NoUndef)
             .set(ArgAttribute::NoFree);
         attrs.pointee_size = layout.size;
-        attrs.pointee_align = Some(layout.align.abi);
+        attrs.pointee_align = Some(layout.align);
 
         if layout.is_unsized() {
             PassMode::IndirectUnsized { attrs, meta_attrs: ArgAttributes::new() }
@@ -616,21 +616,6 @@ impl<'a, Ty> ArgAbi<'a, Ty> {
         // Ideally we'd just compare the `mode`, but that is not enough -- for some modes LLVM will
         // look at the type.
         self.layout.eq_abi(&other.layout) && self.mode.eq_abi(&other.mode)
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, StableHash)]
-pub enum RiscvInterruptKind {
-    Machine,
-    Supervisor,
-}
-
-impl RiscvInterruptKind {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Machine => "machine",
-            Self::Supervisor => "supervisor",
-        }
     }
 }
 

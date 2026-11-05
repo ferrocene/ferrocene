@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 // `s_no_extra_traits` produces an `impl` block so the `#[cfg]` attribute needs
 // to go *outside* the macro
-#[cfg(target_os = "nto")]
+#[cfg(all(target_os = "nto", not(target_env = "nto71_iosock")))]
 s_no_extra_traits! {
     pub union __c_anonymous_ifr_ifru {
         pub ifru_addr: crate::sockaddr,
@@ -25,7 +25,7 @@ s_no_extra_traits! {
     }
 }
 
-#[cfg(target_os = "qnx")]
+#[cfg(any(target_os = "qnx", target_env = "nto71_iosock"))]
 s_no_extra_traits! {
     pub union __c_anonymous_ifr_ifru {
         pub ifru_addr: crate::sockaddr,
@@ -43,6 +43,7 @@ s_no_extra_traits! {
         pub ifru_cap: [c_int; 2],
         pub ifru_fib: c_uint,
         pub ifru_vlan_pcp: c_uchar,
+        #[cfg(not(target_env = "nto71_iosock"))]
         pub ifru_nv: ifreq_nv_req,
     }
 
@@ -51,6 +52,7 @@ s_no_extra_traits! {
         pub buffer: *mut c_void,
     }
 
+    #[cfg(not(target_env = "nto71_iosock"))]
     pub struct ifreq_nv_req {
         pub buf_length: c_uint,
         pub length: c_uint,

@@ -1,3 +1,5 @@
+use std::debug_assert_matches;
+
 use derive_where::derive_where;
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash_NoContext};
@@ -6,7 +8,7 @@ use rustc_type_ir_macros::{
 };
 
 use crate::inherent::*;
-use crate::{self as ty, AliasTerm, Interner};
+use crate::{self as ty, AliasTerm, Const, Interner};
 
 #[derive_where(Clone, Copy, PartialEq, Debug; I: Interner)]
 #[derive(GenericTypeVisitable)]
@@ -16,7 +18,7 @@ use crate::{self as ty, AliasTerm, Interner};
 )]
 pub enum TermKind<I: Interner> {
     Ty(I::Ty),
-    Const(I::Const),
+    Const(Const<I>),
 }
 
 impl<I: Interner> Eq for TermKind<I> {}
@@ -167,16 +169,6 @@ impl<I: Interner> AliasTerm<I> {
         Self::new_from_args(interner, kind, args)
     }
 
-    pub fn new_from_def_id(
-        interner: I,
-        def_id: I::DefId,
-        args: I::GenericArgs,
-        inherent_args: ty::AliasConstInherentArgsKind,
-    ) -> AliasTerm<I> {
-        let kind = interner.alias_term_kind_from_def_id(def_id, inherent_args);
-        Self::new_from_args(interner, kind, args)
-    }
-
     pub fn expect_ty(self) -> ty::AliasTy<I> {
         let kind = match self.kind {
             AliasTermKind::ProjectionTy { def_id } => ty::AliasTyKind::Projection { def_id },
@@ -221,7 +213,7 @@ impl<I: Interner> AliasTerm<I> {
                 .into()
         };
         let alias_const = |kind| {
-            I::Const::new_alias(interner, is_rigid, ty::AliasConst::new(interner, kind, self.args))
+            Const::new_alias(interner, is_rigid, ty::AliasConst::new(interner, kind, self.args))
                 .into()
         };
         match self.kind {
@@ -265,11 +257,25 @@ impl<I: Interner> AliasTerm<I> {
 /// The following methods work only with (trait) associated term projections.
 // FIXME: Replace by an impl on Alias<ProjectionAliasTermKind>
 impl<I: Interner> AliasTerm<I> {
+    fn debug_assert_has_self(self) {
+        // InherentConstImpl is deliberately omitted here, it is not self-format args
+        debug_assert_matches!(
+            self.kind,
+            AliasTermKind::ProjectionTy { .. }
+                | AliasTermKind::ProjectionConst { .. }
+                | AliasTermKind::InherentTy { .. }
+                | AliasTermKind::InherentConstSelf { .. },
+            "AliasTerm::self_ty is only valid on projection and inherent aliases"
+        );
+    }
+
     pub fn self_ty(self) -> I::Ty {
+        self.debug_assert_has_self();
         self.args.type_at(0)
     }
 
     pub fn with_replaced_self_ty(self, interner: I, self_ty: I::Ty) -> Self {
+        self.debug_assert_has_self();
         AliasTerm::new(
             interner,
             self.kind,

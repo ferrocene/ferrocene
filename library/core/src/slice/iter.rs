@@ -420,6 +420,7 @@ where
 
 impl<'a, T: 'a, P: FnMut(&T) -> bool> Split<'a, T, P> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub(super) fn new(slice: &'a [T], pred: P) -> Self {
         Self { v: slice, pred, finished: false }
     }
@@ -468,6 +469,7 @@ where
     type Item = &'a [T];
 
     #[inline]
+    #[ferrocene::prevalidated]
     fn next(&mut self) -> Option<&'a [T]> {
         if self.finished {
             return None;
@@ -530,6 +532,7 @@ where
     P: FnMut(&T) -> bool,
 {
     #[inline]
+    #[ferrocene::prevalidated]
     fn finish(&mut self) -> Option<&'a [T]> {
         if self.finished {
             None

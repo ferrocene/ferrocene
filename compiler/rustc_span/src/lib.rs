@@ -17,7 +17,7 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
-#![cfg_attr(target_arch = "loongarch64", feature(stdarch_loongarch))]
+#![cfg_attr(all(bootstrap, target_arch = "loongarch64"), feature(stdarch_loongarch))]
 #![feature(core_io_borrowed_buf)]
 #![feature(decl_macro)]
 #![feature(diagnostic_on_unknown)]
@@ -913,7 +913,7 @@ impl Span {
     /// [`find_ancestor_inside`]: Self::find_ancestor_inside
     /// [`find_ancestor_inside_same_ctxt`]: Self::find_ancestor_inside_same_ctxt
     pub fn find_ancestor_in_same_ctxt(mut self, other: Span) -> Option<Span> {
-        while !self.eq_ctxt(other) {
+        while self.ctxt() != other.ctxt() {
             self = self.parent_callsite()?;
         }
         Some(self)
@@ -932,7 +932,7 @@ impl Span {
     /// [`find_ancestor_inside`]: Self::find_ancestor_inside
     /// [`find_ancestor_in_same_ctxt`]: Self::find_ancestor_in_same_ctxt
     pub fn find_ancestor_inside_same_ctxt(mut self, outer: Span) -> Option<Span> {
-        while !outer.contains(self) || !self.eq_ctxt(outer) {
+        while !outer.contains(self) || self.ctxt() != outer.ctxt() {
             self = self.parent_callsite()?;
         }
         Some(self)

@@ -669,6 +669,7 @@ symbols! {
         cold,
         cold_path,
         collapse_debuginfo,
+        color,
         column,
         compare_bytes,
         compare_exchange,
@@ -803,7 +804,6 @@ symbols! {
         debug_assertions,
         debug_c_like_enum_write_str,
         debug_struct_fields_finish,
-        debug_tuple_fields_finish,
         debugger_visualizer,
         decl_macro,
         declare_lint_pass,
@@ -1296,6 +1296,7 @@ symbols! {
         manually_drop,
         map,
         map_err,
+        marked_unchecked_type_aliases,
         marker,
         marker_trait_attr,
         masked,
@@ -1757,6 +1758,7 @@ symbols! {
         residual,
         result,
         result_ffi_guarantees,
+        resumable_breakpoint,
         return_address,
         return_position_impl_trait_in_trait,
         return_type_notation,
@@ -1910,11 +1912,13 @@ symbols! {
         rustc_test_marker,
         rustc_then_this_would_need,
         rustc_trivial_field_reads,
+        rustc_unchecked_type_alias,
         // FIXME(#159429): temporary rename to avoid `#[unroll]` nameres ambiguity
         rustc_unroll,
         rustdoc,
         rustdoc_internals,
         rustdoc_missing_doc_code_examples,
+        rustdoc_skip_body,
         rustfmt,
         rvalue_static_promotion,
         rvector,
@@ -2400,6 +2404,7 @@ symbols! {
         vtable_align,
         vtable_size,
         warn,
+        warnings,
         wasip2,
         wasm,
         wasm32,
@@ -2556,7 +2561,7 @@ impl Ident {
 impl PartialEq for Ident {
     #[inline]
     fn eq(&self, rhs: &Self) -> bool {
-        self.name == rhs.name && self.span.eq_ctxt(rhs.span)
+        self.name == rhs.name && self.span.ctxt() == rhs.span.ctxt()
     }
 }
 

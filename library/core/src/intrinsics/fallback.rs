@@ -160,8 +160,7 @@ impl_disjoint_bitor! {
     i8, i16, i32, i64, i128, isize,
 }
 
-#[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-pub const trait FunnelShift: Copy + 'static {
+pub trait FunnelShift: Copy + 'static {
     /// We just need the trait indirection to handle different types
     /// since calling intrinsics with generics doesn't work.
     ///
@@ -183,15 +182,10 @@ pub const trait FunnelShift: Copy + 'static {
 
 macro_rules! impl_funnel_shifts {
     ($($type:ident),*) => {$(
-        #[rustc_const_unstable(feature = "core_intrinsics_fallbacks", issue = "none")]
-        const impl FunnelShift for $type {
-            #[ferrocene::prevalidated]
-            #[cfg_attr(miri, track_caller)]
+        impl FunnelShift for $type {
             #[inline]
+            #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shl(self, right: Self, shift: u32) -> Self {
-                // This implementation is also used by Miri so we have to check the precondition.
-                // SAFETY: this is guaranteed by the caller
-                unsafe { super::assume(shift < $type::BITS) };
                 if shift == 0 {
                     self
                 } else {
@@ -211,13 +205,9 @@ macro_rules! impl_funnel_shifts {
                 }
             }
 
-            #[ferrocene::prevalidated]
-            #[cfg_attr(miri, track_caller)]
             #[inline]
+            #[ferrocene::prevalidated]
             unsafe fn unchecked_funnel_shr(self, right: Self, shift: u32) -> Self {
-                // This implementation is also used by Miri so we have to check the precondition.
-                // SAFETY: this is guaranteed by the caller
-                unsafe { super::assume(shift < $type::BITS) };
                 if shift == 0 {
                     right
                 } else {

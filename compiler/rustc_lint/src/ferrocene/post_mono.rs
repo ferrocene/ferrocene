@@ -29,7 +29,7 @@ use rustc_middle::mir::{
 use rustc_middle::mono::MonoItem;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
-    self, EarlyBinder, GenericArgsRef, Instance, InstanceKind, ShimKind, TyCtxt, TypeFoldable,
+    self, EarlyBinder, GenericArgs, Instance, InstanceKind, ShimKind, TyCtxt, TypeFoldable,
     TypingEnv,
 };
 use rustc_span::{Span, span_bug};
@@ -436,7 +436,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
     fn monomorphize_instance(
         &self,
         def_id: DefId,
-        generic_args: GenericArgsRef<'tcx>,
+        generic_args: GenericArgs<'tcx>,
         span: Span,
     ) -> Instance<'tcx> {
         let (mono_args, typing_env) = self.monomorphize_args(generic_args);

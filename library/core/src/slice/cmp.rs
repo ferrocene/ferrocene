@@ -366,6 +366,7 @@ where
 impl<T: BytewiseEq> SliceContains for T {
     #[inline]
     #[expect(clippy::manual_contains, reason = "implements slice_contains")]
+    #[ferrocene::prevalidated]
     default fn slice_contains(&self, x: &[Self]) -> bool {
         if size_of::<T>() == 1 {
             // SAFETY: `BytewiseEq` guarantees that values have no padding or provenance and

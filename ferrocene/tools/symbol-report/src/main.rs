@@ -9,7 +9,7 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 
-use std::collections::{BTreeSet, HashSet};
+use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::process::ExitCode;
@@ -19,8 +19,8 @@ use build_helper::symbol_report::{Function, SymbolReport};
 use rustc_ast::attr::AttributeExt;
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
+use rustc_hir::HirId;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
-use rustc_hir::{AttrId, HirId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
@@ -36,12 +36,12 @@ static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =
 struct Vis<'tcx> {
     tcx: TyCtxt<'tcx>,
     report: SymbolReport,
-    visited_attrs: BTreeSet<AttrId>,
+    visited_attrs: HashSet<Span>,
 }
 
 impl<'tcx> Vis<'tcx> {
     fn new(tcx: TyCtxt<'tcx>) -> Self {
-        Self { tcx, report: SymbolReport::new(), visited_attrs: BTreeSet::new() }
+        Self { tcx, report: SymbolReport::new(), visited_attrs: HashSet::new() }
     }
 
     fn convert_span(&mut self, span: Span) -> (String, usize, usize) {
@@ -62,8 +62,10 @@ impl<'tcx> Vis<'tcx> {
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
-            let Attribute::Unparsed(attr_item) = attr else { unreachable!() };
-            self.visited_attrs.insert(attr_item.id.attr_id);
+            let (Attribute::Tool(attr_item) | Attribute::DeriveHelper(attr_item)) = attr else {
+                unreachable!()
+            };
+            self.visited_attrs.insert(attr_item.span);
         }
     }
 }
@@ -89,8 +91,10 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
 
     fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
         if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
-            let Attribute::Unparsed(attr) = attr else { unreachable!() };
-            if !self.visited_attrs.contains(&attr.id.attr_id) {
+            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+                unreachable!()
+            };
+            if !self.visited_attrs.contains(&attr.span) {
                 eprintln!("Unused annotation at {:?}", attr.span);
             }
         }
@@ -202,8 +206,10 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         // here.
         if let Some(attr) = has_ferrocene_annotation(tcx, def) {
             vis.report.add_annotation(filename.clone(), start_line, end_line);
-            let Attribute::Unparsed(attr) = attr else { unreachable!() };
-            vis.visited_attrs.insert(attr.id.attr_id);
+            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+                unreachable!()
+            };
+            vis.visited_attrs.insert(attr.span);
             // Set the start line of the function as the minimum between the start line of the
             // function and the start of the annotation so it can be seen in the coverage report.
             let (_, span_start_line, _) = vis.convert_span(attr.span);

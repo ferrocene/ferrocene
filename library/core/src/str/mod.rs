@@ -340,6 +340,8 @@ impl str {
     /// Converts a slice of bytes to a string slice without checking
     /// that the string contains valid UTF-8; mutable version.
     ///
+    /// # Safety
+    ///
     /// See the immutable version, [`from_utf8_unchecked()`] for documentation and safety requirements.
     ///
     /// # Examples
@@ -656,6 +658,7 @@ impl str {
     #[stable(feature = "str_checked_slicing", since = "1.20.0")]
     #[rustc_const_unstable(feature = "const_index", issue = "143775")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn get<I: [const] SliceIndex<str>>(&self, i: I) -> Option<&I::Output> {
         i.get(self)
     }

@@ -1421,6 +1421,7 @@
 <T as core::convert::TryFrom<U>>::try_from
 <T as core::convert::TryInto<U>>::try_into
 <T as core::iter::adapters::step_by::SpecRangeSetup<T>>::setup
+<T as core::slice::cmp::SliceContains>::slice_contains
 <[T] as core::convert::AsMut<[T]>>::as_mut
 <[T] as core::convert::AsRef<[T]>>::as_ref
 <[T] as core::fmt::Debug>::fmt
@@ -3619,6 +3620,8 @@
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::position
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::rposition
 <core::slice::iter::IterMut<'a, T> as core::iter::traits::iterator::Iterator>::size_hint
+<core::slice::iter::Split<'a, T, P> as core::iter::traits::iterator::Iterator>::next
+<core::slice::iter::Split<'a, T, P> as core::slice::iter::SplitIter>::finish
 <core::slice::iter::Windows<'a, T> as core::fmt::Debug>::fmt
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::count
 <core::slice::iter::Windows<'a, T> as core::iter::traits::iterator::Iterator>::last
@@ -6415,12 +6418,6 @@ core::fmt::Formatter::<'a>::debug_struct_field4_finish
 core::fmt::Formatter::<'a>::debug_struct_field5_finish
 core::fmt::Formatter::<'a>::debug_struct_fields_finish
 core::fmt::Formatter::<'a>::debug_tuple
-core::fmt::Formatter::<'a>::debug_tuple_field1_finish
-core::fmt::Formatter::<'a>::debug_tuple_field2_finish
-core::fmt::Formatter::<'a>::debug_tuple_field3_finish
-core::fmt::Formatter::<'a>::debug_tuple_field4_finish
-core::fmt::Formatter::<'a>::debug_tuple_field5_finish
-core::fmt::Formatter::<'a>::debug_tuple_fields_finish
 core::fmt::Formatter::<'a>::debug_upper_hex
 core::fmt::Formatter::<'a>::fill
 core::fmt::Formatter::<'a>::flags
@@ -6666,6 +6663,7 @@ core::fmt::rt::Argument::<'_>::new_octal
 core::fmt::rt::Argument::<'_>::new_pointer
 core::fmt::rt::Argument::<'_>::new_upper_exp
 core::fmt::rt::Argument::<'_>::new_upper_hex
+core::fmt::split_str_by_space
 core::fmt::wide_pointer_fmt_inner
 core::fmt::write
 core::hash::Hash::hash_slice
@@ -8399,6 +8397,7 @@ core::slice::<impl [T]>::chunks_exact
 core::slice::<impl [T]>::chunks_exact_mut
 core::slice::<impl [T]>::chunks_mut
 core::slice::<impl [T]>::clone_from_slice
+core::slice::<impl [T]>::contains
 core::slice::<impl [T]>::copy_from_slice
 core::slice::<impl [T]>::ends_with
 core::slice::<impl [T]>::fill
@@ -8421,6 +8420,7 @@ core::slice::<impl [T]>::reverse
 core::slice::<impl [T]>::reverse::revswap
 core::slice::<impl [T]>::rotate_left
 core::slice::<impl [T]>::rotate_right
+core::slice::<impl [T]>::split
 core::slice::<impl [T]>::split_at
 core::slice::<impl [T]>::split_at_checked
 core::slice::<impl [T]>::split_at_mut
@@ -8502,6 +8502,7 @@ core::slice::iter::IterMut::<'a, T>::new
 core::slice::iter::IterMut::<'a, T>::next_back_unchecked
 core::slice::iter::IterMut::<'a, T>::post_inc_start
 core::slice::iter::IterMut::<'a, T>::pre_dec_end
+core::slice::iter::Split::<'a, T, P>::new
 core::slice::iter::Windows::<'a, T>::new
 core::slice::memchr::contains_zero_byte
 core::slice::memchr::memchr
@@ -8517,6 +8518,7 @@ core::slice::raw::from_raw_parts_mut::precondition_check
 core::slice::raw::from_ref
 core::slice::rotate::const_min
 core::slice::rotate::ptr_rotate
+core::slice::rotate::ptr_rotate_dispatch
 core::slice::rotate::ptr_rotate_gcd
 core::slice::rotate::ptr_rotate_memmove
 core::slice::rotate::ptr_rotate_swap
@@ -8540,6 +8542,7 @@ core::str::<impl str>::from_utf8
 core::str::<impl str>::from_utf8_mut
 core::str::<impl str>::from_utf8_unchecked
 core::str::<impl str>::from_utf8_unchecked_mut
+core::str::<impl str>::get
 core::str::<impl str>::get_unchecked
 core::str::<impl str>::is_ascii
 core::str::<impl str>::is_char_boundary

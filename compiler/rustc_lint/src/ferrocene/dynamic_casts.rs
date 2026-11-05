@@ -9,7 +9,7 @@ use rustc_infer::traits::{
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
-    self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, ShimKind, Ty, TyCtxt,
+    self, ExistentialPredicate, GenericArgs, Instance, PolyTraitRef, ShimKind, Ty, TyCtxt,
     TypeSuperVisitable as _, TypeVisitable as _, TypingEnv, Unnormalized,
 };
 use rustc_span::{Span, span_bug};
@@ -26,7 +26,7 @@ impl<'tcx> LintState<'tcx> {
         &self,
         source: Ty<'tcx>,
         dst_trait: PolyTraitRef<'tcx>,
-        try_instantiate: &mut impl FnMut(DefId, GenericArgsRef<'tcx>) -> InstantiateResult<'tcx>,
+        try_instantiate: &mut impl FnMut(DefId, GenericArgs<'tcx>) -> InstantiateResult<'tcx>,
         span: Span,
     ) -> Option<UseKind<'tcx>> {
         debug!("check cast of {source:?} to function pointer");
@@ -84,7 +84,7 @@ impl<'tcx> LintState<'tcx> {
         dest_ty: Ty<'tcx>,
         source_ty: Ty<'tcx>,
         typing_env: TypingEnv<'tcx>,
-        try_instantiate: &mut impl FnMut(DefId, GenericArgsRef<'tcx>) -> InstantiateResult<'tcx>,
+        try_instantiate: &mut impl FnMut(DefId, GenericArgs<'tcx>) -> InstantiateResult<'tcx>,
         span: Span,
     ) -> Option<UseKind<'tcx>> {
         let tcx = self.tcx;
@@ -175,7 +175,7 @@ impl<'tcx> LintState<'tcx> {
         &self,
         ty: Ty<'tcx>,
         fn_trait_ref: Option<PolyTraitRef<'tcx>>,
-        try_instantiate: &mut impl FnMut(DefId, GenericArgsRef<'tcx>) -> InstantiateResult<'tcx>,
+        try_instantiate: &mut impl FnMut(DefId, GenericArgs<'tcx>) -> InstantiateResult<'tcx>,
         span: Span,
     ) -> Option<Instance<'tcx>> {
         let tcx = self.tcx;
@@ -187,13 +187,13 @@ impl<'tcx> LintState<'tcx> {
                 try_instantiate(*maybe_trait_fn, generic_args.no_bound_vars().unwrap()).instance()
             }
             ty::Closure(def_id, args) => {
-                Some(Instance::resolve_closure(tcx, *def_id, args, ty::ClosureKind::FnOnce))
+                Some(Instance::resolve_closure(tcx, *def_id, *args, ty::ClosureKind::FnOnce))
             }
             ty::CoroutineClosure(def_id, args) => {
                 let coroutine_closure_def_id = *def_id;
                 // See comment in `rustc_ty_utils::instance::resolve_associated_item`.
                 let instance = if ty::ClosureKind::FnOnce == args.as_coroutine_closure().kind() {
-                    Instance::new_raw(coroutine_closure_def_id, args)
+                    Instance::new_raw(coroutine_closure_def_id, *args)
                 } else {
                     let trait_id = fn_trait_ref.unwrap().def_id();
                     let target_kind = tcx.fn_trait_kind_from_def_id(trait_id).unwrap();
@@ -202,7 +202,7 @@ impl<'tcx> LintState<'tcx> {
                             coroutine_closure_def_id,
                             receiver_by_ref: target_kind != ty::ClosureKind::FnOnce,
                         }),
-                        args,
+                        args: *args,
                     }
                 };
                 Some(instance)
@@ -314,7 +314,7 @@ impl<'tcx> LintState<'tcx> {
                             for (idx, def) in
                                 dst_def.variant(VariantIdx::ZERO).fields.iter_enumerated()
                             {
-                                if !def.ty(tcx, dst_args).skip_norm_wip().is_sized(tcx, typing_env)
+                                if !def.ty(tcx, *dst_args).skip_norm_wip().is_sized(tcx, typing_env)
                                 {
                                     unsized_field = Some(idx);
                                     break;
@@ -325,8 +325,8 @@ impl<'tcx> LintState<'tcx> {
                             })
                         }
                     };
-                    src_inner = get_adt_field(*src_def, src_args, field);
-                    dst_inner = get_adt_field(*dst_def, dst_args, field);
+                    src_inner = get_adt_field(*src_def, *src_args, field);
+                    dst_inner = get_adt_field(*dst_def, *dst_args, field);
                 }
                 _ => span_bug!(
                     span,

@@ -2610,6 +2610,13 @@ impl<'a> Parser<'a> {
             if self.prev_token == token::Or {
                 // This was part of a closure, the that part of the parser recover.
                 return Err(self.dcx().create_err(err));
+            } else if AssocOp::from_token(&self.prev_token).is_some()
+                || self.prev_token == token::Bang
+            {
+                // This was something like `- let`, we want to point at that.
+                let mut err = self.dcx().create_err(err);
+                err.span_label(self.prev_token.span, "expected an expression after this");
+                Recovered::Yes(err.emit_err())
             } else {
                 Recovered::Yes(self.dcx().emit_err(err))
             }
@@ -3749,7 +3756,9 @@ impl<'a> Parser<'a> {
                         // make sure the block is at the end by eating a `;`,
                         // we shouldn't report such diagnostic for `let a = foo{return 43;}+bar;`
                         // also skip the suggestion if the span cross macro boundaries
-                        if might_be_stmt && snapshot.eat(exp!(Semi)) && pth.span.eq_ctxt(open_span)
+                        if might_be_stmt
+                            && snapshot.eat(exp!(Semi))
+                            && pth.span.ctxt() == open_span.ctxt()
                         {
                             let span = pth.span.between(open_span);
                             e.subdiagnostic(crate::diagnostics::MissingElseInLet { span });

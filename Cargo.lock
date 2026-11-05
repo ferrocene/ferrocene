@@ -279,7 +279,7 @@ dependencies = [
  "addr2line",
  "cfg-if",
  "libc",
- "miniz_oxide",
+ "miniz_oxide 0.8.9",
  "object 0.36.7",
  "rustc-demangle",
  "windows-targets 0.52.6",
@@ -913,7 +913,7 @@ dependencies = [
  "itertools",
  "leb128",
  "md-5",
- "miniz_oxide",
+ "miniz_oxide 0.9.1",
  "regex",
  "rustc-demangle",
 ]
@@ -1459,7 +1459,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "843fba2746e448b37e26a819579957415c8cef339bf08564fe8b7ddbd959573c"
 dependencies = [
  "crc32fast",
- "miniz_oxide",
+ "miniz_oxide 0.8.9",
  "zlib-rs",
 ]
 
@@ -2545,6 +2545,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "miniz_oxide"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
+dependencies = [
+ "adler2",
+]
+
+[[package]]
 name = "mio"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3553,6 +3562,7 @@ dependencies = [
  "similar",
  "tempfile",
  "wasmparser 0.247.0",
+ "windows 0.62.2",
 ]
 
 [[package]]
@@ -4673,6 +4683,7 @@ dependencies = [
  "thin-vec",
  "tracing",
  "unicode-normalization",
+ "unicode-properties",
  "unicode-width 0.2.2",
 ]
 
@@ -4694,7 +4705,6 @@ dependencies = [
  "rustc_ast_lowering",
  "rustc_attr_ir",
  "rustc_attr_parsing",
- "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -4819,6 +4829,7 @@ dependencies = [
  "rustc_ast_pretty",
  "rustc_attr_ir",
  "rustc_attr_parsing",
+ "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
@@ -4938,6 +4949,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_hashes",
  "rustc_hir",
+ "rustc_macros",
  "rustc_middle",
  "rustc_session",
  "rustc_span",

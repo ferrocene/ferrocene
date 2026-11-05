@@ -2,9 +2,8 @@ use itertools::Itertools;
 use rustc_abi::ExternAbi;
 use rustc_hir::def_id::DefId;
 use rustc_lint_defs::builtin::FUNCTION_ITEM_REFERENCES;
-use rustc_middle::mir::visit::Visitor;
 use rustc_middle::mir::*;
-use rustc_middle::ty::{self, EarlyBinder, GenericArgsRef, Ty, TyCtxt};
+use rustc_middle::ty::{self, EarlyBinder, GenericArgs, Ty, TyCtxt};
 use rustc_span::{Span, Spanned, sym};
 
 use crate::diagnostics;
@@ -14,7 +13,9 @@ pub(super) struct FunctionItemReferences;
 impl<'tcx> crate::MirLint<'tcx> for FunctionItemReferences {
     fn run_lint(&self, tcx: TyCtxt<'tcx>, body: &Body<'tcx>) {
         let mut checker = FunctionItemRefChecker { tcx, body };
-        checker.visit_body(body);
+        for bb in body.basic_blocks.iter() {
+            checker.check_terminator(bb.terminator())
+        }
     }
 }
 
@@ -23,11 +24,11 @@ struct FunctionItemRefChecker<'a, 'tcx> {
     body: &'a Body<'tcx>,
 }
 
-impl<'tcx> Visitor<'tcx> for FunctionItemRefChecker<'_, 'tcx> {
+impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
     /// Emits a lint for function reference arguments bound by `fmt::Pointer` or passed to
     /// `transmute`. This only handles arguments in calls outside macro expansions to avoid double
     /// counting function references formatted as pointers by macros.
-    fn visit_terminator(&mut self, terminator: &Terminator<'tcx>, location: Location) {
+    fn check_terminator(&mut self, terminator: &Terminator<'tcx>) {
         if let TerminatorKind::Call {
             func,
             args,
@@ -38,7 +39,11 @@ impl<'tcx> Visitor<'tcx> for FunctionItemRefChecker<'_, 'tcx> {
             fn_span: _,
         } = &terminator.kind
         {
-            let source_info = *self.body.source_info(location);
+            if args.is_empty() {
+                // This lint is applied to function arguments, we have nothing to check here.
+                return;
+            }
+            let source_info = terminator.source_info;
             let func_ty = func.ty(self.body, self.tcx);
             if let ty::FnDef(def_id, args_ref) = *func_ty.kind() {
                 // Handle calls to `transmute`
@@ -61,17 +66,14 @@ impl<'tcx> Visitor<'tcx> for FunctionItemRefChecker<'_, 'tcx> {
                 }
             }
         }
-        self.super_terminator(terminator, location);
     }
-}
 
-impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
     /// Emits a lint for function reference arguments bound by `fmt::Pointer` in calls to the
     /// function defined by `def_id` with the generic parameters `args_ref`.
     fn check_bound_args(
         &self,
         def_id: DefId,
-        args_ref: GenericArgsRef<'tcx>,
+        args_ref: GenericArgs<'tcx>,
         args: &[Spanned<Operand<'tcx>>],
         source_info: SourceInfo,
     ) {
@@ -122,8 +124,8 @@ impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
     }
 
     /// If a type is a reference or raw pointer to the anonymous type of a function definition,
-    /// returns that function's `DefId` and `GenericArgsRef`.
-    fn is_fn_ref(ty: Ty<'tcx>) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+    /// returns that function's `DefId` and `GenericArgs`.
+    fn is_fn_ref(ty: Ty<'tcx>) -> Option<(DefId, GenericArgs<'tcx>)> {
         let referent_ty = match ty.kind() {
             ty::Ref(_, referent_ty, _) => Some(referent_ty),
             ty::RawPtr(referent_ty, _) => Some(referent_ty),
@@ -147,7 +149,7 @@ impl<'tcx> FunctionItemRefChecker<'_, 'tcx> {
     fn emit_lint(
         &self,
         fn_id: DefId,
-        fn_args: GenericArgsRef<'tcx>,
+        fn_args: GenericArgs<'tcx>,
         source_info: SourceInfo,
         span: Span,
     ) {

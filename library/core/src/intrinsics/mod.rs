@@ -567,10 +567,18 @@ pub const fn prefetch_write_instruction<T, const LOCALITY: i32>(data: *const T) 
 
 /// Executes a breakpoint trap, for inspection by a debugger.
 ///
-/// This intrinsic does not have a stable counterpart.
+/// The public version of this intrinsic is [`core::arch::breakpoint`].
 #[rustc_intrinsic]
 #[rustc_nounwind]
 pub fn breakpoint();
+
+/// Executes a breakpoint trap, for inspection by a debugger. This is allowed to resume.
+///
+/// The public version of this intrinsic is [`core::process::resumable_breakpoint`].
+#[rustc_intrinsic]
+#[rustc_nounwind]
+#[miri::intrinsic_fallback_is_spec]
+pub const fn resumable_breakpoint() {}
 
 /// A container for the string arguments passed to [`codeview_annotation`].
 #[unstable(feature = "codeview_annotation", issue = "163964")]
@@ -611,10 +619,10 @@ pub fn rustc_peek<T>(_: T) -> T;
 
 /// Ungracefully aborts the execution of the process.
 ///
-/// This is the intrinsic for directly implementing [`core::process::abort_immediate`] which, on
-/// most platforms, will invoke an invalid instruction. On Unix, the process will probably
-/// terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or `SIGBUS`. The
-/// precise behavior is not guaranteed and not stable.
+/// This is the intrinsic for directly implementing [`core::process::crash`] which, on most
+/// platforms, will invoke an invalid instruction. On Unix, the process will probably terminate with
+/// a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or `SIGBUS`. The precise behavior is not
+/// guaranteed and not stable.
 ///
 /// [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,
 /// as its behavior is more user-friendly and more stable.
@@ -622,7 +630,7 @@ pub fn rustc_peek<T>(_: T) -> T;
 /// Note that, unlike most intrinsics, this is safe to call; it does not require an `unsafe` block.
 /// Therefore, implementations must not require the user to uphold any safety invariants.
 ///
-/// The stabilized version of this intrinsic is [`core::process::abort_immediate`].
+/// The stabilized version of this intrinsic is [`core::process::crash`].
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn abort_immediate() -> !;
@@ -2139,9 +2147,10 @@ pub const unsafe fn unchecked_mul<T: Copy>(x: T, y: T) -> T;
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[rustc_allow_const_fn_unstable(const_trait_impl)]
+#[cfg_attr(miri, track_caller)]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::prevalidated]
-pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
+pub const fn rotate_left<T: fallback::FunnelShift>(x: T, shift: u32) -> T {
     // Make sure to call the intrinsic for `funnel_shl`, not the fallback impl.
     // SAFETY: we modulo `shift` so that the result is definitely less than the size of
     // `T` in bits.
@@ -2162,9 +2171,10 @@ pub const fn rotate_left<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> 
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[rustc_allow_const_fn_unstable(const_trait_impl)]
+#[cfg_attr(miri, track_caller)]
 #[miri::intrinsic_fallback_is_spec]
 #[ferrocene::prevalidated]
-pub const fn rotate_right<T: [const] fallback::FunnelShift>(x: T, shift: u32) -> T {
+pub const fn rotate_right<T: fallback::FunnelShift>(x: T, shift: u32) -> T {
     // Make sure to call the intrinsic for `funnel_shr`, not the fallback impl.
     // SAFETY: we modulo `shift` so that the result is definitely less than the size of
     // `T` in bits.
@@ -2258,21 +2268,15 @@ pub const fn saturating_sub<T: Copy>(a: T, b: T) -> T;
 ///
 /// Safe versions of this intrinsic are available on the integer primitives
 /// via the `funnel_shl` method. For example, [`u32::funnel_shl`].
-#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[track_caller]
-#[rustc_allow_const_fn_unstable(const_trait_impl, core_intrinsics_fallbacks)]
-#[miri::intrinsic_fallback_is_spec]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_do_not_const_check] // Use built-in impl to avoid const-checks in the fallback body.
 #[ferrocene::annotation(
     "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::FunnelShift::unchecked_funnel_shl` which is thoroughly tested. The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/rotate_left.rs`"
 )]
 #[ferrocene::prevalidated]
-pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
-    a: T,
-    b: T,
-    shift: u32,
-) -> T {
+pub const unsafe fn unchecked_funnel_shl<T: fallback::FunnelShift>(a: T, b: T, shift: u32) -> T {
     // SAFETY: caller ensures that `shift` is in-range
     unsafe { a.unchecked_funnel_shl(b, shift) }
 }
@@ -2290,21 +2294,15 @@ pub const unsafe fn unchecked_funnel_shl<T: [const] fallback::FunnelShift>(
 ///
 /// Safer versions of this intrinsic are available on the integer primitives
 /// via the `funnel_shr` method. For example, [`u32::funnel_shr`]
-#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
 #[rustc_nounwind]
-#[track_caller]
-#[rustc_allow_const_fn_unstable(const_trait_impl, core_intrinsics_fallbacks)]
-#[miri::intrinsic_fallback_is_spec]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_do_not_const_check] // Ise built-in impl to avoid const-checks in the fallback body.
 #[ferrocene::annotation(
     "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::FunnelShift::unchecked_funnel_shr` which is thoroughly tested. "
 )]
 #[ferrocene::prevalidated]
-pub const unsafe fn unchecked_funnel_shr<T: [const] fallback::FunnelShift>(
-    a: T,
-    b: T,
-    shift: u32,
-) -> T {
+pub const unsafe fn unchecked_funnel_shr<T: fallback::FunnelShift>(a: T, b: T, shift: u32) -> T {
     // SAFETY: caller ensures that `shift` is in-range
     unsafe { a.unchecked_funnel_shr(b, shift) }
 }
@@ -3554,11 +3552,10 @@ pub const fn maximumf128(x: f128, y: f128) -> f128 {
 /// primitives via the `abs` method. For example, [`f32::abs`].
 #[ferrocene::prevalidated]
 #[rustc_nounwind]
-#[rustc_const_unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_intrinsic_const_stable_indirect]
 #[rustc_intrinsic]
+#[rustc_intrinsic_const_stable_indirect]
+#[rustc_do_not_const_check] // Use built-in impl to avoid const-checks in the fallback body.
 #[miri::intrinsic_fallback_is_spec]
-#[rustc_do_not_const_check] // use built-in impl to avoid const-checks in the fallback body.
 #[ferrocene::prevalidated]
 #[ferrocene::annotation(
     "The LLVM backend emits `llvm.fabs` instead of this function, thus cannot be directly covered. \

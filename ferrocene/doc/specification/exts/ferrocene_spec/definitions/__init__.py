@@ -88,7 +88,7 @@ class DefinitionsCollector(EnvironmentCollector):
 
     def merge_other(self, app, env, docnames, other):
         """
-        Merge the collected informations from two environments into one.
+        Merge the collected information from two environments into one.
 
         Sphinx supports parallel builds, with each process having its own
         environment instance, but once each document is processed those

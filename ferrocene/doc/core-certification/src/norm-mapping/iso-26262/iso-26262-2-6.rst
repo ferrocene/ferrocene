@@ -202,12 +202,12 @@ Not applicable, no proven in use applied.
 6.4.6.6.d
 +++++++++
 
-Resource planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
+Resource planning is covered in the project management tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.6.e
 +++++++++
 
-Time planning is covered in the project manangement tool listed in :doc:`qualification-plan:development`.
+Time planning is covered in the project management tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.6.f
 +++++++++
@@ -237,7 +237,7 @@ Not applicable, no modification/impact analysis
 6.4.6.8
 ~~~~~~~
 
-Safety plan updates are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Safety plan updates are tracked in the project management tool listed in :doc:`qualification-plan:development`.
 
 6.4.6.9
 ~~~~~~~
@@ -272,7 +272,7 @@ Safety Plan Tracking of open activities in Clickup
 6.4.8.1
 ~~~~~~~
 
-Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Safety activities are tracked in the project management tool listed in :doc:`qualification-plan:development`.
 Each release has a checklist of safety activities.
 
 Each release is formally approved as described in :doc:`qualification-plan:infrastructure`.
@@ -280,7 +280,7 @@ Each release is formally approved as described in :doc:`qualification-plan:infra
 6.4.8.2
 ~~~~~~~
 
-Safety activites are tracked in the project manangement tool listed in :doc:`qualification-plan:development`.
+Safety activities are tracked in the project management tool listed in :doc:`qualification-plan:development`.
 Each release has a checklist of safety activities.
 
 Each release is formally approved as described in :doc:`qualification-plan:release`.

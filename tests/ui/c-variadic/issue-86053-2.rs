@@ -8,8 +8,5 @@ unsafe extern "C" fn ordering4<'a, F: H<&'static &'a ()>>(_: (), _: ...) {}
 
 fn main() {}
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
-//
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

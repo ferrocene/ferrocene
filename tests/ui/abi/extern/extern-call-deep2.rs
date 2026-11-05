@@ -32,3 +32,6 @@ pub fn main() {
     })
     .join().unwrap();
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External block functions

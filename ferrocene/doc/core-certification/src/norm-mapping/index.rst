@@ -34,3 +34,9 @@ Norm mapping of ISO 26262 standard requirements
 - :doc:`iso-26262/iso-26262-8-9`
 - :doc:`iso-26262/iso-26262-8-10`
 - :doc:`iso-26262/iso-26262-8-11`
+
+Norm mapping of EN 50716 standard requirements
+----------------------------------------------
+
+- :doc:`en-50716/en-50716`
+- :doc:`en-50716/en-50716-annex-a`

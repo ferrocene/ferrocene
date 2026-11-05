@@ -89,4 +89,4 @@ To use the target, the following additional flags must be provided to
 
 .. _aarch64-ferrocene-qnx:
 
-.. NOTE: this is a std target so we redirect to a no-std equivalent for certified core.
+.. NOTE: this is a std target so we redirect to a no-std equivalent for library certification.

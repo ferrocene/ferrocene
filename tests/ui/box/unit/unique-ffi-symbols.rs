@@ -18,9 +18,6 @@ fn main() {
     assert_eq!((a(), b()), (0, 5));
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
-//
 // ferrocene-annotations: fls_1qhsun1vyarz
 // Type Cast Expressions
 //

@@ -1,0 +1,1013 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+EN 50716
+--------
+
+4
+~
+
+Covered by the following subsections.
+
+4.1
+~~~
+
+N/A; there is no system in which the certified libraries are embedded during their certification.
+
+.. include:: ../../partials/no-system.rst
+
+4.2-3
+~~~~~
+
+All functions in all certified libraries are deemed to be of the same software integrity level, see :ref:`safety-plan/scope:systematic capabilities`. The certified libraries are targeting |en_50716_core_sil|, see :doc:`core-certification:safety-plan/scope`.
+
+4.4
+~~~
+
+Covered by :ref:`safety-plan/scope:systematic capabilities`: every public function of the certified subset is considered safety related and is targeting |en_50716_core_sil|.
+
+4.5
+~~~
+
+Covered by this norm mapping and by :ref:`safety-plan/project-setup:safety assessment`.
+
+4.6-9
+~~~~~
+
+The selection of the techniques and measures of Annex A, including the justification for every deviation from a highly recommended (HR) technique and for every technique not contained in the tables, is documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+4.10
+~~~~
+
+Covered by this norm mapping and by :ref:`safety-plan/project-setup:safety assessment`.
+
+4.11
+~~~~
+
+N/A; the certified libraries are assessed against this document, they are not re-used software developed according to EN 50128 or EN 50657.
+
+5
+~
+
+Covered by the following subsections.
+
+5.1.1
+~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:roles and responsibilities`
+- :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
+
+5.1.2.1
+~~~~~~~
+
+Ferrous Systems is ISO 9001:2015 certified. See :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
+5.1.2.2
+~~~~~~~
+
+Intentionally left blank in the standard.
+
+5.1.2.3
+~~~~~~~
+
+Covered by :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
+5.1.2.4-7
+~~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:safety assessment`: the Assessor is TÜV SÜD, an independent assessment body which is organizationally independent from the project team.
+
+5.1.2.8
+~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:safety case`
+- :doc:`qualification-plan:release`
+
+The release decision is taken by the Release Manager after reviewing the evidence, see :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
+5.1.2.9-12
+~~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:roles and responsibilities`
+- :ref:`safety-plan/project-setup:responsibility split`
+- :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
+
+The upstream Rust project specifies, designs and implements the certified libraries; Ferrous Systems performs the verification and the testing of the code it receives. Every change is reviewed by an expert who was not involved in the change.
+
+5.2.1
+~~~~~
+
+Covered by :ref:`safety-plan/project-setup:roles and responsibilities`.
+
+5.2.2.1
+~~~~~~~
+
+The key competencies of Annex B are covered by the roles described in :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`. No additional competencies are required, therefore nothing is added to the Software Quality Assurance Plan.
+
+5.2.2.2-4
+~~~~~~~~~
+
+Covered by
+
+- :ref:`6.2.13 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2.13>`
+- :ref:`6.2.15 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2.15>`
+- :ref:`6.2.16 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2.16>`
+
+5.2.2.5
+~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:roles and responsibilities`
+- :ref:`safety-plan/project-setup:responsibility split`
+- :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
+
+The responsibilities and competencies of the roles in Annex B are allocated there.
+
+5.3.1
+~~~~~
+
+Covered by :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+5.3.2.1
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+5.3.2.2-3
+~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:v-model`
+- :ref:`safety-plan/project-setup:internal procedures`
+
+The deviations from the ideal lifecycle (as compared to certification of an existing project) are documented in :ref:`safety-plan/project-setup:v-model`.
+
+5.3.2.4
+~~~~~~~
+
+The plans required by this document are distributed over the Ferrocene certification documentation:
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Document of EN 50716
+     - Ferrocene document
+   * - Software Quality Assurance Plan
+     - :doc:`core-certification:safety-plan/purpose` and :doc:`qualification-plan:index`
+   * - Software Verification Plan
+     - :doc:`qualification-plan:development` and :doc:`core-certification:safety-plan/testing-plan`
+   * - Software Validation Plan
+     - :doc:`qualification-plan:validation`
+   * - Software Configuration Management Plan
+     - :ref:`safety-plan/project-setup:configuration` and :doc:`qualification-plan:ci`
+   * - Software Maintenance Plan
+     - :doc:`qualification-plan:patching` and :doc:`qualification-plan:change-tracking`
+   * - Software Assessment Plan and Report
+     - Written by the external Assessor, see :ref:`safety-plan/project-setup:safety assessment`
+
+5.3.2.5
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+5.3.2.6
+~~~~~~~
+
+All documentation is part of the `Ferrocene documentation package <../../../../index.html>`_ and is versioned together with the code (see :doc:`qualification-plan:change-tracking`).
+
+5.3.2.7
+~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/requirements:requirement identifier`
+- :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
+
+5.3.2.8
+~~~~~~~
+
+All documents of the `Ferrocene documentation package <../../../../index.html>`_ share one glossary and are reviewed together (:ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`).
+
+5.3.2.9
+~~~~~~~
+
+Covered by :ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`.
+
+5.3.2.10
+~~~~~~~~
+
+All documents of the `Ferrocene documentation package <../../../../index.html>`_ share one glossary and are reviewed together (:ref:`Qualification Plan - Documentation Validation <qualification-plan:documentation-validation>`).
+
+5.3.2.11
+~~~~~~~~
+
+All documentation is part of the `Ferrocene documentation package <../../../../index.html>`_ and is versioned together with the code (see :doc:`qualification-plan:change-tracking`).
+
+5.3.2.12-13
+~~~~~~~~~~~
+
+The documents are combined as listed in the table of 5.3.2.4; the parts produced by independent roles are reviewed independently (see :ref:`safety-plan/project-setup:responsibility split`).
+
+5.3.2.14
+~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:safety assessment`.
+
+6
+~
+
+Covered by the following subsections.
+
+6.1.1-3
+~~~~~~~
+
+The test specifications are the test suites in the source code, described in :doc:`core-certification:safety-plan/testing-plan`; the test reports are the :doc:`test results <qualification-report:rustc/index>`.
+
+There are no separate test specification documents for the software/hardware integration level, see 7.3.4.34-40.
+
+6.1.4.1
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:responsibility split`: most tests are written by the upstream Rust project and are accepted by Ferrous Systems after review; the rationale is documented there.
+
+6.1.4.2
+~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/tools:Tool safety assessments`
+- :doc:`qualification-plan:infrastructure`
+
+No measurement equipment is used; testing is performed on real targets and emulators, both listed in the tool safety assessments.
+
+6.1.4.3-5
+~~~~~~~~~
+
+Covered by
+
+- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`qualification-report:rustc/index`
+
+Deviation: the Test Specification is the test suite source code (test cases, test data and expected results are the assertions), and the Test Report is the CI test report, which also records the identity and configuration of all items involved.
+
+6.2.1-4
+~~~~~~~
+
+Covered by :doc:`qualification-plan:development` and :doc:`core-certification:safety-plan/testing-plan`.
+
+6.2.4.1-4
+~~~~~~~~~
+
+Covered by :doc:`qualification-plan:development`; the verification results are retained by the CI infrastructure, see :ref:`Storing Test Results <qualification-plan:ci:Storing Test Results>`.
+
+6.2.4.5
+~~~~~~~
+
+The techniques and measures chosen from Table A.5, Table A.6 and Table A.7 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+6.2.4.6-9
+~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:safety case`
+- :doc:`qualification-report:rustc/index`
+
+Performance requirements are not verified at library level, see 7.9.2.14 of :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3`.
+
+6.2.4.10-11
+~~~~~~~~~~~
+
+The verification of the plans is part of the safety assessment, see :ref:`safety-plan/project-setup:safety assessment`.
+
+6.2.4.12-13
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-report:rustc/index`
+- :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
+
+The identity and configuration of the verified items is recorded in the CI artifacts (see :ref:`safety-plan/project-setup:configuration`).
+
+6.3.1-3
+~~~~~~~
+
+Covered by :doc:`qualification-plan:validation`.
+
+Ferrous Systems does not appoint a separate Validator; the independence is achieved by the split of responsibilities between the upstream Rust project and Ferrous Systems (see :ref:`safety-plan/project-setup:responsibility split`) and by the independent Assessor.
+
+6.3.4.1-3
+~~~~~~~~~
+
+Covered by :doc:`qualification-plan:validation`.
+
+Ferrous Systems does not appoint a separate Validator; the independence is achieved by the split of responsibilities between the upstream Rust project and Ferrous Systems (see :ref:`safety-plan/project-setup:responsibility split`) and by the independent Assessor.
+
+6.3.4.4-6
+~~~~~~~~~
+
+Covered by
+
+- :ref:`Validation Strategy <qualification-plan:validation:Validation Strategy>`
+- :doc:`core-certification:safety-plan/testing-plan`
+
+Only dynamic testing (real targets and emulators) is used; no static, analytical or statistical validation techniques are applied beyond the code coverage measurement.
+
+6.3.4.7-11
+~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-report:rustc/index`
+- :ref:`safety-plan/project-setup:safety case`
+- :doc:`safety-manual:known-problems`
+
+The validated software baseline is the released Ferrocene version (see 9.1.4.2-3).
+
+6.3.4.12-14
+~~~~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:safety assessment` and :doc:`qualification-plan:release`. Simulation and modelling are not used.
+
+6.4.1-3
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:safety assessment`: the assessment is performed by TÜV SÜD as the independent Assessor.
+
+6.4.4.1
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:safety assessment`: the assessment is performed by TÜV SÜD as the independent Assessor.
+
+6.4.4.2
+~~~~~~~
+
+Not used; no previously assessed software is re-used (see 7.3.4.7-8). Every Ferrocene release undergoes a new assessment, see :ref:`safety-plan/project-setup:release cadence`.
+
+6.4.4.3
+~~~~~~~
+
+Covered by :ref:`safety-plan/deliverables:Deliverables and documents`.
+
+6.4.4.4-5
+~~~~~~~~~
+
+The Software Assessment Plan is written by the Assessor, based on the deliverables listed in :ref:`safety-plan/deliverables:Deliverables and documents`.
+
+6.4.4.6-7
+~~~~~~~~~
+
+The application conditions of the certified libraries are documented in :doc:`safety-manual:core/constraints`; the applied techniques of Annex A are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+6.4.4.8
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:configuration` and :doc:`qualification-plan:change-tracking`.
+
+6.4.4.9
+~~~~~~~
+
+Covered by :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`.
+
+6.4.4.10-13
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`safety-manual:known-problems`
+- :ref:`safety-plan/project-setup:safety assessment`
+
+6.4.4.14-17
+~~~~~~~~~~~
+
+The Software Assessment Report is written by the Assessor, based on the evidence provided in the deliverables (see :ref:`safety-plan/deliverables:Deliverables and documents`).
+
+6.5.1-3
+~~~~~~~
+
+Covered by the documents listed in 5.3.2.4 and by
+
+- :ref:`safety-plan/project-setup:internal procedures`
+- :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
+
+The techniques and measures of Table A.9 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+6.5.4.1-6
+~~~~~~~~~
+
+Covered by the documents listed in 5.3.2.4 and by
+
+- :ref:`safety-plan/project-setup:internal procedures`
+- :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
+
+The techniques and measures of Table A.9 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+6.5.4.7-8
+~~~~~~~~~
+
+Intentionally left blank in the standard.
+
+6.5.4.9
+~~~~~~~
+
+All planning documents are updated through the same process as the code, see :doc:`qualification-plan:change-tracking` and :doc:`safety-manual:changelog`.
+
+6.5.4.10-12
+~~~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:configuration`
+- :doc:`qualification-plan:ci`
+- :doc:`qualification-plan:infrastructure`
+
+The complete development and test environment is delivered to the customer in the ``ferrocene-src`` component, which allows reproducing every release.
+
+6.5.4.13
+~~~~~~~~
+
+N/A; no external suppliers are involved, see :ref:`6.2.17 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2.17>`.
+
+The upstream Rust project is not an external supplier: its contributions are integrated and verified like every other change, as described in :ref:`safety-plan/project-setup:responsibility split`.
+
+6.5.4.14-17
+~~~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/requirements:tracing requirements to tests`
+- :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
+- :doc:`core-certification:safety-report/code-coverage`
+
+Code which cannot be traced or tested is annotated and justified, see :ref:`safety-plan/testing-plan:manual test coverage`.
+
+6.5.4.18
+~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:responsibility split`: the upstream Rust project develops the libraries, Ferrous Systems performs the certification activities. The interface between both is documented there.
+
+6.6.1-3
+~~~~~~~
+
+Covered by :doc:`qualification-plan:change-tracking` and :doc:`qualification-plan:development`.
+
+6.6.4.1
+~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:development`
+- :doc:`qualification-plan:change-tracking`
+- :doc:`qualification-plan:kp-tracking`
+- :ref:`safety-plan/testing-plan:re-verification scope`
+
+Impact analysis is not performed per change: the complete test suite of all certified libraries is executed for every change, therefore no re-verification scope has to be determined.
+
+6.6.4.2
+~~~~~~~
+
+Covered by :ref:`safety-plan/testing-plan:re-verification scope` and :doc:`qualification-plan:development`.
+
+6.7.1-3
+~~~~~~~
+
+Covered by :ref:`safety-plan/tools:Tool safety assessments`, which also classifies the tools into T1, T2 and T3.
+
+6.7.4.1-3
+~~~~~~~~~
+
+Covered by :ref:`safety-plan/tools:Tool safety assessments` (usage, version and safety assessment of every tool).
+
+6.7.4.4-5
+~~~~~~~~~
+
+Covered by :ref:`safety-plan/tools:Tool safety assessments`; the compiler is pre-qualified (see :doc:`evaluation-plan:index`), therefore no tool validation is performed for it.
+
+6.7.4.6-8
+~~~~~~~~~
+
+Intentionally left blank in the standard.
+
+6.7.4.9
+~~~~~~~
+
+The Ferrocene compiler is the only automatic translator used; it is qualified as described in :doc:`evaluation-plan:index` and :doc:`evaluation-report:rustc/tool-analysis`.
+
+6.7.4.10-11
+~~~~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:configuration`: all tools and their versions are pinned in the versioned build environment (``ferrocene-src``), and the tool versions are re-assessed for each release.
+
+6.7.4.12
+~~~~~~~~
+
+Covered by :ref:`safety-plan/tools:Tool safety assessments`.
+
+7
+~
+
+Covered by the following subsections.
+
+7.1.1
+~~~~~
+
+Covered by :ref:`safety-plan/project-setup:v-model`.
+
+7.1.2.1
+~~~~~~~
+
+The documents of Table A.1 are listed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` and provided as described in :ref:`safety-plan/deliverables:Deliverables and documents`.
+
+7.1.2.2
+~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:v-model`.
+
+7.2.1-3
+~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+
+Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+7.2.4.1-5
+~~~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+
+Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+7.2.4.13
+~~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+
+Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+
+7.2.4.6
+~~~~~~~
+
+Covered by the `Certified standard library API docs <../../../../index.html#library-apis>`_, which document all public interfaces of the certified libraries. There are no interfaces to any other system.
+
+.. include:: ../../partials/no-system.rst
+
+7.2.4.7-8
+~~~~~~~~~
+
+The behaviour of every function, including its failure behaviour (panic), is documented in its doc-comment, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. The user shall compile with ``-C panic=abort``, see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`.
+
+There is no programmable electronics in the certification scope.
+
+7.2.4.9
+~~~~~~~
+
+The constraints between the certified libraries and their environment are documented in :doc:`safety-manual:core/constraints` (e.g. static linking, matching compiler version).
+
+7.2.4.10
+~~~~~~~~
+
+N/A; there is no hardware to be checked by the software.
+
+.. include:: ../../partials/no-system.rst
+
+7.2.4.11-12
+~~~~~~~~~~~
+
+N/A for periodic testing and for testability during overall system operation: the overall system is unknown at certification time, see 7.9.2.14 of :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3`.
+
+All functions of the certified subset are testable and tested, see :doc:`core-certification:safety-report/code-coverage`.
+
+7.2.4.14
+~~~~~~~~
+
+N/A; no function of the certified libraries can be configured by application data.
+
+.. include:: ../../partials/na-no-config.rst
+
+7.2.4.15
+~~~~~~~~
+
+The techniques and measures chosen from Table A.2 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+7.2.4.16-19
+~~~~~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/testing-plan`: the Overall Software Test Specification is the set of unit test, doc-test and integration test suites executed by the CI for every change on all qualified targets.
+
+Out-of-specification inputs (7.2.4.19 d)) are covered by the tests of panics and error paths, see :ref:`safety-plan/testing-plan:unit tests` and :doc:`core-certification:safety-report/code-coverage`.
+
+7.2.4.20-22
+~~~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/requirements:quality of the doc-comments`
+- :doc:`qualification-plan:development`
+
+The requirements are re-checked for every release during the semantic diff (see :ref:`safety-plan/project-setup:safety case`).
+
+7.3.1-3
+~~~~~~~
+
+N/A; no Software Architecture Specification and no Software Design Specification document is written, see 7.3.4.1-3 below.
+
+7.3.4.1-3
+~~~~~~~~~
+
+N/A; no Software Architecture Specification is written.
+
+.. include:: ../../partials/simple-design.rst
+
+The feasibility of the required integrity level is argued in :ref:`safety-plan/scope:systematic capabilities`.
+
+7.3.4.10
+~~~~~~~~
+
+N/A; no Software Architecture Specification is written.
+
+.. include:: ../../partials/simple-design.rst
+
+The feasibility of the required integrity level is argued in :ref:`safety-plan/scope:systematic capabilities`.
+
+7.3.4.12
+~~~~~~~~
+
+N/A; no Software Architecture Specification is written.
+
+.. include:: ../../partials/simple-design.rst
+
+The feasibility of the required integrity level is argued in :ref:`safety-plan/scope:systematic capabilities`.
+
+7.3.4.14
+~~~~~~~~
+
+N/A; no Software Architecture Specification is written.
+
+.. include:: ../../partials/simple-design.rst
+
+The feasibility of the required integrity level is argued in :ref:`safety-plan/scope:systematic capabilities`.
+
+7.3.4.4
+~~~~~~~
+
+N/A; there is no hardware in the certification scope, see :doc:`core-certification:safety-plan/alloc` for the allocator interface which must be implemented by the user.
+
+7.3.4.5-6
+~~~~~~~~~
+
+All software components (modules) of the certified libraries are identified in the `Certified standard library API docs <../../../../index.html#library-apis>`_ and in :doc:`core-certification:safety-report/subset`. They are all new from the point of view of this certification and are individually versioned by git, see :ref:`safety-plan/project-setup:configuration`.
+
+7.3.4.7-8
+~~~~~~~~~
+
+N/A; the certified libraries are handled as a new development, they do not integrate pre-existing software elements (see 8-12 of :doc:`core-certification:norm-mapping/iso-26262/applicable-clauses`).
+
+7.3.4.9
+~~~~~~~
+
+All functions in all certified libraries are deemed to be of the same software integrity level, therefore no evidence of non-interference between different levels is needed.
+
+7.3.4.11
+~~~~~~~~
+
+Fault avoidance is achieved by the language and the tooling, see :doc:`core-certification:safety-plan/programming-language`. Possible failures and their mitigation are analysed in :doc:`core-certification:safety-plan/failure-analysis`.
+
+7.3.4.13
+~~~~~~~~
+
+N/A; the certified libraries contain no application data.
+
+.. include:: ../../partials/na-no-config.rst
+
+7.3.4.15
+~~~~~~~~
+
+Intentionally left blank in the standard.
+
+7.3.4.16-17
+~~~~~~~~~~~
+
+N/A; no prototyping is used in the development of the certified libraries.
+
+7.3.4.18-19
+~~~~~~~~~~~
+
+Covered by the `Certified standard library API docs <../../../../index.html#library-apis>`_ (function signatures and doc-comments).
+
+The Rust type system defines the valid values of every interface; boundary values and the behaviour when they are exceeded (panic, wrapped result) are part of the doc-comments, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. Unused and forbidden equivalence classes cannot be constructed for most types due to strong typing.
+
+7.3.4.20-24
+~~~~~~~~~~~
+
+Covered by :ref:`safety-plan/requirements:architecture and software design`: the module doc-comments are the Software Design Specification.
+
+.. include:: ../../partials/simple-design.rst
+
+The techniques and measures chosen from Table A.4 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+7.3.4.25
+~~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/programming-language`; the criteria of Table A.15 are assessed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+7.3.4.26-28
+~~~~~~~~~~~
+
+.. include:: ../../partials/implicit-coding-standard.rst
+
+As such, the certified libraries do not have a coding standard of their own; the implicit upstream standards are enforced by the ``tidy`` test suite and the lints, see :ref:`safety-plan/testing-plan:rustc lints`.
+
+7.3.4.29
+~~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/programming-language` (modularity, encapsulation, data structures) and :ref:`safety-plan/scope:systematic capabilities` (verifiability through coverage).
+
+7.3.4.30-33
+~~~~~~~~~~~
+
+Covered by :ref:`safety-plan/testing-plan:integration tests`: the certified libraries are integrated and tested by building and testing the other components of the Ferrocene toolchain on all supported platforms. The results of the component tests that are re-used are the unit test suites, see :ref:`safety-plan/testing-plan:re-verification scope`.
+
+7.3.4.34-40
+~~~~~~~~~~~
+
+N/A; there is no hardware in the certification scope.
+
+.. include:: ../../partials/no-system.rst
+
+7.3.4.41-44
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:development` (independent review of every change)
+- :ref:`safety-plan/project-setup:safety case` (semantic diff for every release)
+
+7.4.1-3
+~~~~~~~
+
+Covered by the module doc-comments and the test suites, see :ref:`safety-plan/requirements:architecture and software design` and :ref:`safety-plan/testing-plan:unit tests`.
+
+7.4.4.1-6
+~~~~~~~~~
+
+Covered by the module doc-comments and the source code, see :ref:`safety-plan/requirements:architecture and software design`. Author, configuration history and description of every component are provided by git and the code review process (see :doc:`qualification-plan:development`).
+
+.. include:: ../../partials/simple-design.rst
+
+7.4.4.7-10
+~~~~~~~~~~
+
+Covered by :ref:`safety-plan/testing-plan:unit tests`. The required criteria and degree of test coverage are defined in :ref:`safety-plan/project-setup:lifecycle phases overview` (100 % statement coverage) and justified in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` (Table A.21).
+
+7.4.4.11-13
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:development`
+- :ref:`safety-plan/project-setup:safety case`
+
+7.5.1-3
+~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:configuration`.
+
+7.5.4.1-4
+~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/project-setup:configuration` (all source code is under configuration control before testing)
+- :doc:`core-certification:safety-plan/programming-language` (size and complexity: compiler recursion limit, discouraged many-parameter functions)
+
+7.5.4.5-7
+~~~~~~~~~
+
+.. include:: ../../partials/core-testing.rst
+
+The statement of test coverage per component is provided by :doc:`core-certification:safety-report/code-coverage`.
+
+7.5.4.8-10
+~~~~~~~~~~
+
+Covered by
+
+- :ref:`safety-plan/testing-plan:rustc lints` and the ``tidy`` test suite (:ref:`safety-plan/testing-plan:tidy test suite`)
+- :doc:`qualification-plan:development`
+- :doc:`qualification-report:rustc/index`
+
+The correct application of the coding standard is verified by these lints, see 7.3.4.26-28.
+
+7.6.1-3
+~~~~~~~
+
+Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`core-certification:safety-plan/testing-plan`.
+
+7.6.4.1-2
+~~~~~~~~~
+
+Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`qualification-plan:development`. Every change triggers a complete rebuild and re-test, therefore the impact study of 7.6.4.2 always covers the whole test suite (see :ref:`safety-plan/testing-plan:re-verification scope`).
+
+7.6.4.3-6
+~~~~~~~~~
+
+.. include:: ../../partials/core-testing.rst
+
+The identity and configuration of all items involved is recorded in the CI artifacts (see :ref:`safety-plan/project-setup:configuration`).
+
+7.6.4.7-10
+~~~~~~~~~~
+
+N/A; there is no hardware in the certification scope.
+
+.. include:: ../../partials/no-system.rst
+
+7.6.4.11-13
+~~~~~~~~~~~
+
+Covered by :doc:`qualification-report:rustc/index` and :ref:`safety-plan/project-setup:safety case`.
+
+7.7.1-3
+~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:safety case`.
+
+7.7.4.1-4
+~~~~~~~~~
+
+.. include:: ../../partials/core-testing.rst
+
+The Overall Software Test Specification and Report are the complete Ferrocene test suite and its results on all qualified targets; there is no separate overall test document.
+
+7.7.4.5
+~~~~~~~
+
+Covered by :doc:`qualification-plan:infrastructure`: the tests are executed on real hardware targets and on emulators, listed in :doc:`all qualified targets <user-manual:targets/index>`. Simulated environments are only used for bare metal targets, see :ref:`Bare metal testing <qualification-plan:ci:Bare metal testing>`.
+
+7.7.4.6-10
+~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-report:rustc/index`
+- :ref:`safety-plan/project-setup:safety case`
+- :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
+
+The evaluation of the applied techniques and measures is documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+7.7.4.11-12
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`release-notes:index`
+- :doc:`safety-manual:known-problems`
+- :doc:`safety-manual:core/constraints`
+
+8
+~
+
+N/A; the certified libraries are not configurable by application data, therefore Clause 8 does not apply.
+
+.. include:: ../../partials/na-no-config.rst
+
+This also covers 7.2.4.14 and Table A.11.
+
+9
+~
+
+Covered by the following subsections.
+
+9.1.1-3
+~~~~~~~
+
+The certified libraries are delivered as pre-compiled, statically linked libraries; their deployment into a target system is performed by the customer.
+
+.. include:: ../../partials/no-system.rst
+
+9.1.4.1
+~~~~~~~
+
+Covered by :doc:`qualification-plan:release`; the deployment in the final environment of application is under the responsibility of the user of the certified libraries.
+
+9.1.4.2-3
+~~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:configuration`: every release is uniquely identified and the ``ferrocene-src`` component contains everything needed to reproduce it, including the pre-existing and previously developed parts.
+
+9.1.4.4-5
+~~~~~~~~~
+
+Intentionally left blank in the standard.
+
+9.1.4.6-7
+~~~~~~~~~
+
+Covered by :doc:`safety-manual:procedures` (Installation Procedures) and :doc:`user-manual:rustc/install`.
+
+9.1.4.8-9
+~~~~~~~~~
+
+Covered by the constraint to use matching versions of the certified libraries and ``rustc``, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`, and by static linking only, see :qualification:id:`CORE_CSTR_0080_LINK_STATIC`.
+
+9.1.4.10
+~~~~~~~~
+
+N/A for the certified libraries themselves: a rollback is achieved by re-installing a previous Ferrocene release, which is only performed as a whole (see :ref:`Installation Validation <safety-manual:procedures:Installation Validation>`).
+
+9.1.4.11
+~~~~~~~~
+
+N/A; the certified libraries are statically linked into the application binary and are not loaded at run-time. Their identity is established through the matching versions constraint, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`.
+
+9.1.4.12-14
+~~~~~~~~~~~
+
+The deployment records and the traceability to delivered installations are the responsibility of the customer, since the installations are unknown at certification time.
+
+Covered on the Ferrocene side by :doc:`qualification-plan:change-tracking` (traceability up to delivery) and by :ref:`Installation Validation <safety-manual:procedures:Installation Validation>`.
+
+9.1.4.15
+~~~~~~~~
+
+N/A; fault monitoring is a system level activity. The certified libraries report failures by panicking, which is documented per function in the API docs (see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`).
+
+9.1.4.16-19
+~~~~~~~~~~~
+
+Intentionally left blank for 9.1.4.19; otherwise covered by :doc:`safety-manual:procedures` and :ref:`safety-plan/project-setup:safety assessment`.
+
+9.1.4.20
+~~~~~~~~
+
+Covered by :ref:`Installation Validation <safety-manual:procedures:Installation Validation>` (checking that the archives were extracted correctly) and by :ref:`safety-plan/project-setup:configuration` (hashes of all packages of the build environment).
+
+9.2.1-3
+~~~~~~~
+
+Covered by :doc:`qualification-plan:patching` and :ref:`safety-plan/project-setup:internal procedures`: corrections, enhancements and adaptations are performed with the same process, tools and documentation as the initial development.
+
+9.2.4.1-3
+~~~~~~~~~
+
+Covered by :doc:`qualification-plan:patching`: for every change it is decided whether it falls within the scope of a patch release or requires assessor review, and this decision is recorded.
+
+Maintenance is performed with the same process as the development (see 9.2.4.15-17).
+
+9.2.4.4
+~~~~~~~
+
+Covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/requirements:architecture and software design`.
+
+9.2.4.5-6
+~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:patching`
+- :doc:`qualification-plan:kp-tracking`
+- :doc:`safety-manual:customer-interactions`
+
+The techniques and measures of Table A.10 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+
+9.2.4.7-10
+~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:change-tracking` (git history, change records, release identification)
+- :ref:`safety-plan/testing-plan:re-verification scope` (re-validation and regression testing: the complete test suite is executed for every change)
+
+9.2.4.11-14
+~~~~~~~~~~~
+
+Covered by :doc:`qualification-plan:development` (review of every change, including its documentation) and :ref:`safety-plan/project-setup:safety assessment`.
+
+9.2.4.15-17
+~~~~~~~~~~~
+
+Covered by :ref:`safety-plan/project-setup:internal procedures`: maintenance uses the same tools, infrastructure, review process and configuration management as the initial development.
+
+9.2.4.18
+~~~~~~~~
+
+N/A; no external suppliers are involved.
+
+9.2.4.19-20
+~~~~~~~~~~~
+
+Covered by
+
+- :doc:`qualification-plan:kp-tracking` (severity tagging and impact of every known problem)
+- :doc:`safety-manual:known-problems` (workaround, detection and mitigation strategies)
+- :doc:`core-certification:safety-plan/failure-analysis`

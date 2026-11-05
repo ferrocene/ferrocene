@@ -11,6 +11,6 @@ fn main() {}
 // ferrocene-annotations: fls_21vnag69kbwe
 // Identifiers
 // ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// External Block Functions
 // ferrocene-annotations: fls_s4yt19sptl7d
 // External Statics

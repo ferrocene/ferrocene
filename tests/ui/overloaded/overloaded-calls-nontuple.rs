@@ -30,5 +30,5 @@ fn main() {
     //~^ ERROR cannot use call notation
 }
 
-// ferrocene-annotations: fls_yztwtek0y34v
-// External Functions
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

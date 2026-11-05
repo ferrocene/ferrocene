@@ -45,4 +45,5 @@ The ``std`` library supplies allocator implementations, but ``std`` is currently
 Recursion limit
 ---------------
 
-By default Rust has a recursion limit of 128. It can be configured with the `recursion_limit attribute <https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute>`_.
+
+By default, the Rust compiler has a recursion limit of 128 for compile-time operations such as macro expansion and automatic dereferencing, to limit the maximum source code complexity. This can be configured with the `recursion_limit attribute <https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute>`_.

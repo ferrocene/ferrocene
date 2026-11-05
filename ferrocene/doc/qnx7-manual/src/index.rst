@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-QNX7 Manual
-===========
+QNX 7 Manual
+============
 
 .. toctree::
    :numbered:

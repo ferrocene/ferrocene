@@ -454,9 +454,11 @@ fn update_target_reliable_float_cfg(target: &Target, cfg: &mut TargetConfig) {
         // On big-endian powerpc the symbol selection is correct, despite __ibmf128 being
         // long double on the target, but the f128 symbols are not defined.
         (Arch::PowerPC | Arch::PowerPC64, _) if *target_endian == Endian::Big => false,
+        // Ferrocene change: f128 is disabled on x86_64 for compatibililty with older versions
+        // of GLIBC.
+        (Arch::X86_64, _) => false,
         // After applying all these exceptions, the rest should work.
-        // Ferrocene change: f128 is disabled for compatibililty with older versions of GLIBC.
-        _ => false,
+        _ => true,
     } && cfg.has_reliable_f128;
 }
 

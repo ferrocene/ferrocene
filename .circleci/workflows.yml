@@ -916,6 +916,77 @@ jobs:
                 name: Verify that all of the expected artifacts were uploaded
                 command: ferrocene/ci/scripts/validate-packages-toml.py ${CIRCLE_SHA1}
 
+  facade_generic_coverage:
+    description: >
+      Gathers coverage for a facade target on a specialized docker executor
+
+      Facade targets are a variant of a no-std architecture that we run under
+      emulation in a patched version of qemu.
+
+      This job relies on the facade_testserver executor that has very specific
+      assumptions about the resource class used for testing.
+    parameters:
+      emulated:
+        description: Whether to run the testserver under emulation. (String true or false)
+        type: string
+        default: "false"
+      qemu_arch:
+        type: string
+        default: ""
+      qemu_version:
+        type: string
+        default: 11.0.1
+      qemu_cpu:
+        type: string
+        default: ""
+      test_variant:
+        type: string
+      target:
+        type: string
+      ferrocene_host:
+        type: string
+        default: x86_64-unknown-linux-gnu
+      resource_class:
+        type: string
+        default: ferrocene/k8s-amd64-medium
+      test_image:
+        type: string
+      testserver_image:
+        type: string
+      testdevice_address:
+        type: string
+        default: 127.0.0.1:12345
+    executor:
+      name: ferrocene/facade_testserver
+      emulated: << parameters.emulated >>
+      qemu_arch: << parameters.qemu_arch >>
+      qemu_version: << parameters.qemu_version >>
+      target: << parameters.target >>
+      test_image: << parameters.test_image >>
+      testserver_image: << parameters.testserver_image >>
+      qemu_cpu: << parameters.qemu_cpu >>
+    resource_class: << parameters.resource_class >>
+    environment:
+      FERROCENE_HOST: << parameters.ferrocene_host >>
+      FERROCENE_TARGETS: << parameters.target >>
+      # We currently don't pass this via bootstrap, so we need to set it externally
+      RUSTDOCFLAGS: "--cfg=ferrocene_facade_secretsauce -Z unstable-options --test-args '--exclude-should-panic'"
+      # This cannot be multiple steps since it all needs to be execute inside ferrocene/ci/run.sh
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
+        echo "Building the remote testserver for << parameters.target >>"
+        ./x build src/tools/remote-test-server --target "<< parameters.target >>" --stage "2"
+        echo "Copying the remote testserver to the testrunner container"
+         cp build/<< parameters.ferrocene_host >>/stage2-tools/<< parameters.target >>/release/remote-test-server /shared/testserver/remote-test-server
+        ./x clean
+        ./x.py test --stage=2 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test_variant >>
+    steps:
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
+      - ferrocene/ci
+
+
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
@@ -1016,15 +1087,23 @@ workflows:
             - aarch64-qnx8-test-library-compiletest
             - aarch64-none-test-library-compiletest
             - aarch64-none-test-target-cpu-library-compiletest
+            - aarch64-none-library-coverage
             - aarch64r82-none-test-library-compiletest
+            - aarch64r82-none-library-coverage
             - aarch64v8r-none-test-library-compiletest
+            - aarch64v8r-none-library-coverage
             - armv7r-eabihf-test-library-compiletest
+            - armv7r-eabihf-library-coverage
             - thumbv7em-eabihf-test-library-compiletest
             - thumbv7em-eabihf-test-target-cpu-library-compiletest
+            - thumbv7em-eabihf-library-coverage
             - thumbv7em-eabi-test-library-compiletest
             - thumbv7em-eabi-test-target-cpu-library-compiletest
+            - thumbv7em-eabi-library-coverage
             - thumbv8m.main-eabi-test-library-compiletest
+            - thumbv8m.main-eabi-library-coverage
             - thumbv8m.main-eabihf-test-library-compiletest
+            - thumbv8m.main-eabihf-library-coverage
             - aarch64-linux-test
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
@@ -1121,6 +1200,21 @@ workflows:
             - build-docker--emulator--x86_64
             - aarch64-none-test-library-compiletest
 
+      - facade_generic_coverage:
+          name: aarch64-none-library-coverage
+          target: aarch64-unknown-ferrocene.facade
+          test_variant: 2021-cortex-a53
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-a53
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- aarch64-none-test-library-compiletest
+
       - ferrocene/facade_generic_test:
           name: aarch64r82-none-test-library-compiletest
           target: aarch64r82-unknown-ferrocene.facade
@@ -1137,6 +1231,21 @@ workflows:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
 
+      - facade_generic_coverage:
+          name: aarch64r82-none-library-coverage
+          target: aarch64r82-unknown-ferrocene.facade
+          test_variant: 2021-neoverse-v1
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: neoverse-v1
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- aarch64r82-none-test-library-compiletest
+
       - ferrocene/facade_generic_test:
           name: aarch64v8r-none-test-library-compiletest
           target: aarch64v8r-unknown-ferrocene.facade
@@ -1152,6 +1261,21 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+
+      - facade_generic_coverage:
+          name: aarch64v8r-none-library-coverage
+          target: aarch64v8r-unknown-ferrocene.facade
+          test_variant: 2021-neoverse-v1
+          emulated: "true"
+          qemu_arch: qemu-aarch64
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: neoverse-v1
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- aarch64v8r-none-test-library-compiletest
 
       - wasm-dist-oxidos:
           requires:
@@ -1207,6 +1331,21 @@ workflows:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
 
+      - facade_generic_coverage:
+          name: armv7r-eabihf-library-coverage
+          target: armv7r-ferrocene.facade-eabihf
+          test_variant: 2021-cortex-r5f
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-r5f
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- armv7r-eabihf-test-library-compiletest
+
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-library-compiletest
           target: thumbv7em-ferrocene.facade-eabihf
@@ -1222,6 +1361,21 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+
+      - facade_generic_coverage:
+          name: thumbv7em-eabihf-library-coverage
+          target: thumbv7em-ferrocene.facade-eabihf
+          test_variant: 2021-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-m4
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- thumbv7em-eabihf-test-library-compiletest
 
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabihf-test-target-cpu-library-compiletest
@@ -1256,6 +1410,21 @@ workflows:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
 
+      - facade_generic_coverage:
+          name: thumbv7em-eabi-library-coverage
+          target: thumbv7em-ferrocene.facade-eabi
+          test_variant: 2021-cortex-m4
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-m4
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- thumbv7em-eabi-test-library-compiletest
+
       - ferrocene/facade_generic_test:
           name: thumbv7em-eabi-test-target-cpu-library-compiletest
           target: thumbv7em-ferrocene.facade-eabi
@@ -1289,6 +1458,21 @@ workflows:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
 
+      - facade_generic_coverage:
+          name: thumbv8m.main-eabi-library-coverage
+          target: thumbv8m.main-ferrocene.facade-eabi
+          test_variant: 2021-cortex-m33
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-m33
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- thumbv8m.main-eabi-test-library-compiletest
+
       - ferrocene/facade_generic_test:
           name: thumbv8m.main-eabihf-test-library-compiletest
           target: thumbv8m.main-ferrocene.facade-eabihf
@@ -1304,6 +1488,21 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+
+      - facade_generic_coverage:
+          name: thumbv8m.main-eabihf-library-coverage
+          target: thumbv8m.main-ferrocene.facade-eabihf
+          test_variant: 2021-cortex-m33
+          emulated: "true"
+          qemu_arch: qemu-arm
+          qemu_version: << pipeline.parameters.qemu-version >>
+          qemu_cpu: cortex-m33
+          test_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:runner--<< pipeline.parameters.docker-images-hash >>--x86_64
+          testserver_image: harbor.infra.ferrous-systems.net/ferrocene-ci-ecr-cache/ci-docker-images:emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
+          requires:
+            - x86_64-linux-build
+            - build-docker--emulator--x86_64
+            #- thumbv8m.main-eabihf-test-library-compiletest
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-compiletest

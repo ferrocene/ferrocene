@@ -979,7 +979,7 @@ jobs:
         ./x build src/tools/remote-test-server --target "<< parameters.target >>" --stage "2"
         echo "Copying the remote testserver to the testrunner container"
          cp build/<< parameters.ferrocene_host >>/stage2-tools/<< parameters.target >>/release/remote-test-server /shared/testserver/remote-test-server
-        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test_variant >>
+        ./x.py test --stage=2 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc --ferrocene-test-one-crate-per-cargo-call --test-variant << parameters.test_variant >>
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:

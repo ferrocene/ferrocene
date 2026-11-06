@@ -476,6 +476,11 @@ pub fn run_compiler<R: Send>(mut config: Config, f: impl FnOnce(&Compiler) -> R 
                 is_nightly_build,
                 is_crt_static,
             );
+            util::add_target_modifiers(
+                &mut sess.early_sess.opts.target_modifiers,
+                &target_config,
+                &sess.early_sess.target,
+            );
 
             sess.check_config = parse_check_cfg(&sess, config.crate_check_cfg);
 

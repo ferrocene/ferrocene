@@ -3785,7 +3785,6 @@
 <core::time::Duration as core::cmp::PartialOrd>::partial_cmp
 <core::time::Duration as core::default::Default>::default
 <core::time::Duration as core::fmt::Debug>::fmt
-<core::time::Duration as core::fmt::Debug>::fmt::fmt_decimal
 <core::time::Duration as core::hash::Hash>::hash
 <core::time::Duration as core::ops::arith::Add>::add
 <core::time::Duration as core::ops::arith::Div<u32>>::div
@@ -8928,6 +8927,7 @@ core::time::Duration::subsec_micros
 core::time::Duration::subsec_millis
 core::time::Duration::subsec_nanos
 core::time::Duration::try_from_secs_f32
+core::time::fmt_decimal
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::eq
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::ne
 core::tuple::<impl core::cmp::PartialEq for (B, A, Z, Y, X, W, V, U, T)>::eq

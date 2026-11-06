@@ -162,17 +162,23 @@ pub fn item_is_validated(tcx: TyCtxt<'_>, def_id: DefId) -> ValidatedStatus {
     }
 }
 
-// This was removed upstream, so was saved here since we still use it
-fn get_attrs_by_path<'tcx>(
+fn get_span_by_path<'tcx>(
     tcx: TyCtxt<'tcx>,
     did: DefId,
     attr: &[Symbol],
-) -> impl Iterator<Item = &'tcx rustc_attr_ir::Attribute> {
+) -> Option<rustc_span::Span> {
     let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
-    if let Some(did) = did.as_local() {
+    let mut attrs = if let Some(did) = did.as_local() {
         tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
     } else {
         tcx.attrs_for_def(did).iter().filter(filter_fn)
+    };
+    if let Some(attr) = attrs.next()
+        && let rustc_attr_ir::Attribute::Tool(attr) = attr
+    {
+        Some(attr.span)
+    } else {
+        None
     }
 }
 
@@ -189,15 +195,14 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
             }
             _ => {}
         }
-        // Check if the current item has an annotation
-        if let Some(attr) = get_attrs_by_path(tcx, current, VALIDATED_ATTR).next() {
-            if let rustc_attr_ir::Attribute::Tool(attr) = attr {
-                return Some(ValidatedStatus::Validated {
-                    annotation: Some(attr.span),
-                    inherited: current != item,
-                });
-            };
-        }
+        // Get span if the current item has an annotation
+        let span = get_span_by_path(tcx, current, VALIDATED_ATTR);
+        if span.is_some() {
+            return Some(ValidatedStatus::Validated {
+                annotation: span,
+                inherited: current != item,
+            });
+        };
 
         if current.is_crate_root() {
             return None;
@@ -209,9 +214,5 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
 
 /// Check if this item is marked with `#[ferrocene::requires_validation]`.
 pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
-    if let Some(attr) = get_attrs_by_path(tcx, def_id, REQUIRES_VALIDATION_ATTR).next() {
-        if let rustc_attr_ir::Attribute::Tool(attr) = attr { Some(attr.span) } else { None }
-    } else {
-        None
-    }
+    get_span_by_path(tcx, def_id, REQUIRES_VALIDATION_ATTR)
 }

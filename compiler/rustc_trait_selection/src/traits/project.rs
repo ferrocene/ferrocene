@@ -2,22 +2,19 @@
 
 use std::ops::ControlFlow;
 
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_data_structures::sso::SsoHashSet;
 use rustc_errors::ErrorGuaranteed;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_hir::def_id::DefId;
 use rustc_infer::infer::DefineOpaqueTypes;
-use rustc_infer::infer::resolve::OpportunisticRegionResolver;
 use rustc_infer::traits::{ObligationCauseCode, PredicateObligations};
 use rustc_middle::traits::select::OverflowError;
 use rustc_middle::traits::{BuiltinImplSource, ImplSource, ImplSourceUserDefinedData};
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::{
-    self, FieldInfo, Term, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingMode, Unnormalized,
-    Upcast,
+    self, FieldInfo, Term, Ty, TyCtxt, TypeVisitableExt, TypingMode, Unnormalized, Upcast,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::sym;
+use rustc_span::{bug, span_bug, sym};
 use tracing::{debug, instrument};
 
 use super::{
@@ -309,7 +306,7 @@ pub(super) fn opt_normalize_projection_term<'a, 'b, 'tcx>(
 ) -> Result<Option<Term<'tcx>>, InProgress> {
     let infcx = selcx.infcx;
     debug_assert!(!selcx.infcx.next_trait_solver());
-    let projection_term = infcx.resolve_vars_if_possible(projection_term);
+    let projection_term = infcx.deeply_resolve_ignoring_regions(projection_term);
     let cache_key = ProjectionCacheKey::new(projection_term, param_env);
 
     // FIXME(#20304) For now, I am caching here, which is good, but it
@@ -388,7 +385,7 @@ pub(super) fn opt_normalize_projection_term<'a, 'b, 'tcx>(
             // an impl, where-clause etc) and hence we must
             // re-normalize it
 
-            let projected_term = selcx.infcx.resolve_vars_if_possible(projected_term);
+            let projected_term = selcx.infcx.deeply_resolve_ignoring_regions(projected_term);
 
             let mut result = if projected_term.has_aliases() {
                 let normalized_ty = normalize_with_depth_to(
@@ -505,6 +502,22 @@ fn push_const_arg_has_type_obligation<'tcx>(
     }
 }
 
+/// The old solver does not support references to non-type-consts.
+/// Emit a delayed bug if there is a type system reference to a non type const, as this should have
+/// already errored elsewhere.
+pub fn const_of_item_or_delayed_bug<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> ty::EarlyBinder<'tcx, ty::Const<'tcx>> {
+    tcx.const_of_item(def_id).unwrap_or_else(|| {
+        let e = tcx.dcx().span_delayed_bug(
+            tcx.def_span(def_id),
+            "encountered regular consts in the old solver's const normalization",
+        );
+        ty::EarlyBinder::bind(tcx, ty::Const::new_error(tcx, e))
+    })
+}
+
 /// Confirm and normalize the given inherent projection.
 // FIXME(mgca): While this supports constants, it is only used for types by default right now
 #[instrument(level = "debug", skip(selcx, param_env, cause, obligations))]
@@ -565,10 +578,10 @@ pub fn normalize_inherent_projection<'a, 'b, 'tcx>(
     let term = if alias_term.kind.is_type() {
         tcx.type_of(def_id).instantiate(tcx, args).map(Into::into)
     } else {
-        tcx.const_of_item(def_id).instantiate(tcx, args).map(Into::into)
+        const_of_item_or_delayed_bug(tcx, def_id).instantiate(tcx, args).map(Into::into)
     };
 
-    let term = selcx.infcx.resolve_vars_if_possible(term);
+    let term = selcx.infcx.deeply_resolve_ignoring_regions(term);
     let term =
         normalize_with_depth_to(selcx, param_env, cause.clone(), depth + 1, term, obligations);
 
@@ -724,7 +737,7 @@ fn project<'cx, 'tcx>(
                     )
                 } else {
                     let violations = tcx.dyn_compatibility_violations(def_id);
-                    report_dyn_incompatibility(tcx, span, None, def_id, &violations).emit()
+                    report_dyn_incompatibility(tcx, span, None, def_id, &violations).emit_err()
                 };
                 return Ok(Projected::Progress(Progress::error_for_term(
                     tcx,
@@ -1037,7 +1050,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                                     // NOTE(eddyb) inference variables can resolve to parameters, so
                                     // assume `poly_trait_ref` isn't monomorphic, if it contains any.
                                     let poly_trait_ref =
-                                        selcx.infcx.resolve_vars_if_possible(trait_ref);
+                                        selcx.infcx.deeply_resolve_ignoring_regions(trait_ref);
                                     !poly_trait_ref.still_further_specializable()
                                 }
                             }
@@ -1310,7 +1323,7 @@ fn confirm_candidate<'cx, 'tcx>(
     if let Ok(Projected::Progress(progress)) = &mut result
         && progress.term.has_infer_regions()
     {
-        progress.term = progress.term.fold_with(&mut OpportunisticRegionResolver::new(selcx.infcx));
+        progress.term = selcx.infcx.deeply_resolve_via_unification_table(progress.term);
     }
 
     result
@@ -2115,7 +2128,7 @@ fn confirm_impl_candidate<'cx, 'tcx>(
         let term = if obligation.predicate.kind.is_type() {
             tcx.type_of(assoc_term.item.def_id).map_bound(|ty| ty.into())
         } else {
-            tcx.const_of_item(assoc_term.item.def_id).map_bound(|ct| ct.into())
+            const_of_item_or_delayed_bug(tcx, assoc_term.item.def_id).map_bound(|ct| ct.into())
         };
 
         assoc_term_own_obligations(selcx, obligation, &mut nested);
@@ -2205,7 +2218,7 @@ impl<'cx, 'tcx> ProjectionCacheKeyExt<'cx, 'tcx> for ProjectionCacheKey<'tcx> {
                 // from a specific call to `opt_normalize_projection_type` - if
                 // there's no precise match, the original cache entry is "stranded"
                 // anyway.
-                infcx.resolve_vars_if_possible(predicate.projection_term),
+                infcx.deeply_resolve_ignoring_regions(predicate.projection_term),
                 obligation.param_env,
             )
         })

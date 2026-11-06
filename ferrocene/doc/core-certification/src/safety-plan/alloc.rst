@@ -15,10 +15,9 @@ Any allocator that implements the ``core::alloc::GlobalAllocator`` trait can be 
 
 Note that both the ``Allocator`` and the ``GlobalAllocator``  traits are currently unstable and cannot be directly implemented by users. The ``Allocator`` trait is expected to be stabilised in Rust version ``1.100.0`` (the next upcoming stable release). The ``GlobalAllocator`` trait has no clear date for stabilisation yet. Instead users can currently implement the ``core::alloc::GlobalAlloc`` trait (note the missing "-or"), which has a blanket implementation ``impl<A> GlobalAlloc for A where A: GlobalAllocator + ?Size``. In effect this means that currently user can implement custom own global allocators, but not custom per-datastructure allocators.
 
-Below you can see a diagram of all allocator traits and types and how they interact (you can zoom):
+Below you can see a diagram of all allocator traits and types and how they interact:
 
 .. mermaid:: ./alloc-traits-types.mmd
-    :zoom:
 
 compiler-builtins dependency
 ++++++++++++++++++++++++++++

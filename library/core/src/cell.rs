@@ -433,17 +433,11 @@ impl<T> Cell<T> {
     ///
     /// c.set(10);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_cell_traits", issue = "147787")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn set(&self, val: T)
     where
         T: [const] Destruct,
@@ -516,18 +510,12 @@ impl<T> Cell<T> {
     /// assert_eq!(cell.replace(10), 5);
     /// assert_eq!(cell.get(), 10);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
     #[rustc_confusables("swap")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn replace(&self, val: T) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -566,17 +554,11 @@ impl<T: Copy> Cell<T> {
     ///
     /// let five = c.get();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_cell", since = "1.88.0")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn get(&self) -> T {
         // SAFETY: This can cause data races if called from a separate thread,
         // but `Cell` is `!Sync` so this won't happen.
@@ -1055,19 +1037,13 @@ impl<T> RefCell<T> {
     /// assert_eq!(old_value, 5);
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "refcell_replace", since = "1.24.0")]
     #[track_caller]
     #[rustc_confusables("swap")]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn replace(&self, t: T) -> T {
         mem::replace(&mut self.borrow_mut(), t)
     }
@@ -1088,17 +1064,11 @@ impl<T> RefCell<T> {
     /// assert_eq!(old_value, 5);
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "refcell_replace_swap", since = "1.35.0")]
     #[track_caller]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
         let replacement = f(mut_borrow);
@@ -1166,18 +1136,12 @@ impl<T: ?Sized> RefCell<T> {
     /// let m = c.borrow_mut();
     /// let b = c.borrow(); // this causes a panic
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn borrow(&self) -> Ref<'_, T> {
         match self.try_borrow() {
             Ok(b) => b,
@@ -1210,18 +1174,12 @@ impl<T: ?Sized> RefCell<T> {
     ///     assert!(c.try_borrow().is_ok());
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "try_borrow", since = "1.13.0")]
     #[inline]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
         match BorrowRef::new(&self.borrow) {
             Some(b) => {
@@ -1280,18 +1238,12 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// let b = c.borrow_mut(); // this causes a panic
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     #[track_caller]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn borrow_mut(&self) -> RefMut<'_, T> {
         match self.try_borrow_mut() {
             Ok(b) => b,
@@ -1321,18 +1273,12 @@ impl<T: ?Sized> RefCell<T> {
     ///
     /// assert!(c.try_borrow_mut().is_ok());
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "try_borrow", since = "1.13.0")]
     #[inline]
     #[cfg_attr(feature = "debug_refcell", track_caller)]
     #[rustc_const_unstable(feature = "const_ref_cell", issue = "137844")]
-<<<<<<< ferrocene/main
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
         match BorrowRefMut::new(&self.borrow) {
             Some(b) => {
@@ -2518,23 +2464,13 @@ impl<T: ?Sized> UnsafeCell<T> {
     ///
     /// let five = uc.get();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_unsafecell_get", since = "1.32.0")]
-<<<<<<< ferrocene/main
-    #[rustc_as_ptr]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-    #[rustc_as_ptr]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_should_not_be_called_on_const_items]
-=======
     #[lint::as_ptr]
     #[lint::never_returns_null_ptr]
     #[lint::should_not_be_called_on_const_items]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn get(&self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)].

@@ -7,13 +7,7 @@
 //
 
 //@ ignore-cross-compile
-<<<<<<< ferrocene/main
-//@ ignore-musl
 //@ ignore-test Please check what this test does
-||||||| 1c3a6506966
-//@ ignore-musl
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 use run_make_support::{diff, run_with_args, rustc};
 

@@ -605,17 +605,13 @@ impl str {
     /// let s = "Hello";
     /// let ptr = s.as_ptr();
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "rustc_str_as_ptr", since = "1.32.0")]
     #[must_use]
     #[inline(always)]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-=======
     #[lint::as_ptr]
     #[lint::never_returns_null_ptr]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_ptr(&self) -> *const u8 {
         self as *const str as *const u8
     }

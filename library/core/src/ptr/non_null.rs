@@ -407,16 +407,12 @@ impl<T: PointeeSized> NonNull<T> {
     /// let x_value = unsafe { *ptr.as_ptr() };
     /// assert_eq!(x_value, 2);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_as_ptr", since = "1.32.0")]
     #[must_use]
     #[inline(always)]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| 1c3a6506966
-=======
     #[lint::never_returns_null_ptr]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     pub const fn as_ptr(self) -> *mut T {
         // This is a transmute for the same reasons as `NonZero::get`.
 

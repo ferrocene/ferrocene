@@ -191,10 +191,12 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
         }
         // Check if the current item has an annotation
         if let Some(attr) = get_attrs_by_path(tcx, current, VALIDATED_ATTR).next() {
-            return Some(ValidatedStatus::Validated {
-                annotation: attr.path_span(),
-                inherited: current != item,
-            });
+            if let rustc_attr_ir::Attribute::Tool(attr) = attr {
+                return Some(ValidatedStatus::Validated {
+                    annotation: Some(attr.span),
+                    inherited: current != item,
+                });
+            };
         }
 
         if current.is_crate_root() {
@@ -207,7 +209,9 @@ fn any_parent_is_validated(tcx: TyCtxt<'_>, item: DefId) -> Option<ValidatedStat
 
 /// Check if this item is marked with `#[ferrocene::requires_validation]`.
 pub fn has_requires_validation_attribute(tcx: TyCtxt<'_>, def_id: DefId) -> Option<Span> {
-    get_attrs_by_path(tcx, def_id, REQUIRES_VALIDATION_ATTR)
-        .next()
-        .map(|attr| attr.path_span().unwrap())
+    if let Some(attr) = get_attrs_by_path(tcx, def_id, REQUIRES_VALIDATION_ATTR).next() {
+        if let rustc_attr_ir::Attribute::Tool(attr) = attr { Some(attr.span) } else { None }
+    } else {
+        None
+    }
 }

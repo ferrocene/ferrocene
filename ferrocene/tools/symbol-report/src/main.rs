@@ -20,7 +20,7 @@ use rustc_ast::attr::AttributeExt;
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::HirId;
-use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
+use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
@@ -265,19 +265,9 @@ fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usi
     (filename, start_line, end_line)
 }
 
-// This was removed upstream, so was saved here since we still use it
-fn get_attrs_by_path<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    did: DefId,
-    attr: &[Symbol],
-) -> impl Iterator<Item = &'tcx rustc_attr_ir::Attribute> {
-    let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
-    if let Some(did) = did.as_local() {
-        tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
-    } else {
-        tcx.attrs_for_def(did).iter().filter(filter_fn)
-    }
-}
 fn has_ferrocene_annotation(tcx: TyCtxt<'_>, def: LocalDefId) -> Option<&Attribute> {
-    get_attrs_by_path(tcx, def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
+    let filter_fn = move |attr: &&rustc_attr_ir::Attribute| {
+        attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice())
+    };
+    tcx.hir_attrs(tcx.local_def_id_to_hir_id(def)).iter().filter(filter_fn).next()
 }

@@ -3,7 +3,12 @@
 //! The index from `enumerate()` over a slice is never greater than the slice
 //! length, so the assertion and its panic must be removed.
 
-//@ compile-flags: -Copt-level=3
+// Ferrocene changes:
+// Added revisions to account for facade targets, which fail on opt-level 2 and 3
+//@ revisions: facade other
+//@[facade] compile-flags: -Copt-level=1
+//@[other]  compile-flags: -Copt-level=3
+//@[other]  ignore-ferrocene.facade
 //@ ignore-wasm32 LLVM does not remove the assertion on wasm32
 
 #![crate_type = "lib"]

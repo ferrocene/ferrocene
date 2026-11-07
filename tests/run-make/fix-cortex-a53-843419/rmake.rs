@@ -37,7 +37,7 @@ fn main() {
 
     let outcome = compile.run();
     // Ensure --print=link-args shows the errata fix linker flag.
-    assert!(outcome.stdout_utf8().contains("--fix-cortex-a53-843419"));
+    assert!(outcome.stdout_utf8().contains("-mfix-cortex-a53-843419"));
 
     // sanity check that no prologue was injected
     assert!(grep_instruction(0xff0, "nop"));

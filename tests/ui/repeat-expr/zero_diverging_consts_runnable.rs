@@ -6,6 +6,10 @@
 //@ check-run-results
 //@ exec-env:RUST_BACKTRACE=0
 
+// Ferrocene note: do we have wonky optimizations
+// ... see also tests/codegen-llvm/issues/enumerate-index-le-len-no-panic-92174.rs
+//@ ignore-ferrocene.facade
+
 fn get(v: &[u32], i: usize) -> u32 {
     if i >= v.len() {
         let _: [!; 0] = [const { panic!() }; 0];

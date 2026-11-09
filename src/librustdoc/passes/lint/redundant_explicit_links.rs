@@ -3,8 +3,9 @@ use std::ops::Range;
 use rustc_ast::NodeId;
 use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level, SuggestionStyle};
 use rustc_hir::HirId;
-use rustc_hir::def::{DefKind, DocLinkResMap, Namespace, Res};
+use rustc_hir::def::{DefKind, Namespace, Res};
 use rustc_lint::Applicability;
+use rustc_middle::middle::resolve::DocLinkResMap;
 use rustc_resolve::rustdoc::pulldown_cmark::{
     BrokenLink, BrokenLinkCallback, CowStr, Event, LinkType, OffsetIter, Parser, Tag,
 };
@@ -163,8 +164,8 @@ struct RedundantExplicitLinksWithoutSuggestion {
     dest_link: String,
 }
 
-impl<'a> Diagnostic<'a, ()> for RedundantExplicitLinksWithoutSuggestion {
-    fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+impl<'a> Diagnostic<'a> for RedundantExplicitLinksWithoutSuggestion {
+    fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
         let Self { attr_span, display_link, dest_link } = self;
 
         Diag::new(dcx, level, "redundant explicit link target")
@@ -198,8 +199,8 @@ fn check_inline_or_reference_unknown_redundancy(
         display_link: String,
     }
 
-    impl<'a> Diagnostic<'a, ()> for RedundantExplicitLinks {
-        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+    impl<'a> Diagnostic<'a> for RedundantExplicitLinks {
+        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
             let Self { explicit_span, display_span, link_span, display_link } = self;
 
             Diag::new(dcx, level, "redundant explicit link target")
@@ -317,8 +318,8 @@ fn check_reference_redundancy(
         display_link: String,
     }
 
-    impl<'a> Diagnostic<'a, ()> for RedundantExplicitLinkTarget {
-        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
+    impl<'a> Diagnostic<'a> for RedundantExplicitLinkTarget {
+        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a> {
             let Self { explicit_span, display_span, def_span, link_span, display_link } = self;
 
             Diag::new(dcx, level, "redundant explicit link target")
@@ -464,7 +465,7 @@ fn local_href_for_res(cx: &DocContext<'_>, module_id: DefId, res: Res<NodeId>) -
 
     if matches!(
         cx.tcx.def_kind(did),
-        DefKind::AssocTy | DefKind::AssocFn | DefKind::AssocConst { .. } | DefKind::Variant
+        DefKind::AssocTy | DefKind::AssocFn | DefKind::AssocConst | DefKind::Variant
     ) || !did.is_local()
     {
         return None;

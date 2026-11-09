@@ -5,8 +5,8 @@
 use rustc_abi::FieldIdx;
 use rustc_middle::mir::visit::MutVisitor;
 use rustc_middle::mir::*;
-use rustc_middle::span_bug;
 use rustc_middle::ty::{self, PatternKind, Ty, TyCtxt};
+use rustc_span::span_bug;
 
 use crate::PassPolicy;
 use crate::patch::MirPatch;
@@ -150,7 +150,7 @@ impl<'tcx> crate::MirPass<'tcx> for ElaborateBoxDerefs {
         }
     }
 
-    fn policy(&self, _sess: &rustc_session::Session) -> PassPolicy {
+    fn policy(&self, _ctx: &crate::PassCtx<'_>) -> PassPolicy {
         // Implements Box dereference semantics so backends and Miri do not have to handle them.
         PassPolicy::Required
     }

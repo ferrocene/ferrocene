@@ -78,7 +78,6 @@ impl<T> ThinBox<T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(allocator_api)]
     /// #![feature(thin_box)]
     /// use std::boxed::ThinBox;
     ///
@@ -167,7 +166,7 @@ impl<T: ?Sized> Drop for ThinBox<T> {
     fn drop(&mut self) {
         let value = self.deref_mut();
         let value = value as *mut T;
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `value` is valid for reads and writes for our `T`.
         unsafe {
             self.with_header().drop::<T>(value);
         }
@@ -249,7 +248,7 @@ impl<H> WithHeader<H> {
             debug_assert!(value_offset == 0 && T::IS_ZST && H::IS_ZST);
             layout.dangling_ptr()
         } else {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: We check above that the layout size is nonzero.
             let ptr = unsafe { alloc::alloc(layout) };
             if ptr.is_null() {
                 alloc::handle_alloc_error(layout);
@@ -265,7 +264,8 @@ impl<H> WithHeader<H> {
 
         let result = WithHeader(ptr, PhantomData);
 
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `result.header()` promises to give us a valid place for writing
+        // the header, and `result.value()` promises the same for the value.
         unsafe {
             ptr::write(result.header(), header);
             ptr::write(result.value().cast(), value);
@@ -291,7 +291,7 @@ impl<H> WithHeader<H> {
             debug_assert!(value_offset == 0 && T::IS_ZST && H::IS_ZST);
             layout.dangling_ptr()
         } else {
-            // ignore-tidy-undocumented-unsafe
+            // SAFETY: We check above that the layout size is nonzero.
             let ptr = unsafe { alloc::alloc(layout) };
             if ptr.is_null() {
                 return Err(core::alloc::AllocError);
@@ -308,7 +308,8 @@ impl<H> WithHeader<H> {
 
         let result = WithHeader(ptr, PhantomData);
 
-        // ignore-tidy-undocumented-unsafe
+        // SAFETY: `result.header()` promises to give us a valid place for writing
+        // the header, and `result.value()` promises the same for the value.
         unsafe {
             ptr::write(result.header(), header);
             ptr::write(result.value().cast(), value);
@@ -368,9 +369,10 @@ impl<H> WithHeader<H> {
         WithHeader(NonNull::new(value_ptr.cast()).unwrap(), PhantomData)
     }
 
-    // Safety:
-    // - Assumes that either `value` can be dereferenced, or is the
-    //   `NonNull::dangling()` we use when both `T` and `H` are ZSTs.
+    /// # Safety
+    ///
+    /// `value` must point to an undropped owned `T`, and `self` must not be
+    /// accessed again after this is called.
     unsafe fn drop<T: ?Sized>(&self, value: *mut T) {
         struct DropGuard<H> {
             ptr: NonNull<u8>,

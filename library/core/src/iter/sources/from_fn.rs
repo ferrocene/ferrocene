@@ -42,7 +42,12 @@ use crate::fmt;
 /// ```
 #[inline]
 #[stable(feature = "iter_from_fn", since = "1.34.0")]
+<<<<<<< ferrocene/release/1.100
 #[ferrocene::prevalidated]
+||||||| fb9a3389fde
+=======
+#[rustc_diagnostic_item = "iter_from_fn"]
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 pub fn from_fn<T, F>(f: F) -> FromFn<F>
 where
     F: FnMut() -> Option<T>,

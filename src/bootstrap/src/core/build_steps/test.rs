@@ -4263,19 +4263,25 @@ impl Step for RemoteCopyLibs {
 
         builder.info(&format!("REMOTE copy libs to emulator ({target})"));
 
-        let remote_test_server = builder.ensure(tool::RemoteTestServer { build_compiler, target });
-
-        // Spawn the emulator and wait for it to come online
+        // Ferrocene modification: When testing facade targets, we start the remote test server
+        // separately. So there is no need to build and spawn it here
         let tool = builder.tool_exe(Tool::RemoteTestClient);
-        let mut cmd = command(&tool);
-        cmd.arg("spawn-emulator")
-            .arg(target.triple)
-            .arg(&remote_test_server.tool_path)
-            .arg(builder.tempdir());
-        if let Some(rootfs) = builder.qemu_rootfs(target) {
-            cmd.arg(rootfs);
+
+        if !target.contains("ferrocene.facade") {
+            let remote_test_server =
+                builder.ensure(tool::RemoteTestServer { build_compiler, target });
+
+            // Spawn the emulator and wait for it to come online
+            let mut cmd = command(&tool);
+            cmd.arg("spawn-emulator")
+                .arg(target.triple)
+                .arg(&remote_test_server.tool_path)
+                .arg(builder.tempdir());
+            if let Some(rootfs) = builder.qemu_rootfs(target) {
+                cmd.arg(rootfs);
+            }
+            cmd.run(builder);
         }
-        cmd.run(builder);
 
         // Push all our dylibs to the emulator
         for f in t!(builder.sysroot_target_libdir(build_compiler, target).read_dir()) {

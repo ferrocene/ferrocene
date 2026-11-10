@@ -1,0 +1,47 @@
+Submodule src/tools/cargo contains modified content
+diff --git a/src/tools/cargo/Cargo.lock b/src/tools/cargo/Cargo.lock
+index 36cf8804a..7134a8fd4 100644
+--- a/src/tools/cargo/Cargo.lock
++++ b/src/tools/cargo/Cargo.lock
+@@ -2071,7 +2071,6 @@ checksum = "f2a2bb3680b094add03bb3732ec520ece34da31a8cd2d633d1389d0f0fb60d0c"
+ dependencies = [
+  "cc",
+  "libc",
+- "libssh2-sys",
+  "libz-sys",
+  "openssl-sys",
+  "pkg-config",
+@@ -2114,20 +2113,6 @@ dependencies = [
+  "vcpkg",
+ ]
+ 
+-[[package]]
+-name = "libssh2-sys"
+-version = "0.3.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2dc8a030b787e2119a731f1951d6a773e2280c660f8ec4b0f5e1505a386e71ee"
+-dependencies = [
+- "cc",
+- "libc",
+- "libz-sys",
+- "openssl-sys",
+- "pkg-config",
+- "vcpkg",
+-]
+-
+ [[package]]
+ name = "libz-sys"
+ version = "1.1.12"
+diff --git a/src/tools/cargo/Cargo.toml b/src/tools/cargo/Cargo.toml
+index c07b0047b..a6859808c 100644
+--- a/src/tools/cargo/Cargo.toml
++++ b/src/tools/cargo/Cargo.toml
+@@ -40,7 +40,7 @@ curl = "0.4.44"
+ curl-sys = "0.4.70"
+ filetime = "0.2.22"
+ flate2 = { version = "1.0.28", default-features = false, features = ["zlib"] }
+-git2 = "0.18.1"
++git2 = { version = "0.18.1", default-features = false, features = ["https"] }
+ git2-curl = "0.19.0"
+ gix = { version = "0.56.0", default-features = false, features = ["blocking-http-transport-curl", "progress-tree", "revision"] }
+ gix-features-for-configuration-only = { version = "0.35.0", package = "gix-features", features = [ "parallel" ] }

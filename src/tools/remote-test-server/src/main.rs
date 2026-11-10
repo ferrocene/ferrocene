@@ -296,6 +296,8 @@ fn handle_run(socket: TcpStream, work: &Path, tmp: &Path, lock: &Mutex<()>, conf
 
     let socket = Arc::new(Mutex::new(reader.into_inner()));
 
+    println!("Running {:?} in {}", cmd, std::fs::canonicalize(".").unwrap().display());
+
     let status = if config.batch {
         let child =
             t!(cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).output());
@@ -319,6 +321,10 @@ fn handle_run(socket: TcpStream, work: &Path, tmp: &Path, lock: &Mutex<()>, conf
 
     // Finally send over the exit status.
     let (which, code) = get_status_code(&status);
+
+    println!("Command {:?} in {} finished", cmd, std::fs::canonicalize(".").unwrap().display());
+    println!("Listing:");
+    let _ = Command::new("ls").arg("-AFRX").status();
 
     t!(socket.lock().unwrap().write_all(&[
         which,

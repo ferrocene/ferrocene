@@ -564,7 +564,7 @@ Covered by the `Certified standard library API docs <../../../../index.html#libr
 7.2.4.7-8
 ~~~~~~~~~
 
-The behaviour of every function, including its failure behaviour (panic), is documented in its doc-comment, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. The user shall compile with ``-C panic=abort``, see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`.
+The behaviour of every function, including its failure behaviour (panic), is documented in its doc-comment, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. The user shall compile with ``-C panic=abort``, see :qualification:id:`LIBS_CSTR_0020_PANIC_ABORT`.
 
 There is no programmable electronics in the certification scope.
 
@@ -918,7 +918,7 @@ Covered by :doc:`safety-manual:procedures` (Installation Procedures) and :doc:`u
 9.1.4.8-9
 ~~~~~~~~~
 
-Covered by the constraint to use matching versions of the certified libraries and ``rustc``, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`, and by static linking only, see :qualification:id:`CORE_CSTR_0080_LINK_STATIC`.
+Covered by the constraint to use matching versions of the certified libraries and ``rustc``, see :qualification:id:`LIBS_CSTR_0040_MATCHING_VERSION`, and by static linking only, see :qualification:id:`LIBS_CSTR_0080_LINK_STATIC`.
 
 9.1.4.10
 ~~~~~~~~
@@ -928,7 +928,7 @@ N/A for the certified libraries themselves: a rollback is achieved by re-install
 9.1.4.11
 ~~~~~~~~
 
-N/A; the certified libraries are statically linked into the application binary and are not loaded at run-time. Their identity is established through the matching versions constraint, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`.
+N/A; the certified libraries are statically linked into the application binary and are not loaded at run-time. Their identity is established through the matching versions constraint, see :qualification:id:`LIBS_CSTR_0040_MATCHING_VERSION`.
 
 9.1.4.12-14
 ~~~~~~~~~~~
@@ -940,7 +940,7 @@ Covered on the Ferrocene side by :doc:`qualification-plan:change-tracking` (trac
 9.1.4.15
 ~~~~~~~~
 
-N/A; fault monitoring is a system level activity. The certified libraries report failures by panicking, which is documented per function in the API docs (see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`).
+N/A; fault monitoring is a system level activity. The certified libraries report failures by panicking, which is documented per function in the API docs (see :qualification:id:`LIBS_CSTR_0020_PANIC_ABORT`).
 
 9.1.4.16-19
 ~~~~~~~~~~~

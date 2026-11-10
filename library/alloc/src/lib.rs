@@ -194,7 +194,7 @@
 // tidy-alphabetical-end
 //
 // Language features:
-// not-alphabetical-start
+// tidy-alphabetical-start
 #![feature(allocator_internals)]
 #![feature(allow_internal_unstable)]
 #![feature(cfg_sanitize)]
@@ -222,20 +222,12 @@
 #![feature(unsized_fn_params)]
 #![feature(with_negative_coherence)]
 #![rustc_preserve_ub_checks]
-<<<<<<< ferrocene/release/1.101
-// not-alphabetical-end
-//
-||||||| 1c3a6506966
-// tidy-alphabetical-end
-//
-=======
 // tidy-alphabetical-end
 
 // tidy-alphabetical-start
 #![register_tool(lint)]
 // tidy-alphabetical-end
 
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
 // Rustdoc features:
 #![feature(doc_cfg)]
 #![feature(doc_notable_trait)]

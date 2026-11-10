@@ -560,6 +560,7 @@ impl Config {
         // Now override TOML values with flags, to make sure that we won't later override flags with
         // TOML values by accident instead, because flags have higher priority.
         let Build {
+            uv, // Ferrocene addition
             description: build_description,
             build: build_build,
             host: build_host,
@@ -623,12 +624,7 @@ impl Config {
             compiletest_allow_stage0: build_compiletest_allow_stage0,
             sde: build_sde,
             allocator: build_allocator,
-<<<<<<< ferrocene/release/1.101
-            uv,
-||||||| 1c3a6506966
-=======
             rustc_perf_path: build_rustc_perf_path,
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
         } = toml_build.unwrap_or_default();
 
         let Install {

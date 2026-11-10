@@ -607,11 +607,15 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "rustc_str_as_ptr", since = "1.32.0")]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
+<<<<<<< ferrocene/release/1.101
     #[ferrocene::prevalidated]
+||||||| 1c3a6506966
+=======
+    #[lint::as_ptr]
+    #[lint::never_returns_null_ptr]
+>>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
     pub const fn as_ptr(&self) -> *const u8 {
         self as *const str as *const u8
     }
@@ -627,11 +631,11 @@ impl str {
     #[ferrocene::prevalidated]
     #[stable(feature = "str_as_mut_ptr", since = "1.36.0")]
     #[rustc_const_stable(feature = "const_str_as_mut", since = "1.83.0")]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_as_ptr]
     #[must_use]
     #[inline(always)]
     #[rustc_no_writable]
+    #[lint::as_ptr]
+    #[lint::never_returns_null_ptr]
     pub const fn as_mut_ptr(&mut self) -> *mut u8 {
         self as *mut str as *mut u8
     }

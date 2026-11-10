@@ -28,3 +28,6 @@ done
 for pid in "${pids[@]}"; do
     wait "$pid"
 done
+
+repo=$(dirname $(dirname $(dirname $(dirname $(realpath $0)))))
+git -C $repo apply "$repo/ferrocene/patches/cargo/disable-embedded-git-ssh.patch"

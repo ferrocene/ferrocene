@@ -45,5 +45,20 @@ The ``std`` library supplies allocator implementations, but ``std`` is currently
 Recursion limit
 ---------------
 
+Compile-time
+~~~~~~~~~~~~
 
 By default, the Rust compiler has a recursion limit of 128 for compile-time operations such as macro expansion and automatic dereferencing, to limit the maximum source code complexity. This can be configured with the `recursion_limit attribute <https://doc.rust-lang.org/reference/attributes/limits.html#the-recursion_limit-attribute>`_.
+
+Runtime
+~~~~~~~
+
+Rust has no runtime recursion limit, but it is the user responsiblity to enforce any limits.
+
+To support users there are a few lints that catch common problems related to recursion, e.g.:
+
+- `unconditional_recursion <https://doc.rust-lang.org/rustc/lints/listing/warn-by-default.html#unconditional-recursion>`_
+- `clippy::main_recursion <https://clippy.rust-lang.org/main/index.html#main_recursion>`_
+- `clippy::only_used_in_recursion <https://clippy.rust-lang.org/main/index.html#only_used_in_recursion>`_
+
+Note that the `recursion_depth_exceeding_limit <https://doc.rust-lang.org/rustc/lints/listing/warn-by-default.html#recursion-depth-exceeding-limit>`_ lint is not related to runtime recursion, but compile time recursion.

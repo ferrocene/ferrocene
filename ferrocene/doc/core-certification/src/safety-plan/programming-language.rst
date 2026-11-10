@@ -53,7 +53,7 @@ By default, the Rust compiler has a recursion limit of 128 for compile-time oper
 Runtime
 ~~~~~~~
 
-Rust has no runtime recursion limit, but it is the user responsiblity to enforce any limits.
+Rust does not enforce a runtime recursion limit, so it is the user's responsibility to enforce limits in line with appropriate safety standards as part of their coding standards.
 
 To support users there are a few lints that catch common problems related to recursion, e.g.:
 

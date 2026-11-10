@@ -30,4 +30,4 @@ for pid in "${pids[@]}"; do
 done
 
 repo=$(dirname $(dirname $(dirname $(dirname $(realpath $0)))))
-git -C $repo apply "$repo/ferrocene/patches/cargo-disable-embedded-git-ssh.patch"
+git -C $repo apply "$repo/ferrocene/patches/cargo/disable-embedded-git-ssh.patch"

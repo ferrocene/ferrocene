@@ -1032,7 +1032,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::DocumentList,
                 crate::ferrocene::doc::EvaluationPlan,
                 crate::ferrocene::doc::EvaluationReport,
-                crate::ferrocene::doc::CoreCertification,
+                crate::ferrocene::doc::LibraryCertification,
                 crate::ferrocene::doc::QualificationPlan,
                 crate::ferrocene::doc::QualificationReport,
                 crate::ferrocene::doc::SafetyManual,
@@ -1140,10 +1140,10 @@ impl<'a> Builder<'a> {
             ),
             Kind::Sign => describe!(
                 // Qualification
-                crate::ferrocene::sign::CoreCertification,
                 crate::ferrocene::sign::DocumentList,
                 crate::ferrocene::sign::EvaluationPlan,
                 crate::ferrocene::sign::EvaluationReport,
+                crate::ferrocene::sign::LibraryCertification,
                 crate::ferrocene::sign::QualificationPlan,
                 crate::ferrocene::sign::QualificationReport,
                 crate::ferrocene::sign::SafetyManual,

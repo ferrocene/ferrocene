@@ -18,7 +18,7 @@ The certified libraries have a simple design. They are libraries of independent 
 7.4.6
 -----
 
-:doc:`core-certification:safety-plan/requirements`
+:doc:`library-certification:safety-plan/requirements`
 
 All functions in the certified libraries are deemed to be of the same ASIL.
 

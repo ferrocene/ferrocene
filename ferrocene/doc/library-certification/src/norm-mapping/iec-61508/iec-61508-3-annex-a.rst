@@ -10,7 +10,7 @@ Table A.1
 1a
 ""
 
-Covered by :doc:`core-certification:safety-plan/requirements`.
+Covered by :doc:`library-certification:safety-plan/requirements`.
 
 Table A.2
 ~~~~~~~~~
@@ -43,7 +43,7 @@ Table A.3
 1, 2, 4a
 """"""""
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 Table A.4
 ~~~~~~~~~
@@ -72,7 +72,7 @@ As such, the certified libraries do not have a coding standard.
 6
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 7
 "

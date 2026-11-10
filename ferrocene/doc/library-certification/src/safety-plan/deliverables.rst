@@ -20,9 +20,9 @@ Functional Safety Documentation
 -------------------------------
 
 - Safety Plan (this document)
-- :doc:`core-certification:norm-mapping/index` for all safety standards
+- :doc:`library-certification:norm-mapping/index` for all safety standards
 - :doc:`safety-manual:index`
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - Test cases (as specified by the testing plan), and
 - :doc:`qualification-report:rustc/index`
 

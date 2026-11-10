@@ -721,10 +721,10 @@ sphinx_books! [
         dest: "qualification/internal-procedures",
     },
     {
-        ty: CoreCertification,
-        name: "core-certification",
-        src: "ferrocene/doc/core-certification",
-        dest: "certification/core",
+        ty: LibraryCertification,
+        name: "library-certification",
+        src: "ferrocene/doc/library-certification",
+        dest: "certification/library",
     },
     {
         ty: QNX7Manual,

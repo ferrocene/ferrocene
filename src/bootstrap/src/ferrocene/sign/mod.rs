@@ -110,10 +110,10 @@ documents![
     DocumentList,
     EvaluationPlan,
     EvaluationReport,
+    LibraryCertification,
     QualificationPlan,
     QualificationReport,
     SafetyManual,
-    CoreCertification,
     // QMS Documents
     InternalProcedures,
 ];

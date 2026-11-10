@@ -31,7 +31,7 @@ Covered by
 Covered by
 
 - `Certified standard library API docs <../../../../index.html#library-apis>`_
-- :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
+- :doc:`Code coverage report <library-certification:safety-report/code-coverage>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 
 5.2.5
@@ -173,7 +173,7 @@ Covered by
 7.4.2
 ~~~~~
 
-Covered by :doc:`core-certification:safety-plan/failure-analysis`.
+Covered by :doc:`library-certification:safety-plan/failure-analysis`.
 
 7.5.2
 ~~~~~

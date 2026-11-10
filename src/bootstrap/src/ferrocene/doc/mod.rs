@@ -880,7 +880,7 @@ impl CommandLineStep for CoreTechnicalReport {
     type Output = ();
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.alias("ferrocene-core-technical-report")
+        run.alias("ferrocene-library-technical-report")
     }
 
     fn is_default_step(builder: &Builder<'_>) -> bool {
@@ -894,9 +894,9 @@ impl CommandLineStep for CoreTechnicalReport {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let url = builder
             .config
-            .ferrocene_core_technical_report_url
+            .ferrocene_library_technical_report_url
             .as_deref()
-            .expect("ferrocene.core-technical-report-url is not configured");
+            .expect("ferrocene.library-technical-report-url is not configured");
         let cache_path = builder
             .out
             .join("cache")
@@ -915,7 +915,7 @@ impl CommandLineStep for CoreTechnicalReport {
             builder.config.download_file(url, &cache_path, "");
         }
 
-        let mut output_file = output_dir.join("core-technical-report.pdf");
+        let mut output_file = output_dir.join("library-technical-report.pdf");
 
         builder.create_dir(&output_dir);
         builder.copy_link(&cache_path, &output_file, FileType::Regular);

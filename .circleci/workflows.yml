@@ -286,7 +286,10 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
-        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc
+        ./x.py test --stage=1 \
+            --coverage=library --tests \
+            library/core library/alloc \
+            --coverage-crate=core --coverage-crate=alloc --coverage-crate=std
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:
@@ -503,7 +506,10 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py --override-hash << pipeline.parameters.llvm-hash >> download
-        ./x.py test --stage=1 --coverage=library library/core library/alloc --tests --coverage-crate=core --coverage-crate=alloc
+        ./x.py test --stage=1 \
+            --coverage=library --tests \
+            library/core library/alloc \
+            --coverage-crate=core --coverage-crate=alloc --coverage-crate=std
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:

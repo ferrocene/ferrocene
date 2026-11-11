@@ -60,6 +60,7 @@ impl TestMode {
 string_enum! {
     #[derive(Clone, Copy, PartialEq, Debug)]
     pub(crate) enum TestSuite {
+        AssemblyGcc => "assembly-gcc",
         AssemblyLlvm => "assembly-llvm",
         CodegenLlvm => "codegen-llvm",
         CodegenUnits => "codegen-units",
@@ -769,9 +770,6 @@ pub(crate) struct Config {
     pub(crate) override_codegen_backend: Option<String>,
     /// Whether to ignore `//@ ignore-backends`.
     pub(crate) bypass_ignore_backends: bool,
-
-    /// Target tuples for which we've found libgccjit.so.
-    pub(crate) gcc_supported_target_tuples: Vec<String>,
 
     /// Number of parallel jobs configured for the build.
     ///

@@ -21,8 +21,7 @@ use rustc_middle::ty::{
     self, AdtKind, GenericArgs, InlineConstArgs, InlineConstArgsParts, ScalarInt, SplattedDef, Ty,
     TyCtxt, UpvarArgs,
 };
-use rustc_middle::{bug, span_bug};
-use rustc_span::{DesugaringKind, Span};
+use rustc_span::{DesugaringKind, Span, bug, span_bug};
 use tracing::{debug, info, instrument, trace};
 
 use crate::diagnostics::*;
@@ -134,6 +133,9 @@ impl<'tcx> ThirBuildCx<'tcx> {
         }
 
         // Finally, wrap this up in the expr's scope.
+        //
+        // (In addition to marking scope, coverage instrumentation also uses this node
+        // to help mark the point in MIR where an expression is about to be evaluated.)
         expr = Expr {
             temp_scope_id: expr_scope.local_id,
             ty,
@@ -312,7 +314,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
         // using a coercion (or is a no-op).
         if self.typeck_results.is_coercion_cast(source.hir_id) {
             // Convert the lexpr to a vexpr.
-            ExprKind::Use { source: self.mirror_expr(source) }
+            ExprKind::ValueExpr { source: self.mirror_expr(source) }
         } else if self.typeck_results.expr_ty(source).is_ref() {
             // Special cased so that we can type check that the element
             // type of the source matches the pointed to type of the
@@ -325,7 +327,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
         } else if let hir::ExprKind::Path(ref qpath) = source.kind
             && let res = self.typeck_results.qpath_res(qpath, source.hir_id)
             && let ty = self.typeck_results.node_type(source.hir_id)
-            && let ty::Adt(adt_def, args) = ty.kind()
+            && let ty::Adt(adt_def, _) = ty.kind()
             && let Res::Def(DefKind::Ctor(CtorOf::Variant, CtorKind::Const), variant_ctor_id) = res
         {
             // Check whether this is casting an enum variant discriminant.
@@ -367,6 +369,8 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 // in case we are offsetting from a computed discriminant
                 // and not the beginning of discriminants (which is always `0`)
                 Some(did) => {
+                    let args = self.tcx.mk_args(&[]);
+                    self.tcx.debug_assert_args_compatible(did, args);
                     let kind = ExprKind::NamedConst { def_id: did, args, user_ty: None };
                     let lhs =
                         self.thir.exprs.push(Expr { temp_scope_id, ty: discr_ty, span, kind });
@@ -823,22 +827,27 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     .operands
                     .iter()
                     .map(|(op, _op_sp)| match *op {
-                        hir::InlineAsmOperand::In { reg, expr } => {
-                            InlineAsmOperand::In { reg, expr: self.mirror_expr(expr) }
-                        }
+                        hir::InlineAsmOperand::In { reg, expr } => InlineAsmOperand::In {
+                            reg: reg.as_target(),
+                            expr: self.mirror_expr(expr),
+                        },
                         hir::InlineAsmOperand::Out { reg, late, ref expr } => {
                             InlineAsmOperand::Out {
-                                reg,
+                                reg: reg.as_target(),
                                 late,
                                 expr: expr.map(|expr| self.mirror_expr(expr)),
                             }
                         }
                         hir::InlineAsmOperand::InOut { reg, late, expr } => {
-                            InlineAsmOperand::InOut { reg, late, expr: self.mirror_expr(expr) }
+                            InlineAsmOperand::InOut {
+                                reg: reg.as_target(),
+                                late,
+                                expr: self.mirror_expr(expr),
+                            }
                         }
                         hir::InlineAsmOperand::SplitInOut { reg, late, in_expr, ref out_expr } => {
                             InlineAsmOperand::SplitInOut {
-                                reg,
+                                reg: reg.as_target(),
                                 late,
                                 in_expr: self.mirror_expr(in_expr),
                                 out_expr: out_expr.map(|expr| self.mirror_expr(expr)),
@@ -1178,7 +1187,9 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 ExprKind::WrapUnsafeBinder { source: mirrored }
             }
 
-            hir::ExprKind::DropTemps(source) => ExprKind::Use { source: self.mirror_expr(source) },
+            hir::ExprKind::DropTemps(source) => {
+                ExprKind::ValueExpr { source: self.mirror_expr(source) }
+            }
             hir::ExprKind::Array(fields) => ExprKind::Array { fields: self.mirror_exprs(fields) },
             hir::ExprKind::Tup(fields) => ExprKind::Tuple { fields: self.mirror_exprs(fields) },
 
@@ -1202,8 +1213,8 @@ impl<'tcx> ThirBuildCx<'tcx> {
             Res::Def(DefKind::Fn, _)
             | Res::Def(DefKind::AssocFn, _)
             | Res::Def(DefKind::Ctor(_, CtorKind::Fn), _)
-            | Res::Def(DefKind::Const { .. }, _)
-            | Res::Def(DefKind::AssocConst { .. }, _) => {
+            | Res::Def(DefKind::Const, _)
+            | Res::Def(DefKind::AssocConst, _) => {
                 self.typeck_results.user_provided_types().get(hir_id).copied().map(Box::new)
             }
 
@@ -1443,8 +1454,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 ExprKind::ConstParam { param, def_id }
             }
 
-            Res::Def(DefKind::Const { .. }, def_id)
-            | Res::Def(DefKind::AssocConst { .. }, def_id) => {
+            Res::Def(DefKind::Const, def_id) | Res::Def(DefKind::AssocConst, def_id) => {
                 let user_ty = self.user_args_applied_to_res(expr.hir_id, res);
                 ExprKind::NamedConst { def_id, args, user_ty }
             }
@@ -1605,7 +1615,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     name: field,
                 },
                 HirProjectionKind::OpaqueCast => {
-                    ExprKind::Use { source: self.thir.exprs.push(captured_place_expr) }
+                    ExprKind::ValueExpr { source: self.thir.exprs.push(captured_place_expr) }
                 }
                 HirProjectionKind::UnwrapUnsafeBinder => ExprKind::PlaceUnwrapUnsafeBinder {
                     source: self.thir.exprs.push(captured_place_expr),

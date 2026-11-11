@@ -133,6 +133,7 @@
 #![feature(f16)]
 #![feature(field_projections)]
 #![feature(final_associated_functions)]
+#![feature(forced_keywords)]
 #![feature(freeze_impls)]
 #![feature(fundamental)]
 #![feature(impl_restriction)]
@@ -152,6 +153,7 @@
 #![feature(pattern_types)]
 #![feature(pin_macro_internals)]
 #![feature(prelude_import)]
+#![feature(register_tool)]
 #![feature(repr_simd)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
@@ -187,6 +189,10 @@
 #![feature(wasm_target_feature)]
 #![feature(x86_amx_intrinsics)]
 // not-alphabetical-end
+
+// tidy-alphabetical-start
+#![register_tool(lint)]
+// tidy-alphabetical-end
 
 // tidy-alphabetical-start
 #![expect(clippy::partialeq_ne_impl, reason = "we need to implement ne for a lot of core types")]

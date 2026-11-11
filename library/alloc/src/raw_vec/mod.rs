@@ -309,6 +309,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// `NonNull::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must
     /// be careful.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn ptr(&self) -> *mut T {
         self.inner.ptr()
     }
@@ -626,11 +627,13 @@ impl<A: Allocator> RawVecInner<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn ptr<T>(&self) -> *mut T {
         self.non_null::<T>().as_ptr()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn non_null<T>(&self) -> NonNull<T> {
         self.ptr.cast()
     }

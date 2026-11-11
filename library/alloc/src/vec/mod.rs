@@ -1764,6 +1764,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[stable(feature = "vec_as_slice", since = "1.7.0")]
     #[rustc_diagnostic_item = "vec_as_slice"]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: `slice::from_raw_parts` requires pointee is a contiguous, aligned buffer of size
         // `len` containing properly-initialized `T`s. Data must not be mutated for the returned
@@ -1878,6 +1879,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// [`as_ptr`]: Vec::as_ptr
     /// [`as_non_null`]: Vec::as_non_null
     /// [didn't allocate]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[stable(feature = "vec_as_ptr", since = "1.37.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
     #[inline]

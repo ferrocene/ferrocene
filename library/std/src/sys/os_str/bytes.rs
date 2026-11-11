@@ -157,6 +157,7 @@ impl Buf {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn as_slice(&self) -> &Slice {
         // SAFETY: Slice is just a wrapper for [u8],
         // and self.inner.as_slice() returns &[u8].
@@ -291,6 +292,7 @@ impl Slice {
         unsafe { Slice::from_encoded_bytes_unchecked(s.as_bytes()) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn to_str(&self) -> Result<&str, crate::str::Utf8Error> {
         str::from_utf8(&self.inner)

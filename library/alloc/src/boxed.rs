@@ -1562,6 +1562,7 @@ impl<T: ?Sized> Box<T> {
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "box_raw", since = "1.4.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn into_raw(b: Self) -> *mut T {
         // Avoid `into_raw_with_allocator` as that interacts poorly with Miri's Stacked Borrows.
         let mut b = mem::ManuallyDrop::new(b);
@@ -1629,6 +1630,7 @@ impl<T: ?Sized> Box<T> {
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "box_vec_non_null", since = "1.99.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn into_non_null(b: Self) -> NonNull<T> {
         // As of August 2026, we cannot utilize `Box::leak`
         // because whether or not you can reconstruct the `Box`

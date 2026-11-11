@@ -296,6 +296,7 @@ impl<T: ?Sized + Unsize<U>, U: ?Sized> DispatchFromDyn<Arc<U>> for Arc<T> {}
 unsafe impl<T: ?Sized> CloneFromCell for Arc<T> {}
 
 impl<T: ?Sized> Arc<T> {
+    #[ferrocene::prevalidated]
     unsafe fn from_inner(ptr: NonNull<ArcInner<T>>) -> Self {
         // SAFETY: Upheld by caller.
         unsafe { Self::from_inner_in(ptr, Global) }
@@ -315,6 +316,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
         (this.ptr, unsafe { ptr::read(&this.alloc) })
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn from_inner_in(ptr: NonNull<ArcInner<T>>, alloc: A) -> Self {
         Self { ptr, phantom: PhantomData, alloc }
@@ -435,6 +437,7 @@ impl<T> Arc<T> {
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[ferrocene::prevalidated]
     pub fn new(data: T) -> Arc<T> {
         // Start the weak pointer count as 1 which is the weak pointer that's
         // held by all the strong pointers (kinda), see std/rc.rs for more info

@@ -41,7 +41,6 @@ struct Unvalidated;
 #[derive(Clone)]
 struct Unvalidated2;
 
-#[ferrocene::prevalidated]
 #[derive(Clone)]
 struct Validated;
 

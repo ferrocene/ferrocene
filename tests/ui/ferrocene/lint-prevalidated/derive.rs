@@ -8,6 +8,10 @@ fn main() {
 
     DeriveConstValidated.clone(); // ok
     DeriveConstUnvalidated.clone(); //~ ERROR unvalidated
+
+    // BUG: `<Layout as Clone>::clone` should be okay since Layout is marked
+    // prevalidated, but it errors!
+    core::alloc::Layout::new::<u32>().clone()
 }
 
 #[ferrocene::prevalidated]

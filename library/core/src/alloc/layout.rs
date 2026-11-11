@@ -283,6 +283,7 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn dangling_ptr(&self) -> NonNull<u8> {
         NonNull::without_provenance(self.align.as_nonzero_usize())
     }

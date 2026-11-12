@@ -80,17 +80,17 @@ Not applicable, no tailoring based on specific tool usage
 6.4.5.7
 ~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/scope`.
+Covered by :doc:`library-certification:safety-plan/scope`.
 
 6.3.5.7.a
 +++++++++
 
-Covered by "Assumed Requirements" in :doc:`core-certification:safety-plan/requirements`.
+Covered by "Assumed Requirements" in :doc:`library-certification:safety-plan/requirements`.
 
 6.4.5.7.b
 +++++++++
 
-Covered by "Assumed Requirements" in :doc:`core-certification:safety-plan/requirements`.
+Covered by "Assumed Requirements" in :doc:`library-certification:safety-plan/requirements`.
 
 6.4.5.8
 ~~~~~~~

@@ -17,20 +17,20 @@ Covered by the table of documents in :ref:`section 5.3.2.4 of the EN 50716 norm 
 
 Covered by
 
-- :doc:`core-certification:safety-plan/requirements`
+- :doc:`library-certification:safety-plan/requirements`
 - `Certified standard library API docs <../../../../index.html#library-apis>`_
 
 7
 "
 
-Covered by :doc:`core-certification:safety-plan/testing-plan`.
+Covered by :doc:`library-certification:safety-plan/testing-plan`.
 
 8
 "
 
 Covered by
 
-- :doc:`core-certification:safety-plan/requirements`
+- :doc:`library-certification:safety-plan/requirements`
 - `Certified standard library API docs <../../../../index.html#library-apis>`_
 
 9
@@ -85,7 +85,7 @@ The source code and its configuration history are provided with the ``ferrocene-
 Covered by
 
 - :doc:`qualification-report:rustc/index`
-- :doc:`core-certification:safety-report/code-coverage`
+- :doc:`library-certification:safety-report/code-coverage`
 
 21-24
 """""
@@ -117,7 +117,7 @@ N/A; the certified libraries are not configurable by application data.
 39-41
 """""
 
-Covered on the Ferrocene side by :doc:`safety-manual:procedures`; the deployment into the target system is performed by the customer, see 9.1 of :doc:`core-certification:norm-mapping/en-50716/en-50716`.
+Covered on the Ferrocene side by :doc:`safety-manual:procedures`; the deployment into the target system is performed by the customer, see 9.1 of :doc:`library-certification:norm-mapping/en-50716/en-50716`.
 
 42-45
 """""
@@ -153,7 +153,7 @@ Table A.3 — Software architecture (7.3)
 1
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language` (memory safety, bounds checking, strong typing).
+Covered by :doc:`library-certification:safety-plan/programming-language` (memory safety, bounds checking, strong typing).
 
 2-4
 """
@@ -173,7 +173,7 @@ Not used; the certified libraries are single-channel software without recovery, 
 15
 ""
 
-Covered by :doc:`core-certification:safety-plan/failure-analysis`.
+Covered by :doc:`library-certification:safety-plan/failure-analysis`.
 
 16
 ""
@@ -183,7 +183,7 @@ Not used; the certified libraries are single-channel software without recovery, 
 17
 ""
 
-Covered by the `Certified standard library API docs <../../../../index.html#library-apis>`_ and the Rust type system, see 7.3.4.18-19 of :doc:`core-certification:norm-mapping/en-50716/en-50716`.
+Covered by the `Certified standard library API docs <../../../../index.html#library-apis>`_ and the Rust type system, see 7.3.4.18-19 of :doc:`library-certification:norm-mapping/en-50716/en-50716`.
 
 18
 ""
@@ -219,19 +219,19 @@ Covered by
 6
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language` and :doc:`core-certification:safety-report/code-coverage`.
+Covered by :doc:`library-certification:safety-plan/programming-language` and :doc:`library-certification:safety-report/code-coverage`.
 
 7
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 The selected set is 2, 3, 4, 5, 7 and 8, which is an approved combination for |en_50716_core_sil| (requirement 2 of this table).
 
 8
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 The selected set is 2, 3, 4, 5, 7 and 8, which is an approved combination for |en_50716_core_sil| (requirement 2 of this table).
 
@@ -241,7 +241,7 @@ Table A.5 — Software component analysis and testing (6.2 and 7.4)
 1
 "
 
-Not used; no formal proof is performed. The static guarantees of the Rust language (type checking, borrow checking) provide an equivalent assurance, see :doc:`core-certification:safety-plan/programming-language`.
+Not used; no formal proof is performed. The static guarantees of the Rust language (type checking, borrow checking) provide an equivalent assurance, see :doc:`library-certification:safety-plan/programming-language`.
 
 2
 "
@@ -251,7 +251,7 @@ Covered by :ref:`safety-plan/testing-plan:rustc lints` and the ``tidy`` test sui
 3
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The selected techniques of Table A.13 are documented in that table.
 
@@ -263,7 +263,7 @@ Not used; no further metrics are measured. Size and complexity of the source cod
 5
 "
 
-Covered by :doc:`core-certification:safety-report/code-coverage`, see Table A.21.
+Covered by :doc:`library-certification:safety-report/code-coverage`, see Table A.21.
 
 6
 "
@@ -283,7 +283,7 @@ Table A.6 — Software integration analysis and testing (7.3 and 7.6)
 1
 "
 
-Covered by :doc:`core-certification:safety-plan/testing-plan` (the complete test suite is executed for every change on all qualified targets).
+Covered by :doc:`library-certification:safety-plan/testing-plan` (the complete test suite is executed for every change on all qualified targets).
 
 2
 "
@@ -301,7 +301,7 @@ N/A; timing performance depends on the system requirements, which are unknown du
 2
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The "overall software" of a library is its complete public API; the black-box tests are the doc-tests and the integration tests of the Ferrocene components that use the certified libraries.
 
@@ -394,7 +394,7 @@ As such, the certified libraries do not have an additional coding standard of th
 3
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language` (compiler recursion limit, functions with many parameters are discouraged). Requirement 1 of this table is applied: further modularization of some complex generic functions is not sensible.
+Covered by :doc:`library-certification:safety-plan/programming-language` (compiler recursion limit, functions with many parameters are discouraged). Requirement 1 of this table is applied: further modularization of some complex generic functions is not sensible.
 
 4
 "
@@ -422,7 +422,7 @@ Not used; no error seeding is performed.
 3
 "
 
-Covered by :doc:`core-certification:safety-report/code-coverage`: test execution is measured against the code structure for every release.
+Covered by :doc:`library-certification:safety-report/code-coverage`: test execution is measured against the code structure for every release.
 
 4
 "
@@ -462,7 +462,7 @@ Table A.15 — Suitable Programming Languages
 
 Covered by
 
-- :doc:`core-certification:safety-plan/programming-language` (all measures of this table)
+- :doc:`library-certification:safety-plan/programming-language` (all measures of this table)
 - :doc:`specification:index`, which documents the operational semantics of the language used
 - :ref:`safety-plan/testing-plan:code coverage tests` for measure 7
 
@@ -479,7 +479,7 @@ N/A; no modelling techniques are used. The design of each module is described in
 Table A.18 — Performance testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-N/A; timing and memory performance depend on the target system and on the application, which are unknown during the certification phase (see 7.9.2.14 of :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3`).
+N/A; timing and memory performance depend on the target system and on the application, which are unknown during the certification phase (see 7.9.2.14 of :doc:`library-certification:norm-mapping/iec-61508/iec-61508-3`).
 
 Table A.19 — Static analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -487,12 +487,12 @@ Table A.19 — Static analysis
 1, 2
 """"
 
-Covered by the Ferrocene compiler, which performs thorough control flow and data flow analysis (including the borrow checker), see :doc:`core-certification:safety-plan/programming-language`.
+Covered by the Ferrocene compiler, which performs thorough control flow and data flow analysis (including the borrow checker), see :doc:`library-certification:safety-plan/programming-language`.
 
 3
 "
 
-Covered by :doc:`core-certification:safety-plan/failure-analysis` and :doc:`evaluation-report:rustc/tool-analysis`.
+Covered by :doc:`library-certification:safety-plan/failure-analysis` and :doc:`evaluation-report:rustc/tool-analysis`.
 
 4
 "
@@ -505,12 +505,12 @@ Table A.20 — Components
 1
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language`: all items of a module and all fields and methods of a data structure are private unless explicitly made public.
+Covered by :doc:`library-certification:safety-plan/programming-language`: all items of a module and all fields and methods of a data structure are private unless explicitly made public.
 
 2
 "
 
-Covered by :doc:`core-certification:safety-plan/programming-language` (``clippy::too_many_arguments``).
+Covered by :doc:`library-certification:safety-plan/programming-language` (``clippy::too_many_arguments``).
 
 3
 "
@@ -523,11 +523,11 @@ Table A.21 — Test coverage for code
 1
 "
 
-Covered by :ref:`safety-plan/project-setup:lifecycle phases overview` (100 % statement coverage of the certified subset) and by :doc:`core-certification:safety-report/code-coverage`.
+Covered by :ref:`safety-plan/project-setup:lifecycle phases overview` (100 % statement coverage of the certified subset) and by :doc:`library-certification:safety-report/code-coverage`.
 
 2-5
 """
 
 Not measured; the code coverage report measures region/statement coverage.
 
-Requirement 4 of this table is applied: lines which cannot be covered by automated tests are annotated with ``#[ferrocene::annotation(REASON)]`` and reasoned there, see :ref:`safety-plan/testing-plan:manual test coverage`. Additionally, unused code cannot be executed, see :doc:`core-certification:safety-plan/uncertified-unused`.
+Requirement 4 of this table is applied: lines which cannot be covered by automated tests are annotated with ``#[ferrocene::annotation(REASON)]`` and reasoned there, see :ref:`safety-plan/testing-plan:manual test coverage`. Additionally, unused code cannot be executed, see :doc:`library-certification:safety-plan/uncertified-unused`.

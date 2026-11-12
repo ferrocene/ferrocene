@@ -14,7 +14,7 @@ ISO 26262 8-9
 9.4.1.1
 ~~~~~~~
 
-:doc:`core-certification:safety-plan/testing-plan`.
+:doc:`library-certification:safety-plan/testing-plan`.
 
 9.4.1.1.a
 +++++++++
@@ -64,7 +64,7 @@ See 9.4.1.1.
 9.4.1.2
 ~~~~~~~
 
-:doc:`core-certification:safety-plan/testing-plan`.
+:doc:`library-certification:safety-plan/testing-plan`.
 
 9.4.1.2.a
 +++++++++
@@ -92,7 +92,7 @@ See 9.4.1.2.
 9.4.2.1
 ~~~~~~~
 
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - :doc:`qualification-report:rustc/index`
 
 9.4.2.1.a
@@ -113,7 +113,7 @@ See 9.4.2.1.
 9.4.2.2
 ~~~~~~~
 
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - :doc:`qualification-report:rustc/index`
 
 9.4.2.2.a
@@ -154,7 +154,7 @@ See 9.4.2.2.
 9.4.2.3
 ~~~~~~~
 
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - :doc:`qualification-report:rustc/index`
 
 9.4.2.3.a
@@ -186,7 +186,7 @@ Covered by
 9.4.3.1
 ~~~~~~~
 
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - :doc:`qualification-report:rustc/index`
 
 9.4.3.2

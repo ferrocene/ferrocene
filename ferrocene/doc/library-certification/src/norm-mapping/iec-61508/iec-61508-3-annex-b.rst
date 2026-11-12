@@ -15,7 +15,7 @@ Table B.1 - Design and coding standards
 2, 5, 7, 8
 """"""""""
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 Table B.2 - Dynamic analysis and testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,7 +28,7 @@ Table B.2 - Dynamic analysis and testing
 7b
 ""
 
-Covered by :doc:`core-certification:safety-report/code-coverage`.
+Covered by :doc:`library-certification:safety-report/code-coverage`.
 
 Table B.3 - Functional and black-box testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,7 +44,7 @@ Table B.4 - Failure analysis
 3
 "
 
-Covered by :doc:`core-certification:safety-plan/failure-analysis`.
+Covered by :doc:`library-certification:safety-plan/failure-analysis`.
 
 
 Table B.5 - Modelling
@@ -71,7 +71,7 @@ N/A
 Table B.7 - Semi-formal methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/requirements`.
+Covered by :doc:`library-certification:safety-plan/requirements`.
 
 Table B.8 - Static analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,7 +79,7 @@ Table B.8 - Static analysis
 3-4
 """
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 Table B.9 - Modular approach
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,4 +87,4 @@ Table B.9 - Modular approach
 1, 3, 4, 5, 6
 """""""""""""
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.

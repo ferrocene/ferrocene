@@ -7,7 +7,7 @@ IEC 61508-3
 4
 ~
 
-1. The :doc:`core-certification:safety-plan/scope` specifies and justifies the SIL.
+1. The :doc:`library-certification:safety-plan/scope` specifies and justifies the SIL.
 2. The certified library certification excludes the requirement of having an architecture.
 
    .. include:: ../../partials/simple-design.rst
@@ -25,7 +25,7 @@ Covered by :ref:`6.2 of IEC 61508-1 <norm-mapping/iec-61508/iec-61508-1:6.2>`.
 6.2.2
 ~~~~~
 
-Covered by :doc:`the Safety Plan <core-certification:safety-plan/purpose>`.
+Covered by :doc:`the Safety Plan <library-certification:safety-plan/purpose>`.
 
 6.2.3
 ~~~~~
@@ -49,14 +49,14 @@ Covered by :ref:`safety-plan/project-setup:v-model`.
 7.1.2.7
 ~~~~~~~
 
-Covered by :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3-annex-a`.
+Covered by :doc:`library-certification:norm-mapping/iec-61508/iec-61508-3-annex-a`.
 
 7.1.2.8-9
 ~~~~~~~~~
 
 The following relevant artefacts are included in the deliverables:
 
-- :doc:`Code coverage report <core-certification:safety-report/code-coverage>`
+- :doc:`Code coverage report <library-certification:safety-report/code-coverage>`
 - :doc:`Test results <qualification-report:rustc/index>`
 - :ref:`safety-plan/requirements:quality of the doc-comments`
 - `Certified standard library API docs <../../../../index.html#library-apis>`_
@@ -64,7 +64,7 @@ The following relevant artefacts are included in the deliverables:
 7.2.2.1-3
 ~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/requirements`.
+Covered by :doc:`library-certification:safety-plan/requirements`.
 
 7.2.2.4
 ~~~~~~~
@@ -100,7 +100,7 @@ N/A; the certified libraries do not use, and therefore do not configure, any pre
 7.3.2.1-5
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.4.2.1
 ~~~~~~~
@@ -137,12 +137,12 @@ N/A, therefore no architecture is needed
 7.4.4.1-9
 ~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/tools`.
+Covered by :doc:`library-certification:safety-plan/tools`.
 
 7.4.4.10-11
 ~~~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/programming-language`.
+Covered by :doc:`library-certification:safety-plan/programming-language`.
 
 7.4.4.12-13
 ~~~~~~~~~~~
@@ -182,12 +182,12 @@ Covered by :ref:`safety-plan/project-setup:responsibility split`.
 7.4.7-8
 ~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.5
 ~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.6
 ~~~
@@ -202,7 +202,7 @@ Objective met.
 7.7.2.1-4
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.7.2.5-6
 ~~~~~~~~~
@@ -212,7 +212,7 @@ Covered by :ref:`safety-plan/testing-plan:unit tests`.
 7.7.2.7-9
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.8
 ~~~
@@ -230,7 +230,7 @@ Objective met.
 7.9.2.1-7
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.9.2.8
 ~~~~~~~
@@ -245,7 +245,7 @@ N/A; There is no architecture design.
 7.9.2.10-13
 ~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.9.2.14
 ~~~~~~~~

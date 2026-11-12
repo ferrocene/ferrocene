@@ -1333,7 +1333,7 @@
 
 # Download URL for the core library technical report. If omitted, the
 # technical report will not be included in the documentation.
-#core-technical-report-url = <none> (url)
+#library-technical-report-url = <none> (url)
 
 # Amazon Web Services profile that you may have to set to work with AWS resources
 # while working locally.

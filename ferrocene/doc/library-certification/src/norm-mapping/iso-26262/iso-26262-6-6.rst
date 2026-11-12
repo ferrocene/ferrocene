@@ -11,14 +11,14 @@ ISO 26262 6-6
 6.4.1
 ------
 
-- :doc:`core-certification:safety-plan/requirements`
+- :doc:`library-certification:safety-plan/requirements`
 - Requirements are directly on unit level, no overall safety requirements as these are independent
   library functionalities
 
 6.4.2
 -----
 
-Covered by :doc:`core-certification:safety-plan/requirements`.
+Covered by :doc:`library-certification:safety-plan/requirements`.
 
 6.4.2.a
 ~~~~~~~

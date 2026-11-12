@@ -19,7 +19,7 @@ N/A; there is no system in which the certified libraries are embedded during the
 4.2-3
 ~~~~~
 
-All functions in all certified libraries are deemed to be of the same software integrity level, see :ref:`safety-plan/scope:systematic capabilities`. The certified libraries are targeting |en_50716_core_sil|, see :doc:`core-certification:safety-plan/scope`.
+All functions in all certified libraries are deemed to be of the same software integrity level, see :ref:`safety-plan/scope:systematic capabilities`. The certified libraries are targeting |en_50716_core_sil|, see :doc:`library-certification:safety-plan/scope`.
 
 4.4
 ~~~
@@ -34,7 +34,7 @@ Covered by this norm mapping and by :ref:`safety-plan/project-setup:safety asses
 4.6-9
 ~~~~~
 
-The selection of the techniques and measures of Annex A, including the justification for every deviation from a highly recommended (HR) technique and for every technique not contained in the tables, is documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The selection of the techniques and measures of Annex A, including the justification for every deviation from a highly recommended (HR) technique and for every technique not contained in the tables, is documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 4.10
 ~~~~
@@ -162,9 +162,9 @@ The plans required by this document are distributed over the Ferrocene certifica
    * - Document of EN 50716
      - Ferrocene document
    * - Software Quality Assurance Plan
-     - :doc:`core-certification:safety-plan/purpose` and :doc:`qualification-plan:index`
+     - :doc:`library-certification:safety-plan/purpose` and :doc:`qualification-plan:index`
    * - Software Verification Plan
-     - :doc:`qualification-plan:development` and :doc:`core-certification:safety-plan/testing-plan`
+     - :doc:`qualification-plan:development` and :doc:`library-certification:safety-plan/testing-plan`
    * - Software Validation Plan
      - :doc:`qualification-plan:validation`
    * - Software Configuration Management Plan
@@ -230,7 +230,7 @@ Covered by the following subsections.
 6.1.1-3
 ~~~~~~~
 
-The test specifications are the test suites in the source code, described in :doc:`core-certification:safety-plan/testing-plan`; the test reports are the :doc:`test results <qualification-report:rustc/index>`.
+The test specifications are the test suites in the source code, described in :doc:`library-certification:safety-plan/testing-plan`; the test reports are the :doc:`test results <qualification-report:rustc/index>`.
 
 There are no separate test specification documents for the software/hardware integration level, see 7.3.4.34-40.
 
@@ -254,7 +254,7 @@ No measurement equipment is used; testing is performed on real targets and emula
 
 Covered by
 
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 - :doc:`qualification-report:rustc/index`
 
 Deviation: the Test Specification is the test suite source code (test cases, test data and expected results are the assertions), and the Test Report is the CI test report, which also records the identity and configuration of all items involved.
@@ -262,7 +262,7 @@ Deviation: the Test Specification is the test suite source code (test cases, tes
 6.2.1-4
 ~~~~~~~
 
-Covered by :doc:`qualification-plan:development` and :doc:`core-certification:safety-plan/testing-plan`.
+Covered by :doc:`qualification-plan:development` and :doc:`library-certification:safety-plan/testing-plan`.
 
 6.2.4.1-4
 ~~~~~~~~~
@@ -272,7 +272,7 @@ Covered by :doc:`qualification-plan:development`; the verification results are r
 6.2.4.5
 ~~~~~~~
 
-The techniques and measures chosen from Table A.5, Table A.6 and Table A.7 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures chosen from Table A.5, Table A.6 and Table A.7 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 6.2.4.6-9
 ~~~~~~~~~
@@ -282,7 +282,7 @@ Covered by
 - :ref:`safety-plan/project-setup:safety case`
 - :doc:`qualification-report:rustc/index`
 
-Performance requirements are not verified at library level, see 7.9.2.14 of :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3`.
+Performance requirements are not verified at library level, see 7.9.2.14 of :doc:`library-certification:norm-mapping/iec-61508/iec-61508-3`.
 
 6.2.4.10-11
 ~~~~~~~~~~~
@@ -319,7 +319,7 @@ Ferrous Systems does not appoint a separate Validator; the independence is achie
 Covered by
 
 - :ref:`Validation Strategy <qualification-plan:validation:Validation Strategy>`
-- :doc:`core-certification:safety-plan/testing-plan`
+- :doc:`library-certification:safety-plan/testing-plan`
 
 Only dynamic testing (real targets and emulators) is used; no static, analytical or statistical validation techniques are applied beyond the code coverage measurement.
 
@@ -367,7 +367,7 @@ The Software Assessment Plan is written by the Assessor, based on the deliverabl
 6.4.4.6-7
 ~~~~~~~~~
 
-The application conditions of the certified libraries are documented in :doc:`safety-manual:core/constraints`; the applied techniques of Annex A are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The application conditions of the certified libraries are documented in :doc:`safety-manual:core/constraints`; the applied techniques of Annex A are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 6.4.4.8
 ~~~~~~~
@@ -400,7 +400,7 @@ Covered by the documents listed in 5.3.2.4 and by
 - :ref:`safety-plan/project-setup:internal procedures`
 - :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
 
-The techniques and measures of Table A.9 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures of Table A.9 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 6.5.4.1-6
 ~~~~~~~~~
@@ -410,7 +410,7 @@ Covered by the documents listed in 5.3.2.4 and by
 - :ref:`safety-plan/project-setup:internal procedures`
 - :doc:`Qualification Plan - Ferrocene Organization <qualification-plan:organization>`
 
-The techniques and measures of Table A.9 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures of Table A.9 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 6.5.4.7-8
 ~~~~~~~~~
@@ -447,7 +447,7 @@ Covered by
 
 - :ref:`safety-plan/requirements:tracing requirements to tests`
 - :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
-- :doc:`core-certification:safety-report/code-coverage`
+- :doc:`library-certification:safety-report/code-coverage`
 
 Code which cannot be traced or tested is annotated and justified, see :ref:`safety-plan/testing-plan:manual test coverage`.
 
@@ -526,7 +526,7 @@ Covered by :ref:`safety-plan/project-setup:v-model`.
 7.1.2.1
 ~~~~~~~
 
-The documents of Table A.1 are listed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` and provided as described in :ref:`safety-plan/deliverables:Deliverables and documents`.
+The documents of Table A.1 are listed in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a` and provided as described in :ref:`safety-plan/deliverables:Deliverables and documents`.
 
 7.1.2.2
 ~~~~~~~
@@ -536,23 +536,23 @@ Covered by :ref:`safety-plan/project-setup:v-model`.
 7.2.1-3
 ~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+Covered by :doc:`library-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
 
-Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+Robustness and maintainability requirements are covered by :doc:`library-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 7.2.4.1-5
 ~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+Covered by :doc:`library-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
 
-Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+Robustness and maintainability requirements are covered by :doc:`library-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 7.2.4.13
 ~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
+Covered by :doc:`library-certification:safety-plan/requirements`: the doc-comments plus the function signature are the Software Requirements Specification of each function.
 
-Robustness and maintainability requirements are covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
+Robustness and maintainability requirements are covered by :doc:`library-certification:safety-plan/programming-language` and :ref:`safety-plan/project-setup:lifecycle phases overview`.
 
 7.2.4.6
 ~~~~~~~
@@ -564,7 +564,7 @@ Covered by the `Certified standard library API docs <../../../../index.html#libr
 7.2.4.7-8
 ~~~~~~~~~
 
-The behaviour of every function, including its failure behaviour (panic), is documented in its doc-comment, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. The user shall compile with ``-C panic=abort``, see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`.
+The behaviour of every function, including its failure behaviour (panic), is documented in its doc-comment, see :ref:`safety-plan/requirements:doc-comments in the certified libraries`. The user shall compile with ``-C panic=abort``, see :qualification:id:`LIBS_CSTR_0020_PANIC_ABORT`.
 
 There is no programmable electronics in the certification scope.
 
@@ -583,9 +583,9 @@ N/A; there is no hardware to be checked by the software.
 7.2.4.11-12
 ~~~~~~~~~~~
 
-N/A for periodic testing and for testability during overall system operation: the overall system is unknown at certification time, see 7.9.2.14 of :doc:`core-certification:norm-mapping/iec-61508/iec-61508-3`.
+N/A for periodic testing and for testability during overall system operation: the overall system is unknown at certification time, see 7.9.2.14 of :doc:`library-certification:norm-mapping/iec-61508/iec-61508-3`.
 
-All functions of the certified subset are testable and tested, see :doc:`core-certification:safety-report/code-coverage`.
+All functions of the certified subset are testable and tested, see :doc:`library-certification:safety-report/code-coverage`.
 
 7.2.4.14
 ~~~~~~~~
@@ -597,14 +597,14 @@ N/A; no function of the certified libraries can be configured by application dat
 7.2.4.15
 ~~~~~~~~
 
-The techniques and measures chosen from Table A.2 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures chosen from Table A.2 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 7.2.4.16-19
 ~~~~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/testing-plan`: the Overall Software Test Specification is the set of unit test, doc-test and integration test suites executed by the CI for every change on all qualified targets.
+Covered by :doc:`library-certification:safety-plan/testing-plan`: the Overall Software Test Specification is the set of unit test, doc-test and integration test suites executed by the CI for every change on all qualified targets.
 
-Out-of-specification inputs (7.2.4.19 d)) are covered by the tests of panics and error paths, see :ref:`safety-plan/testing-plan:unit tests` and :doc:`core-certification:safety-report/code-coverage`.
+Out-of-specification inputs (7.2.4.19 d)) are covered by the tests of panics and error paths, see :ref:`safety-plan/testing-plan:unit tests` and :doc:`library-certification:safety-report/code-coverage`.
 
 7.2.4.20-22
 ~~~~~~~~~~~
@@ -660,17 +660,17 @@ The feasibility of the required integrity level is argued in :ref:`safety-plan/s
 7.3.4.4
 ~~~~~~~
 
-N/A; there is no hardware in the certification scope, see :doc:`core-certification:safety-plan/alloc` for the allocator interface which must be implemented by the user.
+N/A; there is no hardware in the certification scope, see :doc:`library-certification:safety-plan/alloc` for the allocator interface which must be implemented by the user.
 
 7.3.4.5-6
 ~~~~~~~~~
 
-All software components (modules) of the certified libraries are identified in the `Certified standard library API docs <../../../../index.html#library-apis>`_ and in :doc:`core-certification:safety-report/subset`. They are all new from the point of view of this certification and are individually versioned by git, see :ref:`safety-plan/project-setup:configuration`.
+All software components (modules) of the certified libraries are identified in the `Certified standard library API docs <../../../../index.html#library-apis>`_ and in :doc:`library-certification:safety-report/subset`. They are all new from the point of view of this certification and are individually versioned by git, see :ref:`safety-plan/project-setup:configuration`.
 
 7.3.4.7-8
 ~~~~~~~~~
 
-N/A; the certified libraries are handled as a new development, they do not integrate pre-existing software elements (see 8-12 of :doc:`core-certification:norm-mapping/iso-26262/applicable-clauses`).
+N/A; the certified libraries are handled as a new development, they do not integrate pre-existing software elements (see 8-12 of :doc:`library-certification:norm-mapping/iso-26262/applicable-clauses`).
 
 7.3.4.9
 ~~~~~~~
@@ -680,7 +680,7 @@ All functions in all certified libraries are deemed to be of the same software i
 7.3.4.11
 ~~~~~~~~
 
-Fault avoidance is achieved by the language and the tooling, see :doc:`core-certification:safety-plan/programming-language`. Possible failures and their mitigation are analysed in :doc:`core-certification:safety-plan/failure-analysis`.
+Fault avoidance is achieved by the language and the tooling, see :doc:`library-certification:safety-plan/programming-language`. Possible failures and their mitigation are analysed in :doc:`library-certification:safety-plan/failure-analysis`.
 
 7.3.4.13
 ~~~~~~~~
@@ -713,12 +713,12 @@ Covered by :ref:`safety-plan/requirements:architecture and software design`: the
 
 .. include:: ../../partials/simple-design.rst
 
-The techniques and measures chosen from Table A.4 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures chosen from Table A.4 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 7.3.4.25
 ~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/programming-language`; the criteria of Table A.15 are assessed in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+Covered by :doc:`library-certification:safety-plan/programming-language`; the criteria of Table A.15 are assessed in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 7.3.4.26-28
 ~~~~~~~~~~~
@@ -730,7 +730,7 @@ As such, the certified libraries do not have a coding standard of their own; the
 7.3.4.29
 ~~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/programming-language` (modularity, encapsulation, data structures) and :ref:`safety-plan/scope:systematic capabilities` (verifiability through coverage).
+Covered by :doc:`library-certification:safety-plan/programming-language` (modularity, encapsulation, data structures) and :ref:`safety-plan/scope:systematic capabilities` (verifiability through coverage).
 
 7.3.4.30-33
 ~~~~~~~~~~~
@@ -767,7 +767,7 @@ Covered by the module doc-comments and the source code, see :ref:`safety-plan/re
 7.4.4.7-10
 ~~~~~~~~~~
 
-Covered by :ref:`safety-plan/testing-plan:unit tests`. The required criteria and degree of test coverage are defined in :ref:`safety-plan/project-setup:lifecycle phases overview` (100 % statement coverage) and justified in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a` (Table A.21).
+Covered by :ref:`safety-plan/testing-plan:unit tests`. The required criteria and degree of test coverage are defined in :ref:`safety-plan/project-setup:lifecycle phases overview` (100 % statement coverage) and justified in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a` (Table A.21).
 
 7.4.4.11-13
 ~~~~~~~~~~~
@@ -780,7 +780,7 @@ Covered by
 7.5.1-3
 ~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:configuration`.
+Covered by :doc:`library-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:configuration`.
 
 7.5.4.1-4
 ~~~~~~~~~
@@ -788,14 +788,14 @@ Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-p
 Covered by
 
 - :ref:`safety-plan/project-setup:configuration` (all source code is under configuration control before testing)
-- :doc:`core-certification:safety-plan/programming-language` (size and complexity: compiler recursion limit, discouraged many-parameter functions)
+- :doc:`library-certification:safety-plan/programming-language` (size and complexity: compiler recursion limit, discouraged many-parameter functions)
 
 7.5.4.5-7
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
-The statement of test coverage per component is provided by :doc:`core-certification:safety-report/code-coverage`.
+The statement of test coverage per component is provided by :doc:`library-certification:safety-report/code-coverage`.
 
 7.5.4.8-10
 ~~~~~~~~~~
@@ -811,7 +811,7 @@ The correct application of the coding standard is verified by these lints, see 7
 7.6.1-3
 ~~~~~~~
 
-Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`core-certification:safety-plan/testing-plan`.
+Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`library-certification:safety-plan/testing-plan`.
 
 7.6.4.1-2
 ~~~~~~~~~
@@ -821,7 +821,7 @@ Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`qualifica
 7.6.4.3-6
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The identity and configuration of all items involved is recorded in the CI artifacts (see :ref:`safety-plan/project-setup:configuration`).
 
@@ -840,12 +840,12 @@ Covered by :doc:`qualification-report:rustc/index` and :ref:`safety-plan/project
 7.7.1-3
 ~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:safety case`.
+Covered by :doc:`library-certification:safety-plan/testing-plan` and :ref:`safety-plan/project-setup:safety case`.
 
 7.7.4.1-4
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The Overall Software Test Specification and Report are the complete Ferrocene test suite and its results on all qualified targets; there is no separate overall test document.
 
@@ -863,7 +863,7 @@ Covered by
 - :ref:`safety-plan/project-setup:safety case`
 - :doc:`Requirements traceability report <qualification-report:requirements-traceability>`
 
-The evaluation of the applied techniques and measures is documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The evaluation of the applied techniques and measures is documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 7.7.4.11-12
 ~~~~~~~~~~~
@@ -918,7 +918,7 @@ Covered by :doc:`safety-manual:procedures` (Installation Procedures) and :doc:`u
 9.1.4.8-9
 ~~~~~~~~~
 
-Covered by the constraint to use matching versions of the certified libraries and ``rustc``, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`, and by static linking only, see :qualification:id:`CORE_CSTR_0080_LINK_STATIC`.
+Covered by the constraint to use matching versions of the certified libraries and ``rustc``, see :qualification:id:`LIBS_CSTR_0040_MATCHING_VERSION`, and by static linking only, see :qualification:id:`LIBS_CSTR_0080_LINK_STATIC`.
 
 9.1.4.10
 ~~~~~~~~
@@ -928,7 +928,7 @@ N/A for the certified libraries themselves: a rollback is achieved by re-install
 9.1.4.11
 ~~~~~~~~
 
-N/A; the certified libraries are statically linked into the application binary and are not loaded at run-time. Their identity is established through the matching versions constraint, see :qualification:id:`CORE_CSTR_0040_MATCHING_VERSION`.
+N/A; the certified libraries are statically linked into the application binary and are not loaded at run-time. Their identity is established through the matching versions constraint, see :qualification:id:`LIBS_CSTR_0040_MATCHING_VERSION`.
 
 9.1.4.12-14
 ~~~~~~~~~~~
@@ -940,7 +940,7 @@ Covered on the Ferrocene side by :doc:`qualification-plan:change-tracking` (trac
 9.1.4.15
 ~~~~~~~~
 
-N/A; fault monitoring is a system level activity. The certified libraries report failures by panicking, which is documented per function in the API docs (see :qualification:id:`CORE_CSTR_0020_PANIC_ABORT`).
+N/A; fault monitoring is a system level activity. The certified libraries report failures by panicking, which is documented per function in the API docs (see :qualification:id:`LIBS_CSTR_0020_PANIC_ABORT`).
 
 9.1.4.16-19
 ~~~~~~~~~~~
@@ -967,7 +967,7 @@ Maintenance is performed with the same process as the development (see 9.2.4.15-
 9.2.4.4
 ~~~~~~~
 
-Covered by :doc:`core-certification:safety-plan/programming-language` and :ref:`safety-plan/requirements:architecture and software design`.
+Covered by :doc:`library-certification:safety-plan/programming-language` and :ref:`safety-plan/requirements:architecture and software design`.
 
 9.2.4.5-6
 ~~~~~~~~~
@@ -978,7 +978,7 @@ Covered by
 - :doc:`qualification-plan:kp-tracking`
 - :doc:`safety-manual:customer-interactions`
 
-The techniques and measures of Table A.10 are documented in :doc:`core-certification:norm-mapping/en-50716/en-50716-annex-a`.
+The techniques and measures of Table A.10 are documented in :doc:`library-certification:norm-mapping/en-50716/en-50716-annex-a`.
 
 9.2.4.7-10
 ~~~~~~~~~~
@@ -1010,4 +1010,4 @@ Covered by
 
 - :doc:`qualification-plan:kp-tracking` (severity tagging and impact of every known problem)
 - :doc:`safety-manual:known-problems` (workaround, detection and mitigation strategies)
-- :doc:`core-certification:safety-plan/failure-analysis`
+- :doc:`library-certification:safety-plan/failure-analysis`

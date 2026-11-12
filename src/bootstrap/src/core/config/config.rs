@@ -366,7 +366,7 @@ pub(crate) struct Config {
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_allow_dev_signing: bool,
     pub ferrocene_compiler_technical_report_url: Option<String>,
-    pub ferrocene_core_technical_report_url: Option<String>,
+    pub ferrocene_library_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
 }
 
@@ -1209,7 +1209,7 @@ impl Config {
         let mut ferrocene_tarball_signing_kms_key_arn = Default::default();
         let mut ferrocene_document_signatures = Default::default();
         let mut ferrocene_compiler_technical_report_url = Default::default();
-        let mut ferrocene_core_technical_report_url = Default::default();
+        let mut ferrocene_library_technical_report_url = Default::default();
         let mut ferrocene_secret_sauce = Default::default();
         let mut ferrocene_allow_dev_signing = Default::default();
         if let Some(f) = toml.ferrocene {
@@ -1231,7 +1231,7 @@ impl Config {
             ferrocene_oxidos_src = f.oxidos_src;
             ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             ferrocene_compiler_technical_report_url = f.compiler_technical_report_url;
-            ferrocene_core_technical_report_url = f.core_technical_report_url;
+            ferrocene_library_technical_report_url = f.library_technical_report_url;
             ferrocene_document_signatures = match (
                 f.document_signatures.as_deref(),
                 f.document_signatures_s3_bucket,
@@ -1842,7 +1842,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             ferrocene_tarball_signing_kms_key_arn,
             ferrocene_document_signatures,
             ferrocene_compiler_technical_report_url,
-            ferrocene_core_technical_report_url,
+            ferrocene_library_technical_report_url,
             ferrocene_secret_sauce,
             ferrocene_allow_dev_signing,
         }

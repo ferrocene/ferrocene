@@ -1788,6 +1788,7 @@ impl AsRef<OsStr> for String {
 }
 
 impl FromInner<Buf> for OsString {
+    #[ferrocene::prevalidated]
     #[inline]
     fn from_inner(buf: Buf) -> OsString {
         OsString { inner: buf }
@@ -1802,6 +1803,7 @@ impl IntoInner<Buf> for OsString {
 }
 
 impl AsInner<Slice> for OsStr {
+    #[ferrocene::prevalidated]
     #[inline]
     fn as_inner(&self) -> &Slice {
         &self.inner

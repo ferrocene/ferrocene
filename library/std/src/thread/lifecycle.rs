@@ -35,11 +35,7 @@ where
             n => return n - 1,
         }
 
-        // Ferrocene modification: Users are not allowed to use RUST_MIN_STACK
-        // to modify the stack size. This is to reduce the certification effort.
-        #[expect(ferrocene::unvalidated)]
-        let rust_min_stack = env::var_os("RUST_MIN_STACK");
-        let amt = rust_min_stack
+        let amt = env::var_os("RUST_MIN_STACK")
             .and_then(|s| s.to_str().and_then(|s| s.parse().ok()))
             .unwrap_or(imp::DEFAULT_MIN_STACK_SIZE);
 

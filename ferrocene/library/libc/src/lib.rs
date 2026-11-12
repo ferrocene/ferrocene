@@ -198,7 +198,7 @@
     ambiguous_glob_reexports,
     unsafe_op_in_unsafe_fn,
     missing_abi,
-    useless_deprecated,
+    useless_deprecated
 )]
 // Pretty much all C API doesn't match Rust conventions.
 #![allow(nonstandard_style)]
@@ -235,6 +235,9 @@
 #![cfg_attr(feature = "rustc-dep-of-std", allow(static_mut_refs))]
 #![cfg_attr(not(feature = "rustc-dep-of-std"), no_std)]
 #![cfg_attr(feature = "rustc-dep-of-std", no_core)]
+//
+// Ferrocene additions:
+#![warn(ferrocene::unvalidated)]
 
 #[macro_use]
 mod macros;

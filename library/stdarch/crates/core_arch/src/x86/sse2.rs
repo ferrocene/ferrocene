@@ -16,6 +16,7 @@ use crate::{
 /// loops.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_pause)
+#[ferrocene::prevalidated]
 #[inline]
 #[cfg_attr(all(test, target_feature = "sse2"), assert_instr(pause))]
 #[stable(feature = "simd_x86", since = "1.27.0")]

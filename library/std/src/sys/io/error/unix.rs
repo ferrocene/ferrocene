@@ -4,6 +4,7 @@ use crate::ffi::{CStr, c_char};
 use crate::{fmt, io};
 
 unsafe extern "C" {
+    #[ferrocene::prevalidated]
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "vxworks",
@@ -45,6 +46,7 @@ unsafe extern "C" {
 }
 
 /// Returns the platform-specific value of errno
+#[ferrocene::prevalidated]
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "vxworks",
@@ -130,11 +132,13 @@ pub fn set_errno(val: i32) {
     }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 pub fn is_interrupted(errno: i32) -> bool {
     errno == libc::EINTR
 }
 
+#[ferrocene::prevalidated]
 pub fn decode_error_kind(errno: i32) -> io::ErrorKind {
     use io::ErrorKind::*;
     match errno as libc::c_int {
@@ -194,6 +198,7 @@ pub fn decode_error_kind(errno: i32) -> io::ErrorKind {
 }
 
 /// Gets a detailed string description for the given error number.
+#[ferrocene::prevalidated]
 #[cfg(any(target_family = "unix", target_os = "wasi"))]
 pub fn format_error(errno: i32, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     const TMPBUF_SZ: usize = if cfg!(target_os = "wasi") { 1024 } else { 128 };

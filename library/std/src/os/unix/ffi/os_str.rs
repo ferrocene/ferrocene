@@ -26,6 +26,7 @@ pub impl(self) trait OsStringExt {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl OsStringExt for OsString {
     #[inline]
+    #[ferrocene::prevalidated]
     fn from_vec(vec: Vec<u8>) -> OsString {
         FromInner::from_inner(Buf { inner: vec })
     }
@@ -60,6 +61,7 @@ impl OsStrExt for OsStr {
     }
     #[inline]
     #[rustdoc_skip_body]
+    #[ferrocene::prevalidated]
     fn as_bytes(&self) -> &[u8] {
         &self.as_inner().inner
     }

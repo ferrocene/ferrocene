@@ -106,6 +106,7 @@ impl Flag {
 
     /// Checks the flag for an unguarded borrow, where we only care about existing poison.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) fn borrow(&self) -> LockResult<()> {
         if self.get() { Err(PoisonError::new(())) } else { Ok(()) }
     }
@@ -134,12 +135,14 @@ impl Flag {
 
     #[inline]
     #[cfg(panic = "unwind")]
+    #[ferrocene::prevalidated]
     pub(crate) fn get(&self) -> bool {
         self.failed.load(Ordering::Relaxed)
     }
 
     #[inline(always)]
     #[cfg(not(panic = "unwind"))]
+    #[ferrocene::prevalidated]
     pub(crate) fn get(&self) -> bool {
         false
     }
@@ -266,6 +269,7 @@ impl<T> PoisonError<T> {
     #[doc(auto_cfg = false)]
     #[cfg(panic = "unwind")]
     #[stable(feature = "sync_poison", since = "1.2.0")]
+    #[ferrocene::prevalidated]
     pub fn new(data: T) -> PoisonError<T> {
         PoisonError { data }
     }
@@ -376,6 +380,7 @@ impl<T> Error for TryLockError<T> {
     }
 }
 
+#[ferrocene::prevalidated]
 pub(crate) fn map_result<T, U, F>(result: LockResult<T>, f: F) -> LockResult<U>
 where
     F: FnOnce(T) -> U,

@@ -1378,6 +1378,7 @@ impl<T, A: Allocator> Box<[mem::MaybeUninit<T>], A> {
     ///
     /// assert_eq!(*values, [1, 2, 3])
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[inline]
     pub unsafe fn assume_init(self) -> Box<[T], A> {
@@ -1814,6 +1815,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [`deallocate`]: Allocator::deallocate
+    #[ferrocene::prevalidated]
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]

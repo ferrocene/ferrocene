@@ -78,6 +78,7 @@ pub use realalloc::collections::TryReserveError;
 #[cfg(not(test))]
 impl TryReserveError {
     /// Details about the allocation that caused the error
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(
@@ -122,6 +123,7 @@ pub enum TryReserveErrorKind {
     },
 }
 
+#[ferrocene::prevalidated]
 #[unstable(
     feature = "try_reserve_kind",
     reason = "Uncertain how much info should be exposed",

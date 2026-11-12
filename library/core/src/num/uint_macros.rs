@@ -1419,6 +1419,7 @@ macro_rules! uint_impl {
         /// [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked
         #[doc = concat!("[`checked_mul`]: ", stringify!($SelfT), "::checked_mul")]
         #[doc = concat!("[`wrapping_mul`]: ", stringify!($SelfT), "::wrapping_mul")]
+        #[ferrocene::prevalidated]
         #[stable(feature = "unchecked_math", since = "1.79.0")]
         #[rustc_const_stable(feature = "unchecked_math", since = "1.79.0")]
         #[must_use = "this returns the result of the operation, \

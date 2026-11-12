@@ -1911,6 +1911,7 @@ extern "C" {
     #[cfg_attr(gnu_time_bits64, link_name = "__clock_getres64")]
     #[cfg_attr(musl_redir_time64, link_name = "__clock_getres_time64")]
     pub fn clock_getres(clk_id: crate::clockid_t, tp: *mut crate::timespec) -> c_int;
+    #[ferrocene::prevalidated]
     #[cfg_attr(
         any(gnu_time_bits64, musl_redir_time64),
         link_name = "__clock_gettime64"

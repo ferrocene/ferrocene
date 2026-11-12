@@ -488,6 +488,7 @@ impl CStr {
     ///
     /// assert_eq!(unsafe { CStr::from_ptr(ptr) }, c"HI!");
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -661,6 +662,7 @@ impl CStr {
     /// let cstr = c"Hello, world!";
     /// println!("{}", cstr.display());
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "cstr_display", since = "CURRENT_RUSTC_VERSION")]
     #[must_use = "this does not display the `CStr`; \
                   it returns an object that can be displayed"]

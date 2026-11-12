@@ -794,6 +794,7 @@ extern "C" {
         target_os = "visionos"
     )))]
     pub fn system(s: *const c_char) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn getenv(s: *const c_char) -> *mut c_char;
 
     pub fn strcpy(dst: *mut c_char, src: *const c_char) -> *mut c_char;

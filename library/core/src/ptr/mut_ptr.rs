@@ -1231,6 +1231,7 @@ impl<T: PointeeSized> *mut T {
     ///     ptr = ptr.wrapping_sub(step);
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
@@ -1251,6 +1252,7 @@ impl<T: PointeeSized> *mut T {
     ///
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]

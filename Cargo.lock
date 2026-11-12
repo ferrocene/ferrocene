@@ -2591,7 +2591,6 @@ dependencies = [
  "ipc-channel",
  "libc",
  "libffi",
- "libffi-sys",
  "libloading",
  "measureme",
  "mio",
@@ -5225,7 +5224,7 @@ dependencies = [
 
 [[package]]
 name = "rustfmt-nightly"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "annotate-snippets 0.12.16",
  "anyhow",

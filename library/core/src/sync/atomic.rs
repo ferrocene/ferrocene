@@ -836,12 +836,12 @@ impl AtomicBool {
     /// some_bool.store(false, Ordering::Relaxed);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn store(&self, val: bool, order: Ordering) {
         // SAFETY: any data races are prevented by atomic intrinsics and the raw
         // pointer passed in is valid because we got it from a reference.
@@ -875,7 +875,7 @@ impl AtomicBool {
     #[unstable(feature = "atomic_volatile", issue = "158947")]
     #[rustc_const_unstable(feature = "atomic_volatile", issue = "158947")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const unsafe fn store_volatile(self: *const Self, val: bool, order: Ordering) {
         // SAFETY: follows from our own safety requirements.
         unsafe {
@@ -903,13 +903,13 @@ impl AtomicBool {
     /// assert_eq!(some_bool.swap(false, Ordering::Relaxed), true);
     /// assert_eq!(some_bool.load(Ordering::Relaxed), false);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn swap(&self, val: bool, order: Ordering) -> bool {
         if EMULATE_ATOMIC_BOOL {
             #[ferrocene::annotation(
@@ -981,7 +981,7 @@ impl AtomicBool {
     )]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn compare_and_swap(&self, current: bool, new: bool, order: Ordering) -> bool {
         match self.compare_exchange(current, new, order, strongest_failure_ordering(order)) {
             Ok(x) => x,
@@ -1031,6 +1031,7 @@ impl AtomicBool {
     /// `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides
     /// of CAS operations. In particular, a load of the value followed by a successful
     /// `compare_exchange` with the previous load *does not ensure* that other threads have not
+    #[ferrocene::prevalidated]
     /// changed the value in the interim. This is usually important when the *equality* check in
     /// the `compare_exchange` is being used to check the *identity* of a value, but equality
     /// does not necessarily imply identity. In this case, `compare_exchange` can lead to the
@@ -1044,8 +1045,7 @@ impl AtomicBool {
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn compare_exchange(
         &self,
         current: bool,
@@ -1153,7 +1153,7 @@ impl AtomicBool {
     #[doc(alias = "compare_and_swap")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn compare_exchange_weak(
         &self,
         current: bool,
@@ -1212,13 +1212,13 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_and(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), false);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn fetch_and(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_and(self.v.get().cast::<u8>(), val as u8, order) != 0 }
@@ -1262,7 +1262,7 @@ impl AtomicBool {
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn fetch_nand(&self, val: bool, order: Ordering) -> bool {
         // We can't use atomic_nand here because it can result in a bool with
         // an invalid value. This happens because the atomic operation is done
@@ -1311,13 +1311,13 @@ impl AtomicBool {
     /// assert_eq!(foo.fetch_or(false, Ordering::SeqCst), false);
     /// assert_eq!(foo.load(Ordering::SeqCst), false);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
-    #[ferrocene::prevalidated]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn fetch_or(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_or(self.v.get().cast::<u8>(), val as u8, order) != 0 }
@@ -1360,7 +1360,7 @@ impl AtomicBool {
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn fetch_xor(&self, val: bool, order: Ordering) -> bool {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_xor(self.v.get().cast::<u8>(), val as u8, order) != 0 }
@@ -1399,7 +1399,7 @@ impl AtomicBool {
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn fetch_not(&self, order: Ordering) -> bool {
         self.fetch_xor(true, order)
     }
@@ -1437,8 +1437,8 @@ impl AtomicBool {
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::never_returns_null_ptr]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn as_ptr(&self) -> *mut bool {
         self.v.get().cast()
     }
@@ -1448,7 +1448,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     #[deprecated(
         since = "1.99.0",
         note = "renamed to `try_update` for consistency",
@@ -1517,7 +1517,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_try_update", since = "1.95.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn try_update(
         &self,
         set_order: Ordering,
@@ -1580,7 +1580,7 @@ impl AtomicBool {
     #[stable(feature = "atomic_try_update", since = "1.95.0")]
     #[cfg(target_has_atomic = "8")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn update(
         &self,
         set_order: Ordering,
@@ -1968,7 +1968,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn store(&self, ptr: *mut T, order: Ordering) {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
@@ -2029,7 +2029,7 @@ impl<T> AtomicPtr<T> {
     #[unstable(feature = "atomic_volatile", issue = "158947")]
     #[rustc_const_unstable(feature = "atomic_volatile", issue = "158947")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const unsafe fn store_volatile(self: *const Self, ptr: *mut T, order: Ordering) {
         // SAFETY: follows from our own safety requirements.
         unsafe {
@@ -2064,7 +2064,7 @@ impl<T> AtomicPtr<T> {
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub const fn swap(&self, ptr: *mut T, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_swap(self.as_ptr(), ptr, order) }
@@ -2127,7 +2127,7 @@ impl<T> AtomicPtr<T> {
     )]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn compare_and_swap(&self, current: *mut T, new: *mut T, order: Ordering) -> *mut T {
         match self.compare_exchange(current, new, order, strongest_failure_ordering(order)) {
             Ok(x) => x,
@@ -2182,7 +2182,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn compare_exchange(
         &self,
         current: *mut T,
@@ -2246,7 +2246,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "extended_compare_and_swap", since = "1.10.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn compare_exchange_weak(
         &self,
         current: *mut T,
@@ -2266,7 +2266,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "atomic_fetch_update", since = "1.53.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     #[deprecated(
         since = "1.99.0",
         note = "renamed to `try_update` for consistency",
@@ -2344,7 +2344,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "atomic_try_update", since = "1.95.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn try_update(
         &self,
         set_order: Ordering,
@@ -2412,7 +2412,7 @@ impl<T> AtomicPtr<T> {
     #[stable(feature = "atomic_try_update", since = "1.95.0")]
     #[cfg(target_has_atomic = "ptr")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn update(
         &self,
         set_order: Ordering,
@@ -2464,7 +2464,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_ptr_add(&self, val: usize, order: Ordering) -> *mut T {
         self.fetch_byte_add(val.wrapping_mul(size_of::<T>()), order)
     }
@@ -2509,7 +2509,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_ptr_sub(&self, val: usize, order: Ordering) -> *mut T {
         self.fetch_byte_sub(val.wrapping_mul(size_of::<T>()), order)
     }
@@ -2544,7 +2544,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_byte_add(&self, val: usize, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_add(self.as_ptr(), val, order).cast() }
@@ -2580,7 +2580,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_byte_sub(&self, val: usize, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_sub(self.as_ptr(), val, order).cast() }
@@ -2631,7 +2631,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_or(&self, val: usize, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_or(self.as_ptr(), val, order).cast() }
@@ -2681,7 +2681,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_and(&self, val: usize, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_and(self.as_ptr(), val, order).cast() }
@@ -2729,7 +2729,7 @@ impl<T> AtomicPtr<T> {
     #[cfg(target_has_atomic = "ptr")]
     #[stable(feature = "strict_provenance_atomic_ptr", since = "1.91.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    #[rustc_should_not_be_called_on_const_items]
+    #[lint::should_not_be_called_on_const_items]
     pub fn fetch_xor(&self, val: usize, order: Ordering) -> *mut T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { atomic_xor(self.as_ptr(), val, order).cast() }
@@ -2769,7 +2769,7 @@ impl<T> AtomicPtr<T> {
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
-    #[rustc_never_returns_null_ptr]
+    #[lint::never_returns_null_ptr]
     pub const fn as_ptr(&self) -> *mut *mut T {
         self.v.get().cast()
     }
@@ -3245,12 +3245,12 @@ macro_rules! atomic_int {
             /// some_var.store(10, Ordering::Relaxed);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn store(&self, val: $int_type, order: Ordering) {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_store::<_, /* VOLATILE */ false>(self.as_ptr(), val, order); }
@@ -3295,7 +3295,7 @@ macro_rules! atomic_int {
             #[unstable(feature = "atomic_volatile", issue = "158947")]
             #[rustc_const_unstable(feature = "atomic_volatile", issue = "158947")]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
+            #[lint::should_not_be_called_on_const_items]
             pub const unsafe fn store_volatile(self: *const Self, val: $int_type, order: Ordering) {
                 // SAFETY: follows from our own safety requirements.
                 unsafe {
@@ -3323,13 +3323,13 @@ macro_rules! atomic_int {
             ///
             /// assert_eq!(some_var.swap(10, Ordering::Relaxed), 5);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn swap(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_swap(self.as_ptr(), val, order) }
@@ -3387,6 +3387,7 @@ macro_rules! atomic_int {
             /// assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);
             /// assert_eq!(some_var.load(Ordering::Relaxed), 10);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
@@ -3396,8 +3397,7 @@ macro_rules! atomic_int {
             ]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn compare_and_swap(&self,
                                     current: $int_type,
                                     new: $int_type,
@@ -3463,13 +3463,13 @@ macro_rules! atomic_int {
             ///
             /// [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem
             /// [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable_cxchg]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn compare_exchange(&self,
                                     current: $int_type,
                                     new: $int_type,
@@ -3530,13 +3530,13 @@ macro_rules! atomic_int {
             ///
             /// [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem
             /// [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable_cxchg]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn compare_exchange_weak(&self,
                                          current: $int_type,
                                          new: $int_type,
@@ -3570,13 +3570,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);
             /// assert_eq!(foo.load(Ordering::SeqCst), 10);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_add(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_add(self.as_ptr(), val, order) }
@@ -3604,13 +3604,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);
             /// assert_eq!(foo.load(Ordering::SeqCst), 10);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_sub(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_sub(self.as_ptr(), val, order) }
@@ -3641,13 +3641,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_and(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b100001);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_and(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_and(self.as_ptr(), val, order) }
@@ -3678,13 +3678,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_nand(0x31, Ordering::SeqCst), 0x13);
             /// assert_eq!(foo.load(Ordering::SeqCst), !(0x13 & 0x31));
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable_nand]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_nand(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_nand(self.as_ptr(), val, order) }
@@ -3715,13 +3715,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_or(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b111111);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_or(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_or(self.as_ptr(), val, order) }
@@ -3752,13 +3752,13 @@ macro_rules! atomic_int {
             /// assert_eq!(foo.fetch_xor(0b110011, Ordering::SeqCst), 0b101101);
             /// assert_eq!(foo.load(Ordering::SeqCst), 0b011110);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[$stable]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_xor(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { atomic_xor(self.as_ptr(), val, order) }
@@ -3771,7 +3771,7 @@ macro_rules! atomic_int {
             #[stable(feature = "no_more_cas", since = "1.45.0")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
+            #[lint::should_not_be_called_on_const_items]
             #[deprecated(
                 since = "1.99.0",
                 note = "renamed to `try_update` for consistency",
@@ -3833,12 +3833,12 @@ macro_rules! atomic_int {
             /// assert_eq!(x.try_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)), Ok(8));
             /// assert_eq!(x.load(Ordering::SeqCst), 9);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_try_update", since = "1.95.0")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub fn try_update(
                 &self,
                 set_order: Ordering,
@@ -3901,12 +3901,12 @@ macro_rules! atomic_int {
             /// assert_eq!(x.update(Ordering::SeqCst, Ordering::SeqCst, |x| x + 1), 8);
             /// assert_eq!(x.load(Ordering::SeqCst), 9);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_try_update", since = "1.95.0")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub fn update(
                 &self,
                 set_order: Ordering,
@@ -3959,13 +3959,13 @@ macro_rules! atomic_int {
             /// let max_foo = foo.fetch_max(bar, Ordering::SeqCst).max(bar);
             /// assert!(max_foo == 42);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_min_max", since = "1.45.0")]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_max(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { $max_fn(self.as_ptr(), val, order) }
@@ -4010,13 +4010,13 @@ macro_rules! atomic_int {
             /// let min_foo = foo.fetch_min(bar, Ordering::SeqCst).min(bar);
             /// assert_eq!(min_foo, 12);
             /// ```
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_min_max", since = "1.45.0")]
             #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
             #[cfg(any($cfg_cas, doc))]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-            #[rustc_should_not_be_called_on_const_items]
-            #[ferrocene::prevalidated]
+            #[lint::should_not_be_called_on_const_items]
             pub const fn fetch_min(&self, val: $int_type, order: Ordering) -> $int_type {
                 // SAFETY: data races are prevented by atomic intrinsics.
                 unsafe { $min_fn(self.as_ptr(), val, order) }
@@ -4054,11 +4054,11 @@ macro_rules! atomic_int {
             /// ```
             ///
             /// [memory model]: self#memory-model-for-atomic-accesses
+            #[ferrocene::prevalidated]
             #[inline]
             #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
             #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]
-            #[rustc_never_returns_null_ptr]
-            #[ferrocene::prevalidated]
+            #[lint::never_returns_null_ptr]
             pub const fn as_ptr(&self) -> *mut $int_type {
                 self.v.get().cast()
             }

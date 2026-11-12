@@ -917,14 +917,8 @@ impl TraitAliasPart {
             // for any value of `B`, because `!` is less than any identifier-starting char.
             implementors.sort_unstable_by(|a, b| compare_names(&a.cmp_text, &b.cmp_text));
 
-            let part = OrderedJson::array_unsorted(
-                implementors
-                    .iter()
-                    .map(OrderedJson::serialize)
-                    .collect::<Result<Vec<_>, _>>()
-                    .unwrap(),
-            );
-            path_parts.push(path, OrderedJson::array_unsorted([crate_name_json, &part]));
+            path_parts
+                .push(path, OrderedJson::serialize((crate_name_json, &implementors)).unwrap());
         }
         Ok(path_parts)
     }
@@ -1008,7 +1002,7 @@ impl<'item> DocVisitor<'item> for TypeImplCollector<'_, '_, 'item> {
     fn visit_item(&mut self, it: &'item Item) {
         self.visit_item_recur(it);
         let cache = &self.cx.shared.cache;
-        let ItemKind::TypeAliasItem(ref t) = it.kind else { return };
+        let ItemKind::TypeAlias(ref t) = it.kind else { return };
         let Some(self_did) = it.item_id.as_def_id() else { return };
         if !self.visited_aliases.insert(self_did) {
             return;

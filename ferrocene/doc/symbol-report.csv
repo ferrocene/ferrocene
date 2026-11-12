@@ -5675,8 +5675,26 @@ alloc::alloc::handle_alloc_error::ct_error
 alloc::alloc::handle_alloc_error::rt_error
 alloc::alloc::realloc
 alloc::alloc::realloc_nonnull
+alloc::boxed::Box::<T>::into_non_null
+alloc::boxed::Box::<T>::into_raw
 alloc::boxed::Box::<T>::new
 alloc::boxed::box_new_uninit
+alloc::raw_vec::RawVec::<T, A>::ptr
+alloc::raw_vec::RawVecInner::<A>::non_null
+alloc::raw_vec::RawVecInner::<A>::ptr
+alloc::rcs::arc::Arc::<T, A>::from_inner_in
+alloc::rcs::arc::Arc::<T, A>::from_ptr_in
+alloc::rcs::arc::Arc::<T, A>::get_mut_unchecked
+alloc::rcs::arc::Arc::<T, A>::into_inner_with_allocator
+alloc::rcs::arc::Arc::<T, A>::new_uninit_in
+alloc::rcs::arc::Arc::<T>::allocate_for_layout
+alloc::rcs::arc::Arc::<T>::from_inner
+alloc::rcs::arc::Arc::<T>::initialize_arcinner
+alloc::rcs::arc::Arc::<T>::new
+alloc::rcs::arc::Arc::<core::mem::maybe_uninit::MaybeUninit<T>, A>::assume_init
+alloc::rcs::arc::arcinner_layout_for_value_layout
+alloc::vec::Vec::<T, A>::as_ptr
+alloc::vec::Vec::<T, A>::as_slice
 alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::set_len::precondition_check
@@ -5685,15 +5703,20 @@ core::alloc::global::GlobalAlloc::realloc
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::alignment
 core::alloc::layout::Layout::dangling_ptr
+core::alloc::layout::Layout::extend
+core::alloc::layout::Layout::for_value_raw
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
+core::alloc::layout::Layout::from_size_alignment
 core::alloc::layout::Layout::from_size_alignment_unchecked
 core::alloc::layout::Layout::from_size_alignment_unchecked::precondition_check
 core::alloc::layout::Layout::is_size_align_valid
 core::alloc::layout::Layout::is_size_alignment_valid
 core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
+core::alloc::layout::Layout::pad_to_align
 core::alloc::layout::Layout::size
+core::alloc::layout::Layout::size_rounded_up_to_custom_alignment
 core::any::TypeId::as_u128
 core::any::TypeId::of
 core::any::type_name
@@ -6959,12 +6982,15 @@ core::iter::traits::iterator::iter_compare::compare
 core::iter::traits::iterator::iter_eq
 core::mem::align_of
 core::mem::align_of_val
+core::mem::align_of_val_raw
 core::mem::alignment::Alignment::as_nonzero_usize
 core::mem::alignment::Alignment::as_usize
 core::mem::alignment::Alignment::log2
+core::mem::alignment::Alignment::max
 core::mem::alignment::Alignment::new
 core::mem::alignment::Alignment::new_unchecked
 core::mem::alignment::Alignment::new_unchecked::precondition_check
+core::mem::alignment::Alignment::of_val_raw
 core::mem::conjure_zst
 core::mem::conjure_zst::do_panic
 core::mem::conjure_zst::do_panic::compiletime
@@ -8204,6 +8230,7 @@ core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
 core::panicking::unreachable_default_msg
+core::pin::Pin::<Ptr>::new_unchecked
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset

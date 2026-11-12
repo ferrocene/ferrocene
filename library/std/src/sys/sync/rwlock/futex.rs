@@ -23,26 +23,31 @@ const MAX_READERS: Primitive = MASK - 1;
 const READERS_WAITING: Primitive = 1 << 30;
 const WRITERS_WAITING: Primitive = 1 << 31;
 
+#[ferrocene::prevalidated]
 #[inline]
 fn is_unlocked(state: Primitive) -> bool {
     state & MASK == 0
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn is_write_locked(state: Primitive) -> bool {
     state & MASK == WRITE_LOCKED
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn has_readers_waiting(state: Primitive) -> bool {
     state & READERS_WAITING != 0
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn has_writers_waiting(state: Primitive) -> bool {
     state & WRITERS_WAITING != 0
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn is_read_lockable(state: Primitive) -> bool {
     // This also returns false if the counter could overflow if we tried to read lock it.
@@ -54,6 +59,7 @@ fn is_read_lockable(state: Primitive) -> bool {
     state & MASK < MAX_READERS && !has_readers_waiting(state) && !has_writers_waiting(state)
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn is_read_lockable_after_wakeup(state: Primitive) -> bool {
     // We make a special case for checking if we can read-lock _after_ a reader thread that went to
@@ -72,6 +78,7 @@ fn is_read_lockable_after_wakeup(state: Primitive) -> bool {
         && !is_unlocked(state)
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn has_reached_max_readers(state: Primitive) -> bool {
     state & MASK == MAX_READERS
@@ -91,6 +98,7 @@ impl RwLock {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn read(&self) {
         let state = self.state.load(Relaxed);
         if !is_read_lockable(state)
@@ -120,6 +128,7 @@ impl RwLock {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     fn read_contended(&self) {
         let mut has_slept = false;
@@ -330,6 +339,7 @@ impl RwLock {
     }
 
     /// Spin for a while, but stop directly at the given condition.
+    #[ferrocene::prevalidated]
     #[inline]
     fn spin_until(&self, f: impl Fn(Primitive) -> bool) -> Primitive {
         let mut spin = 100; // Chosen by fair dice roll.
@@ -349,6 +359,7 @@ impl RwLock {
         self.spin_until(|state| is_unlocked(state) || has_writers_waiting(state))
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn spin_read(&self) -> Primitive {
         // Stop spinning when it's unlocked or read locked, or when there's waiting threads.

@@ -414,6 +414,7 @@ impl<T: ?Sized> RwLock<T> {
     ///     assert!(r.is_ok());
     /// }).join().unwrap();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[lint::should_not_be_called_on_const_items]
@@ -749,6 +750,7 @@ impl<'rwlock, T: ?Sized> RwLockReadGuard<'rwlock, T> {
     /// This function is safe if and only if the same thread has successfully and safely called
     /// `lock.inner.read()`, `lock.inner.try_read()`, or `lock.inner.downgrade()` before
     /// instantiating this object.
+    #[ferrocene::prevalidated]
     unsafe fn new(lock: &'rwlock RwLock<T>) -> LockResult<RwLockReadGuard<'rwlock, T>> {
         poison::map_result(lock.poison.borrow(), |()| RwLockReadGuard {
             data: unsafe { NonNull::new_unchecked(lock.data.get()) },

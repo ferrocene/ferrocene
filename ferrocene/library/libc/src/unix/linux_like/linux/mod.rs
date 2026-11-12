@@ -3620,6 +3620,7 @@ extern "C" {
     pub fn vhangup() -> c_int;
     pub fn sync();
     pub fn syncfs(fd: c_int) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn syscall(num: c_long, ...) -> c_long;
     pub fn sched_setaffinity(
         pid: crate::pid_t,

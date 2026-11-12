@@ -18,6 +18,7 @@ pub fn run_path_with_cstr<T>(path: &Path, f: &dyn Fn(&CStr) -> io::Result<T>) ->
     run_with_cstr(path.as_os_str().as_encoded_bytes(), f)
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 pub fn run_with_cstr<T>(bytes: &[u8], f: &dyn Fn(&CStr) -> io::Result<T>) -> io::Result<T> {
     // Dispatch and dyn erase the closure type to prevent mono bloat.
@@ -32,6 +33,7 @@ pub fn run_with_cstr<T>(bytes: &[u8], f: &dyn Fn(&CStr) -> io::Result<T>) -> io:
 /// # Safety
 ///
 /// `bytes` must have a length less than `MAX_STACK_ALLOCATION`.
+#[ferrocene::prevalidated]
 unsafe fn run_with_cstr_stack<T>(
     bytes: &[u8],
     f: &dyn Fn(&CStr) -> io::Result<T>,
@@ -50,6 +52,7 @@ unsafe fn run_with_cstr_stack<T>(
     }
 }
 
+#[ferrocene::prevalidated]
 #[cold]
 #[inline(never)]
 fn run_with_cstr_allocating<T>(bytes: &[u8], f: &dyn Fn(&CStr) -> io::Result<T>) -> io::Result<T> {

@@ -28,6 +28,7 @@ cfg_select! {
 /// Returns directly if the futex doesn't hold the expected value.
 ///
 /// Returns false on timeout, and true in all other cases.
+#[ferrocene::prevalidated]
 #[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
 pub fn futex_wait(futex: &Atomic<u32>, expected: u32, timeout: Option<Duration>) -> bool {
     use crate::ptr::null;

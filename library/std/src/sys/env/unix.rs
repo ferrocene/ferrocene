@@ -64,6 +64,7 @@ pub unsafe fn environ() -> *mut *const *const c_char {
 
 static ENV_LOCK: RwLock<()> = RwLock::new(());
 
+#[ferrocene::prevalidated]
 pub fn env_read_lock() -> impl Drop {
     ENV_LOCK.read().unwrap_or_else(PoisonError::into_inner)
 }
@@ -109,9 +110,11 @@ pub fn env() -> Env {
     }
 }
 
+#[ferrocene::prevalidated]
 pub fn getenv(k: &OsStr) -> Option<OsString> {
     // environment variables with a nul byte can't be set, so their value is
     // always None as well
+    #[expect(ferrocene::unvalidated, reason = "FIXME: call_once is unvalidated")]
     run_with_cstr(k.as_bytes(), &|k| {
         let _guard = env_read_lock();
         let v = unsafe { libc::getenv(k.as_ptr()) } as *const libc::c_char;

@@ -254,6 +254,7 @@ impl CString {
     /// This function will return an error if the supplied bytes contain an
     /// internal 0 byte. The [`NulError`] returned will contain the bytes as well as
     /// the position of the nul byte.
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new<T: Into<Vec<u8>>>(t: T) -> Result<CString, NulError> {
         trait SpecNewImpl {
@@ -346,6 +347,7 @@ impl CString {
         unsafe { Self::_from_vec_unchecked(v) }
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn _from_vec_unchecked(mut v: Vec<u8>) -> Self {
         v.reserve_exact(1);
         v.push(0);
@@ -565,6 +567,7 @@ impl CString {
     /// let bytes = c_string.as_bytes_with_nul();
     /// assert_eq!(bytes, &[b'f', b'o', b'o', b'\0']);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -584,6 +587,7 @@ impl CString {
     /// assert_eq!(cstr,
     ///            CStr::from_bytes_with_nul(b"foo\0").expect("we provided bytes that has one NUL byte exactly at the end, so CStr::from_bytes_with_nul should not fail"));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "as_c_str", since = "1.20.0")]
@@ -718,6 +722,7 @@ impl Drop for CString {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ops::Deref for CString {
     type Target = CStr;

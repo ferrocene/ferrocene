@@ -263,6 +263,7 @@ pub fn var<K: AsRef<OsStr>>(key: K) -> Result<String, VarError> {
 /// can be used to separate items.
 #[must_use]
 #[stable(feature = "env", since = "1.0.0")]
+#[ferrocene::prevalidated]
 pub fn var_os<K: AsRef<OsStr>>(key: K) -> Option<OsString> {
     env_imp::getenv(key.as_ref())
 }

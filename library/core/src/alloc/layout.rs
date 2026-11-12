@@ -542,6 +542,7 @@ impl Layout {
     /// aligned.
     ///
     /// On arithmetic overflow, returns `LayoutError`.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[inline]

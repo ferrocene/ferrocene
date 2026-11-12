@@ -16,6 +16,7 @@
 <&T as core::fmt::UpperExp>::fmt
 <&T as core::fmt::UpperHex>::fmt
 <&T as core::ops::deref::Deref>::deref
+<&[u8] as alloc::ffi::c_str::CString::new::SpecNewImpl>::spec_new_impl
 <&bool as core::ops::bit::BitAnd<&bool>>::bitand
 <&bool as core::ops::bit::BitAnd<bool>>::bitand
 <&bool as core::ops::bit::BitOr<&bool>>::bitor
@@ -975,8 +976,10 @@
 <&mut W as core::fmt::Write>::write_char
 <&mut W as core::fmt::Write>::write_fmt
 <&mut W as core::fmt::Write>::write_str
+<&mut [u8] as alloc::ffi::c_str::CString::new::SpecNewImpl>::spec_new_impl
 <&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnMut<(usize,)>>::call_mut
 <&mut core::array::drain::Drain<'_, '_, T, F> as core::ops::function::FnOnce<(usize,)>>::call_once
+<&str as alloc::ffi::c_str::CString::new::SpecNewImpl>::spec_new_impl
 <&u128 as core::ops::arith::Add<&u128>>::add
 <&u128 as core::ops::arith::Add<u128>>::add
 <&u128 as core::ops::arith::Div<&u128>>::div
@@ -1397,6 +1400,7 @@
 <*const T as core::fmt::Pointer>::fmt
 <*mut T as core::fmt::Debug>::fmt
 <*mut T as core::fmt::Pointer>::fmt
+<<T as alloc::slice::<impl [T]>::to_vec_in::ConvertVec>::to_vec::DropGuard<'a, T, A> as core::ops::drop::Drop>::drop
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::iter::traits::iterator::SpecIterEq<B>>::spec_iter_eq
 <A as core::slice::cmp::SliceOrd>::compare
@@ -1409,6 +1413,9 @@
 <I as core::iter::traits::double_ended::DoubleEndedIterator::advance_back_by::SpecAdvanceBackBy>::spec_advance_back_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
 <I as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by
+<T as alloc::ffi::c_str::CString::new::SpecNewImpl>::spec_new_impl
+<T as alloc::slice::<impl [T]>::to_vec_in::ConvertVec>::to_vec
+<T as alloc::slice::<impl [T]>::to_vec_in::ConvertVec>::to_vec
 <T as core::array::SpecArrayClone>::clone
 <T as core::array::SpecArrayClone>::clone
 <T as core::array::equality::SpecArrayEq<Other, N>>::spec_eq
@@ -1439,6 +1446,10 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice
 <[u8] as core::slice::specialize::SpecFill<u8>>::spec_fill
 <alloc::alloc::Global as core::alloc::Allocator>::allocate
+<alloc::collections::TryReserveErrorKind as core::clone::Clone>::clone
+<alloc::ffi::c_str::CString as core::ops::deref::Deref>::deref
+<alloc::vec::Vec<T, A> as core::iter::traits::collect::Extend<&'a T>>::extend
+<alloc::vec::Vec<T, A> as core::ops::deref::Deref>::deref
 <bool as core::default::Default>::default
 <bool as core::fmt::Debug>::fmt
 <bool as core::fmt::Display>::fmt
@@ -5675,13 +5686,50 @@ alloc::alloc::handle_alloc_error::ct_error
 alloc::alloc::handle_alloc_error::rt_error
 alloc::alloc::realloc
 alloc::alloc::realloc_nonnull
+alloc::boxed::Box::<T, A>::from_raw_in
+alloc::boxed::Box::<T, A>::into_raw_with_allocator
 alloc::boxed::Box::<T>::into_non_null
 alloc::boxed::Box::<T>::into_raw
 alloc::boxed::Box::<T>::new
+alloc::boxed::Box::<[core::mem::maybe_uninit::MaybeUninit<T>], A>::assume_init
+alloc::boxed::BoxRaw::<T>::new_unchecked
 alloc::boxed::box_new_uninit
+alloc::collections::TryReserveError::kind
+alloc::ffi::c_str::CString::_from_vec_unchecked
+alloc::ffi::c_str::CString::as_bytes_with_nul
+alloc::ffi::c_str::CString::as_c_str
+alloc::ffi::c_str::CString::new
+alloc::ffi::c_str::CString::new::SpecNewImpl::spec_new_impl
+alloc::ffi::c_str::CString::new::spec_new_impl_bytes
+alloc::raw_vec::RawVec::<T, A>::capacity
+alloc::raw_vec::RawVec::<T, A>::grow_one
+alloc::raw_vec::RawVec::<T, A>::into_box
 alloc::raw_vec::RawVec::<T, A>::ptr
+alloc::raw_vec::RawVec::<T, A>::reserve_exact
+alloc::raw_vec::RawVec::<T, A>::shrink_to_fit
+alloc::raw_vec::RawVec::<T, A>::with_capacity_in
+alloc::raw_vec::RawVecInner::<A>::capacity
+alloc::raw_vec::RawVecInner::<A>::current_memory
+alloc::raw_vec::RawVecInner::<A>::finish_grow
+alloc::raw_vec::RawVecInner::<A>::grow_amortized
+alloc::raw_vec::RawVecInner::<A>::grow_exact
+alloc::raw_vec::RawVecInner::<A>::grow_one
+alloc::raw_vec::RawVecInner::<A>::needs_to_grow
+alloc::raw_vec::RawVecInner::<A>::new_in
 alloc::raw_vec::RawVecInner::<A>::non_null
 alloc::raw_vec::RawVecInner::<A>::ptr
+alloc::raw_vec::RawVecInner::<A>::reserve_exact
+alloc::raw_vec::RawVecInner::<A>::set_ptr_and_cap
+alloc::raw_vec::RawVecInner::<A>::shrink
+alloc::raw_vec::RawVecInner::<A>::shrink_to_fit
+alloc::raw_vec::RawVecInner::<A>::shrink_unchecked
+alloc::raw_vec::RawVecInner::<A>::try_allocate_in
+alloc::raw_vec::RawVecInner::<A>::try_reserve_exact
+alloc::raw_vec::RawVecInner::<A>::with_capacity_in
+alloc::raw_vec::capacity_overflow
+alloc::raw_vec::handle_error
+alloc::raw_vec::layout_array
+alloc::raw_vec::min_non_zero_cap
 alloc::rcs::arc::Arc::<T, A>::from_inner_in
 alloc::rcs::arc::Arc::<T, A>::from_ptr_in
 alloc::rcs::arc::Arc::<T, A>::get_mut_unchecked
@@ -5693,11 +5741,26 @@ alloc::rcs::arc::Arc::<T>::initialize_arcinner
 alloc::rcs::arc::Arc::<T>::new
 alloc::rcs::arc::Arc::<core::mem::maybe_uninit::MaybeUninit<T>, A>::assume_init
 alloc::rcs::arc::arcinner_layout_for_value_layout
+alloc::slice::<impl [T]>::to_vec
+alloc::slice::<impl [T]>::to_vec_in
+alloc::slice::<impl [T]>::to_vec_in::ConvertVec::to_vec
+alloc::vec::Vec::<T, A>::as_mut_ptr
 alloc::vec::Vec::<T, A>::as_ptr
 alloc::vec::Vec::<T, A>::as_slice
+alloc::vec::Vec::<T, A>::capacity
 alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
+alloc::vec::Vec::<T, A>::into_boxed_slice
+alloc::vec::Vec::<T, A>::len
+alloc::vec::Vec::<T, A>::push
+alloc::vec::Vec::<T, A>::push_mut
+alloc::vec::Vec::<T, A>::reserve_exact
+alloc::vec::Vec::<T, A>::set_len
 alloc::vec::Vec::<T, A>::set_len::precondition_check
+alloc::vec::Vec::<T, A>::shrink_to_fit
+alloc::vec::Vec::<T, A>::spare_capacity_mut
+alloc::vec::Vec::<T, A>::with_capacity_in
+alloc::vec::Vec::<T>::with_capacity
 core::alloc::global::GlobalAlloc::alloc_zeroed
 core::alloc::global::GlobalAlloc::realloc
 core::alloc::layout::Layout::align
@@ -5715,6 +5778,7 @@ core::alloc::layout::Layout::is_size_alignment_valid
 core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
 core::alloc::layout::Layout::pad_to_align
+core::alloc::layout::Layout::repeat_packed
 core::alloc::layout::Layout::size
 core::alloc::layout::Layout::size_rounded_up_to_custom_alignment
 core::any::TypeId::as_u128
@@ -6419,6 +6483,8 @@ core::f64::<impl f64>::is_sign_negative
 core::f64::<impl f64>::is_sign_positive
 core::f64::<impl f64>::to_bits
 core::f64::<impl f64>::to_le_bytes
+core::ffi::c_str::CStr::as_ptr
+core::ffi::c_str::CStr::display
 core::ffi::c_str::CStr::from_bytes_with_nul
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked
 core::ffi::c_str::CStr::from_bytes_with_nul_unchecked::compiletime
@@ -6762,7 +6828,9 @@ core::hash::impls::<impl core::hash::Hash for usize>::hash
 core::hash::impls::<impl core::hash::Hash for usize>::hash_slice
 core::hint::assert_unchecked
 core::hint::assert_unchecked::precondition_check
+core::hint::must_use
 core::hint::select_unpredictable
+core::hint::spin_loop
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
 core::intrinsics::assume
@@ -6800,6 +6868,15 @@ core::intrinsics::ub_checks
 core::intrinsics::unchecked_funnel_shl
 core::intrinsics::unchecked_funnel_shr
 core::intrinsics::unlikely
+core::io::error::Error::from_raw_os_error_with_functions
+core::io::error::Error::from_static_message
+core::io::error::ErrorKind::from_prim
+core::io::error::os_functions::set_functions
+core::io::error::os_functions::set_functions::set_functions_inner
+core::io::error::repr::Repr::data
+core::io::error::repr::Repr::new_os
+core::io::error::repr::Repr::new_simple_message
+core::io::error::repr::decode_repr
 core::iter::adapters::array_chunks::ArrayChunks::<I, N>::next_back_remainder
 core::iter::adapters::chain::Chain::<A, B>::new
 core::iter::adapters::chain::and_then_or_clear
@@ -7482,6 +7559,7 @@ core::num::<impl u128>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u128>::unchecked_div_exact::precondition_check
 core::num::<impl u128>::unchecked_funnel_shl::precondition_check
 core::num::<impl u128>::unchecked_funnel_shr::precondition_check
+core::num::<impl u128>::unchecked_mul
 core::num::<impl u128>::unchecked_mul::precondition_check
 core::num::<impl u128>::unchecked_shl
 core::num::<impl u128>::unchecked_shl::precondition_check
@@ -7562,6 +7640,7 @@ core::num::<impl u16>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u16>::unchecked_div_exact::precondition_check
 core::num::<impl u16>::unchecked_funnel_shl::precondition_check
 core::num::<impl u16>::unchecked_funnel_shr::precondition_check
+core::num::<impl u16>::unchecked_mul
 core::num::<impl u16>::unchecked_mul::precondition_check
 core::num::<impl u16>::unchecked_shl
 core::num::<impl u16>::unchecked_shl::precondition_check
@@ -7641,6 +7720,7 @@ core::num::<impl u32>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u32>::unchecked_div_exact::precondition_check
 core::num::<impl u32>::unchecked_funnel_shl::precondition_check
 core::num::<impl u32>::unchecked_funnel_shr::precondition_check
+core::num::<impl u32>::unchecked_mul
 core::num::<impl u32>::unchecked_mul::precondition_check
 core::num::<impl u32>::unchecked_shl
 core::num::<impl u32>::unchecked_shl::precondition_check
@@ -7720,6 +7800,7 @@ core::num::<impl u64>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u64>::unchecked_div_exact::precondition_check
 core::num::<impl u64>::unchecked_funnel_shl::precondition_check
 core::num::<impl u64>::unchecked_funnel_shr::precondition_check
+core::num::<impl u64>::unchecked_mul
 core::num::<impl u64>::unchecked_mul::precondition_check
 core::num::<impl u64>::unchecked_shl
 core::num::<impl u64>::unchecked_shl::precondition_check
@@ -7809,6 +7890,7 @@ core::num::<impl u8>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl u8>::unchecked_div_exact::precondition_check
 core::num::<impl u8>::unchecked_funnel_shl::precondition_check
 core::num::<impl u8>::unchecked_funnel_shr::precondition_check
+core::num::<impl u8>::unchecked_mul
 core::num::<impl u8>::unchecked_mul::precondition_check
 core::num::<impl u8>::unchecked_shl
 core::num::<impl u8>::unchecked_shl::precondition_check
@@ -7890,6 +7972,7 @@ core::num::<impl usize>::unchecked_disjoint_bitor::precondition_check
 core::num::<impl usize>::unchecked_div_exact::precondition_check
 core::num::<impl usize>::unchecked_funnel_shl::precondition_check
 core::num::<impl usize>::unchecked_funnel_shr::precondition_check
+core::num::<impl usize>::unchecked_mul
 core::num::<impl usize>::unchecked_mul::precondition_check
 core::num::<impl usize>::unchecked_shl
 core::num::<impl usize>::unchecked_shl::precondition_check
@@ -8246,6 +8329,7 @@ core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
 core::ptr::const_ptr::<impl *const T>::cast_slice
+core::ptr::const_ptr::<impl *const T>::copy_to_nonoverlapping
 core::ptr::const_ptr::<impl *const T>::expose_provenance
 core::ptr::const_ptr::<impl *const T>::guaranteed_eq
 core::ptr::const_ptr::<impl *const T>::is_aligned_to
@@ -8322,8 +8406,11 @@ core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap
 core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::compiletime
 core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::to_raw_parts
+core::ptr::mut_ptr::<impl *mut T>::with_metadata_of
 core::ptr::mut_ptr::<impl *mut T>::wrapping_add
+core::ptr::mut_ptr::<impl *mut T>::wrapping_byte_sub
 core::ptr::mut_ptr::<impl *mut T>::wrapping_offset
+core::ptr::mut_ptr::<impl *mut T>::wrapping_sub
 core::ptr::mut_ptr::<impl *mut T>::write
 core::ptr::mut_ptr::<impl *mut T>::write_bytes
 core::ptr::mut_ptr::<impl *mut [T]>::as_mut_array
@@ -8680,6 +8767,9 @@ core::str::validations::utf8_acc_cont_byte
 core::str::validations::utf8_char_width
 core::str::validations::utf8_first_byte
 core::str::validations::utf8_is_cont_byte
+core::sync::atomic::Atomic::<*mut T>::as_ptr
+core::sync::atomic::Atomic::<*mut T>::load
+core::sync::atomic::Atomic::<*mut T>::store
 core::sync::atomic::Atomic::<bool>::compare_exchange
 core::sync::atomic::Atomic::<bool>::fetch_and
 core::sync::atomic::Atomic::<bool>::fetch_or

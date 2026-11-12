@@ -249,6 +249,7 @@ impl<T: ?Sized, U: ?Sized> DispatchFromDyn<BoxRaw<U>> for BoxRaw<T> where T: Uns
 impl<T: ?Sized> BoxRaw<T> {
     /// # Safety
     /// `ptr` must be non-null
+    #[ferrocene::prevalidated]
     #[inline]
     const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: Upheld by the caller
@@ -1377,6 +1378,7 @@ impl<T, A: Allocator> Box<[mem::MaybeUninit<T>], A> {
     ///
     /// assert_eq!(*values, [1, 2, 3])
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[inline]
     pub unsafe fn assume_init(self) -> Box<[T], A> {
@@ -1697,6 +1699,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [considerations for unsafe code]: self#considerations-for-unsafe-code
+    #[ferrocene::prevalidated]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub unsafe fn from_raw_in(raw: *mut T, alloc: A) -> Self {
@@ -1811,6 +1814,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [`deallocate`]: Allocator::deallocate
+    #[ferrocene::prevalidated]
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]

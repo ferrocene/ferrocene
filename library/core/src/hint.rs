@@ -268,6 +268,7 @@ pub const unsafe fn assert_unchecked(cond: bool) {
 /// ```
 ///
 /// [`thread::yield_now`]: ../../std/thread/fn.yield_now.html
+#[ferrocene::prevalidated]
 #[inline(always)]
 #[stable(feature = "renamed_spin_loop", since = "1.49.0")]
 pub fn spin_loop() {
@@ -610,6 +611,7 @@ pub const fn black_box<T>(dummy: T) -> T {
 ///   #     assert_send(f());
 ///   # }
 ///   ```
+#[ferrocene::prevalidated]
 #[unstable(feature = "hint_must_use", issue = "94745")]
 #[must_use] // <-- :)
 #[inline(always)]

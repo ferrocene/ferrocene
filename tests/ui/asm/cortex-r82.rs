@@ -7,7 +7,6 @@
 //@ [target] compile-flags: --target aarch64r82-unknown-none
 //@ [target] needs-llvm-components: aarch64
 //@ build-pass
-//@ ignore-backends: gcc
 
 #![deny(dead_code)]
 #![feature(no_core)]

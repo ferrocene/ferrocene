@@ -90,12 +90,12 @@ N/A; the certified libraries are libraries.
 3
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 4
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 8
 "
@@ -113,7 +113,7 @@ Table A.7
 4
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 Table A.8
 ~~~~~~~~~
@@ -144,7 +144,7 @@ Covered by :ref:`safety-plan/testing-plan:rustc lints`.
 4
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 Table A.10
 ~~~~~~~~~~

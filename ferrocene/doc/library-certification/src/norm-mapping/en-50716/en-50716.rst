@@ -793,7 +793,7 @@ Covered by
 7.5.4.5-7
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The statement of test coverage per component is provided by :doc:`library-certification:safety-report/code-coverage`.
 
@@ -821,7 +821,7 @@ Covered by :ref:`safety-plan/testing-plan:integration tests` and :doc:`qualifica
 7.6.4.3-6
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The identity and configuration of all items involved is recorded in the CI artifacts (see :ref:`safety-plan/project-setup:configuration`).
 
@@ -845,7 +845,7 @@ Covered by :doc:`library-certification:safety-plan/testing-plan` and :ref:`safet
 7.7.4.1-4
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The Overall Software Test Specification and Report are the complete Ferrocene test suite and its results on all qualified targets; there is no separate overall test document.
 

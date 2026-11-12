@@ -251,7 +251,7 @@ Covered by :ref:`safety-plan/testing-plan:rustc lints` and the ``tidy`` test sui
 3
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The selected techniques of Table A.13 are documented in that table.
 
@@ -301,7 +301,7 @@ N/A; timing performance depends on the system requirements, which are unknown du
 2
 "
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 The "overall software" of a library is its complete public API; the black-box tests are the doc-tests and the integration tests of the Ferrocene components that use the certified libraries.
 

@@ -100,7 +100,7 @@ N/A; the certified libraries do not use, and therefore do not configure, any pre
 7.3.2.1-5
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.4.2.1
 ~~~~~~~
@@ -182,12 +182,12 @@ Covered by :ref:`safety-plan/project-setup:responsibility split`.
 7.4.7-8
 ~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.5
 ~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.6
 ~~~
@@ -202,7 +202,7 @@ Objective met.
 7.7.2.1-4
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.7.2.5-6
 ~~~~~~~~~
@@ -212,7 +212,7 @@ Covered by :ref:`safety-plan/testing-plan:unit tests`.
 7.7.2.7-9
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.8
 ~~~
@@ -230,7 +230,7 @@ Objective met.
 7.9.2.1-7
 ~~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.9.2.8
 ~~~~~~~
@@ -245,7 +245,7 @@ N/A; There is no architecture design.
 7.9.2.10-13
 ~~~~~~~~
 
-.. include:: ../../partials/core-testing.rst
+.. include:: ../../partials/library-testing.rst
 
 7.9.2.14
 ~~~~~~~~

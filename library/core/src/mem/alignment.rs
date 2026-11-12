@@ -155,6 +155,7 @@ impl Alignment {
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn of_val_raw<T: MetaSized>(val: *const T) -> Self {
         // SAFETY: precondition propagated to the caller
         let align = unsafe { mem::align_of_val_raw(val) };
@@ -291,6 +292,7 @@ impl Alignment {
     }
 
     // FIXME(const-hack) Remove me once `Ord::max` is usable in const
+    #[ferrocene::prevalidated]
     pub(crate) const fn max(a: Self, b: Self) -> Self {
         if a.as_usize() > b.as_usize() { a } else { b }
     }

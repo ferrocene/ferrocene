@@ -1348,6 +1348,7 @@ impl<Ptr: Deref> Pin<Ptr> {
     #[inline(always)]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
     #[stable(feature = "pin", since = "1.33.0")]
+    #[ferrocene::prevalidated]
     pub const unsafe fn new_unchecked(pointer: Ptr) -> Pin<Ptr> {
         Pin { pointer }
     }

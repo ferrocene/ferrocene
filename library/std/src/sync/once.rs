@@ -81,6 +81,7 @@ impl Once {
     #[stable(feature = "once_new", since = "1.2.0")]
     #[rustc_const_stable(feature = "const_once_new", since = "1.32.0")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn new() -> Once {
         Once { inner: sys::Once::new() }
     }

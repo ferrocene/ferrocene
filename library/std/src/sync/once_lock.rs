@@ -137,6 +137,7 @@ impl<T> OnceLock<T> {
     #[must_use]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[rustc_const_stable(feature = "once_cell", since = "1.70.0")]
+    #[ferrocene::prevalidated]
     pub const fn new() -> OnceLock<T> {
         OnceLock {
             once: Once::new(),

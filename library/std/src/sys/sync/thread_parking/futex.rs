@@ -38,6 +38,7 @@ pub struct Parker {
 impl Parker {
     /// Constructs the futex parker. The UNIX parker implementation
     /// requires this to happen in-place.
+    #[ferrocene::prevalidated]
     pub unsafe fn new_in_place(parker: *mut Parker) {
         unsafe { parker.write(Self { state: Futex::new(EMPTY) }) };
     }

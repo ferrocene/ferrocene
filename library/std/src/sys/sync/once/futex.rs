@@ -71,6 +71,7 @@ pub struct Once {
 
 impl Once {
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new() -> Once {
         Once { state_and_queued: Futex::new(INCOMPLETE) }
     }

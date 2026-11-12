@@ -92,6 +92,7 @@ pub struct Thread {
 }
 
 impl Thread {
+    #[ferrocene::prevalidated]
     pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {
         let name = name.map(ThreadNameString::from);
 

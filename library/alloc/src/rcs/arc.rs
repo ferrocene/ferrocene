@@ -310,6 +310,7 @@ impl<T: ?Sized> Arc<T> {
 
 impl<T: ?Sized, A: Allocator> Arc<T, A> {
     #[inline]
+    #[ferrocene::prevalidated]
     fn into_inner_with_allocator(this: Self) -> (NonNull<ArcInner<T>>, A) {
         let this = mem::ManuallyDrop::new(this);
         // SAFETY: Pointer is valid for reads.
@@ -323,6 +324,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn from_ptr_in(ptr: *mut ArcInner<T>, alloc: A) -> Self {
         // SAFETY: Upheld by caller.
         unsafe { Self::from_inner_in(NonNull::new_unchecked(ptr), alloc) }
@@ -409,6 +411,7 @@ struct ArcInner<T: ?Sized> {
 }
 
 /// Calculate layout for `ArcInner<T>` using the inner value's layout
+#[ferrocene::prevalidated]
 fn arcinner_layout_for_value_layout(layout: Layout) -> Layout {
     // Calculate layout using the given value layout.
     // Previously, layout was calculated on the expression
@@ -741,6 +744,7 @@ impl<T, A: Allocator> Arc<T, A> {
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn new_uninit_in(alloc: A) -> Arc<mem::MaybeUninit<T>, A> {
         // ignore-tidy-undocumented-unsafe
         unsafe {
@@ -1496,6 +1500,7 @@ impl<T, A: Allocator> Arc<mem::MaybeUninit<T>, A> {
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub unsafe fn assume_init(self) -> Arc<T, A> {
         let (ptr, alloc) = Arc::into_inner_with_allocator(self);
         // ignore-tidy-undocumented-unsafe
@@ -2281,6 +2286,7 @@ impl<T: ?Sized> Arc<T> {
     /// The function `mem_to_arcinner` is called with the data pointer
     /// and must return back a (potentially fat)-pointer for the `ArcInner<T>`.
     #[cfg(not(no_global_oom_handling))]
+    #[ferrocene::prevalidated]
     unsafe fn allocate_for_layout(
         value_layout: Layout,
         allocate: impl FnOnce(Layout) -> Result<NonNull<[u8]>, AllocError>,
@@ -2315,14 +2321,21 @@ impl<T: ?Sized> Arc<T> {
         Ok(inner)
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn initialize_arcinner(
         ptr: NonNull<[u8]>,
         layout: Layout,
         mem_to_arcinner: impl FnOnce(*mut u8) -> *mut ArcInner<T>,
     ) -> *mut ArcInner<T> {
         let inner = mem_to_arcinner(ptr.as_non_null_ptr().as_ptr());
-        // SAFETY: Upheld by caller.
-        debug_assert_eq!(unsafe { Layout::for_value_raw(inner) }, layout);
+
+        // <Layout as Clone>::clone not being validated it a false-positive. It
+        // is validated, since the Layout struct is marked as prevalidated.
+        #[allow(ferrocene::unvalidated)]
+        {
+            // SAFETY: Upheld by caller.
+            debug_assert_eq!(unsafe { Layout::for_value_raw(inner) }, layout);
+        }
 
         // ignore-tidy-undocumented-unsafe
         unsafe {
@@ -2859,6 +2872,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     /// ```
     #[inline]
     #[unstable(feature = "get_mut_unchecked", issue = "63292")]
+    #[ferrocene::prevalidated]
     pub unsafe fn get_mut_unchecked(this: &mut Self) -> &mut T {
         // We are careful to *not* create a reference covering the "count" fields, as
         // this would alias with concurrent access to the reference counts (e.g. by `Weak`).

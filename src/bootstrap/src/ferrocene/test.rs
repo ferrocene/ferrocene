@@ -178,8 +178,8 @@ impl CommandLineStep for GenerateTarball {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct DiffUpstream {}
-impl CommandLineStep for DiffUpstream {
+pub(crate) struct CheckFlsAnnotations {}
+impl CommandLineStep for CheckFlsAnnotations {
     type Output = ();
     const IS_HOST: bool = true;
 
@@ -187,7 +187,7 @@ impl CommandLineStep for DiffUpstream {
         true
     }
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("ferrocene/tools/diff-upstream")
+        run.path("ferrocene/tools/check-fls-annotations").alias("fls-annotations")
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -200,9 +200,11 @@ impl CommandLineStep for DiffUpstream {
             compiler: builder.compiler(builder.top_stage, host),
         });
 
-        builder.info("Testing ferrocene/tools/diff-upstream");
-        let mut cmd = BootstrapCommand::new("ferrocene/tools/diff-upstream/diff.py");
-        cmd.arg("--hide-diff");
+        builder.info("Running ferrocene/tools/check-fls-annotations");
+        let mut cmd = BootstrapCommand::new("ferrocene/tools/check-fls-annotations/check.py");
+        if builder.config.cmd.bless() {
+            cmd.arg("--bless");
+        }
         cmd.run(builder);
     }
 }

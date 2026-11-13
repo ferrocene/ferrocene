@@ -909,7 +909,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::SelfTest,
                 crate::ferrocene::test::CheckDocumentSignatures,
                 crate::ferrocene::test::GenerateTarball,
-                crate::ferrocene::test::DiffUpstream,
+                crate::ferrocene::test::CheckFlsAnnotations,
                 crate::ferrocene::test::certified_core_symbols::CertifiedCoreSymbols,
                 crate::ferrocene::test::flip_link::FlipLink,
                 crate::core::build_steps::toolstate::ToolStateCheck,

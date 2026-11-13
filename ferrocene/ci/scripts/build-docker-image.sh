@@ -25,6 +25,9 @@ image="${registry}/${ECR_REPOSITORY}:${IMAGE_TAG}"
 aws ecr get-login-password --region "${ECR_REGION}" \
     | docker login --username AWS --password-stdin "${registry}"
 
+mkdir -p ferrocene/ci/docker-images/sources
+aws s3 cp s3://ferrocene-ci-artifacts/manual/musl-cross-make/musl-cross-make-v0.9.11-with-source.tar.xz ferrocene/ci/docker-images/sources/musl-cross-make-v0.9.11-with-source.tar.xz
+
 # Build and push the image
 docker build --progress=plain -t "${image}" -f "ferrocene/ci/docker-images/${IMAGE_NAME}/Dockerfile" .
 docker push "${image}"

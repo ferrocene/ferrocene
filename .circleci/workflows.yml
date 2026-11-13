@@ -1211,6 +1211,7 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1222,7 +1223,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - when:
           condition: <<parameters.restore-from-job>>
           steps:

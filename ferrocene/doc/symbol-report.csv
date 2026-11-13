@@ -8087,6 +8087,7 @@ core::ops::range::Bound::<T>::as_mut
 core::ops::range::Bound::<T>::as_ref
 core::ops::range::Bound::<T>::map
 core::ops::range::Range::<Idx>::contains
+core::ops::range::Range::<Idx>::is_empty
 core::ops::range::RangeBounds::contains
 core::ops::range::RangeInclusive::<Idx>::contains
 core::ops::range::RangeInclusive::<Idx>::end
@@ -8549,6 +8550,8 @@ core::str::<impl str>::is_empty
 core::str::<impl str>::len
 core::str::<impl str>::parse
 core::str::<impl str>::split
+core::str::<impl str>::split_at_mut_unchecked::precondition_check
+core::str::<impl str>::split_at_unchecked::precondition_check
 core::str::<impl str>::split_inclusive
 core::str::<impl str>::starts_with
 core::str::<impl str>::strip_suffix

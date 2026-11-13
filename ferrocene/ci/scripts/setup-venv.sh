@@ -15,7 +15,11 @@ source $HOME/.cargo/env
 echo "source $HOME/.cargo/env" >> $BASH_ENV
 
 uv venv ~/.venv
-if [[ "${OSTYPE}" = "msys" ]]; then
+
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
+if isWindows; then
     source ~/.venv/Scripts/activate
     echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
 else

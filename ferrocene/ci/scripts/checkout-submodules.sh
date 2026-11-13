@@ -28,3 +28,9 @@ done
 for pid in "${pids[@]}"; do
     wait "$pid"
 done
+
+repo=$(dirname $(dirname $(dirname $(dirname $(realpath $0)))))
+for cargo_patch in $repo/ferrocene/patches/cargo/*.patch; do
+    echo 'applying patch file: ' $cargo_patch
+    git -C $repo apply $cargo_patch
+done

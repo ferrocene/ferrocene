@@ -23,8 +23,8 @@ from more_itertools import peekable
 had_error = False
 
 
-def error(msg):
-    print("error:", msg)
+def error(*messages):
+    print("error:", *messages)
     global had_error
     had_error = True
 

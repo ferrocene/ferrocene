@@ -487,6 +487,7 @@ pub fn spin_loop() {
 /// ```
 ///
 /// During constant evaluation, `black_box` is treated as a no-op.
+#[ferrocene::prevalidated]
 #[inline]
 #[stable(feature = "bench_black_box", since = "1.66.0")]
 #[rustc_const_stable(feature = "const_black_box", since = "1.86.0")]

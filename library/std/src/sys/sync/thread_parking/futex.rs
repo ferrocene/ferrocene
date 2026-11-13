@@ -38,6 +38,7 @@ pub struct Parker {
 impl Parker {
     /// Constructs the futex parker. The UNIX parker implementation
     /// requires this to happen in-place.
+    #[ferrocene::prevalidated]
     pub unsafe fn new_in_place(parker: *mut Parker) {
         unsafe { parker.write(Self { state: Futex::new(EMPTY) }) };
     }
@@ -85,6 +86,7 @@ impl Parker {
     }
 
     // This implementation doesn't require `Pin`, but other implementations do.
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn unpark(self: Pin<&Self>) {
         // Change PARKED=>NOTIFIED, EMPTY=>NOTIFIED, or NOTIFIED=>NOTIFIED, and

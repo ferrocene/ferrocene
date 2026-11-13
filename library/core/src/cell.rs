@@ -534,6 +534,7 @@ impl<T> Cell<T> {
     ///
     /// assert_eq!(five, 5);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]

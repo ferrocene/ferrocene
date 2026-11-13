@@ -643,6 +643,7 @@ pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
 #[must_use]
 #[stable(feature = "layout_for_ptr", since = "1.99.0")]
 #[rustc_const_stable(feature = "layout_for_ptr", since = "1.99.0")]
+#[ferrocene::prevalidated]
 pub const unsafe fn align_of_val_raw<T: ?Sized>(val: *const T) -> usize {
     // SAFETY: the caller must provide a valid raw pointer
     unsafe { intrinsics::align_of_val(val) }

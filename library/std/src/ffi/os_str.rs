@@ -649,6 +649,7 @@ impl<T: ?Sized + AsRef<OsStr>> From<&T> for OsString {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 impl ops::Index<ops::RangeFull> for OsString {
     type Output = OsStr;
 
@@ -667,6 +668,7 @@ impl ops::IndexMut<ops::RangeFull> for OsString {
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
+#[ferrocene::prevalidated]
 impl ops::Deref for OsString {
     type Target = OsStr;
 
@@ -878,6 +880,7 @@ impl OsStr {
 
     #[inline]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+    #[ferrocene::prevalidated]
     const fn from_inner(inner: &Slice) -> &OsStr {
         // SAFETY: OsStr is just a wrapper of Slice,
         // therefore converting &Slice to &OsStr is safe.
@@ -910,6 +913,7 @@ impl OsStr {
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn to_str(&self) -> Option<&str> {
         self.inner.to_str().ok()
     }

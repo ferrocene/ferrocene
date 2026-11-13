@@ -102,6 +102,7 @@ pub fn futex_wait(futex: &Atomic<u32>, expected: u32, timeout: Option<Duration>)
 /// or false if no thread was waiting on this futex.
 ///
 /// On some platforms, this always returns false.
+#[ferrocene::prevalidated]
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub fn futex_wake(futex: &Atomic<u32>) -> bool {
     let ptr = futex as *const Atomic<u32> as *const u32;

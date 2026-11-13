@@ -109,6 +109,7 @@ impl<T> RawVec<T, Global> {
     /// `RawVec` with capacity `0`. If `T` is zero-sized, then it makes a
     /// `RawVec` with capacity `usize::MAX`. Useful for implementing
     /// delayed allocation.
+    #[ferrocene::prevalidated]
     #[must_use]
     pub(crate) const fn new() -> Self {
         Self::new_in(Global)
@@ -205,6 +206,7 @@ impl<T, A: Allocator> RawVec<T, A> {
 
     /// Like `new`, but parameterized over the choice of allocator for
     /// the returned `RawVec`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn new_in(alloc: A) -> Self {
         // Check assumption made in `current_memory`
@@ -309,10 +311,12 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// `NonNull::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must
     /// be careful.
     #[inline]
+    #[ferrocene::prevalidated]
     pub(crate) const fn ptr(&self) -> *mut T {
         self.inner.ptr()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn non_null(&self) -> NonNull<T> {
         self.inner.non_null()
@@ -321,12 +325,14 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// Gets the capacity of the allocation.
     ///
     /// This will always be `usize::MAX` if `T` is zero-sized.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn capacity(&self) -> usize {
         self.inner.capacity(size_of::<T>())
     }
 
     /// Returns a shared reference to the allocator backing this `RawVec`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn allocator(&self) -> &A {
         self.inner.allocator()
@@ -588,6 +594,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
 }
 
 impl<A: Allocator> RawVecInner<A> {
+    #[ferrocene::prevalidated]
     #[inline]
     const fn new_in(alloc: A, align: Alignment) -> Self {
         let ptr = NonNull::without_provenance(align.as_nonzero_usize());
@@ -626,20 +633,24 @@ impl<A: Allocator> RawVecInner<A> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn ptr<T>(&self) -> *mut T {
         self.non_null::<T>().as_ptr()
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     const fn non_null<T>(&self) -> NonNull<T> {
         self.ptr.cast()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn capacity(&self, elem_size: usize) -> usize {
         if elem_size == 0 { usize::MAX } else { self.cap.as_inner() }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn allocator(&self) -> &A {
         &self.alloc

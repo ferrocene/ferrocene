@@ -110,6 +110,7 @@ impl Layout {
     ///   less than or equal to `isize::MAX`).
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn from_size_alignment(
         size: usize,
         alignment: Alignment,
@@ -266,6 +267,7 @@ impl Layout {
     #[rustc_const_stable(feature = "layout_for_ptr", since = "1.99.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const unsafe fn for_value_raw<T: ?Sized>(val: *const T) -> Self {
         // SAFETY: we pass along the prerequisites of these functions to the caller
         let (size, alignment) = unsafe { (mem::size_of_val_raw(val), Alignment::of_val_raw(val)) };
@@ -283,6 +285,7 @@ impl Layout {
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn dangling_ptr(&self) -> NonNull<u8> {
         NonNull::without_provenance(self.align.as_nonzero_usize())
     }
@@ -359,6 +362,7 @@ impl Layout {
     /// This can return at most `Alignment::MAX` (aka `isize::MAX + 1`)
     /// because the original size is at most `isize::MAX`.
     #[inline]
+    #[ferrocene::prevalidated]
     const fn size_rounded_up_to_custom_alignment(&self, alignment: Alignment) -> usize {
         // SAFETY:
         // Rounded up value is:
@@ -394,6 +398,7 @@ impl Layout {
     #[must_use = "this returns a new `Layout`, \
                   without modifying the original"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn pad_to_align(&self) -> Layout {
         // This cannot overflow. Quoting from the invariant of Layout:
         // > `size`, when rounded up to the nearest multiple of `align`,
@@ -507,6 +512,7 @@ impl Layout {
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn extend(&self, next: Self) -> Result<(Self, usize), LayoutError> {
         let new_alignment = Alignment::max(self.align, next.align);
         let offset = self.size_rounded_up_to_custom_alignment(next.align);

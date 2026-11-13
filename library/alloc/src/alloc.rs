@@ -318,6 +318,7 @@ unsafe fn realloc_nonnull(ptr: NonNull<u8>, layout: Layout, new_size: usize) -> 
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+#[ferrocene::prevalidated]
 pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
     // SAFETY: Upheld by caller.
     unsafe {
@@ -332,6 +333,7 @@ pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
 impl Global {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[ferrocene::prevalidated]
     fn alloc_impl_runtime(layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
         match layout.size() {
             0 => Ok(layout.dangling_ptr().cast_slice(0)),
@@ -458,6 +460,7 @@ impl Global {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+    #[ferrocene::prevalidated]
     const fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
         core::intrinsics::const_eval_select(
             (layout, zeroed),
@@ -516,6 +519,7 @@ impl Global {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+    #[ferrocene::prevalidated]
     const fn alloc_impl_const(layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
         match layout.size() {
             0 => Ok(layout.dangling_ptr().cast_slice(0)),
@@ -576,6 +580,7 @@ impl Global {
 const unsafe impl Allocator for Global {
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[ferrocene::prevalidated]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, false)
     }
@@ -671,6 +676,7 @@ unsafe extern "Rust" {
 #[cfg(not(no_global_oom_handling))]
 #[cold]
 #[optimize(size)]
+#[ferrocene::prevalidated]
 pub const fn handle_alloc_error(layout: Layout) -> ! {
     const fn ct_error(_: Layout) -> ! {
         panic!("allocation failed");

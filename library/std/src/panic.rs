@@ -354,6 +354,7 @@ pub use core::panic::abort_on_unwind;
 /// });
 /// assert!(result.is_err());
 /// ```
+#[ferrocene::prevalidated]
 #[stable(feature = "catch_unwind", since = "1.9.0")]
 pub fn catch_unwind<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Result<R> {
     unsafe { panicking::catch_unwind(f) }

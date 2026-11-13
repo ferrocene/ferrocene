@@ -45,6 +45,7 @@ pub(super) struct ScopeData {
 }
 
 impl ScopeData {
+    #[ferrocene::prevalidated]
     pub(super) fn increment_num_running_threads(&self) {
         // We check for 'overflow' with usize::MAX / 2, to make sure there's no
         // chance it overflows to 0, which would result in unsoundness.
@@ -54,12 +55,14 @@ impl ScopeData {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     fn overflow(&self) {
         self.decrement_num_running_threads(false);
         panic!("too many running threads in thread scope");
     }
 
+    #[ferrocene::prevalidated]
     pub(super) fn decrement_num_running_threads(&self, panic: bool) {
         if panic {
             self.a_thread_panicked.store(true, Ordering::Relaxed);

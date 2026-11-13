@@ -465,6 +465,7 @@ impl<T> Vec<T> {
     /// # #![allow(unused_mut)]
     /// let mut vec: Vec<i32> = Vec::new();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_stable(feature = "const_vec_new", since = "1.39.0")]
     #[rustc_diagnostic_item = "vec_new"]
@@ -1764,6 +1765,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[stable(feature = "vec_as_slice", since = "1.7.0")]
     #[rustc_diagnostic_item = "vec_as_slice"]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: `slice::from_raw_parts` requires pointee is a contiguous, aligned buffer of size
         // `len` containing properly-initialized `T`s. Data must not be mutated for the returned
@@ -1878,6 +1880,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// [`as_ptr`]: Vec::as_ptr
     /// [`as_non_null`]: Vec::as_non_null
     /// [didn't allocate]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[stable(feature = "vec_as_ptr", since = "1.37.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
     #[inline]
@@ -2040,6 +2043,7 @@ impl<T, A: Allocator> Vec<T, A> {
     }
 
     /// Returns a reference to the underlying allocator.
+    #[ferrocene::prevalidated]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline]
@@ -3150,6 +3154,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// let a = vec![1, 2, 3];
     /// assert_eq!(a.len(), 3);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
@@ -4186,6 +4191,7 @@ impl<T> FromIterator<T> for Vec<T> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T, A: Allocator> IntoIterator for Vec<T, A> {
     type Item = T;
@@ -4556,6 +4562,7 @@ const unsafe impl<#[may_dangle] T: [const] Destruct, A: [const] Allocator + [con
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 const impl<T> Default for Vec<T> {

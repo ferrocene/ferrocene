@@ -1438,6 +1438,14 @@
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::assume_init_ref
 <[core::mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice
 <[u8] as core::slice::specialize::SpecFill<u8>>::spec_fill
+<alloc::alloc::Global as core::alloc::Allocator>::allocate
+<alloc::boxed::Box<F, A> as core::ops::function::Fn<Args>>::call
+<alloc::boxed::Box<F, A> as core::ops::function::FnOnce<Args>>::call_once
+<alloc::rcs::arc::Arc<T, A> as core::clone::Clone>::clone
+<alloc::rcs::arc::Arc<T, A> as core::ops::deref::Deref>::deref
+<alloc::vec::Vec<T, A> as core::iter::traits::collect::IntoIterator>::into_iter
+<alloc::vec::Vec<T> as core::default::Default>::default
+<alloc::vec::into_iter::IntoIter<T, A> as core::iter::traits::iterator::Iterator>::next
 <bool as core::default::Default>::default
 <bool as core::fmt::Debug>::fmt
 <bool as core::fmt::Display>::fmt
@@ -3504,6 +3512,8 @@
 <core::panic::panic_info::PanicMessage<'_> as core::fmt::Display>::fmt
 <core::panicking::AssertKind as core::fmt::Debug>::fmt
 <core::panicking::assert_matches_failed::Pattern<'_> as core::fmt::Debug>::fmt
+<core::pin::Pin<Ptr> as core::clone::Clone>::clone
+<core::pin::Pin<Ptr> as core::ops::deref::Deref>::deref
 <core::ptr::metadata::DynMetadata<Dyn> as core::clone::Clone>::clone
 <core::ptr::metadata::DynMetadata<Dyn> as core::fmt::Debug>::fmt
 <core::ptr::non_null::NonNull<T> as core::clone::Clone>::clone
@@ -5662,27 +5672,75 @@
 <usize as core::slice::index::SliceIndex<[T]>>::get_unchecked_mut::precondition_check
 <usize as core::slice::index::SliceIndex<[T]>>::index
 <usize as core::slice::index::SliceIndex<[T]>>::index_mut
+alloc::alloc::Global::alloc_impl
+alloc::alloc::Global::alloc_impl_const
+alloc::alloc::Global::alloc_impl_runtime
 alloc::alloc::alloc
+alloc::alloc::alloc_zeroed
 alloc::alloc::dealloc
 alloc::alloc::dealloc_nonnull
+alloc::alloc::handle_alloc_error
+alloc::alloc::handle_alloc_error::ct_error
+alloc::alloc::handle_alloc_error::rt_error
 alloc::alloc::realloc
 alloc::alloc::realloc_nonnull
+alloc::boxed::Box::<T, A>::from_raw_in
+alloc::boxed::Box::<T>::from_raw
+alloc::boxed::Box::<T>::into_non_null
+alloc::boxed::Box::<T>::into_raw
+alloc::boxed::Box::<T>::new
+alloc::boxed::BoxRaw::<T>::new_unchecked
+alloc::boxed::box_new_uninit
+alloc::raw_vec::RawVec::<T, A>::allocator
+alloc::raw_vec::RawVec::<T, A>::capacity
+alloc::raw_vec::RawVec::<T, A>::new_in
+alloc::raw_vec::RawVec::<T, A>::non_null
+alloc::raw_vec::RawVec::<T, A>::ptr
+alloc::raw_vec::RawVec::<T>::new
+alloc::raw_vec::RawVecInner::<A>::allocator
+alloc::raw_vec::RawVecInner::<A>::capacity
+alloc::raw_vec::RawVecInner::<A>::new_in
+alloc::raw_vec::RawVecInner::<A>::non_null
+alloc::raw_vec::RawVecInner::<A>::ptr
+alloc::rcs::arc::Arc::<T, A>::from_inner_in
+alloc::rcs::arc::Arc::<T, A>::from_ptr_in
+alloc::rcs::arc::Arc::<T, A>::get_mut_unchecked
+alloc::rcs::arc::Arc::<T, A>::inner
+alloc::rcs::arc::Arc::<T, A>::into_inner_with_allocator
+alloc::rcs::arc::Arc::<T, A>::new_uninit_in
+alloc::rcs::arc::Arc::<T>::allocate_for_layout
+alloc::rcs::arc::Arc::<T>::from_inner
+alloc::rcs::arc::Arc::<T>::initialize_arcinner
+alloc::rcs::arc::Arc::<T>::new
+alloc::rcs::arc::Arc::<core::mem::maybe_uninit::MaybeUninit<T>, A>::assume_init
+alloc::rcs::arc::arcinner_layout_for_value_layout
+alloc::vec::Vec::<T, A>::allocator
+alloc::vec::Vec::<T, A>::as_ptr
+alloc::vec::Vec::<T, A>::as_slice
 alloc::vec::Vec::<T, A>::from_parts_in::precondition_check
 alloc::vec::Vec::<T, A>::from_raw_parts_in::precondition_check
+alloc::vec::Vec::<T, A>::len
 alloc::vec::Vec::<T, A>::set_len::precondition_check
+alloc::vec::Vec::<T>::new
 core::alloc::global::GlobalAlloc::alloc_zeroed
 core::alloc::global::GlobalAlloc::realloc
 core::alloc::layout::Layout::align
 core::alloc::layout::Layout::alignment
+core::alloc::layout::Layout::dangling_ptr
+core::alloc::layout::Layout::extend
+core::alloc::layout::Layout::for_value_raw
 core::alloc::layout::Layout::from_size_align_unchecked
 core::alloc::layout::Layout::from_size_align_unchecked::precondition_check
+core::alloc::layout::Layout::from_size_alignment
 core::alloc::layout::Layout::from_size_alignment_unchecked
 core::alloc::layout::Layout::from_size_alignment_unchecked::precondition_check
 core::alloc::layout::Layout::is_size_align_valid
 core::alloc::layout::Layout::is_size_alignment_valid
 core::alloc::layout::Layout::max_size_for_alignment
 core::alloc::layout::Layout::new
+core::alloc::layout::Layout::pad_to_align
 core::alloc::layout::Layout::size
+core::alloc::layout::Layout::size_rounded_up_to_custom_alignment
 core::any::TypeId::as_u128
 core::any::TypeId::of
 core::any::type_name
@@ -5763,6 +5821,7 @@ core::byte_str::ByteStr::from_bytes
 core::cell::BorrowRef::<'b>::new
 core::cell::BorrowRefMut::<'b>::new
 core::cell::Cell::<T>::get
+core::cell::Cell::<T>::into_inner
 core::cell::Cell::<T>::new
 core::cell::Cell::<T>::replace
 core::cell::Cell::<T>::set
@@ -6728,6 +6787,7 @@ core::hash::impls::<impl core::hash::Hash for usize>::hash
 core::hash::impls::<impl core::hash::Hash for usize>::hash_slice
 core::hint::assert_unchecked
 core::hint::assert_unchecked::precondition_check
+core::hint::black_box
 core::hint::select_unpredictable
 core::hint::unreachable_unchecked
 core::hint::unreachable_unchecked::precondition_check
@@ -6735,6 +6795,7 @@ core::intrinsics::assume
 core::intrinsics::carrying_mul_add
 core::intrinsics::carryless_mul
 core::intrinsics::cold_path
+core::intrinsics::const_allocate
 core::intrinsics::const_make_global
 core::intrinsics::contract_check_ensures::compiletime
 core::intrinsics::contract_check_ensures::runtime
@@ -6880,6 +6941,7 @@ core::iter::range::Step::backward_unchecked
 core::iter::range::Step::forward
 core::iter::range::Step::forward_unchecked
 core::iter::sources::from_fn::from_fn
+core::iter::sources::successors::successors
 core::iter::traits::collect::Extend::extend_one
 core::iter::traits::collect::Extend::extend_one_unchecked
 core::iter::traits::collect::Extend::extend_reserve
@@ -6947,12 +7009,16 @@ core::iter::traits::iterator::iter_compare::compare
 core::iter::traits::iterator::iter_eq
 core::mem::align_of
 core::mem::align_of_val
+core::mem::align_of_val_raw
 core::mem::alignment::Alignment::as_nonzero_usize
 core::mem::alignment::Alignment::as_usize
 core::mem::alignment::Alignment::log2
+core::mem::alignment::Alignment::max
 core::mem::alignment::Alignment::new
 core::mem::alignment::Alignment::new_unchecked
 core::mem::alignment::Alignment::new_unchecked::precondition_check
+core::mem::alignment::Alignment::of
+core::mem::alignment::Alignment::of_val_raw
 core::mem::conjure_zst
 core::mem::conjure_zst::do_panic
 core::mem::conjure_zst::do_panic::compiletime
@@ -8192,6 +8258,10 @@ core::panicking::panic_nounwind_fmt::runtime::panic_impl
 core::panicking::panic_nounwind_nobacktrace
 core::panicking::panic_null_pointer_dereference
 core::panicking::unreachable_default_msg
+core::pin::Pin::<&'a T>::get_ref
+core::pin::Pin::<&'a T>::map_unchecked
+core::pin::Pin::<Ptr>::as_ref
+core::pin::Pin::<Ptr>::new_unchecked
 core::profiling::compiler_copy
 core::profiling::compiler_move
 core::ptr::align_offset
@@ -8203,6 +8273,7 @@ core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::compiletime
 core::ptr::const_ptr::<impl *const T>::add::runtime_add_nowrap::runtime
 core::ptr::const_ptr::<impl *const T>::addr
 core::ptr::const_ptr::<impl *const T>::align_offset
+core::ptr::const_ptr::<impl *const T>::as_ref
 core::ptr::const_ptr::<impl *const T>::byte_add
 core::ptr::const_ptr::<impl *const T>::cast
 core::ptr::const_ptr::<impl *const T>::cast_array
@@ -8233,7 +8304,9 @@ core::ptr::const_ptr::<impl *const T>::to_raw_parts
 core::ptr::const_ptr::<impl *const T>::try_cast_aligned
 core::ptr::const_ptr::<impl *const T>::with_metadata_of
 core::ptr::const_ptr::<impl *const T>::wrapping_add
+core::ptr::const_ptr::<impl *const T>::wrapping_byte_sub
 core::ptr::const_ptr::<impl *const T>::wrapping_offset
+core::ptr::const_ptr::<impl *const T>::wrapping_sub
 core::ptr::const_ptr::<impl *const [T]>::as_array
 core::ptr::const_ptr::<impl *const [T]>::as_ptr
 core::ptr::const_ptr::<impl *const [T]>::is_empty
@@ -8283,7 +8356,9 @@ core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap
 core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::compiletime
 core::ptr::mut_ptr::<impl *mut T>::sub::runtime_sub_nowrap::runtime
 core::ptr::mut_ptr::<impl *mut T>::to_raw_parts
+core::ptr::mut_ptr::<impl *mut T>::with_metadata_of
 core::ptr::mut_ptr::<impl *mut T>::wrapping_add
+core::ptr::mut_ptr::<impl *mut T>::wrapping_byte_add
 core::ptr::mut_ptr::<impl *mut T>::wrapping_offset
 core::ptr::mut_ptr::<impl *mut T>::write
 core::ptr::mut_ptr::<impl *mut T>::write_bytes
@@ -8301,14 +8376,21 @@ core::ptr::non_null::NonNull::<T>::as_ptr
 core::ptr::non_null::NonNull::<T>::as_ref
 core::ptr::non_null::NonNull::<T>::cast
 core::ptr::non_null::NonNull::<T>::cast_array
+core::ptr::non_null::NonNull::<T>::cast_slice
 core::ptr::non_null::NonNull::<T>::from_mut
 core::ptr::non_null::NonNull::<T>::from_ref
+core::ptr::non_null::NonNull::<T>::new
 core::ptr::non_null::NonNull::<T>::new_unchecked
 core::ptr::non_null::NonNull::<T>::new_unchecked::precondition_check
 core::ptr::non_null::NonNull::<T>::offset
 core::ptr::non_null::NonNull::<T>::offset_from_unsigned
 core::ptr::non_null::NonNull::<T>::read
 core::ptr::non_null::NonNull::<T>::sub
+core::ptr::non_null::NonNull::<T>::without_provenance
+core::ptr::non_null::NonNull::<T>::write_bytes
+core::ptr::non_null::NonNull::<[T]>::as_mut_ptr
+core::ptr::non_null::NonNull::<[T]>::as_non_null_ptr
+core::ptr::non_null::NonNull::<[T]>::slice_from_raw_parts
 core::ptr::null
 core::ptr::null_mut
 core::ptr::read

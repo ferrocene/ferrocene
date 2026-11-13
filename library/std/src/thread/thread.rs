@@ -55,11 +55,15 @@ struct Inner {
 }
 
 impl Inner {
+    #[ferrocene::prevalidated]
     fn parker(self: Pin<&Self>) -> Pin<&Parker> {
         unsafe { Pin::map_unchecked(self, |inner| &inner.parker) }
     }
 }
 
+#[ferrocene::prevalidated]
+// FIXME: this should be "expect(...)", but that does not work
+#[allow(ferrocene::unvalidated, reason = "false-positive in derived Clone implementation")]
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
 /// A handle to a thread.
@@ -92,6 +96,7 @@ pub struct Thread {
 }
 
 impl Thread {
+    #[ferrocene::prevalidated]
     pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {
         let name = name.map(ThreadNameString::from);
 
@@ -210,6 +215,7 @@ impl Thread {
     ///
     /// [`park`]: super::park
     /// [park documentation]: super::park
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn unpark(&self) {

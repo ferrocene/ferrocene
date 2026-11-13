@@ -437,6 +437,7 @@ pub mod panic_count {
         });
     }
 
+    #[ferrocene::prevalidated]
     pub fn decrease() {
         GLOBAL_PANIC_COUNT.fetch_sub(1, Ordering::Relaxed);
         LOCAL_PANIC_COUNT.with(|c| {
@@ -494,6 +495,7 @@ pub unsafe fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any +
 }
 
 /// Invoke a closure, capturing the cause of an unwinding panic if one occurs.
+#[ferrocene::prevalidated]
 #[cfg(not(panic = "immediate-abort"))]
 pub(crate) unsafe fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + Send>> {
     union Data<F, R> {

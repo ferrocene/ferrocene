@@ -32,6 +32,7 @@ pub struct ThreadId(NonZero<u64>);
 
 impl ThreadId {
     // Generate a new unique thread ID.
+    #[ferrocene::prevalidated]
     pub(crate) fn new() -> ThreadId {
         #[cold]
         fn exhausted() -> ! {

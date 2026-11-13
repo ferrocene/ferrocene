@@ -11,14 +11,11 @@
 # ///
 
 import argparse
-import os
-import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from pathlib import Path
 
 from automations_common import cmd_capture
 from ignorelib import IgnoreFilterManager
-from more_itertools import peekable
 
 had_error = False
 
@@ -103,23 +100,17 @@ for line in all_changed:
                 continue
             val = path
         case DiffKind.RENAMED:
-            val = rest.split()
+            similarity, old_name, new_name = rest.split("\t")
+            val = f"{old_name} -> {new_name} ({int(similarity)}%)"
         case _:
             raise ValueError(f"Don't know how to handle diff kind {kind}")
     changemap[kind].append(val)
 
 
-for kind in ["A", "D", "R"]:
+for kind in ["A", "D", "R", "M"]:
     if changemap[kind]:
         print(f"\nPrinting all {DIFF_NAMES[kind]} files")
     for p in changemap[kind]:
         print(f"{kind}\t{p}")
-
-print(
-    rf"\ngit diff {base_commit} --name-status --diff-filter=M -I'#\[ferrocene::' -- :!.github' ':!**/.github/**' ':!ferrocene'"
-)
-
-for p in changemap["M"]:
-    print(f"M\t{p}")
 
 exit(had_error)

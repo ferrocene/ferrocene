@@ -241,12 +241,8 @@ pub const trait Clone: Sized {
     /// allocations.
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
-||||||| 712e1d350f1
-=======
     #[lang = "clone_from_fn"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn clone_from(&mut self, source: &Self)
     where
         Self: [const] Destruct,

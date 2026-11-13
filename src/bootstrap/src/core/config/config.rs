@@ -623,12 +623,8 @@ impl Config {
             compiletest_allow_stage0: build_compiletest_allow_stage0,
             sde: build_sde,
             allocator: build_allocator,
-<<<<<<< ferrocene/main
             uv,
-||||||| 712e1d350f1
-=======
             rustc_perf_path: build_rustc_perf_path,
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         } = toml_build.unwrap_or_default();
 
         let Install {

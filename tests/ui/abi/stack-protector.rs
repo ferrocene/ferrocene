@@ -4,14 +4,8 @@
 //@ [ssp] compile-flags: -Z stack-protector=all -Z allow-partial-mitigations=stack-protector
 //@ compile-flags: -C opt-level=2
 //@ compile-flags: -g
-<<<<<<< ferrocene/main
-//@ ignore-backends: gcc
 //@ ignore-test glibc versions earlier than 2.25 are generally not SSP enabled
 //              https://gitlab.com/gnutools/glibc/-/tags/glibc-2.25
-||||||| 712e1d350f1
-//@ ignore-backends: gcc
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 #![allow(function_casts_as_integer)]
 

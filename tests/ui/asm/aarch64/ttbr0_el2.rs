@@ -3,17 +3,11 @@
 //@ build-pass
 //@ compile-flags: --target aarch64-unknown-linux-gnu
 //@ needs-llvm-components: aarch64
-<<<<<<< ferrocene/main
-//@ ignore-backends: gcc
 
 // Ferrocene addition: TTBR0_EL2 is not present on Armv8-R AArch64, where EL2 only supports PMSA
 //@ ignore-aarch64r82-unknown-ferrocene.facade
 //@ ignore-aarch64v8r-unknown-ferrocene.facade
 
-||||||| 712e1d350f1
-//@ ignore-backends: gcc
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![crate_type = "lib"]
 #![feature(no_core)]
 #![no_core]

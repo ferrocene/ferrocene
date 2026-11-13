@@ -3,16 +3,10 @@
 //@ exec-env:RUST_BACKTRACE=0
 //@ normalize-stderr: "(core/src/panicking\.rs):[0-9]+:[0-9]+" -> "$1:$$LINE:$$COL"
 //@ normalize-stderr: "/rustc(?:-dev)?/[a-z0-9.]+/" -> ""
-<<<<<<< ferrocene/main
-//@ ignore-backends: gcc
 
 // Ferrocene addition: Remove extra output line added by qemu
 //@ normalize-stderr: "qemu: uncaught target signal 6 \(Aborted\) - core dumped\n" -> ""
 
-||||||| 712e1d350f1
-//@ ignore-backends: gcc
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #![feature(extern_types)]
 
 extern "C" {

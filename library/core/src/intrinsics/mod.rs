@@ -748,18 +748,10 @@ pub const fn unlikely(b: bool) -> bool {
 /// The public form of this intrinsic is [`core::hint::select_unpredictable`].
 /// However unlike the public form, the intrinsic will not drop the value that
 /// is not selected.
-<<<<<<< ferrocene/main
 #[ferrocene::annotation(
     "All calls of this function are replaced during code generation, meaning that the code inside the function is never run. The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/select_unpredictable.rs`"
 )]
-#[unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
-||||||| 712e1d350f1
-#[unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_const_unstable(feature = "const_select_unpredictable", issue = "145938")]
-=======
 #[rustc_const_unstable(feature = "core_intrinsics", issue = "none")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[rustc_intrinsic]
 #[rustc_nounwind]
 #[miri::intrinsic_fallback_is_spec]
@@ -2036,18 +2028,10 @@ pub const fn mul_with_overflow<T: Copy>(x: T, y: T) -> (T, bool);
 ///
 /// This currently supports unsigned integers *only*, no signed ones.
 /// The stabilized versions of this intrinsic are available on integers.
-<<<<<<< ferrocene/main
 #[ferrocene::annotation(
     "All calls to this function are replaced during code generation unless the target doesn't have this intrinsic. In the latter case, the body of this function remains unchanged, meaning that it calls `intrinsics::fallback::CarryingMulAdd::carrying_mul_add` which is thoroughly tested.  The correctness of the code generation is tested in `tests/codegen-llvm/intrinsics/carrying_mul_add.rs`"
 )]
-#[unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_const_unstable(feature = "const_carrying_mul_add", issue = "152015")]
-||||||| 712e1d350f1
-#[unstable(feature = "core_intrinsics", issue = "none")]
-#[rustc_const_unstable(feature = "const_carrying_mul_add", issue = "152015")]
-=======
 #[rustc_const_unstable(feature = "core_intrinsics", issue = "none")]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
@@ -2708,13 +2692,7 @@ pub const fn is_val_statically_known<T: Copy>(_arg: T) -> bool {
 #[rustc_nounwind]
 #[inline]
 #[rustc_intrinsic]
-<<<<<<< ferrocene/main
-#[rustc_intrinsic_const_stable_indirect]
 #[ferrocene::prevalidated]
-||||||| 712e1d350f1
-#[rustc_intrinsic_const_stable_indirect]
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub const unsafe fn typed_swap_nonoverlapping<T>(x: *mut T, y: *mut T) {
     // SAFETY: The caller provided single non-overlapping items behind
     // pointers, so swapping them with `count: 1` is fine.

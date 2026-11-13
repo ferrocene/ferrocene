@@ -8,8 +8,10 @@ if ! command -v uv &> /dev/null; then
     curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
 fi
 
-source $HOME/.cargo/env
-echo "source $HOME/.cargo/env" >> $BASH_ENV
+if [[ -d $HOME/.cargo ]]; then
+    source $HOME/.cargo/env
+    echo "source $HOME/.cargo/env" >> $BASH_ENV
+fi
 
 uv venv ~/.venv
 

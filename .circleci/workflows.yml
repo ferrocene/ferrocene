@@ -1090,6 +1090,7 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1101,7 +1102,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-venv
-      - aws-oidc-auth
       - when:
           condition:  <<parameters.restore-from-job>>
           steps:
@@ -1273,7 +1273,7 @@ commands:
       - run:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
-          
+
 
   ferrocene-setup-windows:
     description: Prepare the Windows environment

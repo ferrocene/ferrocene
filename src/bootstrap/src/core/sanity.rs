@@ -47,6 +47,7 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabihf",
     "thumbv8m.main-ferrocene.facade-eabi",
     "thumbv8m.main-ferrocene.facade-eabihf",
+    "x86_64-pc-qos",
     // just a dummy comment so the list doesn't get onelined
     "aarch64-unknown-qtee",
 ];

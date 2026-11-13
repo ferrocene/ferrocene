@@ -333,6 +333,7 @@ pub(crate) const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-ferrocene.facade",
     "needs-linker-flavor-lld-cc",
     "only-ferrocene.facade",
+    "only-qnx",
 ];
 
 pub(crate) const KNOWN_HTMLDOCCK_DIRECTIVE_NAMES: &[&str] = &[

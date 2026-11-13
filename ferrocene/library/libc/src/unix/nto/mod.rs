@@ -2473,7 +2473,7 @@ f! {
 // Network related functions are provided by libsocket and regex
 // functions are provided by libregex.
 // In QNX <=7.0, libregex functions were included in libc itself.
-#[link(name = "socket")]
+#[cfg_attr(not(feature = "qos"), link(name = "socket"))] // Ferrocene change
 #[cfg_attr(not(target_env = "nto70"), link(name = "regex"))]
 // `inotify_*` functions are provided by `fsnotify` on QNX 8.0
 #[cfg_attr(target_os = "qnx", link(name = "fsnotify"))]

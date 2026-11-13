@@ -1671,6 +1671,7 @@ supported_targets! {
     ("x86_64-pc-nto-qnx710", x86_64_pc_nto_qnx710),
     ("x86_64-pc-nto-qnx710_iosock", x86_64_pc_nto_qnx710_iosock),
     ("x86_64-pc-qnx", x86_64_pc_qnx),
+    ("x86_64-pc-qos", x86_64_pc_qos),
     ("i686-pc-nto-qnx700", i686_pc_nto_qnx700),
 
     ("i386-lynx-lynxos178", i386_lynx_lynxos178),

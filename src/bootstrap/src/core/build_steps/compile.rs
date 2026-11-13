@@ -760,6 +760,10 @@ pub fn std_cargo(
 
     let mut features = String::new();
 
+    if target.ends_with("-qos") {
+        features += " qos ";
+    }
+
     if builder.no_std(target) == Some(true) {
         features += " compiler-builtins-mem";
         if !target.starts_with("bpf") {

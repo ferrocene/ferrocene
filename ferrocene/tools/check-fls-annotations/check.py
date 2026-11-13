@@ -13,108 +13,212 @@
 import argparse
 import os
 import re
-from collections import defaultdict, namedtuple
-from pathlib import Path
 
-from automations_common import cmd_capture
-from ignorelib import IgnoreFilterManager
-from more_itertools import peekable
-
-had_error = False
-
-
-def error(*messages):
-    print("error:", *messages)
-    global had_error
-    had_error = True
+from io import StringIO
 
 
 parser = argparse.ArgumentParser(
     prog="check-fls-annotations", description="Check FLS annotations in tests"
 )
+parser.add_argument(
+    "--bless", action="store_true", help="Automatically fix issues where possible"
+)
 args = parser.parse_args()
 
 
-class DiffKind:
-    ADDED = "A"
-    MODIFIED = "M"
-    DELETED = "D"
-    RENAMED = "R"
+had_any_error = False
+had_unfixable_error = False
 
 
-DIFF_NAMES = {
-    DiffKind.ADDED: "added",
-    DiffKind.MODIFIED: "modified",
-    DiffKind.DELETED: "deleted",
-    DiffKind.RENAMED: "renamed",
-}
+def error(*messages, fixable=True):
+    global had_any_error
+    global had_unfixable_error
+
+    had_any_error = True
+
+    if fixable and args.bless:
+        # Don't print an error message in this case
+        pass
+    else:
+        print("error:", *messages)
+        had_unfixable_error = True
 
 
-base_commit = cmd_capture("git log -n1 --author=bors@rust-lang.org --pretty=%H".split())
+# Wrapper around a file which tracks line numbers and allows peeking at the next line
+# without advancing.
+class FileWrapper:
+    def __init__(self, data):
+        self.fd = data
+        self.lineno = 0
+        self.pending_line = None
 
-diff_tests = f"git diff -U0 --no-prefix --diff-filter=M {base_commit} -- tests/".split()
-test_changes = peekable(cmd_capture(diff_tests).splitlines())
+    def __iter__(self):
+        return self
 
-file = None
-lineno = 0
-changes: list[DiffKind, str] = []
-test_changemap = {}
-missing_annotations = {}
-annotations = {}
+    def __next__(self):
+        if self.pending_line is None:
+            line = self.fd.readline()
 
-Span = namedtuple("Span", ["file", "line"])
+            if line == "":
+                raise StopIteration
 
-for line in test_changes:
-    if line.startswith("diff --git"):
-        # Record the file we just finished parsing.
-        if changes:
-            assert file, "saw changes for unknown file"
-            test_changemap[file] = changes
-        # Now parse the header for the new file.
-        file, changes, lineno = line.split()[2], [], 0
-        for _ in range(4):
-            next(test_changes)  # discard `index ...`
-        continue
+            self.lineno += 1
+            return (self.lineno, line)
 
-    lineno += 1
-    kind, change = line[0], line[1:]
-    if not change or change == "//" or change.startswith("//@ ignore-ferrocene.facade"):
-        continue
-
-    if re.search(r"^\s*// ferrocene-annotations: ", change):
-        span = Span(file, lineno)
-        id = next(reversed(change.split(" ")))
-        if id.startswith("um_rustc"):
-            annotations[id] = span, ""
-            continue
-        # Next line is the section name it corresponds to.
-        section = test_changes.peek()
-        if not ((section[0] == "+") and section[1:].lstrip().startswith("//")):
-            missing_annotations[span] = id
         else:
-            annotations[id] = span, section.split(" ", 1)[1]
-            next(test_changes)  # discard section
-        continue
+            line = self.pending_line
+            self.lineno += 1
+            self.pending_line = None
 
-    changes.append([kind, change])
+            return (self.lineno, line)
 
-if missing_annotations:
-    error(
-        f"found {len(missing_annotations)} ferrocene-annotations not followed by section name!"
-    )
-    for span, annotation in missing_annotations.items():
-        print("%s:%d" % span, annotation)
+    def next(self):
+        return self.__next__()
+
+    def peek(self):
+        if self.pending_line is None:
+            next_line = self.fd.readline()
+            if next_line == "":
+                return (self.lineno + 1, None)
+            else:
+                self.pending_line = next_line
+                return (self.lineno + 1, next_line)
+
+        else:
+            return (self.lineno + 1, self.pending_line)
 
 
-# load all section titles
-def load_sections(fd, sections):
-    for line in fd:
+def load_sections(fd, file, sections):
+    wrapper = FileWrapper(fd)
+    fixed = StringIO()
+
+    for lineno, line in wrapper:
         if line.startswith(".. _fls"):
             # Get id, truncating trailing colon.
-            id = line.strip().split(".. _", 1)[1][:-1]
-            n = next(fd)
-            assert n.strip() == "", n
-            sections[id.lower()] = next(fd).strip().replace("`", "")
+            id = line[4:].rstrip()  # Remove the ".. _" part, keep the rest
+
+            if not id.endswith(":"):
+                error(f"FLS ID at {file}:{lineno} is not followed by a ':'")
+            else:
+                id = id[:-1]
+
+            if not id.islower():
+                error(f"Non-lowercase FLS ID definition at {file}:{lineno}")
+                id = id.lower()  # to allow further processing
+
+            (_, n) = wrapper.peek()
+            if n is None or n.strip() != "":
+                error(f"FLS ID at {file}:{lineno} is not followed by a blank line")
+            else:
+                wrapper.next()  # Skip the line we peeked at
+
+            (_, title_line) = wrapper.next()
+            sections[id] = title_line.strip().replace("`", "")
+
+            # Normalize formatting
+            fixed.write(f".. _{id}:\n")
+            fixed.write("\n")
+            fixed.write(title_line)
+        else:
+            fixed.write(line)
+
+    return fixed.getvalue()
+
+
+def validate_annotations_in_file(fd, file, sections, cli_ids):
+    wrapper = FileWrapper(fd)
+    fixed = StringIO()
+
+    for lineno, line in wrapper:
+        if line.lstrip().startswith("// ferrocene-annotations: "):
+            indent = line.split("//", maxsplit=1)[0]
+            x = line.strip().split()
+
+            if len(x) < 3:
+                error(f"Missing FLS ID at {file}:{lineno}", fixable=False)
+                fixed.write(line)  # Can't automatically fix
+                continue
+
+            if len(x) > 3:
+                error(f"Multiple FLS IDs at {file}:{lineno}", fixable=False)
+                # In theory we could split this into one line per item, but don't do that
+                # automatically for now.
+                fixed.write(line)
+                continue
+
+            id = x[2]
+
+            if id.startswith("um_rustc"):
+                if id in cli_ids:
+                    # Okay
+                    fixed.write(line)
+                    continue
+                else:
+                    error(
+                        f"Unknown CLI spec id '{id}' at {file}:{lineno}", fixable=False
+                    )
+                    # Can't automatically fix
+                    fixed.write(line)
+                    continue
+
+            if not id.islower():
+                error(f"Non-lowercase FLS ID '{id}'' at {file}:{lineno}")
+                id = id.lower()  # to allow further processing
+
+            # Normalize formatting
+            fixed.write(f"{indent}// ferrocene-annotations: {id}\n")
+
+            if id in sections:
+                # Next line should be the title of the corresponding section.
+                (_, title_line) = wrapper.peek()
+                if title_line.lstrip().startswith("//"):
+                    title = title_line.split(maxsplit=1)[1].rstrip()
+                    expected_title = sections[id]
+                    if title != expected_title:
+                        error(
+                            f"Incorrect section title at {file}:{lineno}: expected '{expected_title}', found '{title}'"
+                        )
+                    fixed.write(f"{indent}// {expected_title}\n")
+                    wrapper.next()
+                else:
+                    error(
+                        f"Annotation at {file}:{lineno} ({id}) is not followed by a section title"
+                    )
+
+            else:
+                error(f"Unknown section '{id}' at {file}:{lineno}")
+                # Can't automatically fix
+                # Next line should be the title of the corresponding section.
+                # We can't check it if we don't know the section ID, but make sure that there's
+                # *something* there
+                (_, title_line) = wrapper.peek()
+                if title_line.lstrip().startswith("//"):
+                    fixed.write(title_line)
+                    wrapper.next()
+                else:
+                    error(
+                        f"Annotation at {file}:{lineno} ({id}) is not followed by a section title"
+                    )
+
+        else:
+            fixed.write(line)
+
+    return fixed.getvalue()
+
+
+def load_cli_ids():
+    cli_ids = set()
+    matrix = "build/host/doc/qualification/traceability-matrix.html"
+    id_regex = re.compile(r'id="(um_rustc_[^"]*)"')
+    try:
+        with open(matrix) as fd:
+            for line in fd:
+                if m := id_regex.search(line):
+                    cli_ids.add(m.group(1))
+    except FileNotFoundError:
+        exit(f"error: {matrix} not found. try running './x build traceability-matrix'.")
+
+    return cli_ids
 
 
 def validate_annotations():
@@ -122,37 +226,32 @@ def validate_annotations():
     for dir, _subdirs, files in os.walk("ferrocene/doc/specification"):
         for file in files:
             if file.endswith(".rst"):
-                with open(dir + "/" + file) as fd:
-                    load_sections(fd, sections)
+                path = os.path.join(dir, file)
+                original = open(path).read()
+                fixed = load_sections(StringIO(original), path, sections)
+                if args.bless and fixed != original:
+                    print(f"Modified file {path}")
+                    open(path, "w").write(fixed)
 
-    cli_ids = set()
-    matrix = "build/host/doc/qualification/traceability-matrix.html"
-    try:
-        with open(matrix) as fd:
-            for line in fd:
-                if m := re.search(r'id="(um_rustc_[^"]*)"', line):
-                    cli_ids.add(m.group(1))
-    except FileNotFoundError:
-        exit(
-            f"error: {matrix} not found. try running './x build traceaqbility-matrix'."
-        )
+    cli_ids = load_cli_ids()
 
-    for id, (span, name) in annotations.items():
-        if id.startswith("um_rustc_"):
-            if id not in cli_ids:
-                error("Unknown CLI spec id:", id)
-        elif id not in sections:
-            error(f"Unknown section '{id}'!")
-        elif name.lower() != sections[id].lower():
-            error(
-                "Incorrect section name on %s:%d:" % span,
-                f"Expected '{sections[id]}', found '{name}'",
-            )
+    for dir, _subdirs, files in os.walk("tests"):
+        for file in files:
+            if file.endswith(".rs") or file == "ferrocene-annotations":
+                path = os.path.join(dir, file)
+                original = open(path).read()
+                fixed = validate_annotations_in_file(
+                    StringIO(original), path, sections, cli_ids
+                )
+                if args.bless and fixed != original:
+                    print(f"Modified file {path}")
+                    open(path, "w").write(fixed)
 
 
 print("Validating Ferrocene annotations against traceability matrix")
 validate_annotations()
-if not had_error:
+
+if not had_any_error:
     print("All annotations match the spec!")
 
-exit(had_error)
+exit(had_unfixable_error)

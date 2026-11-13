@@ -248,6 +248,7 @@ path = [
     "CODEOWNERS",
     "ferrocene/tools/Cargo.toml",
     "ferrocene/tools/Cargo.lock",
+    "ferrocene/patches/**"
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

@@ -48,6 +48,7 @@ dependencies = [
  "clap",
  "clap_complete",
  "cmake",
+ "getrandom",
  "home",
  "ignore",
  "insta",

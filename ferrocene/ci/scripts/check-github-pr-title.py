@@ -7,9 +7,15 @@
 # dependencies = []
 # ///
 
-# Check that Github pull request titles start with a reference to a Clickup ticket. Ticket IDs
-# are a sequence of lowercase ASCII letters and digits.
-# Example of expected format: "[869ed4uxf] Fix bug in ..."
+# Check that Github pull request titles contain at least one reference to a Clickup ticket.
+# Ticket IDs are the last part of the ticket URL, and are always formed from lowercase ASCII letters
+# and digits.
+#
+# For example, PRs related to `https://app.clickup.com/.../869ed4uxf` might have titles like:
+#
+#     [869ed4uxf] Fix bug in ... (normal PRs to the main branch)
+#     WIP: [869ed4uxf] Fix bug in ... (or other similar labels)
+#     [1.99] [869ed4uxf] Fix bug in ... (for PRs to a specific release branch)
 
 import os
 import re
@@ -21,7 +27,7 @@ def is_automated_pr(pr_source_branch):
 
 
 def is_valid_pr_title(pr_title):
-    ticket_reference = re.match(r"^\[[0-9a-z]+\]", pr_title)
+    ticket_reference = re.match(r"\[[0-9a-z]+\]", pr_title)
     return ticket_reference is not None
 
 
@@ -42,8 +48,9 @@ if __name__ == "__main__":
 
     if not is_valid_pr_title(pr_title):
         print(
-            "Error: Pull request title does not start with a valid Clickup ticket reference.\n"
-            "Clickup URLs have the form 'https://app.clickup.com/t/[team]/[ticket-reference]'",
+            "Error: Pull request title does not contain a valid Clickup ticket reference.\n"
+            "The expected format is the last part of the ticket URL, in square brackets.\n"
+            "E.g. a PR for `https://app.clickup.com/.../869ed4uxf` should contain `[869ed4uxf]` in the title",
             file=sys.stderr,
         )
         sys.exit(1)

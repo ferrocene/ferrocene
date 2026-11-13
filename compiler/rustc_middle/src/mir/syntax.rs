@@ -104,12 +104,13 @@ pub enum AnalysisPhase {
     /// * [`TerminatorKind::FalseEdge`]
     /// * [`StatementKind::FakeRead`]
     /// * [`StatementKind::AscribeUserType`]
-    /// * [`StatementKind::Coverage`] with [`CoverageKind::BlockMarker`] or
-    ///   [`CoverageKind::SpanMarker`]
+    /// * [`StatementKind::Coverage`] with [`CoverageKind::is_removed_after_analysis`]
     /// * [`Rvalue::Ref`] with `BorrowKind::Fake`
     /// * [`CastKind::PointerCoercion`] with any of the following:
     ///   * [`PointerCoercion::ArrayToPointer`]
     ///   * [`PointerCoercion::MutToConstPointer`]
+    ///
+    /// [`CoverageKind::is_removed_after_analysis`]: crate::mir::coverage::CoverageKind::is_removed_after_analysis
     ///
     /// Furthermore, `Deref` projections must be the first projection within any place (if they
     /// appear at all)
@@ -1711,7 +1712,7 @@ pub enum BinOp {
     /// - `Ordering::Equal` (`0_i8`, as a Scalar) if `A == B`
     /// - `Ordering::Greater` (`+1_i8`, as a Scalar) if `A > B`
     ///
-    /// [`LangItem::OrderingEnum`]: rustc_hir::attrs::lang_items::LangItem
+    /// [`LangItem::OrderingEnum`]: rustc_attr_ir::lang_items::LangItem
     Cmp,
     /// The `ptr.offset` operator
     Offset,

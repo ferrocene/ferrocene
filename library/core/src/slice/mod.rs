@@ -2584,7 +2584,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.split_once(|&x| x == 0), None);
     /// ```
-    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "slice_split_once", since = "1.101.0")]
     #[inline]
     pub fn split_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
@@ -2612,7 +2612,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.rsplit_once(|&x| x == 0), None);
     /// ```
-    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "slice_split_once", since = "1.101.0")]
     #[inline]
     pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where

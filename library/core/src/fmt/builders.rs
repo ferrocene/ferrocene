@@ -220,8 +220,8 @@ impl<'a, 'b: 'a> DebugStruct<'a, 'b> {
     ///     r#"Bar { bar: 0x0000000a, another: "Hello World" }"#,
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn field_with(
         &mut self,
         name: &str,
@@ -444,8 +444,8 @@ impl<'a, 'b: 'a> DebugTuple<'a, 'b> {
     ///     r#"Foo(0x0000000a, "Hello World")"#,
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn field_with(
         &mut self,
         value_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -681,8 +681,8 @@ impl<'a, 'b: 'a> DebugSet<'a, 'b> {
     ///     "{[10, 11], {12, 13}}",
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn entry_with(
         &mut self,
         entry_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -903,8 +903,8 @@ impl<'a, 'b: 'a> DebugList<'a, 'b> {
     ///     "[[10, 11], {12, 13}]",
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn entry_with(
         &mut self,
         entry_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1202,8 +1202,8 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///     r#"{entry A: 0x0000000a, entry B: 0x0000000b}"#,
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn key_with(
         &mut self,
         key_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,
@@ -1302,8 +1302,8 @@ impl<'a, 'b: 'a> DebugMap<'a, 'b> {
     ///     r#"{entry A: 0x0000000a, entry B: 0x0000000b}"#,
     /// );
     /// ```
-    #[stable(feature = "debug_closure_helpers", since = "CURRENT_RUSTC_VERSION")]
     #[ferrocene::prevalidated]
+    #[stable(feature = "debug_closure_helpers", since = "1.101.0")]
     pub fn value_with(
         &mut self,
         value_fmt: impl FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,

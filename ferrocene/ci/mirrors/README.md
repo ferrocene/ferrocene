@@ -6,45 +6,95 @@
 These exist to reduce our dependency on external infrastructure.
 Most of these are built from a dockerfile which is present in this directory, but never executed in CI.
 Use the dockerfiles if you need to regenerate the packages for some reason
-(e.g. if you need to recompile with a newer version of GCC).
+(e.g. if you need to recompile with a newer version of GCC or for a different host operating system).
 
-You can cross-compile all these images by adding `--platform=linux/amd64` or
-`--platform=linux/arm64` respectively. A list of shasums is kept in `hashes.txt` and checked
-during the docker image build.
+You need to build all dependencies with the exception of the gcc packages from the same commit. It is not supported to rebuild dependencies that have already been uploaded and the upload steps will not overwrite existing files.
+
+Packages are built from source mirrored in `ferrocene-ci-artifacts`. If you need to update a package, first upload the
+source package and then update the version in the Makefile and rebuild.
+
+You need to execute the full build on an x68_64 and an aarch64 host system to build the dependencies for both architectures. After the dependencies have been built and uploaded, you can execute `update-hashes` which will download all dependencies and 
+generate the hashes file used in the dockerfile.
+
+## Authentication
+
+all upload/download commands assume you have an authenticated session that has read permissions to ferrocene-ci-artifacts and read/write permissions to ferrocene-ci-mirrors.
+
+The tasks have been split into download-src, build, upload to avoid timing out between downloads.
 
 ## Packages
 
-### CMake
+### Building all packages
 
-The version packaged on Ubuntu 20.04 is too old.
+You can rebuild the full dependency chain from the bootstrap gcc to the final packages in a single go by using the *-all commands. If you set `BOOTSTRAP_GCC_FROM` and/or `GCC_FROM` the builds for the gcc packages will be skipped. See the bootstrap-gcc and gcc package below for details.
 
 Build commands:
 ```
-docker build -f cmake.dockerfile -t cmake .
-id=$(docker create cmake)
-docker cp $id:/cmake/cmake-3.21.1.tar.xz .
-docker rm $id
+make download-all-src
+make build-all
+make upload-all
 ```
 
-S3 paths:
-- aarch64 host: `s3://ferrocene-ci-mirrors/manual/cmake/cmake-3.21.1-aarch64.tar.xz`
-- x86_64  host: `s3://ferrocene-ci-mirrors/manual/cmake/cmake-3.21.1-x86_64.tar.xz`
+### Updating hashes
+
+run `make update-hashes` to generate a hashes file matching the dependencies. The hashes file can be generated on any hardware architecture, but dependencies for both x86_64 and aarch64 must have been built from the same commit and on both architectures. `update-hashes` will respect `GCC_FROM` and pull the gcc packages from this commit instead.
+
+### Building individual packages
+
+You can build individual packages as laid out below. Note that various packages depend on each other an rebuilding leaf-packages may often rebuild their dependencies.
+
+### bootstrap-gcc (gcc 11)
+The GCC in our runner OS image is too old to compile a recent GCC version, so an intermediary GCC is required. GCC 11 has been chosen because it's old enough to compile without issues, and recent enough to build the latest GCC versions.
+
+Build commands:
+```
+make download-bootstrap-gcc-src
+make bootstrap-gcc
+make upload-bootstrap-gcc
+```
+
+Instead of rebuilding the bootstrap GCC, you can reuse an existing build by setting the environment variable "BOOTSTRAP_GCC_FROM" to a commit that has a working GCC version. Unlike the main GCC, this commit can be different for the aarch64 and x86_64 builds.
+
+### gcc (gcc-16.1.0)
+
+Build commands:
+```
+make download-gcc-src
+make gcc
+make upload-gcc
+```
+
+Instead of rebuilding GCC, you can reuse an existing build by setting the environment variable "GCC_FROM" to a commit that has a working GCC version. The commit to use needs to be identical for both aarch64 and x86_64, otherwise hash generation will fail.
+
+### utils (binutils and coreutils)
+
+Binutils and coreutils are built in the same dockerfile as recent coreutils require a more recent version of binutils than provided by the os.
+
+Build commands:
+```
+make download-utils-src
+make utils
+make upload-utils
+```
+
+### CMake
+
+The version packaged on our runner OS is too old. Official binary releases up to 3.31.12 work both on aarch64 and x86_64, so this is a mirrored version of the tarball downloaded from the official release page.
 
 ### Python
 
-The version packaged on Ubuntu 20.04 is too old.
+The packaged version is too old. Please try to keep the version in sync with the version we use in uv.
 
 Build commands:
 ```
-docker build -f python.dockerfile -t python .
-id=$(docker create python)
-docker cp $id:/python/python-3.12.3.tar.xz .
-docker rm $id
+make download-python-src
+make python
+make upload-python
 ```
 
 S3 paths:
-- aarch64 host: `s3://ferrocene-ci-mirrors/manual/python/python-3.12.3-aarch64.tar.xz`
-- x86_64  host: `s3://ferrocene-ci-mirrors/manual/python/python-3.12.3-x86_64.tar.xz`
+- aarch64 host: `s3://ferrocene-ci-mirrors/manual/python/python-<version>-aarch64-<commit>.tar.xz`
+- x86_64  host: `s3://ferrocene-ci-mirrors/manual/python/python-<version>-x86_64-<commit>.tar.xz`
 
 ### GDB
 
@@ -52,19 +102,17 @@ We need version of GDB that doesn't fail debuginfo tests.
 Upstream doesn't have very good version detection, so pin the same version that they do.
 
 We have to build from source because the binary packages have too recent a version of glibc.
-Note: this uses python 3.8, not our custom python 3.12, because distutils was removed in python 3.12.
 
 Build commands:
 ```
-docker build -f gdb.dockerfile -t gdb .
-id=$(docker create gdb)
-docker cp $id:/gdb-12.1/gdb-12.1.tar.xz .
-docker rm $id
+make download-gdb-src
+make gdb
+make upload-gdb
 ```
 
 S3 paths:
-- aarch64 host: `s3://ferrocene-ci-mirrors/manual/gdb/gdb-12.1-aarch64.tar.xz`
-- x86_64  host: `s3://ferrocene-ci-mirrors/manual/gdb/gdb-12.1-x86_64.tar.xz`
+- aarch64 host: `s3://ferrocene-ci-mirrors/manual/gdb/gdb-12.1-aarch64-<commit>.tar.xz`
+- x86_64  host: `s3://ferrocene-ci-mirrors/manual/gdb/gdb-12.1-x86_64-<commit>.tar.xz`
 
 ### musl-cross-make
 
@@ -73,17 +121,15 @@ needing a dynamically linked MUSL libc on the host.
 
 Build commands:
 ```
-docker build -f musl.dockerfile -t musl-cross .
-id=$(docker create musl-cross)
-docker cp $id:/musl-cross-make/musl-cross-make-aarch64.tar.xz .
-docker cp $id:/musl-cross-make/musl-cross-make-x86_64.tar.xz .
-docker rm $id
+make download-musl-cross-src
+make musl-cross
+make upload-musl-cross
 ```
 S3 paths:
-- aarch64 host, aarch64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64.tar.xz`
-- aarch64 host, x86_64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64.tar.xz` 
-- x86_64 host, aarch64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64.tar.xz`
-- x86_64 host, x86_64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64.tar.xz` 
+- aarch64 host, aarch64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-aarch64-<commit>.tar.xz`
+- aarch64 host, x86_64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-aarch64-to-x86_64-<commit>.tar.xz`
+- x86_64 host, aarch64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-aarch64-<commit>.tar.xz`
+- x86_64 host, x86_64 target: `s3://ferrocene-ci-mirrors/manual/musl/musl-cross-make-x86_64-to-x86_64-<commit>.tar.xz`
 
 ### ARM GCC
 

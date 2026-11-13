@@ -1,0 +1,40 @@
+Submodule src/tools/cargo contains modified content
+diff --git a/src/tools/cargo/src/cargo/sources/git/utils.rs b/src/tools/cargo/src/cargo/sources/git/utils.rs
+index 33093e2d1..9dc2ad320 100644
+--- a/src/tools/cargo/src/cargo/sources/git/utils.rs
++++ b/src/tools/cargo/src/cargo/sources/git/utils.rs
+@@ -1030,7 +1030,7 @@ pub fn fetch(
+         }
+     }
+ 
+-    let result = if let Some(true) = gctx.net_config()?.git_fetch_with_cli {
++    let result = if gctx.net_config()?.git_fetch_with_cli.unwrap_or(true) {
+         fetch_with_cli(repo, remote_url, &refspecs, tags, gctx)
+     } else if gctx.cli_unstable().gitoxide.map_or(false, |git| git.fetch) {
+         fetch_with_gitoxide(repo, remote_url, refspecs, tags, shallow, gctx)
+diff --git a/src/tools/cargo/src/doc/src/reference/config.md b/src/tools/cargo/src/doc/src/reference/config.md
+index 105de8f50..22b15bfc6 100644
+--- a/src/tools/cargo/src/doc/src/reference/config.md
++++ b/src/tools/cargo/src/doc/src/reference/config.md
+@@ -831,17 +831,15 @@ Number of times to retry possibly spurious network errors.
+ 
+ #### `net.git-fetch-with-cli`
+ * Type: boolean
+-* Default: false
++* Default: true
+ * Environment: `CARGO_NET_GIT_FETCH_WITH_CLI`
+ 
+ If this is `true`, then Cargo will use the `git` executable to fetch registry
+ indexes and git dependencies. If `false`, then it uses a built-in `git`
+-library.
++library with SSH features disabled.
+ 
+-Setting this to `true` can be helpful if you have special authentication
+-requirements that Cargo does not support. See [Git
+-Authentication](../appendix/git-authentication.md) for more information about
+-setting up git authentication.
++See [Git Authentication](../appendix/git-authentication.md) for more
++information about setting up git authentication.
+ 
+ #### `net.offline`
+ * Type: boolean

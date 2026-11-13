@@ -4,12 +4,9 @@
 
 set -xeuo pipefail
 
-if command -v uv &> /dev/null; then
-    echo "uv was already installed, skipping"
-    exit 0
+if ! command -v uv &> /dev/null; then
+    curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
 fi
-
-curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
 
 source $HOME/.cargo/env
 echo "source $HOME/.cargo/env" >> $BASH_ENV

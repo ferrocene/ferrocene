@@ -30,6 +30,7 @@ fn get_os_functions() -> &'static OsFunctions {
 ///
 /// The provided reference must point to data that is entirely constant; it must
 /// not be created during runtime.
+#[ferrocene::prevalidated]
 #[inline]
 pub(super) unsafe fn set_functions(f: &'static OsFunctions) {
     #[cold]

@@ -49,6 +49,7 @@ unsafe impl Sync for Thread {}
 
 impl Thread {
     // unsafe: see thread::Builder::spawn_unchecked for safety requirements
+    #[ferrocene::prevalidated]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub unsafe fn new(stack: usize, init: Box<ThreadInit>) -> io::Result<Thread> {
         let data = init;
@@ -346,6 +347,7 @@ pub fn available_parallelism() -> io::Result<NonZero<usize>> {
     }
 }
 
+#[ferrocene::prevalidated]
 pub fn current_os_id() -> Option<u64> {
     // Most Unix platforms have a way to query an integer ID of the current thread, all with
     // slightly different spellings.
@@ -440,6 +442,7 @@ pub fn set_name(name: &CStr) {
     }
 }
 
+#[ferrocene::prevalidated]
 #[cfg(any(
     target_os = "linux",
     target_os = "freebsd",

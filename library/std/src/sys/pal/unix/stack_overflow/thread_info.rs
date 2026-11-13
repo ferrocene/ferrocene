@@ -109,6 +109,7 @@ fn spin_lock_in_setup(this: usize) -> UnlockOnDrop {
     }
 }
 
+#[ferrocene::prevalidated]
 pub fn set_current_info(guard_page_range: Range<usize>) {
     let tid = crate::thread::current_os_id();
     let name = crate::thread::with_current_name(|name| name.map(Box::from));

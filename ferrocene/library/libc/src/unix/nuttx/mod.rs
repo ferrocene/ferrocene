@@ -3,12 +3,7 @@
 ///! Following definitions are based on NuttX 13.0.0.
 ///! See https://github.com/apache/nuttx/tree/releases/13.0 for more details.
 use crate::prelude::*;
-use crate::{
-    in6_addr,
-    in_addr_t,
-    timespec,
-    DIR,
-};
+use crate::{in6_addr, in_addr_t, timespec, DIR};
 
 pub type pid_t = c_int;
 pub type nlink_t = u16;

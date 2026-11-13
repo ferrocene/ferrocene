@@ -212,6 +212,7 @@ impl Once {
     /// // once any success happens, we stop propagating the poison
     /// INIT.call_once(|| {});
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "once_poison", since = "1.51.0")]
     #[lint::should_not_be_called_on_const_items]
@@ -225,6 +226,10 @@ impl Once {
         }
 
         let mut f = Some(f);
+        #[expect(
+            ferrocene::unvalidated,
+            reason = "FIXME: <closure as FnOnce>::call_once is unvalidated"
+        )]
         self.inner.call(true, &mut |p| f.take().unwrap()(p));
     }
 
@@ -269,6 +274,7 @@ impl Once {
     /// assert!(handle.join().is_err());
     /// assert_eq!(INIT.is_completed(), false);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "once_is_completed", since = "1.43.0")]
     #[inline]
     pub fn is_completed(&self) -> bool {
@@ -402,6 +408,7 @@ impl OnceState {
 
     /// Poison the associated [`Once`] without explicitly panicking.
     // NOTE: This is currently only exposed for `OnceLock`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) fn poison(&self) {
         self.inner.poison();

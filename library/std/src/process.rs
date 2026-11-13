@@ -2637,6 +2637,7 @@ pub fn exit(code: i32) -> ! {
 /// ```
 ///
 /// [panic hook]: crate::panic::set_hook
+#[ferrocene::prevalidated]
 #[stable(feature = "process_abort", since = "1.17.0")]
 #[cold]
 #[cfg_attr(not(test), rustc_diagnostic_item = "process_abort")]

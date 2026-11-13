@@ -118,7 +118,6 @@ where
         // Similarly, the `sys` implementation must guarantee that no references to the closure
         // exist after the thread has terminated, which is signaled by `Thread::join`
         // returning.
-        #[expect(ferrocene::unvalidated, reason = "defer validating platform specifics")]
         native: unsafe { imp::Thread::new(stack_size, init)? },
         thread,
         packet: my_packet,
@@ -137,6 +136,7 @@ pub(crate) struct ThreadInit {
 impl ThreadInit {
     /// Initialize the 'current thread' mechanism on this thread, returning the
     /// Rust entry point.
+    #[ferrocene::prevalidated]
     pub(crate) fn init(self: Box<Self>) -> Box<dyn FnOnce() + Send> {
         // Set the current thread before any (de)allocations on the global allocator occur,
         // so that it may call std::thread::current() in its implementation. This is also

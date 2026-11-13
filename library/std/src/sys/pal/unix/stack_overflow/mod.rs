@@ -53,6 +53,7 @@ pub struct Handler {
 }
 
 impl Handler {
+    #[ferrocene::prevalidated]
     pub unsafe fn new() -> Handler {
         // The stack overflow detection logic, even if disabled, has some
         // synchronization logic that should be disabled under miri.
@@ -63,6 +64,7 @@ impl Handler {
         imp::make_handler(false)
     }
 
+    #[ferrocene::prevalidated]
     fn null() -> Handler {
         Handler { data: crate::ptr::null_mut() }
     }

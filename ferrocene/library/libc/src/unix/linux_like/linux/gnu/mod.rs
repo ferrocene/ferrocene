@@ -970,6 +970,7 @@ extern "C" {
     pub fn gettimeofday(tp: *mut crate::timeval, tz: *mut crate::timezone) -> c_int;
     pub fn getentropy(buf: *mut c_void, buflen: size_t) -> c_int;
     pub fn getrandom(buf: *mut c_void, buflen: size_t, flags: c_uint) -> ssize_t;
+    #[ferrocene::prevalidated]
     pub fn getauxval(type_: c_ulong) -> c_ulong;
 
     #[cfg_attr(gnu_time_bits64, link_name = "___adjtimex64")]

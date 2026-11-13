@@ -200,6 +200,7 @@
     missing_abi,
     useless_deprecated,
 )]
+#![warn(ferrocene::unvalidated)]
 // Pretty much all C API doesn't match Rust conventions.
 #![allow(nonstandard_style)]
 // Not all macros and all patterns are used on all targets.

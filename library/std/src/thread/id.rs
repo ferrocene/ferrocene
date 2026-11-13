@@ -26,6 +26,7 @@ use crate::sync::atomic::{Atomic, Ordering};
 ///
 /// [`Thread`]: super::Thread
 /// [`id`]: super::Thread::id
+#[ferrocene::prevalidated]
 #[stable(feature = "thread_id", since = "1.19.0")]
 #[derive(Eq, PartialEq, Clone, Copy, Hash, Debug)]
 pub struct ThreadId(NonZero<u64>);
@@ -105,6 +106,7 @@ impl ThreadId {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cfg(any(not(target_thread_local), target_has_atomic = "64"))]
     pub(super) fn from_u64(v: u64) -> Option<ThreadId> {
         NonZero::new(v).map(ThreadId)
@@ -118,6 +120,7 @@ impl ThreadId {
     /// value is entirely opaque -- only equality testing is stable. Note that
     /// it is not guaranteed which values new threads will return, and this may
     /// change across Rust versions.
+    #[ferrocene::prevalidated]
     #[must_use]
     #[unstable(feature = "thread_id_value", issue = "67939")]
     pub fn as_u64(&self) -> NonZero<u64> {

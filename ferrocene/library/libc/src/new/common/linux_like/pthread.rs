@@ -8,6 +8,7 @@ extern "C" {
         cpuset: *mut crate::cpu_set_t,
     ) -> c_int;
 
+    #[ferrocene::prevalidated]
     pub fn pthread_getattr_np(native: crate::pthread_t, attr: *mut crate::pthread_attr_t) -> c_int;
 
     #[cfg(target_os = "linux")]

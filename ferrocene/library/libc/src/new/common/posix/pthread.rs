@@ -12,6 +12,7 @@ extern "C" {
         child: Option<unsafe extern "C" fn()>,
     ) -> c_int;
 
+    #[ferrocene::prevalidated]
     #[cfg(any(target_os = "android", target_os = "l4re", target_os = "linux"))]
     pub fn pthread_attr_getguardsize(
         attr: *const crate::pthread_attr_t,
@@ -41,6 +42,7 @@ extern "C" {
         policy: *mut c_int,
     ) -> c_int;
 
+    #[ferrocene::prevalidated]
     #[cfg(any(
         target_os = "android",
         target_os = "emscripten",
@@ -157,6 +159,7 @@ extern "C" {
         pshared: c_int,
     ) -> c_int;
 
+    #[ferrocene::prevalidated]
     #[cfg(any(
         target_os = "android",
         target_os = "emscripten",

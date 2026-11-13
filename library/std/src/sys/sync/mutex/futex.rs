@@ -25,6 +25,7 @@ impl Mutex {
         self.futex.compare_exchange(UNLOCKED, LOCKED, Acquire, Relaxed).is_ok()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     // Make this a diagnostic item for Miri's concurrency model checker.
     #[cfg_attr(not(test), rustc_diagnostic_item = "sys_mutex_lock")]
@@ -34,6 +35,7 @@ impl Mutex {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     fn lock_contended(&self) {
         // Spin first to speed things up if the lock is released quickly.
@@ -65,6 +67,7 @@ impl Mutex {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn spin(&self) -> State {
         let mut spin = 100;
         loop {

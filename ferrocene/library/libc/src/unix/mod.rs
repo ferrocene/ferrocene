@@ -779,6 +779,7 @@ extern "C" {
     pub fn malloc(size: size_t) -> *mut c_void;
     pub fn realloc(p: *mut c_void, size: size_t) -> *mut c_void;
     pub fn free(p: *mut c_void);
+    #[ferrocene::prevalidated]
     pub fn abort() -> !;
     pub fn exit(status: c_int) -> !;
     pub fn _exit(status: c_int) -> !;
@@ -1374,6 +1375,7 @@ extern "C" {
     #[cfg_attr(target_os = "netbsd", link_name = "__times13")]
     pub fn times(buf: *mut crate::tms) -> crate::clock_t;
 
+    #[ferrocene::prevalidated]
     pub fn pthread_self() -> crate::pthread_t;
     pub fn pthread_equal(t1: crate::pthread_t, t2: crate::pthread_t) -> c_int;
     #[cfg_attr(
@@ -1382,12 +1384,15 @@ extern "C" {
     )]
     pub fn pthread_join(native: crate::pthread_t, value: *mut *mut c_void) -> c_int;
     pub fn pthread_exit(value: *mut c_void) -> !;
+    #[ferrocene::prevalidated]
     pub fn pthread_attr_init(attr: *mut crate::pthread_attr_t) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn pthread_attr_destroy(attr: *mut crate::pthread_attr_t) -> c_int;
     pub fn pthread_attr_getstacksize(
         attr: *const crate::pthread_attr_t,
         stacksize: *mut size_t,
     ) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn pthread_attr_setstacksize(attr: *mut crate::pthread_attr_t, stack_size: size_t)
         -> c_int;
     pub fn pthread_attr_setdetachstate(attr: *mut crate::pthread_attr_t, state: c_int) -> c_int;

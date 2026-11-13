@@ -1,10 +1,7 @@
 #![allow(dead_code)]
 
 use crate::prelude::*;
-use crate::{
-    c_schar,
-    ptrdiff_t,
-};
+use crate::{c_schar, ptrdiff_t};
 
 // types
 pub type __s16_type = c_short;

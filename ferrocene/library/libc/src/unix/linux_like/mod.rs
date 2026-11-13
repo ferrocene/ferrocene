@@ -2147,6 +2147,7 @@ cfg_if! {
                 all(target_os = "l4re", target_pointer_width = "64"),
                 allow(deprecated)
             )]
+            #[ferrocene::prevalidated]
             pub fn mmap64(
                 addr: *mut c_void,
                 len: size_t,

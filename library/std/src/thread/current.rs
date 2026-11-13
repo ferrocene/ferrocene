@@ -30,10 +30,12 @@ pub(super) mod id {
 
             pub(super) const CHEAP: bool = true;
 
+            #[ferrocene::prevalidated]
             pub(crate) fn get() -> Option<ThreadId> {
                 ID.get()
             }
 
+            #[ferrocene::prevalidated]
             pub(super) fn set(id: ThreadId) {
                 ID.set(Some(id))
             }
@@ -103,6 +105,7 @@ pub(super) mod id {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub(super) fn get_or_init() -> ThreadId {
         get().unwrap_or_else(
@@ -118,6 +121,7 @@ pub(super) mod id {
 
 /// Tries to set the thread handle for the current thread. Fails if a handle was
 /// already set or if the thread ID of `thread` would change an already-set ID.
+#[ferrocene::prevalidated]
 pub(super) fn set_current(thread: Thread) -> Result<(), Thread> {
     if CURRENT.get() != NONE {
         return Err(thread);
@@ -158,6 +162,7 @@ pub(super) fn set_current(thread: Thread) -> Result<(), Thread> {
 /// let other_thread_id = other_thread.join().unwrap();
 /// assert_ne!(thread::current_id(), other_thread_id);
 /// ```
+#[ferrocene::prevalidated]
 #[inline]
 #[must_use]
 #[unstable(feature = "current_thread_id", issue = "147194")]
@@ -181,12 +186,14 @@ pub fn current_id() -> ThreadId {
 /// pointer, and Apple uses `uint64_t`. This is a "best effort" approach for diagnostics and is
 /// allowed to fall back to a non-OS ID (such as the Rust thread ID) or a non-unique ID (such as a
 /// PID) if the thread ID cannot be retrieved.
+#[ferrocene::prevalidated]
 pub(crate) fn current_os_id() -> u64 {
     imp::current_os_id().unwrap_or_else(|| current_id().as_u64().get())
 }
 
 /// Gets a reference to the handle of the thread that invokes it, if the handle
 /// has been initialized.
+#[ferrocene::prevalidated]
 fn try_with_current<F, R>(f: F) -> R
 where
     F: FnOnce(Option<&Thread>) -> R,
@@ -209,6 +216,7 @@ where
 ///
 /// Modulo thread local accesses, this function is safe to call from signal
 /// handlers and in similar circumstances where allocations are not possible.
+#[ferrocene::prevalidated]
 pub(crate) fn with_current_name<F, R>(f: F) -> R
 where
     F: FnOnce(Option<&str>) -> R,

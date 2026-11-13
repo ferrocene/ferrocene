@@ -1,3 +1,0 @@
-org = "rust-lang"
-repo = "stdarch"
-path = "library/stdarch"

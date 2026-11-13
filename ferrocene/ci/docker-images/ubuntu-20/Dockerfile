@@ -247,8 +247,10 @@ EOF
 # these targets. Here we build said compiler as well as the MUSL libc.a
 WORKDIR /build/
 COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
+COPY ferrocene/ci/docker-images/sources/musl-cross-make-v0.9.11-with-source.tar.xz /build/
 RUN bash musl-toolchain.sh aarch64 && rm -rf /build
 COPY ferrocene/ci/docker-images/ubuntu-20/musl-toolchain.sh /build/
+COPY ferrocene/ci/docker-images/sources/musl-cross-make-v0.9.11-with-source.tar.xz /build/
 RUN bash musl-toolchain.sh x86_64 && rm -rf /build
 WORKDIR /
 

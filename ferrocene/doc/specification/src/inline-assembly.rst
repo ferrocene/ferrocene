@@ -991,9 +991,7 @@ the :t:`[assembly instruction]s` are treated as concatenated into a single
 :t:`string literal`, with character 0x0A (new line) between them.
 
 :dp:`fls_u8lifqig90gq`
-The set of memory locations that an :t:`assembly code block` is allowed to
-read and write are the same as those for an :t:`external function`, excluding
-the memory locations that are private to the :t:`assembly code block`.
+The set of memory locations that an :t:`assembly code block` is allowed to read and write are the same as those for an :t:`external block function`, excluding the memory locations that are private to the :t:`assembly code block`.
 
 :dp:`fls_lfeun3er5sc9`
 A tool is not required to guarantee that an :t:`assembly code block` appears

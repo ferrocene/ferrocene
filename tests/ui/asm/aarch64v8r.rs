@@ -17,7 +17,6 @@
 //@ [sf_r82_target] compile-flags: --target aarch64r82-unknown-none-softfloat
 //@ [sf_r82_target] needs-llvm-components: aarch64
 //@ build-pass
-//@ ignore-backends: gcc
 
 #![feature(no_core)]
 #![no_core]

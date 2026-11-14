@@ -390,6 +390,8 @@ declare_features! (
     (unstable, asm_goto_with_outputs, "1.85.0", Some(119364)),
     /// Allows the `may_unwind` option in inline assembly.
     (unstable, asm_unwind, "1.58.0", Some(93334)),
+    /// Allows `_` for the name of associated constants.
+    (unstable, associated_const_underscore, "CURRENT_RUSTC_VERSION", Some(158944)),
     /// Allows associated type defaults.
     (unstable, associated_type_defaults, "1.2.0", Some(29661)),
     /// Allows implementing `AsyncDrop`.
@@ -654,6 +656,8 @@ declare_features! (
     (unstable, movdiri_target_feature, "CURRENT_RUSTC_VERSION", Some(163741)),
     /// Allows `move(expr)` in closures.
     (incomplete, move_expr, "1.97.0", Some(155050)),
+    /// The `Move` autotrait.
+    (incomplete, move_trait, "CURRENT_RUSTC_VERSION", Some(149607)),
     /// The `movrs` target feature on x86.
     (unstable, movrs_target_feature, "1.88.0", Some(137976)),
     /// Allows the `multiple_supertrait_upcastable` lint.

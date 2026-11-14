@@ -6,7 +6,6 @@ use std::ops::{Deref, DerefMut};
 use std::str;
 
 use rustc_abi::{HasDataLayout, Size, TargetDataLayout, VariantIdx};
-use rustc_codegen_ssa::back::versioned_llvm_target;
 use rustc_codegen_ssa::base::{wants_msvc_seh, wants_wasm_eh};
 use rustc_codegen_ssa::diagnostics as ssa_errors;
 use rustc_codegen_ssa::traits::*;
@@ -49,7 +48,7 @@ use crate::{attributes, common, coverageinfo, debuginfo, llvm_util};
 pub(crate) struct SCx<'ll> {
     pub llmod: llvm::Module<'ll>,
     pub llcx: llvm::Context<'ll>,
-    pub isize_ty: &'ll Type,
+    pub isize_ty: Type<'ll>,
 }
 
 impl<'ll> Borrow<SCx<'ll>> for FullCx<'ll, '_> {
@@ -128,10 +127,10 @@ pub(crate) struct FullCx<'ll, 'tcx> {
     pub compiler_used_statics: RefCell<Vec<&'ll Value>>,
 
     /// Mapping of non-scalar types to llvm types.
-    pub type_lowering: RefCell<FxHashMap<(Ty<'tcx>, Option<VariantIdx>), &'ll Type>>,
+    pub type_lowering: RefCell<FxHashMap<(Ty<'tcx>, Option<VariantIdx>), Type<'ll>>>,
 
     /// Mapping of scalar types to llvm types.
-    pub scalar_lltypes: RefCell<FxHashMap<Ty<'tcx>, &'ll Type>>,
+    pub scalar_lltypes: RefCell<FxHashMap<Ty<'tcx>, Type<'ll>>>,
 
     /// Extra per-CGU codegen state needed when coverage instrumentation is enabled.
     pub coverage_cx: Option<coverageinfo::CguCoverageContext<'ll, 'tcx>>,
@@ -139,10 +138,10 @@ pub(crate) struct FullCx<'ll, 'tcx> {
     pub sanitizer_ignorelist: Option<SanitizerIgnoreList>,
 
     eh_personality: Cell<Option<&'ll Value>>,
-    pub rust_try_fn: Cell<Option<(&'ll Type, &'ll Value)>>,
+    pub rust_try_fn: Cell<Option<(Type<'ll>, &'ll Value)>>,
 
     intrinsics:
-        RefCell<FxHashMap<(Cow<'static, str>, SmallVec<[&'ll Type; 2]>), (&'ll Type, &'ll Value)>>,
+        RefCell<FxHashMap<(Cow<'static, str>, SmallVec<[Type<'ll>; 2]>), (Type<'ll>, &'ll Value)>>,
 
     /// A counter that is used for generating local symbol names
     local_gen_sym_counter: Cell<usize>,
@@ -157,7 +156,7 @@ pub(crate) struct FullCx<'ll, 'tcx> {
     pub renamed_statics: RefCell<FxHashMap<DefId, &'ll Value>>,
 
     /// Cached Objective-C class type
-    pub objc_class_t: Cell<Option<&'ll Type>>,
+    pub objc_class_t: Cell<Option<Type<'ll>>>,
 
     /// Cache of Objective-C class references
     pub objc_classrefs: RefCell<FxHashMap<Symbol, &'ll Value>>,
@@ -240,7 +239,7 @@ fn init_module<'ll, 'tcx>(tcx: TyCtxt<'tcx>, llcx: llvm::Context<'ll>, llmod: ll
         llvm::LLVMSetDataLayout(llmod, data_layout.as_ptr());
     }
 
-    let llvm_target = SmallCStr::new(&versioned_llvm_target(sess));
+    let llvm_target = SmallCStr::new(&llvm_util::llvm_target(sess));
     unsafe {
         llvm::LLVMRustSetNormalizedTarget(llmod, llvm_target.as_ptr());
     }
@@ -876,10 +875,10 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
     }
 }
 impl<'ll> SimpleCx<'ll> {
-    pub(crate) fn get_type_of_global(&self, val: &'ll Value) -> &'ll Type {
+    pub(crate) fn get_type_of_global(&self, val: &'ll Value) -> Type<'ll> {
         unsafe { llvm::LLVMGlobalGetValueType(val) }
     }
-    pub(crate) fn val_ty(&self, v: &'ll Value) -> &'ll Type {
+    pub(crate) fn val_ty(&self, v: &'ll Value) -> Type<'ll> {
         common::val_ty(v)
     }
 }
@@ -899,7 +898,7 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
         llvm::LLVMMetadataAsValue(self.llcx(), metadata)
     }
 
-    pub(crate) fn get_const_int(&self, ty: &'ll Type, val: u64) -> &'ll Value {
+    pub(crate) fn get_const_int(&self, ty: Type<'ll>, val: u64) -> &'ll Value {
         unsafe { llvm::LLVMConstInt(ty, val, llvm::FALSE) }
     }
 
@@ -1072,6 +1071,11 @@ impl<'ll, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
         attributes::apply_to_llfn(llfn, llvm::AttributePlace::Function, &attrs);
     }
 
+    fn apply_default_optimisation_attrs(&self, llfn: &'ll Value) {
+        let attrs = attributes::default_optimisation_attrs(self, self.sess());
+        attributes::apply_to_llfn(llfn, llvm::AttributePlace::Function, &attrs);
+    }
+
     fn declare_c_main(&self, fn_type: Self::Type) -> Option<Self::Function> {
         let entry_name = self.sess().target.entry_name.as_ref();
         if self.get_declared_value(entry_name).is_none() {
@@ -1103,8 +1107,8 @@ impl<'ll> CodegenCx<'ll, '_> {
     pub(crate) fn get_intrinsic(
         &self,
         base_name: Cow<'static, str>,
-        type_params: &[&'ll Type],
-    ) -> (&'ll Type, &'ll Value) {
+        type_params: &[Type<'ll>],
+    ) -> (Type<'ll>, &'ll Value) {
         *self
             .intrinsics
             .borrow_mut()
@@ -1117,8 +1121,8 @@ impl<'ll> CodegenCx<'ll, '_> {
     fn declare_intrinsic(
         &self,
         base_name: &str,
-        type_params: &[&'ll Type],
-    ) -> (&'ll Type, &'ll Value) {
+        type_params: &[Type<'ll>],
+    ) -> (Type<'ll>, &'ll Value) {
         match base_name {
             // This isn't an "LLVM intrinsic", but LLVM's optimization passes
             // recognize it like one (including turning it into `bcmp` sometimes)

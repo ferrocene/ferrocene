@@ -10,7 +10,6 @@ use rustc_abi::{AddressSpace, Align, Size, WrappingRange};
 use rustc_llvm::RustString;
 
 pub(crate) use self::CallConv::*;
-pub(crate) use self::CodeGenOptSize::*;
 pub(crate) use self::conversions::*;
 pub(crate) use self::ffi::*;
 pub(crate) use self::metadata_kind::*;
@@ -122,15 +121,15 @@ pub(crate) fn CreateDereferenceableOrNullAttr<'ll>(
     unsafe { LLVMRustCreateDereferenceableOrNullAttr(llcx, bytes) }
 }
 
-pub(crate) fn CreateByValAttr<'ll>(llcx: Context<'ll>, ty: &'ll Type) -> &'ll Attribute {
+pub(crate) fn CreateByValAttr<'ll>(llcx: Context<'ll>, ty: Type<'ll>) -> &'ll Attribute {
     unsafe { LLVMRustCreateByValAttr(llcx, ty) }
 }
 
-pub(crate) fn CreateByRefAttr<'ll>(llcx: Context<'ll>, ty: &'ll Type) -> &'ll Attribute {
+pub(crate) fn CreateByRefAttr<'ll>(llcx: Context<'ll>, ty: Type<'ll>) -> &'ll Attribute {
     unsafe { LLVMRustCreateByRefAttr(llcx, ty) }
 }
 
-pub(crate) fn CreateStructRetAttr<'ll>(llcx: Context<'ll>, ty: &'ll Type) -> &'ll Attribute {
+pub(crate) fn CreateStructRetAttr<'ll>(llcx: Context<'ll>, ty: Type<'ll>) -> &'ll Attribute {
     unsafe { LLVMRustCreateStructRetAttr(llcx, ty) }
 }
 
@@ -195,14 +194,6 @@ impl AttributePlace {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
-#[repr(C)]
-pub(crate) enum CodeGenOptSize {
-    CodeGenOptSizeNone = 0,
-    CodeGenOptSizeDefault = 1,
-    CodeGenOptSizeAggressive = 2,
-}
-
 pub(crate) fn SetInstructionCallConv(instr: &Value, cc: CallConv) {
     unsafe {
         LLVMSetInstructionCallConv(instr, cc as c_uint);
@@ -257,7 +248,7 @@ pub(crate) fn set_section(llglobal: &Value, section_name: &CStr) {
     }
 }
 
-pub(crate) fn add_global<'ll>(llmod: Module<'ll>, ty: &'ll Type, name_cstr: &CStr) -> &'ll Value {
+pub(crate) fn add_global<'ll>(llmod: Module<'ll>, ty: Type<'ll>, name_cstr: &CStr) -> &'ll Value {
     unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
 }
 
@@ -372,7 +363,7 @@ impl Intrinsic {
     pub(crate) fn get_declaration<'ll>(
         self,
         llmod: Module<'ll>,
-        type_params: &[&'ll Type],
+        type_params: &[Type<'ll>],
     ) -> &'ll Value {
         unsafe {
             LLVMGetIntrinsicDeclaration(llmod, self.id, type_params.as_ptr(), type_params.len())
@@ -382,6 +373,7 @@ impl Intrinsic {
 
 /// Safe wrapper for `LLVMSetValueName2` from a byte slice
 pub(crate) fn set_value_name(value: &Value, name: &[u8]) {
+    assert!(!name.contains(&0));
     unsafe { LLVMSetValueName2(value, name.as_ptr(), name.len()) };
 }
 
@@ -511,7 +503,7 @@ pub(crate) fn append_module_inline_asm<'ll>(
 /// Safe wrapper for `LLVMAddAlias2`
 pub(crate) fn add_alias<'ll>(
     module: Module<'ll>,
-    ty: &Type,
+    ty: Type<'ll>,
     address_space: AddressSpace,
     aliasee: &Value,
     name: &CStr,

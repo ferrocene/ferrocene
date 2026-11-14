@@ -134,10 +134,19 @@ JOBS_DEFINITION: JobsDefinition = {
 
         # Library tests are the second slowest part of a test run, so we run
         # them in a separate job to reduce the CI wall clock time.
-        "library": ["library/core", "library/alloc", "library/test", "library/std", "ferrocene/library/libc"],
+        "library": [
+            "library/core", "library/alloc", "library/test", "library/std", "ferrocene/library/libc",
+            # coretests and alloctests are implied by library/core and library/alloc respectively,
+            # but listing them explicitly allows them to be excluded from the "everything else" test job
+            # so that these aren't run twice
+            "library/coretests", "library/alloctests",
+        ],
 
         # This is the library without std, for all targets that have no std.
-        "library-nostd": ["library/core", "library/alloc", "library/test"],
+        "library-nostd": [
+            "library/core", "library/alloc", "library/test",
+            "library/coretests", "library/alloctests",
+        ],
 
         # The flip link tests require the `--target thumbv7-none-eabi` flag
         "flip-link": ["flip-link"],

@@ -19,6 +19,23 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.100.0
+--------------------------------
+
+- `Stabilize never type <https://github.com/rust-lang/rust/pull/155499>`_
+
+- `Lint against repeated #[repr(..)] attributes <https://github.com/rust-lang/rust/pull/157036>`_
+
+- `Stabilize extern "custom" <https://github.com/rust-lang/rust/pull/158504>`_
+
+- `Extend dropping_references, dropping_copy_types and undropped_manually_drops lints to drop_in_place <https://github.com/rust-lang/rust/pull/160229>`_
+
+- `Unfulfilled_lint_expectations no longer fires on #[expect(dead_code)] inside code that is covered by a dead parents' diagnostic <https://github.com/rust-lang/rust/pull/161005>`_
+
+- `Turn the error for repr(align) fields in a repr(packed) type into a (deny-by-default) lint, aligned_fields_in_packed <https://github.com/rust-lang/rust/pull/162160>`_
+
+- `volatile: allow accesses to non-AM memory to trap <https://github.com/rust-lang/rust/pull/160564>`_
+
 Language changes in Rust 1.99.0
 -------------------------------
 

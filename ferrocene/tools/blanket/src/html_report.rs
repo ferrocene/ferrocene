@@ -1,9 +1,22 @@
 use std::collections::HashSet;
 use std::path::Path;
 
+use llvm_profparser::RegionKind;
 use maud::{DOCTYPE, PreEscaped};
 
 use crate::{Annotated, ColumnRange, FunctionCoverage, FunctionCoverageStatus, LineCoverageStatus};
+
+fn region_kind_label(kind: RegionKind) -> &'static str {
+    match kind {
+        RegionKind::Code => "Code",
+        RegionKind::Expansion => "Expansion",
+        RegionKind::Skipped => "Skipped",
+        RegionKind::Gap => "Gap",
+        RegionKind::Branch => "Branch",
+        RegionKind::MCDCDecision => "MC/DC Decision",
+        RegionKind::MCDCBranch => "MC/DC Branch",
+    }
+}
 
 const CSS: &str = include_str!("../assets/html_report.css");
 const JS: &str = include_str!("../assets/html_report.js");
@@ -239,6 +252,39 @@ fn generate_function(
                                     (line) "\n"
                                 },
                             }
+                            @if let Some(line_regions) = function.regions.get(linenum) {
+                                div class="region-details" {
+                                    @for cr in line_regions {
+                                        @for info in &cr.regions {
+                                            div class="region-detail" {
+                                                span class="region-kind" { (region_kind_label(info.kind)) }
+                                                " "
+                                                span class="region-span" {
+                                                    (format!(
+                                                        "{}:{}\u{2013}{}:{}",
+                                                        cr.region_line_start,
+                                                        cr.region_col_start,
+                                                        cr.region_line_end,
+                                                        cr.region_col_end,
+                                                    ))
+                                                }
+                                                " "
+                                                @if info.tested() {
+                                                    span class="region-tested-label" { "tested" }
+                                                } @else {
+                                                    span class="region-untested-label" { "untested" }
+                                                }
+                                                @if let Some(false_count) = info.false_count {
+                                                    " "
+                                                    span class="region-branch-counts" {
+                                                        (format!("(true: {}, false: {false_count})", info.true_count))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -292,9 +338,23 @@ fn ceil_char_boundary(line: &str, index: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::RegionInfo;
 
     fn range(start_col: usize, end_col: Option<usize>, tested: bool) -> ColumnRange {
-        ColumnRange { start_col, end_col, tested }
+        ColumnRange {
+            start_col,
+            end_col,
+            tested,
+            region_line_start: 0,
+            region_col_start: start_col,
+            region_line_end: 0,
+            region_col_end: end_col.unwrap_or(start_col),
+            regions: vec![RegionInfo {
+                kind: RegionKind::Code,
+                true_count: tested as i64,
+                false_count: None,
+            }],
+        }
     }
 
     #[test]

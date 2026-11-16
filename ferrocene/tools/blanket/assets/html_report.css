@@ -165,6 +165,28 @@ details.partial-annotation summary::after {
     border-radius: 2px;
 }
 
+.functions .region-details {
+    display: block;
+    margin-left: 2rem;
+    font-size: 0.8em;
+    color: gray;
+}
+.functions .region-detail {
+    display: block;
+}
+.functions .region-kind {
+    font-weight: bold;
+}
+.functions .region-tested-label {
+    color: var(--var-tested);
+}
+.functions .region-untested-label {
+    color: var(--var-untested);
+}
+.functions .region-branch-counts {
+    font-style: italic;
+}
+
 .functions .line-ignored {
     color: var(--var-ignored);
     cursor: copy;

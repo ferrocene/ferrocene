@@ -23,7 +23,7 @@ import sys
 
 
 def is_automated_pr(pr_source_branch):
-    return pr_source_branch.startswith("automation/")
+    return pr_source_branch.startswith(("automation/", "dependabot/"))
 
 
 def is_valid_pr_title(pr_title):

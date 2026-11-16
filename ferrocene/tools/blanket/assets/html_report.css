@@ -165,26 +165,34 @@ details.partial-annotation summary::after {
     border-radius: 2px;
 }
 
-.functions .region-details {
-    display: block;
-    margin-left: 2rem;
-    font-size: 0.8em;
-    color: gray;
-}
-.functions .region-detail {
-    display: block;
-}
-.functions .region-kind {
+.functions .branch-marker {
+    display: inline-flex;
+    gap: 0.2em;
+    font-size: 0.7em;
     font-weight: bold;
+    line-height: 1;
+    vertical-align: middle;
+    cursor: help;
 }
-.functions .region-tested-label {
-    color: var(--var-tested);
+.functions .branch-marker-true,
+.functions .branch-marker-false {
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+    color: white;
 }
-.functions .region-untested-label {
-    color: var(--var-untested);
+.functions .branch-marker-true.tested,
+.functions .branch-marker-false.tested {
+    background-color: var(--var-tested);
 }
-.functions .region-branch-counts {
-    font-style: italic;
+.functions .branch-marker-true.untested,
+.functions .branch-marker-false.untested {
+    background-color: var(--var-untested);
+}
+
+.functions .branch-group:hover .branch-text {
+    outline: 1px dashed currentColor;
+    outline-offset: 1px;
+    border-radius: 2px;
 }
 
 .functions .line-ignored {

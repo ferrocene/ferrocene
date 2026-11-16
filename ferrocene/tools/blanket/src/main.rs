@@ -88,13 +88,6 @@ struct ColumnRange {
     /// `None` means the region continues past the end of this line.
     end_col: Option<usize>,
     tested: bool,
-    /// The full span of the region for this range.
-    /// `start_col` and `end_col` are limited to a current line only,
-    /// but the region can extend to multiple lines.
-    region_line_start: usize,
-    region_col_start: usize,
-    region_line_end: usize,
-    region_col_end: usize,
     /// Every individual region covering this exact span. There can be more than one: e.g. a
     /// `Branch` region and the `MCDCDecision` region it's part of commonly share the same source
     /// span, and each has its own independent counter(s).
@@ -107,12 +100,6 @@ struct RegionInfo {
     true_count: i64,
     /// Only meaningful for `RegionKind::Branch` and `RegionKind::MCDCBranch`.
     false_count: Option<i64>,
-}
-
-impl RegionInfo {
-    fn tested(&self) -> bool {
-        self.true_count > 0
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -449,16 +436,7 @@ fn column_ranges_for_line(
             let end_col = if loc.line_end == line { Some(loc.column_end) } else { None };
             let regions =
                 region_infos.and_then(|infos| infos.get(loc)).cloned().unwrap_or_default();
-            ColumnRange {
-                start_col,
-                end_col,
-                tested: count > 0,
-                region_line_start: loc.line_start,
-                region_col_start: loc.column_start,
-                region_line_end: loc.line_end,
-                region_col_end: loc.column_end,
-                regions,
-            }
+            ColumnRange { start_col, end_col, tested: count > 0, regions }
         })
         .collect();
     ranges.sort_by_key(|range| range.start_col);

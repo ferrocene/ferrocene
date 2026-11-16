@@ -435,7 +435,7 @@ jobs:
 
   aarch64-darwin-llvm:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -460,7 +460,7 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -475,7 +475,7 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -491,7 +491,7 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -506,7 +506,7 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
@@ -523,7 +523,7 @@ jobs:
 
   aarch64-darwin-generic-test-runner:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     parameters:
       job:
         type: string

@@ -224,7 +224,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "serde",
  "serde_derive",
- "syn 3.0.3",
+ "syn 3.0.6",
 ]
 
 [[package]]

@@ -443,17 +443,18 @@ fn branch_marker_markup(true_count: i64, false_count: i64) -> maud::Markup {
         if false_count > 0 { "branch-marker-false tested" } else { "branch-marker-false untested" };
     maud::html!(
         span class="branch-marker" {
-            span class=(true_class) title=(format!("true: {true_count}")) { "T" }
-            span class=(false_class) title=(format!("false: {false_count}")) { "F" }
+            span class=(true_class) title=(format!("true: {true_count}")) {}
+            span class=(false_class) title=(format!("false: {false_count}")) {}
         }
     )
 }
 
 #[cfg(test)]
 mod tests {
+    use llvm_profparser::RegionKind;
+
     use super::*;
     use crate::RegionInfo;
-    use llvm_profparser::RegionKind;
 
     fn range(start_col: usize, end_col: Option<usize>, tested: bool) -> ColumnRange {
         ColumnRange {
@@ -677,16 +678,16 @@ mod tests {
         std::fs::remove_dir_all(&dir).ok();
 
         assert!(
-            html.contains(r#"<span class="branch-marker-true tested" title="true: 3">T</span>"#)
+            html.contains(r#"<span class="branch-marker-true tested" title="true: 3"></span>"#)
         );
         assert!(
-            html.contains(
-                r#"<span class="branch-marker-false untested" title="false: 0">F</span>"#
-            )
+            html.contains(r#"<span class="branch-marker-false untested" title="false: 0"></span>"#)
         );
         // The branch's own text is rendered inside the `branch-group`,
         // followed by its marker with no gap, and exactly one space afterwards
-        // before the next token (`&&` is HTML-escaped to `&amp;&amp;`).
+        // before the next token (`&&` is HTML-escaped to `&amp;&amp;`). The T/F letters
+        // themselves are drawn by CSS `::before` content, not real text, so a user copying
+        // this line's text never picks them up.
         assert!(html.contains(r#"<span class="branch-text">cond</span>"#));
         assert!(html.contains("</span></span> &amp;&amp;"));
     }

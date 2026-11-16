@@ -35,6 +35,12 @@ expression: dist
 [Dist] bootstrap::ferrocene::dist::flip_link::FlipLink
     targets: [aarch64-unknown-linux-gnu]
     - Set({flip-link})
+[Dist] bootstrap::ferrocene::dist::coverage_tools::SymbolReport
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({symbol-report})
+[Dist] bootstrap::ferrocene::dist::coverage_tools::Blanket
+    targets: [x86_64-unknown-linux-gnu]
+    - Set({blanket})
 [Dist] bootstrap::ferrocene::dist::SourceTarball
     targets: [x86_64-unknown-linux-gnu]
     - Set({ferrocene-src})

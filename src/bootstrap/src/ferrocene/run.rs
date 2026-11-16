@@ -286,7 +286,7 @@ impl CommandLineStep for CoverageReport {
             p.as_os_str().to_str().expect("invalid utf8 in path")
         }
 
-        let mut blanket = exec::command(builder.ensure(Blanket {}));
+        let mut blanket = exec::command(builder.ensure(Blanket { target: builder.host_target }));
         blanket.args(&[
             "show",
             "--instr-profile",

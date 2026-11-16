@@ -239,7 +239,7 @@ RUN <<-EOF
 EOF
 
 USER ci
-WORKDIR /project
+WORKDIR /home/ci/project
 
 # We prefer uv over other solutions, it's in Rust and fast
 ENV PATH="/home/ci/.venv/bin:/home/ci/.local/bin:$PATH"

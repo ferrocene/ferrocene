@@ -1539,8 +1539,8 @@ commands:
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
-                    --workdir /project \
-                    --volume $(pwd):/project \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1559,8 +1559,8 @@ commands:
                   docker run \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-                    --workdir /project \
-                    --volume $(pwd):/project \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1576,8 +1576,8 @@ commands:
             docker run \
               --rm \
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-              --workdir /project \
-              --volume $(pwd):/project \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
               --volume $HOME/tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \

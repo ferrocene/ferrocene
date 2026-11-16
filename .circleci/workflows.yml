@@ -988,6 +988,15 @@ workflows:
           restore_from_job: x86_64-linux-build
           requires: [x86_64-linux-build]
       - linux-generic-test-container:
+          name: x86_64-linux-test-docs-tools
+          executor: *executor-x86_64-runner
+          tasks: $(ferrocene/ci/split-tasks.py test:docs-tools)
+          resource-class: ferrocene/k8s-amd64-medium
+          test-variant: "2021"
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [x86_64-linux-build]
+      - linux-generic-test-container:
           name: x86_64-linux-test-flip-link
           executor: *executor-x86_64-runner
           tasks: $(ferrocene/ci/split-tasks.py test:flip-link)

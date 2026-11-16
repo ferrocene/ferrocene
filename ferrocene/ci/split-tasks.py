@@ -94,18 +94,38 @@ JOBS_DEFINITION: JobsDefinition = {
         # Tests to execute in the initial "misc-checks" job. These tests should
         # be fairly quick to complete, and they must not require the compiler
         # to be built.
-        "misc-checks": ["src/tools/tidy", "src/bootstrap"],
+        "misc-checks": [
+            "src/bootstrap",
+            "src/tools/tidy",
+            "tidyselftest",
+        ],
 
-        "docs": [
-            # Linkchecker requires the documentation, which takes a while to build.
-            # The separate job will also allow to run dist with the same artifacts.
-            "src/tools/linkchecker",
-            # Signature verification requires building the documentation that
-            # needs to be verified. To avoid wasting resources, run it in the
-            # docs builder along with the rest of the steps that build docs.
-            "ferrocene-check-document-signatures",
-            # The core symbol report requires building the core library, which takes a while to build
+        # Tests for the tools we use to build our docs bundles. These are run in a test job
+        # off the critical path
+        "docs-tools": [
+            "coverage-dump",
+            "error-index",
             "ferrocene/doc/symbol-report.csv",
+            "ferrocene/tools/diff-upstream", # Check FLS annotations
+            "ferrocene/tools/generate-tarball",
+            "ferrocene/tools/traceability-matrix",
+            "jsondoclint",
+            "replace-version-placeholder",
+            "rustdoc",
+            "rustdoc-html",
+            "rustdoc-js",
+            "rustdoc-js-std",
+            "rustdoc-json",
+            "rustdoc-json-types",
+            "rustdoc-ui",
+            "src/doc",
+        ],
+
+        # Tests for the docs bundle itself. These must be run after the docs have been compiled,
+        # which places them on the critical path
+        "docs": [
+            "src/tools/linkchecker",
+            "ferrocene-check-document-signatures",
         ],
 
         # Compiletests require custom tooling to be built (compiletest itself),
@@ -116,12 +136,17 @@ JOBS_DEFINITION: JobsDefinition = {
             exclude=[
                 # `auxiliary` is not a compiletest suite.
                 "auxiliary",
+                # Rustdoc and co are tested in the "docs-tools" group
+                "rustdoc",
+                "rustdoc-html",
+                "rustdoc-js",
+                "rustdoc-js-std",
+                "rustdoc-json",
+                "rustdoc-json-types",
+                "rustdoc-ui",
                 # `rustdoc-gui` requires nodejs, npm and chromium to be installed
                 # in the container, which is currently not the case.
                 "rustdoc-gui",
-                # `rustdoc-js-std` tests are frequently unstable and this is not part of our
-                # qualified tooling.
-                "rustdoc-js-std",
             ],
             deprioritize=[
                 # This test suite interferes with the others (notably the UI
@@ -136,6 +161,7 @@ JOBS_DEFINITION: JobsDefinition = {
         # them in a separate job to reduce the CI wall clock time.
         "library": [
             "library/core", "library/alloc", "library/test", "library/std", "ferrocene/library/libc",
+            "test-float-parse", "compiler-builtins",
             # coretests and alloctests are implied by library/core and library/alloc respectively,
             # but listing them explicitly allows them to be excluded from the "everything else" test job
             # so that these aren't run twice
@@ -145,6 +171,7 @@ JOBS_DEFINITION: JobsDefinition = {
         # This is the library without std, for all targets that have no std.
         "library-nostd": [
             "library/core", "library/alloc", "library/test",
+            "compiler-builtins",
             "library/coretests", "library/alloctests",
         ],
 

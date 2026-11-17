@@ -133,6 +133,7 @@ pub struct OnceLock<#[rustc_assert_variance(invariant)] T> {
 
 impl<T> OnceLock<T> {
     /// Creates a new uninitialized cell.
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "once_cell", since = "1.70.0")]

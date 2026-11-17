@@ -465,6 +465,7 @@ impl<T> Vec<T> {
     /// # #![allow(unused_mut)]
     /// let mut vec: Vec<i32> = Vec::new();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_stable(feature = "const_vec_new", since = "1.39.0")]
     #[rustc_diagnostic_item = "vec_new"]
@@ -525,6 +526,7 @@ impl<T> Vec<T> {
     /// let vec_units = Vec::<()>::with_capacity(10);
     /// assert_eq!(vec_units.capacity(), usize::MAX);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -933,6 +935,7 @@ const impl<T, A: [const] Allocator + [const] Destruct> Vec<T, A> {
     /// let vec_units = Vec::<(), System>::with_capacity_in(10, System);
     /// assert_eq!(vec_units.capacity(), usize::MAX);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     pub fn with_capacity_in(capacity: usize, alloc: A) -> Self {
@@ -959,6 +962,7 @@ const impl<T, A: [const] Allocator + [const] Destruct> Vec<T, A> {
     /// capacity after the push, *O*(*capacity*) time is taken to copy the
     /// vector's elements to a larger allocation. This expensive operation is
     /// offset by the *capacity* *O*(1) insertions it allows.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("push_back", "put", "append")]
@@ -991,6 +995,7 @@ const impl<T, A: [const] Allocator + [const] Destruct> Vec<T, A> {
     /// capacity after the push, *O*(*capacity*) time is taken to copy the
     /// vector's elements to a larger allocation. This expensive operation is
     /// offset by the *capacity* *O*(1) insertions it allows.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "push_mut", since = "1.95.0")]
     #[must_use = "if you don't need a reference to the value, use `Vec::push` instead"]
@@ -1353,6 +1358,7 @@ impl<T, A: Allocator> Vec<T, A> {
     ///     assert_eq!(v.capacity(), usize::MAX);
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
@@ -1377,6 +1383,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// vec.reserve(10);
     /// assert!(vec.capacity() >= 11);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "vec_reserve"]
@@ -1408,6 +1415,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// vec.reserve_exact(10);
     /// assert!(vec.capacity() >= 11);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn reserve_exact(&mut self, additional: usize) {
@@ -1512,6 +1520,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// vec.shrink_to_fit();
     /// assert!(vec.capacity() >= 3);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
@@ -1646,6 +1655,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// let slice = vec.into_boxed_slice();
     /// assert_eq!(slice.into_vec().capacity(), 3);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn into_boxed_slice(mut self) -> Box<[T], A> {
@@ -1770,6 +1780,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[stable(feature = "vec_as_slice", since = "1.7.0")]
     #[rustc_diagnostic_item = "vec_as_slice"]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
+    #[ferrocene::prevalidated]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: `slice::from_raw_parts` requires pointee is a contiguous, aligned buffer of size
         // `len` containing properly-initialized `T`s. Data must not be mutated for the returned
@@ -1884,6 +1895,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// [`as_ptr`]: Vec::as_ptr
     /// [`as_non_null`]: Vec::as_non_null
     /// [didn't allocate]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[stable(feature = "vec_as_ptr", since = "1.37.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
     #[inline]
@@ -1969,6 +1981,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// [`dealloc`]: crate::alloc::GlobalAlloc::dealloc
     /// [`ManuallyDrop`]: core::mem::ManuallyDrop
     /// [didn't allocate]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[stable(feature = "vec_as_ptr", since = "1.37.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
     #[lint::as_ptr]
@@ -2046,6 +2059,7 @@ impl<T, A: Allocator> Vec<T, A> {
     }
 
     /// Returns a reference to the underlying allocator.
+    #[ferrocene::prevalidated]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline]
@@ -2139,6 +2153,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// the contents and thus not leak memory.
     ///
     /// [`spare_capacity_mut()`]: Vec::spare_capacity_mut
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -3014,6 +3029,7 @@ impl<T, A: Allocator> Vec<T, A> {
     }
 
     /// Appends elements to `self` from other buffer.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     unsafe fn append_elements(&mut self, other: *const [T]) {
@@ -3036,6 +3052,7 @@ impl<T, A: Allocator> Vec<T, A> {
     }
 
     /// Appends elements to `self` from other buffer without reserving additional capacity.
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn append_elements_unreserved(&mut self, other: *const [T]) {
         let count = other.len();
@@ -3158,6 +3175,7 @@ impl<T, A: Allocator> Vec<T, A> {
     /// let a = vec![1, 2, 3];
     /// assert_eq!(a.len(), 3);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
@@ -3362,6 +3380,7 @@ impl<T, A: Allocator> Vec<T, A> {
     ///
     /// assert_eq!(&v, &[0, 1, 2]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "vec_spare_capacity", since = "1.60.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline]
@@ -4082,6 +4101,7 @@ impl<T: TrivialClone, A: Allocator> ExtendFromWithinSpec for Vec<T, A> {
 // Common trait implementations for Vec
 ////////////////////////////////////////////////////////////////////////////////
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl<T, A: Allocator> ops::Deref for Vec<T, A> {
@@ -4105,6 +4125,7 @@ const impl<T, A: Allocator> ops::DerefMut for Vec<T, A> {
 #[unstable(feature = "deref_pure_trait", issue = "87121")]
 unsafe impl<T, A: Allocator> ops::DerefPure for Vec<T, A> {}
 
+#[ferrocene::prevalidated]
 #[cfg(not(no_global_oom_handling))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: Clone, A: Allocator + Clone> Clone for Vec<T, A> {
@@ -4164,6 +4185,7 @@ impl<T: Hash, A: Allocator> Hash for Vec<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_index", issue = "143775")]
 const impl<T, I: [const] SliceIndex<[T]>, A: Allocator> Index<I> for Vec<T, A> {
@@ -4228,6 +4250,7 @@ const impl<T, I: [const] SliceIndex<[T]>, A: Allocator> IndexMut<I> for Vec<T, A
 ///     LONG_LIVED.lock().unwrap().push(result);
 /// }
 /// ```
+#[ferrocene::prevalidated]
 #[cfg(not(no_global_oom_handling))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T> FromIterator<T> for Vec<T> {
@@ -4237,6 +4260,7 @@ impl<T> FromIterator<T> for Vec<T> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T, A: Allocator> IntoIterator for Vec<T, A> {
     type Item = T;
@@ -4329,6 +4353,7 @@ impl<T, A: Allocator> Extend<T> for Vec<T, A> {
 impl<T, A: Allocator> Vec<T, A> {
     // leaf method to which various SpecFrom/SpecExtend implementations delegate when
     // they have no further optimizations to apply
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     fn extend_desugared<I: Iterator<Item = T>>(&mut self, mut iterator: I) {
         // This is the case for a general iterator.
@@ -4539,6 +4564,7 @@ impl<T, A: Allocator> Vec<T, A> {
 #[cfg(not(no_global_oom_handling))]
 #[stable(feature = "extend_ref", since = "1.2.0")]
 impl<'a, T: Copy + 'a, A: Allocator> Extend<&'a T> for Vec<T, A> {
+    #[ferrocene::prevalidated]
     fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iter: I) {
         self.spec_extend(iter.into_iter())
     }
@@ -4590,6 +4616,7 @@ impl<T: Ord, A: Allocator> Ord for Vec<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 const unsafe impl<#[may_dangle] T: [const] Destruct, A: [const] Allocator + [const] Destruct> Drop
@@ -4607,6 +4634,7 @@ const unsafe impl<#[may_dangle] T: [const] Destruct, A: [const] Allocator + [con
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 const impl<T> Default for Vec<T> {

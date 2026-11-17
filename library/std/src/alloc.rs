@@ -160,12 +160,14 @@ unsafe impl core::alloc::AllocatorClone for System {}
 unsafe impl core::alloc::StaticAllocator for System {}
 
 impl System {
+    #[ferrocene::prevalidated]
     #[inline]
     fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
         match layout.size() {
             0 => Ok(layout.dangling_ptr().cast_slice(0)),
             // SAFETY: `layout` is non-zero in size,
             size => unsafe {
+                #[expect(ferrocene::unvalidated, reason = "defer validating platform-specifics")]
                 let raw_ptr = if zeroed { imp::alloc_zeroed(layout) } else { imp::alloc(layout) };
                 let ptr = NonNull::new(raw_ptr).ok_or(AllocError)?;
                 Ok(ptr.cast_slice(size))
@@ -226,6 +228,7 @@ impl System {
 // platform functions in `std::sys::*::alloc`.
 #[stable(feature = "allocator_api", since = "1.100.0")]
 unsafe impl Allocator for System {
+    #[ferrocene::prevalidated]
     #[inline]
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, false)
@@ -236,11 +239,13 @@ unsafe impl Allocator for System {
         self.alloc_impl(layout, true)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
         if layout.size() != 0 {
             // SAFETY: `layout` is non-zero in size,
             // other conditions must be upheld by the caller
+            #[expect(ferrocene::unvalidated, reason = "defer validating platform-specifics")]
             unsafe { imp::dealloc(ptr.as_ptr(), layout) }
         }
     }

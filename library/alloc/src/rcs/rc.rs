@@ -3432,6 +3432,7 @@ impl<T, A: Allocator> Weak<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 pub(crate) fn is_dangling<T: ?Sized>(ptr: *const T) -> bool {
     (ptr.cast::<()>()).addr() == usize::MAX
 }

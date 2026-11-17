@@ -1055,6 +1055,7 @@ impl String {
     ///
     /// assert_eq!(&[104, 101, 108, 108, 111][..], &bytes[..]);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -3556,6 +3557,7 @@ impl From<String> for Vec<u8> {
     ///     println!("{b}");
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     fn from(string: String) -> Vec<u8> {
         string.into_bytes()
     }

@@ -48,6 +48,7 @@ impl Alignment {
     ///
     /// This provides the same numerical value as [`align_of`],
     /// but in an `Alignment` instead of a `usize`.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
@@ -151,6 +152,7 @@ impl Alignment {
     /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
     #[inline]
     #[must_use]
+    #[ferrocene::prevalidated]
     #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     pub const unsafe fn of_val_raw<T: ?Sized>(val: *const T) -> Self {
@@ -281,6 +283,7 @@ impl Alignment {
     }
 
     // FIXME(const-hack) Remove me once `Ord::max` is usable in const
+    #[ferrocene::prevalidated]
     pub(crate) const fn max(a: Self, b: Self) -> Self {
         if a.as_usize() > b.as_usize() { a } else { b }
     }

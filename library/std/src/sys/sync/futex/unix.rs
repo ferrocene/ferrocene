@@ -1,3 +1,5 @@
+#![allow(ferrocene::unvalidated, reason = "defer validating platform-specifics")]
+
 use crate::sync::atomic::Atomic;
 use crate::time::Duration;
 

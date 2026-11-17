@@ -1,3 +1,5 @@
+#![allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+
 use super::{MIN_ALIGN, realloc_fallback};
 use crate::alloc::Layout;
 use crate::ptr;

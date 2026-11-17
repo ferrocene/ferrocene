@@ -118,6 +118,7 @@ impl<T, A: Allocator> IntoIter<T, A> {
         &self.alloc
     }
 
+    #[ferrocene::prevalidated]
     fn as_raw_mut_slice(&mut self) -> *mut [T] {
         self.ptr.as_ptr().cast_slice(self.len())
     }
@@ -199,6 +200,7 @@ impl<T, A: Allocator> IntoIter<T, A> {
     /// or otherwise used in any way, either because it is being forgotten or because its `Drop`
     /// is already executing; otherwise a double-free will occur, and possibly a read from freed
     /// memory if there are any remaining elements.
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn dealloc_only(&mut self) {
         // SAFETY: our caller promises not to touch `*self` again.
@@ -265,6 +267,7 @@ unsafe impl<T: Sync, A: Allocator + Sync> Sync for IntoIter<T, A> {}
 impl<T, A: Allocator> Iterator for IntoIter<T, A> {
     type Item = T;
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<T> {
         let ptr = if T::IS_ZST {
@@ -288,6 +291,7 @@ impl<T, A: Allocator> Iterator for IntoIter<T, A> {
         Some(unsafe { ptr.read() })
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let exact = if T::IS_ZST {
@@ -602,6 +606,7 @@ impl<T: Clone, A: Allocator + Clone> Clone for IntoIter<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 unsafe impl<#[may_dangle] T, A: Allocator> Drop for IntoIter<T, A> {
     fn drop(&mut self) {

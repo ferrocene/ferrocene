@@ -5106,12 +5106,16 @@ impl CommandLineStep for TestFloatParse {
         );
         cargo_run.allow_features(TEST_FLOAT_PARSE_ALLOW_FEATURES);
 
+        // Ferrocene modification: We modified `add_cargo_target_runner()` to add command line
+        // arguments for Cargo to support our CI setup. These need to be added before the `--`
+        // which marks the beginning of the arguments to the test-float-parse binary itself
+        let mut cargo_run = cargo_run.into_cmd();
+        add_cargo_target_runner(&mut cargo_run, target, builder);
+
         if !matches!(env::var("FLOAT_PARSE_TESTS_NO_SKIP_HUGE").as_deref(), Ok("1") | Ok("true")) {
             cargo_run.args(["--", "--skip-huge"]);
         }
 
-        let mut cargo_run = cargo_run.into_cmd();
-        add_cargo_target_runner(&mut cargo_run, target, builder);
         cargo_run.run(builder);
     }
 

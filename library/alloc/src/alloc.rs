@@ -15,15 +15,20 @@ unsafe extern "Rust" {
     // (the code expanding that attribute macro generates those functions), or to call
     // the default implementations in std (`__rdl_alloc` etc. in `library/std/src/alloc.rs`)
     // otherwise.
+    #[ferrocene::prevalidated]
     #[rustc_allocator]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
     #[rustc_allocator_zeroed_variant = "__rust_alloc_zeroed"]
     fn __rust_alloc(size: usize, align: Alignment) -> *mut u8;
+
+    #[ferrocene::prevalidated]
     #[rustc_deallocator]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
     fn __rust_dealloc(ptr: NonNull<u8>, size: usize, align: Alignment);
+
+    #[ferrocene::prevalidated]
     #[rustc_reallocator]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
@@ -33,11 +38,14 @@ unsafe extern "Rust" {
         align: Alignment,
         new_size: usize,
     ) -> *mut u8;
+
+    #[ferrocene::prevalidated]
     #[rustc_allocator_zeroed]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
     fn __rust_alloc_zeroed(size: usize, align: Alignment) -> *mut u8;
 
+    #[ferrocene::prevalidated]
     #[rustc_nounwind]
     #[rustc_std_internal_symbol]
     fn __rust_no_alloc_shim_is_unstable_v2();
@@ -78,6 +86,7 @@ unsafe extern "Rust" {
 /// This may change in the future. You must not rely on it for correctness!
 ///
 /// [*equivalent*]: Allocator#equivalent-allocators
+#[ferrocene::prevalidated]
 #[stable(feature = "allocator_api", since = "1.100.0")]
 #[derive(Copy, Debug)]
 #[derive_const(Clone, Default)]
@@ -314,6 +323,7 @@ unsafe fn realloc_nonnull(ptr: NonNull<u8>, layout: Layout, new_size: usize) -> 
 ///     dealloc(ptr, layout);
 /// }
 /// ```
+#[ferrocene::prevalidated]
 #[stable(feature = "global_alloc", since = "1.28.0")]
 #[must_use = "losing the pointer will leak memory"]
 #[inline]
@@ -330,6 +340,7 @@ pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
 }
 
 impl Global {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn alloc_impl_runtime(layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {
@@ -344,6 +355,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn deallocate_impl_runtime(ptr: NonNull<u8>, layout: Layout) {
@@ -361,6 +373,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn grow_impl_runtime(
@@ -409,6 +422,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn shrink_impl_runtime(
@@ -455,6 +469,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::allocate`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -467,6 +482,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::deallocate`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -479,6 +495,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::grow`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -497,6 +514,7 @@ impl Global {
     }
 
     // SAFETY: Same as `Allocator::shrink`
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -513,6 +531,7 @@ impl Global {
         )
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -532,6 +551,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -544,6 +564,7 @@ impl Global {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
@@ -574,18 +595,21 @@ impl Global {
 #[stable(feature = "allocator_api", since = "1.100.0")]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 const unsafe impl Allocator for Global {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, false)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.alloc_impl(layout, true)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
@@ -593,6 +617,7 @@ const unsafe impl Allocator for Global {
         unsafe { self.deallocate_impl(ptr, layout) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn grow(
@@ -617,6 +642,7 @@ const unsafe impl Allocator for Global {
         unsafe { self.grow_impl(ptr, old_layout, new_layout, true) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     unsafe fn shrink(
@@ -666,6 +692,7 @@ unsafe extern "Rust" {
 /// [`take_alloc_error_hook`]: ../../std/alloc/fn.take_alloc_error_hook.html
 /// [The panic handler]: https://doc.rust-lang.org/reference/runtime.html#the-panic_handler-attribute
 /// [no_std]: https://doc.rust-lang.org/reference/names/preludes.html#the-no_std-attribute
+#[ferrocene::prevalidated]
 #[stable(feature = "global_alloc", since = "1.28.0")]
 #[rustc_const_unstable(feature = "const_alloc_error", issue = "92523")]
 #[cfg(not(no_global_oom_handling))]

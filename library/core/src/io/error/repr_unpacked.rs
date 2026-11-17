@@ -13,6 +13,7 @@ impl Repr {
     pub(super) fn new_custom(b: CustomOwner) -> Self {
         Self(Inner::Custom(b))
     }
+    #[ferrocene::prevalidated]
     #[inline]
     pub(super) fn new_os(code: RawOsError) -> Self {
         Self(Inner::Os(code))

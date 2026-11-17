@@ -268,6 +268,7 @@ impl Error {
     ///
     /// `functions` must point to data that is entirely constant; it must
     /// not be created during runtime.
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
     #[must_use]
@@ -676,6 +677,7 @@ unsafe impl Send for CustomOwner {}
 #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
 unsafe impl Sync for CustomOwner {}
 
+#[ferrocene::prevalidated]
 #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
 impl Drop for CustomOwner {
     fn drop(&mut self) {
@@ -691,6 +693,7 @@ impl CustomOwner {
     ///
     /// * `custom` must point to valid `Custom`.
     /// * The `outer_drop` of the provided `custom` must be the drop function for this pointer.
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
     pub unsafe fn from_raw(custom: NonNull<Custom>) -> CustomOwner {
@@ -1060,6 +1063,7 @@ impl ErrorKind {
     // This compiles to the same code as the check+transmute, but doesn't require
     // unsafe, or to hard-code max ErrorKind or its size in a way the compiler
     // couldn't verify.
+    #[ferrocene::prevalidated]
     #[inline]
     #[allow(dead_code, reason = "only used for packed representation")]
     const fn from_prim(ek: u32) -> Option<Self> {

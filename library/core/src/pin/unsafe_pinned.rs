@@ -48,6 +48,7 @@ impl<T> UnsafePinned<T> {
     ///
     /// All access to the inner value through `&UnsafePinned<T>` or `&mut UnsafePinned<T>` or
     /// `Pin<&mut UnsafePinned<T>>` requires `unsafe` code.
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[must_use]
     #[unstable(feature = "unsafe_pinned", issue = "125735")]
@@ -104,6 +105,7 @@ impl<T: ?Sized> UnsafePinned<T> {
     ///     assert_eq!(ptr.read(), 1);
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[must_use]
     #[unstable(feature = "unsafe_pinned", issue = "125735")]

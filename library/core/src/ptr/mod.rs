@@ -2564,6 +2564,7 @@ pub fn eq<T: PointeeSized>(a: *const T, b: *const T) -> bool {
 /// assert!(ptr::addr_eq(whole, first));
 /// assert!(!ptr::eq::<dyn std::fmt::Debug>(whole, first));
 /// ```
+#[ferrocene::prevalidated]
 #[stable(feature = "ptr_addr_eq", since = "1.76.0")]
 #[inline(always)]
 #[must_use = "pointer comparison produces a value"]

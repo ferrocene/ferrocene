@@ -1,3 +1,5 @@
+#![allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+
 use super::Mutex;
 use crate::pin::Pin;
 use crate::sys::helpers::COpaque;

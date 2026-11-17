@@ -534,6 +534,7 @@ impl<T> Cell<T> {
     ///
     /// assert_eq!(five, 5);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "move_cell", since = "1.17.0")]
     #[rustc_const_stable(feature = "const_cell_into_inner", since = "1.83.0")]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
@@ -2656,6 +2657,7 @@ unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
 #[unstable(feature = "sync_unsafe_cell", issue = "95439")]
 impl<T> SyncUnsafeCell<T> {
     /// Constructs a new instance of `SyncUnsafeCell` which will wrap the specified value.
+    #[ferrocene::prevalidated]
     #[inline]
     pub const fn new(value: T) -> Self {
         Self { value: UnsafeCell { value } }
@@ -2677,6 +2679,7 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
     /// Ensure that the access is unique (no active references, mutable or not)
     /// when casting to `&mut T`, and ensure that there are no mutations
     /// or mutable aliases going on when casting to `&T`
+    #[ferrocene::prevalidated]
     #[inline]
     #[lint::as_ptr]
     #[lint::never_returns_null_ptr]

@@ -340,6 +340,7 @@ impl<B: ?Sized + ToOwned> Cow<'_, B> {
 // FIXME(inference): const bounds removed due to inference regressions found by crater;
 //   see https://github.com/rust-lang/rust/issues/147964
 // #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<B: ?Sized + ToOwned> Deref for Cow<'_, B>
 // where

@@ -69,6 +69,7 @@ impl Error {
     /// assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
     /// # }
     /// ```
+    #[allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
     #[rustc_allow_incoherent_impl]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]

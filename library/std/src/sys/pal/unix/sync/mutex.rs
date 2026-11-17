@@ -1,3 +1,5 @@
+#![allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+
 use super::super::cvt_nz;
 use crate::io::Error;
 use crate::pin::{Pin, pin};

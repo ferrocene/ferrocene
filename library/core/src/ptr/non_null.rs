@@ -96,6 +96,7 @@ impl<T: Sized> NonNull<T> {
     /// For more details, see the equivalent method on a raw pointer, [`ptr::without_provenance_mut`].
     ///
     /// This is a [Strict Provenance][crate::ptr#strict-provenance] API.
+    #[ferrocene::prevalidated]
     #[stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[rustc_const_stable(feature = "nonnull_provenance", since = "1.89.0")]
     #[must_use]
@@ -278,6 +279,7 @@ impl<T: PointeeSized> NonNull<T> {
     #[stable(feature = "nonnull", since = "1.25.0")]
     #[rustc_const_stable(feature = "const_nonnull_new", since = "1.85.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn new(ptr: *mut T) -> Option<Self> {
         if !ptr.is_null() {
             // SAFETY: The pointer is already checked and is not null
@@ -1144,6 +1146,7 @@ impl<T: PointeeSized> NonNull<T> {
     /// See [`ptr::write_bytes`] for safety concerns and examples.
     ///
     /// [`ptr::write_bytes`]: crate::ptr::write_bytes()
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[doc(alias = "memset")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -1401,6 +1404,7 @@ impl<T> NonNull<T> {
     ///
     /// (Note that this example artificially demonstrates a use of this method,
     /// but `let slice = NonNull::from(&x[..]);` would be a better way to write code like this.)
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "ptr_cast_slice", since = "1.101.0")]
@@ -1444,6 +1448,7 @@ impl<T> NonNull<[T]> {
     ///
     /// (Note that this example artificially demonstrates a use of this method,
     /// but `let slice = NonNull::from(&x[..]);` would be a better way to write code like this.)
+    #[ferrocene::prevalidated]
     #[stable(feature = "nonnull_slice_from_raw_parts", since = "1.70.0")]
     #[rustc_const_stable(feature = "const_slice_from_raw_parts_mut", since = "1.83.0")]
     #[must_use]
@@ -1505,6 +1510,7 @@ impl<T> NonNull<[T]> {
     /// let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);
     /// assert_eq!(slice.as_non_null_ptr(), NonNull::<i8>::dangling());
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]
@@ -1523,6 +1529,7 @@ impl<T> NonNull<[T]> {
     /// let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);
     /// assert_eq!(slice.as_mut_ptr(), NonNull::<i8>::dangling().as_ptr());
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "slice_ptr_get", issue = "74265")]

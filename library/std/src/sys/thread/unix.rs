@@ -831,6 +831,7 @@ pub fn sleep_until(deadline: crate::time::Instant) {
     }
 }
 
+#[allow(ferrocene::unvalidated, reason = "defer validating platform-specifics")]
 pub fn yield_now() {
     let ret = unsafe { libc::sched_yield() };
     debug_assert_eq!(ret, 0);

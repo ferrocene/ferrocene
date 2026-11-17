@@ -60,6 +60,7 @@ impl<T> COpaque<T> {
     /// ```ignore (for-illustration-purposes-only)
     /// let var = pin!(COpaque::uninit());
     /// ```
+    #[ferrocene::prevalidated]
     pub fn uninit() -> COpaque<T> {
         COpaque { inner: UnsafePinned::new(MaybeUninit::uninit()) }
     }
@@ -95,6 +96,7 @@ impl<T> COpaque<T> {
     /// Gets a pointer to the value.
     ///
     /// Use this as a replacement for C's ampersand operator.
+    #[ferrocene::prevalidated]
     pub fn get(self: Pin<&Self>) -> *mut T {
         self.inner.get().cast_init()
     }

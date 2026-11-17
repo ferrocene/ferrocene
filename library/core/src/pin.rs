@@ -1082,6 +1082,7 @@ pub use self::unsafe_pinned::UnsafePinned;
 //
 // Note: the `Clone` derive below is sound because either `Ptr: PinSafePointer`
 // or the pointee is `Unpin`.
+#[ferrocene::prevalidated]
 #[stable(feature = "pin", since = "1.33.0")]
 #[lang = "pin"]
 #[fundamental]
@@ -1344,6 +1345,7 @@ impl<Ptr: Deref> Pin<Ptr> {
     ///
     /// [`mem::swap`]: crate::mem::swap
     /// [`pin` module docs]: self
+    #[ferrocene::prevalidated]
     #[lang = "new_unchecked"]
     #[inline(always)]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
@@ -1359,6 +1361,7 @@ impl<Ptr: Deref> Pin<Ptr> {
     /// the pointee cannot move after `Pin<Pointer<T>>` got created.
     /// "Malicious" implementations of `Pointer::Deref` are likewise
     /// ruled out by the contract of `Pin::new_unchecked`.
+    #[ferrocene::prevalidated]
     #[stable(feature = "pin", since = "1.33.0")]
     #[inline(always)]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
@@ -1534,6 +1537,7 @@ impl<'a, T: ?Sized> Pin<&'a T> {
     /// not move out of the argument you receive to the interior function.
     ///
     /// [`pin` module]: self#projections-and-structural-pinning
+    #[ferrocene::prevalidated]
     #[stable(feature = "pin", since = "1.33.0")]
     pub unsafe fn map_unchecked<U, F>(self, func: F) -> Pin<&'a U>
     where
@@ -1565,6 +1569,7 @@ impl<'a, T: ?Sized> Pin<&'a T> {
     /// with the same lifetime as the reference it wraps.
     ///
     /// ["pinning projections"]: self#projections-and-structural-pinning
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[must_use]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
@@ -1576,6 +1581,7 @@ impl<'a, T: ?Sized> Pin<&'a T> {
 
 impl<'a, T: ?Sized> Pin<&'a mut T> {
     /// Converts this `Pin<&mut T>` into a `Pin<&T>` with the same lifetime.
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
@@ -1682,6 +1688,7 @@ impl<T: ?Sized> Pin<&'static mut T> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "pin", since = "1.33.0")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl<Ptr: [const] Deref> Deref for Pin<Ptr> {
@@ -2207,6 +2214,7 @@ pub struct PinMacroHelper<T> {
 /// # Safety
 /// Calling this function has the same safety requirements as calling
 /// `Pin::new_unchecked` on `&mut pinned.value`
+#[ferrocene::prevalidated]
 #[unstable(feature = "pin_macro_internals", issue = "none")]
 #[doc(hidden)]
 #[inline]

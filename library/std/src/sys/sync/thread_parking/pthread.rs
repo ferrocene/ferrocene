@@ -1,5 +1,7 @@
 //! Thread parking without `futex` using the `pthread` synchronization primitives.
 
+#![allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+
 use crate::pin::Pin;
 use crate::sync::atomic::Ordering::{Acquire, Relaxed, Release};
 use crate::sync::atomic::{Atomic, AtomicUsize};

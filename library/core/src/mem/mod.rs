@@ -639,6 +639,7 @@ pub const fn align_of_val<T: ?Sized>(val: &T) -> usize {
 /// that is, the above assertion does not pass on all platforms.)
 ///
 /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
+#[ferrocene::prevalidated]
 #[inline]
 #[must_use]
 #[stable(feature = "layout_for_ptr", since = "1.99.0")]

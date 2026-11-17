@@ -5,17 +5,16 @@
 
 use std::iter;
 
+use rustc_attr_ir::lang_items::LangItem;
 use rustc_hir as hir;
-use rustc_hir::attrs::lang_items::LangItem;
 use rustc_infer::traits::{ObligationCauseCode, PredicateObligation, PredicateObligations};
-use rustc_middle::bug;
 use rustc_middle::ty::{
-    self, DelayedSet, GenericArgsRef, Term, TermKind, Ty, TyCtxt, TypeSuperVisitable,
-    TypeVisitable, TypeVisitableExt, TypeVisitor,
+    self, DelayedSet, GenericArgsRef, PredicateProxy, Term, TermKind, Ty, TyCtxt,
+    TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor,
 };
 use rustc_session::diagnostics::feature_err;
 use rustc_span::def_id::{DefId, LocalDefId};
-use rustc_span::{Span, sym};
+use rustc_span::{Span, bug, sym};
 use tracing::{debug, instrument};
 
 use crate::infer::InferCtxt;
@@ -98,7 +97,7 @@ pub fn unnormalized_obligations<'tcx>(
     span: Span,
     body_def_id: LocalDefId,
 ) -> Option<PredicateObligations<'tcx>> {
-    debug_assert_eq!(term, infcx.resolve_vars_if_possible(term));
+    debug_assert_eq!(term, infcx.deeply_resolve_ignoring_regions(term));
 
     // However, if `term` IS an unresolved inference variable, returns `None`,
     // because we are not able to make any progress at all. This is to prevent
@@ -504,7 +503,16 @@ impl<'a, 'tcx> WfPredicates<'a, 'tcx> {
         // (*) The predicates of an inherent associated type include the
         //     predicates of the impl that it's contained in.
 
-        if !data.self_ty().has_escaping_bound_vars() {
+        // In an ideal world, there are no escaping bound vars here. However, WF is jank, and
+        // sometimes there are. We can only `compute_inherent_assoc_term_args` if the Self ty in the
+        // args has no escaping bound vars. If we already have impl format args, though,
+        // `compute_inherent_assoc_term_args` is a no-op (and we have no Self type), so no need to
+        // check for escaping bound vars.
+        let can_compute_impl_args =
+            matches!(data.kind, ty::AliasTermKind::InherentConstImpl { .. })
+                || !data.self_ty().has_escaping_bound_vars();
+
+        if can_compute_impl_args {
             // FIXME(inherent_associated_types): Should this happen inside of a snapshot?
             // FIXME(inherent_associated_types): This is incompatible with the new solver and lazy norm!
             let args = traits::project::compute_inherent_assoc_term_args(
@@ -994,7 +1002,10 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                         let kind = obligation.predicate.kind().skip_binder();
                         let keep = match kind {
                             ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType(ct, _))
-                                if matches!(ct.kind(), ty::ConstKind::Param(..)) =>
+                                if matches!(
+                                    ct.kind(),
+                                    ty::ConstKind::Param(..) | ty::ConstKind::Placeholder(..)
+                                ) =>
                             {
                                 // ConstArgHasType clauses are not higher kinded. Assert as
                                 // such so we can fix this up if that ever changes.
@@ -1079,8 +1090,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
             ty::ConstKind::Alias(_, alias_const) => {
                 if !c.has_escaping_bound_vars() {
                     // Skip type consts as mGCA doesn't support evaluatable clauses
-                    if !alias_const.kind.is_type_const(tcx) && !tcx.features().generic_const_args()
-                    {
+                    if !alias_const.kind.is_direct_const(tcx) && !tcx.features().gca_const_items() {
                         let predicate = ty::Binder::dummy(ty::PredicateKind::Clause(
                             ty::ClauseKind::ConstEvaluatable(c),
                         ));
@@ -1099,10 +1109,12 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                             self.add_wf_preds_for_inherent_projection(alias_const.into());
                             return; // Subtree is handled by above function
                         }
-                        // please ping khyperia and/or BoxyUwU if this `bug!` fires
-                        ty::AliasConstKind::InherentImpl { .. } => bug!(
-                            "This ought to be unreachable, the entrypoints of WF should still have InherentSelf-form alias consts."
-                        ),
+                        // FIXME: This should be unreachable but isn't because we normalize in item
+                        // wfck before computing wf requirements
+                        ty::AliasConstKind::InherentImpl { .. } => {
+                            self.add_wf_preds_for_inherent_projection(alias_const.into());
+                            return;
+                        }
                         ty::AliasConstKind::Projection { def_id }
                         | ty::AliasConstKind::Free { def_id }
                         | ty::AliasConstKind::Anon { def_id } => {
@@ -1157,7 +1169,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
             }
             ty::ConstKind::Value(val) => {
                 // FIXME(mgca): no need to feature-gate once valtree lifetimes are not erased
-                if tcx.features().min_generic_const_args() {
+                if tcx.features().gca_min_const_items() {
                     match val.ty.kind() {
                         ty::Adt(adt_def, args) => {
                             let adt_val = val.destructure_adt_const();
@@ -1228,7 +1240,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
         c.super_visit_with(self)
     }
 
-    fn visit_predicate(&mut self, _p: ty::Predicate<'tcx>) -> Self::Result {
+    fn visit_predicate<P: PredicateProxy<TyCtxt<'tcx>>>(&mut self, _p: P) -> Self::Result {
         bug!("predicate should not be checked for well-formedness");
     }
 }

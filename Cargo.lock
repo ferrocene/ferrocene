@@ -64,9 +64,9 @@ dependencies = [
 
 [[package]]
 name = "annotate-snippets"
-version = "0.12.16"
+version = "0.12.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f211a51805bc641f3ad5b7664c77d2547af685cc33b4cd8d31964027a46f13f1"
+checksum = "0258346f92c78dbc5b336b9a5b27c64447aa10643bc64e651db2edb145361564"
 dependencies = [
  "anstyle",
  "memchr",
@@ -655,7 +655,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "clippy"
-version = "0.1.101"
+version = "0.1.102"
 dependencies = [
  "anstream 0.6.21",
  "askama",
@@ -682,7 +682,7 @@ dependencies = [
 name = "clippy-dev"
 version = "0.0.1"
 dependencies = [
- "annotate-snippets 0.12.16",
+ "annotate-snippets 0.12.18",
  "anstream 0.6.21",
  "chrono",
  "clap",
@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.101"
+version = "0.1.102"
 dependencies = [
  "arrayvec",
  "clippy_utils",
@@ -707,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.101"
+version = "0.1.102"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.23.1",
@@ -737,7 +737,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.101"
+version = "0.1.102"
 dependencies = [
  "arrayvec",
  "itertools",
@@ -1150,7 +1150,7 @@ checksum = "a0afaad2b26fa326569eb264b1363e8ae3357618c43982b3f285f0774ce76b69"
 
 [[package]]
 name = "declare_clippy_lint"
-version = "0.1.101"
+version = "0.1.102"
 
 [[package]]
 name = "derive-where"
@@ -2524,9 +2524,9 @@ dependencies = [
 
 [[package]]
 name = "minifier"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "245c950e30794ed20f72ff60c85ae1cddb0ba54fda4623017a678943f98f636c"
+checksum = "56b6ef9682ae78237a99dde4f4060d556c2be0d50573361dd17b20d6f500b609"
 
 [[package]]
 name = "minimal-lexical"
@@ -3952,6 +3952,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
+ "rustc_hir_pretty",
  "rustc_index",
  "rustc_infer",
  "rustc_lint_defs",
@@ -4088,7 +4089,7 @@ dependencies = [
 name = "rustc_errors"
 version = "0.0.0"
 dependencies = [
- "annotate-snippets 0.12.16",
+ "annotate-snippets 0.12.18",
  "anstream 0.6.21",
  "anstyle",
  "derive_setters",
@@ -5226,7 +5227,7 @@ dependencies = [
 name = "rustfmt-nightly"
 version = "1.12.0"
 dependencies = [
- "annotate-snippets 0.12.16",
+ "annotate-snippets 0.12.18",
  "anyhow",
  "bytecount",
  "cargo_metadata 0.23.1",
@@ -5681,9 +5682,9 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.39.2"
+version = "0.40.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14311e7e9a03114cd4b65eedd54e8fed2945e17f08586ae97ef53bc0669f9581"
+checksum = "3e80749408e2d8bec0ffa303012cf4e1b3b355f4a09087b4fdf7473680f6a2de"
 dependencies = [
  "libc",
  "objc2-core-foundation",
@@ -6254,9 +6255,9 @@ checksum = "75b844d17643ee918803943289730bec8aac480150456169e647ed0b576ba539"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.24"
+version = "1.0.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
 
 [[package]]
 name = "unicode-normalization"

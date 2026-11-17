@@ -3,6 +3,8 @@
 //@ ignore-android: FIXME(#142855)
 //@ ignore-sgx: (x86 machine code cannot be directly executed)
 //@ ignore-pauthtest: (it requires non-trivial compilation of c sources, and only supports dynamic
+// The GCC backend does not implement x87_f80 yet.
+//@ ignore-backends: gcc
 //  linking, ignore the test).
 
 // Ferrocene addition: This is currently broken on facade targets, as our CI's libc is too old

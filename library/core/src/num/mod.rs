@@ -1737,17 +1737,13 @@ macro_rules! from_str_int_impl {
             /// # Examples
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             #[doc = concat!("assert_eq!(", stringify!($int_ty), "::from_ascii_bytes(b\"+10\"), Ok(10));")]
             /// ```
             /// Trailing space returns error:
             /// ```
-            /// # #![feature(int_from_ascii)]
-            /// #
             #[doc = concat!("assert!(", stringify!($int_ty), "::from_ascii_bytes(b\"1 \").is_err());")]
             /// ```
-            #[unstable(feature = "int_from_ascii", issue = "134821")]
+            #[stable(feature = "int_from_ascii", since = "CURRENT_RUSTC_VERSION")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
             #[inline]
             pub const fn from_ascii_bytes<T>(src: T) -> Result<$int_ty, ParseIntError>
@@ -1785,17 +1781,13 @@ macro_rules! from_str_int_impl {
             /// # Examples
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             #[doc = concat!("assert_eq!(", stringify!($int_ty), "::from_ascii_bytes_radix(b\"A\", 16), Ok(10));")]
             /// ```
             /// Trailing space returns error:
             /// ```
-            /// # #![feature(int_from_ascii)]
-            /// #
             #[doc = concat!("assert!(", stringify!($int_ty), "::from_ascii_bytes_radix(b\"1 \", 10).is_err());")]
             /// ```
-            #[unstable(feature = "int_from_ascii", issue = "134821")]
+            #[stable(feature = "int_from_ascii", since = "CURRENT_RUSTC_VERSION")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
             #[inline]
             #[ferrocene::prevalidated]

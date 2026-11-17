@@ -13,7 +13,7 @@ use rustc_target::callconv::{CastTarget, FnAbi};
 use crate::abi::{FnAbiLlvmExt, LlvmType};
 use crate::common;
 use crate::context::{CodegenCx, GenericCx, SCx};
-use crate::llvm::{self, FALSE, TRUE, ToLlvmBool, Type, TypeKind, Value};
+use crate::llvm::{self, FALSE, TRUE, Type, TypeKind, Value};
 use crate::type_of::LayoutLlvmExt;
 
 impl<'ll> fmt::Debug for Type<'ll> {
@@ -29,16 +29,25 @@ impl<'ll> fmt::Debug for Type<'ll> {
 
 impl<'ll> CodegenCx<'ll, '_> {}
 impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
-    pub(crate) fn type_named_struct(&self, name: &str) -> Type<'ll> {
+    pub(crate) fn type_named_struct(&self, name: &str, els: &[Type<'ll>]) -> Type<'ll> {
+        let res = self.type_named_struct_deferred(name);
+        self.set_struct_body(res, els);
+        res
+    }
+
+    pub(crate) fn type_named_struct_deferred(&self, name: &str) -> Type<'ll> {
         let name = SmallCStr::new(name);
         unsafe { llvm::LLVMStructCreateNamed(self.llcx(), name.as_ptr()) }
     }
 
-    pub(crate) fn set_struct_body(&self, ty: Type<'ll>, els: &[Type<'ll>], packed: bool) {
-        unsafe {
-            llvm::LLVMStructSetBody(ty, els.as_ptr(), els.len() as c_uint, packed.to_llvm_bool())
-        }
+    pub(crate) fn set_struct_body(&self, ty: Type<'ll>, els: &[Type<'ll>]) {
+        unsafe { llvm::LLVMStructSetBody(ty, els.as_ptr(), els.len() as c_uint, FALSE) }
     }
+
+    pub(crate) fn set_struct_body_packed(&self, ty: Type<'ll>, els: &[Type<'ll>]) {
+        unsafe { llvm::LLVMStructSetBody(ty, els.as_ptr(), els.len() as c_uint, TRUE) }
+    }
+
     pub(crate) fn type_void(&self) -> Type<'ll> {
         unsafe { llvm::LLVMVoidTypeInContext(self.llcx()) }
     }
@@ -56,7 +65,7 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
         unsafe { llvm::LLVMScalableVectorType(ty, count as c_uint) }
     }
 
-    pub(crate) fn add_func(&self, name: &str, ty: Type<'ll>) -> &'ll Value {
+    pub(crate) fn add_func(&self, name: &str, ty: Type<'ll>) -> Value<'ll> {
         let name = SmallCStr::new(name);
         unsafe { llvm::LLVMAddFunction(self.llmod(), name.as_ptr(), ty) }
     }
@@ -141,10 +150,6 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
         (**self).borrow().llmod
     }
 
-    pub(crate) fn isize_ty(&self) -> Type<'ll> {
-        (**self).borrow().isize_ty
-    }
-
     pub(crate) fn type_variadic_func(&self, args: &[Type<'ll>], ret: Type<'ll>) -> Type<'ll> {
         unsafe { llvm::LLVMFunctionType(ret, args.as_ptr(), args.len() as c_uint, TRUE) }
     }
@@ -165,12 +170,12 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
         }
     }
 
-    pub(crate) fn type_bf16(&self) -> Type<'ll> {
-        unsafe { llvm::LLVMBFloatTypeInContext(self.llcx()) }
-    }
-
     pub(crate) fn type_array(&self, ty: Type<'ll>, len: u64) -> Type<'ll> {
         unsafe { llvm::LLVMArrayType2(ty, len) }
+    }
+
+    pub(crate) fn type_byte_array(&self, len: Size) -> Type<'ll> {
+        self.type_array(self.type_i8(), len.bytes())
     }
 
     /// Prefer more specific methods (e.g. `int_width`, `float_type`, `vector_element_type`) when
@@ -202,7 +207,7 @@ impl<'ll, CX: Borrow<SCx<'ll>>> BaseTypeCodegenMethods for GenericCx<'ll, CX> {
     }
 
     fn type_isize(&self) -> Type<'ll> {
-        self.isize_ty()
+        (**self).borrow().isize_ty
     }
 
     fn type_f16(&self) -> Type<'ll> {
@@ -274,7 +279,7 @@ impl<'ll, CX: Borrow<SCx<'ll>>> BaseTypeCodegenMethods for GenericCx<'ll, CX> {
         }
     }
 
-    fn val_ty(&self, v: &'ll Value) -> Type<'ll> {
+    fn val_ty(&self, v: Value<'ll>) -> Type<'ll> {
         common::val_ty(v)
     }
 }
@@ -320,24 +325,24 @@ impl<'ll, 'tcx> LayoutTypeCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
 }
 
 impl<'ll, 'tcx> TypeMembershipCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
-    fn add_type_metadata(&self, function: &'ll Value, typeid: &[u8]) {
+    fn add_type_metadata(&self, function: Value<'ll>, typeid: &[u8]) {
         let typeid_metadata = self.create_metadata(typeid);
         let v = [llvm::LLVMValueAsMetadata(self.const_usize(0)), typeid_metadata];
         self.global_add_metadata_node(function, llvm::MD_type, &v);
     }
 
-    fn set_type_metadata(&self, function: &'ll Value, typeid: &[u8]) {
+    fn set_type_metadata(&self, function: Value<'ll>, typeid: &[u8]) {
         let typeid_metadata = self.create_metadata(typeid);
         let v = [llvm::LLVMValueAsMetadata(self.const_usize(0)), typeid_metadata];
         self.global_set_metadata_node(function, llvm::MD_type, &v);
     }
 
-    fn add_kcfi_type_metadata(&self, function: &'ll Value, kcfi_typeid: u32) {
+    fn add_kcfi_type_metadata(&self, function: Value<'ll>, kcfi_typeid: u32) {
         let kcfi_type_metadata = [llvm::LLVMValueAsMetadata(self.const_u32(kcfi_typeid))];
         self.global_add_metadata_node(function, llvm::MD_kcfi_type, &kcfi_type_metadata);
     }
 
-    fn set_kcfi_type_metadata(&self, function: &'ll Value, kcfi_typeid: u32) {
+    fn set_kcfi_type_metadata(&self, function: Value<'ll>, kcfi_typeid: u32) {
         let kcfi_type_metadata = [llvm::LLVMValueAsMetadata(self.const_u32(kcfi_typeid))];
         self.global_set_metadata_node(function, llvm::MD_kcfi_type, &kcfi_type_metadata);
     }

@@ -987,6 +987,7 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
             continue;
         }
 
+<<<<<<< ferrocene/main
         // Ferrocene tarballs' contents are different. Compared to upstream, this handles
         // Ferrocene and upstream tarballs seamlessly together.
         let short_path = match original_path.strip_prefix(directory_prefix) {
@@ -1006,6 +1007,19 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
             Err(_) => &original_path,
         };
 
+||||||| ee8268e23d0
+        if !(short_path.starts_with(pattern) || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
+        {
+            continue;
+        }
+        short_path = short_path.strip_prefix(pattern).unwrap_or(short_path);
+=======
+        if !(short_path.starts_with(pattern) || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
+        {
+            continue;
+        }
+        short_path = short_path.trim_prefix(pattern);
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         let dst_path = dst.join(short_path);
 
         exec_ctx.do_if_verbose(|| {

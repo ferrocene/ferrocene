@@ -303,15 +303,6 @@ fn tested_mask(line: &str, regions: &[ColumnRange]) -> Vec<bool> {
     tested
 }
 
-fn line_runs(line: &str, regions: Option<&Vec<ColumnRange>>) -> Vec<(String, bool)> {
-    let len = line.len();
-    let Some(regions) = regions.filter(|regions| !regions.is_empty() && len > 0) else {
-        return vec![(line.to_string(), false)];
-    };
-
-    chunk_runs(&tested_mask(line, regions), line, 0)
-}
-
 /// Groups consecutive tested / untested bytes into `(text, tested)` runs.
 fn chunk_runs(mask: &[bool], line: &str, offset: usize) -> Vec<(String, bool)> {
     let mut local_offset = 0;
@@ -386,15 +377,15 @@ fn line_segments(line: &str, regions: Option<&Vec<ColumnRange>>) -> Vec<LineSegm
         return vec![LineSegment::Text(line.to_string(), false)];
     };
 
+    let mask = tested_mask(line, regions);
     let branch_spans = branch_spans_for_line(line, regions);
     if branch_spans.is_empty() {
-        return line_runs(line, Some(regions))
+        return chunk_runs(&mask, line, 0)
             .into_iter()
             .map(|(text, tested)| LineSegment::Text(text, tested))
             .collect();
     }
 
-    let mask = tested_mask(line, regions);
     let mut result = Vec::new();
     let mut pos = 0;
     for span in &branch_spans {
@@ -489,15 +480,15 @@ mod tests {
 
     #[test]
     fn no_regions_is_one_untested_run() {
-        let runs = line_runs("    baz();", None);
-        assert_eq!(runs, vec![("    baz();".to_string(), false)]);
+        let segments = line_segments("    baz();", None);
+        assert_eq!(segments, vec![LineSegment::Text("    baz();".to_string(), false)]);
     }
 
     #[test]
     fn single_region_covering_whole_line() {
         let regions = vec![range(1, None, true)];
-        let runs = line_runs("    baz();", Some(&regions));
-        assert_eq!(runs, vec![("    baz();".to_string(), true)]);
+        let segments = line_segments("    baz();", Some(&regions));
+        assert_eq!(segments, vec![LineSegment::Text("    baz();".to_string(), true)]);
     }
 
     #[test]
@@ -510,12 +501,12 @@ mod tests {
             range(22, Some(27), true),  // ` else `
             range(28, Some(42), false), // `{ uncovered() }`
         ];
-        let runs = line_runs(line, Some(&regions));
+        let segments = line_segments(line, Some(&regions));
         assert_eq!(
-            runs,
+            segments,
             vec![
-                ("if cond { covered() } else ".to_string(), true),
-                ("{ uncovered() }".to_string(), false),
+                LineSegment::Text("if cond { covered() } else ".to_string(), true),
+                LineSegment::Text("{ uncovered() }".to_string(), false),
             ]
         );
     }
@@ -530,13 +521,13 @@ mod tests {
             range(1, None, false),   // whole line, untested
             range(5, Some(5), true), // `a`
         ];
-        let runs = line_runs(line, Some(&regions));
+        let segments = line_segments(line, Some(&regions));
         assert_eq!(
-            runs,
+            segments,
             vec![
-                ("    ".to_string(), false),
-                ("a".to_string(), true),
-                (" && b".to_string(), false),
+                LineSegment::Text("    ".to_string(), false),
+                LineSegment::Text("a".to_string(), true),
+                LineSegment::Text(" && b".to_string(), false),
             ]
         );
     }
@@ -544,8 +535,8 @@ mod tests {
     #[test]
     fn out_of_range_columns_are_clamped_not_panicking() {
         let regions = vec![range(1, Some(9999), true)];
-        let runs = line_runs("short", Some(&regions));
-        assert_eq!(runs, vec![("short".to_string(), true)]);
+        let segments = line_segments("short", Some(&regions));
+        assert_eq!(segments, vec![LineSegment::Text("short".to_string(), true)]);
     }
 
     #[test]
@@ -639,7 +630,7 @@ mod tests {
     }
 
     #[test]
-    fn line_segments_without_markers_matches_line_runs() {
+    fn line_segments_without_regions_is_one_untested_text_run() {
         let line = "    baz();";
         assert_eq!(line_segments(line, None), vec![LineSegment::Text(line.to_string(), false)]);
     }

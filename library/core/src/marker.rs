@@ -225,7 +225,7 @@ pub trait PointeeSized {
 ///
 /// [`ops::CoerceUnsized`]: crate::ops::CoerceUnsized
 /// [`Rc`]: ../../std/rc/struct.Rc.html
-/// [RFC982]: https://github.com/rust-lang/rfcs/blob/master/text/0982-dst-coercion.md
+/// [RFC982]: https://rust-lang.github.io/rfcs/0982-dst-coercion.html
 /// [nomicon-coerce]: ../../nomicon/coercions.html
 /// [^1]: Formerly known as *object safe*.
 #[unstable(feature = "unsize", issue = "18598")]
@@ -480,7 +480,7 @@ marker_impls! {
 
 }
 
-#[stable(feature = "never_type", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "never_type", since = "1.100.0")]
 impl Copy for ! {}
 
 /// Shared references can be copied, but mutable references *cannot*!
@@ -1079,13 +1079,13 @@ pub trait Tuple {}
 
 /// Creates a new style directly represented const argument.
 /// ```ignore (cannot test this from within core yet)
-/// type const BAR<const N: usize>: usize = N;
-/// type const FOO<const N: usize>: usize = direct!(BAR::<N>);
+/// const BAR<const N: usize>: usize = gca!(N);
+/// const FOO<const N: usize>: usize = gca!(BAR::<N>);
 /// ```
-#[rustc_builtin_macro(direct_const_arg)]
-#[unstable(feature = "min_generic_const_args", issue = "132980")]
+#[rustc_builtin_macro(gca)]
+#[unstable(feature = "gca_min_const_items", issue = "132980")]
 #[macro_export]
-macro_rules! direct_const_arg {
+macro_rules! gca {
     ($($arg:tt)*) => {
         /* compiler built-in */
     };
@@ -1305,7 +1305,7 @@ marker_impls! {
 ///             value,
 ///         });
 ///         Self {
-///             inner: NonNull::from(Box::leak(inner)),
+///             inner: Box::into_non_null(inner),
 ///         }
 ///     }
 /// }

@@ -385,6 +385,7 @@ impl fmt::Display for AccessError {
 impl Error for AccessError {}
 
 // This ensures the panicking code is outlined from `with` for `LocalKey`.
+#[ferrocene::prevalidated]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 #[track_caller]
 #[cold]
@@ -426,6 +427,7 @@ impl<T: 'static> LocalKey<T> {
     ///     "I am initialized",
     /// );
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn with<F, R>(&'static self, f: F) -> R
     where
@@ -460,6 +462,7 @@ impl<T: 'static> LocalKey<T> {
     ///     Ok(String::from("I am initialized")),
     /// );
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "thread_local_try_with", since = "1.26.0")]
     #[inline]
     pub fn try_with<F, R>(&'static self, f: F) -> Result<R, AccessError>
@@ -482,6 +485,7 @@ impl<T: 'static> LocalKey<T> {
     /// This function will panic if the key currently has its destructor
     /// running, and it **may** panic if the destructor has previously been run
     /// for this thread.
+    #[ferrocene::prevalidated]
     fn initialize_with<F, R>(&'static self, init: T, f: F) -> R
     where
         F: FnOnce(Option<T>, &T) -> R,
@@ -526,6 +530,7 @@ impl<T: 'static> LocalKey<Cell<T>> {
     ///
     /// assert_eq!(X.get(), 123);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "local_key_cell_methods", since = "1.73.0")]
     pub fn set(&'static self, value: T) {
         self.initialize_with(Cell::new(value), |value, cell| {

@@ -265,6 +265,7 @@ unsafe impl<T: Sync, A: Allocator + Sync> Sync for IntoIter<T, A> {}
 impl<T, A: Allocator> Iterator for IntoIter<T, A> {
     type Item = T;
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn next(&mut self) -> Option<T> {
         let ptr = if T::IS_ZST {

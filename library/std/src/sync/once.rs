@@ -77,11 +77,13 @@ pub const ONCE_INIT: Once = Once::new();
 
 impl Once {
     /// Creates a new `Once` value.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "once_new", since = "1.2.0")]
     #[rustc_const_stable(feature = "const_once_new", since = "1.32.0")]
     #[must_use]
     pub const fn new() -> Once {
+        #[expect(ferrocene::unvalidated, reason = "defer validating platform specifics")]
         Once { inner: sys::Once::new() }
     }
 

@@ -74,6 +74,7 @@ impl Builder {
     ///
     /// handler.join().unwrap();
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new() -> Builder {
         Builder { name: None, stack_size: None, no_hooks: false }
@@ -180,6 +181,7 @@ impl Builder {
     ///
     /// [`thread::spawn`]: super::spawn
     /// [`spawn`]: super::spawn
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub fn spawn<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
@@ -249,6 +251,7 @@ impl Builder {
     ///
     /// [`thread::spawn`]: super::spawn
     /// [`spawn`]: super::spawn
+    #[ferrocene::prevalidated]
     #[stable(feature = "thread_spawn_unchecked", since = "1.82.0")]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub unsafe fn spawn_unchecked<F, T>(self, f: F) -> io::Result<JoinHandle<T>>

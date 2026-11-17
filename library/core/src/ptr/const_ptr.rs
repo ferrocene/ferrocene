@@ -267,6 +267,7 @@ impl<T: PointeeSized> *const T {
     /// [`is_null`]: #method.is_null
     /// [`as_uninit_ref`]: #method.as_uninit_ref
     /// [`as_ref_unchecked`]: #method.as_ref_unchecked
+    #[ferrocene::prevalidated]
     #[stable(feature = "ptr_as_ref", since = "1.9.0")]
     #[rustc_const_stable(feature = "const_ptr_is_null", since = "1.84.0")]
     #[inline]
@@ -1142,6 +1143,7 @@ impl<T: PointeeSized> *const T {
     /// assert_eq!(out, "5, 3, 1, ");
     /// # std::fmt::Result::Ok(())
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
@@ -1162,6 +1164,7 @@ impl<T: PointeeSized> *const T {
     ///
     /// For non-`Sized` pointees this operation changes only the data pointer,
     /// leaving the metadata untouched.
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]

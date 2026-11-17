@@ -249,6 +249,7 @@ impl<T: ?Sized, U: ?Sized> DispatchFromDyn<BoxRaw<U>> for BoxRaw<T> where T: Uns
 impl<T: ?Sized> BoxRaw<T> {
     /// # Safety
     /// `ptr` must be non-null
+    #[ferrocene::prevalidated]
     #[inline]
     const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         // SAFETY: Upheld by the caller
@@ -319,6 +320,7 @@ pub struct Box<
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 #[cfg(not(no_global_oom_handling))]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
+#[ferrocene::prevalidated]
 const fn box_new_uninit(layout: Layout) -> *mut u8 {
     if layout.size() == 0 {
         return layout.dangling_ptr().as_ptr();
@@ -365,6 +367,7 @@ impl<T> Box<T> {
     #[must_use]
     #[rustc_diagnostic_item = "box_new"]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
+    #[ferrocene::prevalidated]
     pub fn new(x: T) -> Self {
         // This is `Box::new_uninit` but inlined to avoid build time regressions.
         let ptr = box_new_uninit(<T as SizedTypeProperties>::LAYOUT) as *mut T;
@@ -1436,6 +1439,7 @@ impl<T: ?Sized> Box<T> {
     ///
     /// [memory layout]: self#memory-layout
     /// [considerations for unsafe code]: self#considerations-for-unsafe-code
+    #[ferrocene::prevalidated]
     #[stable(feature = "box_raw", since = "1.4.0")]
     #[inline]
     #[must_use = "call `drop(Box::from_raw(ptr))` if you intend to drop the `Box`"]
@@ -1560,6 +1564,7 @@ impl<T: ?Sized> Box<T> {
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "box_raw", since = "1.4.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn into_raw(b: Self) -> *mut T {
         // Avoid `into_raw_with_allocator` as that interacts poorly with Miri's Stacked Borrows.
         let mut b = mem::ManuallyDrop::new(b);
@@ -1627,6 +1632,7 @@ impl<T: ?Sized> Box<T> {
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "box_vec_non_null", since = "1.99.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn into_non_null(b: Self) -> NonNull<T> {
         // As of August 2026, we cannot utilize `Box::leak`
         // because whether or not you can reconstruct the `Box`
@@ -1693,6 +1699,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     ///
     /// [memory layout]: self#memory-layout
     /// [considerations for unsafe code]: self#considerations-for-unsafe-code
+    #[ferrocene::prevalidated]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
     pub unsafe fn from_raw_in(raw: *mut T, alloc: A) -> Self {
@@ -2458,6 +2465,7 @@ unsafe impl<T: ?Sized, A: Allocator> DerefPure for Box<T, A> {}
 #[unstable(feature = "legacy_receiver_trait", issue = "none")]
 impl<T: ?Sized, A: Allocator> LegacyReceiver for Box<T, A> {}
 
+#[ferrocene::prevalidated]
 #[stable(feature = "boxed_closure_impls", since = "1.35.0")]
 impl<Args: Tuple, F: FnOnce<Args> + ?Sized, A: Allocator> FnOnce<Args> for Box<F, A> {
     type Output = <F as FnOnce<Args>>::Output;
@@ -2474,6 +2482,7 @@ impl<Args: Tuple, F: FnMut<Args> + ?Sized, A: Allocator> FnMut<Args> for Box<F, 
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "boxed_closure_impls", since = "1.35.0")]
 impl<Args: Tuple, F: Fn<Args> + ?Sized, A: Allocator> Fn<Args> for Box<F, A> {
     extern "rust-call" fn call(&self, args: Args) -> Self::Output {

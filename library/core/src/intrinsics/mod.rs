@@ -631,6 +631,7 @@ pub fn rustc_peek<T>(_: T) -> T;
 /// Therefore, implementations must not require the user to uphold any safety invariants.
 ///
 /// The stabilized version of this intrinsic is [`core::process::crash`].
+#[ferrocene::prevalidated]
 #[rustc_nounwind]
 #[rustc_intrinsic]
 pub const fn abort_immediate() -> !;
@@ -2781,6 +2782,7 @@ pub const fn overflow_checks() -> bool {
 #[rustc_nounwind]
 #[rustc_intrinsic]
 #[miri::intrinsic_fallback_is_spec]
+#[ferrocene::prevalidated]
 pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
     // const eval overrides this function, but runtime code for now just returns null pointers.
     // See <https://github.com/rust-lang/rust/issues/93935>.
@@ -3020,6 +3022,7 @@ pub const unsafe fn size_of_val<T: ?Sized>(ptr: *const T) -> usize;
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_intrinsic_const_stable_indirect]
+#[ferrocene::prevalidated]
 pub const unsafe fn align_of_val<T: ?Sized>(ptr: *const T) -> usize;
 
 /// Gets a static string slice containing the name of a type.

@@ -16,7 +16,6 @@ use crate::ptr;
 ///
 /// The stabilized version of this intrinsic is [`core::any::TypeId::of`].
 #[rustc_nounwind]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_comptime]
 pub fn type_id<T: ?Sized>() -> crate::any::TypeId;
@@ -25,7 +24,6 @@ pub fn type_id<T: ?Sized>() -> crate::any::TypeId;
 /// It can only be called at compile time, the backends do
 /// not implement it.
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type;
 
@@ -36,7 +34,6 @@ pub fn type_id_type_of(_id: crate::any::TypeId) -> crate::mem::type_info::Type;
 /// The stabilized version of this intrinsic is the [PartialEq] impl for [`core::any::TypeId`].
 #[ferrocene::prevalidated]
 #[rustc_nounwind]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_do_not_const_check]
 pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
@@ -47,7 +44,6 @@ pub const fn type_id_eq(a: crate::any::TypeId, b: crate::any::TypeId) -> bool {
 
 #[rustc_intrinsic]
 #[rustc_comptime]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 /// Check if a type represented by a `TypeId` implements a trait represented by a `TypeId`.
 /// It can only be called at compile time, the backends do
 /// not implement it. If it implements the trait the dyn metadata gets returned for vtable access.
@@ -65,7 +61,6 @@ pub fn type_id_vtable(
 ///
 /// The stabilized version of this intrinsic is [`core::any::type_name`].
 #[rustc_nounwind]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_intrinsic]
 #[rustc_comptime]
 pub fn type_name<T: ?Sized>() -> &'static str;
@@ -74,7 +69,6 @@ pub fn type_name<T: ?Sized>() -> &'static str;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::is_signed`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_is_signed(_id: crate::any::TypeId) -> bool;
 
@@ -82,7 +76,6 @@ pub fn type_id_is_signed(_id: crate::any::TypeId) -> bool;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::array_len`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_array_len(_id: crate::any::TypeId) -> usize;
 
@@ -90,7 +83,6 @@ pub fn type_id_array_len(_id: crate::any::TypeId) -> usize;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::element_ty`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_element_ty(_id: crate::any::TypeId) -> Option<crate::any::TypeId>;
 
@@ -98,7 +90,6 @@ pub fn type_id_element_ty(_id: crate::any::TypeId) -> Option<crate::any::TypeId>
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::size`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_size_of(_id: crate::any::TypeId) -> Option<usize>;
 
@@ -106,7 +97,6 @@ pub fn type_id_size_of(_id: crate::any::TypeId) -> Option<usize>;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::variants`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_variants(_id: crate::any::TypeId) -> usize;
 
@@ -116,7 +106,6 @@ pub fn type_id_variants(_id: crate::any::TypeId) -> usize;
 ///
 /// [`TypeId`]: crate::any::TypeId
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_variant_name(_base: crate::any::TypeId, _variant_index: usize) -> &'static str;
 
@@ -128,7 +117,6 @@ pub fn type_id_variant_name(_base: crate::any::TypeId, _variant_index: usize) ->
 ///
 /// [`TypeId`]: crate::any::TypeId
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_variant_non_exhaustive(base: crate::any::TypeId, variant: usize) -> bool;
 
@@ -136,20 +124,17 @@ pub fn type_id_variant_non_exhaustive(base: crate::any::TypeId, variant: usize) 
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::fields`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_fields(_id: crate::any::TypeId, _variant_index: usize) -> usize;
 
 /// Checks whether this type is non-exhaustive.
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_non_exhaustive(_id: crate::any::TypeId) -> bool;
 
 /// Returns the list of generic args on this type.
 /// Only meaningful for Adts, closures, ... Everything else returns an empty slice.
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_generics(_id: crate::any::TypeId) -> &'static [crate::mem::type_info::Generic];
 
@@ -159,7 +144,6 @@ pub fn type_id_generics(_id: crate::any::TypeId) -> &'static [crate::mem::type_i
 ///
 /// [`FieldRepresentingType`]: crate::field::FieldRepresentingType
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_field_representing_type(
     _id: crate::any::TypeId,
@@ -172,7 +156,6 @@ pub fn type_id_field_representing_type(
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::points_to`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_points_to(_id: crate::any::TypeId) -> Option<crate::any::TypeId>;
 
@@ -181,7 +164,6 @@ pub fn type_id_points_to(_id: crate::any::TypeId) -> Option<crate::any::TypeId>;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::points_mutably`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_points_mutably(_id: crate::any::TypeId) -> bool;
 
@@ -190,6 +172,5 @@ pub fn type_id_points_mutably(_id: crate::any::TypeId) -> bool;
 ///
 /// The more user-friendly version of this intrinsic is [`core::any::TypeId::function_ptr`].
 #[rustc_intrinsic]
-#[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_comptime]
 pub fn type_id_function_ptr(_type_id: crate::any::TypeId) -> Option<crate::mem::type_info::FnPtr>;

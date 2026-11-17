@@ -38,7 +38,9 @@ extended = true
 #
 # NOTE: If you add a new tool here, make sure to also change `ferrocene/packages.toml` to include it
 # in new releases.
-tools = ["rustdoc", "cargo", "llvm-tools", "rustfmt", "rust-analyzer", "rust-analyzer-proc-macro-srv", "clippy", "miri"]
+tools = ["rustdoc", "cargo", "llvm-tools", "rustfmt", "rust-analyzer",
+  "rust-analyzer-proc-macro-srv", "clippy", "miri", "symbol-report",
+  "blanket"]
 
 # Build and enable the profiler runtime.
 #

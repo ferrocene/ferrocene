@@ -1,6 +1,5 @@
 #![allow(clippy::enum_clike_unportable_variant)]
 
-use crate::marker::MetaSized;
 use crate::num::NonZero;
 use crate::ub_checks::assert_unsafe_precondition;
 use crate::{cmp, fmt, hash, mem, num};
@@ -10,7 +9,7 @@ use crate::{cmp, fmt, hash, mem, num};
 ///
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[derive(Copy)]
 #[derive_const(Clone, PartialEq, Eq)]
 #[repr(transparent)]
@@ -38,19 +37,19 @@ impl Alignment {
     /// # Examples
     ///
     /// ```
-    /// #![feature(ptr_alignment_type)]
     /// use std::mem::Alignment;
     ///
     /// assert_eq!(Alignment::MIN.as_usize(), 1);
     /// ```
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     pub const MIN: Self = Self::new(1).unwrap();
 
     /// Returns the alignment for a type.
     ///
     /// This provides the same numerical value as [`align_of`],
     /// but in an `Alignment` instead of a `usize`.
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[must_use]
     pub const fn of<T>() -> Self {
@@ -72,7 +71,6 @@ impl Alignment {
     /// # Examples
     ///
     /// ```
-    /// #![feature(ptr_alignment_type)]
     /// use std::mem::Alignment;
     ///
     /// assert_eq!(Alignment::of_val(&5i32).as_usize(), 4);
@@ -85,7 +83,6 @@ impl Alignment {
     /// `Alignment::of_val()` can be used to learn those alignments:
     ///
     /// ```
-    /// #![feature(ptr_alignment_type)]
     /// use std::mem::Alignment;
     ///
     /// let a: &dyn ToString = &1234u16;
@@ -98,8 +95,9 @@ impl Alignment {
     /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
     #[inline]
     #[must_use]
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    pub const fn of_val<T: MetaSized>(val: &T) -> Self {
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    pub const fn of_val<T: ?Sized>(val: &T) -> Self {
         let align = mem::align_of_val(val);
         // SAFETY: `align_of_val` returns valid alignment
         unsafe { Alignment::new_unchecked(align) }
@@ -142,7 +140,6 @@ impl Alignment {
     /// # Examples
     ///
     /// ```
-    /// #![feature(ptr_alignment_type)]
     /// use std::mem::Alignment;
     ///
     /// assert_eq!(unsafe { Alignment::of_val_raw(&5i32) }.as_usize(), 4);
@@ -154,8 +151,9 @@ impl Alignment {
     /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
     #[inline]
     #[must_use]
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    pub const unsafe fn of_val_raw<T: MetaSized>(val: *const T) -> Self {
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    pub const unsafe fn of_val_raw<T: ?Sized>(val: *const T) -> Self {
         // SAFETY: precondition propagated to the caller
         let align = unsafe { mem::align_of_val_raw(val) };
         // SAFETY: `align_of_val_raw` returns valid alignment
@@ -166,7 +164,8 @@ impl Alignment {
     /// not a power of two.
     ///
     /// Note that `0` is not a power of two, nor a valid alignment.
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[ferrocene::prevalidated]
     pub const fn new(align: usize) -> Option<Self> {
@@ -186,7 +185,8 @@ impl Alignment {
     ///
     /// Equivalently, it must be `1 << exp` for some `exp` in `0..usize::BITS`.
     /// It must *not* be zero.
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[track_caller]
     #[ferrocene::prevalidated]
@@ -203,7 +203,8 @@ impl Alignment {
     }
 
     /// Returns the alignment as a [`usize`].
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[ferrocene::prevalidated]
     pub const fn as_usize(self) -> usize {
@@ -214,19 +215,8 @@ impl Alignment {
     }
 
     /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
-    #[deprecated(
-        since = "1.96.0",
-        note = "renamed to `as_nonzero_usize`",
-        suggestion = "as_nonzero_usize"
-    )]
-    #[inline]
-    pub const fn as_nonzero(self) -> NonZero<usize> {
-        self.as_nonzero_usize()
-    }
-
-    /// Returns the alignment as a <code>[NonZero]<[usize]></code>.
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+    #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     #[ferrocene::prevalidated]
     pub const fn as_nonzero_usize(self) -> NonZero<usize> {
@@ -247,12 +237,12 @@ impl Alignment {
     ///
     /// ```
     /// #![feature(ptr_alignment_type)]
-    /// use std::ptr::Alignment;
+    /// use std::mem::Alignment;
     ///
     /// assert_eq!(Alignment::of::<u8>().log2(), 0);
     /// assert_eq!(Alignment::new(1024).unwrap().log2(), 10);
     /// ```
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[unstable(feature = "ptr_alignment_type", issue = "165719")]
     #[inline]
     #[ferrocene::prevalidated]
     pub const fn log2(self) -> u32 {
@@ -266,8 +256,7 @@ impl Alignment {
     /// # Examples
     ///
     /// ```
-    /// #![feature(ptr_mask)]
-    /// #![feature(ptr_alignment_type)]
+    /// #![feature(ptr_alignment_type, ptr_mask)]
     /// use std::mem::Alignment;
     /// use std::ptr::NonNull;
     ///
@@ -283,7 +272,8 @@ impl Alignment {
     /// assert_eq!(four.mask(Alignment::of::<Align4>().mask()), four);
     /// assert_ne!(one.mask(Alignment::of::<Align4>().mask()), one);
     /// ```
-    #[unstable(feature = "ptr_alignment_type", issue = "102070")]
+    #[unstable(feature = "ptr_alignment_type", issue = "165719")]
+    // Also #[unstable(feature = "ptr_mask", issue = "98290")]
     #[inline]
     pub const fn mask(self) -> usize {
         // SAFETY: The alignment is always nonzero, and therefore decrementing won't overflow.
@@ -296,7 +286,7 @@ impl Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 impl fmt::Debug for Alignment {
     #[ferrocene::prevalidated]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -304,7 +294,7 @@ impl fmt::Debug for Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl TryFrom<NonZero<usize>> for Alignment {
     type Error = num::TryFromIntError;
@@ -315,7 +305,7 @@ const impl TryFrom<NonZero<usize>> for Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl TryFrom<usize> for Alignment {
     type Error = num::TryFromIntError;
@@ -326,7 +316,7 @@ const impl TryFrom<usize> for Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl From<Alignment> for NonZero<usize> {
     #[inline]
@@ -335,7 +325,7 @@ const impl From<Alignment> for NonZero<usize> {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
 const impl From<Alignment> for usize {
     #[inline]
@@ -344,7 +334,7 @@ const impl From<Alignment> for usize {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 const impl cmp::Ord for Alignment {
     #[inline]
@@ -353,7 +343,7 @@ const impl cmp::Ord for Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
 const impl cmp::PartialOrd for Alignment {
     #[inline]
@@ -362,7 +352,7 @@ const impl cmp::PartialOrd for Alignment {
     }
 }
 
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 impl hash::Hash for Alignment {
     #[inline]
     #[ferrocene::prevalidated]
@@ -372,7 +362,7 @@ impl hash::Hash for Alignment {
 }
 
 /// Returns [`Alignment::MIN`], which is valid for any type.
-#[unstable(feature = "ptr_alignment_type", issue = "102070")]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[rustc_const_unstable(feature = "const_default", issue = "143894")]
 const impl Default for Alignment {
     fn default() -> Alignment {

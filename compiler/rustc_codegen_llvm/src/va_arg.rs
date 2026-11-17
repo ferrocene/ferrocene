@@ -95,7 +95,7 @@ fn get_param_type_alignment<'ll, 'tcx>(
                 Integer::I128 => return Align::EIGHT,
             },
             Primitive::Float(float) => match float {
-                Float::F16 | Float::F16B | Float::F32 => unreachable!(),
+                Float::F16 | Float::F16B | Float::F32 | Float::X87F80 => unreachable!(),
                 Float::F64 | Float::F128 => { /* fall through */ }
                 Float::PpcF128 => {
                     return if is_powerpc_softfloat_abi(&bx.cx.tcx.sess.target) {
@@ -493,6 +493,9 @@ fn emit_s390x_va_arg<'ll, 'tcx>(
                 }
                 Primitive::Float(Float::PpcF128) => {
                     bug!("`ppcf128` use in varadics unsupported on s390x")
+                }
+                Primitive::Float(Float::X87F80) => {
+                    bug!("`x87_f80` use in varadics unsupported on s390x")
                 }
             },
 
@@ -1295,11 +1298,29 @@ pub(super) fn emit_va_arg<'ll, 'tcx>(
                 Endian::Little => ForceRightAdjust::No,
             },
         ),
+        Arch::Msp430 => emit_ptr_va_arg(
+            bx,
+            addr,
+            layout,
+            PassMode::Direct,
+            SlotSize::Bytes1,
+            AllowHigherAlign::Yes,
+            ForceRightAdjust::No,
+        ),
+        Arch::Avr => emit_ptr_va_arg(
+            bx,
+            addr,
+            layout,
+            PassMode::Direct,
+            SlotSize::Bytes1,
+            AllowHigherAlign::No,
+            ForceRightAdjust::No,
+        ),
 
         Arch::Bpf => bug!("bpf does not support c-variadic functions"),
         Arch::SpirV => bug!("spirv does not support c-variadic functions"),
 
-        Arch::Avr | Arch::M68k | Arch::Msp430 => {
+        Arch::M68k => {
             std::assert_matches!(stability, CVariadicStatus::Unstable { .. });
 
             // Clang uses the LLVM implementation for these architectures.

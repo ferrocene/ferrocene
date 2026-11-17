@@ -57,6 +57,6 @@ fn hash_non_zero() {
 #[test]
 fn hash_alignment() {
     let mut hasher = TestHasher { hash: 0 };
-    Hash::hash(&core::ptr::Alignment::MIN, &mut hasher);
+    Hash::hash(&core::mem::Alignment::MIN, &mut hasher);
     assert_eq!(1, hasher.finish());
 }

@@ -1,4 +1,4 @@
-//@ revisions: all strong basic none missing
+//@ revisions: all strong none missing
 //@ assembly-output: emit-asm
 //@ ignore-apple slightly different policy on stack protection of arrays
 //@ ignore-msvc stack check code uses different function names
@@ -7,7 +7,6 @@
 //@ ignore-ferrocene.facade
 //@ [all] compile-flags: -Z stack-protector=all
 //@ [strong] compile-flags: -Z stack-protector=strong
-//@ [basic] compile-flags: -Z stack-protector=basic
 //@ [none] compile-flags: -Z stack-protector=none
 //@ compile-flags: -C opt-level=2 -Z merge-functions=disabled -Z allow-partial-mitigations=stack-protector
 
@@ -25,7 +24,6 @@
 pub fn emptyfn() {
     // all: __stack_chk_fail
     // strong-NOT: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -43,7 +41,6 @@ pub fn array_char(f: fn(*const char)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -59,7 +56,6 @@ pub fn array_u8_1(f: fn(*const u8)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -73,10 +69,10 @@ pub fn array_u8_small(f: fn(*const u8)) {
     f(&b as *const _);
 
     // Small arrays do not lead to stack protection by the 'basic' heuristic.
+    // (basic is not currently supported, leaving the test anyway).
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -89,10 +85,10 @@ pub fn array_u8_large(f: fn(*const u8)) {
 
     // Since `a` is a byte array with size greater than 8, the basic heuristic
     // will also protect this function.
+    // (basic is not currently supported, leaving the test anyway).
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -108,10 +104,10 @@ pub fn array_bytesizednewtype_9(f: fn(*const ByteSizedNewtype)) {
 
     // Since `a` is a byte array in the LLVM output, the basic heuristic will
     // also protect this function.
+    // (basic is not currently supported, leaving the test anyway).
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -138,7 +134,6 @@ pub fn local_var_addr_used_indirectly(f: fn(bool)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -154,7 +149,6 @@ pub fn local_string_addr_taken(f: fn(&String)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -183,7 +177,6 @@ pub fn local_var_addr_taken_used_locally_only(factory: fn() -> i32, sink: fn(i32
 
     // all: __stack_chk_fail
     // strong-NOT: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -220,7 +213,6 @@ pub fn local_large_var_moved(f: fn(Gigastruct)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -249,7 +241,6 @@ pub fn local_large_var_cloned(f: fn(Gigastruct)) {
 
     // all: __stack_chk_fail
     // strong: __stack_chk_fail
-    // basic: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -289,7 +280,6 @@ pub fn alloca_small_compile_time_constant_arg(f: fn(*mut ())) {
 
     // all: __stack_chk_fail
     // strong-NOT: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -301,7 +291,6 @@ pub fn alloca_large_compile_time_constant_arg(f: fn(*mut ())) {
 
     // all: __stack_chk_fail
     // strong-NOT: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }
@@ -313,7 +302,6 @@ pub fn alloca_dynamic_arg(f: fn(*mut ()), n: usize) {
 
     // all: __stack_chk_fail
     // strong-NOT: __stack_chk_fail
-    // basic-NOT: __stack_chk_fail
     // none-NOT: __stack_chk_fail
     // missing-NOT: __stack_chk_fail
 }

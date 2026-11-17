@@ -169,6 +169,7 @@ language_item_table! {
     Copy,                    sym::copy,                copy_trait,                 Target::Trait,          GenericRequirement::Exact(0);
     Clone,                   sym::clone,               clone_trait,                Target::Trait,          GenericRequirement::None;
     CloneFn,                 sym::clone_fn,            clone_fn,                   Target::Method(MethodKind::Trait { body: false }), GenericRequirement::None;
+    CloneFromFn,             sym::clone_from_fn,       clone_from_fn,              Target::Method(MethodKind::Trait { body: true }), GenericRequirement::None;
     UseCloned,               sym::use_cloned,          use_cloned_trait,           Target::Trait,          GenericRequirement::None;
     TrivialClone,            sym::trivial_clone,       trivial_clone_trait,        Target::Trait,          GenericRequirement::None;
     Sync,                    sym::sync,                sync_trait,                 Target::Trait,          GenericRequirement::Exact(0);
@@ -239,6 +240,8 @@ language_item_table! {
 
     Complex,                 sym::complex,             complex,                    Target::Struct,         GenericRequirement::Exact(1);
     PpcF128,                 sym::ppcf128,             ppcf128,                    Target::Struct,         GenericRequirement::None;
+    X87F80,                  sym::x87_f80,             x87_f80,                    Target::Struct,         GenericRequirement::None;
+    X87F80Raw,               sym::x87_f80_raw,         x87_f80_raw,                Target::Struct,         GenericRequirement::None;
 
     Deref,                   kw::Deref,                deref_trait,                Target::Trait,          GenericRequirement::Exact(0);
     DerefMut,                sym::deref_mut,           deref_mut_trait,            Target::Trait,          GenericRequirement::Exact(0);
@@ -278,6 +281,8 @@ language_item_table! {
 
     Unpin,                   sym::unpin,               unpin_trait,                Target::Trait,          GenericRequirement::None;
     Pin,                     kw::Pin,                  pin_type,                   Target::Struct,         GenericRequirement::None;
+
+    Move,                    sym::move_trait,          move_trait,                 Target::Trait,          GenericRequirement::None;
 
     OrderingEnum,            sym::Ordering,            ordering_enum,              Target::Enum,           GenericRequirement::Exact(0);
     PartialEq,               sym::eq,                  eq_trait,                   Target::Trait,          GenericRequirement::Exact(1);

@@ -747,6 +747,7 @@ impl<T: ?Sized> DerefMut for MutexGuard<'_, T> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Drop for MutexGuard<'_, T> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn drop(&mut self) {
         unsafe {

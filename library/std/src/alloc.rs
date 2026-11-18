@@ -148,6 +148,7 @@ use crate::{hint, mem, ptr};
 /// still allocate memory using `malloc` and `HeapAlloc`.
 ///
 /// [global_allocator]: GlobalAlloc#the-global_allocator-attribute
+#[ferrocene::prevalidated]
 #[stable(feature = "alloc_system_type", since = "1.28.0")]
 #[derive(Copy, Debug)]
 #[derive_const(Clone, Default)]

@@ -86,6 +86,7 @@ impl Mutex {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     // Make this a diagnostic item for Miri's concurrency model checker.
     #[cfg_attr(not(test), rustc_diagnostic_item = "sys_mutex_unlock")]
@@ -99,6 +100,7 @@ impl Mutex {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     fn wake(&self) {
         futex_wake(&self.futex);

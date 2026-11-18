@@ -478,6 +478,7 @@ pub mod panic_count {
 
     // Slow path is in a separate function to reduce the amount of code
     // inlined from `count_is_zero`.
+    #[ferrocene::prevalidated]
     #[inline(never)]
     #[cold]
     fn is_zero_slow_path() -> bool {
@@ -600,6 +601,7 @@ pub(crate) unsafe fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dy
 }
 
 /// Determines whether the current thread is unwinding because of panic.
+#[ferrocene::prevalidated]
 #[inline]
 pub(crate) fn panicking() -> bool {
     !panic_count::count_is_zero()

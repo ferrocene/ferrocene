@@ -2566,6 +2566,7 @@ impl<T: ?Sized, A: AllocatorClone> Clone for Arc<T, A> {
         }
 
         // SAFETY: Pointer is valid & allocator corresponds to the one used to allocate it.
+        // FIXME: can neither validate nor ignore warning on `<alloc_crate::alloc::Global as core::clone::Clone>::clone`
         unsafe { Self::from_inner_in(self.ptr, self.alloc.clone()) }
     }
 }

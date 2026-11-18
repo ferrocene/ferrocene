@@ -680,6 +680,7 @@ unsafe impl Sync for CustomOwner {}
 
 #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
 impl Drop for CustomOwner {
+    #[ferrocene::prevalidated]
     fn drop(&mut self) {
         // SAFETY: by `CustomOwner` invariants, this is a drop call on a valid pointer.
         unsafe {
@@ -693,6 +694,7 @@ impl CustomOwner {
     ///
     /// * `custom` must point to valid `Custom`.
     /// * The `outer_drop` of the provided `custom` must be the drop function for this pointer.
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
     pub unsafe fn from_raw(custom: NonNull<Custom>) -> CustomOwner {

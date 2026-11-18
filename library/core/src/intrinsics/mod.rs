@@ -2800,6 +2800,7 @@ pub const unsafe fn const_allocate(_size: usize, _align: usize) -> *mut u8 {
 ///    - At runtime, it is not checked.
 /// - If the `ptr` is created in an another const, this intrinsic doesn't deallocate it.
 /// - If the `ptr` is pointing to a local variable, this intrinsic doesn't deallocate it.
+#[ferrocene::prevalidated]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 #[unstable(feature = "core_intrinsics", issue = "none")]
 #[rustc_nounwind]

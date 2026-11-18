@@ -256,16 +256,19 @@ impl<T: ?Sized> BoxRaw<T> {
         unsafe { BoxRaw { pointer: NonNull::new_unchecked(ptr), _marker: PhantomData } }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn cast<U>(self) -> BoxRaw<U> {
         BoxRaw { pointer: self.pointer.cast(), _marker: PhantomData }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn as_non_null_ptr(self) -> NonNull<T> {
         self.pointer
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn as_ptr(self) -> *mut T {
         self.pointer.as_ptr()
@@ -288,6 +291,7 @@ impl<T: ?Sized> Clone for BoxRaw<T> {
 }
 impl<T: ?Sized> Copy for BoxRaw<T> {}
 
+#[ferrocene::prevalidated]
 #[expect(ineffective_unstable_trait_impl, reason = "See #164109")]
 #[unstable(feature = "box_internals", issue = "none")]
 impl<T: ?Sized> From<BoxRaw<T>> for NonNull<T> {
@@ -877,6 +881,7 @@ impl<T: ?Sized + CloneToUninit> Box<T> {
     /// ```
     ///
     /// [memory layout]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "clone_from_ref", issue = "149075")]
     #[must_use]
@@ -925,6 +930,7 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     /// ```
     ///
     /// [memory layout]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "clone_from_ref", issue = "149075")]
     //#[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
@@ -955,6 +961,7 @@ impl<T: ?Sized + CloneToUninit, A: Allocator> Box<T, A> {
     /// ```
     ///
     /// [memory layout]: self#memory-layout
+    #[ferrocene::prevalidated]
     #[unstable(feature = "clone_from_ref", issue = "149075")]
     //#[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
@@ -2136,6 +2143,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 unsafe impl<#[may_dangle] T: ?Sized, A: Allocator> Drop for Box<T, A> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn drop(&mut self) {
         // the T in the Box is dropped by the compiler before the destructor is run
@@ -2475,6 +2483,7 @@ impl<T: ?Sized, A: Allocator> LegacyReceiver for Box<T, A> {}
 impl<Args: Tuple, F: FnOnce<Args> + ?Sized, A: Allocator> FnOnce<Args> for Box<F, A> {
     type Output = <F as FnOnce<Args>>::Output;
 
+    #[ferrocene::prevalidated]
     extern "rust-call" fn call_once(self, args: Args) -> Self::Output {
         <F as FnOnce<Args>>::call_once(*self, args)
     }

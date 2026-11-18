@@ -658,6 +658,7 @@ unsafe impl<T: Clone> CloneToUninit for T {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 unsafe impl<T: Clone> CloneToUninit for [T] {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {
@@ -669,6 +670,7 @@ unsafe impl<T: Clone> CloneToUninit for [T] {
 
 #[unstable(feature = "clone_to_uninit", issue = "126799")]
 unsafe impl CloneToUninit for str {
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_to_uninit(&self, dest: *mut u8) {

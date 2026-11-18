@@ -132,6 +132,7 @@ impl From<&str> for Box<str> {
     /// let boxed: Box<str> = Box::from("hello");
     /// println!("{boxed}");
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     fn from(s: &str) -> Box<str> {
         Box::clone_from_ref(s)

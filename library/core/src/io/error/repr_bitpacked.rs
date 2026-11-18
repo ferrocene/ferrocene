@@ -230,6 +230,7 @@ impl Repr {
 }
 
 impl Drop for Repr {
+    #[ferrocene::prevalidated]
     #[inline]
     fn drop(&mut self) {
         // SAFETY: We're a Repr, decode_repr is fine. The `Box::from_raw` is

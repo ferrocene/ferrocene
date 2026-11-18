@@ -215,6 +215,7 @@ pub fn yield_now() {
 /// ```
 ///
 /// [Mutex]: crate::sync::Mutex
+#[ferrocene::prevalidated]
 #[inline]
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]

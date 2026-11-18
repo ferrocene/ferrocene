@@ -62,6 +62,7 @@ unsafe impl<T: TrivialClone> CopySpec for T {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg_attr(debug_assertions, track_caller)]
     unsafe fn clone_slice(src: &[Self], dst: *mut [Self]) {

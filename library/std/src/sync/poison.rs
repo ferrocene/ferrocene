@@ -122,6 +122,7 @@ impl Flag {
         if self.get() { Err(PoisonError::new(ret)) } else { Ok(ret) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg(panic = "unwind")]
     pub(crate) fn done(&self, guard: &Guard) {
@@ -130,6 +131,7 @@ impl Flag {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg(not(panic = "unwind"))]
     pub(crate) fn done(&self, _guard: &Guard) {}

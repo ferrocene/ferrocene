@@ -97,6 +97,7 @@ impl Alignment {
     /// ```
     ///
     /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "ptr_alignment_type", issue = "102070")]

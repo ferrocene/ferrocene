@@ -2,7 +2,7 @@
 //! - [Errors and lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html)
 
 use rustc_attr_ir::LangItem;
-use rustc_errors::{Diag, MultiSpan};
+use rustc_errors::{Applicability, Diag, MultiSpan};
 use rustc_hir::HirId;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -165,6 +165,8 @@ impl<'tcx> LintState<'tcx> {
             };
             diag.span_label(self.func_span(callee), format!("`{name}` is unvalidated"));
 
+            try_emit_prevalidate_suggestion(use_, tcx, callee, diag);
+
             if let UseKind::ContainsFnPtr(_, ty) = use_.kind {
                 diag.note(format!("`{name}` contains a function pointer that might be called at runtime"));
                 diag.note(format!("the Ferrocene compiler does not know if the `{ty}` was verified, so it must assume it is unverified"));
@@ -288,4 +290,48 @@ impl<'tcx> Use<'tcx> {
             UseKind::ContainsFnPtr(..) => "uses",
         }
     }
+}
+
+/// Emit a suggestion to prevalidate the unvalidated item, if possible.
+///
+/// An item is possible to annotate if it is:
+/// 1. Called explicitly
+/// 2. A function or associated function
+/// 3. Not from a macro
+fn try_emit_prevalidate_suggestion(
+    use_: Use<'_>,
+    tcx: TyCtxt<'_>,
+    callee: DefId,
+    diag: &mut Diag<'_>,
+) {
+    // Only a direct call identifies the function to validate. For casts and
+    // function pointers, the diagnostic cannot safely recommend annotating
+    // the target as the right fix.
+    if matches!(use_.kind, UseKind::Called(..))
+        && let Some((span, replacement)) = prevalidated_suggestion(tcx, callee)
+    {
+        diag.span_suggestion(
+            span,
+            "add `#[ferrocene::prevalidated]` to this definition",
+            replacement,
+            Applicability::MachineApplicable,
+        );
+    }
+}
+
+fn prevalidated_suggestion(tcx: TyCtxt<'_>, def_id: DefId) -> Option<(Span, String)> {
+    // Is it a function or associated function?
+    if !matches!(tcx.def_kind(def_id), DefKind::Fn | DefKind::AssocFn) {
+        return None;
+    }
+
+    let span = tcx.def_span(def_id);
+
+    // Does the function come from a macro?
+    if span.from_expansion() {
+        return None;
+    }
+
+    let indent = tcx.sess.source_map().indentation_before(span)?;
+    Some((span.shrink_to_lo(), format!("#[ferrocene::prevalidated]\n{indent}")))
 }

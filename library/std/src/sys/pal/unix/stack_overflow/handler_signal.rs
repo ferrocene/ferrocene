@@ -147,6 +147,7 @@ pub unsafe fn init() {
     }
 }
 
+#[ferrocene::prevalidated]
 fn get_stack() -> libc::stack_t {
     // OpenBSD requires this flag for stack mapping
     // otherwise the said mapping will fail as a no-op on most systems
@@ -189,6 +190,7 @@ fn get_stack() -> libc::stack_t {
     libc::stack_t { ss_sp: stackp, ss_flags: 0, ss_size: sigstack_size }
 }
 
+#[ferrocene::prevalidated]
 pub fn make_handler(main_thread: bool) -> Handler {
     if cfg!(panic = "immediate-abort") || !NEED_ALTSTACK.load(Ordering::Acquire) {
         return Handler::null();
@@ -270,6 +272,7 @@ pub unsafe fn drop_handler(data: *mut libc::c_void) {
 }
 
 /// Modern kernels on modern hardware can have dynamic signal stack sizes.
+#[ferrocene::prevalidated]
 #[cfg(all(any(target_os = "linux", target_os = "android"), not(target_env = "uclibc")))]
 fn sigstack_size() -> usize {
     // SAFETY: `getauxval` is always safe to call.
@@ -561,6 +564,7 @@ fn current_guard() -> Option<Range<usize>> {
     Some(stackaddr - PAGE_SIZE.load(Ordering::Relaxed)..stackaddr)
 }
 
+#[ferrocene::prevalidated]
 #[cfg(any(
     target_os = "android",
     target_os = "freebsd",

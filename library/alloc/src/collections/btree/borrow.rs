@@ -23,6 +23,7 @@ impl<'a, T> DormantMutRef<'a, T> {
     /// Capture a unique borrow, and immediately reborrow it. For the compiler,
     /// the lifetime of the new reference is the same as the lifetime of the
     /// original reference, but you promise to use it for a shorter period.
+    #[ferrocene::prevalidated]
     pub(super) fn new(t: &'a mut T) -> (&'a mut T, Self) {
         let ptr = NonNull::from(t);
         // SAFETY: we hold the borrow throughout 'a via `_marker`, and we expose
@@ -48,6 +49,7 @@ impl<'a, T> DormantMutRef<'a, T> {
     ///
     /// The reborrow must have ended, i.e., the reference returned by `new` and
     /// all pointers and references derived from it, must not be used anymore.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn reborrow(&mut self) -> &'a mut T {
         // SAFETY: our own safety conditions imply this reference is again unique.
         unsafe { &mut *self.ptr.as_ptr() }

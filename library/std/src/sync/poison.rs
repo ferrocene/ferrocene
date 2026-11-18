@@ -111,9 +111,11 @@ impl Flag {
     }
 
     /// Checks the flag for a guarded borrow, where we may also set poison when `done`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) fn guard(&self) -> LockResult<Guard> {
         let ret = Guard {
+            #[expect(ferrocene::unvalidated, reason = "only panic=abort is certified")]
             #[cfg(panic = "unwind")]
             panicking: thread::panicking(),
         };
@@ -132,6 +134,7 @@ impl Flag {
     #[cfg(not(panic = "unwind"))]
     pub(crate) fn done(&self, _guard: &Guard) {}
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[cfg(panic = "unwind")]
     pub(crate) fn get(&self) -> bool {
@@ -263,6 +266,7 @@ impl<T> PoisonError<T> {
     /// or [`RwLock::read`](crate::sync::RwLock::read).
     ///
     /// This method may panic if std was built with `panic="abort"`.
+    #[ferrocene::prevalidated]
     #[doc(auto_cfg = false)]
     #[cfg(panic = "unwind")]
     #[stable(feature = "sync_poison", since = "1.2.0")]
@@ -376,6 +380,7 @@ impl<T> Error for TryLockError<T> {
     }
 }
 
+#[ferrocene::prevalidated]
 pub(crate) fn map_result<T, U, F>(result: LockResult<T>, f: F) -> LockResult<U>
 where
     F: FnOnce(T) -> U,

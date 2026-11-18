@@ -129,6 +129,7 @@ impl<T: Sized> NonNull<T> {
     #[rustc_const_stable(feature = "const_nonnull_dangling", since = "1.36.0")]
     #[must_use]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn dangling() -> Self {
         let align = crate::mem::Alignment::of::<T>();
         NonNull::without_provenance(align.as_nonzero_usize())

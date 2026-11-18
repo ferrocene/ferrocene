@@ -27,6 +27,7 @@ mod thread_name_string {
         }
     }
 
+    #[ferrocene::prevalidated]
     impl ThreadNameString {
         pub(crate) fn as_cstr(&self) -> &CStr {
             &self.inner
@@ -140,6 +141,7 @@ impl Thread {
     ///
     /// `imp::current_os_id` must not allocate with the global allocator or call
     /// `thread::current`.
+    #[ferrocene::prevalidated]
     pub(crate) fn set_os_id_to_current(&self) {
         if let Some(os_id) = imp::current_os_id() {
             if self.inner.os_id.set(os_id).is_err() {
@@ -241,6 +243,7 @@ impl Thread {
     /// let other_thread_id = other_thread.join().unwrap();
     /// assert!(thread::current().id() != other_thread_id);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "thread_id", since = "1.19.0")]
     #[must_use]
     pub fn id(&self) -> ThreadId {
@@ -318,6 +321,7 @@ impl Thread {
     /// ```
     ///
     /// [naming-threads]: ./index.html#naming-threads
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use]
     pub fn name(&self) -> Option<&str> {
@@ -350,6 +354,7 @@ impl Thread {
     ///     assert_eq!(Thread::from_raw(ptr).id(), id);
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[unstable(feature = "thread_raw", issue = "97523")]
     pub fn into_raw(self) -> *const () {
         // Safety: We only expose an opaque pointer, which maintains the `Pin` invariant.
@@ -373,6 +378,7 @@ impl Thread {
     ///
     /// Calling this function twice on the same raw pointer can lead
     /// to a double-free if both `Thread` instances are dropped.
+    #[ferrocene::prevalidated]
     #[unstable(feature = "thread_raw", issue = "97523")]
     pub unsafe fn from_raw(ptr: *const ()) -> Thread {
         // Safety: Upheld by caller.
@@ -381,6 +387,7 @@ impl Thread {
         }
     }
 
+    #[ferrocene::prevalidated]
     pub(crate) fn cname(&self) -> Option<&CStr> {
         if let Some(name) = &self.inner.name {
             Some(name.as_cstr())

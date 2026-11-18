@@ -565,6 +565,7 @@ impl CString {
     /// let bytes = c_string.as_bytes_with_nul();
     /// assert_eq!(bytes, &[b'f', b'o', b'o', b'\0']);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -584,6 +585,7 @@ impl CString {
     /// assert_eq!(cstr,
     ///            CStr::from_bytes_with_nul(b"foo\0").expect("we provided bytes that has one NUL byte exactly at the end, so CStr::from_bytes_with_nul should not fail"));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "as_c_str", since = "1.20.0")]
@@ -718,6 +720,7 @@ impl Drop for CString {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ops::Deref for CString {
     type Target = CStr;

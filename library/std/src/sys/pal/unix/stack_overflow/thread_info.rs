@@ -91,6 +91,7 @@ pub fn with_current_info<R>(f: impl FnOnce(Option<&ThreadInfo>) -> R) -> R {
     f(thread_info.get(&this))
 }
 
+#[ferrocene::prevalidated]
 fn spin_lock_in_setup(this: usize) -> UnlockOnDrop {
     loop {
         match SPIN_LOCK.compare_exchange(0, this, Ordering::Acquire, Ordering::Relaxed) {
@@ -109,6 +110,7 @@ fn spin_lock_in_setup(this: usize) -> UnlockOnDrop {
     }
 }
 
+#[ferrocene::prevalidated]
 pub fn set_current_info(guard_page_range: Range<usize>) {
     let tid = crate::thread::current_os_id();
     let name = crate::thread::with_current_name(|name| name.map(Box::from));

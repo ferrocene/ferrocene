@@ -72,6 +72,7 @@ impl<K, V> LeafNode<K, V> {
     /// # Safety
     ///
     /// The caller must ensure that `this` points to a (possibly uninitialized) `LeafNode`
+    #[ferrocene::prevalidated]
     unsafe fn init(this: *mut Self) {
         // As a general policy, we leave fields uninitialized if they can be, as this should
         // be both slightly faster and easier to track in Valgrind.
@@ -84,6 +85,7 @@ impl<K, V> LeafNode<K, V> {
     }
 
     /// Creates a new boxed `LeafNode`.
+    #[ferrocene::prevalidated]
     fn new<A: AllocatorClone>(alloc: A) -> Box<Self, A> {
         let mut leaf = Box::new_uninit_in(alloc);
 
@@ -117,6 +119,7 @@ impl<K, V> InternalNode<K, V> {
     /// An invariant of internal nodes is that they have at least one
     /// initialized and valid edge. This function does not set up
     /// such an edge.
+    #[ferrocene::prevalidated]
     unsafe fn new<A: AllocatorClone>(alloc: A) -> Box<Self, A> {
         let mut node = Box::<Self, _>::new_uninit_in(alloc);
 
@@ -220,10 +223,12 @@ unsafe impl<K: Send, V: Send, Type> Send for NodeRef<marker::Owned, K, V, Type> 
 unsafe impl<K: Send, V: Send, Type> Send for NodeRef<marker::Dying, K, V, Type> {}
 
 impl<K, V> NodeRef<marker::Owned, K, V, marker::Leaf> {
+    #[ferrocene::prevalidated]
     pub(super) fn new_leaf<A: AllocatorClone>(alloc: A) -> Self {
         Self::from_new_leaf(LeafNode::new(alloc))
     }
 
+    #[ferrocene::prevalidated]
     fn from_new_leaf<A: AllocatorClone>(leaf: Box<LeafNode<K, V>, A>) -> Self {
         // The allocator must be dropped, not leaked.  See also `BTreeMap::alloc`.
         let (node, _alloc) = Box::into_non_null_with_allocator(leaf);
@@ -233,6 +238,7 @@ impl<K, V> NodeRef<marker::Owned, K, V, marker::Leaf> {
 
 impl<K, V> NodeRef<marker::Owned, K, V, marker::Internal> {
     /// Creates a new internal (height > 0) `NodeRef`
+    #[ferrocene::prevalidated]
     fn new_internal<A: AllocatorClone>(child: Root<K, V>, alloc: A) -> Self {
         // ignore-tidy-undocumented-unsafe
         let mut new_node = unsafe { InternalNode::new(alloc) };
@@ -241,6 +247,7 @@ impl<K, V> NodeRef<marker::Owned, K, V, marker::Internal> {
     }
 
     /// Creates a new internal (height > 0) `NodeRef` from an existing internal node
+    #[ferrocene::prevalidated]
     fn from_new_internal<A: AllocatorClone>(
         internal: Box<InternalNode<K, V>, A>,
         height: NonZero<usize>,
@@ -255,6 +262,7 @@ impl<K, V> NodeRef<marker::Owned, K, V, marker::Internal> {
 
 impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Internal> {
     /// Unpack a node reference that was packed as `NodeRef::parent`.
+    #[ferrocene::prevalidated]
     fn from_internal(node: NonNull<InternalNode<K, V>>, height: usize) -> Self {
         debug_assert!(height > 0);
         NodeRef { height, node: node.cast(), _marker: PhantomData }
@@ -265,6 +273,7 @@ impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Internal> {
     /// Exposes the data of an internal node.
     ///
     /// Returns a raw ptr to avoid invalidating other references to this node.
+    #[ferrocene::prevalidated]
     fn as_internal_ptr(this: &Self) -> *mut InternalNode<K, V> {
         // SAFETY: the static node type is `Internal`.
         this.node.as_ptr() as *mut InternalNode<K, V>
@@ -273,6 +282,7 @@ impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Internal> {
 
 impl<'a, K, V> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
     /// Borrows exclusive access to the data of an internal node.
+    #[ferrocene::prevalidated]
     fn as_internal_mut(&mut self) -> &mut InternalNode<K, V> {
         let ptr = Self::as_internal_ptr(self);
         // ignore-tidy-undocumented-unsafe
@@ -285,6 +295,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
     /// The number of edges is `len() + 1`.
     /// Note that, despite being safe, calling this function can have the side effect
     /// of invalidating mutable references that unsafe code has created.
+    #[ferrocene::prevalidated]
     pub(super) fn len(&self) -> usize {
         // SAFETY: We only access the `len` field here. If BorrowType is marker::ValMut,
         // there might be outstanding mutable references to values that we must not invalidate.
@@ -301,6 +312,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
     }
 
     /// Temporarily takes out another, immutable reference to the same node.
+    #[ferrocene::prevalidated]
     pub(super) fn reborrow(&self) -> NodeRef<marker::Immut<'_>, K, V, Type> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -308,6 +320,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
     /// Exposes the leaf portion of any leaf or internal node.
     ///
     /// Returns a raw ptr to avoid invalidating other references to this node.
+    #[ferrocene::prevalidated]
     fn as_leaf_ptr(this: &Self) -> *mut LeafNode<K, V> {
         // The node must be valid for at least the LeafNode portion.
         // This is not a reference in the NodeRef type because we don't know if
@@ -326,6 +339,7 @@ impl<BorrowType: marker::BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type>
     ///
     /// `edge.descend().ascend().unwrap()` and `node.ascend().unwrap().descend()` should
     /// both, upon success, do nothing.
+    #[ferrocene::prevalidated]
     pub(super) fn ascend(
         self,
     ) -> Result<Handle<NodeRef<BorrowType, K, V, marker::Internal>, marker::Edge>, Self> {
@@ -391,6 +405,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
 
 impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Immut<'a>, K, V, Type> {
     /// Exposes the leaf portion of any leaf or internal node in an immutable tree.
+    #[ferrocene::prevalidated]
     fn into_leaf(self) -> &'a LeafNode<K, V> {
         let ptr = Self::as_leaf_ptr(&self);
         // SAFETY: there can be no mutable references into this tree borrowed as `Immut`.
@@ -398,6 +413,7 @@ impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Immut<'a>, K, V, Type> {
     }
 
     /// Borrows a view into the keys stored in the node.
+    #[ferrocene::prevalidated]
     pub(super) fn keys(&self) -> &[K] {
         let leaf = self.into_leaf();
         // ignore-tidy-undocumented-unsafe
@@ -481,11 +497,13 @@ impl<'a, K, V, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
     // FIXME(@gereeter) consider adding yet another type parameter to `NodeRef`
     // that restricts the use of navigation methods on reborrowed pointers,
     // preventing this unsafety.
+    #[ferrocene::prevalidated]
     unsafe fn reborrow_mut(&mut self) -> NodeRef<marker::Mut<'_>, K, V, Type> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
 
     /// Borrows exclusive access to the leaf portion of a leaf or internal node.
+    #[ferrocene::prevalidated]
     fn as_leaf_mut(&mut self) -> &mut LeafNode<K, V> {
         let ptr = Self::as_leaf_ptr(self);
         // SAFETY: we have exclusive access to the entire node.
@@ -493,6 +511,7 @@ impl<'a, K, V, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
     }
 
     /// Offers exclusive access to the leaf portion of a leaf or internal node.
+    #[ferrocene::prevalidated]
     fn into_leaf_mut(mut self) -> &'a mut LeafNode<K, V> {
         let ptr = Self::as_leaf_ptr(&mut self);
         // SAFETY: we have exclusive access to the entire node.
@@ -501,6 +520,7 @@ impl<'a, K, V, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
 
     /// Returns a dormant copy of this node with its lifetime erased which can
     /// be reawakened later.
+    #[ferrocene::prevalidated]
     pub(super) fn dormant(&self) -> NodeRef<marker::DormantMut, K, V, Type> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -513,6 +533,7 @@ impl<K, V, Type> NodeRef<marker::DormantMut, K, V, Type> {
     ///
     /// The reborrow must have ended, i.e., the reference returned by `new` and
     /// all pointers and references derived from it, must not be used anymore.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn awaken<'a>(self) -> NodeRef<marker::Mut<'a>, K, V, Type> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -532,6 +553,7 @@ impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
     ///
     /// # Safety
     /// `index` is in bounds of 0..CAPACITY
+    #[ferrocene::prevalidated]
     unsafe fn key_area_mut<I, Output: ?Sized>(&mut self, index: I) -> &mut Output
     where
         I: SliceIndex<[MaybeUninit<K>], Output = Output>,
@@ -546,6 +568,7 @@ impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
     ///
     /// # Safety
     /// `index` is in bounds of 0..CAPACITY
+    #[ferrocene::prevalidated]
     unsafe fn val_area_mut<I, Output: ?Sized>(&mut self, index: I) -> &mut Output
     where
         I: SliceIndex<[MaybeUninit<V>], Output = Output>,
@@ -562,6 +585,7 @@ impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
     ///
     /// # Safety
     /// `index` is in bounds of 0..CAPACITY + 1
+    #[ferrocene::prevalidated]
     unsafe fn edge_area_mut<I, Output: ?Sized>(&mut self, index: I) -> &mut Output
     where
         I: SliceIndex<[MaybeUninit<BoxedNode<K, V>>], Output = Output>,
@@ -598,6 +622,7 @@ impl<'a, K, V, Type> NodeRef<marker::ValMut<'a>, K, V, Type> {
 
 impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
     /// Borrows exclusive access to the length of the node.
+    #[ferrocene::prevalidated]
     pub(super) fn len_mut(&mut self) -> &mut u16 {
         &mut self.as_leaf_mut().len
     }
@@ -606,6 +631,7 @@ impl<'a, K: 'a, V: 'a, Type> NodeRef<marker::Mut<'a>, K, V, Type> {
 impl<'a, K, V> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
     /// # Safety
     /// Every item returned by `range` is a valid edge index for the node.
+    #[ferrocene::prevalidated]
     unsafe fn correct_childrens_parent_links<R: Iterator<Item = usize>>(&mut self, range: R) {
         for i in range {
             debug_assert!(i <= self.len());
@@ -614,6 +640,7 @@ impl<'a, K, V> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn correct_all_childrens_parent_links(&mut self) {
         let len = self.len();
         // ignore-tidy-undocumented-unsafe
@@ -624,6 +651,7 @@ impl<'a, K, V> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
 impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::LeafOrInternal> {
     /// Sets the node's link to its parent edge,
     /// without invalidating other references to the node.
+    #[ferrocene::prevalidated]
     fn set_parent_link(&mut self, parent: NonNull<InternalNode<K, V>>, parent_idx: usize) {
         let leaf = Self::as_leaf_ptr(self);
         // ignore-tidy-undocumented-unsafe
@@ -651,6 +679,7 @@ impl<K, V> NodeRef<marker::Owned, K, V, marker::LeafOrInternal> {
     /// Adds a new internal node with a single edge pointing to the previous root node,
     /// make that new node the root node, and return it. This increases the height by 1
     /// and is the opposite of `pop_internal_level`.
+    #[ferrocene::prevalidated]
     pub(super) fn push_internal_level<A: AllocatorClone>(
         &mut self,
         alloc: A,
@@ -694,6 +723,7 @@ impl<K, V, Type> NodeRef<marker::Owned, K, V, Type> {
     /// Mutably borrows the owned root node. Unlike `reborrow_mut`, this is safe
     /// because the return value cannot be used to destroy the root, and there
     /// cannot be other references to the tree.
+    #[ferrocene::prevalidated]
     pub(super) fn borrow_mut(&mut self) -> NodeRef<marker::Mut<'_>, K, V, Type> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -717,6 +747,7 @@ impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::Leaf> {
     /// # Safety
     ///
     /// The returned handle has an unbound lifetime.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn push_with_handle<'b>(
         &mut self,
         key: K,
@@ -748,6 +779,7 @@ impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::Leaf> {
 impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
     /// Adds a key-value pair, and an edge to go to the right of that pair,
     /// to the end of the node.
+    #[ferrocene::prevalidated]
     pub(super) fn push(&mut self, key: K, val: V, edge: Root<K, V>) {
         assert!(edge.height == self.height - 1);
 
@@ -767,6 +799,7 @@ impl<'a, K: 'a, V: 'a> NodeRef<marker::Mut<'a>, K, V, marker::Internal> {
 
 impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Leaf> {
     /// Removes any static information asserting that this node is a `Leaf` node.
+    #[ferrocene::prevalidated]
     pub(super) fn forget_type(self) -> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -774,6 +807,7 @@ impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Leaf> {
 
 impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Internal> {
     /// Removes any static information asserting that this node is an `Internal` node.
+    #[ferrocene::prevalidated]
     pub(super) fn forget_type(self) -> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {
         NodeRef { height: self.height, node: self.node, _marker: PhantomData }
     }
@@ -781,6 +815,7 @@ impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Internal> {
 
 impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {
     /// Checks whether a node is an `Internal` node or a `Leaf` node.
+    #[ferrocene::prevalidated]
     pub(super) fn force(
         self,
     ) -> ForceResult<
@@ -805,6 +840,7 @@ impl<BorrowType, K, V> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {
 
 impl<'a, K, V> NodeRef<marker::Mut<'a>, K, V, marker::LeafOrInternal> {
     /// Unsafely asserts to the compiler the static information that this node is a `Leaf`.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn cast_to_leaf_unchecked(
         self,
     ) -> NodeRef<marker::Mut<'a>, K, V, marker::Leaf> {
@@ -857,6 +893,7 @@ impl<Node, Type> Handle<Node, Type> {
 impl<BorrowType, K, V, NodeType> Handle<NodeRef<BorrowType, K, V, NodeType>, marker::KV> {
     /// Creates a new handle to a key-value pair in `node`.
     /// Unsafe because the caller must ensure that `idx < node.len()`.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn new_kv(node: NodeRef<BorrowType, K, V, NodeType>, idx: usize) -> Self {
         debug_assert!(idx < node.len());
 
@@ -912,6 +949,7 @@ impl<'a, K, V, NodeType, HandleType> Handle<NodeRef<marker::Mut<'a>, K, V, NodeT
     /// Returns a dormant copy of this handle which can be reawakened later.
     ///
     /// See `DormantMutRef` for more details.
+    #[ferrocene::prevalidated]
     pub(super) fn dormant(
         &self,
     ) -> Handle<NodeRef<marker::DormantMut, K, V, NodeType>, HandleType> {
@@ -926,6 +964,7 @@ impl<K, V, NodeType, HandleType> Handle<NodeRef<marker::DormantMut, K, V, NodeTy
     ///
     /// The reborrow must have ended, i.e., the reference returned by `new` and
     /// all pointers and references derived from it, must not be used anymore.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn awaken<'a>(
         self,
     ) -> Handle<NodeRef<marker::Mut<'a>, K, V, NodeType>, HandleType> {
@@ -937,6 +976,7 @@ impl<K, V, NodeType, HandleType> Handle<NodeRef<marker::DormantMut, K, V, NodeTy
 impl<BorrowType, K, V, NodeType> Handle<NodeRef<BorrowType, K, V, NodeType>, marker::Edge> {
     /// Creates a new handle to an edge in `node`.
     /// Unsafe because the caller must ensure that `idx <= node.len()`.
+    #[ferrocene::prevalidated]
     pub(super) unsafe fn new_edge(node: NodeRef<BorrowType, K, V, NodeType>, idx: usize) -> Self {
         debug_assert!(idx <= node.len());
 
@@ -976,6 +1016,7 @@ pub(super) enum LeftOrRight<T> {
 /// The goal of the split point is for its key and value to end up in a parent node;
 /// the keys, values and edges to the left of the split point become the left child;
 /// the keys, values and edges to the right of the split point become the right child.
+#[ferrocene::prevalidated]
 fn splitpoint(edge_idx: usize) -> (usize, LeftOrRight<usize>) {
     debug_assert!(edge_idx <= CAPACITY);
     // Rust issue #74834 tries to explain these symmetric rules.
@@ -991,6 +1032,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, mark
     /// Inserts a new key-value pair between the key-value pairs to the right and left of
     /// this edge. This method assumes that there is enough space in the node for the new
     /// pair to fit.
+    #[ferrocene::prevalidated]
     unsafe fn insert_fit(
         mut self,
         key: K,
@@ -1016,6 +1058,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, mark
     ///
     /// Returns a dormant handle to the inserted node which can be reawakened
     /// once splitting is complete.
+    #[ferrocene::prevalidated]
     fn insert<A: AllocatorClone>(
         self,
         key: K,
@@ -1055,6 +1098,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, mark
 impl<'a, K, V> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Internal>, marker::Edge> {
     /// Fixes the parent pointer and index in the child node that this edge
     /// links to. This is useful when the ordering of edges has been changed,
+    #[ferrocene::prevalidated]
     fn correct_parent_link(self) {
         // Create backpointer without invalidating other references to the node.
         // ignore-tidy-undocumented-unsafe
@@ -1069,6 +1113,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Internal>, 
     /// Inserts a new key-value pair and an edge that will go to the right of that new pair
     /// between this edge and the key-value pair to the right of this edge. This method assumes
     /// that there is enough space in the node for the new pair to fit.
+    #[ferrocene::prevalidated]
     fn insert_fit(&mut self, key: K, val: V, edge: Root<K, V>) {
         debug_assert!(self.node.len() < CAPACITY);
         debug_assert!(edge.height == self.node.height - 1);
@@ -1088,6 +1133,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Internal>, 
     /// Inserts a new key-value pair and an edge that will go to the right of that new pair
     /// between this edge and the key-value pair to the right of this edge. This method splits
     /// the node if there isn't enough room.
+    #[ferrocene::prevalidated]
     fn insert<A: AllocatorClone>(
         mut self,
         key: K,
@@ -1129,6 +1175,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, mark
     /// If the returned result is some `SplitResult`, the `left` field will be the root node.
     /// The returned pointer points to the inserted value, which in the case of `SplitResult`
     /// is in the `left` or `right` tree.
+    #[ferrocene::prevalidated]
     pub(super) fn insert_recursing<A: AllocatorClone>(
         self,
         key: K,
@@ -1173,6 +1220,7 @@ impl<BorrowType: marker::BorrowType, K, V>
     ///
     /// `edge.descend().ascend().unwrap()` and `node.ascend().unwrap().descend()` should
     /// both, upon success, do nothing.
+    #[ferrocene::prevalidated]
     pub(super) fn descend(self) -> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {
         const {
             assert!(BorrowType::TRAVERSAL_PERMIT);
@@ -1210,6 +1258,7 @@ impl<'a, K: 'a, V: 'a, NodeType> Handle<NodeRef<marker::Mut<'a>, K, V, NodeType>
         unsafe { self.node.key_area_mut(self.idx).assume_init_mut() }
     }
 
+    #[ferrocene::prevalidated]
     pub(super) fn into_val_mut(self) -> &'a mut V {
         debug_assert!(self.idx < self.node.len());
         let leaf = self.node.into_leaf_mut();
@@ -1236,6 +1285,7 @@ impl<'a, K, V, NodeType> Handle<NodeRef<marker::ValMut<'a>, K, V, NodeType>, mar
 }
 
 impl<'a, K: 'a, V: 'a, NodeType> Handle<NodeRef<marker::Mut<'a>, K, V, NodeType>, marker::KV> {
+    #[ferrocene::prevalidated]
     pub(super) fn kv_mut(&mut self) -> (&mut K, &mut V) {
         debug_assert!(self.idx < self.node.len());
         // We cannot call separate key and value methods, because calling the second one
@@ -1304,6 +1354,7 @@ impl<K, V, NodeType> Handle<NodeRef<marker::Dying, K, V, NodeType>, marker::KV> 
 impl<'a, K: 'a, V: 'a, NodeType> Handle<NodeRef<marker::Mut<'a>, K, V, NodeType>, marker::KV> {
     /// Helps implementations of `split` for a particular `NodeType`,
     /// by taking care of leaf data.
+    #[ferrocene::prevalidated]
     fn split_leaf_data(&mut self, new_node: &mut LeafNode<K, V>) -> (K, V) {
         debug_assert!(self.idx < self.node.len());
         let old_len = self.node.len();
@@ -1337,6 +1388,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Leaf>, mark
     /// - The key and value pointed to by this handle are extracted.
     /// - All the key-value pairs to the right of this handle are put into a newly
     ///   allocated node.
+    #[ferrocene::prevalidated]
     pub(super) fn split<A: AllocatorClone>(
         mut self,
         alloc: A,
@@ -1373,6 +1425,7 @@ impl<'a, K: 'a, V: 'a> Handle<NodeRef<marker::Mut<'a>, K, V, marker::Internal>, 
     /// - The key and value pointed to by this handle are extracted.
     /// - All the edges and key-value pairs to the right of this handle are put into
     ///   a newly allocated node.
+    #[ferrocene::prevalidated]
     pub(super) fn split<A: AllocatorClone>(
         mut self,
         alloc: A,
@@ -1771,6 +1824,7 @@ impl<BorrowType, K, V> Handle<NodeRef<BorrowType, K, V, marker::Internal>, marke
 }
 
 impl<BorrowType, K, V> Handle<NodeRef<BorrowType, K, V, marker::Leaf>, marker::KV> {
+    #[ferrocene::prevalidated]
     pub(super) fn forget_node_type(
         self,
     ) -> Handle<NodeRef<BorrowType, K, V, marker::LeafOrInternal>, marker::KV> {
@@ -1781,6 +1835,7 @@ impl<BorrowType, K, V> Handle<NodeRef<BorrowType, K, V, marker::Leaf>, marker::K
 
 impl<BorrowType, K, V, Type> Handle<NodeRef<BorrowType, K, V, marker::LeafOrInternal>, Type> {
     /// Checks whether the underlying node is an `Internal` node or a `Leaf` node.
+    #[ferrocene::prevalidated]
     pub(super) fn force(
         self,
     ) -> ForceResult<
@@ -1872,12 +1927,14 @@ pub(super) struct SplitResult<'a, K, V, NodeType> {
 }
 
 impl<'a, K, V> SplitResult<'a, K, V, marker::Leaf> {
+    #[ferrocene::prevalidated]
     pub(super) fn forget_node_type(self) -> SplitResult<'a, K, V, marker::LeafOrInternal> {
         SplitResult { left: self.left.forget_type(), kv: self.kv, right: self.right.forget_type() }
     }
 }
 
 impl<'a, K, V> SplitResult<'a, K, V, marker::Internal> {
+    #[ferrocene::prevalidated]
     pub(super) fn forget_node_type(self) -> SplitResult<'a, K, V, marker::LeafOrInternal> {
         SplitResult { left: self.left.forget_type(), kv: self.kv, right: self.right.forget_type() }
     }
@@ -1924,6 +1981,7 @@ pub(super) mod marker {
 ///
 /// # Safety
 /// The slice has more than `idx` elements.
+#[ferrocene::prevalidated]
 unsafe fn slice_insert<T>(slice: &mut [MaybeUninit<T>], idx: usize, val: T) {
     let len = slice.len();
     debug_assert!(len > idx);
@@ -1981,6 +2039,7 @@ unsafe fn slice_shr<T>(slice: &mut [MaybeUninit<T>], distance: usize) {
 /// Moves all values from a slice of initialized elements to a slice
 /// of uninitialized elements, leaving behind `src` as all uninitialized.
 /// Works like `dst.copy_from_slice(src)` but does not require `T` to be `Copy`.
+#[ferrocene::prevalidated]
 fn move_to_slice<T>(src: &mut [MaybeUninit<T>], dst: &mut [MaybeUninit<T>]) {
     assert!(src.len() == dst.len());
     // ignore-tidy-undocumented-unsafe

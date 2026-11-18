@@ -583,6 +583,7 @@ impl<T, A: Allocator> Box<T, A> {
     ///
     /// assert_eq!(*five, 5)
     /// ```
+    #[ferrocene::prevalidated]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[cfg(not(no_global_oom_handling))]
     #[must_use]
@@ -614,6 +615,7 @@ impl<T, A: Allocator> Box<T, A> {
     /// assert_eq!(*five, 5);
     /// # Ok::<(), std::alloc::AllocError>(())
     /// ```
+    #[ferrocene::prevalidated]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     pub fn try_new_uninit_in(alloc: A) -> Result<Box<mem::MaybeUninit<T>, A>, AllocError> {
         let ptr = if T::IS_ZST {
@@ -1310,6 +1312,7 @@ impl<T, A: Allocator> Box<mem::MaybeUninit<T>, A> {
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline(always)]
+    #[ferrocene::prevalidated]
     pub const unsafe fn assume_init(self) -> Box<T, A> {
         // This is used in the `vec!` macro, so we optimize for minimal IR generation
         // even in debug builds.
@@ -1818,6 +1821,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub const fn into_raw_with_allocator(b: Self) -> (*mut T, A) {
         let mut b = mem::ManuallyDrop::new(b);
         // We carefully get the raw pointer out in a way that Miri's aliasing model understands what
@@ -1881,6 +1885,7 @@ impl<T: ?Sized, A: Allocator> Box<T, A> {
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn into_non_null_with_allocator(b: Self) -> (NonNull<T>, A) {
         let (ptr, alloc) = Box::into_raw_with_allocator(b);
         // SAFETY: `Box` is guaranteed to be non-null.

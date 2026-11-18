@@ -56,6 +56,7 @@ where
     #[stable(feature = "drop_guard", since = "1.100.0")]
     #[rustc_const_unstable(feature = "const_drop_guard", issue = "none")]
     #[must_use]
+    #[ferrocene::prevalidated]
     pub const fn new(inner: T, f: F) -> Self {
         Self { inner: ManuallyDrop::new(inner), f: ManuallyDrop::new(f) }
     }
@@ -111,6 +112,7 @@ where
 {
     type Target = T;
 
+    #[ferrocene::prevalidated]
     fn deref(&self) -> &T {
         &self.inner
     }

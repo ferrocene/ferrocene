@@ -49,6 +49,7 @@ unsafe impl Sync for Thread {}
 
 impl Thread {
     // unsafe: see thread::Builder::spawn_unchecked for safety requirements
+    #[ferrocene::prevalidated]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub unsafe fn new(stack: usize, init: Box<ThreadInit>) -> io::Result<Thread> {
         let data = init;
@@ -346,6 +347,7 @@ pub fn available_parallelism() -> io::Result<NonZero<usize>> {
     }
 }
 
+#[ferrocene::prevalidated]
 pub fn current_os_id() -> Option<u64> {
     // Most Unix platforms have a way to query an integer ID of the current thread, all with
     // slightly different spellings.
@@ -416,6 +418,7 @@ pub fn current_os_id() -> Option<u64> {
     target_vendor = "apple",
     target_os = "netbsd",
 ))]
+#[ferrocene::prevalidated]
 fn truncate_cstr<const MAX_WITH_NUL: usize>(cstr: &CStr) -> [libc::c_char; MAX_WITH_NUL] {
     let mut result = [0; MAX_WITH_NUL];
     for (src, dst) in cstr.to_bytes().iter().zip(&mut result[..MAX_WITH_NUL - 1]) {
@@ -440,6 +443,7 @@ pub fn set_name(name: &CStr) {
     }
 }
 
+#[ferrocene::prevalidated]
 #[cfg(any(
     target_os = "linux",
     target_os = "freebsd",
@@ -1062,6 +1066,7 @@ mod cgroups {
 // is created in an application with big thread-local storage requirements.
 // See #6233 for rationale and details.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[ferrocene::prevalidated]
 unsafe fn min_stack_size(attr: *const libc::pthread_attr_t) -> usize {
     // We use dlsym to avoid an ELF version dependency on GLIBC_PRIVATE. (#23628)
     // We shouldn't really be using such an internal symbol, but there's currently

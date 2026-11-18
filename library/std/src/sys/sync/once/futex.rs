@@ -43,6 +43,7 @@ impl OnceState {
         self.poisoned
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn poison(&self) {
         self.set_state_to.set(POISONED);
@@ -80,6 +81,7 @@ impl Once {
         Once { state_and_queued: Futex::new(COMPLETE) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub fn is_completed(&self) -> bool {
         // Use acquire ordering to make all initialization changes visible to the
@@ -141,6 +143,7 @@ impl Once {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     #[track_caller]
     pub fn call(&self, ignore_poisoning: bool, f: &mut dyn FnMut(&public::OnceState)) {

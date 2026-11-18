@@ -19,6 +19,7 @@ cfg_select! {
 
         static MAIN: Atomic<u64> = AtomicU64::new(0);
 
+        #[ferrocene::prevalidated]
         pub(super) fn get() -> Option<ThreadId> {
             ThreadId::from_u64(MAIN.load(Relaxed))
         }

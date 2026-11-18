@@ -46,6 +46,7 @@ impl<BorrowType: marker::BorrowType, K, V> NodeRef<BorrowType, K, V, marker::Lea
     ///
     /// The result is meaningful only if the tree is ordered by key, like the tree
     /// in a `BTreeMap` is.
+    #[ferrocene::prevalidated]
     pub(super) fn search_tree<Q: ?Sized>(
         mut self,
         key: &Q,
@@ -197,6 +198,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
     ///
     /// The result is meaningful only if the tree is ordered by key, like the tree
     /// in a `BTreeMap` is.
+    #[ferrocene::prevalidated]
     pub(super) fn search_node<Q: ?Sized>(
         self,
         key: &Q,
@@ -222,6 +224,7 @@ impl<BorrowType, K, V, Type> NodeRef<BorrowType, K, V, Type> {
     ///
     /// # Safety
     /// `start_index` must be a valid edge index for the node.
+    #[ferrocene::prevalidated]
     unsafe fn find_key_index<Q: ?Sized>(&self, key: &Q, start_index: usize) -> IndexResult
     where
         Q: Ord,

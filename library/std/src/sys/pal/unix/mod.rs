@@ -236,6 +236,7 @@ impl_is_minus_one! { i8 i16 i32 i64 isize }
 
 /// Converts native return values to Result using the *-1 means error is in `errno`*  convention.
 /// Non-error values are `Ok`-wrapped.
+#[ferrocene::prevalidated]
 pub fn cvt<T: IsMinusOne>(t: T) -> io::Result<T> {
     if t.is_minus_one() { Err(io::Error::last_os_error()) } else { Ok(t) }
 }
@@ -295,6 +296,7 @@ pub fn cvt_nz(error: libc::c_int) -> io::Result<()> {
 // multithreaded C program.  It is much less severe for Rust, because Rust
 // stdlib doesn't use libc stdio buffering.  In a typical Rust program, which
 // does not use C stdio, even a buggy libc::abort() is, in fact, safe.
+#[ferrocene::prevalidated]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 pub fn abort_internal() -> ! {
     unsafe { libc::abort() }

@@ -30,11 +30,13 @@ const KEY_SENTVAL: usize = 0;
 const KEY_SENTVAL: usize = libc::PTHREAD_KEYS_MAX + 1;
 
 impl LazyKey {
+    #[ferrocene::prevalidated]
     pub const fn new(dtor: Option<unsafe extern "C" fn(*mut u8)>) -> LazyKey {
         LazyKey { key: AtomicUsize::new(KEY_SENTVAL), dtor }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn force(&self) -> super::Key {
         match self.key.load(Ordering::Acquire) {
             KEY_SENTVAL => self.lazy_init() as super::Key,
@@ -43,6 +45,7 @@ impl LazyKey {
     }
 
     #[cold]
+    #[ferrocene::prevalidated]
     fn lazy_init(&self) -> usize {
         // POSIX allows the key created here to be KEY_SENTVAL, but the compare_exchange
         // below relies on using KEY_SENTVAL as a sentinel value to check who won the

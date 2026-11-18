@@ -1721,6 +1721,7 @@ extern "C" {
     #[cfg_attr(gnu_time_bits64, link_name = "__shmctl64")]
     pub fn shmctl(shmid: c_int, cmd: c_int, buf: *mut crate::shmid_ds) -> c_int;
 
+    #[ferrocene::prevalidated]
     pub fn mprotect(addr: *mut c_void, len: size_t, prot: c_int) -> c_int;
     pub fn __errno_location() -> *mut c_int;
 

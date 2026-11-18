@@ -494,6 +494,7 @@ impl CStr {
     #[rustc_const_stable(feature = "const_str_as_ptr", since = "1.32.0")]
     #[lint::as_ptr]
     #[lint::never_returns_null_ptr]
+    #[ferrocene::prevalidated]
     pub const fn as_ptr(&self) -> *const c_char {
         self.inner.as_ptr()
     }
@@ -665,6 +666,7 @@ impl CStr {
     #[must_use = "this does not display the `CStr`; \
                   it returns an object that can be displayed"]
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn display(&self) -> Display<'_> {
         Display { c_str: self }
     }

@@ -140,6 +140,7 @@ impl<T: PointeeSized> *const T {
     ///
     /// This is a bit safer than `as` because it wouldn't silently change the type if the code is
     /// refactored.
+    #[ferrocene::prevalidated]
     #[stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_const_stable(feature = "ptr_const_cast", since = "1.65.0")]
     #[rustc_diagnostic_item = "ptr_cast_mut"]
@@ -939,6 +940,7 @@ impl<T: PointeeSized> *const T {
     ///     assert_eq!(*end.sub(2), b'2');
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "pointer_methods", since = "1.26.0")]
     #[must_use = "returns a new pointer rather than modifying its argument"]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
@@ -1001,6 +1003,7 @@ impl<T: PointeeSized> *const T {
     /// # Safety
     ///
     /// See [sub][pointer::sub] for documentation and safety requirements.
+    #[ferrocene::prevalidated]
     #[must_use]
     #[inline(always)]
     #[stable(feature = "pointer_byte_offsets", since = "1.75.0")]

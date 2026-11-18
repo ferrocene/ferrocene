@@ -1512,6 +1512,7 @@ impl<Ptr: Deref> Pin<Ptr> {
     ///
     /// If the underlying data is [`Unpin`], [`Pin::into_inner`] should be used
     /// instead.
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[rustc_allow_const_fn_unstable(const_precise_live_drops)]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
@@ -1581,6 +1582,7 @@ impl<'a, T: ?Sized> Pin<&'a T> {
 
 impl<'a, T: ?Sized> Pin<&'a mut T> {
     /// Converts this `Pin<&mut T>` into a `Pin<&T>` with the same lifetime.
+    #[ferrocene::prevalidated]
     #[inline(always)]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[rustc_const_stable(feature = "const_pin", since = "1.84.0")]
@@ -2213,6 +2215,7 @@ pub struct PinMacroHelper<T> {
 /// # Safety
 /// Calling this function has the same safety requirements as calling
 /// `Pin::new_unchecked` on `&mut pinned.value`
+#[ferrocene::prevalidated]
 #[unstable(feature = "pin_macro_internals", issue = "none")]
 #[doc(hidden)]
 #[inline]

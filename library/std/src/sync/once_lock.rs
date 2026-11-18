@@ -179,6 +179,7 @@ impl<T> OnceLock<T> {
     ///
     /// Returns `None` if the cell is uninitialized, or being initialized.
     /// This method never blocks.
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[lint::should_not_be_called_on_const_items]
@@ -262,6 +263,7 @@ impl<T> OnceLock<T> {
     ///     assert_eq!(CELL.get(), Some(&92));
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[lint::should_not_be_called_on_const_items]
@@ -302,6 +304,7 @@ impl<T> OnceLock<T> {
     ///     assert_eq!(CELL.get(), Some(&92));
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "once_cell_try_insert", issue = "116693")]
     #[lint::should_not_be_called_on_const_items]
@@ -341,6 +344,7 @@ impl<T> OnceLock<T> {
     /// let value = cell.get_or_init(|| unreachable!());
     /// assert_eq!(value, &92);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "once_cell", since = "1.70.0")]
     #[lint::should_not_be_called_on_const_items]
@@ -422,6 +426,7 @@ impl<T> OnceLock<T> {
     /// assert_eq!(value, Ok(&92));
     /// assert_eq!(cell.get(), Some(&92))
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "once_cell_try", issue = "109737")]
     #[lint::should_not_be_called_on_const_items]
@@ -543,6 +548,7 @@ impl<T> OnceLock<T> {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn initialized(&self) -> bool {
         self.once.is_completed()
@@ -558,6 +564,7 @@ impl<T> OnceLock<T> {
         }
     }
 
+    #[ferrocene::prevalidated]
     #[cold]
     #[optimize(size)]
     fn initialize<F, E>(&self, f: F) -> Result<(), E>
@@ -606,6 +613,7 @@ impl<T> OnceLock<T> {
     /// let value = unsafe { cell.get_unchecked() };
     /// assert_eq!(*value, 42);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "once_lazy_lock_get_unchecked", issue = "162716")]
     pub unsafe fn get_unchecked(&self) -> &T {

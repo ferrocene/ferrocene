@@ -1029,6 +1029,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[inline]
     #[stable(feature = "allocator_api", since = "1.100.0")]
     #[rustc_const_unstable(feature = "allocator_ext", issue = "163177")]
+    #[ferrocene::prevalidated]
     pub const fn new_in(alloc: A) -> Self {
         Vec { buf: RawVec::new_in(alloc), len: 0 }
     }
@@ -1357,6 +1358,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_vec_string_slice", since = "1.87.0")]
+    #[ferrocene::prevalidated]
     pub const fn capacity(&self) -> usize {
         self.buf.capacity()
     }
@@ -2920,6 +2922,7 @@ impl<T, A: Allocator> Vec<T, A> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_diagnostic_item = "vec_pop"]
+    #[ferrocene::prevalidated]
     pub fn pop(&mut self) -> Option<T> {
         if self.len == 0 {
             None

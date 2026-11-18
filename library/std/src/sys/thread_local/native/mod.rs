@@ -136,10 +136,12 @@ impl LocalPointer {
         LocalPointer { p: Cell::new(ptr::null_mut()) }
     }
 
+    #[ferrocene::prevalidated]
     pub fn get(&self) -> *mut () {
         self.p.get()
     }
 
+    #[ferrocene::prevalidated]
     pub fn set(&self, p: *mut ()) {
         self.p.set(p)
     }

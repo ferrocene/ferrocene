@@ -1904,6 +1904,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     /// let x = unsafe { Arc::from_raw_in(ptr, alloc) };
     /// assert_eq!(&*x, "hello");
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use = "losing the pointer will leak memory"]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     pub fn into_raw_with_allocator(this: Self) -> (*const T, A) {
@@ -1930,6 +1931,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     /// assert_eq!(x_ptr, Arc::as_ptr(&y));
     /// assert_eq!(unsafe { &*x_ptr }, "hello");
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use]
     #[stable(feature = "rc_as_ptr", since = "1.45.0")]
     #[lint::never_returns_null_ptr]
@@ -2012,6 +2014,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     ///     assert_eq!(&*x, &[1, 2, 3]);
     /// }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     pub unsafe fn from_raw_in(ptr: *const T, alloc: A) -> Self {
@@ -4413,6 +4416,7 @@ impl<T: ?Sized, A: Allocator> Unpin for Arc<T, A> {}
 ///
 /// The pointer must point to (and have valid metadata for) a previously
 /// valid instance of T, but the T is allowed to be dropped.
+#[ferrocene::prevalidated]
 unsafe fn data_offset<T: ?Sized>(ptr: *const T) -> usize {
     // Align the unsized value to the end of the ArcInner.
     // Because ArcInner is repr(C), it will always be the last field in memory.
@@ -4423,6 +4427,7 @@ unsafe fn data_offset<T: ?Sized>(ptr: *const T) -> usize {
     unsafe { data_offset_alignment(Alignment::of_val_raw(ptr)) }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 fn data_offset_alignment(alignment: Alignment) -> usize {
     let layout = Layout::new::<ArcInner<()>>();

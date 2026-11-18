@@ -1612,6 +1612,7 @@ impl<T> AtomicPtr<T> {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_atomic_new", since = "1.24.0")]
+    #[ferrocene::prevalidated]
     pub const fn new(p: *mut T) -> AtomicPtr<T> {
         // SAFETY:
         // `Atomic<T>` is essentially a transparent wrapper around `T`.
@@ -1867,6 +1868,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// let value = some_ptr.load(Ordering::Relaxed);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
@@ -1964,6 +1966,7 @@ impl<T> AtomicPtr<T> {
     ///
     /// some_ptr.store(other_ptr, Ordering::Relaxed);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_unstable(feature = "const_atomic", issue = "160078")]
@@ -2766,6 +2769,7 @@ impl<T> AtomicPtr<T> {
     /// ```
     ///
     /// [memory model]: self#memory-model-for-atomic-accesses
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "atomic_as_ptr", since = "1.70.0")]
     #[rustc_const_stable(feature = "atomic_as_ptr", since = "1.70.0")]

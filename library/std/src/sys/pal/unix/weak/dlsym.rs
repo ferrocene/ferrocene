@@ -40,6 +40,7 @@ impl<F: FnPtr> DlsymWeak<F> {
     /// If the signature of `F` does not match the signature of the symbol (if
     /// it exists), calling the function pointer returned by `get()` is
     /// undefined behaviour.
+    #[ferrocene::prevalidated]
     pub const unsafe fn new(name: &'static CStr) -> Self {
         DlsymWeak {
             name: name.as_ptr(),
@@ -49,6 +50,7 @@ impl<F: FnPtr> DlsymWeak<F> {
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn get(&self) -> Option<F> {
         // The caller is presumably going to read through this value
         // (by calling the function we've dlsymed). This means we'd
@@ -84,6 +86,7 @@ impl<F: FnPtr> DlsymWeak<F> {
 
     // Cold because it should only happen during first-time initialization.
     #[cold]
+    #[ferrocene::prevalidated]
     fn initialize(&self) -> Option<F> {
         // SAFETY: `self.name` was created from a `&'static CStr` and is
         // therefore a valid C string pointer.

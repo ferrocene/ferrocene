@@ -257,6 +257,7 @@ impl Error {
     ///
     /// This function should maybe change to `from_static_message<const MSG: &'static
     /// str>(kind: ErrorKind)` in the future, when const generics allow that.
+    #[ferrocene::prevalidated]
     #[inline]
     #[doc(hidden)]
     #[unstable(feature = "io_const_error_internals", issue = "none")]
@@ -268,6 +269,7 @@ impl Error {
     ///
     /// `functions` must point to data that is entirely constant; it must
     /// not be created during runtime.
+    #[ferrocene::prevalidated]
     #[doc(hidden)]
     #[unstable(feature = "core_io_internals", reason = "exposed only for libstd", issue = "none")]
     #[must_use]
@@ -1060,6 +1062,7 @@ impl ErrorKind {
     // This compiles to the same code as the check+transmute, but doesn't require
     // unsafe, or to hard-code max ErrorKind or its size in a way the compiler
     // couldn't verify.
+    #[ferrocene::prevalidated]
     #[inline]
     #[allow(dead_code, reason = "only used for packed representation")]
     const fn from_prim(ek: u32) -> Option<Self> {

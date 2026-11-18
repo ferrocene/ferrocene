@@ -36,6 +36,7 @@ impl Timespec {
     // which will cause the compatibility wrapper to not be executed at all.
     pub const MIN: Timespec = unsafe { Self::new_unchecked(i64::MIN, 0) };
 
+    #[ferrocene::prevalidated]
     const unsafe fn new_unchecked(tv_sec: i64, tv_nsec: i64) -> Timespec {
         Timespec { tv_sec, tv_nsec: unsafe { Nanoseconds::new_unchecked(tv_nsec as u32) } }
     }
@@ -44,6 +45,7 @@ impl Timespec {
         unsafe { Self::new_unchecked(0, 0) }
     }
 
+    #[ferrocene::prevalidated]
     pub const fn new(tv_sec: i64, tv_nsec: i64) -> Result<Timespec, io::Error> {
         // On Apple OS, dates before epoch are represented differently than on other
         // Unix platforms: e.g. 1/10th of a second before epoch is represented as `seconds=-1`
@@ -72,6 +74,7 @@ impl Timespec {
     }
 
     #[allow(dead_code)]
+    #[ferrocene::prevalidated]
     pub fn now(clock: libc::clockid_t) -> Timespec {
         use crate::mem::MaybeUninit;
         use crate::sys::cvt;
@@ -142,6 +145,7 @@ impl Timespec {
         }
     }
 
+    #[ferrocene::prevalidated]
     pub fn checked_add_duration(&self, other: &Duration) -> Option<Timespec> {
         let mut secs = self.tv_sec.checked_add_unsigned(other.as_secs())?;
 
@@ -168,8 +172,13 @@ impl Timespec {
     }
 
     #[allow(dead_code)]
+    #[ferrocene::prevalidated]
     pub fn to_timespec(&self) -> Option<libc::timespec> {
         Some({
+            #[expect(
+                ferrocene::unvalidated,
+                reason = "false-positive: `<libc::timespec as core::default::Default>::default`"
+            )]
             let mut ts = libc::timespec::default();
             ts.tv_sec = self.tv_sec.try_into().ok()?;
             ts.tv_nsec = self.tv_nsec.as_inner().try_into().ok()?;

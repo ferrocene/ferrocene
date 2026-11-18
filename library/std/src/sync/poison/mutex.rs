@@ -491,6 +491,7 @@ impl<T: ?Sized> Mutex<T> {
     /// }).join().expect("`thread::spawn` should not fail");
     /// assert_eq!(*mutex.lock().unwrap(), 10);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[lint::should_not_be_called_on_const_items]
     pub fn lock(&self) -> LockResult<MutexGuard<'_, T>> {
@@ -722,6 +723,7 @@ impl<T: ?Sized + fmt::Debug> fmt::Debug for Mutex<T> {
 }
 
 impl<'mutex, T: ?Sized> MutexGuard<'mutex, T> {
+    #[ferrocene::prevalidated]
     unsafe fn new(lock: &'mutex Mutex<T>) -> LockResult<MutexGuard<'mutex, T>> {
         poison::map_result(lock.poison.guard(), |guard| MutexGuard { lock, poison: guard })
     }

@@ -26,6 +26,7 @@ pub unsafe fn register(t: *mut u8, dtor: unsafe extern "C" fn(*mut u8)) {
 ///
 /// May only be run on thread exit to guarantee that there are no live references
 /// to TLS variables while they are destroyed.
+#[ferrocene::prevalidated]
 pub unsafe fn run() {
     loop {
         let mut dtors = DTORS.borrow_mut();

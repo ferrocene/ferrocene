@@ -23,6 +23,7 @@ mod libc {
 pub type Key = libc::pthread_key_t;
 
 #[inline]
+#[ferrocene::prevalidated]
 pub fn create(dtor: Option<unsafe extern "C" fn(*mut u8)>) -> Key {
     let mut key = 0;
     if unsafe { libc::pthread_key_create(&mut key, mem::transmute(dtor)) } != 0 {
@@ -32,11 +33,13 @@ pub fn create(dtor: Option<unsafe extern "C" fn(*mut u8)>) -> Key {
 }
 
 #[cold]
+#[ferrocene::prevalidated]
 fn fail() -> ! {
     rtabort!("Unexpected TLS failure")
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub unsafe fn set(key: Key, value: *mut u8) {
     let r = unsafe { libc::pthread_setspecific(key, value as *mut _) };
     // May happen on memory exhaustion
@@ -52,6 +55,7 @@ pub unsafe fn get(key: Key) -> *mut u8 {
 }
 
 #[inline]
+#[ferrocene::prevalidated]
 pub unsafe fn destroy(key: Key) {
     let r = unsafe { libc::pthread_key_delete(key) };
     // only documented error is for invalid keys

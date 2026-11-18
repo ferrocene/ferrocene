@@ -3620,6 +3620,7 @@ extern "C" {
     pub fn vhangup() -> c_int;
     pub fn sync();
     pub fn syncfs(fd: c_int) -> c_int;
+    #[ferrocene::prevalidated]
     pub fn syscall(num: c_long, ...) -> c_long;
     pub fn sched_setaffinity(
         pid: crate::pid_t,
@@ -3687,6 +3688,7 @@ extern "C" {
     ) -> c_int;
     #[cfg_attr(gnu_file_offset_bits64, link_name = "sendfile64")]
     pub fn sendfile(out_fd: c_int, in_fd: c_int, offset: *mut off_t, count: size_t) -> ssize_t;
+    #[ferrocene::prevalidated]
     pub fn sigaltstack(ss: *const stack_t, oss: *mut stack_t) -> c_int;
     pub fn getdtablesize() -> c_int;
     pub fn getgrouplist(

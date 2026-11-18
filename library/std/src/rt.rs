@@ -123,6 +123,7 @@ unsafe fn init(argc: isize, argv: *const *const u8, sigpipe: u8) {
 /// code managed by the Rust runtime, but will not cause UB if that condition is
 /// not fulfilled. Also note that this function is not guaranteed to be run, but
 /// skipping it will cause leaks and therefore is to be avoided.
+#[ferrocene::prevalidated]
 pub(crate) fn thread_cleanup() {
     // This function is run in situations where unwinding leads to an abort
     // (think `extern "C"` functions). Abort here instead so that we can

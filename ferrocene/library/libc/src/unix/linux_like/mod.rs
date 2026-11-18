@@ -1915,6 +1915,7 @@ extern "C" {
         any(gnu_time_bits64, musl_redir_time64),
         link_name = "__clock_gettime64"
     )]
+    #[ferrocene::prevalidated]
     pub fn clock_gettime(clk_id: crate::clockid_t, tp: *mut crate::timespec) -> c_int;
     #[cfg_attr(
         any(gnu_time_bits64, musl_redir_time64),
@@ -2147,6 +2148,7 @@ cfg_if! {
                 all(target_os = "l4re", target_pointer_width = "64"),
                 allow(deprecated)
             )]
+            #[ferrocene::prevalidated]
             pub fn mmap64(
                 addr: *mut c_void,
                 len: size_t,

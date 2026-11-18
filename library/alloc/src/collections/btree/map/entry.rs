@@ -421,6 +421,7 @@ impl<'a, K: Ord, V, A: AllocatorClone> VacantEntry<'a, K, V, A> {
     /// }
     /// assert_eq!(map["poneyland"], 37);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("push", "put")]
     pub fn insert(self, value: V) -> &'a mut V {
@@ -444,6 +445,7 @@ impl<'a, K: Ord, V, A: AllocatorClone> VacantEntry<'a, K, V, A> {
     /// }
     /// assert_eq!(map["poneyland"], 37);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "btree_entry_insert", since = "1.92.0")]
     pub fn insert_entry(mut self, value: V) -> OccupiedEntry<'a, K, V, A> {
         let handle = match self.handle {
@@ -574,6 +576,7 @@ impl<'a, K: Ord, V, A: AllocatorClone> OccupiedEntry<'a, K, V, A> {
     /// }
     /// assert_eq!(map["poneyland"], 24);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn get_mut(&mut self) -> &mut V {
         self.handle.kv_mut().1
@@ -600,6 +603,7 @@ impl<'a, K: Ord, V, A: AllocatorClone> OccupiedEntry<'a, K, V, A> {
     /// }
     /// assert_eq!(map["poneyland"], 22);
     /// ```
+    #[ferrocene::prevalidated]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn into_mut(self) -> &'a mut V {
@@ -623,6 +627,7 @@ impl<'a, K: Ord, V, A: AllocatorClone> OccupiedEntry<'a, K, V, A> {
     /// }
     /// assert_eq!(map["poneyland"], 15);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_confusables("push", "put")]
     pub fn insert(&mut self, value: V) -> V {

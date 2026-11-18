@@ -2,6 +2,7 @@
 //! (i.e., `#[thread_local] static`). Instead, we use one TLS key with a destructor that will run
 //! all native TLS destructors in the destructor list. It also runs `rt::thread_cleanup`.
 
+#[ferrocene::prevalidated]
 #[cfg(target_thread_local)]
 pub fn enable() {
     use crate::ptr;

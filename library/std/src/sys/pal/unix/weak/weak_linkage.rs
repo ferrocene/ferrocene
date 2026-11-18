@@ -21,11 +21,13 @@ pub(crate) struct ExternWeak<F: Copy> {
 
 impl<F: Copy> ExternWeak<F> {
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn new(weak_ptr: Option<F>) -> Self {
         ExternWeak { weak_ptr }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     pub fn get(&self) -> Option<F> {
         self.weak_ptr
     }

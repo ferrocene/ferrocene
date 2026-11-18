@@ -19,6 +19,7 @@ use crate::{
 #[inline]
 #[cfg_attr(all(test, target_feature = "sse2"), assert_instr(pause))]
 #[stable(feature = "simd_x86", since = "1.27.0")]
+#[ferrocene::prevalidated]
 pub fn _mm_pause() {
     // note: `pause` is guaranteed to be interpreted as a `nop` by CPUs without
     // the SSE2 target-feature - therefore it does not require any target features

@@ -2119,6 +2119,7 @@ pub const unsafe fn unchecked_add<T: Copy>(x: T, y: T) -> T;
 ///
 /// The stable counterpart of this intrinsic is `unchecked_sub` on the various
 /// integer types, such as [`u16::unchecked_sub`] and [`i64::unchecked_sub`].
+#[ferrocene::prevalidated]
 #[rustc_intrinsic_const_stable_indirect]
 #[rustc_nounwind]
 #[rustc_intrinsic]

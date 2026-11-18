@@ -194,6 +194,7 @@ impl f128 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
@@ -952,6 +953,7 @@ impl f128 {
     /// assert_eq!(v, 12.5);
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]

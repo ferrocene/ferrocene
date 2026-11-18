@@ -188,6 +188,7 @@ impl f16 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "f16", issue = "116909")]

@@ -81,6 +81,7 @@ macro_rules! impl_float_primitive {
             fn from_bits(bits: Self::UInt) -> Self {
                 $float::from_bits(bits)
             }
+            #[ferrocene::prevalidated]
             #[inline]
             fn is_nan(self) -> bool {
                 $float::is_nan(self)

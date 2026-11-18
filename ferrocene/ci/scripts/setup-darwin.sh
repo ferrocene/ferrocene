@@ -18,7 +18,7 @@ curl -Lo /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.p
 cat <<EOF > /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.pkg.sha256
 b93712026cec9f98a5d98dfec84e8096d32be3759642381e1982c4a5d2aa020b  /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.pkg
 EOF
-sha256sum --check /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.pkg.sha256
+shasum -a 256 --check /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.pkg.sha256
 sudo installer -pkg /tmp/ferrocene/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.pkg -target /
 
 # There are a number of reports of very slow uploads in Mac VMs due to TSO, disable it.

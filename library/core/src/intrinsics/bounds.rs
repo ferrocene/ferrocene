@@ -58,148 +58,25 @@ pub unsafe trait FloatPrimitive:
     fn is_sign_negative(self) -> bool;
 }
 
-<<<<<<< ferrocene/main
-unsafe impl FloatPrimitive for f16 {
-    type UInt = u16;
-    const SIGN_MASK: Self::UInt = f16::SIGN_MASK;
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f16::<impl f16>::to_bits` with no other conversions. \
-        Since `core::f16::<impl f16>::to_bits` is covered, this function can be considered validated."
-    )]
-    fn to_bits(self) -> Self::UInt {
-        f16::to_bits(self)
-    }
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f16::<impl f16>::from_bits` with no other conversions. \
-        Since `core::f16::<impl f16>::from_bits` is covered, this function can be considered validated."
-    )]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f16::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f32 {
-    type UInt = u32;
-    const SIGN_MASK: Self::UInt = f32::SIGN_MASK;
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f32::<impl f32>::to_bits` with no other conversions. \
-        Since `core::f32::<impl f32>::to_bits` is covered, this function can be considered validated."
-    )]
-    fn to_bits(self) -> Self::UInt {
-        f32::to_bits(self)
-    }
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f32::<impl f32>::from_bits` with no other conversions. \
-        Since `core::f32::<impl f32>::from_bits` is covered, this function can be considered validated."
-    )]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f32::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f64 {
-    type UInt = u64;
-    const SIGN_MASK: Self::UInt = f64::SIGN_MASK;
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f64::<impl f64>::to_bits` with no other conversions. \
-        Since `core::f64::<impl f64>::to_bits` is covered, this function can be considered validated."
-    )]
-    fn to_bits(self) -> Self::UInt {
-        f64::to_bits(self)
-    }
-    #[inline]
-    #[ferrocene::prevalidated]
-    #[ferrocene::annotation(
-        "This function directly calls `core::f64::<impl f64>::from_bits` with no other conversions. \
-        Since `core::f64::<impl f64>::from_bits` is covered, this function can be considered validated."
-    )]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f64::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f128 {
-    type UInt = u128;
-    const SIGN_MASK: Self::UInt = f128::SIGN_MASK;
-    #[inline]
-    fn to_bits(self) -> Self::UInt {
-        f128::to_bits(self)
-    }
-    #[inline]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f128::from_bits(bits)
-    }
-||||||| ee8268e23d0
-unsafe impl FloatPrimitive for f16 {
-    type UInt = u16;
-    const SIGN_MASK: Self::UInt = f16::SIGN_MASK;
-    #[inline]
-    fn to_bits(self) -> Self::UInt {
-        f16::to_bits(self)
-    }
-    #[inline]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f16::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f32 {
-    type UInt = u32;
-    const SIGN_MASK: Self::UInt = f32::SIGN_MASK;
-    #[inline]
-    fn to_bits(self) -> Self::UInt {
-        f32::to_bits(self)
-    }
-    #[inline]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f32::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f64 {
-    type UInt = u64;
-    const SIGN_MASK: Self::UInt = f64::SIGN_MASK;
-    #[inline]
-    fn to_bits(self) -> Self::UInt {
-        f64::to_bits(self)
-    }
-    #[inline]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f64::from_bits(bits)
-    }
-}
-
-unsafe impl FloatPrimitive for f128 {
-    type UInt = u128;
-    const SIGN_MASK: Self::UInt = f128::SIGN_MASK;
-    #[inline]
-    fn to_bits(self) -> Self::UInt {
-        f128::to_bits(self)
-    }
-    #[inline]
-    fn from_bits(bits: Self::UInt) -> Self {
-        f128::from_bits(bits)
-    }
-=======
 macro_rules! impl_float_primitive {
     ($($float:ident => $bits:ident),+) => {$(
         unsafe impl FloatPrimitive for $float {
             type UInt = $bits;
             const SIGN_MASK: Self::UInt = $float::SIGN_MASK;
+            #[ferrocene::prevalidated]
+            #[ferrocene::annotation(
+                "This function directly calls `core::$float::<impl $float>::to_bits` with no other conversions. \
+                Since `core::$float::<impl $float>::to_bits` is covered, this function can be considered validated."
+            )]
             #[inline]
             fn to_bits(self) -> Self::UInt {
                 $float::to_bits(self)
             }
+            #[ferrocene::prevalidated]
+            #[ferrocene::annotation(
+                "This function directly calls `core::$float::<impl $float>::from_bits` with no other conversions. \
+                Since `core::$float::<impl $float>::from_bits` is covered, this function can be considered validated."
+            )]
             #[inline]
             fn from_bits(bits: Self::UInt) -> Self {
                 $float::from_bits(bits)
@@ -218,7 +95,6 @@ macro_rules! impl_float_primitive {
             }
         }
     )+};
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 }
 impl_float_primitive!(f16 => u16, f32 => u32, f64 => u64, f128 => u128);
 

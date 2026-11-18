@@ -12,9 +12,11 @@
 
 //@ build-pass
 //@ add-minicore
-//@ revisions: i686 x86_64
+//@ revisions: i686 x86_64 i686-thin x86_64-thin
 //@[i686] compile-flags: --target i686-pc-windows-msvc
 //@[x86_64] compile-flags: --target x86_64-pc-windows-msvc
+//@[i686-thin] compile-flags: --target i686-pc-windows-msvc -Clto=thin -Cprefer-dynamic=no
+//@[x86_64-thin] compile-flags: --target x86_64-pc-windows-msvc -Clto=thin -Cprefer-dynamic=no
 //@ compile-flags: -Clinker=rust-lld -Clink-arg=/NOENTRY -Cpanic=abort
 //@ needs-llvm-components: x86
 //@ needs-rust-lld

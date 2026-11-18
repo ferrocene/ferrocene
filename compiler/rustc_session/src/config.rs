@@ -887,7 +887,7 @@ pub enum ErrorOutputType {
     /// Output meant for the consumption of humans.
     #[default]
     HumanReadable {
-        kind: HumanReadableErrorType = HumanReadableErrorType { short: false, unicode: false },
+        kind: HumanReadableErrorType = HumanReadableErrorType { no_graphics: false, short: false, unicode: false },
         color_config: ColorConfig = ColorConfig::Auto,
     },
     /// Output that's consumed by other tools such as `rustfix` or the `RLS`.
@@ -1440,7 +1440,7 @@ pub fn parse_remap_path_scope(
                     }
 
                     RemapPathScopeComponents::DOCUMENTATION
-                },
+                }
                 "debuginfo" => RemapPathScopeComponents::DEBUGINFO,
                 "coverage" => RemapPathScopeComponents::COVERAGE,
                 "object" => RemapPathScopeComponents::OBJECT,
@@ -1828,9 +1828,34 @@ fn parse_jobs_all(
                 check_upper_limit(frontend, opt_name);
                 frontend
             }
-            None => JobsMode::Sequential, // default to 1 thread irrespectively of `jobs` for now
+            None => {
+                // Build-time override to opt into a different default for the frontend thread count
+                if let Some(default_frontend_jobs) = option_env!("CFG_DEFAULT_FRONTEND_JOBS") {
+                    let mut frontend_jobs = parse_jobs_one(
+                        early_dcx,
+                        "CFG_DEFAULT_FRONTEND_JOBS",
+                        default_frontend_jobs,
+                        true,
+                        &mut available,
+                    );
+
+                    // CFG_DEFAULT_FRONTEND_JOBS is a build-time config, so we cannot use
+                    // `check_upper_limit` here. Instead, we cap the frontend jobs to the value of
+                    // --jobs, if it was passed and was smaller than the default frontend jobs
+                    // count.
+                    if let Some(jobs) = jobs
+                        && frontend_jobs.limit() > jobs.limit()
+                    {
+                        frontend_jobs = jobs;
+                    }
+                    frontend_jobs
+                } else {
+                    JobsMode::Sequential // default to 1 thread irrespectively of `jobs` for now
+                }
+            }
         },
     };
+
     let backend = match matches.opt_str("jobs-backend") {
         Some(jobs_backend) => {
             let opt_name = "--jobs-backend";
@@ -2337,7 +2362,8 @@ impl JsonUnusedExterns {
 /// The first value returned is how to render JSON diagnostics, and the second
 /// is whether or not artifact notifications are enabled.
 pub fn parse_json(early_dcx: &EarlyDiagCtxt, matches: &getopts::Matches) -> JsonConfig {
-    let mut json_rendered = HumanReadableErrorType { short: false, unicode: false };
+    let mut json_rendered =
+        HumanReadableErrorType { no_graphics: false, short: false, unicode: false };
     let mut json_color = ColorConfig::Never;
     let mut json_artifact_notifications = false;
     let mut json_unused_externs = JsonUnusedExterns::No;
@@ -2354,10 +2380,16 @@ pub fn parse_json(early_dcx: &EarlyDiagCtxt, matches: &getopts::Matches) -> Json
         for sub_option in option.split(',') {
             match sub_option {
                 "diagnostic-short" => {
-                    json_rendered = HumanReadableErrorType { short: true, unicode: false };
+                    json_rendered =
+                        HumanReadableErrorType { no_graphics: false, short: true, unicode: false };
+                }
+                "diagnostic-no-graphics" => {
+                    json_rendered =
+                        HumanReadableErrorType { no_graphics: true, short: false, unicode: false };
                 }
                 "diagnostic-unicode" => {
-                    json_rendered = HumanReadableErrorType { short: false, unicode: true };
+                    json_rendered =
+                        HumanReadableErrorType { no_graphics: false, short: false, unicode: true };
                 }
                 "diagnostic-rendered-ansi" => json_color = ColorConfig::Always,
                 "artifacts" => json_artifact_notifications = true,
@@ -2388,7 +2420,7 @@ pub fn parse_error_format(
     json_color: ColorConfig,
     json_rendered: HumanReadableErrorType,
 ) -> ErrorOutputType {
-    let default_kind = HumanReadableErrorType { short: false, unicode: false };
+    let default_kind = HumanReadableErrorType { no_graphics: false, short: false, unicode: false };
     // We need the `opts_present` check because the driver will send us Matches
     // with only stable options if no unstable options are used. Since error-format
     // is unstable, it will not be present. We have to use `opts_present` not
@@ -2405,11 +2437,15 @@ pub fn parse_error_format(
                 ErrorOutputType::Json { pretty: true, json_rendered, color_config: json_color }
             }
             Some("short") => ErrorOutputType::HumanReadable {
-                kind: HumanReadableErrorType { short: true, unicode: false },
+                kind: HumanReadableErrorType { no_graphics: false, short: true, unicode: false },
+                color_config,
+            },
+            Some("human-no-graphics") => ErrorOutputType::HumanReadable {
+                kind: HumanReadableErrorType { no_graphics: true, short: false, unicode: false },
                 color_config,
             },
             Some("human-unicode") => ErrorOutputType::HumanReadable {
-                kind: HumanReadableErrorType { short: false, unicode: true },
+                kind: HumanReadableErrorType { no_graphics: false, short: false, unicode: true },
                 color_config,
             },
             Some(arg) => {
@@ -2418,8 +2454,8 @@ pub fn parse_error_format(
                     kind: default_kind,
                 });
                 early_dcx.early_fatal(format!(
-                    "argument for `--error-format` must be `human`, `human-unicode`, \
-                    `json`, `pretty-json` or `short` (instead was `{arg}`)"
+                    "argument for `--error-format` must be `human`, `human-no-graphics`, \
+                    `human-unicode`, `json`, `pretty-json` or `short` (instead was `{arg}`)"
                 ))
             }
         }
@@ -2494,6 +2530,7 @@ fn check_error_format_stability(
     let format = match format {
         ErrorOutputType::Json { pretty: true, .. } => "pretty-json",
         ErrorOutputType::HumanReadable { kind, .. } => match kind {
+            HumanReadableErrorType { no_graphics: true, .. } => "human-no-graphics",
             HumanReadableErrorType { unicode: true, .. } => "human-unicode",
             _ => return,
         },
@@ -3430,6 +3467,14 @@ impl PpMode {
 }
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
+pub enum LlvmTpde {
+    /// Attempt to compile with TPDE-LLVM, but fall back to LLVM if unsupported LLVM IR is encountered
+    Try,
+    /// Attempt to compile with TPDE-LLVM, and bail if unsupported LLVM IR is encountered
+    Only,
+}
+
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub enum WasiExecModel {
     Command,
     Reactor,
@@ -3479,7 +3524,7 @@ pub(crate) mod dep_tracking {
         AnnotateMoves, AutoDiff, BranchProtection, CFGuard, CFProtection, CodegenRetagOptions,
         CoverageOptions, CrateType, DebugInfo, DebugInfoCompression, ErrorOutputType, FmtDebug,
         FunctionReturn, InliningThreshold, InstrumentCoverage, InstrumentMcount,
-        InstrumentMcountOpts, InstrumentXRay, LinkerPluginLto, LocationDetail, LtoCli,
+        InstrumentMcountOpts, InstrumentXRay, LinkerPluginLto, LlvmTpde, LocationDetail, LtoCli,
         MirStripDebugInfo, NextSolverConfig, Offload, OptLevel, OutFileName, OutputType,
         OutputTypes, PatchableFunctionEntry, PointerAuthOption, Polonius, ResolveDocLinks,
         SourceFileHashAlgorithm, SplitDwarfKind, SwitchWithOptPath, SymbolManglingVersion,
@@ -3552,6 +3597,7 @@ pub(crate) mod dep_tracking {
         InstrumentXRay,
         LanguageIdentifier,
         LinkerPluginLto,
+        LlvmTpde,
         LocationDetail,
         LtoCli,
         MergeFunctions,

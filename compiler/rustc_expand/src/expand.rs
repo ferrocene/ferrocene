@@ -23,7 +23,7 @@ use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_errors::PResult;
 use rustc_feature::Features;
 use rustc_hir::def::MacroKinds;
-use rustc_lint_defs::builtin::{UNUSED_ATTRIBUTES, UNUSED_DOC_COMMENTS};
+use rustc_lint_defs::builtin::UNUSED_DOC_COMMENTS;
 use rustc_parse::parser::{
     AllowConstBlockItems, AttemptLocalParseRecovery, CommaRecoveryMode, ForceCollect, Parser,
     RecoverColon, RecoverComma, Recovery, token_descr,
@@ -41,7 +41,6 @@ use crate::diagnostics::{
     GlobDelegationTraitlessQpath, IncompleteParse, RecursionLimitReached, RemoveExprNotSupported,
     UnsupportedKeyValue, WrongFragmentKind,
 };
-use crate::mbe::diagnostics::annotate_err_with_kind;
 use crate::module::{
     DirOwnership, ParsedExternalMod, mod_dir_path, mod_file_path_from_attr, parse_external_mod,
 };
@@ -1067,7 +1066,6 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                 if err.span.is_dummy() {
                     err.span(span);
                 }
-                annotate_err_with_kind(&mut err, kind, span);
                 let guar = err.emit_err();
                 self.cx.macro_error_and_trace_macros_diag();
                 kind.dummy(span, guar)
@@ -2231,7 +2229,6 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
     // Run attributes through the attribute parser
     // since they will not be detected after macro expansion.
     fn check_attributes(&self, attrs: &[ast::Attribute], call: &ast::MacCall) {
-        use SyntheticAttr::*;
         let mut attrs = attrs.iter().peekable();
         let mut span: Option<Span> = None;
         while let Some(attr) = attrs.next() {
@@ -2266,29 +2263,6 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
                     crate::diagnostics::MacroCallUnusedDocComment { span: attr.span },
                 );
                 continue;
-            }
-
-            match &attr.kind {
-                AttrKind::Normal(normal)
-                    if rustc_attr_parsing::is_builtin_attr(&normal.item)
-                        && !AttributeParser::is_parsed_attribute(&attr.path()) =>
-                {
-                    let attr_name = attr.name().unwrap();
-                    self.cx.sess.psess.buffer_lint(
-                        UNUSED_ATTRIBUTES,
-                        attr.span,
-                        self.cx.current_expansion.lint_node_id,
-                        crate::diagnostics::UnusedBuiltinAttribute {
-                            attr_name,
-                            macro_name: pprust::path_to_string(&call.path),
-                            invoc_span: call.path.span,
-                            attr_span: attr.span,
-                        },
-                    );
-                }
-                AttrKind::Normal(_) => {}
-                AttrKind::Synthetic(CfgTrace(_) | CfgAttrTrace(_)) | AttrKind::Generated(..) => {}
-                AttrKind::DocComment(..) => unreachable!(), // handled above
             }
         }
     }

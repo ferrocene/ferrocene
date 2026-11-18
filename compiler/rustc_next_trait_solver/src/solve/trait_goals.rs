@@ -368,6 +368,33 @@ where
         }
     }
 
+    fn consider_builtin_fn_static_trait_candidate(
+        ecx: &mut EvalCtxt<'_, D>,
+        goal: Goal<I, Self>,
+    ) -> Result<Candidate<I>, NoSolutionOrRerunNonErased> {
+        let self_ty = goal.predicate.self_ty();
+        match goal.predicate.polarity {
+            // impl FnStatic for FnDef {}
+            ty::ClausePolarity::Positive => match self_ty.kind() {
+                ty::FnDef(_, _) => {
+                    ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
+                        ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+                    })
+                }
+                _ => Err(NoSolution.into()),
+            },
+            //  impl !FnStatic for T where T != FnDef && T is rigid {}
+            ty::ClausePolarity::Negative => match self_ty.kind() {
+                ty::FnDef(_, _) if self_ty.is_known_rigid() => {
+                    ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
+                        ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+                    })
+                }
+                _ => Err(NoSolution.into()),
+            },
+        }
+    }
+
     fn consider_builtin_fn_trait_candidates(
         ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
@@ -815,6 +842,9 @@ where
                 ) => {
                     panic!("unexpected type `{ty:?}`")
                 }
+
+                // FIXME(scrabsha)
+                ty::View(..) => unimplemented!(),
             }
 
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
@@ -1504,6 +1534,9 @@ where
             ty::Infer(_) | ty::Alias(ty::IsRigid::No, _) | ty::Bound(_, _) => {
                 panic!("unexpected type `{self_ty:?}`")
             }
+
+            // FIXME(scrabsha)
+            ty::View(..) => unimplemented!(),
         }
     }
 

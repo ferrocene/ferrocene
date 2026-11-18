@@ -998,7 +998,7 @@ fn unpack(exec_ctx: &ExecutionContext, tarball: &Path, dst: &Path, pattern: &str
                 {
                     continue;
                 }
-                short_path.strip_prefix(pattern).unwrap_or(short_path)
+                short_path.trim_prefix(pattern)
             }
             // Ferrocene tarballs:
             // For Ferrocene we don't check the pattern, as it's used to filter down the

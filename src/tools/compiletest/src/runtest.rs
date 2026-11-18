@@ -16,7 +16,7 @@ use tracing::*;
 use crate::common::{
     CompareMode, Config, Debugger, ForcePassMode, PassFailMode, RunResult, TestMode, TestPaths,
     TestSuite, UI_EXTENSIONS, UI_FIXED, UI_RUN_STDERR, UI_RUN_STDOUT, UI_STDERR, UI_STDOUT, UI_SVG,
-    UI_WINDOWS_SVG, expected_output_path, incremental_dir, output_base_dir, output_base_name,
+    expected_output_path, incremental_dir, output_base_dir, output_base_name,
 };
 use crate::directives::{AuxCrate, TestProps};
 use crate::edition::Edition;
@@ -1829,6 +1829,26 @@ impl<'test> TestCx<'test> {
             rustc.arg(dir_opt);
         };
 
+        if !self.config.parallel_frontend_enabled() {
+            // If the parallel frontend thread count was not specified, we override
+            // it to 1, because the tested toolchain might have a different default
+            // value for the frontend thread count, but we want to run tests in
+            // compiletest with the sequential frontend for now, until we prepare the testing
+            // infrastructure of all test suites to support potentially non-deterministic order of
+            // diagnostics.
+
+            // We can't set this option if the test already specifies the frontend thread count
+            // though.
+            if !self
+                .props
+                .compile_flags
+                .iter()
+                .any(|flag| flag.contains("-Zthreads") || flag.contains("--jobs-frontend"))
+            {
+                compiler.arg("-Zthreads=1");
+            }
+        }
+
         match self.config.mode {
             TestMode::Incremental => {
                 // If we are extracting and matching errors in the new
@@ -2476,13 +2496,7 @@ impl<'test> TestCx<'test> {
         let (stderr_kind, stdout_kind) = match output_kind {
             TestOutput::Compile => (
                 if self.force_color_svg() {
-                    if self.config.target.contains("windows") {
-                        // We single out Windows here because some of the CLI coloring is
-                        // specifically changed for Windows.
-                        UI_WINDOWS_SVG
-                    } else {
-                        UI_SVG
-                    }
+                    UI_SVG
                 } else if self.props.stderr_per_bitwidth {
                     &stderr_bits
                 } else {

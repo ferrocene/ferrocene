@@ -126,6 +126,10 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 Some(LangItem::FnPtrTrait) => {
                     self.assemble_candidates_for_fn_ptr_trait(obligation, &mut candidates);
                 }
+                Some(LangItem::FnAddrTrait) => {
+                    self.assemble_candidates_for_fn_ptr_trait(obligation, &mut candidates);
+                    self.assemble_candidates_for_fn_static_trait(obligation, &mut candidates);
+                }
                 Some(LangItem::BikeshedGuaranteedNoDrop) => {
                     self.assemble_candidates_for_bikeshed_guaranteed_no_drop_trait(
                         obligation,
@@ -716,6 +720,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 // FIXME: Function definitions could actually implement `FnPtr` by
                 // casting the ZST function def to a function pointer.
                 ty::FnDef(_, _) => return true,
+
+                // FIXME(scrabsha)
+                ty::View(..) => unimplemented!(),
             }
 
             // Generic params can implement `FnPtr` if the predicate
@@ -904,6 +911,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 ty::Error(_) => {
                     candidates.vec.push(AutoImplCandidate);
                 }
+
+                // FIXME(scrabsha)
+                ty::View(..) => unimplemented!(),
             }
         }
     }
@@ -1242,6 +1252,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
                 bug!("asked to assemble builtin bounds of unexpected type: {:?}", self_ty);
             }
+
+            // FIXME(scrabsha)
+            ty::View(..) => unimplemented!(),
         }
     }
 
@@ -1299,7 +1312,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             },
 
             // Not `MetaSized` or `Sized`.
-            ty::Foreign(..) => {}
+            ty::Foreign(..) | ty::View(..) => {}
 
             ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) => {}
 
@@ -1365,6 +1378,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Error(_)
             | ty::Infer(_)
             | ty::Placeholder(_) => {}
+
+            // FIXME(scrabsha)
+            ty::View(..) => unimplemented!(),
         }
     }
 
@@ -1413,6 +1429,25 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::Infer(ty::InferTy::TyVar(_) | ty::InferTy::FreshTy(_)) => {
                 candidates.ambiguous = true;
             }
+
+            // FIXME(scrabsha)
+            ty::View(..) => unimplemented!(),
+        }
+    }
+
+    fn assemble_candidates_for_fn_static_trait(
+        &mut self,
+        obligation: &PolyTraitObligation<'tcx>,
+        candidates: &mut SelectionCandidateSet<'tcx>,
+    ) {
+        let self_ty = self.infcx.deeply_resolve_ignoring_regions(obligation.self_ty());
+
+        match *self_ty.skip_binder().kind() {
+            ty::FnDef(_, _) => candidates.vec.push(BuiltinCandidate),
+            ty::Infer(ty::InferTy::TyVar(_) | ty::InferTy::FreshTy(_)) => {
+                candidates.ambiguous = true;
+            }
+            _ => {}
         }
     }
 
@@ -1457,6 +1492,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
                 candidates.ambiguous = true;
             }
+
+            // FIXME(scrabsha)
+            ty::View(..) => unimplemented!(),
         }
     }
 

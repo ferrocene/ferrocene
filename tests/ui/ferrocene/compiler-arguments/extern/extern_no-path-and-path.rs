@@ -4,7 +4,7 @@
 //@ edition:2018
 
 fn main() {
-    ::some_crate::hello(); //~ ERROR extern location for some_crate does not exist: invalid
+    ::some_crate::hello(); //~ ERROR extern location for `some_crate` does not exist at `invalid`
 }
 
 // ferrocene-annotations: um_rustc_extern

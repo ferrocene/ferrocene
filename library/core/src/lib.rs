@@ -93,6 +93,7 @@
 #![feature(asm_experimental_arch)]
 #![feature(byte_str_internals)]
 #![feature(cfg_target_has_reliable_f16_f128)]
+#![feature(cfg_target_has_reliable_f16b)]
 #![feature(const_cmp)]
 #![feature(const_destruct)]
 #![feature(const_eval_select)]
@@ -103,7 +104,7 @@
 #![feature(io_const_error)]
 #![feature(offset_of_enum)]
 #![feature(panic_internals)]
-#![feature(pattern_type_macro)]
+#![feature(pattern_types)]
 #![feature(ub_checks)]
 // not-alphabetical-end
 //
@@ -150,7 +151,6 @@
 #![feature(must_not_suspend)]
 #![feature(negative_impls)]
 #![feature(no_core)]
-#![feature(pattern_types)]
 #![feature(pin_macro_internals)]
 #![feature(prelude_import)]
 #![feature(register_tool)]
@@ -323,7 +323,7 @@ pub mod option;
 pub mod os;
 pub mod panic;
 pub mod panicking;
-#[unstable(feature = "pattern_type_macro", issue = "123646")]
+#[unstable(feature = "pattern_types", issue = "123646")]
 pub mod pat;
 pub mod pin;
 #[unstable(feature = "abort_immediate", issue = "154601")]
@@ -360,7 +360,7 @@ mod bool;
 mod escape;
 mod tuple;
 mod unit;
-#[unstable(feature = "view_type_macro", issue = "155938")]
+#[unstable(feature = "view_types", issue = "155938")]
 pub mod view;
 
 #[stable(feature = "core_primitive", since = "1.43.0")]

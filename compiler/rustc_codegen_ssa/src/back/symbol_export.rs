@@ -1,7 +1,7 @@
 use std::collections::hash_map::Entry::*;
 
 use object::pe;
-use rustc_abi::CanonAbi;
+use rustc_abi::{CanonAbi, ExternAbi};
 use rustc_ast::expand::allocator::{AllocatorKind, NO_ALLOC_SHIM_IS_UNSTABLE, global_fn_name};
 use rustc_crate_store::CrateDepKind;
 use rustc_data_structures::fx::FxHashSet;
@@ -758,6 +758,40 @@ fn calling_convention_for_symbol<'tcx>(
         .unwrap_or((CanonAbi::Rust, &[]))
 }
 
+/// Whether symbol decoration might require computing the full FnAbi.
+fn needs_calling_convention_decoration<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    symbol: ExportedSymbol<'tcx>,
+) -> bool {
+    let target = &tcx.sess.target;
+
+    if !matches!(target.arch, Arch::X86 | Arch::X86_64) {
+        return false;
+    }
+
+    let def_id = match symbol {
+        ExportedSymbol::NonGeneric(def_id) | ExportedSymbol::Generic(def_id, _) => def_id,
+        _ => return false,
+    };
+
+    if !matches!(tcx.def_kind(def_id), DefKind::Fn | DefKind::AssocFn) {
+        return false;
+    }
+
+    let sig = tcx.fn_sig(def_id).skip_binder();
+
+    match target.arch {
+        Arch::X86 => match sig.abi() {
+            ExternAbi::Vectorcall { .. } => true,
+            ExternAbi::Fastcall { .. } | ExternAbi::Stdcall { .. } => target.is_like_windows,
+            ExternAbi::System { .. } => target.is_like_windows && !sig.c_variadic(),
+            _ => false,
+        },
+        Arch::X86_64 => matches!(sig.abi(), ExternAbi::Vectorcall { .. }),
+        _ => false,
+    }
+}
+
 /// Names used to preserve an exported symbol during LTO.
 ///
 /// The restriction pass matches LLVM IR names, which retain the `\x01`
@@ -769,6 +803,15 @@ pub(crate) fn symbol_names_for_lto<'tcx>(
     instantiating_crate: CrateNum,
 ) -> Vec<String> {
     let name = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
+    // ThinLTO GUIDs omit the LLVM marker for explicitly named symbols.
+    if let Some(stripped) = name.strip_prefix('\x01') {
+        return vec![name.clone(), stripped.to_owned()];
+    }
+
+    if !needs_calling_convention_decoration(tcx, symbol) {
+        return vec![name];
+    }
+
     let (callconv, args) = calling_convention_for_symbol(tcx, symbol);
 
     if let Some(decorated) =
@@ -799,6 +842,10 @@ pub(crate) fn linking_symbol_name_for_instance_in_crate<'tcx>(
 
     let target = &tcx.sess.target;
     if !target.is_like_windows {
+        if !needs_calling_convention_decoration(tcx, symbol) {
+            return undecorated;
+        }
+
         let (callconv, args) = calling_convention_for_symbol(tcx, symbol);
         if let Some(name) =
             crate::common::windows_calling_convention_name(target, callconv, &undecorated, args)

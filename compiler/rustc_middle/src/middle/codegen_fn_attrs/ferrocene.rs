@@ -1,4 +1,3 @@
-use rustc_ast::attr::AttributeExt;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{
@@ -177,12 +176,23 @@ fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedSta
     }
 }
 
+// This was removed upstream, so was saved here since we still use it
+#[inline]
+fn path_matches(attr: &rustc_attr_ir::Attribute, name: &[Symbol]) -> bool {
+    match &attr {
+        rustc_attr_ir::Attribute::Tool(n) | rustc_attr_ir::Attribute::DeriveHelper(n) => {
+            n.path.segments.iter().eq(name)
+        }
+        _ => false,
+    }
+}
+
 fn get_span_by_path<'tcx>(
     tcx: TyCtxt<'tcx>,
     did: DefId,
     attr: &[Symbol],
 ) -> Option<rustc_span::Span> {
-    let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
+    let filter_fn = move |a: &&rustc_attr_ir::Attribute| path_matches(a, attr);
     let mut attrs = if let Some(did) = did.as_local() {
         tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
     } else {

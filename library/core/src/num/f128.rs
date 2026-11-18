@@ -194,6 +194,7 @@ impl f128 {
     /// assert!(!f.is_nan());
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
@@ -620,7 +621,7 @@ impl f128 {
     #[rustc_const_unstable(feature = "f128", issue = "116909")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     pub const fn max(self, other: f128) -> f128 {
-        intrinsics::maximum_number_nsz_f128(self, other)
+        intrinsics::maximum_number_nsz(self, other)
     }
 
     /// Returns the minimum of the two numbers, ignoring NaN.
@@ -651,7 +652,7 @@ impl f128 {
     #[rustc_const_unstable(feature = "f128", issue = "116909")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     pub const fn min(self, other: f128) -> f128 {
-        intrinsics::minimum_number_nsz_f128(self, other)
+        intrinsics::minimum_number_nsz(self, other)
     }
 
     /// Returns the maximum of the two numbers, propagating NaN.
@@ -680,10 +681,11 @@ impl f128 {
     /// ```
     #[inline]
     #[unstable(feature = "f128", issue = "116909")]
+    #[rustc_const_unstable(feature = "f128", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     pub const fn maximum(self, other: f128) -> f128 {
-        intrinsics::maximumf128(self, other)
+        intrinsics::maximum(self, other)
     }
 
     /// Returns the minimum of the two numbers, propagating NaN.
@@ -712,10 +714,11 @@ impl f128 {
     /// ```
     #[inline]
     #[unstable(feature = "f128", issue = "116909")]
+    #[rustc_const_unstable(feature = "f128", issue = "116909")]
     // #[unstable(feature = "float_minimum_maximum", issue = "91079")]
     #[must_use = "this returns the result of the comparison, without modifying either input"]
     pub const fn minimum(self, other: f128) -> f128 {
-        intrinsics::minimumf128(self, other)
+        intrinsics::minimum(self, other)
     }
 
     /// Calculates the midpoint (average) between `self` and `rhs`.
@@ -950,6 +953,7 @@ impl f128 {
     /// assert_eq!(v, 12.5);
     /// # }
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[unstable(feature = "f128", issue = "116909")]
@@ -1442,7 +1446,7 @@ impl f128 {
     #[rustc_const_unstable(feature = "f128", issue = "116909")]
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub const fn copysign(self, sign: f128) -> f128 {
-        intrinsics::copysignf128(self, sign)
+        intrinsics::copysign(self, sign)
     }
 
     /// Float addition that allows optimizations based on algebraic rules.

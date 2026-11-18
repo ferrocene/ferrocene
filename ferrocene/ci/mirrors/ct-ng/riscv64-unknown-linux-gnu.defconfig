@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+CT_CONFIG_VERSION="4"
+CT_PARALLEL_JOBS=4
+CT_LOAD="8"
+CT_ARCH_RISCV=y
+# CT_DEMULTILIB is not set
+CT_ARCH_USE_MMU=y
+CT_ARCH_64=y
+CT_ARCH_ARCH="rv64gc"
+CT_KERNEL_LINUX=y
+# 4.20 is the earliest supported kernel as per
+# https://doc.rust-lang.org/rustc/platform-support/riscv64gc-unknown-linux-gnu.html
+CT_LINUX_V_4_20=y
+CT_BINUTILS_V_2_46=y
+CT_BINUTILS_PLUGINS=y
+CT_GLIBC_V_2_17=y
+CT_CC_LANG_CXX=y
+CT_DEBUG_GDB=y
+# CT_GDB_CROSS_PYTHON is not set
+# CT_GDB_GDBSERVER is not set
+# for risc, upstream and our config expect riscv64-unknown-linux-gnu-gcc
+CT_OMIT_TARGET_VENDOR=n
+CT_EXTRA_CFLAGS_FOR_HOST="-fno-char8_t"
+CT_EXTRA_LDFLAGS_FOR_HOST="-fno-char8_t"

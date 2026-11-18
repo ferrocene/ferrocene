@@ -355,11 +355,12 @@ pub fn crate_description(crates: &[impl AsRef<str>]) -> String {
     if crates.is_empty() {
         return "".into();
     }
+
     if crates.len() == 1 {
-        return crates[0].as_ref().into();
+        return format!(" {}", crates[0].as_ref());
     }
 
-    let mut descr = String::from("{");
+    let mut descr = String::from(" {");
     descr.push_str(crates[0].as_ref());
     for krate in &crates[1..] {
         descr.push_str(", ");

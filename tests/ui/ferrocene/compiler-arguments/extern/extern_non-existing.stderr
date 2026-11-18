@@ -1,4 +1,4 @@
-error: extern location for some_crate does not exist: non_existing
+error: extern location for `some_crate` does not exist at `non_existing`
   --> $DIR/extern_non-existing.rs:7:7
    |
 LL |     ::some_crate::hello();

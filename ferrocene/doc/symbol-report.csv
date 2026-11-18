@@ -3798,6 +3798,9 @@
 <core::time::TryFromFloatSecsErrorKind as core::cmp::PartialEq>::eq
 <core::time::TryFromFloatSecsErrorKind as core::fmt::Debug>::fmt
 <f128 as core::default::Default>::default
+<f128 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f128 as core::intrinsics::bounds::FloatPrimitive>::is_nan
+<f128 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f128 as core::iter::traits::accum::Sum<&'a f128>>::sum
 <f128 as core::iter::traits::accum::Sum>::sum
 <f128 as core::ops::arith::Add<&f128>>::add
@@ -3824,6 +3827,7 @@
 <f16 as core::default::Default>::default
 <f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f16 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f16 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f16 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
@@ -3854,6 +3858,7 @@
 <f32 as core::default::Default>::default
 <f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f32 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f32 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
@@ -3884,6 +3889,7 @@
 <f64 as core::default::Default>::default
 <f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f64 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f64 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
@@ -6347,6 +6353,8 @@ core::escape::verbatim
 core::f128::<impl f128>::clamp::do_panic
 core::f128::<impl f128>::clamp::do_panic::compiletime
 core::f128::<impl f128>::clamp::do_panic::runtime
+core::f128::<impl f128>::from_bits
+core::f128::<impl f128>::is_nan
 core::f128::<impl f128>::to_bits
 core::f16::<impl f16>::abs
 core::f16::<impl f16>::clamp::do_panic
@@ -6354,6 +6362,7 @@ core::f16::<impl f16>::clamp::do_panic::compiletime
 core::f16::<impl f16>::clamp::do_panic::runtime
 core::f16::<impl f16>::classify
 core::f16::<impl f16>::from_bits
+core::f16::<impl f16>::is_nan
 core::f16::<impl f16>::to_bits
 core::f32::<impl f32>::abs
 core::f32::<impl f32>::clamp::do_panic
@@ -6740,8 +6749,7 @@ core::intrinsics::contract_check_ensures::compiletime
 core::intrinsics::contract_check_ensures::runtime
 core::intrinsics::contract_check_requires::compiletime
 core::intrinsics::contract_check_requires::runtime
-core::intrinsics::copysignf32
-core::intrinsics::copysignf64
+core::intrinsics::copysign
 core::intrinsics::disjoint_bitor
 core::intrinsics::fabs
 core::intrinsics::fallback::wide_mul_u128
@@ -6752,8 +6760,8 @@ core::intrinsics::integer_max
 core::intrinsics::integer_min
 core::intrinsics::is_val_statically_known
 core::intrinsics::likely
-core::intrinsics::maximum_number_nsz_f32
-core::intrinsics::minimum_number_nsz_f32
+core::intrinsics::maximum_number_nsz
+core::intrinsics::minimum_number_nsz
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
 core::intrinsics::reflection::type_id_eq

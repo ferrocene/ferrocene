@@ -1,6 +1,5 @@
 #![feature(rustc_private)]
 
-extern crate rustc_ast;
 extern crate rustc_attr_ir;
 extern crate rustc_driver;
 extern crate rustc_hir;
@@ -16,7 +15,6 @@ use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
-use rustc_ast::attr::AttributeExt;
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::HirId;
@@ -39,6 +37,17 @@ struct Vis<'tcx> {
     visited_attrs: HashSet<Span>,
 }
 
+// This was removed upstream, so was saved here since we still use it
+#[inline]
+fn path_matches(attr: &rustc_attr_ir::Attribute, name: &[Symbol]) -> bool {
+    match &attr {
+        rustc_attr_ir::Attribute::Tool(n) | rustc_attr_ir::Attribute::DeriveHelper(n) => {
+            n.path.segments.iter().eq(name)
+        }
+        _ => false,
+    }
+}
+
 impl<'tcx> Vis<'tcx> {
     fn new(tcx: TyCtxt<'tcx>) -> Self {
         Self { tcx, report: SymbolReport::new(), visited_attrs: HashSet::new() }
@@ -58,7 +67,7 @@ impl<'tcx> Vis<'tcx> {
             .tcx
             .hir_attrs(hir_id)
             .iter()
-            .find(|attr| attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()))
+            .find(|attr| path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice()))
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
@@ -90,7 +99,7 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     }
 
     fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
-        if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
+        if path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice()) {
             let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
                 unreachable!()
             };
@@ -267,7 +276,7 @@ fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usi
 
 fn has_ferrocene_annotation(tcx: TyCtxt<'_>, def: LocalDefId) -> Option<&Attribute> {
     let filter_fn = move |attr: &&rustc_attr_ir::Attribute| {
-        attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice())
+        path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice())
     };
     tcx.hir_attrs(tcx.local_def_id_to_hir_id(def)).iter().filter(filter_fn).next()
 }

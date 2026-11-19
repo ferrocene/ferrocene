@@ -24,12 +24,12 @@ use rustc_query_impl::{CollectActiveJobsKind, collect_active_query_jobs};
 use rustc_session::config::{
     Cfg, Jobs, OutFileName, OutputFilenames, OutputTypes, Sysroot, host_tuple,
 };
-use rustc_session::{EarlyDiagCtxt, IncrCompSession, Session, filesearch};
+use rustc_session::{EarlyDiagCtxt, EarlySession, IncrCompSession, Session, filesearch};
 use rustc_span::edition::Edition;
 use rustc_span::source_map::SourceMapInputs;
 use rustc_span::{SessionGlobals, Symbol, sym};
 use rustc_structures::CrateType;
-use rustc_target::spec::Target;
+use rustc_target::spec::{Arch, Target};
 use tracing::info;
 
 use crate::diagnostics;
@@ -74,6 +74,9 @@ pub(crate) fn add_configuration(
     if target_config.has_reliable_f16_math {
         cfg.insert((sym::target_has_reliable_f16_math, None));
     }
+    if target_config.has_reliable_f16b {
+        cfg.insert((sym::target_has_reliable_f16b, None));
+    }
     if target_config.has_reliable_f128 {
         cfg.insert((sym::target_has_reliable_f128, None));
     }
@@ -102,16 +105,38 @@ pub(crate) fn check_abi_required_features(sess: &Session) {
         );
     }
 
+    // Make this a hard error on ARM since starting with LLVM24, the backend will otherwise
+    // emit a (less friendly) hard error.
+    // Also make it a hard error on x86, where we use SSE registers for the "Rust" ABI. The
+    // post-mono ABI check only systematically checks "C" calls, so we better reject this here.
+    let hard_error = matches!(sess.target.arch, Arch::Arm | Arch::X86);
+
     for feature in abi_feature_constraints.required {
         if !sess.internal_target_features.contains(&Symbol::intern(feature)) {
-            sess.dcx()
-                .emit_warn(diagnostics::AbiRequiredTargetFeature { feature, enabled: "enabled" });
+            let diag = diagnostics::AbiRequiredTargetFeature {
+                feature,
+                enabled: "enabled",
+                fcw: !hard_error,
+            };
+            if hard_error {
+                sess.dcx().emit_err(diag);
+            } else {
+                sess.dcx().emit_warn(diag);
+            }
         }
     }
     for feature in abi_feature_constraints.incompatible {
         if sess.internal_target_features.contains(&Symbol::intern(feature)) {
-            sess.dcx()
-                .emit_warn(diagnostics::AbiRequiredTargetFeature { feature, enabled: "disabled" });
+            let diag = diagnostics::AbiRequiredTargetFeature {
+                feature,
+                enabled: "disabled",
+                fcw: !hard_error,
+            };
+            if hard_error {
+                sess.dcx().emit_err(diag);
+            } else {
+                sess.dcx().emit_warn(diag);
+            }
         }
     }
 }
@@ -139,7 +164,7 @@ fn init_stack_size(early_dcx: &EarlyDiagCtxt) -> usize {
                         r#"`RUST_MIN_STACK` should be a number of bytes, but was "{s}""#,
                     ));
                     err.note("you can also unset `RUST_MIN_STACK` to use the default stack size");
-                    err.emit()
+                    err.emit_fatal()
                 })
             })
             // otherwise pick a consistent default
@@ -316,7 +341,7 @@ internal compiler error: query cycle handler thread panicked, aborting process";
                     diag.help(
                         "try lowering `-Z threads` or checking the operating system's resource limits",
                     );
-                    diag.emit()
+                    diag.emit_fatal()
                 })
         })
     })
@@ -379,7 +404,7 @@ impl CodegenBackend for DummyCodegenBackend {
         "dummy"
     }
 
-    fn target_config(&self, sess: &Session) -> TargetConfig {
+    fn target_config(&self, sess: &EarlySession) -> TargetConfig {
         let abi_required_features = sess.target.abi_required_features();
         let internal_target_features = internal_target_features::<0>(
             sess,
@@ -397,6 +422,7 @@ impl CodegenBackend for DummyCodegenBackend {
             internal_target_features,
             has_reliable_f16: true,
             has_reliable_f16_math: true,
+            has_reliable_f16b: true,
             has_reliable_f128: true,
             has_reliable_f128_math: true,
         }

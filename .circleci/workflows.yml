@@ -479,8 +479,8 @@ jobs:
 
   aarch64-darwin-llvm:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
@@ -504,8 +504,8 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -519,8 +519,8 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -535,8 +535,8 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -550,8 +550,8 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.medium.gen1 # 4 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
@@ -1232,6 +1232,7 @@ commands:
     steps:
       - run:
           name: Setup Darwin environment
+          no_output_timeout: 30m
           command: ferrocene/ci/scripts/setup-darwin.sh
 
 

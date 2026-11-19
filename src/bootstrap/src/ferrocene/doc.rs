@@ -90,7 +90,7 @@ impl Step for SphinxVirtualEnv {
             .arg("--locked")
             // Use our own custom path for the virtual environment.
             .env("UV_PROJECT_ENVIRONMENT", &venv)
-            .run(builder);
+            .run_retry(builder);
 
         VirtualEnv { path: venv }
     }

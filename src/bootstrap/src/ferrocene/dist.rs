@@ -202,7 +202,7 @@ impl Step for SourceTarball {
                 .arg(builder.src.join(project))
                 .env("UV_CACHE_DIR", &uv_cache_dir)
                 .env("UV_PROJECT_ENVIRONMENT", venv)
-                .run(&builder);
+                .run_retry(&builder);
         }
 
         drop(generic_tarball);

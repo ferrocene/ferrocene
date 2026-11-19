@@ -7,7 +7,7 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::thin_vec::{ThinVec, thin_vec};
 use rustc_hir::def::{DefKind, MacroKinds, Res};
 use rustc_hir::def_id::{DefId, DefIdSet, LocalDefId, LocalModId};
-use rustc_hir::{self as hir, Mutability, find_attr};
+use rustc_hir::{self as hir, HirId, Mutability, find_attr};
 use rustc_metadata::creader::{CStore, LoadedMacro};
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, TyCtxt};
@@ -150,7 +150,7 @@ pub(crate) fn try_inline(
                 clean::StaticItem(build_static(cx, did, cx.tcx.is_mutable_static(did)))
             })
         }
-        Res::Def(DefKind::Const { .. }, did) => {
+        Res::Def(DefKind::Const, did) => {
             record_extern_fqn(cx, did, ItemType::Constant);
             cx.with_param_env(did, |cx| {
                 let ct = build_const_item(cx, did);
@@ -184,7 +184,8 @@ pub(crate) fn try_inline_glob(
     current_mod: LocalModId,
     visited: &mut DefIdSet,
     inlined_names: &mut FxHashSet<(ItemType, Symbol)>,
-    import: &hir::Item<'_>,
+    import_id: LocalDefId,
+    import_hir_id: HirId,
 ) -> Option<Vec<clean::Item>> {
     let did = res.opt_def_id()?;
     if did.is_local() {
@@ -203,7 +204,7 @@ pub(crate) fn try_inline_glob(
                 .filter_map(|child| child.res.opt_def_id())
                 .filter(|&def_id| !cx.tcx.is_doc_hidden(def_id))
                 .collect();
-            let attrs = cx.tcx.hir_attrs(import.hir_id());
+            let attrs = cx.tcx.hir_attrs(import_hir_id);
             let mut items = build_module_items(
                 cx,
                 did,
@@ -211,7 +212,7 @@ pub(crate) fn try_inline_glob(
                 visited,
                 inlined_names,
                 Some(&reexports),
-                Some((attrs, Some(import.owner_id.def_id))),
+                Some((attrs, Some(import_id))),
             );
             items.retain(|item| {
                 if let Some(name) = item.name {
@@ -703,7 +704,7 @@ fn should_ignore_def_kind(kind: DefKind) -> bool {
             | DefKind::Variant
             | DefKind::Mod
             | DefKind::Static { .. }
-            | DefKind::Const { .. }
+            | DefKind::Const
             | DefKind::Macro(_)
             | DefKind::Use
     )

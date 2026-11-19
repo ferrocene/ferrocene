@@ -8,11 +8,11 @@ use rustc_hir::{CoroutineDesugaring, CoroutineKind};
 use rustc_index::Idx;
 use rustc_middle::mir::*;
 use rustc_middle::ty::adjustment::PointerCoercion;
+use rustc_middle::ty::consts::ConstExt;
 use rustc_middle::ty::util::{Discr, IntTypeExt};
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
-use rustc_middle::{bug, span_bug};
 use rustc_mir_dataflow::DropFlagState;
-use rustc_span::{DUMMY_SP, dummy_spanned};
+use rustc_span::{DUMMY_SP, bug, dummy_spanned, span_bug};
 use tracing::{debug, instrument};
 
 use crate::coroutine::CTX_ARG;

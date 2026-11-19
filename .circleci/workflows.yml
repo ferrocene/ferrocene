@@ -1361,6 +1361,7 @@ commands:
     steps:
       - run:
           name: Setup Darwin environment
+          no_output_timeout: 30m
           command: ferrocene/ci/scripts/setup-darwin.sh
 
 

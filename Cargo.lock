@@ -198,9 +198,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "askama"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1bf825125edd887a019d0a3a837dcc5499a68b0d034cc3eb594070c3e18addc"
+checksum = "6024d73179f43f15ccd2b881bfea6fee7f3a46ec53f33b52210dea749ebebaa4"
 dependencies = [
  "askama_macros",
  "itoa",
@@ -211,9 +211,9 @@ dependencies = [
 
 [[package]]
 name = "askama_derive"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1c7065972a130eafa84215f21352ae15b4a7393da48c1f5e103904490736738"
+checksum = "071ee5ebf2138e3ad180e0aacf6940c2cab5e6d8333741d9925c7bee2b153f39"
 dependencies = [
  "askama_parser",
  "basic-toml",
@@ -224,23 +224,23 @@ dependencies = [
  "rustc-hash 2.1.1",
  "serde",
  "serde_derive",
- "syn 2.0.117",
+ "syn 3.0.3",
 ]
 
 [[package]]
 name = "askama_macros"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e23b1d2c4bd39a41971f6124cef4cc6fd0540913ecb90919b69ab3bbe44ae1a"
+checksum = "643e1c7cbb6aec1d920332fe51a7c0d8219e273dcb8602db03f5263e4d16487b"
 dependencies = [
  "askama_derive",
 ]
 
 [[package]]
 name = "askama_parser"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7db09fde9143e7ac4513358fb32ee32847125b63b18ea715afd487956da715da"
+checksum = "2c5ae75772275d268b03ab8bdccdd12117b6169ee23256942b34e46c9f476583"
 dependencies = [
  "rustc-hash 2.1.1",
  "serde",
@@ -284,12 +284,6 @@ dependencies = [
  "rustc-demangle",
  "windows-targets 0.52.6",
 ]
-
-[[package]]
-name = "base64"
-version = "0.21.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
 name = "base64"
@@ -737,7 +731,6 @@ dependencies = [
 name = "clippy_lints_internal"
 version = "0.0.1"
 dependencies = [
- "clippy_config",
  "clippy_utils",
  "itertools",
  "regex",
@@ -2158,7 +2151,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bdc5a74b0feeb5e6a1dc2dd08c34280a61e37668d10a6a3b27ad69d0fb9ce2e"
 dependencies = [
  "aho-corasick",
- "base64 0.22.1",
+ "base64",
  "bstr",
  "jaq-core",
  "jiff",
@@ -3488,7 +3481,6 @@ name = "replace-version-placeholder"
 version = "0.1.0"
 dependencies = [
  "tidy",
- "walkdir",
 ]
 
 [[package]]
@@ -3896,7 +3888,6 @@ dependencies = [
  "rustc_macros",
  "rustc_metadata",
  "rustc_middle",
- "rustc_mir_transform",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
@@ -3921,6 +3912,7 @@ dependencies = [
  "rustc_abi",
  "rustc_apfloat",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4096,17 +4088,27 @@ dependencies = [
  "rustc_lexer",
  "rustc_lint_defs",
  "rustc_macros",
- "rustc_middle",
  "rustc_parse",
  "rustc_proc_macro",
  "rustc_serialize",
  "rustc_session",
  "rustc_span",
  "rustc_structures",
- "scoped-tls",
  "smallvec",
  "thin-vec",
  "tracing",
+]
+
+[[package]]
+name = "rustc_expand_queries"
+version = "0.0.0"
+dependencies = [
+ "rustc_ast",
+ "rustc_expand",
+ "rustc_middle",
+ "rustc_proc_macro",
+ "rustc_span",
+ "scoped-tls",
 ]
 
 [[package]]
@@ -4168,6 +4170,7 @@ dependencies = [
  "rustc_abi",
  "rustc_arena",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_feature",
@@ -4207,6 +4210,7 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_hir",
  "rustc_span",
 ]
@@ -4242,6 +4246,7 @@ name = "rustc_incremental"
 version = "0.0.0"
 dependencies = [
  "rand 0.9.3",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_fs_util",
@@ -4312,6 +4317,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
+ "rustc_expand_queries",
  "rustc_feature",
  "rustc_fs_util",
  "rustc_hir",
@@ -4362,6 +4368,7 @@ dependencies = [
  "rustc_apfloat",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4440,6 +4447,7 @@ dependencies = [
  "odht",
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_crate_store",
  "rustc_data_structures",
@@ -4461,6 +4469,7 @@ dependencies = [
  "rustc_target",
  "tempfile",
  "tracing",
+ "twox-hash 2.1.2",
 ]
 
 [[package]]
@@ -4530,10 +4539,10 @@ dependencies = [
  "polonius-engine",
  "regex",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_graphviz",
- "rustc_hir",
  "rustc_index",
  "rustc_macros",
  "rustc_middle",
@@ -4576,6 +4585,7 @@ version = "0.0.0"
 dependencies = [
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4647,6 +4657,7 @@ dependencies = [
  "rustc_abi",
  "rustc_ast",
  "rustc_ast_lowering",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_crate_store",
  "rustc_data_structures",
@@ -4692,6 +4703,7 @@ name = "rustc_privacy"
 version = "0.0.0"
 dependencies = [
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4746,6 +4758,7 @@ name = "rustc_query_impl"
 version = "0.0.0"
 dependencies = [
  "measureme",
+ "parking_lot",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
@@ -4768,6 +4781,7 @@ dependencies = [
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_pretty",
+ "rustc_attr_ir",
  "rustc_attr_parsing",
  "rustc_data_structures",
  "rustc_errors",
@@ -4792,6 +4806,7 @@ name = "rustc_sanitizers"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "libc",
  "rustc_abi",
  "rustc_data_structures",
  "rustc_hir",
@@ -4883,6 +4898,7 @@ dependencies = [
  "punycode",
  "rustc-demangle",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_hashes",
  "rustc_hir",
@@ -4945,10 +4961,12 @@ dependencies = [
  "itertools",
  "rustc_abi",
  "rustc_ast",
+ "rustc_attr_ir",
  "rustc_crate_store",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hir",
+ "rustc_index",
  "rustc_infer",
  "rustc_lint_defs",
  "rustc_macros",
@@ -4981,8 +4999,8 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
- "rustc_hir",
  "rustc_middle",
  "rustc_span",
  "smallvec",
@@ -4995,6 +5013,7 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "rustc_abi",
+ "rustc_attr_ir",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_hashes",
@@ -5079,10 +5098,10 @@ version = "0.0.0"
 dependencies = [
  "arrayvec",
  "askama",
- "base64 0.21.7",
  "expect-test",
  "indexmap",
  "itertools",
+ "libc",
  "minifier",
  "proc-macro2",
  "pulldown-cmark-escape",
@@ -5158,7 +5177,7 @@ dependencies = [
 
 [[package]]
 name = "rustfmt-nightly"
-version = "1.10.0"
+version = "1.11.0"
 dependencies = [
  "annotate-snippets 0.12.16",
  "anyhow",
@@ -6722,13 +6741,14 @@ dependencies = [
 
 [[package]]
 name = "windows-bindgen"
-version = "0.66.0"
+version = "0.100.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81b7ec123a4eadd44d1f44f76804316b477b2537abed9a2ab950b3c54afa1fcf"
+checksum = "c6bb7c22ca81c6dc1554fd328c12697b4b0ad5c45081df2c3c9a3f89cc467da2"
 dependencies = [
- "serde",
- "serde_json",
- "windows-threading 0.2.1",
+ "proc-macro2",
+ "quote",
+ "windows-default",
+ "windows-metadata",
 ]
 
 [[package]]
@@ -6774,6 +6794,12 @@ dependencies = [
  "windows-result 0.4.1",
  "windows-strings 0.5.1",
 ]
+
+[[package]]
+name = "windows-default"
+version = "0.100.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4882bb065b03115aa8891d44d076bbe843d286d8bfd0b55caaa4b049141a712"
 
 [[package]]
 name = "windows-future"
@@ -6830,6 +6856,12 @@ name = "windows-link"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+
+[[package]]
+name = "windows-metadata"
+version = "0.100.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d3a758dc1da4ae61aa7f93afbb505d564c72dd6431e513ed581377857896a72"
 
 [[package]]
 name = "windows-numerics"

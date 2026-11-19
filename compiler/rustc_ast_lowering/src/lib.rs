@@ -39,38 +39,41 @@
 // tidy-alphabetical-end
 
 use std::mem;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 use rustc_ast::mut_visit::{self, MutVisitor};
 use rustc_ast::node_id::NodeMap;
 use rustc_ast::visit::{self, Visitor};
 use rustc_ast::{self as ast, *};
+use rustc_attr_ir::find_attr;
+use rustc_attr_ir::lang_items::LangItem;
+use rustc_attr_ir::target::Target;
 use rustc_attr_parsing::{AttributeParser, Recovery, ShouldEmit};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::stable_hash::{StableHash, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::TaggedRef;
-use rustc_data_structures::unord::ExtendUnord;
 use rustc_errors::codes::*;
 use rustc_errors::{DiagArgFromDisplay, DiagCtxtHandle, ErrorGuaranteed};
-use rustc_hir::attrs::lang_items::LangItem;
-use rustc_hir::def::{DefKind, LifetimeRes, Namespace, PartialRes, PerNS, Res};
+use rustc_hir::def::{DefKind, Namespace, PerNS, Res};
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId, LocalDefIdMap};
 use rustc_hir::definitions::PerParentDisambiguatorState;
 use rustc_hir::lints::DelayedLint;
 use rustc_hir::{
-    self as hir, AngleBrackets, ConstArg, GenericArg, HirId, ItemLocalMap, LifetimeSource,
-    LifetimeSyntax, MissingLifetimeKind, ParamName, Target, TraitCandidate, find_attr,
+    self as hir, AngleBrackets, CRATE_OWNER_ID, ConstArg, GenericArg, HirId, ItemLocalMap,
+    LifetimeSource, LifetimeSyntax, MissingLifetimeKind, ParamName, TraitCandidate,
 };
-use rustc_index::{Idx, IndexVec};
+use rustc_index::{Idx, IndexSlice, IndexVec};
 use rustc_macros::extension;
+use rustc_middle::middle::resolve::{
+    AstOwner, LifetimeRes, PartialRes, PerOwnerResolverData, ResolverAstLowering,
+};
 use rustc_middle::queries::Providers;
-use rustc_middle::span_bug;
-use rustc_middle::ty::{PerOwnerResolverData, ResolverAstLowering, TyCtxt};
+use rustc_middle::ty::TyCtxt;
 use rustc_session::diagnostics::add_feature_diagnostics;
 use rustc_span::symbol::{Ident, Symbol, kw, sym};
-use rustc_span::{DUMMY_SP, DesugaringKind, Span};
+use rustc_span::{DUMMY_SP, DesugaringKind, Span, span_bug};
 use smallvec::{SmallVec, smallvec};
 use thin_vec::ThinVec;
 use tracing::{debug, instrument, trace};
@@ -99,6 +102,8 @@ pub mod stability;
 pub fn provide(providers: &mut Providers) {
     providers.index_ast = index_ast;
     providers.lower_to_hir = lower_to_hir;
+    providers.resolve_type_relative_delegations =
+        delegation::resolution::resolve_type_relative_delegations;
 }
 
 #[cfg(debug_assertions)]
@@ -131,35 +136,156 @@ pub(crate) mod re_lowering {
             ctx: &mut LoweringContext<'a, 'hir>,
             op: impl FnOnce(&mut LoweringContext<'a, 'hir>) -> TRes,
         ) -> TRes {
-            assert!(!ctx.relowering_checker.can_relower, "reentrant relowering is not supported");
+            assert!(
+                !ctx.curr_owner.relowering_checker.can_relower,
+                "reentrant relowering is not supported"
+            );
 
-            ctx.relowering_checker.can_relower = true;
+            ctx.curr_owner.relowering_checker.can_relower = true;
 
             let res = op(ctx);
 
-            ctx.relowering_checker.can_relower = false;
+            ctx.curr_owner.relowering_checker.can_relower = false;
 
             res
         }
     }
 }
 
-struct LoweringContext<'a, 'hir> {
-    tcx: TyCtxt<'hir>,
-    resolver: &'a ResolverAstLowering<'hir>,
-    current_disambiguator: PerParentDisambiguatorState,
+struct PerOwnerLoweringState<'a, 'hir> {
+    // -- Identity --
+    owner: &'a PerOwnerResolverData<'hir>,
+    disambiguator: PerParentDisambiguatorState,
 
-    /// Used to allocate HIR nodes.
-    arena: &'hir hir::Arena<'hir>,
+    // -- HirId allocation --
+    item_local_id_counter: hir::ItemLocalId,
+    /// NodeIds of pattern identifiers and labelled nodes that are lowered inside the current HIR
+    /// owner.
+    ident_and_label_to_local_id: NodeMap<hir::ItemLocalId>,
+    /// NodeIds that are lowered inside the current HIR owner. Only used for duplicate lowering
+    /// check.
+    #[cfg(debug_assertions)]
+    relowering_checker: re_lowering::ReloweringChecker,
 
+    // -- Accumulated outputs --
+    /// Attributes inside the owner being lowered.
+    attrs: SortedMap<hir::ItemLocalId, &'hir [rustc_attr_ir::Attribute]>,
     /// Bodies inside the owner being lowered.
     bodies: Vec<(hir::ItemLocalId, &'hir hir::Body<'hir>)>,
     /// `#[define_opaque]` attributes
     define_opaque: Option<&'hir [(Span, LocalDefId)]>,
-    /// Attributes inside the owner being lowered.
-    attrs: SortedMap<hir::ItemLocalId, &'hir [hir::Attribute]>,
+    trait_map: ItemLocalMap<&'hir [TraitCandidate<'hir>]>,
+    delayed_lints: Vec<DelayedLint>,
     /// Collect items that were created by lowering the current owner.
     children: LocalDefIdMap<hir::MaybeOwner<'hir>>,
+
+    // -- Transient --
+    impl_trait_defs: Vec<hir::GenericParam<'hir>>,
+    impl_trait_bounds: Vec<hir::WherePredicate<'hir>>,
+}
+
+impl<'a, 'hir> PerOwnerLoweringState<'a, 'hir> {
+    fn new(resolver: &'a ResolverAstLowering<'hir>, owner: NodeId) -> Self {
+        let owner = &resolver.owners[&owner];
+
+        let disambiguator = resolver
+            .disambiguators
+            .get(&owner.def_id)
+            .map(|s| s.steal())
+            .unwrap_or_else(|| PerParentDisambiguatorState::new(owner.def_id));
+
+        PerOwnerLoweringState {
+            owner,
+            disambiguator,
+            // 0 corresponds to `owner` lowered as `owner_id`, and we never call
+            // `lower_node_id(owner)`.
+            item_local_id_counter: hir::ItemLocalId::new(1),
+            ident_and_label_to_local_id: Default::default(),
+            #[cfg(debug_assertions)]
+            relowering_checker: Default::default(),
+            attrs: SortedMap::default(),
+            bodies: Vec::new(),
+            define_opaque: None,
+            trait_map: Default::default(),
+            delayed_lints: Vec::new(),
+            children: LocalDefIdMap::default(),
+            impl_trait_defs: Vec::new(),
+            impl_trait_bounds: Vec::new(),
+        }
+    }
+
+    fn owner_id(&self) -> hir::OwnerId {
+        hir::OwnerId { def_id: self.owner.def_id }
+    }
+
+    fn into_owner_info(
+        self,
+        tcx: TyCtxt<'hir>,
+        node: hir::OwnerNode<'hir>,
+    ) -> &'hir hir::OwnerInfo<'hir> {
+        assert_eq!(self.owner_id(), node.def_id());
+        assert!(self.impl_trait_defs.is_empty());
+        assert!(self.impl_trait_bounds.is_empty());
+
+        let attrs = self.attrs;
+        let mut bodies = self.bodies;
+        let define_opaque = self.define_opaque;
+        let trait_map = self.trait_map;
+        let delayed_lints = Steal::new(self.delayed_lints.into_boxed_slice());
+        let children = self.children;
+
+        #[cfg(debug_assertions)]
+        for (id, attrs) in attrs.iter() {
+            // Verify that we do not store empty slices in the map.
+            if attrs.is_empty() {
+                panic!("Stored empty attributes for {:?}", id);
+            }
+        }
+
+        bodies.sort_by_key(|(k, _)| *k);
+        let bodies = SortedMap::from_presorted_elements(bodies);
+
+        // Don't hash unless necessary, because it's expensive.
+        let rustc_middle::hir::Hashes { bodies_hash, attrs_hash } =
+            tcx.hash_owner_nodes(node, &bodies, &attrs, define_opaque);
+        let num_nodes = self.item_local_id_counter.as_usize();
+        let (nodes, parenting) = index::index_hir(tcx, node, &bodies, num_nodes);
+        let nodes = hir::OwnerNodes { opt_hash: bodies_hash, nodes, bodies };
+        let attrs = hir::AttributeMap { map: attrs, opt_hash: attrs_hash, define_opaque };
+
+        let opt_hash = tcx.needs_owner_info_hash().then(|| {
+            tcx.with_stable_hashing_context(|mut hcx| {
+                let mut stable_hasher = StableHasher::new();
+                bodies_hash.unwrap().stable_hash(&mut hcx, &mut stable_hasher);
+                attrs_hash.unwrap().stable_hash(&mut hcx, &mut stable_hasher);
+                // Do not hash delayed_lints.
+                parenting.stable_hash(&mut hcx, &mut stable_hasher);
+                trait_map.stable_hash(&mut hcx, &mut stable_hasher);
+                children.stable_hash(&mut hcx, &mut stable_hasher);
+                stable_hasher.finish()
+            })
+        });
+
+        tcx.hir_arena.alloc(hir::OwnerInfo {
+            opt_hash,
+            nodes,
+            parenting,
+            attrs,
+            trait_map,
+            delayed_lints,
+            children,
+        })
+    }
+}
+
+struct LoweringContext<'a, 'hir> {
+    tcx: TyCtxt<'hir>,
+    resolver: &'a ResolverAstLowering<'hir>,
+
+    curr_owner: PerOwnerLoweringState<'a, 'hir>,
+
+    /// Used to allocate HIR nodes.
+    arena: &'hir hir::Arena<'hir>,
 
     contract_ensures: Option<(Span, Ident, HirId)>,
 
@@ -171,26 +297,13 @@ struct LoweringContext<'a, 'hir> {
 
     /// Used to get the current `fn`'s def span to point to when using `await`
     /// outside of an `async fn`.
-    current_item: Option<Span>,
+    current_item_span: Option<Span>,
 
     try_block_scope: TryBlockScope,
     loop_scope: Option<HirId>,
     is_in_loop_condition: bool,
     is_in_dyn_type: bool,
 
-    current_hir_id_owner: hir::OwnerId,
-    owner: &'a PerOwnerResolverData<'hir>,
-    item_local_id_counter: hir::ItemLocalId,
-    trait_map: ItemLocalMap<&'hir [TraitCandidate<'hir>]>,
-
-    impl_trait_defs: Vec<hir::GenericParam<'hir>>,
-    impl_trait_bounds: Vec<hir::WherePredicate<'hir>>,
-
-    /// NodeIds of pattern identifiers and labelled nodes that are lowered inside the current HIR owner.
-    ident_and_label_to_local_id: NodeMap<hir::ItemLocalId>,
-    /// NodeIds that are lowered inside the current HIR owner. Only used for duplicate lowering check.
-    #[cfg(debug_assertions)]
-    relowering_checker: re_lowering::ReloweringChecker,
     /// The `NodeId` space is split in two.
     /// `0..resolver.next_node_id` are created by the resolver on the AST.
     /// The higher part `resolver.next_node_id..next_node_id` are created during lowering.
@@ -202,58 +315,47 @@ struct LoweringContext<'a, 'hir> {
     /// so we only store `self_param_id`.
     partial_res_overrides: NodeMap<NodeId>,
 
-    allow_contracts: Arc<[Symbol]>,
-    allow_try_trait: Arc<[Symbol]>,
-    allow_gen_future: Arc<[Symbol]>,
-    allow_pattern_type: Arc<[Symbol]>,
-    allow_async_gen: Arc<[Symbol]>,
-    allow_async_iterator: Arc<[Symbol]>,
-    allow_for_await: Arc<[Symbol]>,
-    allow_async_fn_traits: Arc<[Symbol]>,
-
-    delayed_lints: Vec<DelayedLint>,
-
-    /// Stack of `move(...)` collection states. A plain closure body pushes
+    /// Stack of `move(...)` collection states. A closure-like body pushes
     /// `Some`, so `move(...)` expressions can record the generated locals they
     /// should lower to. Nested bodies that cannot use `move(...)` push `None`.
     move_expr_bindings: Vec<Option<expr::MoveExprState<'hir>>>,
 
+    /// Whether an initializer for a recorded `move(...)` is currently being lowered.
+    lowering_move_expr_initializer: bool,
+
     attribute_parser: AttributeParser<'hir>,
+}
+
+macro_rules! allow {
+    ($($name:ident: $list:expr;)*) => {
+        $( static $name: LazyLock<Arc<[Symbol]>> = LazyLock::new(|| $list.into()); )*
+    }
+}
+
+allow! {
+    ALLOW_CONTRACTS: [sym::contracts_internals];
+    ALLOW_TRY_TRAIT: [sym::try_trait_v2, sym::try_trait_v2_residual, sym::yeet_desugar_details];
+    ALLOW_PATTERN_TYPE: [sym::pattern_types, sym::pattern_type_range_trait];
+    ALLOW_GEN_FUTURE: [sym::gen_future];
+    ALLOW_GEN_FUTURE_WITH_ASYNC_FN_TRACK_CALLER: [sym::gen_future, sym::closure_track_caller];
+    ALLOW_FOR_AWAIT: [sym::async_gen_internals, sym::async_iterator];
+    ALLOW_ASYNC_FN_TRAITS: [sym::async_fn_traits];
+    ALLOW_ASYNC_GEN: [sym::async_gen_internals];
+    // FIXME(gen_blocks): how does `closure_track_caller`/`async_fn_track_caller`
+    // interact with `gen`/`async gen` blocks
+    ALLOW_ASYNC_ITERATOR: [sym::gen_future, sym::async_iterator];
 }
 
 impl<'a, 'hir> LoweringContext<'a, 'hir> {
     fn new(tcx: TyCtxt<'hir>, resolver: &'a ResolverAstLowering<'hir>, owner: NodeId) -> Self {
-        let current_ast_owner = &resolver.owners[&owner];
-        let current_hir_id_owner = hir::OwnerId { def_id: current_ast_owner.def_id };
-        let current_disambiguator = resolver
-            .disambiguators
-            .get(&current_hir_id_owner.def_id)
-            .map(|s| s.steal())
-            .unwrap_or_else(|| PerParentDisambiguatorState::new(current_hir_id_owner.def_id));
-
         Self {
             tcx,
             resolver,
-            current_disambiguator,
-            owner: current_ast_owner,
+            curr_owner: PerOwnerLoweringState::new(resolver, owner),
             arena: tcx.hir_arena,
 
-            // HirId handling.
-            bodies: Vec::new(),
-            define_opaque: None,
-            attrs: SortedMap::default(),
-            children: LocalDefIdMap::default(),
             contract_ensures: None,
-            current_hir_id_owner,
-            // 0 corresponds to `owner` lowered as `current_hir_id_owner`,
-            // and we never call `lower_node_id(owner)`.
-            item_local_id_counter: hir::ItemLocalId::new(1),
-            ident_and_label_to_local_id: Default::default(),
 
-            #[cfg(debug_assertions)]
-            relowering_checker: Default::default(),
-
-            trait_map: Default::default(),
             next_node_id: resolver.next_node_id,
             node_id_to_def_id: NodeMap::default(),
             partial_res_overrides: NodeMap::default(),
@@ -265,42 +367,29 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             is_in_dyn_type: false,
             coroutine_kind: None,
             task_context: None,
-            current_item: None,
-            impl_trait_defs: Vec::new(),
-            impl_trait_bounds: Vec::new(),
-            allow_contracts: [sym::contracts_internals].into(),
-            allow_try_trait: [
-                sym::try_trait_v2,
-                sym::try_trait_v2_residual,
-                sym::yeet_desugar_details,
-            ]
-            .into(),
-            allow_pattern_type: [sym::pattern_types, sym::pattern_type_range_trait].into(),
-            allow_gen_future: if tcx.features().async_fn_track_caller() {
-                [sym::gen_future, sym::closure_track_caller].into()
-            } else {
-                [sym::gen_future].into()
-            },
-            allow_for_await: [sym::async_gen_internals, sym::async_iterator].into(),
-            allow_async_fn_traits: [sym::async_fn_traits].into(),
-            allow_async_gen: [sym::async_gen_internals].into(),
-            // FIXME(gen_blocks): how does `closure_track_caller`/`async_fn_track_caller`
-            // interact with `gen`/`async gen` blocks
-            allow_async_iterator: [sym::gen_future, sym::async_iterator].into(),
+            current_item_span: None,
 
             move_expr_bindings: Vec::new(),
+            lowering_move_expr_initializer: false,
             attribute_parser: AttributeParser::new(
                 tcx.sess,
                 tcx.features(),
                 tcx.registered_attr_tools(()),
                 ShouldEmit::ErrorsAndLints { recovery: Recovery::Allowed },
             ),
-            delayed_lints: Vec::new(),
         }
     }
 
     pub(crate) fn dcx(&self) -> DiagCtxtHandle<'hir> {
         self.tcx.dcx()
+    }
+
+    fn allow_gen_future(&self) -> &Arc<[Symbol]> {
+        if self.tcx.features().async_fn_track_caller() {
+            &ALLOW_GEN_FUTURE_WITH_ASYNC_FN_TRACK_CALLER
+        } else {
+            &ALLOW_GEN_FUTURE
+        }
     }
 }
 
@@ -498,7 +587,7 @@ enum TryBlockScope {
 fn index_ast<'tcx>(
     tcx: TyCtxt<'tcx>,
     (): (),
-) -> IndexVec<LocalDefId, Steal<(Arc<ResolverAstLowering<'tcx>>, AstOwner)>> {
+) -> &'tcx IndexSlice<LocalDefId, Steal<(Arc<ResolverAstLowering<'tcx>>, AstOwner)>> {
     // Queries that borrow `resolver_for_lowering`.
     tcx.ensure_done().output_filenames(());
     tcx.ensure_done().early_lint_checks(());
@@ -520,8 +609,9 @@ fn index_ast<'tcx>(
 
     let index = indexer.index;
     let resolver = Arc::new(resolver);
-    let index = index.into_iter().map(|owner| Steal::new((Arc::clone(&resolver), owner))).collect();
-    return index;
+    return tcx.arena.alloc_index_slice_from_iter::<LocalDefId, _, _>(
+        index.into_iter().map(|owner| Steal::new((Arc::clone(&resolver), owner))),
+    );
 
     struct Indexer<'s, 'hir> {
         owners: &'s NodeMap<PerOwnerResolverData<'hir>>,
@@ -575,27 +665,6 @@ fn index_ast<'tcx>(
             let item = mem::replace(item, *dummy);
             self.insert(item.id, node(Box::new(item)));
         }
-
-        #[tracing::instrument(level = "trace", skip(self))]
-        fn visit_item_id_use_tree(
-            &mut self,
-            tree: &UseTree,
-            parent: LocalDefId,
-            items: &mut SmallVec<[Box<Item>; 1]>,
-        ) {
-            match tree.kind {
-                UseTreeKind::Glob(_) | UseTreeKind::Simple(_) => {}
-                UseTreeKind::Nested { items: ref nested_vec, span } => {
-                    for &(ref nested, id) in nested_vec {
-                        self.insert(id, AstOwner::NestedUseTree(parent));
-                        items.push(self.make_dummy(id, span, ItemKind::MacCall));
-
-                        let def_id = self.owners[&id].def_id;
-                        self.visit_item_id_use_tree(nested, def_id, items);
-                    }
-                }
-            }
-        }
     }
 
     impl MutVisitor for Indexer<'_, '_> {
@@ -605,35 +674,11 @@ fn index_ast<'tcx>(
         }
 
         fn flat_map_item(&mut self, mut item: Box<Item>) -> SmallVec<[Box<Item>; 1]> {
-            let def_id = self.owners[&item.id].def_id;
             mut_visit::walk_item(self, &mut *item);
             let dummy = self.make_dummy(item.id, item.span, ItemKind::MacCall);
-            let mut items = smallvec![dummy];
-            if let ItemKind::Use(ref use_tree) = item.kind {
-                self.visit_item_id_use_tree(use_tree, def_id, &mut items);
-            }
+            let items = smallvec![dummy];
             self.insert(item.id, AstOwner::Item(item));
             items
-        }
-
-        fn flat_map_stmt(&mut self, stmt: Stmt) -> SmallVec<[Stmt; 1]> {
-            let Stmt { id, span, kind } = stmt;
-            let mut id = Some(id);
-            mut_visit::walk_flat_map_stmt_kind(self, kind)
-                .into_iter()
-                .map(|kind| {
-                    // Expanding the current statement is a nested `use` item,
-                    // it is expanded into several flat `use` items.
-                    // Create new NodeIds for the corresponding statements
-                    // as two statements cannot have the same.
-                    let id = id.take().unwrap_or_else(|| {
-                        let next = self.next_node_id;
-                        self.next_node_id.increment_by(1);
-                        next
-                    });
-                    Stmt { id, kind, span }
-                })
-                .collect()
         }
 
         fn visit_assoc_item(&mut self, item: &mut AssocItem, ctxt: visit::AssocCtxt) {
@@ -657,15 +702,17 @@ fn index_ast<'tcx>(
 
 #[instrument(level = "trace", skip(tcx))]
 fn lower_to_hir(tcx: TyCtxt<'_>, def_id: LocalDefId) -> hir::MaybeOwner<'_> {
+    tcx.ensure_done().resolve_type_relative_delegations(());
+
     let ast_index = tcx.index_ast(());
     let resolver_and_node = ast_index.get(def_id).map(Steal::steal);
 
-    let fallback_to_ancestor = |parent_id| {
+    let fallback_to_ancestor = || {
         // The item did not exist in the AST, it was created while lowering another item.
-        // `parent_id` may be different from the direct parent of `def_id`,
-        // for instance use-trees are lowered by the first sibling.
+
+        let parent_id = tcx.local_parent(def_id);
         let mut parent_info = tcx.lower_to_hir(parent_id);
-        if let hir::MaybeOwner::NonOwner(hir_id) = parent_info {
+        while let hir::MaybeOwner::NonOwner(hir_id) = parent_info {
             // `parent_id` could also not be a owner either.
             // For instance if `def_id` is an enum variant field,
             // the direct parent is the enum variant.
@@ -676,7 +723,8 @@ fn lower_to_hir(tcx: TyCtxt<'_>, def_id: LocalDefId) -> hir::MaybeOwner<'_> {
 
         let parent_info = parent_info.unwrap();
         *parent_info.children.get(&def_id).unwrap_or_else(|| {
-            panic!(
+            span_bug!(
+                tcx.source_span(def_id),
                 "{:?} does not appear in children of {:?}",
                 def_id,
                 parent_info.nodes.node().def_id()
@@ -688,22 +736,43 @@ fn lower_to_hir(tcx: TyCtxt<'_>, def_id: LocalDefId) -> hir::MaybeOwner<'_> {
         // `ast_index` does not contain all definitions, only up-to the highest
         // `LocalDefId` which has a non-trivial `AstOwner`. Gracefully handle
         // other definitions, in particular those nested inside this highest definition.
-        return fallback_to_ancestor(tcx.local_parent(def_id));
+        return fallback_to_ancestor();
     };
 
-    let mut item_lowerer = item::ItemLowerer { tcx, resolver: &*resolver };
+    fn with_lctx<'hir>(
+        tcx: TyCtxt<'hir>,
+        resolver: &ResolverAstLowering<'hir>,
+        owner: NodeId,
+        f: impl FnOnce(&mut LoweringContext<'_, 'hir>) -> hir::OwnerNode<'hir>,
+    ) -> hir::MaybeOwner<'hir> {
+        let mut lctx = LoweringContext::new(tcx, resolver, owner);
+        let item = f(&mut lctx);
+        hir::MaybeOwner::Owner(lctx.curr_owner.into_owner_info(tcx, item))
+    }
 
     let item = match &node {
         // The item existed in the AST.
-        AstOwner::Crate(c) => item_lowerer.lower_crate(&c),
-        AstOwner::Item(item) => item_lowerer.lower_item(&item),
-        AstOwner::TraitItem(item) => item_lowerer.lower_trait_item(&item),
-        AstOwner::ImplItem(item) => item_lowerer.lower_impl_item(&item),
-        AstOwner::ForeignItem(item) => item_lowerer.lower_foreign_item(&item),
-        AstOwner::NestedUseTree(owner_id) => fallback_to_ancestor(*owner_id),
+        AstOwner::Crate(c) => with_lctx(tcx, &*resolver, CRATE_NODE_ID, |lctx| {
+            debug_assert_eq!(lctx.curr_owner.owner_id(), CRATE_OWNER_ID);
+            let module = lctx.lower_mod(&c.items, &c.spans);
+            lctx.lower_attrs(hir::CRATE_HIR_ID, &c.attrs, c.spans.inner_span, Target::Crate);
+            hir::OwnerNode::Crate(module)
+        }),
+        AstOwner::Item(item) => {
+            with_lctx(tcx, &*resolver, item.id, |lctx| hir::OwnerNode::Item(lctx.lower_item(item)))
+        }
+        AstOwner::TraitItem(item) => with_lctx(tcx, &*resolver, item.id, |lctx| {
+            hir::OwnerNode::TraitItem(lctx.lower_trait_item(item))
+        }),
+        AstOwner::ImplItem(item) => with_lctx(tcx, &*resolver, item.id, |lctx| {
+            hir::OwnerNode::ImplItem(lctx.lower_impl_item(item))
+        }),
+        AstOwner::ForeignItem(item) => with_lctx(tcx, &*resolver, item.id, |lctx| {
+            hir::OwnerNode::ForeignItem(lctx.lower_foreign_item(item))
+        }),
         // The item existed in the AST, but is not a HIR owner.
         // Fetch the correct information from its parent.
-        AstOwner::NonOwner => fallback_to_ancestor(tcx.local_parent(def_id)),
+        AstOwner::NonOwner => fallback_to_ancestor(),
     };
 
     tcx.sess.time("drop_ast", || mem::drop(node));
@@ -732,7 +801,7 @@ enum GenericArgsMode {
     ParenSugar,
     /// Allow RTN, don't allow paren sugar.
     ReturnTypeNotation,
-    // Error if parenthesized generics or RTN are encountered.
+    /// Error if parenthesized generics or RTN are encountered.
     Err,
     /// Silence errors when lowering generics. Only used with `Res::Err`.
     Silence,
@@ -746,7 +815,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         def_kind: DefKind,
         span: Span,
     ) -> LocalDefId {
-        let parent = self.current_hir_id_owner.def_id;
+        let parent = self.curr_owner.owner_id().def_id;
         assert_ne!(node_id, ast::DUMMY_NODE_ID);
         assert!(
             self.opt_local_def_id(node_id).is_none(),
@@ -759,7 +828,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let def_id = self
             .tcx
             .at(span)
-            .create_def(parent, name, def_kind, None, &mut self.current_disambiguator)
+            .create_def(parent, name, def_kind, None, &mut self.curr_owner.disambiguator)
             .def_id();
 
         debug!("create_def: def_id_to_node_id[{:?}] <-> {:?}", def_id, node_id);
@@ -781,7 +850,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn opt_local_def_id(&self, node: NodeId) -> Option<LocalDefId> {
         self.node_id_to_def_id
             .get(&node)
-            .or_else(|| self.owner.node_id_to_def_id.get(&node))
+            .or_else(|| self.curr_owner.owner.node_id_to_def_id.get(&node))
             .copied()
     }
 
@@ -812,135 +881,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         hir::OwnerId { def_id: self.resolver.owners[&node].def_id }
     }
 
-    /// Freshen the `LoweringContext` and ready it to lower a nested item.
-    /// The lowered item is registered into `self.children`.
-    ///
-    /// This function sets up `HirId` lowering infrastructure,
-    /// and stashes the shared mutable state to avoid pollution by the closure.
-    #[instrument(level = "debug", skip(self, f))]
-    fn with_hir_id_owner(
-        &mut self,
-        owner: NodeId,
-        f: impl FnOnce(&mut Self) -> hir::OwnerNode<'hir>,
-    ) {
-        let owner_id = self.owner_id(owner);
-        let def_id = owner_id.def_id;
-
-        let new_disambig = self
-            .resolver
-            .disambiguators
-            .get(&def_id)
-            .map(|s| s.steal())
-            .unwrap_or_else(|| PerParentDisambiguatorState::new(def_id));
-
-        let disambiguator = mem::replace(&mut self.current_disambiguator, new_disambig);
-        let current_ast_owner = mem::replace(&mut self.owner, &self.resolver.owners[&owner]);
-        let current_attrs = mem::take(&mut self.attrs);
-        let current_bodies = mem::take(&mut self.bodies);
-        let current_define_opaque = mem::take(&mut self.define_opaque);
-        let current_ident_and_label_to_local_id = mem::take(&mut self.ident_and_label_to_local_id);
-
-        #[cfg(debug_assertions)]
-        let current_relowering_checker = mem::take(&mut self.relowering_checker);
-        let current_trait_map = mem::take(&mut self.trait_map);
-        let current_owner = mem::replace(&mut self.current_hir_id_owner, owner_id);
-        let current_local_counter =
-            mem::replace(&mut self.item_local_id_counter, hir::ItemLocalId::new(1));
-        let current_impl_trait_defs = mem::take(&mut self.impl_trait_defs);
-        let current_impl_trait_bounds = mem::take(&mut self.impl_trait_bounds);
-        let current_delayed_lints = mem::take(&mut self.delayed_lints);
-        let current_children = mem::take(&mut self.children);
-
-        // Do not reset `next_node_id` and `node_id_to_def_id`:
-        // we want `f` to be able to refer to the `LocalDefId`s that the caller created.
-        // and the caller to refer to some of the subdefinitions' nodes' `LocalDefId`s.
-
-        // Always allocate the first `HirId` for the owner itself.
-        #[cfg(debug_assertions)]
-        self.relowering_checker.assert_node_is_not_relowered(owner, hir::ItemLocalId::ZERO);
-
-        let item = f(self);
-        assert_eq!(owner_id, item.def_id());
-        // `f` should have consumed all the elements in these vectors when constructing `item`.
-        assert!(self.impl_trait_defs.is_empty());
-        assert!(self.impl_trait_bounds.is_empty());
-        let info = self.make_owner_info(item);
-
-        self.current_disambiguator = disambiguator;
-        self.owner = current_ast_owner;
-        self.attrs = current_attrs;
-        self.bodies = current_bodies;
-        self.define_opaque = current_define_opaque;
-        self.ident_and_label_to_local_id = current_ident_and_label_to_local_id;
-
-        #[cfg(debug_assertions)]
-        {
-            self.relowering_checker = current_relowering_checker;
-        }
-        self.trait_map = current_trait_map;
-        self.current_hir_id_owner = current_owner;
-        self.item_local_id_counter = current_local_counter;
-        self.impl_trait_defs = current_impl_trait_defs;
-        self.impl_trait_bounds = current_impl_trait_bounds;
-        self.delayed_lints = current_delayed_lints;
-        self.children = current_children;
-        self.children.extend_unord(info.children.items().map(|(&def_id, &info)| (def_id, info)));
-
-        debug_assert!(!self.children.contains_key(&owner_id.def_id));
-        self.children.insert(owner_id.def_id, hir::MaybeOwner::Owner(info));
-    }
-
-    fn make_owner_info(&mut self, node: hir::OwnerNode<'hir>) -> &'hir hir::OwnerInfo<'hir> {
-        let attrs = mem::take(&mut self.attrs);
-        let mut bodies = mem::take(&mut self.bodies);
-        let define_opaque = mem::take(&mut self.define_opaque);
-        let trait_map = mem::take(&mut self.trait_map);
-        let delayed_lints = Steal::new(mem::take(&mut self.delayed_lints).into_boxed_slice());
-        let children = mem::take(&mut self.children);
-
-        #[cfg(debug_assertions)]
-        for (id, attrs) in attrs.iter() {
-            // Verify that we do not store empty slices in the map.
-            if attrs.is_empty() {
-                panic!("Stored empty attributes for {:?}", id);
-            }
-        }
-
-        bodies.sort_by_key(|(k, _)| *k);
-        let bodies = SortedMap::from_presorted_elements(bodies);
-
-        // Don't hash unless necessary, because it's expensive.
-        let rustc_middle::hir::Hashes { bodies_hash, attrs_hash } =
-            self.tcx.hash_owner_nodes(node, &bodies, &attrs, define_opaque);
-        let num_nodes = self.item_local_id_counter.as_usize();
-        let (nodes, parenting) = index::index_hir(self.tcx, node, &bodies, num_nodes);
-        let nodes = hir::OwnerNodes { opt_hash: bodies_hash, nodes, bodies };
-        let attrs = hir::AttributeMap { map: attrs, opt_hash: attrs_hash, define_opaque };
-
-        let opt_hash = self.tcx.needs_hir_hash().then(|| {
-            self.tcx.with_stable_hashing_context(|mut hcx| {
-                let mut stable_hasher = StableHasher::new();
-                bodies_hash.unwrap().stable_hash(&mut hcx, &mut stable_hasher);
-                attrs_hash.unwrap().stable_hash(&mut hcx, &mut stable_hasher);
-                // Do not hash delayed_lints.
-                parenting.stable_hash(&mut hcx, &mut stable_hasher);
-                trait_map.stable_hash(&mut hcx, &mut stable_hasher);
-                children.stable_hash(&mut hcx, &mut stable_hasher);
-                stable_hasher.finish()
-            })
-        });
-
-        self.arena.alloc(hir::OwnerInfo {
-            opt_hash,
-            nodes,
-            parenting,
-            attrs,
-            trait_map,
-            delayed_lints,
-            children,
-        })
-    }
-
     /// This method allocates a new `HirId` for the given `NodeId`.
     /// Take care not to call this method if the resulting `HirId` is then not
     /// actually used in the HIR, as that would trigger an assertion in the
@@ -950,23 +890,23 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_node_id(&mut self, ast_node_id: NodeId) -> HirId {
         assert_ne!(ast_node_id, DUMMY_NODE_ID);
 
-        let owner = self.current_hir_id_owner;
-        let local_id = self.item_local_id_counter;
+        let owner = self.curr_owner.owner_id();
+        let local_id = self.curr_owner.item_local_id_counter;
         assert_ne!(local_id, hir::ItemLocalId::ZERO);
-        self.item_local_id_counter.increment_by(1);
+        self.curr_owner.item_local_id_counter.increment_by(1);
         let hir_id = HirId { owner, local_id };
 
         if let Some(def_id) = self.opt_local_def_id(ast_node_id) {
-            self.children.insert(def_id, hir::MaybeOwner::NonOwner(hir_id));
+            self.curr_owner.children.insert(def_id, hir::MaybeOwner::NonOwner(hir_id));
         }
 
-        if let Some(traits) = self.owner.trait_map.get(&ast_node_id) {
-            self.trait_map.insert(hir_id.local_id, *traits);
+        if let Some(traits) = self.curr_owner.owner.trait_map.get(&ast_node_id) {
+            self.curr_owner.trait_map.insert(hir_id.local_id, *traits);
         }
 
         // Check whether the same `NodeId` is lowered more than once.
         #[cfg(debug_assertions)]
-        self.relowering_checker.assert_node_is_not_relowered(ast_node_id, local_id);
+        self.curr_owner.relowering_checker.assert_node_is_not_relowered(ast_node_id, local_id);
 
         hir_id
     }
@@ -974,18 +914,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
     /// Generate a new `HirId` without a backing `NodeId`.
     #[instrument(level = "debug", skip(self), ret)]
     fn next_id(&mut self) -> HirId {
-        let owner = self.current_hir_id_owner;
-        let local_id = self.item_local_id_counter;
+        let owner = self.curr_owner.owner_id();
+        let local_id = self.curr_owner.item_local_id_counter;
         assert_ne!(local_id, hir::ItemLocalId::ZERO);
-        self.item_local_id_counter.increment_by(1);
+        self.curr_owner.item_local_id_counter.increment_by(1);
         HirId { owner, local_id }
     }
 
     #[instrument(level = "trace", skip(self))]
-    fn lower_res(&mut self, res: Res<NodeId>) -> Res {
+    fn lower_res(&self, res: Res<NodeId>) -> Res {
         let res: Result<Res, ()> = res.apply_id(|id| {
-            let owner = self.current_hir_id_owner;
-            let local_id = self.ident_and_label_to_local_id.get(&id).copied().ok_or(())?;
+            let owner = self.curr_owner.owner_id();
+            let local_id =
+                self.curr_owner.ident_and_label_to_local_id.get(&id).copied().ok_or(())?;
             Ok(HirId { owner, local_id })
         });
         trace!(?res);
@@ -998,13 +939,27 @@ impl<'hir> LoweringContext<'_, 'hir> {
         res.unwrap_or(Res::Err)
     }
 
-    fn expect_full_res(&mut self, id: NodeId) -> Res<NodeId> {
+    fn expect_full_res(&self, id: NodeId) -> Res<NodeId> {
         self.get_partial_res(id).map_or(Res::Err, |pr| pr.expect_full_res())
     }
 
-    fn lower_import_res(&mut self, id: NodeId, span: Span) -> PerNS<Option<Res>> {
-        debug_assert_eq!(id, self.owner.id);
-        let per_ns = self.owner.import_res.map(|res| res.map(|res| self.lower_res(res)));
+    fn lower_import_res(&self, id: NodeId, span: Span) -> PerNS<Option<Res>> {
+        let per_ns = self
+            .curr_owner
+            .owner
+            .import_res
+            .get(&id)
+            .unwrap_or_else(|| {
+                let sp = self.tcx.source_span(self.curr_owner.owner.def_id);
+                self.tcx.dcx().span_delayed_bug(
+                    sp,
+                    "no import_res entry for import, \
+                        this should only happen if it already errored in resolve",
+                );
+                &PerNS { value_ns: None, type_ns: None, macro_ns: None }
+            })
+            .map(|res| res.map(|res| self.lower_res(res)));
+
         if per_ns.is_empty() {
             // Propagate the error to all namespaces, just to be sure.
             self.dcx().span_delayed_bug(span, "no resolution for an import");
@@ -1062,7 +1017,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn span_lowerer(&self) -> SpanLowerer {
         SpanLowerer {
             is_incremental: self.tcx.sess.opts.incremental.is_some(),
-            def_id: self.current_hir_id_owner.def_id,
+            def_id: self.curr_owner.owner_id().def_id,
         }
     }
 
@@ -1122,7 +1077,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     ) -> &'hir [hir::GenericParam<'hir>] {
         // Start by creating params for extra lifetimes params, as this creates the definitions
         // that may be referred to by the AST inside `generic_params`.
-        let extra_lifetimes = self.owner.extra_lifetime_params(binder);
+        let extra_lifetimes = self.curr_owner.owner.extra_lifetime_params(binder);
         debug!(?extra_lifetimes);
         let extra_lifetimes: Vec<_> = extra_lifetimes
             .iter()
@@ -1153,8 +1108,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
     }
 
     fn with_new_scopes<T>(&mut self, scope_span: Span, f: impl FnOnce(&mut Self) -> T) -> T {
-        let current_item = self.current_item;
-        self.current_item = Some(scope_span);
+        let current_item_span = self.current_item_span;
+        self.current_item_span = Some(scope_span);
 
         let was_in_loop_condition = self.is_in_loop_condition;
         self.is_in_loop_condition = false;
@@ -1171,7 +1126,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         self.is_in_loop_condition = was_in_loop_condition;
 
-        self.current_item = current_item;
+        self.current_item_span = current_item_span;
 
         ret
     }
@@ -1182,8 +1137,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
         attrs: &[Attribute],
         target_span: Span,
         target: Target,
-    ) -> &'hir [hir::Attribute] {
-        self.lower_attrs_with_extra(id, attrs, target_span, target, &[])
+    ) -> &'hir [rustc_attr_ir::Attribute] {
+        self.lower_attrs_with_extra(id, attrs, target_span, target, None, &[])
     }
 
     fn lower_attrs_with_extra(
@@ -1192,16 +1147,17 @@ impl<'hir> LoweringContext<'_, 'hir> {
         attrs: &[Attribute],
         target_span: Span,
         target: Target,
-        extra_hir_attributes: &[hir::Attribute],
-    ) -> &'hir [hir::Attribute] {
+        target_item: Option<&ast::Item>,
+        extra_hir_attributes: &[rustc_attr_ir::Attribute],
+    ) -> &'hir [rustc_attr_ir::Attribute] {
         if attrs.is_empty() && extra_hir_attributes.is_empty() {
             &[]
         } else {
             let mut lowered_attrs =
-                self.lower_attrs_vec(attrs, self.lower_span(target_span), id, target);
+                self.lower_attrs_vec(attrs, self.lower_span(target_span), id, target, target_item);
             lowered_attrs.extend(extra_hir_attributes.iter().cloned());
 
-            assert_eq!(id.owner, self.current_hir_id_owner);
+            assert_eq!(id.owner, self.curr_owner.owner_id());
             let ret = self.arena.alloc_from_iter(lowered_attrs);
 
             // this is possible if an item contained syntactical attribute,
@@ -1213,7 +1169,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             if ret.is_empty() {
                 &[]
             } else {
-                self.attrs.insert(id.local_id, ret);
+                self.curr_owner.attrs.insert(id.local_id, ret);
                 ret
             }
         }
@@ -1225,15 +1181,17 @@ impl<'hir> LoweringContext<'_, 'hir> {
         target_span: Span,
         target_hir_id: HirId,
         target: Target,
-    ) -> Vec<hir::Attribute> {
+        target_item: Option<&ast::Item>,
+    ) -> Vec<rustc_attr_ir::Attribute> {
         let l = self.span_lowerer();
         self.attribute_parser.parse_attribute_list(
             attrs,
             target_span,
             target,
+            target_item,
             |s| l.lower(s),
             |lint_id, span, kind| {
-                self.delayed_lints.push(DelayedLint {
+                self.curr_owner.delayed_lints.push(DelayedLint {
                     lint_id,
                     id: target_hir_id,
                     span,
@@ -1249,16 +1207,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
     }
 
     fn alias_attrs(&mut self, id: HirId, target_id: HirId) {
-        assert_eq!(id.owner, self.current_hir_id_owner);
-        assert_eq!(target_id.owner, self.current_hir_id_owner);
-        if let Some(&a) = self.attrs.get(&target_id.local_id) {
+        assert_eq!(id.owner, self.curr_owner.owner_id());
+        assert_eq!(target_id.owner, self.curr_owner.owner_id());
+        if let Some(&a) = self.curr_owner.attrs.get(&target_id.local_id) {
             assert!(!a.is_empty());
-            self.attrs.insert(id.local_id, a);
+            self.curr_owner.attrs.insert(id.local_id, a);
         }
-    }
-
-    fn lower_delim_args(&self, args: &DelimArgs) -> DelimArgs {
-        args.clone()
     }
 
     /// Lower an associated item constraint.
@@ -1449,7 +1403,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     // type and value namespaces. If we resolved the path in the value namespace, we
                     // transform it into a generic const argument.
                     //
-                    // Note that even under `#![feature(min_generic_const_args)]`, only plain paths
+                    // Note that even under `#![feature(gca_min_const_items)]`, only plain paths
                     // to constants are allowed - e.g. `A::<T::ASSOC_CONST>` and
                     // `A::<CONST_WITH_PARAM::<2>>` are disallowed (they must be wrapped in `{ }`).
                     //
@@ -1466,9 +1420,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         let ct = self.arena.alloc(ct);
                         return GenericArg::Const(ct.try_as_ambig_ct().unwrap());
                     }
-                    TyKind::DirectConstArg(expr)
-                        if self.tcx.features().min_generic_const_args() =>
-                    {
+                    TyKind::GcaMacro(expr) if self.tcx.features().gca_min_const_items() => {
                         let ct = match self.can_lower_expr_to_const_arg_direct(
                             expr,
                             DirectConstArgContext::MacrolessMinGenericConstArgs,
@@ -1600,7 +1552,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     generic_params,
                     safety: self.lower_safety(f.safety, hir::Safety::Safe),
                     abi: self.lower_extern(f.ext),
-                    decl: self.lower_fn_decl(&f.decl, t.id, t.span, FnDeclKind::Pointer, None),
+                    decl: self.lower_fn_decl(&f.decl, t.id, FnDeclKind::Pointer, None),
                     param_idents: self.lower_fn_params_to_idents(&f.decl),
                 }))
             }
@@ -1643,8 +1595,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 self.lower_array_length_to_const_arg(length),
             ),
             TyKind::TraitObject(bounds, kind) => {
-                let mut lifetime_bound = None;
                 let (bounds, lifetime_bound) = self.with_dyn_type_scope(true, |this| {
+                    let mut lifetime_bound = None;
                     let bounds =
                         this.arena.alloc_from_iter(bounds.iter().filter_map(|bound| match bound {
                             // We can safely ignore constness here since AST validation
@@ -1677,9 +1629,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                                 None
                             }
                         }));
-                    let lifetime_bound =
-                        lifetime_bound.unwrap_or_else(|| this.elided_dyn_bound(t.span));
-                    (bounds, lifetime_bound)
+                    (bounds, lifetime_bound.unwrap_or_else(|| this.elided_dyn_bound(t.span)))
                 });
                 hir::TyKind::TraitObject(bounds, TaggedRef::new(lifetime_bound, *kind))
             }
@@ -1706,9 +1656,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
                             ident,
                             bounds,
                         );
-                        self.impl_trait_defs.push(param);
+                        self.curr_owner.impl_trait_defs.push(param);
                         if let Some(bounds) = bounds {
-                            self.impl_trait_bounds.push(bounds);
+                            self.curr_owner.impl_trait_bounds.push(bounds);
                         }
                         path
                     }
@@ -1730,7 +1680,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                                 },
                                 feature,
                             )
-                            .emit();
+                            .emit_err();
                         hir::TyKind::Err(guar)
                     }
                     ImplTraitContext::Disallowed(position) => {
@@ -1776,8 +1726,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let fields = self.arena.alloc_slice(fields);
                 hir::TyKind::View(ty, fields)
             }
-            TyKind::DirectConstArg(expr) => {
-                let e = self.emit_bad_direct_const_arg(t.span, expr, "type");
+            TyKind::GcaMacro(expr) => {
+                let e = self.emit_bad_gca_macro(t.span, expr, "type");
                 hir::TyKind::Err(e)
             }
             TyKind::Dummy => panic!("`TyKind::Dummy` should never be lowered"),
@@ -1786,19 +1736,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
         hir::Ty { kind, span: self.lower_span(t.span), hir_id: self.lower_node_id(t.id) }
     }
 
-    pub(crate) fn emit_bad_direct_const_arg(
+    pub(crate) fn emit_bad_gca_macro(
         &mut self,
         span: Span,
         expr: &Expr,
         expected: &'static str,
     ) -> ErrorGuaranteed {
-        let msg = format!("expected {expected}, found `direct_const_arg!()` constant");
+        let msg = format!("expected {expected}, found `gca!()` constant");
         if expr::WillCreateDefIdsVisitor.visit_expr(expr).is_break() {
             // FIXME(mgca): make this non-fatal once we have a better way to handle
-            // nested items in invalid `direct_const_arg!()` arguments.
-            self.dcx().struct_span_fatal(span, msg).emit()
+            // nested items in invalid `gca!()` arguments.
+            self.dcx().span_fatal(span, msg)
         } else {
-            self.dcx().struct_span_err(span, msg).emit()
+            self.dcx().span_err(span, msg)
         }
     }
 
@@ -1812,7 +1762,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
             None => {
                 let id = if let Some(LifetimeRes::ElidedAnchor { start, end }) =
-                    self.owner.get_lifetime_res(t.id)
+                    self.curr_owner.owner.get_lifetime_res(t.id)
                 {
                     assert_eq!(start.plus(1), end);
                     start
@@ -1960,7 +1910,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         &mut self,
         decl: &FnDecl,
         fn_node_id: NodeId,
-        fn_span: Span,
         kind: FnDeclKind,
         coro: Option<CoroutineMarker>,
     ) -> &'hir hir::FnDecl<'hir> {
@@ -1996,7 +1945,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         let output = match coro {
             Some(coro) => {
-                let fn_def_id = self.owner.def_id;
+                let fn_def_id = self.curr_owner.owner.def_id;
                 self.lower_coroutine_fn_ret_ty(&decl.output, fn_def_id, coro, kind)
             }
             None => match &decl.output {
@@ -2004,19 +1953,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     let itctx = match kind {
                         FnDeclKind::Fn | FnDeclKind::Inherent => ImplTraitContext::OpaqueTy {
                             origin: hir::OpaqueTyOrigin::FnReturn {
-                                parent: self.owner.def_id,
+                                parent: self.curr_owner.owner.def_id,
                                 in_trait_or_impl: None,
                             },
                         },
                         FnDeclKind::Trait => ImplTraitContext::OpaqueTy {
                             origin: hir::OpaqueTyOrigin::FnReturn {
-                                parent: self.owner.def_id,
+                                parent: self.curr_owner.owner.def_id,
                                 in_trait_or_impl: Some(hir::RpitContext::Trait),
                             },
                         },
                         FnDeclKind::Impl => ImplTraitContext::OpaqueTy {
                             origin: hir::OpaqueTyOrigin::FnReturn {
-                                parent: self.owner.def_id,
+                                parent: self.curr_owner.owner.def_id,
                                 in_trait_or_impl: Some(hir::RpitContext::TraitImpl),
                             },
                         },
@@ -2061,7 +2010,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 }
             }))
             .set_lifetime_elision_allowed(
-                self.owner.id == fn_node_id && self.owner.lifetime_elision_allowed,
+                self.curr_owner.owner.id == fn_node_id
+                    && self.curr_owner.owner.lifetime_elision_allowed,
             )
             .set_c_variadic(c_variadic)
             .set_splatted(splatted, inputs.len())
@@ -2091,7 +2041,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let (opaque_ty_node_id, allowed_features) = match coro.kind {
             CoroutineKind::Async | CoroutineKind::Gen => (coro.return_impl_trait_id, None),
             CoroutineKind::AsyncGen => {
-                (coro.return_impl_trait_id, Some(Arc::clone(&self.allow_async_iterator)))
+                (coro.return_impl_trait_id, Some(Arc::clone(&ALLOW_ASYNC_ITERATOR)))
             }
         };
 
@@ -2229,7 +2179,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         source: LifetimeSource,
         syntax: LifetimeSyntax,
     ) -> &'hir hir::Lifetime {
-        let res = if let Some(res) = self.owner.get_lifetime_res(id) {
+        let res = if let Some(res) = self.curr_owner.owner.get_lifetime_res(id) {
             match res {
                 LifetimeRes::Param { param, .. } => hir::LifetimeKind::Param(param),
                 LifetimeRes::Fresh { param, .. } => {
@@ -2315,12 +2265,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 // AST resolution emitted an error on those parameters, so we lower them using
                 // `ParamName::Error`.
                 let ident = self.lower_ident(param.ident);
-                let param_name =
-                    if let Some(LifetimeRes::Error(..)) = self.owner.get_lifetime_res(param.id) {
-                        ParamName::Error(ident)
-                    } else {
-                        ParamName::Plain(ident)
-                    };
+                let param_name = if let Some(LifetimeRes::Error(..)) =
+                    self.curr_owner.owner.get_lifetime_res(param.id)
+                {
+                    ParamName::Error(ident)
+                } else {
+                    ParamName::Plain(ident)
+                };
                 let kind =
                     hir::GenericParamKind::Lifetime { kind: hir::LifetimeParamKind::Explicit };
 
@@ -2607,7 +2558,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         // We cannot just match on `ExprKind::Underscore` as `(_)` is represented as
         // `ExprKind::Paren(ExprKind::Underscore)` and should also be lowered to `GenericArg::Infer`
         //
-        // FIXME(macroless_generic_const_args): Handling of underscores should be moved into
+        // FIXME(gca_macroless_args): Handling of underscores should be moved into
         // lower_expr_to_const_arg_direct. It is left here as retaining compatibility of what is
         // currently allowed on stable gets hairy and annoying otherwise.
         match c.value.peel_parens().kind {
@@ -2678,41 +2629,38 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_const_item_rhs(
         &mut self,
         body: &Option<Box<Expr>>,
-        kind: ConstItemKind,
         span: Span,
     ) -> hir::ConstItemRhs<'hir> {
-        match (body, kind) {
-            (body, ConstItemKind::Body) => {
-                hir::ConstItemRhs::Body(self.lower_const_body(span, body.as_deref()))
+        let is_direct = |body| {
+            if self.tcx.features().gca_macroless_items() {
+                self.can_lower_expr_to_const_arg_direct(
+                    body,
+                    DirectConstArgContext::MacrolessMinGenericConstArgs,
+                )
+                .is_ok()
+            } else {
+                // do not check can_lower_expr_to_const_arg_direct, but rather just
+                // ExprKind::GcaMacro, because we don't want e.g.
+                // `impl<const N: u8> { const C: u8 = N; }` to be a direct-rhs const
+                matches!(body, Expr { kind: ExprKind::GcaMacro(_), .. })
             }
-            (Some(body), ConstItemKind::TypeConst) => {
-                hir::ConstItemRhs::TypeConst(self.arena.alloc(
-                    match self.can_lower_expr_to_const_arg_direct(
-                        &body,
-                        DirectConstArgContext::MacrolessMinGenericConstArgs,
-                    ) {
-                        Ok(()) => self.lower_expr_to_const_arg_direct(&body, None),
-                        Err(err) => err.emit(self),
-                    },
-                ))
-            }
-            (None, ConstItemKind::TypeConst) => {
-                let const_arg = ConstArg {
-                    hir_id: self.next_id(),
-                    kind: hir::ConstArgKind::Error(
-                        self.dcx().span_delayed_bug(DUMMY_SP, "no block"),
-                    ),
-                    span: DUMMY_SP,
-                };
-                hir::ConstItemRhs::TypeConst(self.arena.alloc(const_arg))
-            }
+        };
+        if self.tcx.features().gca_min_const_items()
+            && let Some(body) = body
+            && is_direct(body)
+        {
+            hir::ConstItemRhs::Direct(
+                self.arena.alloc(self.lower_expr_to_const_arg_direct(&body, None)),
+            )
+        } else {
+            hir::ConstItemRhs::Body(self.lower_const_body(span, body.as_deref()))
         }
     }
 
     fn ambient_direct_const_arg_context(&self) -> DirectConstArgContext {
-        if self.tcx.features().macroless_generic_const_args() {
+        if self.tcx.features().gca_macroless_args() {
             DirectConstArgContext::MacrolessMinGenericConstArgs
-        } else if self.tcx.features().min_generic_const_args() {
+        } else if self.tcx.features().gca_min_const_items() {
             DirectConstArgContext::MinGenericConstArgs
         } else {
             DirectConstArgContext::Stable
@@ -2797,7 +2745,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 Ok(())
             }
             (ExprKind::ConstBlock(_), MacrolessMinGenericConstArgs) => Ok(()),
-            (ExprKind::DirectConstArg(_), MacrolessMinGenericConstArgs | MinGenericConstArgs) => {
+            (ExprKind::GcaMacro(_), MacrolessMinGenericConstArgs | MinGenericConstArgs) => {
                 // Always report this as able to be represented directly. If it turns out not to be,
                 // `lower_expr_to_const_arg_direct` will report an error.
                 Ok(())
@@ -2960,9 +2908,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let literal = self.lower_lit(literal, span);
 
                 let kind = if !matches!(literal.node, LitKind::Int(..)) {
-                    let err =
-                        self.dcx().struct_span_err(expr.span, "negated literal must be an integer");
-                    hir::ConstArgKind::Error(err.emit())
+                    let err = self.dcx().span_err(expr.span, "negated literal must be an integer");
+                    hir::ConstArgKind::Error(err)
                 } else {
                     hir::ConstArgKind::Literal { lit: literal.node, negated: true }
                 };
@@ -2980,11 +2927,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     span,
                 }
             }
-            ExprKind::DirectConstArg(expr) => {
+            ExprKind::GcaMacro(expr) => {
                 // `can_lower_expr_to_const_arg_direct` always returns success upon encountering a
-                // ExprKind::DirectConstArg, which effectively forces the expression to be lowered
-                // as a direct arg. If it actually turns out to not be possible, emit an error
-                // instead.
+                // ExprKind::GcaMacro, which effectively forces the expression to be lowered as a
+                // direct arg. If it actually turns out to not be possible, emit an error instead.
                 // Always use MacrolessMinGenericConstArgs, even if we're under regular GCA, because
                 // that's what the macro means: to enter a context that is like macroless GCA.
                 match self.can_lower_expr_to_const_arg_direct(
@@ -3019,7 +2965,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_anon_const_to_const_arg(&mut self, anon: &AnonConst) -> hir::ConstArg<'hir> {
         // Stable only allows one nesting of blocks for directly represented paths. mGCA allows
         // arbitrarily many, and are handled inside lower_expr_to_const_arg_direct for consistency.
-        let expr = if self.tcx.features().macroless_generic_const_args() {
+        let expr = if self.tcx.features().gca_macroless_args() {
             &anon.value
         } else {
             anon.value.maybe_unwrap_block()
@@ -3057,7 +3003,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         }))
     }
 
-    fn lower_unsafe_source(&mut self, u: UnsafeSource) -> hir::UnsafeSource {
+    fn lower_unsafe_source(&self, u: UnsafeSource) -> hir::UnsafeSource {
         match u {
             CompilerGenerated => hir::UnsafeSource::CompilerGenerated,
             UserProvided => hir::UnsafeSource::UserProvided,
@@ -3065,7 +3011,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     }
 
     fn lower_trait_bound_modifiers(
-        &mut self,
+        &self,
         modifiers: TraitBoundModifiers,
     ) -> hir::TraitBoundModifiers {
         let constness = match modifiers.constness {
@@ -3093,7 +3039,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
     fn stmt_let_pat(
         &mut self,
-        attrs: Option<&'hir [hir::Attribute]>,
+        attrs: Option<&'hir [rustc_attr_ir::Attribute]>,
         span: Span,
         init: Option<&'hir hir::Expr<'hir>>,
         pat: &'hir hir::Pat<'hir>,
@@ -3102,7 +3048,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let hir_id = self.next_id();
         if let Some(a) = attrs {
             assert!(!a.is_empty());
-            self.attrs.insert(hir_id.local_id, a);
+            self.curr_owner.attrs.insert(hir_id.local_id, a);
         }
         let local = hir::LetStmt {
             super_: None,
@@ -3336,12 +3282,12 @@ enum DirectConstArgContext {
     /// The only allowed direct const arg representation is simple paths that nameres to generic
     /// const parameters.
     Stable,
-    /// The allowed representations are what is allowed on stable, plus the `direct_const_arg!` macro.
+    /// The allowed representations are what is allowed on stable, plus the `gca!` macro.
     MinGenericConstArgs,
     /// Expressions attempt to be lowered directly, and if that fails, the expression falls back to
     /// being represented as an anon const.
     ///
-    /// This context is also used under MinGenericConstArgs inside a `direct_const_arg!` macro, for
+    /// This context is also used under MinGenericConstArgs inside a `gca!` macro, for
     /// simplicity, as they allow the same code.
     MacrolessMinGenericConstArgs,
 }
@@ -3366,9 +3312,9 @@ impl UnrepresentableConstArgError {
             // FIXME(mgca): make this non-fatal once we have a better way to handle
             // nested items in const args
             // Issue: https://github.com/rust-lang/rust/issues/154539
-            lowering_context.dcx().struct_span_fatal(self.span, msg).emit()
+            lowering_context.dcx().span_fatal(self.span, msg)
         } else {
-            lowering_context.dcx().struct_span_err(self.span, msg).emit()
+            lowering_context.dcx().span_err(self.span, msg)
         };
 
         ConstArg {

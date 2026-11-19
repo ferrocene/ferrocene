@@ -592,7 +592,7 @@ impl fmt::Display for JoinPathsError {
 
 #[stable(feature = "env", since = "1.0.0")]
 impl Error for JoinPathsError {
-    #[allow(deprecated, deprecated_in_future)]
+    #[allow(deprecated)]
     fn description(&self) -> &str {
         self.inner.description()
     }
@@ -606,7 +606,6 @@ impl Error for JoinPathsError {
 /// For example, [XDG Base Directories] on Unix or the `LOCALAPPDATA` and `APPDATA` environment variables on Windows.
 ///
 /// [XDG Base Directories]: https://specifications.freedesktop.org/basedir-spec/latest/
-//  feature(xdg_basedir): This should link to std::os::unix::xdg once it's stabilized
 ///
 /// # Unix
 ///

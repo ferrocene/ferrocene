@@ -35,6 +35,7 @@ pub struct Finder {
 /// Targets can be removed from this list during the usual release process bootstrap compiler bumps,
 /// when the newly-bumped stage 0 compiler now knows about the formerly-missing targets.
 const STAGE0_MISSING_TARGETS: &[&str] = &[
+<<<<<<< ferrocene/main
     // Ferrocene additions
     "aarch64-unknown-ferrocene.facade",
     "aarch64r82-unknown-ferrocene.facade",
@@ -47,6 +48,10 @@ const STAGE0_MISSING_TARGETS: &[&str] = &[
     "thumbv7em-ferrocene.facade-eabihf",
     "thumbv8m.main-ferrocene.facade-eabi",
     "thumbv8m.main-ferrocene.facade-eabihf",
+||||||| 646bb8409b1
+=======
+    "aarch64-unknown-serenity",
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     // just a dummy comment so the list doesn't get onelined
 ];
 

@@ -109,6 +109,7 @@
 #![feature(portable_simd)]
 #![feature(ptr_metadata)]
 #![feature(raw_os_error_ty)]
+#![feature(register_tool)]
 #![feature(rustc_attrs)]
 #![feature(signed_bigint_helpers)]
 #![feature(slice_from_ptr_range)]
@@ -142,6 +143,7 @@
 #![allow(internal_features)]
 #![deny(implicit_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+<<<<<<< ferrocene/main
 // Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
 #![feature(cfg_target_has_atomic)]
 // Ferrocene addition: Enable test-only functions in libcore
@@ -169,6 +171,10 @@
 // Ferrocene addition: coverage tests require panic=abort, we don't certify panic=unwind.
 #[cfg(all(ferrocene_coverage, not(panic = "abort")))]
 compile_error!("only -Cpanic=abort is certified");
+||||||| 646bb8409b1
+=======
+#![register_tool(reflective_tool(reflect))] // to allow testing of attribute reflection in `mem/type_info.rs`
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 /// Version of `assert_matches` that ignores fancy runtime printing in const context and uses structural equality.
 macro_rules! assert_eq_const_safe {

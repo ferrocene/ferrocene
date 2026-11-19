@@ -22,5 +22,11 @@ fn main() {
         //[rwpi]~^ ERROR cannot use register `r9`
     }
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: um_rustc_C_relocation_model
+||||||| 646bb8409b1
+=======
+
+//@ reference: asm.register-names.not-for-io
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

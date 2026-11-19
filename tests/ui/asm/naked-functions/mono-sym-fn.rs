@@ -33,6 +33,12 @@ extern "C" fn foo<U: Tr>() {
 fn main() {
     foo::<E<42>>();
 }
+<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_sd6rumpeb355
 // Attribute naked
+||||||| 646bb8409b1
+=======
+
+//@ reference: asm.operand-type.supported-operands-sym
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

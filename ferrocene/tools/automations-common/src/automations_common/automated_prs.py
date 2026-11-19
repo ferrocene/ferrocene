@@ -164,7 +164,6 @@ class AutomatedPR(abc.ABC):
                     "title": self.__resolved_pr_title(),
                     "head": branch_name,
                     "base": self.base_branch(),
-                    "body": self.pr_body(branch_name),
                     "maintainers_can_modify": True,
                 },
             )

@@ -63,25 +63,37 @@ Failure modes
 """""""""""""
 
 - False-positive: A function is reported as covered, although it is not covered
+
   - Risk: Overreporting, could result in testing gap.
   - Mitigation: No mitigation, since we assume the likelihood of such an error low.
+
 - False-negative: A function is reported as not covered, although it is covered
+
   - Risk: Underreporting, will not result in testing gap.
   - Mitigation: Since we want to achieve 100% line coverage this would stand out and be manually investigated.
+
 - The code coverage instrumentation introduces bugs into the library or the test runner
+
   - Risk: That results in failing tests being reported as successful or successful tests being reported as failing
   - Mitigation: Running the test suite once with and once without code coverage instrumentation and ensuring both report the same result.
+
 - Undercounting: Total number of functions is too high
+
   - Risk: A function is being considered, although it is not part of the certified subset
   - Mitigation: Not a risk as it only results in us testing more than necessary
+
 - Overcounting: Total number of functions is too low
+
   - Risk: A function is not being considered, although it is part of the certified subset
   - Mitigation: Developing ``symbol-report`` which uses exactly the same information as the compiler
+
 - Line that can be executed not being reported as executable
-    - Risk: Underreporting, code that should be tested may not being tested
-    - Mitigation:
-        - ``blanket`` warns if a function has no executable line
-        - (Future work) End-to-end test that ensures the correct lines are being reported as executable
+
+  - Risk: Underreporting, code that should be tested may not being tested
+  - Mitigation:
+
+    - ``blanket`` warns if a function has no executable line
+    - (Future work) End-to-end test that ensures the correct lines are being reported as executable
 
 Compiler
 --------
@@ -226,11 +238,14 @@ Failure modes
 """""""""""""
 
 - False-negative: Fail to detect non-compliance with the consistency rules
-   - Risk: Diverging from consistency rules. This is not critical, because Ferrous Systems only consumes the code from upstream and does not impose additional rules on it.
-   - Mitigation: None. If found, report issue upstream.
+
+  - Risk: Diverging from consistency rules. This is not critical, because Ferrous Systems only consumes the code from upstream and does not impose additional rules on it.
+  - Mitigation: None. If found, report issue upstream.
+
 - False-positive: Report non-compliance, although the code is compliant
-   - Risk: None
-   - Mitigation: Report issue upstream.
+
+  - Risk: None
+  - Mitigation: Report issue upstream.
 
 Test runner
 -----------
@@ -272,11 +287,14 @@ Failure modes
 """""""""""""
 
 - False-positive: Report test as successful, although it is failing
-   - Risk: Not detect incorrect code.
-   - Mitigation: Report issue upstream.
+
+  - Risk: Not detect incorrect code.
+  - Mitigation: Report issue upstream.
+
 - False-negative: Report test as failing, although it is successful
-   - Risk: None
-   - Mitigation: Report issue upstream.
+
+  - Risk: None
+  - Mitigation: Report issue upstream.
 
 Build orchestrator
 ------------------
@@ -432,6 +450,7 @@ Failure modes
 
   - Risk: Lost time invested.
   - Mitigation: Attempt to reproduce on real hardware.
+
 - False-negative: A test passes that would fail on real hardware
 
   - Risk: Code which produces unexpected results on real hardware is certified.
@@ -522,5 +541,6 @@ Failure modes
 """""""""""""
 
 - Modify generated documentation
-   - Risk: Erroneous documentation
-   - Mitigation: If detected, report error.
+
+  - Risk: Erroneous documentation
+  - Mitigation: If detected, report error.

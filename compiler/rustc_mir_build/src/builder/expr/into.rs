@@ -6,10 +6,9 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_hir as hir;
 use rustc_hir::attrs::lang_items::LangItem;
 use rustc_middle::mir::*;
-use rustc_middle::span_bug;
 use rustc_middle::thir::*;
 use rustc_middle::ty::{self, CanonicalUserTypeAnnotation, Ty};
-use rustc_span::{DUMMY_SP, Spanned, sym};
+use rustc_span::{DUMMY_SP, Spanned, span_bug, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use tracing::{debug, instrument};
 
@@ -48,20 +47,16 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             ExprKind::Scope { region_scope, hir_id, value } => {
                 let region_scope = (region_scope, source_info);
                 this.in_scope(region_scope, LintLevel::Explicit(hir_id), |this| {
+                    this.push_coverage_point_for_expr(block, source_info, hir_id);
                     this.expr_into_dest(destination, block, value)
                 })
             }
             ExprKind::Block { block: ast_block } => {
                 this.ast_block(destination, block, ast_block, source_info)
             }
-            ExprKind::Match { scrutinee, ref arms, .. } => this.match_expr(
-                destination,
-                block,
-                scrutinee,
-                arms,
-                expr_span,
-                this.thir[scrutinee].span,
-            ),
+            ExprKind::Match { scrutinee, ref arms, .. } => {
+                this.match_expr(destination, block, scrutinee, arms, expr_span)
+            }
             ExprKind::If { cond, then, else_opt, if_then_scope } => {
                 let then_span = this.thir[then].span;
                 let then_source_info = this.source_info(then_span);
@@ -117,6 +112,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     // There is no `else` arm, so we know both arms have type `()`.
                     // Generate the implicit `else {}` by assigning unit.
                     let correct_si = this.source_info(expr_span.shrink_to_hi());
+                    this.push_coverage_point_for_implicit_else(false_block, correct_si, expr);
                     this.cfg.push_assign_unit(false_block, correct_si, destination, this.tcx);
                 }
 
@@ -301,9 +297,8 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
 
                     // Logic for `match`.
                     let scrutinee_span = this.thir.exprs[scrutinee].span;
-                    let scrutinee_place_builder = unpack!(
-                        body_block = this.lower_scrutinee(body_block, scrutinee, scrutinee_span)
-                    );
+                    let scrutinee_place_builder =
+                        unpack!(body_block = this.lower_scrutinee(body_block, scrutinee));
 
                     let match_start_span = match_span.shrink_to_lo().to(scrutinee_span);
 
@@ -457,9 +452,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         let place = b.project_deeper(&[ProjectionElem::Deref], tcx);
                         // Current type: `MaybeUninit<T>`. Field #1 is `ManuallyDrop<T>`.
                         let place = place.project_to_field(FieldIdx::from_u32(1), decls, tcx);
-                        // Current type: `ManuallyDrop<T>`. Field #0 is `MaybeDangling<T>`.
-                        let place = place.project_to_field(FieldIdx::ZERO, decls, tcx);
-                        // Current type: `MaybeDangling<T>`. Field #0 is `T`.
+                        // Current type: `ManuallyDrop<T>`. Field #0 is `T`.
                         let place = place.project_to_field(FieldIdx::ZERO, decls, tcx);
                         // Sanity check.
                         assert_eq!(place.ty(decls, tcx).ty, generic_args.type_at(0));
@@ -477,7 +470,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         );
                         block.unit()
                     }
-                    _ => rustc_middle::bug!(),
+                    _ => rustc_span::bug!(),
                 }
             }
             ExprKind::Call { ty: _, fun, ref args, from_hir_call, fn_span } => {
@@ -569,7 +562,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     block.unit()
                 }
             }
-            ExprKind::Use { source } => this.expr_into_dest(destination, block, source),
+            ExprKind::ValueExpr { source } => this.expr_into_dest(destination, block, source),
             ExprKind::Borrow { arg, borrow_kind } => {
                 // We don't do this in `as_rvalue` because we use `as_place`
                 // for borrow expressions, so we cannot create an `RValue` that

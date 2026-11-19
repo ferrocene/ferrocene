@@ -17,14 +17,15 @@ use rustc_hir::def_id::DefId;
 use rustc_middle::mono::CodegenUnit;
 use rustc_middle::ty::layout::{
     FnAbiError, FnAbiOfHelpers, FnAbiRequest, HasTypingEnv, LayoutError, LayoutOfHelpers,
+    codegen_handle_fn_abi_err,
 };
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
-use rustc_middle::{bug, span_bug};
+use rustc_sanitizers::ignorelist::{SanitizerIgnoreList, typename_for_ignore_list};
 use rustc_session::config::{
     BranchProtection, CFGuard, CFProtection, DebugInfo, FunctionReturn, PAuthKey, PacRet,
 };
 use rustc_session::{PointerAuthSchema, Session};
-use rustc_span::{DUMMY_SP, Span, Spanned, Symbol, sym};
+use rustc_span::{DUMMY_SP, Span, Symbol, bug, sym};
 use rustc_structures::CrateType;
 use rustc_target::spec::{
     Arch, CfgAbi, Env, FramePointer, HasTargetSpec, Os, RelocModel, SmallDataThresholdSupport,
@@ -92,6 +93,7 @@ pub(crate) type CodegenCx<'ll, 'tcx> = GenericCx<'ll, FullCx<'ll, 'tcx>>;
 
 pub(crate) struct FullCx<'ll, 'tcx> {
     pub tcx: TyCtxt<'tcx>,
+    pub bitcode_needed: bool,
     pub scx: SimpleCx<'ll>,
     pub use_dll_storage_attrs: bool,
     pub tls_model: llvm::ThreadLocalMode,
@@ -133,6 +135,7 @@ pub(crate) struct FullCx<'ll, 'tcx> {
     /// Extra per-CGU codegen state needed when coverage instrumentation is enabled.
     pub coverage_cx: Option<coverageinfo::CguCoverageContext<'ll, 'tcx>>,
     pub dbg_cx: Option<debuginfo::CodegenUnitDebugContext<'ll, 'tcx>>,
+    pub sanitizer_ignorelist: Option<SanitizerIgnoreList>,
 
     eh_personality: Cell<Option<&'ll Value>>,
     pub rust_try_fn: Cell<Option<(&'ll Type, &'ll Value)>>,
@@ -228,7 +231,7 @@ pub(crate) unsafe fn create_module<'ll>(
 
     // Ensure the data-layout values hardcoded remain the defaults.
     {
-        let tm = crate::back::write::create_informational_target_machine(sess, false);
+        let tm = crate::back::write::create_informational_target_machine(sess);
         unsafe {
             llvm::LLVMRustSetDataLayoutFromTargetMachine(llmod, tm.raw());
         }
@@ -556,12 +559,12 @@ pub(crate) unsafe fn create_module<'ll>(
     let name_metadata = cx.create_metadata(rustc_producer.as_bytes());
     cx.module_add_named_metadata_node(llmod, c"llvm.ident", &[name_metadata]);
 
-    // Emit RISC-V specific target-abi metadata
-    // to workaround lld as the LTO plugin not
-    // correctly setting target-abi for the LTO object
-    // FIXME: https://github.com/llvm/llvm-project/issues/50591
+    // Emit the target-abi module flag for LoongArch and RISC-V to pass the ABI to LTO.
     let llvm_abiname = &sess.target.options.llvm_abiname;
-    if matches!(sess.target.arch, Arch::RiscV32 | Arch::RiscV64) {
+    if matches!(
+        sess.target.arch,
+        Arch::LoongArch32 | Arch::LoongArch64 | Arch::RiscV32 | Arch::RiscV64
+    ) {
         llvm::add_module_flag_str(
             llmod,
             llvm::ModuleFlagMergeBehavior::Error,
@@ -579,6 +582,25 @@ pub(crate) unsafe fn create_module<'ll>(
             "float-abi",
             floatabi.desc(),
         );
+    }
+
+    if llvm_version >= (24, 0, 0) {
+        if sess.target.singlethread(&sess.internal_target_features) {
+            llvm::add_module_flag_str(
+                llmod,
+                llvm::ModuleFlagMergeBehavior::Error,
+                "thread-model",
+                "single",
+            );
+        }
+        if wants_wasm_eh(&sess.target) {
+            llvm::add_module_flag_str(
+                llmod,
+                llvm::ModuleFlagMergeBehavior::Error,
+                "exception-model",
+                "wasm",
+            );
+        }
     }
 
     // Add module flags specified via -Z llvm_module_flag
@@ -606,6 +628,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
         tcx: TyCtxt<'tcx>,
         codegen_unit: &'tcx CodegenUnit<'tcx>,
         llvm_module: &'ll crate::ModuleLlvm,
+        bitcode_needed: bool,
     ) -> Self {
         // An interesting part of Windows which MSVC forces our hand on (and
         // apparently MinGW didn't) is the usage of `dllimport` and `dllexport`
@@ -680,9 +703,28 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
             None
         };
 
+        // FIXME: This parses the ignorelist files for each CGU, which adds a performance overhead.
+        // Clang parses it once per frontend invocation. LLVM's `SpecialCaseList::inSection`
+        // mutates an internal `LazyInit` cache and is not thread-safe. We either need to wrap
+        // the queries in a lock or wait for LLVM to expose a thread-safe way to query it.
+        let sanitizer_ignorelist = if !tcx.sess.opts.unstable_opts.sanitizer_ignorelist.is_empty() {
+            for path in &tcx.sess.opts.unstable_opts.sanitizer_ignorelist {
+                let _ = tcx.sess.source_map().load_file(std::path::Path::new(path));
+            }
+            match SanitizerIgnoreList::new(&tcx.sess.opts.unstable_opts.sanitizer_ignorelist) {
+                Ok(list) => Some(list),
+                Err(err) => {
+                    tcx.dcx().fatal(format!("failed to parse sanitizer ignorelist: {}", err));
+                }
+            }
+        } else {
+            None
+        };
+
         GenericCx(
             FullCx {
                 tcx,
+                bitcode_needed,
                 scx: SimpleCx::new(llmod, llcx, tcx.data_layout.pointer_size()),
                 use_dll_storage_attrs,
                 tls_model,
@@ -699,6 +741,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
                 scalar_lltypes: Default::default(),
                 coverage_cx,
                 dbg_cx,
+                sanitizer_ignorelist,
                 eh_personality: Cell::new(None),
                 rust_try_fn: Cell::new(None),
                 intrinsics: Default::default(),
@@ -838,6 +881,17 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
             1 << 6,
         );
     }
+
+    pub(crate) fn is_sanitizer_type_ignored(
+        &self,
+        sanitizer: &std::ffi::CStr,
+        fn_abi: &rustc_target::callconv::FnAbi<'tcx, Ty<'tcx>>,
+    ) -> bool {
+        self.sanitizer_ignorelist.as_ref().is_some_and(|ignorelist| {
+            let type_name = typename_for_ignore_list(self.tcx, fn_abi);
+            ignorelist.contains_prefix(sanitizer, c"type", &type_name)
+        })
+    }
 }
 impl<'ll> SimpleCx<'ll> {
     pub(crate) fn get_type_of_global(&self, val: &'ll Value) -> &'ll Type {
@@ -881,11 +935,6 @@ impl<'ll, CX: Borrow<SCx<'ll>>> GenericCx<'ll, CX> {
 
     pub(crate) fn get_const_i8(&self, n: u64) -> &'ll Value {
         self.get_const_int(self.type_i8(), n)
-    }
-
-    pub(crate) fn get_function(&self, name: &str) -> Option<&'ll Value> {
-        let name = SmallCStr::new(name);
-        unsafe { llvm::LLVMGetNamedFunction((**self).borrow().llmod, name.as_ptr()) }
     }
 
     pub(crate) fn get_md_kind_id(&self, name: &str) -> llvm::MetadataKindId {
@@ -984,9 +1033,9 @@ impl<'ll, 'tcx> MiscCodegenMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             return llpersonality;
         }
 
-        let name = if wants_msvc_seh(self.sess()) {
+        let name = if wants_msvc_seh(&self.sess().target) {
             Some("__CxxFrameHandler3")
-        } else if wants_wasm_eh(self.sess()) {
+        } else if wants_wasm_eh(&self.sess().target) {
             // LLVM specifically tests for the name of the personality function
             // There is no need for this function to exist anywhere, it will
             // not be called. However, its name has to be "__gxx_wasm_personality_v0"
@@ -1286,21 +1335,6 @@ impl<'tcx> FnAbiOfHelpers<'tcx> for CodegenCx<'_, 'tcx> {
         span: Span,
         fn_abi_request: FnAbiRequest<'tcx>,
     ) -> ! {
-        match err {
-            FnAbiError::Layout(LayoutError::SizeOverflow(_) | LayoutError::InvalidSimd { .. }) => {
-                self.tcx.dcx().emit_fatal(Spanned { span, node: err });
-            }
-            _ => match fn_abi_request {
-                FnAbiRequest::OfFnPtr { sig, extra_args } => {
-                    span_bug!(span, "`fn_abi_of_fn_ptr({sig}, {extra_args:?})` failed: {err:?}",);
-                }
-                FnAbiRequest::OfInstance { instance, extra_args } => {
-                    span_bug!(
-                        span,
-                        "`fn_abi_of_instance({instance}, {extra_args:?})` failed: {err:?}",
-                    );
-                }
-            },
-        }
+        codegen_handle_fn_abi_err(self.tcx, err, span, fn_abi_request).raise_fatal()
     }
 }

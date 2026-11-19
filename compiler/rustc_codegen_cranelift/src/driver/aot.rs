@@ -140,7 +140,6 @@ fn emit_module(
         bytecode: None,
         assembly: None,
         llvm_ir: None,
-        links_from_incr_cache: Vec::new(),
     })
 }
 
@@ -284,6 +283,7 @@ impl ExtraBackendMethods for AotDriver {
         &self,
         tcx: TyCtxt<'_>,
         cgu_name: Symbol,
+        _bitcode_needed: bool,
     ) -> (ModuleCodegen<Self::Module>, u64) {
         let start_time = Instant::now();
 
@@ -318,7 +318,6 @@ impl WriteBackendMethods for AotDriver {
         &self,
         _sess: &Session,
         _opt_level: OptLevel,
-        _target_features: &[String],
     ) -> TargetMachineFactoryFn<Self> {
         Arc::new(|_, _| ())
     }

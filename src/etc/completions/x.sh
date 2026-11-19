@@ -3116,7 +3116,7 @@ _x() {
                     return 0
                     ;;
                 --profiles)
-                    COMPREPLY=($(compgen -W "Check Debug Doc Opt Clippy" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3314,7 +3314,7 @@ _x() {
                     return 0
                     ;;
                 --profiles)
-                    COMPREPLY=($(compgen -W "Check Debug Doc Opt Clippy" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3698,7 +3698,7 @@ _x() {
                     return 0
                     ;;
                 --profiles)
-                    COMPREPLY=($(compgen -W "Check Debug Doc Opt Clippy" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
                     return 0
                     ;;
                 --config)
@@ -3896,7 +3896,7 @@ _x() {
                     return 0
                     ;;
                 --profiles)
-                    COMPREPLY=($(compgen -W "Check Debug Doc Opt Clippy" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "Check Debug Doc DocJson Opt Clippy" -- "${cur}"))
                     return 0
                     ;;
                 --config)

@@ -181,26 +181,16 @@ impl BootstrapCommand {
             }
 
             if n < max {
-                match getrandom::u32() {
-                    Ok(r) => {
-                        // Calculate a random delay in [1, base * 2^(n-1)] inclusive
-                        let scale = base << (n - 1);
-                        let delay = 1 + (scale as u64 * r as u64) >> 32;
-                        println!(
-                            "Attempt {}/{} failed. Waiting {} second(s) before retrying.",
-                            n, max, delay
-                        );
+                let r = rand::random::<u32>();
+                // Calculate a random delay in [1, base * 2^(n-1)] inclusive
+                let scale = base << (n - 1);
+                let delay = 1 + (scale as u64 * r as u64) >> 32;
+                println!(
+                    "Attempt {}/{} failed. Waiting {} second(s) before retrying.",
+                    n, max, delay
+                );
 
-                        std::thread::sleep(std::time::Duration::from_secs(delay));
-                    }
-                    Err(_) => {
-                        println!(
-                            "Attempt {}/{} failed. Cannot retry due to an error in random number generation.",
-                            n, max
-                        );
-                        return false;
-                    }
-                }
+                std::thread::sleep(std::time::Duration::from_secs(delay));
             }
         }
 

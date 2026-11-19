@@ -27,9 +27,10 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::direct_use_of_rustc_type_ir)]
+#![cfg_attr(bootstrap, feature(allocator_api))]
 #![cfg_attr(bootstrap, feature(never_type))]
 #![cfg_attr(doc, feature(intra_doc_pointers))]
-#![feature(allocator_api)]
+#![cfg_attr(not(bootstrap), feature(allocator_ext))]
 #![feature(associated_type_defaults)]
 #![feature(closure_track_caller)]
 #![feature(const_default)]
@@ -77,7 +78,6 @@ pub mod hooks;
 pub mod ich;
 pub mod infer;
 pub mod lint;
-pub mod metadata;
 pub mod middle;
 pub mod mir;
 pub mod mono;

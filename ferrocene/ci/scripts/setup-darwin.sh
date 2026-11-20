@@ -8,7 +8,7 @@ source "$parent/../../../src/ci/shared.sh"
 
 # On Mac, XCode's LLVM cannot build for WASM.
 retry brew update
-retry brew install cmake ninja zstd llvm tidy-html5
+retry brew install cmake ninja zstd llvm@21 tidy-html5
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
 # brew install --cask  gcc-arm-embedded

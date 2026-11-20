@@ -128,6 +128,7 @@ pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {
         snapshot
     }) {
         // Iterate over the hooks, run them, and collect the results in a vector.
+        #[allow(ferrocene::unvalidated)]
         let to_run: Vec<_> = iter::successors(hooks.first.as_deref(), |hook| hook.next.as_deref())
             .map(|hook| (hook.hook)(thread))
             .collect();

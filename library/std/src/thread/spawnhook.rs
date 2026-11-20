@@ -23,9 +23,20 @@ struct SpawnHooks {
 impl Drop for SpawnHooks {
     fn drop(&mut self) {
         let mut next = self.first.take();
-        while let Some(SpawnHook { hook, next: n }) = next.and_then(Arc::into_inner) {
-            drop(hook);
-            next = n;
+        // Ferrocene modification: Don't call `.and_then` but `match` to work around
+        // `ferrocene::unvalidated` bug.
+        // while let Some(SpawnHook { hook, next: n }) = next.and_then(Arc::into_inner) {
+        //     drop(hook);
+        //     next = n;
+        // }
+        while let Some(arc) = next {
+            match Arc::into_inner(arc) {
+                Some(SpawnHook { hook, next: n }) => {
+                    drop(hook);
+                    next = n;
+                }
+                None => break,
+            }
         }
     }
 }
@@ -128,6 +139,7 @@ pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {
         snapshot
     }) {
         // Iterate over the hooks, run them, and collect the results in a vector.
+        #[allow(ferrocene::unvalidated, reason = "false-positive")]
         let to_run: Vec<_> = iter::successors(hooks.first.as_deref(), |hook| hook.next.as_deref())
             .map(|hook| (hook.hook)(thread))
             .collect();

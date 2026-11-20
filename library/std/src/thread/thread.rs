@@ -98,7 +98,13 @@ pub struct Thread {
 impl Thread {
     #[ferrocene::prevalidated]
     pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {
-        let name = name.map(ThreadNameString::from);
+        // Ferrocene modification: Don't call `.map` but `match` to work around
+        // `ferrocene::unvalidated` bug.
+        // let name = name.map(ThreadNameString::from);
+        let name = match name {
+            Some(name) => Some(ThreadNameString::from(name)),
+            None => None,
+        };
 
         // We have to use `unsafe` here to construct the `Parker` in-place,
         // which is required for the UNIX implementation.

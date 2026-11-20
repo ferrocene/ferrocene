@@ -45,8 +45,12 @@ Developer usage is described in :doc:`internal-procedures:code-coverage`.
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL1
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL1
+  - EN 50716: T2
+
 - Level of reliance: Low, it is not involved in ensuring correctness, but only a measure of quality of the test suite.
 
 The instrumentation mechanism using ``-Cinstrument-coverage`` is the standard mechanism of collecting code coverage information in Rust. Since it is part of the LLVM suite of tools, it is not only used in Rust but also widely used in the C++ ecosystem. This widespread usage gives us confidence in the quality and robustness of the tooling.
@@ -59,25 +63,37 @@ Failure modes
 """""""""""""
 
 - False-positive: A function is reported as covered, although it is not covered
+
   - Risk: Overreporting, could result in testing gap.
   - Mitigation: No mitigation, since we assume the likelihood of such an error low.
+
 - False-negative: A function is reported as not covered, although it is covered
+
   - Risk: Underreporting, will not result in testing gap.
   - Mitigation: Since we want to achieve 100% line coverage this would stand out and be manually investigated.
+
 - The code coverage instrumentation introduces bugs into the library or the test runner
+
   - Risk: That results in failing tests being reported as successful or successful tests being reported as failing
   - Mitigation: Running the test suite once with and once without code coverage instrumentation and ensuring both report the same result.
+
 - Undercounting: Total number of functions is too high
+
   - Risk: A function is being considered, although it is not part of the certified subset
   - Mitigation: Not a risk as it only results in us testing more than necessary
+
 - Overcounting: Total number of functions is too low
+
   - Risk: A function is not being considered, although it is part of the certified subset
   - Mitigation: Developing ``symbol-report`` which uses exactly the same information as the compiler
+
 - Line that can be executed not being reported as executable
-    - Risk: Underreporting, code that should be tested may not being tested
-    - Mitigation:
-        - ``blanket`` warns if a function has no executable line
-        - (Future work) End-to-end test that ensures the correct lines are being reported as executable
+
+  - Risk: Underreporting, code that should be tested may not being tested
+  - Mitigation:
+
+    - ``blanket`` warns if a function has no executable line
+    - (Future work) End-to-end test that ensures the correct lines are being reported as executable
 
 Compiler
 --------
@@ -167,8 +183,13 @@ An example of such a intrinsic function is ``fn unaligned_volatile_load<T>(src: 
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T3
-- ISO 26262 Tool Classification: TCL3
+- Tool classification
+
+  - IEC 61508-3: T3
+  - ISO 26262: TCL3
+  - EN 50716: T3
+
+- Level of reliance: High
 
 No assessment necessary, since the compiler is pre-qualified.
 
@@ -203,8 +224,11 @@ If we would start to come up with new rules from our coding standard we would ha
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T1
-- ISO 26262 Tool Classification: TCL1
+- Tool classification
+
+  - IEC 61508-3: T1
+  - ISO 26262: TCL1
+  - EN 50716: T1
 
 - Level of reliance: Low, the lints are not involved in ensuring correctness, but only a measure of quality of the source code. (Note: ``rustc`` is involved in ensuring correctness, but here we only look at it in its capacity of a linter, not a compiler.)
 
@@ -214,11 +238,14 @@ Failure modes
 """""""""""""
 
 - False-negative: Fail to detect non-compliance with the consistency rules
-   - Risk: Diverging from consistency rules. This is not critical, because Ferrous Systems only consumes the code from upstream and does not impose additional rules on it.
-   - Mitigation: None. If found, report issue upstream.
+
+  - Risk: Diverging from consistency rules. This is not critical, because Ferrous Systems only consumes the code from upstream and does not impose additional rules on it.
+  - Mitigation: None. If found, report issue upstream.
+
 - False-positive: Report non-compliance, although the code is compliant
-   - Risk: None
-   - Mitigation: Report issue upstream.
+
+  - Risk: None
+  - Mitigation: Report issue upstream.
 
 Test runner
 -----------
@@ -243,8 +270,12 @@ The libtest test runner compiles all tests specified in the unit test suites int
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: High, ensures correctness of the test results.
 
 ``libtest`` is used extensively by virtually every user of Rust, since it powers the common ``cargo test`` command.
@@ -256,11 +287,14 @@ Failure modes
 """""""""""""
 
 - False-positive: Report test as successful, although it is failing
-   - Risk: Not detect incorrect code.
-   - Mitigation: Report issue upstream.
+
+  - Risk: Not detect incorrect code.
+  - Mitigation: Report issue upstream.
+
 - False-negative: Report test as failing, although it is successful
-   - Risk: None
-   - Mitigation: Report issue upstream.
+
+  - Risk: None
+  - Mitigation: Report issue upstream.
 
 Build orchestrator
 ------------------
@@ -285,8 +319,12 @@ The bootstrap build orchestrator compiles the compiler, certified libraries, tes
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: High, ensures the safety plan is being adhered to.
 
 ``bootstrap`` is the build system used to build, package, and test the Rust compiler.
@@ -343,8 +381,12 @@ It schedules "jobs" that execute in a constrained order, saves the results of th
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: High, ensures all tests are run.
 
 CircleCI itself is used extensively by many different closed and open-source projects.
@@ -391,8 +433,12 @@ The provided binaries (eg. ``qemu-aarch64``) are used to test the produced certi
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: High, ensures the correct architecture is tested
 
 Qemu is an industry tool that is widely used. We have used the tooling for several years and are confident in its operation.
@@ -404,6 +450,7 @@ Failure modes
 
   - Risk: Lost time invested.
   - Mitigation: Attempt to reproduce on real hardware.
+
 - False-negative: A test passes that would fail on real hardware
 
   - Risk: Code which produces unexpected results on real hardware is certified.
@@ -434,8 +481,12 @@ Usage
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: Medium
 
 Git and GitHub are very very widely used tools. This gives us confidence in its quality.
@@ -476,8 +527,12 @@ Usage
 Safety Assessment
 ~~~~~~~~~~~~~~~~~
 
-- IEC 61508-3 Tool Classification: T2
-- ISO 26262 Tool Classification: TCL2
+- Tool classification
+
+  - IEC 61508-3: T2
+  - ISO 26262: TCL2
+  - EN 50716: T2
+
 - Level of reliance: Medium
 
 ``rustdoc`` is the standard tool to generate documentation of Rust libraries and is very widely used. Each version of each crate published on `<https://crates.io>`_ automatically gets its documentation build by ``rustdoc`` and published on `<https://doc.rs>`_. This means it is executed hundreds of times per day for a wide variety of crates and documentations. This wide and diverse usage gives high confidence in its quality and robustness.
@@ -486,5 +541,6 @@ Failure modes
 """""""""""""
 
 - Modify generated documentation
-   - Risk: Erroneous documentation
-   - Mitigation: If detected, report error.
+
+  - Risk: Erroneous documentation
+  - Mitigation: If detected, report error.

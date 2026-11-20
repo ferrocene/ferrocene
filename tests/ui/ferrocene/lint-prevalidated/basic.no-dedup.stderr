@@ -186,13 +186,13 @@ error: validated function calls an unvalidated function
 LL | fn normal_def() {
    |    ---------- `normal_def` is unvalidated
 ...
+LL | macro_rules! mbe {
+LL |     () => {
 LL |         normal_def()
    |         ^^^^^^^^^^
 ...
 LL |     mbe!(); // caught in macro definition above; maybe we should have both spans?
    |     ------ in this macro invocation
-   |
-   = note: this error originates in the macro `mbe` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: validated function calls an unvalidated method
   --> $DIR/basic.rs:134:5

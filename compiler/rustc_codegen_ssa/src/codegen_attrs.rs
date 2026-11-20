@@ -8,15 +8,9 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
 use rustc_lint_defs::builtin::{INLINE_NO_SANITIZE, RTSAN_NONBLOCKING_ASYNC};
 use rustc_macros::Diagnostic;
-<<<<<<< ferrocene/release/1.100
-use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{
     Validated, ValidatedStatus, item_is_validated,
 };
-||||||| fb9a3389fde
-use rustc_middle::bug;
-=======
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
 use rustc_middle::middle::codegen_fn_attrs::{
     CodegenFnAttrFlags, CodegenFnAttrs, PatchableFunctionEntry, SanitizerFnAttrs,
 };

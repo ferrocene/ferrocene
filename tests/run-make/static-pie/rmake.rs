@@ -1,13 +1,11 @@
 //@ only-x86_64
 //@ only-linux
 //@ ignore-32bit
-<<<<<<< ferrocene/release/1.100
-//@ ignore-test CentOS 7 cannot support static-pie the glibc lacks support for early relocation
-||||||| fb9a3389fde
-=======
-// FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
 //@ ignore-backends: gcc
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
+
+// Ferrocene addition:
+//@ ignore-test CentOS 7 cannot support static-pie the glibc lacks support for early relocation
+// FIXME: Once GCC backend is fixed, remove this `ignore-backends`.
 
 use std::process::Command;
 

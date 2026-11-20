@@ -765,17 +765,11 @@ const impl AsRef<CStr> for CStr {
 ///
 /// The pointer must point to a valid buffer that contains a NUL terminator. The NUL must be
 /// located within `isize::MAX` from `ptr`.
+#[ferrocene::prevalidated]
 #[inline]
 #[unstable(feature = "cstr_internals", issue = "none")]
 #[rustc_allow_const_fn_unstable(const_eval_select)]
-<<<<<<< ferrocene/release/1.100
-#[ferrocene::prevalidated]
-const unsafe fn strlen(ptr: *const c_char) -> usize {
-||||||| fb9a3389fde
-const unsafe fn strlen(ptr: *const c_char) -> usize {
-=======
 const unsafe fn strlen(ptr: *const c_char) -> UsizeNoHighBitMinusOne {
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
     const_eval_select!(
         @capture { s: *const c_char = ptr } -> UsizeNoHighBitMinusOne:
         if const {

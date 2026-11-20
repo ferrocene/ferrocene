@@ -430,15 +430,8 @@ pub const trait DoubleEndedIterator: [const] Iterator {
         P: [const] FnMut(&Self::Item) -> bool + [const] Destruct,
         Self::Item: [const] Destruct,
     {
-        #[inline]
-<<<<<<< ferrocene/release/1.100
         #[ferrocene::prevalidated]
-        fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
-            move |(), x| {
-||||||| fb9a3389fde
-        fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {
-            move |(), x| {
-=======
+        #[inline]
         #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
         const fn check<T>(
             mut predicate: impl [const] FnMut(&T) -> bool + [const] Destruct,
@@ -447,7 +440,6 @@ pub const trait DoubleEndedIterator: [const] Iterator {
             T: [const] Destruct,
         {
             const move |(), x| {
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
                 if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }
             }
         }

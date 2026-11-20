@@ -1726,18 +1726,10 @@ pub macro offset_of($Container:ty, $($fields:expr)+ $(,)?) {
 /// ```
 ///
 /// [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited
-<<<<<<< ferrocene/release/1.100
-#[unstable(feature = "mem_conjure_zst", issue = "95383")]
-#[rustc_const_unstable(feature = "mem_conjure_zst", issue = "95383")]
 #[ferrocene::prevalidated]
-||||||| fb9a3389fde
-#[unstable(feature = "mem_conjure_zst", issue = "95383")]
-#[rustc_const_unstable(feature = "mem_conjure_zst", issue = "95383")]
-=======
 #[stable(feature = "mem_conjure_zst", since = "1.100.0")]
 #[rustc_const_stable(feature = "mem_conjure_zst", since = "1.100.0")]
 #[rustc_allow_const_fn_unstable(const_type_name)] // type_name() called only at run time
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
 pub const unsafe fn conjure_zst<T>() -> T {
     #[ferrocene::annotation(
         "This assertion only runs in compilation, meaning that it cannot be covered in runtime"

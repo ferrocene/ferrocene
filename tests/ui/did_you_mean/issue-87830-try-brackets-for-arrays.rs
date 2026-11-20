@@ -29,12 +29,6 @@ fn labeled_block() {
 fn fn_body_block() {
     1, 2, 3 //~ ERROR expected one of
 }
-<<<<<<< ferrocene/release/1.100
-
-// ferrocene-annotations: fls_hndm19t57wby
-// Block Expressions
-||||||| fb9a3389fde
-=======
 
 // Don't trigger here, this is not a block expression, only a block.
 fn closure_body_block() {
@@ -46,4 +40,6 @@ fn const_arg() {
     struct Casket<const N: usize>;
     Casket::<{ 1, 2, 3 }>; //~ ERROR expected one of
 }
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions

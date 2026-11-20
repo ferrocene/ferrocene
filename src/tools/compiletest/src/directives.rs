@@ -82,6 +82,8 @@ impl EarlyProps {
 
 #[derive(Clone, Debug)]
 pub(crate) struct TestProps {
+    // Flag to execute the test within a temporary directory
+    pub(crate) ferrocene_execute_in_temp: bool,
     // Lines that should be expected, in order, on standard out
     pub(crate) error_patterns: Vec<String>,
     // Regexes that should be expected, in order, on standard out
@@ -215,19 +217,14 @@ pub(crate) struct TestProps {
     pub(crate) disable_gdb_pretty_printers: bool,
     /// Compare the output by lines, rather than as a single string.
     pub(crate) compare_output_by_lines: bool,
-<<<<<<< ferrocene/release/1.100
-    // Flag to execute the test within a temporary directory
-    pub(crate) ferrocene_execute_in_temp: bool,
-||||||| fb9a3389fde
-=======
     /// Use CCI (`--read-doc-meta` and `--write-doc-meta`) merge mode.
     pub(crate) use_rustdoc_cci_doc_meta_merge: bool,
     /// Where the `//@ should-fail` instruction is present.
     pub(crate) should_fail: bool,
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
 }
 
 mod directives {
+    pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
     pub(crate) const ERROR_PATTERN: &str = "error-pattern";
     pub(crate) const REGEX_ERROR_PATTERN: &str = "regex-error-pattern";
     pub(crate) const COMPILE_FLAGS: &str = "compile-flags";
@@ -272,17 +269,13 @@ mod directives {
     pub(crate) const MINICORE_COMPILE_FLAGS: &str = "minicore-compile-flags";
     pub(crate) const DISABLE_GDB_PRETTY_PRINTERS: &str = "disable-gdb-pretty-printers";
     pub(crate) const COMPARE_OUTPUT_BY_LINES: &str = "compare-output-by-lines";
-<<<<<<< ferrocene/release/1.100
-    pub(crate) const FERROCENE_EXECUTE_IN_TEMP: &'static str = "ferrocene-execute-in-temp";
-||||||| fb9a3389fde
-=======
     pub(crate) const USE_RUSTDOC_CCI_DOC_META_MERGE: &str = "use-rustdoc-cci-doc-meta-merge";
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
 }
 
 impl TestProps {
     pub(crate) fn new() -> Self {
         TestProps {
+            ferrocene_execute_in_temp: false,
             error_patterns: vec![],
             regex_error_patterns: vec![],
             edition: None,
@@ -335,13 +328,8 @@ impl TestProps {
             dont_require_annotations: Default::default(),
             disable_gdb_pretty_printers: false,
             compare_output_by_lines: false,
-<<<<<<< ferrocene/release/1.100
-            ferrocene_execute_in_temp: false,
-||||||| fb9a3389fde
-=======
             use_rustdoc_cci_doc_meta_merge: false,
             should_fail: false,
->>>>>>> rust-lang/rust/stable--generated-by-pull-upstream
         }
     }
 

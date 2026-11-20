@@ -49,7 +49,7 @@ retry choco install -y cmake.portable
 
 retry choco install -y ninja
 
-retry choco install -y llvm
+retry choco install -y llvm --version=19.1.0
 
 retry choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
 

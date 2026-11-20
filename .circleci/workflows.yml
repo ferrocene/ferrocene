@@ -888,7 +888,7 @@ workflows:
           image: emulator
           tag: emulator--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
-          resource_class: large.gen2
+          resource_class: medium.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
@@ -912,7 +912,7 @@ workflows:
           image: runner-glibc-2.17
           tag: runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
-          resource_class: large.gen2
+          resource_class: medium.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
@@ -920,7 +920,7 @@ workflows:
           image: qnx-runner
           tag: qnx-runner--<< pipeline.parameters.docker-images-hash >>--x86_64
           rebuild: << pipeline.parameters.llvm-rebuild >>
-          resource_class: large.gen2
+          resource_class: medium.gen2
           awscli_version: << pipeline.parameters.awscli-version >>
 
       - ferrocene/build_docker:
@@ -982,6 +982,15 @@ workflows:
           name: x86_64-linux-test
           executor: *executor-x86_64-runner
           tasks: $(ferrocene/ci/split-tasks.py test)
+          resource-class: ferrocene/k8s-amd64-medium
+          test-variant: "2021"
+          ferrocene_host: x86_64-unknown-linux-gnu
+          restore_from_job: x86_64-linux-build
+          requires: [x86_64-linux-build]
+      - linux-generic-test-container:
+          name: x86_64-linux-test-docs-tools
+          executor: *executor-x86_64-runner
+          tasks: $(ferrocene/ci/split-tasks.py test:docs-tools)
           resource-class: ferrocene/k8s-amd64-medium
           test-variant: "2021"
           ferrocene_host: x86_64-unknown-linux-gnu
@@ -1539,8 +1548,8 @@ commands:
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
-                    --workdir /project \
-                    --volume $(pwd):/project \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1559,8 +1568,8 @@ commands:
                   docker run \
                     --rm \
                     $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-                    --workdir /project \
-                    --volume $(pwd):/project \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
                     --volume $HOME/tmp/emulator:/tmp/emulator \
                     --volume /tmp/awsjwt:/tmp/awsjwt \
                     --user $(id -u):$(id -g) \
@@ -1576,8 +1585,8 @@ commands:
             docker run \
               --rm \
               $(uv run python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
-              --workdir /project \
-              --volume $(pwd):/project \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
               --volume $HOME/tmp/emulator:/tmp/emulator \
               --volume /tmp/ferrocene:/tmp/ferrocene \
               --user $(id -u):$(id -g) \

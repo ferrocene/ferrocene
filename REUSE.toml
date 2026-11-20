@@ -250,6 +250,7 @@ path = [
     "ferrocene/README.md",
     "ferrocene/tools/automations-common/uv.lock",
     "ferrocene/ci/mirrors/hashes.txt",
+    "ferrocene/patches/**"
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

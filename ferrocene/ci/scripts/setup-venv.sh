@@ -13,7 +13,7 @@ if [[ -d $HOME/.cargo ]]; then
     echo "source $HOME/.cargo/env" >> $BASH_ENV
 fi
 
-uv venv ~/.venv
+uv venv --python 3.12 ~/.venv
 
 parent=$(cd $(dirname $0) && pwd)
 source "$parent/../../../src/ci/shared.sh"

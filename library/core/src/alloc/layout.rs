@@ -25,7 +25,8 @@ use crate::{assert_unsafe_precondition, fmt, mem};
 /// like this are met, use specific allocators with looser
 /// requirements, or use the more lenient `Allocator` interface.)
 #[stable(feature = "alloc_layout", since = "1.28.0")]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive(Copy, Clone, Debug, Eq, Hash)]
 #[lang = "alloc_layout"]
 #[ferrocene::prevalidated]
 pub struct Layout {
@@ -636,5 +637,16 @@ impl Error for LayoutError {}
 impl fmt::Display for LayoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("invalid parameters to Layout::from_size_align")
+    }
+}
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "alloc_layout", since = "1.28.0")]
+impl ::core::cmp::PartialEq for Layout {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.size == other.size && self.align == other.align
     }
 }

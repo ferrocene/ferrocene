@@ -89,7 +89,8 @@ unsafe extern "Rust" {
 #[ferrocene::prevalidated]
 #[stable(feature = "allocator_api", since = "1.100.0")]
 #[derive(Copy, Debug)]
-#[derive_const(Clone, Default)]
+// Ferrocene modification: Remove Clone and implement it manually.
+#[derive_const(Default)]
 // the compiler needs to know when a Box uses the global allocator vs a custom one
 #[lang = "global_alloc_ty"]
 pub struct Global;
@@ -737,3 +738,15 @@ pub mod __alloc_error_handler {
 
 #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
 impl AllocatorNightly for Global {}
+
+// Ferrocene addition: Do not derive Clone because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "allocator_api", since = "1.100.0")]
+#[rustc_const_unstable(feature = "const_clone", issue = "142757")]
+const impl ::core::clone::Clone for Global {
+    #[inline]
+    fn clone(&self) -> Self {
+        Global
+    }
+}

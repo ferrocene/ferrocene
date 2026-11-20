@@ -12,7 +12,8 @@ use crate::{cmp, fmt, hash, mem, num};
 #[ferrocene::prevalidated]
 #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(transparent)]
 pub struct Alignment {
     // This field is never used directly (nor is the enum),
@@ -376,7 +377,8 @@ const impl Default for Alignment {
 #[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "16")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -400,7 +402,8 @@ enum AlignmentEnum {
 #[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "32")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -440,7 +443,8 @@ enum AlignmentEnum {
 #[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "64")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
@@ -508,3 +512,31 @@ enum AlignmentEnum {
     _Align1Shl62 = 1 << 62,
     _Align1Shl63 = 1 << 63,
 }
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+const impl ::core::cmp::PartialEq for Alignment {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self._inner_repr_trick == other._inner_repr_trick
+    }
+}
+#[unstable(feature = "structural_match", issue = "31434")]
+impl ::core::marker::StructuralPartialEq for Alignment {}
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+const impl ::core::cmp::PartialEq for AlignmentEnum {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        ::core::intrinsics::discriminant_value(self)
+            == ::core::intrinsics::discriminant_value(other)
+    }
+}
+#[unstable(feature = "structural_match", issue = "31434")]
+impl ::core::marker::StructuralPartialEq for AlignmentEnum {}

@@ -1211,6 +1211,7 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1222,7 +1223,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - when:
           condition: <<parameters.restore-from-job>>
           steps:
@@ -1520,6 +1520,32 @@ commands:
             # Some versions of AWS CLI fail if `less` is not installed, so
             # disable pager support to suppress the error.
             set_env AWS_PAGER ""
+
+      - run:
+          name: Install AWS CLI
+          command: |
+            # only need to install on macos
+            # logic copied from retry() in src/ci/shared.sh
+            if [[ "${OSTYPE}" = "darwin"* ]]; then
+              n=1
+              base=5
+              max=7
+              while true; do
+                brew install awscli && break
+                if [[ $n -lt $max ]]; then
+                  # $RANDOM returns a random integer in [0, 32767],
+                  # so remap to a random integer in [1, base * 2^(n - 1)]
+                  local delay=$(( 1 + $RANDOM * $base * 2**($n - 1) / 32768 ))
+                  echo "Attempt $n/$max failed. Waiting $delay second(s) before retrying."
+                  sleep $delay
+                  ((n++))
+                  echo "Attempt $n/$max:"
+                else
+                  echo "The command has failed after $n attempts."
+                  return 1
+                fi
+              done
+            fi
 
       - run:
           name: Authenticate with AWS

@@ -66,6 +66,9 @@ tracing-chrome = { version = "0.7", optional = true }
 tracing-subscriber = { version = "0.3", optional = true, features = ["env-filter", "fmt", "registry", "std"] }
 tracing-forest = { version = "0.1.6", optional = true, default-features =  false, features = ["smallvec", "ansi", "env-filter"] }
 
+# Ferrocene addition, needed for randomized retry logic
+getrandom = "0.3"
+
 [target.'cfg(windows)'.dependencies.junction]
 version = "1.0.0"
 

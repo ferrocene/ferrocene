@@ -9,7 +9,7 @@ use crate::utils::exec::BootstrapCommand;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs;
-use std::path::{absolute, Path, PathBuf};
+use std::path::{Path, PathBuf, absolute};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -105,8 +105,10 @@ impl Step for SphinxVirtualEnv {
             .arg(&venv),
         );
         let venv = VirtualEnv { path: venv };
-        builder
-            .run(venv.cmd("pip").args(&["install", "--require-hashes", "-r"]).arg(&requirements));
+        venv.cmd("pip")
+            .args(&["install", "--require-hashes", "-r"])
+            .arg(&requirements)
+            .run_retry(builder);
         builder.copy_link(&requirements, &installed_requirements);
 
         venv

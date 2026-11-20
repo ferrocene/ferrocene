@@ -6,7 +6,8 @@ pub(crate) mod flip_link;
 use std::path::PathBuf;
 
 use crate::core::build_steps::tool::{
-    RustcPrivateCompilers, SourceType, ToolArtifactKind, ToolBuild, prepare_tool_cargo,
+    RustcPrivateCompilers, SourceType, ToolArtifactKind, ToolBuild, ToolTargetBuildMode,
+    get_tool_target_compiler, prepare_tool_cargo,
 };
 use crate::core::builder::{Builder, CommandLineStep, Kind, RunConfig, ShouldRun};
 use crate::core::compiler::Compiler;
@@ -123,7 +124,9 @@ impl CommandLineStep for SymbolReport {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct Blanket {}
+pub(crate) struct Blanket {
+    pub(crate) target: TargetSelection,
+}
 pub(super) const BLANKET_PATH: &str = "ferrocene/tools/blanket";
 
 impl CommandLineStep for Blanket {
@@ -139,16 +142,22 @@ impl CommandLineStep for Blanket {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Blanket {});
+        run.builder.ensure(Blanket { target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let mode = Mode::ToolBootstrap;
+        // flip-link is a submodule and a member of the same Cargo
+        // workspace. All submodules of a workspace need to be present
+        // before building.
+        builder.require_submodule("ferrocene/tools/flip-link", None);
+
+        let build_compiler =
+            get_tool_target_compiler(builder, ToolTargetBuildMode::Build(self.target));
         let tool_build = ToolBuild {
-            build_compiler: builder.compiler(0, builder.host_target),
-            target: builder.host_target,
+            build_compiler,
+            target: self.target,
             tool: "blanket",
-            mode,
+            mode: Mode::ToolTarget,
             path: BLANKET_PATH,
             source_type: SourceType::InTree,
             extra_features: vec![],

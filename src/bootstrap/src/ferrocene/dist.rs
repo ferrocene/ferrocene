@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod coverage_tools;
 pub(crate) mod flip_link;
 pub(crate) mod sbom;
 

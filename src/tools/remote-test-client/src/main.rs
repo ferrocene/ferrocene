@@ -6,10 +6,14 @@
 //! well.
 
 use std::borrow::Cow;
+#[cfg(not(any(windows, target_os = "motor", target_os = "uefi")))]
+use std::fs::Permissions;
 use std::fs::{self, File};
 use std::io::prelude::*;
-use std::io::{self, BufWriter};
+use std::io::{self, BufReader, BufWriter};
 use std::net::{SocketAddr, TcpStream};
+#[cfg(not(any(windows, target_os = "motor", target_os = "uefi")))]
+use std::os::unix::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
@@ -46,6 +50,7 @@ fn main() {
             args.next().map(|s| s.into()),
         ),
         "push" => push(Path::new(&args.next().unwrap())),
+        "pull" => pull(Path::new(&args.next().unwrap()), Path::new(&args.next().unwrap())),
         "run" => run(
             args.next().and_then(|count| count.parse().ok()).unwrap(),
             // the last required parameter must remain the executable
@@ -311,6 +316,89 @@ fn push(path: &Path) {
     println!("done pushing {:?}", path);
 }
 
+fn pull(remote_root: &Path, local_root: &Path) {
+    let mut client = connect_client_with_timeout();
+
+    println!(
+        "Requesting pull from remote path `{}` to local path `{}`",
+        remote_root.display(),
+        local_root.display()
+    );
+
+    t!(client.write_all(b"pull"));
+    t!(client.write_all(remote_root.to_str().unwrap().as_bytes()));
+    t!(client.write_all(&[0]));
+
+    // Read returned files
+    let mut reader = BufReader::new(client);
+    let mut relative_path_buf = Vec::new();
+    loop {
+        relative_path_buf.clear();
+        t!(reader.read_until(b'\0', &mut relative_path_buf));
+
+        if relative_path_buf.pop() != Some(b'\0') {
+            panic!("Unexpected EOF while waiting for reply to pull command");
+        }
+
+        if relative_path_buf.is_empty() {
+            // Empty path marks the end of the file list
+            break;
+        }
+
+        let relative_path = Path::new(t!(str::from_utf8(&relative_path_buf)));
+        println!("Received relative path `{}`", relative_path.display());
+
+        let local_path = secure_join(local_root, relative_path);
+        println!("Translated local path: `{}`", local_path.display());
+
+        t!(fs::create_dir_all(&local_path.parent().unwrap()));
+
+        let length = read_u64(&mut reader);
+        println!("Length = {}", length);
+        if length > 1024 * 1024 * 1024 || length > (usize::MAX as u64) {
+            panic!("Received unreasonably large file from remote test server, size = {}", length)
+        }
+
+        let mut data = vec![0u8; length as usize];
+        t!(reader.read_exact(&mut data));
+
+        t!(t!(File::create(&local_path)).write_all(&data));
+        set_permissions(&local_path);
+    }
+}
+
+// Join root/relative, without allowing the path to escape from the root.
+//
+// Security note: This is only secured against escape via `../` or absolute
+// paths, not against escape through symlinks underneath `root`.
+//
+// This is good enough for the remote test client in Ferrocene's CI, because
+// `root` points to the profiling data directory, which starts out empty. It
+// may not be secure if `root` points to, for example, the top-level build
+// directory or the source repository.
+fn secure_join(root: &Path, relative_path: &Path) -> PathBuf {
+    let mut buf = PathBuf::from(root);
+    for component in relative_path.components() {
+        use std::path::Component::*;
+        match component {
+            Prefix(_) | RootDir | ParentDir => {
+                panic!("Relative path `{}` contains disallowed component", relative_path.display());
+            }
+            CurDir | Normal(_) => {
+                buf.push(component);
+            }
+        }
+    }
+    return buf;
+}
+
+#[cfg(not(any(windows, target_os = "motor", target_os = "uefi")))]
+fn set_permissions(path: &Path) {
+    t!(fs::set_permissions(&path, Permissions::from_mode(0o644)));
+}
+#[cfg(any(windows, target_os = "motor", target_os = "uefi"))]
+fn set_permissions(_path: &Path) {}
+
 fn run(support_lib_count: usize, exe: String, all_args: Vec<String>) {
     let mut client = BufWriter::new(connect_client_with_timeout());
     t!(client.write_all(b"run "));
@@ -403,6 +491,12 @@ fn send(path: &Path, dst: &mut dyn Write) {
 
     t!(dst.write_all(&amt.to_be_bytes()));
     t!(io::copy(&mut file, dst));
+}
+
+fn read_u64(r: &mut dyn Read) -> u64 {
+    let mut len = [0; 8];
+    t!(r.read_exact(&mut len));
+    u64::from_be_bytes(len)
 }
 
 fn help() {

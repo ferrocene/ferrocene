@@ -150,6 +150,8 @@ fn main() {
             t!(socket.write_all(b"pong"));
         } else if &buf[..] == b"push" {
             handle_push(socket, &work, config);
+        } else if &buf[..] == b"pull" {
+            handle_pull(socket);
         } else if &buf[..] == b"run " {
             let lock = lock.clone();
             let work = work.clone();
@@ -183,6 +185,76 @@ fn handle_push(socket: TcpStream, work: &Path, config: Config) {
 
     let mut socket = reader.into_inner();
     t!(socket.write_all(b"ack "));
+}
+
+// Ferrocene addition
+fn handle_pull(mut socket: TcpStream) {
+    let mut reader = BufReader::new(&socket);
+    let mut relative_path_buf = Vec::new();
+    t!(reader.read_until(b'\0', &mut relative_path_buf));
+
+    if relative_path_buf.pop() != Some(b'\0') {
+        panic!("Unexpected EOF while waiting for path in pull command");
+    }
+
+    if relative_path_buf.is_empty() {
+        panic!("Requested path in pull command is empty");
+    }
+
+    // Interpret the requested path relative to the Ferrocene repository root
+    //
+    // Security note: There's no point trying to secure against the client
+    // reading arbitrary files here, because it already has the power to upload
+    // and run arbitrary executables
+    let source_root = Path::new("/home/ci/project/");
+    let relative_path = t!(str::from_utf8(&relative_path_buf));
+    let path = t!(source_root.join(relative_path).canonicalize());
+
+    if !path.is_dir() {
+        panic!("Requested pull from path `{}`, which is not a directory", path.display());
+    }
+
+    println!("Requested pull from path `{}`", path.display());
+
+    send_dir(&mut socket, &path, &path);
+
+    // Send a null entry to finish the file list
+    t!(socket.write_all(&[0]));
+}
+
+// Ferrocene addition
+fn send_dir(socket: &mut TcpStream, path: &Path, root: &Path) {
+    println!("Sending dir `{}`", path.display());
+
+    for entry in t!(std::fs::read_dir(path)) {
+        let entry = entry.unwrap();
+        let entry_type = t!(entry.file_type());
+        let entry_path = entry.path();
+
+        if entry_type.is_dir() {
+            send_dir(socket, &entry_path, root);
+        } else if entry_type.is_file() {
+            send_file(socket, &entry_path, root);
+        } else {
+            // Skip symlinks, pipes, etc.
+            continue;
+        }
+    }
+}
+
+fn send_file(socket: &mut TcpStream, path: &Path, root: &Path) {
+    println!("Sending file `{}`", path.display());
+
+    let relative_path = t!(path.strip_prefix(root));
+    println!("  Relative path `{}`", relative_path.display());
+
+    t!(socket.write_all(relative_path.to_str().unwrap().as_bytes()));
+    t!(socket.write_all(&[0]));
+
+    let contents = t!(std::fs::read(path));
+    let encoded_length = (contents.len() as u64).to_be_bytes();
+    t!(socket.write_all(&encoded_length));
+    t!(socket.write_all(&contents));
 }
 
 struct RemoveOnDrop<'a> {

@@ -44,6 +44,7 @@
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
+use crate::core::build_steps::tool::Tool;
 use crate::core::builder::{Builder, Cargo, Kind, Step};
 use crate::core::compiler::Compiler;
 use crate::core::config::flags::FerroceneCoverageFor;
@@ -52,7 +53,7 @@ use crate::core::session::{self, Mode};
 use crate::ferrocene::run::{CertifiedCoreSymbols, CoverageReport};
 use crate::ferrocene::scan_build_tree::scan_build_tree;
 use crate::ferrocene::{self, download_and_extract_ci_outcomes};
-use crate::utils::exec::BootstrapCommand;
+use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers;
 
 /// Instruct Rustc to inject coverage instrumentation into the crates being compiled by Cargo.
@@ -199,6 +200,29 @@ pub(crate) fn generate_coverage_report(builder: &Builder<'_>) {
 
     let paths = Paths::find(builder, state.target, state.coverage_for);
     let llvm_bin_dir: PathBuf = builder.host_llvm_config().parent().unwrap().into();
+
+    if builder.sess.remote_tested(state.target) {
+        // Fetch coverage data from remote test server
+        let tool = builder.tool_exe(Tool::RemoteTestClient);
+
+        builder.info("Fetching coverage data from remote test server");
+
+        // Hack: This only works if the build directory is underneath the repository root
+        // on both the client and server
+        let repo_root = std::env::current_dir().unwrap();
+        let remote_path = paths.profraw_dir.strip_prefix(&repo_root).unwrap();
+
+        let msg = format!(
+            "Remote path = `{}`, local path = `{}`",
+            remote_path.display(),
+            paths.profraw_dir.display()
+        );
+        builder.info(&msg);
+
+        let mut cmd = command(&tool);
+        cmd.arg("pull").arg(&remote_path).arg(&paths.profraw_dir);
+        cmd.run(builder);
+    }
 
     builder.info("Merging together code coverage measurements");
     let mut cmd = BootstrapCommand::new(llvm_bin_dir.join("llvm-profdata"));

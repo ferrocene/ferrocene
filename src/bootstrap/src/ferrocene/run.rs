@@ -173,13 +173,15 @@ impl Step for CertifiedCoreSymbols {
         // (like `compiler-builtins`) we leave as-is, and let Cargo reuse
         // their artifacts from previous runs.
         let build_dir = cargo_out_dir.join("build");
-        for crate_name in &crates {
-            let dir = build_dir.join(crate_name);
-            if dir.exists() {
-                builder.remove_dir(&dir);
-            }
-        }
-
+        builder.remove_dir(&build_dir);
+        /*
+                for crate_name in &crates {
+                    let dir = build_dir.join(crate_name);
+                    if dir.exists() {
+                        builder.remove_dir(&dir);
+                    }
+                }
+        */
         let _guard = builder.msg(
             Kind::Run,
             format!("symbol-report for certified library subset {}", crate_description(&crates)),

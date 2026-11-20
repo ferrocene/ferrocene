@@ -18,6 +18,7 @@ import subprocess
 
 DEFAULT_BASE_BRANCH = "main"
 ORIGIN = "origin"
+GITHUB_FEELS_SPAMMED = 422  # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#create-a-pull-request--status-codes
 
 #####################
 #                   #
@@ -168,6 +169,26 @@ class AutomatedPR(abc.ABC):
                     "maintainers_can_modify": True,
                 },
             )
+            if response.status_code == GITHUB_FEELS_SPAMMED:
+                body = f"""\
+Asking GitHub to inclue PR list in this body resulted in HTTP error code {GITHUB_FEELS_SPAMMED}.
+Add the list manually by pasting in this message the output of this command:
+
+```console
+git fetch &&
+ferrocene/tools/pull-upstream/generate_pr_body.py origin origin/{self.base_branch()} {branch_name}
+```
+"""
+                response = self.http.post(
+                    self.__repo_api("pulls"),
+                    json={
+                        "title": self.__resolved_pr_title(),
+                        "head": branch_name,
+                        "base": self.base_branch(),
+                        "body": body,
+                        "maintainers_can_modify": True,
+                    },
+                )
             response.raise_for_status()
             create_json = response.json()
 

@@ -36,3 +36,5 @@ fn main() {
 
 // ferrocene-annotations: fls_sd6rumpeb355
 // Attribute naked
+
+//@ reference: asm.operand-type.supported-operands-sym

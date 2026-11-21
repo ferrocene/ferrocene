@@ -1,7 +1,6 @@
 //@ needs-asm-support
 //@ ignore-nvptx64
 //@ ignore-spirv
-//@ reference: attributes.codegen.naked.body
 
 #![feature(asm_unwind, linkage, rustc_attrs, cfg_target_object_format)]
 #![crate_type = "lib"]
@@ -251,3 +250,7 @@ unsafe extern "custom" fn abi_custom() {
 
 // ferrocene-annotations: fls_sd6rumpeb355
 // Attribute naked
+
+//@ reference: asm.operand-type.naked_asm-restriction
+//@ reference: asm.options.naked_asm-restriction
+//@ reference: attributes.codegen.naked.body

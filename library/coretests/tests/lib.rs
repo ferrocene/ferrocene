@@ -109,6 +109,7 @@
 #![feature(portable_simd)]
 #![feature(ptr_metadata)]
 #![feature(raw_os_error_ty)]
+#![feature(register_tool)]
 #![feature(rustc_attrs)]
 #![feature(signed_bigint_helpers)]
 #![feature(slice_from_ptr_range)]
@@ -142,6 +143,8 @@
 #![allow(internal_features)]
 #![deny(implicit_provenance_casts)]
 #![deny(unsafe_op_in_unsafe_fn)]
+// to allow testing of attribute reflection in `mem/type_info.rs`
+#![register_tool(reflective_tool(reflect))]
 // Ferrocene addition: To disable AtomicI64 tests on Thumbv7em
 #![feature(cfg_target_has_atomic)]
 // Ferrocene addition: Enable test-only functions in libcore

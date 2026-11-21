@@ -9,7 +9,7 @@ fn test_unicode_is_printable() {
     }
 
     assert_eq!(string('\u{2a6e0}'), "\\u{2a6e0}");
-    assert_eq!(string('\u{2b81e}'), "\\u{2b81e}");
+    assert_eq!(string('\u{2b81e}'), "𫠞");
     assert_eq!(string('\u{2ceae}'), "\\u{2ceae}");
     assert_eq!(string('\u{2ebe1}'), "\\u{2ebe1}");
     assert_eq!(string('\u{2ee5e}'), "\\u{2ee5e}");

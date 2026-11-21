@@ -2155,12 +2155,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.saturating_div(-1), ", stringify!($SelfT), "::MAX);")]
         ///
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "saturating_div", since = "1.58.0")]
         #[rustc_const_stable(feature = "saturating_div", since = "1.58.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[ferrocene::prevalidated]
+        #[track_caller]
         pub const fn saturating_div(self, rhs: Self) -> Self {
             match self.overflowing_div(rhs) {
                 (result, false) => result,
@@ -2302,12 +2303,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(100", stringify!($SelfT), ".wrapping_div(10), 10);")]
         /// assert_eq!((-128i8).wrapping_div(-1), -128);
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "num_wrapping", since = "1.2.0")]
         #[rustc_const_stable(feature = "const_wrapping_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[ferrocene::prevalidated]
+        #[track_caller]
         pub const fn wrapping_div(self, rhs: Self) -> Self {
             self.overflowing_div(rhs).0
         }
@@ -2334,6 +2336,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[track_caller]
         pub const fn wrapping_div_euclid(self, rhs: Self) -> Self {
             self.overflowing_div_euclid(rhs).0
         }
@@ -2355,12 +2358,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(100", stringify!($SelfT), ".wrapping_rem(10), 0);")]
         /// assert_eq!((-128i8).wrapping_rem(-1), 0);
         /// ```
+        #[ferrocene::prevalidated]
         #[stable(feature = "num_wrapping", since = "1.2.0")]
         #[rustc_const_stable(feature = "const_wrapping_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
-        #[ferrocene::prevalidated]
+        #[track_caller]
         pub const fn wrapping_rem(self, rhs: Self) -> Self {
             self.overflowing_rem(rhs).0
         }
@@ -2386,6 +2390,7 @@ macro_rules! int_impl {
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]
+        #[track_caller]
         pub const fn wrapping_rem_euclid(self, rhs: Self) -> Self {
             self.overflowing_rem_euclid(rhs).0
         }
@@ -2509,7 +2514,6 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[allow(unused_attributes)]
         #[inline]
         #[ferrocene::prevalidated]
         pub const fn wrapping_abs(self) -> Self {
@@ -2887,12 +2891,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_div(2), (2, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_div(-1), (", stringify!($SelfT), "::MIN, true));")]
         /// ```
+        #[ferrocene::prevalidated]
         #[inline]
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_overflowing_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[ferrocene::prevalidated]
+        #[track_caller]
         pub const fn overflowing_div(self, rhs: Self) -> (Self, bool) {
             // Using `&` helps LLVM see that it is the same check made in division.
             if intrinsics::unlikely((self == Self::MIN) & (rhs == -1)) {
@@ -2922,6 +2927,7 @@ macro_rules! int_impl {
         #[rustc_const_stable(feature = "const_euclidean_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
+        #[track_caller]
         pub const fn overflowing_div_euclid(self, rhs: Self) -> (Self, bool) {
             // Using `&` helps LLVM see that it is the same check made in division.
             if intrinsics::unlikely((self == Self::MIN) & (rhs == -1)) {
@@ -2946,12 +2952,13 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(5", stringify!($SelfT), ".overflowing_rem(2), (1, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_rem(-1), (0, true));")]
         /// ```
+        #[ferrocene::prevalidated]
         #[inline]
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_overflowing_int_methods", since = "1.52.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[ferrocene::prevalidated]
+        #[track_caller]
         pub const fn overflowing_rem(self, rhs: Self) -> (Self, bool) {
             if intrinsics::unlikely(rhs == -1) {
                 (0, self == Self::MIN)
@@ -3003,13 +3010,12 @@ macro_rules! int_impl {
         #[doc = concat!("assert_eq!(2", stringify!($SelfT), ".overflowing_neg(), (-2, false));")]
         #[doc = concat!("assert_eq!(", stringify!($SelfT), "::MIN.overflowing_neg(), (", stringify!($SelfT), "::MIN, true));")]
         /// ```
+        #[ferrocene::prevalidated]
         #[inline]
         #[stable(feature = "wrapping", since = "1.7.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
-        #[allow(unused_attributes)]
-        #[ferrocene::prevalidated]
         pub const fn overflowing_neg(self) -> (Self, bool) {
             if intrinsics::unlikely(self == Self::MIN) {
                 (Self::MIN, true)
@@ -3665,7 +3671,6 @@ macro_rules! int_impl {
         /// ```
         #[stable(feature = "rust1", since = "1.0.0")]
         #[rustc_const_stable(feature = "const_int_methods", since = "1.32.0")]
-        #[allow(unused_attributes)]
         #[must_use = "this returns the result of the operation, \
                       without modifying the original"]
         #[inline]

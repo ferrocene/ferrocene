@@ -807,6 +807,11 @@ impl Subcommand {
         }
     }
 
+    /// Are we executing a `check --all-targets` command?
+    pub(crate) fn check_all_targets(&self) -> bool {
+        matches!(self, Subcommand::Check { all_targets: true, .. })
+    }
+
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
             Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {

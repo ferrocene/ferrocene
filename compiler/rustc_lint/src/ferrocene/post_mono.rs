@@ -27,7 +27,7 @@ use rustc_middle::mir::{
     self, Body, CastKind, Location, Rvalue, SourceScope, Terminator, TerminatorKind,
 };
 use rustc_middle::mono::MonoItem;
-use rustc_middle::span_bug;
+use rustc_span::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
     self, EarlyBinder, GenericArgsRef, Instance, InstanceKind, ShimKind, TyCtxt, TypeFoldable,

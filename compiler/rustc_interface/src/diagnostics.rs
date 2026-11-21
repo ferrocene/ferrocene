@@ -101,6 +101,10 @@ pub(crate) struct FailedWritingFile<'a> {
 pub(crate) struct ProcMacroCratePanicAbort;
 
 #[derive(Diagnostic)]
+#[diag("building proc macro crate with sanitizers enabled is not supported")]
+pub(crate) struct CannotSanitizeProcMacro;
+
+#[derive(Diagnostic)]
 #[diag(
     "due to multiple output types requested, the explicitly specified output file name will be adapted for each output type"
 )]
@@ -122,13 +126,16 @@ pub(crate) struct MultipleOutputTypesToStdout;
 #[diag(
     "target feature `{$feature}` must be {$enabled} to ensure that the ABI of the current target can be implemented correctly"
 )]
-#[note(
-    "this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!"
-)]
-#[note("for more information, see issue #116344 <https://github.com/rust-lang/rust/issues/116344>")]
 pub(crate) struct AbiRequiredTargetFeature<'a> {
     pub feature: &'a str,
     pub enabled: &'a str,
+    #[note(
+        "this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!"
+    )]
+    #[note(
+        "for more information, see issue #162235 <https://github.com/rust-lang/rust/issues/162235>"
+    )]
+    pub fcw: bool,
 }
 
 #[derive(Diagnostic)]

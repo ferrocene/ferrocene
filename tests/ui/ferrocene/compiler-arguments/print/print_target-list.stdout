@@ -185,6 +185,7 @@ powerpc-unknown-openbsd
 powerpc-wrs-vxworks
 powerpc-wrs-vxworks-spe
 powerpc64-ibm-aix
+powerpc64-sony-ps3
 powerpc64-unknown-freebsd
 powerpc64-unknown-linux-gnu
 powerpc64-unknown-linux-gnuelfv2

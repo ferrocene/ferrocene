@@ -258,7 +258,6 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
-    #[rustc_non_const_trait_method]
     fn last(self) -> Option<Self::Item>
     where
         Self: Sized + [const] Destruct,

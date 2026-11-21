@@ -6873,6 +6873,7 @@ core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator f
 core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::try_rfold
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::advance_by
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::count
+core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::last
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::next
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::nth
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::size_hint

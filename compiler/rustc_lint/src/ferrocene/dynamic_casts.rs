@@ -7,7 +7,7 @@ use rustc_infer::traits::{
     ImplSourceUserDefinedData, Obligation, ObligationCause, ObligationCauseCode,
 };
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::item_is_validated;
-use rustc_middle::span_bug;
+use rustc_span::span_bug;
 use rustc_middle::ty::adjustment::CustomCoerceUnsized;
 use rustc_middle::ty::{
     self, ExistentialPredicate, GenericArgsRef, Instance, PolyTraitRef, ShimKind, Ty, TyCtxt,
@@ -450,7 +450,7 @@ impl<'tcx> LintState<'tcx> {
         }
 
         let normalized_impl =
-            tcx.erase_and_anonymize_regions(infcx.resolve_vars_if_possible(impl_source));
+            tcx.erase_and_anonymize_regions(infcx.deeply_resolve_ignoring_regions(impl_source));
         debug!("found impl {normalized_impl:?}");
         Some(normalized_impl)
     }

@@ -183,7 +183,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::{HirId, Item};
 use rustc_lint_defs::{declare_lint_pass, declare_tool_lint};
 use rustc_middle::middle::codegen_fn_attrs::ferrocene::{ValidatedStatus, item_is_validated};
-use rustc_middle::span_bug;
+use rustc_span::span_bug;
 use rustc_middle::ty::{Instance, Ty, TyCtxt};
 use rustc_span::Span;
 use rustc_span::def_id::{DefId, LocalDefId};

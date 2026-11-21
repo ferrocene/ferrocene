@@ -45,12 +45,8 @@ fn main() {
         bar();
     }
 }
-<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_spdmit5fy7el
 // Attribute target_feature
-||||||| 646bb8409b1
-=======
 
 //@ reference: asm.register-operands.value-type-constraints
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

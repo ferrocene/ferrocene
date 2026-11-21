@@ -121,24 +121,6 @@ fn fast_print_path(path: &ast::Path) -> Symbol {
     }
 }
 
-<<<<<<< ferrocene/main
-const PREDEFINED_TOOLS: &[Symbol] =
-    // Ferrocene addition: Added sym::ferrocene
-    &[
-        sym::clippy,
-        sym::rustfmt,
-        sym::diagnostic,
-        sym::miri,
-        sym::rust_analyzer,
-        sym::ferrocene,
-    ];
-
-||||||| 646bb8409b1
-const PREDEFINED_TOOLS: &[Symbol] =
-    &[sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer];
-
-=======
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 pub(crate) fn registered_attr_tools(tcx: TyCtxt<'_>, (): ()) -> RegisteredTools {
     let (_, pre_configured_attrs) = &*tcx.crate_for_resolver(()).borrow();
 

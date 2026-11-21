@@ -180,9 +180,8 @@ fn implied_validation(tcx: TyCtxt<'_>, local: LocalDefId) -> Option<ValidatedSta
 #[inline]
 fn path_matches(attr: &rustc_attr_ir::Attribute, name: &[Symbol]) -> bool {
     match &attr {
-        rustc_attr_ir::Attribute::Tool(n) | rustc_attr_ir::Attribute::DeriveHelper(n) => {
-            n.path.segments.iter().eq(name)
-        }
+        rustc_attr_ir::Attribute::Tool { item: n, .. }
+        | rustc_attr_ir::Attribute::DeriveHelper(n) => n.path.segments.iter().eq(name),
         _ => false,
     }
 }
@@ -199,7 +198,7 @@ fn get_span_by_path<'tcx>(
         tcx.attrs_for_def(did).iter().filter(filter_fn)
     };
     if let Some(attr) = attrs.next()
-        && let rustc_attr_ir::Attribute::Tool(attr) = attr
+        && let rustc_attr_ir::Attribute::Tool { item: attr, .. } = attr
     {
         Some(attr.span)
     } else {

@@ -332,7 +332,7 @@ pub(crate) struct RegisterToolParser {
 }
 
 pub const PREDEFINED_TOOLS: &[Symbol] =
-    &[sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer];
+    &[sym::clippy, sym::rustfmt, sym::diagnostic, sym::miri, sym::rust_analyzer, sym::ferrocene];
 
 fn parse_register_tool(
     tools: &mut [&mut FxIndexMap<Ident, ToolOptions>],

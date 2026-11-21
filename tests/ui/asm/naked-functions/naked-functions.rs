@@ -247,14 +247,10 @@ pub extern "C" fn rustfmt_skip() {
 unsafe extern "custom" fn abi_custom() {
     naked_asm!("")
 }
-<<<<<<< ferrocene/main
 
 // ferrocene-annotations: fls_sd6rumpeb355
 // Attribute naked
-||||||| 646bb8409b1
-=======
 
 //@ reference: asm.operand-type.naked_asm-restriction
 //@ reference: asm.options.naked_asm-restriction
 //@ reference: attributes.codegen.naked.body
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

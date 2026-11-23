@@ -7,6 +7,7 @@ use build_helper::stage0_parser::parse_stage0_file;
 use llvm::get_llvm_build_status;
 
 use super::*;
+use crate::core::build_steps::llvm::LlvmKind;
 use crate::core::config::Config;
 use crate::utils::cache::ExecutedStep;
 use crate::utils::helpers::get_host_target;
@@ -321,15 +322,14 @@ fn test_prebuilt_llvm_config_path_resolution() {
         "#,
     );
 
-    // CI-LLVM isn't always available; check if it's enabled before testing.
-    if config.llvm_ci_mode.download_from_ci() {
-        let sess = Session::new(config.clone());
-        let builder = Builder::new(&sess);
+    let sess = Session::new(config.clone());
+    let builder = Builder::new(&sess);
 
-        let actual = get_llvm_build_status(&builder, builder.config.host_target)
-            .llvm_output()
-            .llvm_config()
-            .to_path_buf();
+    let llvm = get_llvm_build_status(&builder, builder.config.host_target);
+    let llvm = llvm.llvm_output();
+    // CI-LLVM isn't always available; check if it's enabled before testing.
+    if llvm.kind() == LlvmKind::DownloadedFromCi {
+        let actual = llvm.llvm_config().to_path_buf();
         let expected = builder
             .out
             .join(builder.config.host_target)
@@ -1807,7 +1807,7 @@ mod snapshot {
         insta::assert_snapshot!(
             ctx.config("check")
                 .path("compiler")
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -1833,7 +1833,7 @@ mod snapshot {
             ctx.config("check")
                 .path("compiler")
                 .stage(1)
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -1847,7 +1847,7 @@ mod snapshot {
         [build] llvm <host>
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
-        [check] rustc 1 <host> -> rustc 2 <host> (77 crates)
+        [check] rustc 1 <host> -> rustc 2 <host> (78 crates)
         ");
     }
 
@@ -1863,7 +1863,7 @@ mod snapshot {
         [build] rustc 0 <host> -> rustc 1 <host>
         [build] rustc 1 <host> -> std 1 <host>
         [check] rustc 1 <host> -> std 1 <target1>
-        [check] rustc 1 <host> -> rustc 2 <target1> (77 crates)
+        [check] rustc 1 <host> -> rustc 2 <target1> (78 crates)
         [check] rustc 1 <host> -> rustc 2 <target1>
         [check] rustc 1 <host> -> Rustdoc 2 <target1>
         [check] rustc 1 <host> -> rustc_codegen_cranelift 2 <target1>
@@ -1959,7 +1959,7 @@ mod snapshot {
             ctx.config("check")
                 .paths(&["library", "compiler"])
                 .args(&args)
-                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+                .render_steps(), @"[check] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 
     #[test]
@@ -2087,6 +2087,7 @@ mod snapshot {
         [test] compiletest-mir-opt 1 <host>
         [test] compiletest-codegen-llvm 1 <host>
         [test] compiletest-codegen-units 1 <host>
+        [test] compiletest-assembly-gcc 1 <host>
         [test] compiletest-assembly-llvm 1 <host>
         [test] compiletest-incremental 1 <host>
         [test] compiletest-debuginfo 1 <host>
@@ -2267,6 +2268,7 @@ mod snapshot {
         [test] compiletest-mir-opt 2 <host>
         [test] compiletest-codegen-llvm 2 <host>
         [test] compiletest-codegen-units 2 <host>
+        [test] compiletest-assembly-gcc 2 <host>
         [test] compiletest-assembly-llvm 2 <host>
         [test] compiletest-incremental 2 <host>
         [test] compiletest-debuginfo 2 <host>
@@ -2915,7 +2917,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("install")
-                .path("src")
+                .path("rust-src")
                 .args(&[
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.normalized_dir()),
@@ -2942,7 +2944,7 @@ mod snapshot {
         let ctx = TestCtx::new();
         insta::assert_snapshot!(
             ctx.config("install")
-                .path("src")
+                .path("rust-src")
                 .args(&[
                     // Using backslashes fails with `--set`
                     "--set", &format!("install.prefix={}", ctx.normalized_dir()),
@@ -3116,7 +3118,7 @@ mod snapshot {
     #[test]
     fn fix_compiler() {
         let ctx = TestCtx::new();
-        insta::assert_snapshot!(ctx.config("fix").path("compiler").render_steps(), @"[fix] rustc 0 <host> -> rustc 1 <host> (77 crates)");
+        insta::assert_snapshot!(ctx.config("fix").path("compiler").render_steps(), @"[fix] rustc 0 <host> -> rustc 1 <host> (78 crates)");
     }
 }
 

@@ -1322,7 +1322,8 @@ commands:
           name: Fetch QNX710 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            if [[ "${OSTYPE}" = "msys" ]]; then
+            source "src/ci/shared.sh"
+            if isWindows; then
                 source $HOME/.venv/Scripts/activate
             else
                 source $HOME/.venv/bin/activate

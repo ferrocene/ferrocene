@@ -29,11 +29,16 @@ merge conflicts and they need to be resolved manually.
 Checkout PR
 ^^^^^^^^^^^
 
-Start by checking out the PR. The name of the branch is
-`automation/pull-upstream-master/<ID>`, e.g. `automation/pull-upstream-master/dfvjj2s4`::
+Start by checking out the PR. The name of the branch can be found on the corresponding
+Github pull request page, and depends on which branch of the upstream Rust repository
+it pulls from.
+
+For example, a typical upstream pull into Ferrocene's `main` branch will pull from
+Rust's `HEAD`, leading to a branch name which looks like `automation/pull-upstream-HEAD/<ID>`.
+To check this out, run::
 
     git fetch
-    git switch automation/pull-upstream-master/<ID>
+    git switch automation/pull-upstream-HEAD/<ID>
 
 Fix conflict
 ^^^^^^^^^^^^

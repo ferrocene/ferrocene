@@ -4,14 +4,16 @@
 Ferrocene 25.11.1
 =================
 
-This is a security release to mitigate Cargo from `CVE-2026-66034`_, a security
-vulnerability in libssh2 that exposes clients to remote code execution from
-malicious servers.
+This is a security release that disables libssh2 in the included Cargo
+distribution to mitigate against several libssh2 vulnerabilities. Notably,
+`CVE-2026-55200`_ and `CVE-2026-66034`_ expose clients to remote code execution
+from malicious servers.
 
 While Ferrocene customers are encouraged to only use trusted remote git servers
 for their dependencies, we still recommend customers to update to this security
 release.
 
+.. _CVE-2026-55200: https://nvd.nist.gov/vuln/detail/cve-2026-55200
 .. _CVE-2026-66034: https://nvd.nist.gov/vuln/detail/cve-2026-66034
 
 Background

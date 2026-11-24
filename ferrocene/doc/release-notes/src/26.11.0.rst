@@ -47,6 +47,10 @@ Changes
   removed from the certified subset. There is no semantic change, so users can simply replace
   any calls to ``fetch_update`` with ``try_update``.
 
+* Cargo is no longer compiled against libssh2 in order to mitigate against past and future
+  vulnerabilities in libssh2. In order to prevent unexpected behavioral changes, the
+  `net.git-fetch-with-cli` Cargo configuration option always defaults to true.
+
 
 Bug fixes
 ---------

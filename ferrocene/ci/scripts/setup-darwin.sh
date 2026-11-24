@@ -3,8 +3,11 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeuo pipefail
 
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
 # On Mac, XCode's LLVM cannot build for WASM.
-brew install cmake ninja zstd llvm tidy-html5
+retry brew install cmake ninja zstd llvm tidy-html5
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation.
 # See ferrocene/ci/mirrors/README.md.

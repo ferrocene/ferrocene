@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout (shallow)
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
@@ -62,6 +64,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh
@@ -128,6 +132,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Unshallow the clone if on the beta channel
         run: ferrocene/ci/scripts/unshallow-on-beta.sh

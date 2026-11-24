@@ -20,3 +20,6 @@ check-cfg = [
     # Internal features aren't marked known config by default
     'cfg(target_has_reliable_f16)',
 ]
+
+[patch.crates-io]
+getrandom = { git = "https://github.com/ferrocene/getrandom", branch = "carmen/qnx8-support" }

@@ -92,9 +92,9 @@ expression: doc
 [Doc] bootstrap::ferrocene::doc::EvaluationReport
     targets: [aarch64-unknown-linux-gnu]
     - Set({ferrocene/doc/evaluation-report})
-[Doc] bootstrap::ferrocene::doc::CoreCertification
+[Doc] bootstrap::ferrocene::doc::LibraryCertification
     targets: [aarch64-unknown-linux-gnu]
-    - Set({ferrocene/doc/core-certification})
+    - Set({ferrocene/doc/library-certification})
 [Doc] bootstrap::ferrocene::doc::QualificationPlan
     targets: [aarch64-unknown-linux-gnu]
     - Set({ferrocene/doc/qualification-plan})

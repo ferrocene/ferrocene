@@ -29,8 +29,8 @@ use rustc_middle::mir::{
 use rustc_middle::mono::MonoItem;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
-    self, EarlyBinder, GenericArgs, Instance, InstanceKind, ShimKind, TyCtxt, TypeFoldable,
-    TypingEnv,
+    self, EarlyBinder, GenericArgs, Instance, InstanceKind, Intrinsic, ShimKind, TyCtxt,
+    TypeFoldable, TypingEnv,
 };
 use rustc_span::{Span, span_bug};
 use tracing::{debug, info, trace};
@@ -300,9 +300,13 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 info!("ignoring intrinsic {owner:?}");
                 return;
             }
-
+            let intrinsic_is_replaced = if let Intrinsic::Rustc(name) = intrinsic.name {
+                tcx.sess.replaced_rustc_intrinsics.contains(&name)
+            } else {
+                false
+            };
             // See equivalent code in `rustc_monomorphize::collector::visit_instance_use`.
-            if tcx.sess.replaced_intrinsics.contains(&intrinsic.name) {
+            if !intrinsic_is_replaced {
                 // This is normal: LLVM in particular has specialized overrides for many
                 // integer operations. But that means the fallback body won't actually be
                 // used, so don't try to check it.
@@ -402,7 +406,7 @@ impl<'a, 'tcx> LintPostMono<'a, 'tcx> {
                 // If T is a function type, the compiler synthesizes an impl, so we'll check
                 // the trait declaration in libcore which isn't what we want. Check if the
                 // function is annotated instead.
-                if let InstanceKind::Shim(ShimKind::FnPtr(_, ty) | ShimKind::FnPtrAsPtr(_, ty)) =
+                if let InstanceKind::Shim(ShimKind::FnPtr(_, ty) | ShimKind::FnAddrAsPtr(_, ty)) =
                     instance.def
                     && let ty::FnDef(fn_item, fn_args) = ty.kind()
                 {

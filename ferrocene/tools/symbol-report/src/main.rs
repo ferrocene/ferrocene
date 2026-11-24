@@ -1,6 +1,5 @@
 #![feature(rustc_private)]
 
-extern crate rustc_ast;
 extern crate rustc_attr_ir;
 extern crate rustc_driver;
 extern crate rustc_hir;
@@ -16,11 +15,10 @@ use std::process::ExitCode;
 use std::sync::LazyLock;
 
 use build_helper::symbol_report::{Function, SymbolReport};
-use rustc_ast::attr::AttributeExt;
 use rustc_attr_ir::Attribute;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_hir::HirId;
-use rustc_hir::def_id::{DefId, LOCAL_CRATE, LocalDefId};
+use rustc_hir::def_id::{LOCAL_CRATE, LocalDefId};
 use rustc_interface::interface::Compiler;
 use rustc_middle::ty::print::{
     with_no_trimmed_paths, with_no_visible_paths, with_resolve_crate_name,
@@ -37,6 +35,16 @@ struct Vis<'tcx> {
     tcx: TyCtxt<'tcx>,
     report: SymbolReport,
     visited_attrs: HashSet<Span>,
+}
+
+// This was removed upstream, so was saved here since we still use it
+#[inline]
+fn path_matches(attr: &rustc_attr_ir::Attribute, name: &[Symbol]) -> bool {
+    match &attr {
+        rustc_attr_ir::Attribute::Tool { item: n, .. }
+        | rustc_attr_ir::Attribute::DeriveHelper(n) => n.path.segments.iter().eq(name),
+        _ => false,
+    }
 }
 
 impl<'tcx> Vis<'tcx> {
@@ -58,11 +66,13 @@ impl<'tcx> Vis<'tcx> {
             .tcx
             .hir_attrs(hir_id)
             .iter()
-            .find(|attr| attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()))
+            .find(|attr| path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice()))
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
-            let (Attribute::Tool(attr_item) | Attribute::DeriveHelper(attr_item)) = attr else {
+            let (Attribute::Tool { item: attr_item, .. } | Attribute::DeriveHelper(attr_item)) =
+                attr
+            else {
                 unreachable!()
             };
             self.visited_attrs.insert(attr_item.span);
@@ -90,8 +100,8 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
     }
 
     fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
-        if attr.path_matches(FERROCENE_ANNOTATION_PATH.as_slice()) {
-            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+        if path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice()) {
+            let (Attribute::Tool { item: attr, .. } | Attribute::DeriveHelper(attr)) = attr else {
                 unreachable!()
             };
             if !self.visited_attrs.contains(&attr.span) {
@@ -206,7 +216,7 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         // here.
         if let Some(attr) = has_ferrocene_annotation(tcx, def) {
             vis.report.add_annotation(filename.clone(), start_line, end_line);
-            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+            let (Attribute::Tool { item: attr, .. } | Attribute::DeriveHelper(attr)) = attr else {
                 unreachable!()
             };
             vis.visited_attrs.insert(attr.span);
@@ -265,19 +275,9 @@ fn get_span(tcx: TyCtxt<'_>, vis: &mut Vis<'_>, def: LocalDefId) -> (String, usi
     (filename, start_line, end_line)
 }
 
-// This was removed upstream, so was saved here since we still use it
-fn get_attrs_by_path<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    did: DefId,
-    attr: &[Symbol],
-) -> impl Iterator<Item = &'tcx rustc_attr_ir::Attribute> {
-    let filter_fn = move |a: &&rustc_attr_ir::Attribute| a.path_matches(attr);
-    if let Some(did) = did.as_local() {
-        tcx.hir_attrs(tcx.local_def_id_to_hir_id(did)).iter().filter(filter_fn)
-    } else {
-        tcx.attrs_for_def(did).iter().filter(filter_fn)
-    }
-}
 fn has_ferrocene_annotation(tcx: TyCtxt<'_>, def: LocalDefId) -> Option<&Attribute> {
-    get_attrs_by_path(tcx, def.into(), FERROCENE_ANNOTATION_PATH.as_slice()).next()
+    let filter_fn = move |attr: &&rustc_attr_ir::Attribute| {
+        path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice())
+    };
+    tcx.hir_attrs(tcx.local_def_id_to_hir_id(def)).iter().filter(filter_fn).next()
 }

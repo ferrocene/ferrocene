@@ -66,6 +66,14 @@ name = "flip-link"
 subset = "default"
 
 [[groups.hosts.packages]]
+name = "symbol-report"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "blanket"
+subset = "default"
+
+[[groups.hosts.packages]]
 name = "miri"
 subset = "default"
 

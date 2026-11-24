@@ -311,7 +311,7 @@ where
     }
 }
 
-#[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "more_from_nonzero", since = "1.101.0")]
 impl<'a, T> From<&'a NonZero<T>> for &'a T
 where
     T: ZeroablePrimitive,
@@ -324,7 +324,7 @@ where
 
 // FIXME: see library/std/tests/slice-from-array-issue-113238.rs
 /*
-#[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "more_from_nonzero", since = "1.101.0")]
 impl<'a, T> From<&'a [NonZero<T>]> for &'a [T]
 where
     T: ZeroablePrimitive,
@@ -349,7 +349,7 @@ where
 }
 */
 
-#[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "more_from_nonzero", since = "1.101.0")]
 impl<T, const N: usize> From<[NonZero<T>; N]> for [T; N]
 where
     T: ZeroablePrimitive,
@@ -364,7 +364,7 @@ where
 macro_rules! impl_ref_try_from {
     ($($t:ty),* $(,)?) => {
         $(
-            #[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+            #[stable(feature = "more_from_nonzero", since = "1.101.0")]
             impl<'a> TryFrom<&'a $t> for &'a NonZero<$t> {
                 type Error = TryFromIntError;
 
@@ -393,7 +393,7 @@ impl_ref_try_from! {
     char,
 }
 
-#[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "more_from_nonzero", since = "1.101.0")]
 impl<'a, T> TryFrom<&'a [T]> for &'a [NonZero<T>]
 where
     T: ZeroablePrimitive,
@@ -406,7 +406,7 @@ where
     }
 }
 
-#[stable(feature = "more_from_nonzero", since = "CURRENT_RUSTC_VERSION")]
+#[stable(feature = "more_from_nonzero", since = "1.101.0")]
 impl<T, const N: usize> TryFrom<[T; N]> for [NonZero<T>; N]
 where
     T: ZeroablePrimitive,
@@ -1541,8 +1541,6 @@ macro_rules! nonzero_integer {
             /// # Examples
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             /// # use std::num::NonZero;
             /// #
             /// # fn main() { test().unwrap(); }
@@ -1555,13 +1553,11 @@ macro_rules! nonzero_integer {
             /// Trailing space returns error:
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             /// # use std::num::NonZero;
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii_bytes(b\"1 \").is_err());")]
             /// ```
-            #[unstable(feature = "int_from_ascii", issue = "134821")]
+            #[stable(feature = "int_from_ascii", since = "CURRENT_RUSTC_VERSION")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
             #[inline]
             pub const fn from_ascii_bytes<T>(src: T) -> Result<Self, ParseIntError>
@@ -1600,8 +1596,6 @@ macro_rules! nonzero_integer {
             /// # Examples
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             /// # use std::num::NonZero;
             /// #
             /// # fn main() { test().unwrap(); }
@@ -1614,13 +1608,11 @@ macro_rules! nonzero_integer {
             /// Trailing space returns error:
             ///
             /// ```
-            /// #![feature(int_from_ascii)]
-            ///
             /// # use std::num::NonZero;
             /// #
             #[doc = concat!("assert!(NonZero::<", stringify!($Int), ">::from_ascii_bytes_radix(b\"1 \", 10).is_err());")]
             /// ```
-            #[unstable(feature = "int_from_ascii", issue = "134821")]
+            #[stable(feature = "int_from_ascii", since = "CURRENT_RUSTC_VERSION")]
             #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
             #[inline]
             pub const fn from_ascii_bytes_radix<T>(src: T, radix: u32) -> Result<Self, ParseIntError>

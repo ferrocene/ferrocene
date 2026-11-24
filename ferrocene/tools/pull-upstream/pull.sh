@@ -310,7 +310,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
 done
 
 # We keep lockfile for Ferrocene tools fresh
-if [ "${upstream_branch}" == "master" ]; then
+if [ "${upstream_branch}" == "main" ]; then
     prefix="ferrocene/tools"
     lock="${prefix}/Cargo.lock"
     manifest="${prefix}/Cargo.toml"

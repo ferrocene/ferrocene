@@ -152,17 +152,15 @@ the technical reports provided by the assessors needs to be uploaded to our AWS
 account with::
 
    aws --profile ferrocene-ci s3 cp path/to/compiler-report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf
-   aws --profile ferrocene-ci s3 cp path/to/core-report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf
+   aws --profile ferrocene-ci s3 cp path/to/core-report.pdf s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-library-technical-report.pdf
 
 In the command above, ``path/to/the/component-report.pdf`` is the local path to the
 downloaded file, ``YYYY-MM-DD`` is the current date (**not** the version
 number), and ``YY.MM.N`` is the version number.
 
-.. FIXME(urhengulas): Rename ``core-technical-report`` to ``certified-libs-technical-report``
-
 Once the files are uploaded, open a new PR targeting the ``release/1.NN`` branch
 changing ``ferrocene/ci/configure.sh``. In that file, find the lines setting the
-``compiler-technical-report-url`` and ``core-technical-report`` options, if
+``compiler-technical-report-url`` and ``library-technical-report`` options, if
 commented uncomment them, and replace the URL with the ``s3://`` URLs of the
 reports you just uploaded.
 
@@ -176,7 +174,7 @@ The reviewer of this change has to check the following:
    .. code-block::
 
       $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-compiler-technical-report.pdf path/to/compiler-report.pdf
-      $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-core-technical-report.pdf path/to/core-report.pdf
+      $ aws --profile ferrocene-ci s3 cp s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-library-technical-report.pdf path/to/library-report.pdf
 
 2. Check that the configuration is correctly set in ``ferrocene/ci/configure.sh``.
 

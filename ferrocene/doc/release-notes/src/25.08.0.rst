@@ -12,7 +12,7 @@ shipped as a preview.
 
 * A subset of the ``core`` library is being certified to IEC-61508 SIL 2.
   This is currently in pre-release and uncertified. For more information,
-  see the :doc:`user-manual:core/index` and :doc:`core-certification:index`.
+  see the :doc:`user-manual:core/index` and :doc:`library-certification:index`.
 
 Removed experimental features
 -----------------------------

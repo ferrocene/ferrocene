@@ -38,8 +38,8 @@ Project Documents
    * - :doc:`release-notes:index`
      - :document-id:`release-notes`
      - |ferrocene_version|
-   * - :doc:`core-certification:index`
-     - :document-id:`core-certification`
+   * - :doc:`library-certification:index`
+     - :document-id:`library-certification`
      - |ferrocene_version|
    * - :doc:`qnx7-manual:index`
      - :document-id:`qnx7-manual`

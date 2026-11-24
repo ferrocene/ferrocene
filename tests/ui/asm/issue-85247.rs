@@ -24,3 +24,5 @@ fn main() {
 }
 
 // ferrocene-annotations: um_rustc_C_relocation_model
+
+//@ reference: asm.register-names.not-for-io

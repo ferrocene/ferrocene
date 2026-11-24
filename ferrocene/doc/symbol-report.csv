@@ -3785,7 +3785,6 @@
 <core::time::Duration as core::cmp::PartialOrd>::partial_cmp
 <core::time::Duration as core::default::Default>::default
 <core::time::Duration as core::fmt::Debug>::fmt
-<core::time::Duration as core::fmt::Debug>::fmt::fmt_decimal
 <core::time::Duration as core::hash::Hash>::hash
 <core::time::Duration as core::ops::arith::Add>::add
 <core::time::Duration as core::ops::arith::Div<u32>>::div
@@ -3799,6 +3798,9 @@
 <core::time::TryFromFloatSecsErrorKind as core::cmp::PartialEq>::eq
 <core::time::TryFromFloatSecsErrorKind as core::fmt::Debug>::fmt
 <f128 as core::default::Default>::default
+<f128 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f128 as core::intrinsics::bounds::FloatPrimitive>::is_nan
+<f128 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f128 as core::iter::traits::accum::Sum<&'a f128>>::sum
 <f128 as core::iter::traits::accum::Sum>::sum
 <f128 as core::ops::arith::Add<&f128>>::add
@@ -3825,6 +3827,7 @@
 <f16 as core::default::Default>::default
 <f16 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f16 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f16 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f16 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f16 as core::iter::traits::accum::Sum<&'a f16>>::sum
 <f16 as core::iter::traits::accum::Sum>::sum
@@ -3855,6 +3858,7 @@
 <f32 as core::default::Default>::default
 <f32 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f32 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f32 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f32 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f32 as core::iter::traits::accum::Sum<&'a f32>>::sum
 <f32 as core::iter::traits::accum::Sum>::sum
@@ -3885,6 +3889,7 @@
 <f64 as core::default::Default>::default
 <f64 as core::fmt::float::GeneralFormat>::already_rounded_value_should_use_exponential
 <f64 as core::intrinsics::bounds::FloatPrimitive>::from_bits
+<f64 as core::intrinsics::bounds::FloatPrimitive>::is_nan
 <f64 as core::intrinsics::bounds::FloatPrimitive>::to_bits
 <f64 as core::iter::traits::accum::Sum<&'a f64>>::sum
 <f64 as core::iter::traits::accum::Sum>::sum
@@ -6348,6 +6353,8 @@ core::escape::verbatim
 core::f128::<impl f128>::clamp::do_panic
 core::f128::<impl f128>::clamp::do_panic::compiletime
 core::f128::<impl f128>::clamp::do_panic::runtime
+core::f128::<impl f128>::from_bits
+core::f128::<impl f128>::is_nan
 core::f128::<impl f128>::to_bits
 core::f16::<impl f16>::abs
 core::f16::<impl f16>::clamp::do_panic
@@ -6355,6 +6362,7 @@ core::f16::<impl f16>::clamp::do_panic::compiletime
 core::f16::<impl f16>::clamp::do_panic::runtime
 core::f16::<impl f16>::classify
 core::f16::<impl f16>::from_bits
+core::f16::<impl f16>::is_nan
 core::f16::<impl f16>::to_bits
 core::f32::<impl f32>::abs
 core::f32::<impl f32>::clamp::do_panic
@@ -6741,8 +6749,7 @@ core::intrinsics::contract_check_ensures::compiletime
 core::intrinsics::contract_check_ensures::runtime
 core::intrinsics::contract_check_requires::compiletime
 core::intrinsics::contract_check_requires::runtime
-core::intrinsics::copysignf32
-core::intrinsics::copysignf64
+core::intrinsics::copysign
 core::intrinsics::disjoint_bitor
 core::intrinsics::fabs
 core::intrinsics::fallback::wide_mul_u128
@@ -6753,8 +6760,8 @@ core::intrinsics::integer_max
 core::intrinsics::integer_min
 core::intrinsics::is_val_statically_known
 core::intrinsics::likely
-core::intrinsics::maximum_number_nsz_f32
-core::intrinsics::minimum_number_nsz_f32
+core::intrinsics::maximum_number_nsz
+core::intrinsics::minimum_number_nsz
 core::intrinsics::overflow_checks
 core::intrinsics::ptr_guaranteed_cmp
 core::intrinsics::reflection::type_id_eq
@@ -6866,6 +6873,7 @@ core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator f
 core::iter::range::<impl core::iter::traits::double_ended::DoubleEndedIterator for core::ops::range::RangeInclusive<A>>::try_rfold
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::advance_by
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::count
+core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::last
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::next
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::nth
 core::iter::range::<impl core::iter::traits::iterator::Iterator for core::ops::range::Range<A>>::size_hint
@@ -8088,6 +8096,7 @@ core::ops::range::Bound::<T>::as_mut
 core::ops::range::Bound::<T>::as_ref
 core::ops::range::Bound::<T>::map
 core::ops::range::Range::<Idx>::contains
+core::ops::range::Range::<Idx>::is_empty
 core::ops::range::RangeBounds::contains
 core::ops::range::RangeInclusive::<Idx>::contains
 core::ops::range::RangeInclusive::<Idx>::end
@@ -8550,6 +8559,8 @@ core::str::<impl str>::is_empty
 core::str::<impl str>::len
 core::str::<impl str>::parse
 core::str::<impl str>::split
+core::str::<impl str>::split_at_mut_unchecked::precondition_check
+core::str::<impl str>::split_at_unchecked::precondition_check
 core::str::<impl str>::split_inclusive
 core::str::<impl str>::starts_with
 core::str::<impl str>::strip_suffix
@@ -8928,6 +8939,7 @@ core::time::Duration::subsec_micros
 core::time::Duration::subsec_millis
 core::time::Duration::subsec_nanos
 core::time::Duration::try_from_secs_f32
+core::time::fmt_decimal
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::eq
 core::tuple::<impl core::cmp::PartialEq for (A, Z, Y, X, W, V, U, T)>::ne
 core::tuple::<impl core::cmp::PartialEq for (B, A, Z, Y, X, W, V, U, T)>::eq

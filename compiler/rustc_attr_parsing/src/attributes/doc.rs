@@ -10,8 +10,10 @@ use rustc_feature::AttributeStability;
 use rustc_lint_defs::builtin::{INVALID_DOC_ATTRIBUTES, UNUSED_ATTRIBUTES};
 use rustc_span::{Span, Symbol, edition, kw, sym};
 
-use super::prelude::{ALL_TARGETS, AllowedTargets};
+use super::prelude::AllowedTargets;
 use super::{AcceptMapping, AttributeParser, template};
+use crate::DuplicateAttribute;
+use crate::attributes::doc_comment::DOC_TARGETS;
 use crate::context::{AcceptContext, FinalizeContext};
 use crate::diagnostics::{
     DocAliasBadChar, DocAliasDuplicated, DocAliasEmpty, DocAliasMalformed, DocAliasStartEnd,
@@ -23,12 +25,12 @@ use crate::diagnostics::{
     DocKeywordNotKeyword, DocTestLiteral, DocTestTakesList, DocTestUnknown, DocUnknownAny,
     DocUnknownInclude, DocUnknownPasses, DocUnknownPlugins, DocUnknownSpotlight,
     DuplicateNotableTraitColor, ExpectedNameValue, ExpectedNoArgs, IllFormedAttributeInput,
-    InvalidNotableTraitAttr, InvalidNotableTraitColor, MalformedDoc, UnusedDuplicate,
+    InvalidNotableTraitAttr, InvalidNotableTraitColor, MalformedDoc,
 };
 use crate::parser::{
     ArgParser, MetaItemListParser, MetaItemOrLitParser, MetaItemParser, OwnedPathParser,
 };
-use crate::target_checking::Policy::Allow;
+use crate::target_checking::Policy::{Allow, AllowSilent};
 
 fn check_keyword(cx: &mut AcceptContext<'_, '_>, keyword: Symbol, span: Span) -> bool {
     // FIXME: Once rustdoc can handle URL conflicts on case insensitive file systems, we
@@ -278,7 +280,12 @@ impl DocParser {
                     let unused_span = path.span();
                     cx.emit_lint(
                         INVALID_DOC_ATTRIBUTES,
-                        UnusedDuplicate { this: unused_span, other: used_span, warning: true },
+                        DuplicateAttribute {
+                            this: unused_span,
+                            other: used_span,
+                            name: sym::no_crate_inject,
+                            warning: true,
+                        },
                         unused_span,
                     );
                     return;
@@ -286,7 +293,10 @@ impl DocParser {
 
                 cx.check_target(
                     sym::no_crate_inject.as_str(),
-                    &AllowedTargets::AllowListWarnRest(&[Allow(Target::Crate)]),
+                    &AllowedTargets::AllowListWarnRest(&[
+                        Allow(Target::Crate),
+                        AllowSilent(Target::Param),
+                    ]),
                 );
 
                 self.attribute.no_crate_inject = Some(path.span())
@@ -398,7 +408,7 @@ impl DocParser {
         }
 
         match cx.target {
-            Target::Use | Target::ExternCrate => {}
+            Target::Use | Target::ExternCrate | Target::Param => {} // Param has a custom error
             _ => {
                 let item_span = cx.target_span;
                 cx.emit_lint(
@@ -676,7 +686,10 @@ impl DocParser {
                 let span = path.span();
                 cx.check_target(
                     concat!("(", stringify!($ident), ")"),
-                    &AllowedTargets::AllowListWarnRest(&[Allow(Target::Crate)]),
+                    &AllowedTargets::AllowListWarnRest(&[
+                        Allow(Target::Crate),
+                        AllowSilent(Target::Param), // Param has a custom error
+                    ]),
                 );
                 self.attribute.$ident = Some(span);
             }};
@@ -695,7 +708,10 @@ impl DocParser {
 
                 cx.check_target(
                     s.as_str(),
-                    &AllowedTargets::AllowListWarnRest(&[Allow(Target::Crate)]),
+                    &AllowedTargets::AllowListWarnRest(&[
+                        Allow(Target::Crate),
+                        AllowSilent(Target::Param), // Param has a custom error
+                    ]),
                 );
 
                 // FIXME: It's errorring when the attribute is passed multiple times on the command
@@ -777,14 +793,13 @@ impl DocParser {
                 no_args_and_not_crate_level!(search_unbox)
             }
             Some(sym::rust_logo) => {
-                // FIXME: Only feature gated at the crate level (!!)
-                if cx.target == Target::Crate {
-                    gated!(
-                        rustdoc_internals,
-                        "the `#[doc(rust_logo)]` attribute is used for Rust branding"
-                    );
-                }
-                no_args_and_crate_level!(rust_logo)
+                gated!(
+                    rustdoc_internals,
+                    "the `#[doc(rust_logo)]` attribute is used for Rust branding"
+                );
+
+                no_args!(rust_logo);
+                cx.check_target("", &AllowedTargets::AllowList(&[Allow(Target::Crate)]));
             }
             Some(sym::auto_cfg) => {
                 gated!(doc_cfg);
@@ -923,43 +938,7 @@ impl AttributeParser for DocParser {
             this.accept_single_doc_attr(cx, args);
         },
     )];
-    // FIXME: Currently emitted from 2 different places, generating duplicated warnings.
-    const ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowList(ALL_TARGETS);
-    // const ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowListWarnRest(&[
-    //     Allow(Target::ExternCrate),
-    //     Allow(Target::Use),
-    //     Allow(Target::Static),
-    //     Allow(Target::Const),
-    //     Allow(Target::Fn),
-    //     Allow(Target::Mod),
-    //     Allow(Target::ForeignMod),
-    //     Allow(Target::TyAlias),
-    //     Allow(Target::Enum),
-    //     Allow(Target::Variant),
-    //     Allow(Target::Struct),
-    //     Allow(Target::Field),
-    //     Allow(Target::Union),
-    //     Allow(Target::Trait),
-    //     Allow(Target::TraitAlias),
-    //     Allow(Target::Impl { of_trait: true }),
-    //     Allow(Target::Impl { of_trait: false }),
-    //     Allow(Target::AssocConst(AssocCtxt::Impl { of_trait: false })),
-    //     Allow(Target::AssocConst(AssocCtxt::Trait)),
-    //     Allow(Target::AssocConst(AssocCtxt::Impl { of_trait: true })),
-    //     Allow(Target::Method(MethodKind::Inherent)),
-    //     Allow(Target::Method(MethodKind::Trait { body: true })),
-    //     Allow(Target::Method(MethodKind::Trait { body: false })),
-    //     Allow(Target::Method(MethodKind::TraitImpl)),
-    //     Allow(Target::AssocTy(AssocCtxt::Impl { of_trait: false })),
-    //     Allow(Target::AssocTy(AssocCtxt::Trait)),
-    //     Allow(Target::AssocTy(AssocCtxt::Impl { of_trait: true })),
-    //     Allow(Target::ForeignFn),
-    //     Allow(Target::ForeignStatic),
-    //     Allow(Target::ForeignTy),
-    //     Allow(Target::MacroDef),
-    //     Allow(Target::Crate),
-    //     Error(Target::WherePredicate),
-    // ]);
+    const ALLOWED_TARGETS: AllowedTargets<'_> = DOC_TARGETS;
 
     fn finalize(self, _cx: &FinalizeContext<'_, '_>) -> Option<AttributeKind> {
         if self.nb_doc_attrs != 0 {

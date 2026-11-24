@@ -248,6 +248,16 @@ install!((self, builder, _config),
         let tarball = builder.ensure(crate::ferrocene::dist::flip_link::FlipLink { target: self.target });
         install(builder, "flip-link", self.compiler.stage, Some(self.target), &tarball);
     };
+    SymbolReport, alias = "symbol-report", Self::should_build(_config), only_hosts: true, {
+        let tarball = builder.ensure(crate::ferrocene::dist::coverage_tools::SymbolReport {
+            target_compiler: builder.compiler(builder.top_stage, self.target),
+        });
+        install(builder, "symbol-report", self.compiler.stage, Some(self.target), &tarball);
+    };
+    Blanket, alias = "blanket", Self::should_build(_config), only_hosts: true, {
+        let tarball = builder.ensure(crate::ferrocene::dist::coverage_tools::Blanket { target: self.target });
+        install(builder, "blanket", self.compiler.stage, Some(self.target), &tarball);
+    };
     SelfTest, alias = "self-test", Self::should_build(_config), only_hosts: true, {
         let tarball = builder.ensure(crate::ferrocene::dist::SelfTest { target: self.target });
         install(builder, "self-test", self.compiler.stage, Some(self.target), &tarball);

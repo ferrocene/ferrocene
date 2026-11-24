@@ -213,6 +213,8 @@ pub(crate) enum TypeLocation {
     TypeBound,
     ImplTarget,
     ImplTrait,
+    /// TypeAnchor trait location e.g. `<Type as $0>`
+    AnchorTrait,
     Other,
 }
 
@@ -244,13 +246,55 @@ impl TypeLocation {
             }
             TypeLocation::AssocConstEq => false,
             TypeLocation::AssocTypeEq => true,
-            TypeLocation::ImplTrait => false,
-            _ => true,
+            TypeLocation::ImplTrait | TypeLocation::AnchorTrait => false,
+
+            TypeLocation::TupleField
+            | TypeLocation::TypeAscription(_)
+            | TypeLocation::GenericArg { .. }
+            | TypeLocation::TypeBound
+            | TypeLocation::ImplTarget
+            | TypeLocation::Other => true,
+        }
+    }
+
+    pub(crate) fn complete_traits(&self) -> bool {
+        match self {
+            TypeLocation::GenericArg { corresponding_param: Some(param), .. } => {
+                matches!(param, ast::GenericParam::TypeParam(_))
+            }
+            TypeLocation::AssocConstEq | TypeLocation::TypeAscription(_) => false,
+
+            TypeLocation::TupleField
+            | TypeLocation::GenericArg { .. }
+            | TypeLocation::AssocTypeEq
+            | TypeLocation::TypeBound
+            | TypeLocation::ImplTarget
+            | TypeLocation::ImplTrait
+            | TypeLocation::AnchorTrait
+            | TypeLocation::Other => true,
         }
     }
 
     pub(crate) fn complete_self_type(&self) -> bool {
         self.complete_types() && !matches!(self, TypeLocation::ImplTarget | TypeLocation::ImplTrait)
+    }
+
+    pub(crate) fn complete_dyn(&self) -> bool {
+        self.complete_types()
+            && !matches!(
+                self,
+                TypeLocation::ImplTarget
+                    | TypeLocation::ImplTrait
+                    | TypeLocation::TypeBound
+                    | TypeLocation::TypeAscription(_)
+            )
+    }
+
+    pub(crate) fn complete_traits_only(&self) -> bool {
+        matches!(
+            self,
+            TypeLocation::ImplTrait | TypeLocation::AnchorTrait | TypeLocation::TypeBound
+        )
     }
 }
 

@@ -15,7 +15,6 @@ mod foo {
     pub const BAR: u8 = 1;
 }
 
-// FIXME(#126763): the span should be `$a::$b` in the macro body.
 macro_rules! path {
     ($a:tt, $b:tt) => {
         let _ = $a::$b;
@@ -25,6 +24,17 @@ macro_rules! path {
 #[rustc_show_spans(path)]
 fn path_from_tts() {
     path!(foo, BAR);
+}
+
+macro_rules! qpath {
+    ($lt:tt, $f:tt) => {
+        let _ = $lt u8 as Default>::$f;
+    };
+}
+
+#[rustc_show_spans(path)]
+fn qpath_from_tts() {
+    qpath!(<, default);
 }
 
 // FIXME(#126763): the field access span should be `$a.$f` in the macro body.

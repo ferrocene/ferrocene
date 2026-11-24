@@ -1,11 +1,11 @@
 use rustc_attr_ir::target::AstTarget;
 use rustc_attr_ir::{MacroUseArgs, find_attr};
 use rustc_feature::AttributeStability;
-use rustc_lint_defs::builtin::{INVALID_MACRO_EXPORT_ARGUMENTS, UNUSED_ATTRIBUTES};
+use rustc_lint_defs::builtin::INVALID_MACRO_EXPORT_ARGUMENTS;
 use rustc_structures::CollapseMacroDebuginfo;
 
 use super::prelude::*;
-use crate::diagnostics::{MacroExport, MacroOnlyAttribute};
+use crate::diagnostics::{MacroExportOnDeclMacro, MacroOnlyAttribute};
 
 pub(crate) struct MacroEscapeParser;
 impl NoArgsAttributeParser for MacroEscapeParser {
@@ -39,6 +39,7 @@ const MACRO_USE_ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowListW
     Allow(Target::Mod),
     Allow(Target::ExternCrate),
     Error(Target::WherePredicate),
+    Error(Target::Param),
 ]);
 
 impl AttributeParser for MacroUseParser {
@@ -57,14 +58,14 @@ impl AttributeParser for MacroUseParser {
                                 "State is UseAll is some so this is not the first attribute",
                             );
                             // Since there is a `#[macro_use]` import already, give a warning
-                            cx.warn_unused_duplicate(first_span, span);
+                            cx.warn_unused_duplicate(first_span, span, sym::macro_use, false);
                         }
                         MacroUseArgs::UseSpecific(_) => {
                             group.state = MacroUseArgs::UseAll;
                             group.first_span = Some(span);
                             // If there is a `#[macro_use]` attribute, warn on all `#[macro_use(...)]` attributes since everything is already imported
                             for specific_use in group.uses_attr_spans.drain(..) {
-                                cx.warn_unused_duplicate(span, specific_use);
+                                cx.warn_unused_duplicate(span, specific_use, sym::macro_use, false);
                             }
                         }
                     }
@@ -80,7 +81,7 @@ impl AttributeParser for MacroUseParser {
                             let first_span = group.first_span.expect(
                                 "State is UseAll is some so this is not the first attribute",
                             );
-                            cx.warn_unused_duplicate(first_span, span);
+                            cx.warn_unused_duplicate(first_span, span, sym::macro_use, false);
                         }
                         MacroUseArgs::UseSpecific(arguments) => {
                             // Store here so if we encounter a `UseAll` later we can still lint this attribute
@@ -152,6 +153,7 @@ impl SingleAttributeParser for MacroExportParser {
         Allow(Target::MacroDef),
         Error(Target::WherePredicate),
         Error(Target::Crate),
+        Error(Target::Param),
     ]);
     const STABILITY: AttributeStability = AttributeStability::Stable;
 
@@ -186,7 +188,7 @@ impl SingleAttributeParser for MacroExportParser {
         };
 
         if !macro_def.macro_rules {
-            cx.emit_lint(UNUSED_ATTRIBUTES, MacroExport::OnDeclMacro, attr_span);
+            cx.emit_err(MacroExportOnDeclMacro { attr_span });
         }
     }
 }

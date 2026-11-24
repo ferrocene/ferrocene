@@ -793,8 +793,7 @@
 # Indicates whether stack protectors should be used
 # via the unstable option `-Zstack-protector`.
 #
-# Valid options are : `none`(default),`basic`,`strong`, or `all`.
-# `strong` and `basic` options may be buggy and are not recommended, see rust-lang/rust#114903.
+# Valid options are : `none`(default), `strong`, or `all`.
 #rust.stack-protector = "none"
 
 # Prints each test name as it is executed, to help debug issues in the test harness itself.
@@ -1333,7 +1332,7 @@
 
 # Download URL for the core library technical report. If omitted, the
 # technical report will not be included in the documentation.
-#core-technical-report-url = <none> (url)
+#library-technical-report-url = <none> (url)
 
 # Amazon Web Services profile that you may have to set to work with AWS resources
 # while working locally.

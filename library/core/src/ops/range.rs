@@ -154,6 +154,7 @@ impl<Idx: PartialOrd<Idx>> Range<Idx> {
     /// assert!( (3.0..f32::NAN).is_empty());
     /// assert!( (f32::NAN..5.0).is_empty());
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "range_is_empty", since = "1.47.0")]
     #[rustc_const_unstable(feature = "const_range", issue = "none")]

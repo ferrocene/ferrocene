@@ -748,13 +748,13 @@ impl<T> [T] {
     /// ```
     ///
     /// [`as_mut_ptr`]: slice::as_mut_ptr
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_slice_as_ptr", since = "1.32.0")]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_as_ptr]
     #[inline(always)]
     #[must_use]
-    #[ferrocene::prevalidated]
+    #[lint::as_ptr]
+    #[lint::never_returns_null_ptr]
     pub const fn as_ptr(&self) -> *const T {
         self as *const [T] as *const T
     }
@@ -783,8 +783,8 @@ impl<T> [T] {
     #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_ptr_offset", since = "1.61.0")]
-    #[rustc_never_returns_null_ptr]
-    #[rustc_as_ptr]
+    #[lint::as_ptr]
+    #[lint::never_returns_null_ptr]
     #[inline(always)]
     #[must_use]
     #[rustc_no_writable]
@@ -2584,7 +2584,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.split_once(|&x| x == 0), None);
     /// ```
-    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "slice_split_once", since = "1.101.0")]
     #[inline]
     pub fn split_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where
@@ -2612,7 +2612,7 @@ impl<T> [T] {
     /// )));
     /// assert_eq!(s.rsplit_once(|&x| x == 0), None);
     /// ```
-    #[stable(feature = "slice_split_once", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "slice_split_once", since = "1.101.0")]
     #[inline]
     pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>
     where

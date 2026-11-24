@@ -27,10 +27,10 @@ page][workflow] and clicking "Run workflow".
 To run the tool, switch to a new branch and run the script:
 
 ```
-ferrocene/tools/pull-upstream/pull.sh master
+ferrocene/tools/pull-upstream/pull.sh main
 ```
 
-The script will fetch the latest changes from `rust-lang/rust`'s `master`
+The script will fetch the latest changes from `rust-lang/rust`'s `main`
 branch, create a commit to remove the excluded files (see below) from the
 upstream branch, and finally try to merge upstream into the current branch.
 

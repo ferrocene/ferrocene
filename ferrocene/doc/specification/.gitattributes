@@ -2,5 +2,5 @@
 # SPDX-FileCopyrightText: The Rust Project Developers
 
 # Instruct linguist not to ignore the main content
-# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md
+# https://github.com/github-linguist/linguist/blob/main/docs/overrides.md
 src/*.rst text linguist-detectable

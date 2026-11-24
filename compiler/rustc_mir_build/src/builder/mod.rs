@@ -20,7 +20,7 @@
 //! `let this = self;` or similar, allowing subsequent code to uniformly refer
 //! to the builder as `this` (and never `self`), even when not nested.
 
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use rustc_abi::{ExternAbi, FieldIdx};
 use rustc_apfloat::Float;
 use rustc_apfloat::ieee::{Double, Half, Quad, Single};
@@ -392,12 +392,35 @@ impl LocalsForNode {
     }
 }
 
-struct CFG<'tcx> {
-    basic_blocks: IndexVec<BasicBlock, BasicBlockData<'tcx>>,
+#[derive(Debug, Clone)]
+pub(crate) struct UnterminatedBlockData<'tcx> {
+    statements: Vec<Statement<'tcx>>,
+    is_cleanup: bool,
+}
+impl<'tcx> UnterminatedBlockData<'tcx> {
+    fn new(statements: Vec<Statement<'tcx>>, is_cleanup: bool) -> Self {
+        UnterminatedBlockData { statements, is_cleanup }
+    }
 }
 
-rustc_index::newtype_index! {
-    struct ScopeId {}
+pub(crate) type CFGBlock<'tcx> = Either<BasicBlockData<'tcx>, UnterminatedBlockData<'tcx>>;
+
+#[cfg(target_pointer_width = "64")]
+mod size_asserts {
+    use rustc_data_structures::static_assert_size;
+
+    use super::*;
+    // Note: It's important that `CFGBlock` has the same layout as `BasicBlockData`.
+    // because it makes the final transition to `IndexVec<BasicBlock, BasicBlockData<'tcx>>`
+    // cheaper. If those type layouts differ, we get a perf regression.
+    // See benchmarks in https://github.com/rust-lang/rust/pull/165611 for more info.
+    static_assert_size!(BasicBlockData<'_>, 136);
+    static_assert_size!(CFGBlock<'_>, 136);
+}
+
+#[derive(Debug, Clone)]
+struct CFG<'tcx> {
+    basic_blocks: IndexVec<BasicBlock, CFGBlock<'tcx>>,
 }
 
 #[derive(Debug)]
@@ -760,7 +783,7 @@ fn construct_error(tcx: TyCtxt<'_>, def_id: LocalDefId, guar: ErrorGuaranteed) -
 
     Body::new(
         MirSource::item(def_id.to_def_id()),
-        cfg.basic_blocks,
+        cfg.into_basic_blocks(),
         source_scopes,
         local_decls,
         IndexVec::new(),
@@ -809,8 +832,13 @@ fn mir_for_direct_const<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> Body<'tc
             let kind = ty::AliasConstKind::Free { def_id: def_id.into() };
             ty::AliasConst::new(tcx, kind, args)
         }
-        DefKind::AssocConst => {
-            if let Some(trait_item_def_id) = tcx.trait_item_of(def_id) {
+        DefKind::AssocConst => match tcx.associated_item(def_id).container {
+            ty::AssocContainer::Trait => {
+                let args = ty::GenericArgs::identity_for_item(tcx, def_id);
+                let kind = ty::AliasConstKind::Projection { def_id: def_id.into() };
+                ty::AliasConst::new(tcx, kind, args)
+            }
+            ty::AssocContainer::TraitImpl(Ok(trait_item_def_id)) => {
                 // HACK(khyperia): The trait solver does not support Projection aliases to impl item
                 // def_ids. So, instead, unresolve the impl back to the trait item's def_id, and
                 // construct a Self arg that will resolve us back to the same impl.
@@ -823,12 +851,14 @@ fn mir_for_direct_const<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> Body<'tc
                 let args = impl_args.rebase_onto(tcx, parent, trait_ref.args);
                 let kind = ty::AliasConstKind::Projection { def_id: trait_item_def_id };
                 ty::AliasConst::new(tcx, kind, args)
-            } else {
+            }
+            ty::AssocContainer::TraitImpl(Err(guar)) => return construct_error(tcx, def_id, guar),
+            ty::AssocContainer::InherentImpl => {
                 let args = ty::GenericArgs::identity_for_item(tcx, def_id);
                 let kind = ty::AliasConstKind::InherentImpl { def_id: def_id.into() };
                 ty::AliasConst::new(tcx, kind, args)
             }
-        }
+        },
         def_kind => span_bug!(tcx.def_span(def_id), "unexpected def_kind {def_kind:?}"),
     };
     let ty_const = ty::Const::new_alias(tcx, ty::IsRigid::No, alias_const);
@@ -837,7 +867,7 @@ fn mir_for_direct_const<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> Body<'tc
     let rvalue = Rvalue::Use(Operand::Constant(Box::new(value)), WithRetag::Yes);
     let statement_kind = StatementKind::Assign(Box::new((Place::return_place(), rvalue)));
     let statement = Statement::new(source_info, statement_kind);
-    let terminator = Some(Terminator { source_info, kind: TerminatorKind::Return });
+    let terminator = Terminator { source_info, kind: TerminatorKind::Return };
     let block = BasicBlockData::new_stmts(vec![statement], terminator, false);
     let basic_blocks = IndexVec::from_elem_n(block, 1);
 
@@ -923,7 +953,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     fn dump_for_debugging(&self) {
         let mut body = Body::new(
             MirSource::item(self.def_id.to_def_id()),
-            self.cfg.basic_blocks.clone(),
+            self.cfg.clone().into_basic_blocks(),
             self.source_scopes.clone(),
             self.local_decls.clone(),
             self.canonical_user_type_annotations.clone(),
@@ -942,7 +972,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     fn finish(self) -> Body<'tcx> {
         let mut body = Body::new(
             MirSource::item(self.def_id.to_def_id()),
-            self.cfg.basic_blocks,
+            self.cfg.into_basic_blocks(),
             self.source_scopes,
             self.local_decls,
             self.canonical_user_type_annotations,

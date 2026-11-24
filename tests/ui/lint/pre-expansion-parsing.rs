@@ -3,8 +3,10 @@
 #[expect] // OK
 #[expect[wut]] // OK
 #[expect(expect)] // OK
-#[expect(expect(expect))] //~ ERROR malformed lint attribute input
+#[expect(expect(expect))] //~ ERROR malformed
 #[deny(({!}))] // OK
 #[expect[helix::<ub>]] // OK
+#[allow = 1u7] // OK
+#[allow = "x"suffix] // OK
 #[cfg(false)]
 const _: () = ();

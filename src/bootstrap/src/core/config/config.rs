@@ -125,6 +125,8 @@ pub(crate) struct Config {
     pub android_ndk: Option<PathBuf>,
     pub optimized_compiler_builtins: CompilerBuiltins,
     pub record_failed_tests_path: PathBuf,
+    /// Path to an external checkout of rustc-perf, for running custom benchmarks.
+    pub rustc_perf_path: Option<PathBuf>,
 
     pub stdout_is_tty: bool,
     pub stderr_is_tty: bool,
@@ -366,7 +368,7 @@ pub(crate) struct Config {
     pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_allow_dev_signing: bool,
     pub ferrocene_compiler_technical_report_url: Option<String>,
-    pub ferrocene_core_technical_report_url: Option<String>,
+    pub ferrocene_library_technical_report_url: Option<String>,
     pub ferrocene_secret_sauce: FerroceneSecretSauce,
 }
 
@@ -558,6 +560,7 @@ impl Config {
         // Now override TOML values with flags, to make sure that we won't later override flags with
         // TOML values by accident instead, because flags have higher priority.
         let Build {
+            uv, // Ferrocene addition
             description: build_description,
             build: build_build,
             host: build_host,
@@ -621,7 +624,7 @@ impl Config {
             compiletest_allow_stage0: build_compiletest_allow_stage0,
             sde: build_sde,
             allocator: build_allocator,
-            uv,
+            rustc_perf_path: build_rustc_perf_path,
         } = toml_build.unwrap_or_default();
 
         let Install {
@@ -1209,7 +1212,7 @@ impl Config {
         let mut ferrocene_tarball_signing_kms_key_arn = Default::default();
         let mut ferrocene_document_signatures = Default::default();
         let mut ferrocene_compiler_technical_report_url = Default::default();
-        let mut ferrocene_core_technical_report_url = Default::default();
+        let mut ferrocene_library_technical_report_url = Default::default();
         let mut ferrocene_secret_sauce = Default::default();
         let mut ferrocene_allow_dev_signing = Default::default();
         if let Some(f) = toml.ferrocene {
@@ -1231,7 +1234,7 @@ impl Config {
             ferrocene_oxidos_src = f.oxidos_src;
             ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             ferrocene_compiler_technical_report_url = f.compiler_technical_report_url;
-            ferrocene_core_technical_report_url = f.core_technical_report_url;
+            ferrocene_library_technical_report_url = f.library_technical_report_url;
             ferrocene_document_signatures = match (
                 f.document_signatures.as_deref(),
                 f.document_signatures_s3_bucket,
@@ -1797,6 +1800,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             rustc_debug_assertions: rust_rustc_debug_assertions.unwrap_or(rust_debug == Some(true)),
             rustc_default_linker: rust_default_linker,
             rustc_error_format: flags_rustc_error_format,
+            rustc_perf_path: build_rustc_perf_path,
             rustdoc_pgo: pgo_rustdoc,
             rustfmt_info,
             sanitizers: build_sanitizers.unwrap_or(false),
@@ -1842,7 +1846,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             ferrocene_tarball_signing_kms_key_arn,
             ferrocene_document_signatures,
             ferrocene_compiler_technical_report_url,
-            ferrocene_core_technical_report_url,
+            ferrocene_library_technical_report_url,
             ferrocene_secret_sauce,
             ferrocene_allow_dev_signing,
         }
@@ -2780,7 +2784,7 @@ pub(crate) fn update_submodule<'a>(
             // This syntax isn't accepted by `branch.{branch}`. Strip it.
             let branch = current_branch.stdout();
             let branch = branch.trim();
-            let branch = branch.strip_prefix("heads/").unwrap_or(branch);
+            let branch = branch.trim_prefix("heads/");
             git.arg("-c").arg(format!("branch.{branch}.remote=origin"));
         }
         git.args(["submodule", "update", "--init", "--recursive", "--depth=1"]);

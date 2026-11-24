@@ -7,10 +7,11 @@
 
 #![feature(test)]
 #![feature(cfg_eval)]
+#![feature(custom_test_frameworks)]
 
 #[test]
 #[test]
-//~^ WARNING duplicated attribute
+//~^ WARNING duplicate `test` attributes
 fn f() {}
 
 // The following shouldn't trigger an error. The attribute is not duplicated.
@@ -27,12 +28,24 @@ use test::Bencher;
 
 #[bench]
 #[bench]
-//~^ WARNING duplicated attribute
+//~^ WARNING duplicate `bench` attributes
 fn f4(_: &mut Bencher) {}
+
+#[test]
+#[test]
+//~^ WARNING duplicate `test` attributes
+#[test]
+//~^ WARNING duplicate `test` attributes
+fn f5() {}
+
+#[test_case]
+#[test_case]
+//~^ WARNING duplicate `test_case` attributes
+struct T;
 
 #[cfg_eval]
 #[cfg_eval]
-//~^ WARNING duplicated attribute
+//~^ WARNING duplicate `cfg_eval` attributes
 struct S;
 
 #[cfg_eval]

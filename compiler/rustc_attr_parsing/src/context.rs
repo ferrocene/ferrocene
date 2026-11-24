@@ -70,14 +70,14 @@ use crate::attributes::unroll::*;
 use crate::attributes::{AttributeParser as _, AttributeSafety, Combine, Single, WithoutArgs};
 use crate::diagnostics::{
     AttributeParseError, AttributeParseErrorReason, AttributeParseErrorSuggestions,
-    ParsedDescription, UnusedDuplicate,
+    ParsedDescription,
 };
 use crate::parser::{
     ArgParser, MetaItemListParser, MetaItemOrLitParser, MetaItemParser, NameValueParser,
     RefPathParser,
 };
 use crate::target_checking::AllowedTargets;
-use crate::{AttributeParser, AttributeTemplate, EmitAttribute};
+use crate::{AttributeParser, AttributeTemplate, DuplicateAttribute, EmitAttribute};
 
 type GroupType = LazyLock<GroupTypeInner>;
 
@@ -244,6 +244,7 @@ attribute_parsers!(
         Single<RustcDumpDefPathParser>,
         Single<RustcDumpSymbolNameParser>,
         Single<RustcIfThisChangedParser>,
+        Single<RustcIntrinsicParser>,
         Single<RustcLegacyConstGenericsParser>,
         Single<RustcLintOptDenyFieldAccessParser>,
         Single<RustcMacroTransparencyParser>,
@@ -274,6 +275,9 @@ attribute_parsers!(
         Single<WithoutArgs<FfiConstParser>>,
         Single<WithoutArgs<FfiPureParser>>,
         Single<WithoutArgs<FundamentalParser>>,
+        Single<WithoutArgs<LintAsPtrParser>>,
+        Single<WithoutArgs<LintNeverReturnsNullPtrParser>>,
+        Single<WithoutArgs<LintShouldNotBeCalledOnConstItemsParser>>,
         Single<WithoutArgs<LoopMatchParser>>,
         Single<WithoutArgs<MacroEscapeParser>>,
         Single<WithoutArgs<MarkerParser>>,
@@ -299,7 +303,6 @@ attribute_parsers!(
         Single<WithoutArgs<RustcAllocatorZeroedParser>>,
         Single<WithoutArgs<RustcAllowIncoherentImplParser>>,
         Single<WithoutArgs<RustcAllowLifetimeDependentSpecializationParser>>,
-        Single<WithoutArgs<RustcAsPtrParser>>,
         Single<WithoutArgs<RustcCanonicalSymbolParser>>,
         Single<WithoutArgs<RustcCaptureAnalysisParser>>,
         Single<WithoutArgs<RustcCoherenceIsCoreParser>>,
@@ -330,12 +333,10 @@ attribute_parsers!(
         Single<WithoutArgs<RustcInheritOverflowChecksParser>>,
         Single<WithoutArgs<RustcInsignificantDtorParser>>,
         Single<WithoutArgs<RustcIntrinsicConstStableIndirectParser>>,
-        Single<WithoutArgs<RustcIntrinsicParser>>,
         Single<WithoutArgs<RustcLintOptTyParser>>,
         Single<WithoutArgs<RustcLintQueryInstabilityParser>>,
         Single<WithoutArgs<RustcLintUntrackedQueryInformationParser>>,
         Single<WithoutArgs<RustcMainParser>>,
-        Single<WithoutArgs<RustcNeverReturnsNullPtrParser>>,
         Single<WithoutArgs<RustcNoImplicitAutorefsParser>>,
         Single<WithoutArgs<RustcNoImplicitBoundsParser>>,
         Single<WithoutArgs<RustcNoMirInlineParser>>,
@@ -353,7 +354,6 @@ attribute_parsers!(
         Single<WithoutArgs<RustcPubTransparentParser>>,
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcRegionsParser>>,
-        Single<WithoutArgs<RustcShouldNotBeCalledOnConstItemsParser>>,
         Single<WithoutArgs<RustcSpecializationTraitParser>>,
         Single<WithoutArgs<RustcStdInternalSymbolParser>>,
         Single<WithoutArgs<RustcStrictCoherenceParser>>,
@@ -475,22 +475,16 @@ impl<'f, 'sess: 'f> SharedContext<'f, 'sess> {
         (self.emit_lint)(LintId::of(lint), span.into(), kind);
     }
 
-    pub(crate) fn warn_unused_duplicate(&mut self, used_span: Span, unused_span: Span) {
-        self.emit_lint(
-            UNUSED_ATTRIBUTES,
-            UnusedDuplicate { this: unused_span, other: used_span, warning: false },
-            unused_span,
-        )
-    }
-
-    pub(crate) fn warn_unused_duplicate_future_error(
+    pub(crate) fn warn_unused_duplicate(
         &mut self,
         used_span: Span,
         unused_span: Span,
+        name: Symbol,
+        future_error: bool,
     ) {
         self.emit_lint(
             UNUSED_ATTRIBUTES,
-            UnusedDuplicate { this: unused_span, other: used_span, warning: true },
+            DuplicateAttribute { this: unused_span, other: used_span, name, warning: future_error },
             unused_span,
         )
     }

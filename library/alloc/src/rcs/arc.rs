@@ -1727,7 +1727,7 @@ impl<T: ?Sized> Arc<T> {
     /// ```
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "rc_raw", since = "1.17.0")]
-    #[rustc_never_returns_null_ptr]
+    #[lint::never_returns_null_ptr]
     pub fn into_raw(this: Self) -> *const T {
         let this = ManuallyDrop::new(this);
         Self::as_ptr(&*this)
@@ -1924,7 +1924,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     /// ```
     #[must_use]
     #[stable(feature = "rc_as_ptr", since = "1.45.0")]
-    #[rustc_never_returns_null_ptr]
+    #[lint::never_returns_null_ptr]
     pub fn as_ptr(this: &Self) -> *const T {
         let ptr: *mut ArcInner<T> = NonNull::as_ptr(this.ptr);
 
@@ -2925,7 +2925,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     ///
     /// [`get_mut_unchecked`]: Self::get_mut_unchecked
     #[inline]
-    #[stable(feature = "arc_is_unique", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "arc_is_unique", since = "1.101.0")]
     pub fn is_unique(this: &Self) -> bool {
         // lock the weak pointer count if we appear to be the sole weak pointer
         // holder.

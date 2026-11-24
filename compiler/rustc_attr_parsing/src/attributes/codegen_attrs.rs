@@ -61,6 +61,7 @@ impl NoArgsAttributeParser for ColdParser {
         Allow(Target::Method(MethodKind::Inherent)),
         Allow(Target::ForeignFn),
         Allow(Target::Closure),
+        Error(Target::Param),
     ]);
     const STABILITY: AttributeStability = AttributeStability::Stable;
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::Cold;
@@ -220,7 +221,7 @@ impl AttributeParser for NakedParser {
 
             if let Some(earlier) = this.span {
                 let span = cx.attr_span;
-                cx.warn_unused_duplicate(earlier, span);
+                cx.warn_unused_duplicate(earlier, span, sym::naked, false);
             } else {
                 this.span = Some(cx.attr_span);
             }
@@ -293,7 +294,7 @@ impl AttributeParser for NakedParser {
                 if other_attr
                     .segments()
                     .next()
-                    .is_some_and(|i| tools.iter().any(|tool| tool.name == i.name))
+                    .is_some_and(|i| tools.iter().any(|(tool, _)| tool.name == i.name))
                 {
                     // effectively skips the error message  being emitted below
                     // if it's a tool attribute
@@ -428,6 +429,7 @@ impl NoArgsAttributeParser for NoMangleParser {
         Allow(Target::Method(MethodKind::TraitImpl)),
         AllowSilent(Target::Const), // Handled in the `InvalidNoMangleItems` pass
         Error(Target::Closure),
+        Error(Target::Param),
     ]);
     const STABILITY: AttributeStability = AttributeStability::Stable;
     const CREATE: fn(Span) -> AttributeKind = AttributeKind::NoMangle;
@@ -503,14 +505,14 @@ impl AttributeParser for UsedParser {
                 UsedBy::Compiler => &mut group.first_compiler,
                 UsedBy::Linker => {
                     if let Some(prev) = group.first_default {
-                        cx.warn_unused_duplicate(prev, attr_span);
+                        cx.warn_unused_duplicate(prev, attr_span, sym::used, false);
                         return;
                     }
                     &mut group.first_linker
                 }
                 UsedBy::Default => {
                     if let Some(prev) = group.first_linker {
-                        cx.warn_unused_duplicate(prev, attr_span);
+                        cx.warn_unused_duplicate(prev, attr_span, sym::used, false);
                         return;
                     }
                     &mut group.first_default
@@ -518,7 +520,7 @@ impl AttributeParser for UsedParser {
             };
 
             if let Some(prev) = *target {
-                cx.warn_unused_duplicate(prev, attr_span);
+                cx.warn_unused_duplicate(prev, attr_span, sym::used, false);
             } else {
                 *target = Some(attr_span);
             }

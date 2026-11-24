@@ -1568,7 +1568,7 @@ impl<T: ?Sized> Rc<T> {
     /// ```
     #[must_use = "losing the pointer will leak memory"]
     #[stable(feature = "rc_raw", since = "1.17.0")]
-    #[rustc_never_returns_null_ptr]
+    #[lint::never_returns_null_ptr]
     pub fn into_raw(this: Self) -> *const T {
         let this = ManuallyDrop::new(this);
         Self::as_ptr(&*this)
@@ -1750,7 +1750,7 @@ impl<T: ?Sized, A: Allocator> Rc<T, A> {
     /// assert_eq!(unsafe { *x_ptr }, 0);
     /// ```
     #[stable(feature = "weak_into_raw", since = "1.45.0")]
-    #[rustc_never_returns_null_ptr]
+    #[lint::never_returns_null_ptr]
     pub fn as_ptr(this: &Self) -> *const T {
         let ptr: *mut RcInner<T> = NonNull::as_ptr(this.ptr);
 
@@ -2045,7 +2045,7 @@ impl<T: ?Sized, A: Allocator> Rc<T, A> {
     ///
     /// [`get_mut_unchecked`]: Self::get_mut_unchecked
     #[inline]
-    #[stable(feature = "arc_is_unique", since = "CURRENT_RUSTC_VERSION")]
+    #[stable(feature = "arc_is_unique", since = "1.101.0")]
     pub fn is_unique(this: &Self) -> bool {
         Rc::weak_count(this) == 0 && Rc::strong_count(this) == 1
     }

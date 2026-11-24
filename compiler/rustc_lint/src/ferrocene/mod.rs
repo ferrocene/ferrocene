@@ -164,7 +164,7 @@ declare_tool_lint! {
     pub ferrocene::UNVALIDATED,
     Allow,
     "a verified function called an unverified function",
-    report_in_external_macro: true
+    @report_in_external_macro = true
 }
 
 // NOTE: LintUnvalidated is public.

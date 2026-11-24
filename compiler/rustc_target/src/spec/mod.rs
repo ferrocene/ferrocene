@@ -1516,6 +1516,7 @@ supported_targets! {
     ("wasm32-wasip3", wasm32_wasip3),
     ("wasm32-wasip1-threads", wasm32_wasip1_threads),
     ("wasm32-wali-linux-musl", wasm32_wali_linux_musl),
+    ("wasm64-unknown-emscripten", wasm64_unknown_emscripten),
     ("wasm64-unknown-unknown", wasm64_unknown_unknown),
 
     ("thumbv6m-none-eabi", thumbv6m_none_eabi),
@@ -1651,6 +1652,7 @@ supported_targets! {
     ("armv7-unknown-linux-uclibceabihf", armv7_unknown_linux_uclibceabihf),
 
     ("x86_64-unknown-none", x86_64_unknown_none),
+    ("i686-unknown-none", i686_unknown_none),
 
     ("aarch64-unknown-teeos", aarch64_unknown_teeos),
 
@@ -1717,6 +1719,9 @@ supported_targets! {
 
     ("aarch64-unknown-hyperlight", aarch64_unknown_hyperlight),
     ("x86_64-unknown-hyperlight", x86_64_unknown_hyperlight),
+
+    ("aarch64-unknown-serenity", aarch64_unknown_serenity),
+    ("x86_64-unknown-serenity", x86_64_unknown_serenity),
 }
 
 /// Cow-Vec-Str: Cow<'static, [Cow<'static, str>]>
@@ -1894,6 +1899,7 @@ crate::target_spec_enum! {
         Qurt = "qurt",
         Redox = "redox",
         Rtems = "rtems",
+        Serenity = "serenity",
         Solaris = "solaris",
         SolidAsp3 = "solid_asp3",
         TeeOs = "teeos",

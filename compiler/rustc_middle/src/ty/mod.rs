@@ -24,7 +24,7 @@ pub use adt::*;
 pub use assoc::*;
 pub use generic_args::{GenericArgKind, TermKind, *};
 pub use generics::*;
-pub use intrinsic::IntrinsicDef;
+pub use intrinsic::{Intrinsic, IntrinsicDef};
 use rustc_abi::{
     Align, FieldIdx, Integer, IntegerType, ReprFlags, ReprOptions, ScalableElt, Size, VariantIdx,
 };
@@ -1924,7 +1924,7 @@ impl<'tcx> TyCtxt<'tcx> {
     ) -> impl Iterator<Item = &'tcx rustc_attr_ir::AttrItem> {
         #[expect(deprecated)]
         self.get_all_attrs(did).iter().filter_map(|attr| {
-            if let rustc_attr_ir::Attribute::Tool(t) = attr
+            if let rustc_attr_ir::Attribute::Tool { item: t, .. } = attr
                 && *t.path.segments == *name
             {
                 Some(&**t)
@@ -2061,6 +2061,8 @@ impl<'tcx> TyCtxt<'tcx> {
                     variant_fields,
                     variant_source_info,
                     storage_conflicts: BitMatrix::new(0, 0),
+                    // FIXME(-Zpack-coroutine-layout): Stop ignoring the flag here.
+                    pack: rustc_abi::PackCoroutineLayout::Classic,
                 };
                 return Ok(self.arena.alloc(proxy_layout));
             } else {

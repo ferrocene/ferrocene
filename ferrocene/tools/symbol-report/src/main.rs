@@ -41,9 +41,8 @@ struct Vis<'tcx> {
 #[inline]
 fn path_matches(attr: &rustc_attr_ir::Attribute, name: &[Symbol]) -> bool {
     match &attr {
-        rustc_attr_ir::Attribute::Tool(n) | rustc_attr_ir::Attribute::DeriveHelper(n) => {
-            n.path.segments.iter().eq(name)
-        }
+        rustc_attr_ir::Attribute::Tool { item: n, .. }
+        | rustc_attr_ir::Attribute::DeriveHelper(n) => n.path.segments.iter().eq(name),
         _ => false,
     }
 }
@@ -71,7 +70,9 @@ impl<'tcx> Vis<'tcx> {
         {
             let (filename, start, end) = self.convert_span(span);
             self.report.add_annotation(filename, start, end);
-            let (Attribute::Tool(attr_item) | Attribute::DeriveHelper(attr_item)) = attr else {
+            let (Attribute::Tool { item: attr_item, .. } | Attribute::DeriveHelper(attr_item)) =
+                attr
+            else {
                 unreachable!()
             };
             self.visited_attrs.insert(attr_item.span);
@@ -100,7 +101,7 @@ impl<'v> rustc_hir::intravisit::Visitor<'v> for Vis<'v> {
 
     fn visit_attribute(&mut self, attr: &'v rustc_attr_ir::Attribute) -> Self::Result {
         if path_matches(attr, FERROCENE_ANNOTATION_PATH.as_slice()) {
-            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+            let (Attribute::Tool { item: attr, .. } | Attribute::DeriveHelper(attr)) = attr else {
                 unreachable!()
             };
             if !self.visited_attrs.contains(&attr.span) {
@@ -215,7 +216,7 @@ fn extract_all_functions<'tcx>(tcx: TyCtxt<'tcx>, mut vis: Vis<'tcx>) -> Vis<'tc
         // here.
         if let Some(attr) = has_ferrocene_annotation(tcx, def) {
             vis.report.add_annotation(filename.clone(), start_line, end_line);
-            let (Attribute::Tool(attr) | Attribute::DeriveHelper(attr)) = attr else {
+            let (Attribute::Tool { item: attr, .. } | Attribute::DeriveHelper(attr)) = attr else {
                 unreachable!()
             };
             vis.visited_attrs.insert(attr.span);

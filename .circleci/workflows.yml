@@ -251,7 +251,7 @@ jobs:
         ./x.py test --stage=1 \
             --coverage=library --tests \
             library/core library/alloc \
-            --coverage-crate=core --coverage-crate=alloc --coverage-crate=std
+            --coverage-crate=core --coverage-crate=alloc
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:
@@ -470,7 +470,7 @@ jobs:
         ./x.py test --stage=1 \
             --coverage=library --tests \
             library/core library/alloc \
-            --coverage-crate=core --coverage-crate=alloc --coverage-crate=std
+            --coverage-crate=core --coverage-crate=alloc
     steps:
       - ferrocene/aws_oidc_auth
       - ferrocene/checkout:

@@ -111,8 +111,8 @@ enum FunctionCoverageStatus {
 }
 
 impl FunctionCoverageStatus {
-    fn new(lines: &LineCoverage) -> Self {
-        match lines {
+    fn new(lines: &LineCoverage, regions: &BTreeMap<usize, Vec<ColumnRange>>) -> Self {
+        let status = match lines {
             // If all lines are ignored, the function is ignored.
             lines
                 if lines.lines.iter().all(|(_, status)| *status == LineCoverageStatus::Ignored) =>
@@ -139,6 +139,13 @@ impl FunctionCoverageStatus {
             }
             // Otherwise, the function mixes uncovered and covered lines.
             _ => FunctionCoverageStatus::PartiallyTested,
+        };
+
+        // Branch coverage check
+        if status == FunctionCoverageStatus::FullyTested && has_untested_branch(regions) {
+            FunctionCoverageStatus::PartiallyTested
+        } else {
+            status
         }
     }
 
@@ -177,6 +184,8 @@ struct FunctionCoverage {
     regions: BTreeMap<usize, Vec<ColumnRange>>,
     status: FunctionCoverageStatus,
     annotated: Annotated,
+    branches_tested: usize,
+    branches_total: usize,
 }
 
 impl FunctionCoverage {
@@ -186,10 +195,71 @@ impl FunctionCoverage {
         lines: LineCoverage,
         regions: BTreeMap<usize, Vec<ColumnRange>>,
         annotated: Annotated,
+        branches_tested: usize,
+        branches_total: usize,
     ) -> Self {
-        let status = FunctionCoverageStatus::new(&lines);
-        Self { source_name, relative_path: filename, lines, regions, status, annotated }
+        let status = FunctionCoverageStatus::new(&lines, &regions);
+        Self {
+            source_name,
+            relative_path: filename,
+            lines,
+            regions,
+            status,
+            annotated,
+            branches_tested,
+            branches_total,
+        }
     }
+}
+
+/// Whether any branch region covering these lines has an arm
+/// that was never taken. For example:
+///
+/// ```
+/// fn maybe_add(mut x: u32) -> u32 {
+///     if x > 0 {
+///         x += 1
+///     }
+///     x
+/// }
+///
+/// #[test]
+/// fn test_maybe_add() {
+///     assert_eq!(maybe_add(1), 2)
+/// }
+/// ```
+///
+/// Line coverage report will show all lines covered even though the case
+/// when `x = 0` is not tested.
+fn has_untested_branch(regions: &BTreeMap<usize, Vec<ColumnRange>>) -> bool {
+    regions.values().flatten().any(|range| {
+        range.regions.iter().any(|info| {
+            matches!(info.kind, RegionKind::Branch | RegionKind::MCDCBranch)
+                && (info.true_count == 0 || info.false_count.unwrap_or(0) == 0)
+        })
+    })
+}
+
+/// Counts branch arms (true/false, counted separately) within `lines`.
+fn count_branches(
+    file_region_infos: &BTreeMap<SourceLocation, Vec<RegionInfo>>,
+    lines: std::ops::RangeInclusive<usize>,
+) -> (usize, usize) {
+    let mut tested = 0;
+    let mut total = 0;
+    for (loc, infos) in file_region_infos {
+        if !lines.contains(&loc.line_start) {
+            continue;
+        }
+        for info in infos {
+            if matches!(info.kind, RegionKind::Branch | RegionKind::MCDCBranch) {
+                total += 2;
+                tested += (info.true_count > 0) as usize;
+                tested += (info.false_count.unwrap_or(0) > 0) as usize;
+            }
+        }
+    }
+    (tested, total)
 }
 
 struct Span {
@@ -284,6 +354,8 @@ fn get_coverage(
             no_coverage,
             BTreeMap::new(),
             annotated,
+            0,
+            0,
         ));
     };
 
@@ -312,12 +384,18 @@ fn get_coverage(
 
     let annotated = get_annotation_status(annotations, &mut covered);
 
+    let (branches_tested, branches_total) = file_region_infos
+        .map(|infos| count_branches(infos, start_line..=end_line))
+        .unwrap_or((0, 0));
+
     Ok(FunctionCoverage::new(
         source_name,
         filename,
         LineCoverage { lines: covered },
         regions,
         annotated,
+        branches_tested,
+        branches_total,
     ))
 }
 
@@ -575,5 +653,133 @@ fn main() -> Result<()> {
     let opts = Opts::parse();
     match opts.cmd {
         Command::Show { show } => show.run(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn code_range(start_col: usize, end_col: usize, tested: bool) -> ColumnRange {
+        ColumnRange {
+            start_col,
+            end_col: Some(end_col),
+            tested,
+            regions: vec![RegionInfo {
+                kind: RegionKind::Code,
+                true_count: tested as i64,
+                false_count: None,
+            }],
+        }
+    }
+
+    fn branch_column_range(
+        start_col: usize,
+        end_col: usize,
+        true_count: i64,
+        false_count: i64,
+    ) -> ColumnRange {
+        ColumnRange {
+            start_col,
+            end_col: Some(end_col),
+            tested: true_count > 0,
+            regions: vec![RegionInfo {
+                kind: RegionKind::Branch,
+                true_count,
+                false_count: Some(false_count),
+            }],
+        }
+    }
+
+    fn all_tested_lines(count: usize) -> LineCoverage {
+        LineCoverage { lines: (1..=count).map(|l| (l, LineCoverageStatus::Tested)).collect() }
+    }
+
+    #[test]
+    fn fully_tested_lines_with_fully_taken_branch_stay_fully_tested() {
+        let lines = all_tested_lines(1);
+        let mut regions = BTreeMap::new();
+        regions.insert(1, vec![branch_column_range(1, 4, 3, 2)]);
+
+        assert_eq!(
+            FunctionCoverageStatus::new(&lines, &regions),
+            FunctionCoverageStatus::FullyTested
+        );
+    }
+
+    #[test]
+    fn fully_tested_lines_with_untested_branch_arm_become_partially_tested() {
+        let lines = all_tested_lines(1);
+        let mut regions = BTreeMap::new();
+        // `true` arm hit 3 times, `false` arm never taken.
+        regions.insert(1, vec![branch_column_range(1, 4, 3, 0)]);
+
+        assert_eq!(
+            FunctionCoverageStatus::new(&lines, &regions),
+            FunctionCoverageStatus::PartiallyTested
+        );
+    }
+
+    #[test]
+    fn untested_function_with_untested_branch_stays_fully_untested() {
+        let lines = LineCoverage { lines: vec![(1, LineCoverageStatus::Untested)] };
+        let mut regions = BTreeMap::new();
+        regions.insert(1, vec![branch_column_range(1, 4, 0, 0)]);
+
+        assert_eq!(
+            FunctionCoverageStatus::new(&lines, &regions),
+            FunctionCoverageStatus::FullyUntested
+        );
+    }
+
+    #[test]
+    fn non_branch_regions_never_downgrade_status() {
+        let lines = all_tested_lines(1);
+        let mut regions = BTreeMap::new();
+        regions.insert(1, vec![code_range(1, 4, true)]);
+
+        assert_eq!(
+            FunctionCoverageStatus::new(&lines, &regions),
+            FunctionCoverageStatus::FullyTested
+        );
+    }
+
+    fn loc(line_start: usize, line_end: usize) -> SourceLocation {
+        SourceLocation { line_start, column_start: 1, line_end, column_end: 1 }
+    }
+
+    #[test]
+    fn count_branches_counts_both_arms_separately() {
+        let mut infos = BTreeMap::new();
+        infos.insert(
+            loc(2, 2),
+            vec![RegionInfo { kind: RegionKind::Branch, true_count: 3, false_count: Some(0) }],
+        );
+
+        assert_eq!(count_branches(&infos, 1..=5), (1, 2));
+    }
+
+    #[test]
+    fn count_branches_ignores_locations_outside_the_function() {
+        let mut infos = BTreeMap::new();
+        infos.insert(
+            loc(10, 10),
+            vec![RegionInfo { kind: RegionKind::Branch, true_count: 1, false_count: Some(1) }],
+        );
+
+        assert_eq!(count_branches(&infos, 1..=5), (0, 0));
+    }
+
+    #[test]
+    fn count_branches_counts_a_multiline_branch_region_once() {
+        // A branch region spanning lines 2..=3 is deduplicated by its unique
+        // `SourceLocation`, not double-counted even though it covers two lines.
+        let mut infos = BTreeMap::new();
+        infos.insert(
+            loc(2, 3),
+            vec![RegionInfo { kind: RegionKind::Branch, true_count: 1, false_count: Some(1) }],
+        );
+
+        assert_eq!(count_branches(&infos, 1..=5), (2, 2));
     }
 }

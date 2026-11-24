@@ -568,8 +568,15 @@ mod tests {
                 (3, LineCoverageStatus::Ignored),
             ],
         };
-        let function =
-            FunctionCoverage::new("f".to_string(), relative_path, lines, regions, Annotated::Not);
+        let function = FunctionCoverage::new(
+            "f".to_string(),
+            relative_path,
+            lines,
+            regions,
+            Annotated::Not,
+            0,
+            0,
+        );
 
         let html = generate_function(&function, &dir).unwrap().into_string();
         std::fs::remove_dir_all(&dir).ok();
@@ -662,8 +669,15 @@ mod tests {
                 (3, LineCoverageStatus::Ignored),
             ],
         };
-        let function =
-            FunctionCoverage::new("f".to_string(), relative_path, lines, regions, Annotated::Not);
+        let function = FunctionCoverage::new(
+            "f".to_string(),
+            relative_path,
+            lines,
+            regions,
+            Annotated::Not,
+            0,
+            0,
+        );
 
         let html = generate_function(&function, &dir).unwrap().into_string();
         std::fs::remove_dir_all(&dir).ok();

@@ -85,7 +85,7 @@
 //! unwinding-based backtraces!
 
 #![deny(missing_docs)]
-#![no_std]
+#![cfg_attr(not(backtrace_in_libstd), no_std)]
 #![cfg_attr(
     all(feature = "std", target_env = "sgx", target_vendor = "fortanix"),
     feature(sgx_platform)

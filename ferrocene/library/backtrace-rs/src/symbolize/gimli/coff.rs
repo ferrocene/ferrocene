@@ -6,7 +6,7 @@ use core::convert::TryFrom;
 use object::LittleEndian as LE;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::StringTable;
-use object::read::coff::ImageSymbol as _;
+use object::read::coff::Symbol as _;
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
 
 #[cfg(target_pointer_width = "32")]

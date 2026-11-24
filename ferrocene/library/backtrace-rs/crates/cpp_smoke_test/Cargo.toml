@@ -1,7 +1,6 @@
 [package]
 name = "cpp_smoke_test"
 version = "0.1.0"
-authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
 edition = "2024"
 build = "build.rs"
 publish = false

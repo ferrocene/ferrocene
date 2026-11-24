@@ -6,14 +6,7 @@ use super::mystd::prelude::v1::*;
 use super::{Library, LibrarySegment};
 use core::convert::TryInto;
 use core::ffi::CStr;
-use core::mem;
-
-// FIXME: replace with ptr::from_ref once MSRV is high enough
-#[inline(always)]
-#[must_use]
-const fn ptr_from_ref<T: ?Sized>(r: &T) -> *const T {
-    r
-}
+use core::{mem, ptr};
 
 pub(super) fn native_libraries() -> Vec<Library> {
     let mut ret = Vec::new();
@@ -52,7 +45,7 @@ fn native_library(i: u32) -> Option<Library> {
                 let endian = NativeEndian;
                 let header = &*header.cast::<macho::MachHeader32<NativeEndian>>();
                 let data = core::slice::from_raw_parts(
-                    ptr_from_ref(header).cast::<u8>(),
+                    ptr::from_ref(header).cast::<u8>(),
                     mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize,
                 );
                 (header.load_commands(endian, data, 0).ok()?, endian)
@@ -61,7 +54,7 @@ fn native_library(i: u32) -> Option<Library> {
                 let endian = NativeEndian;
                 let header = &*header.cast::<macho::MachHeader64<NativeEndian>>();
                 let data = core::slice::from_raw_parts(
-                    ptr_from_ref(header).cast::<u8>(),
+                    ptr::from_ref(header).cast::<u8>(),
                     mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize,
                 );
                 (header.load_commands(endian, data, 0).ok()?, endian)

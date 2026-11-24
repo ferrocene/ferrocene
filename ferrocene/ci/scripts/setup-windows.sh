@@ -38,10 +38,17 @@ else
     echo "Windows Defender Realtime Protection already disabled"
 fi
 
+# Install packages
+# Each package is handled in a separate `choco` invocation, because it seems that
+# `choco install -y ...` returns success as long as *at least one* package was installed,
+# even if others failed.
+
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
-choco install -y cmake.portable ninja llvm
-choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
+retry choco install -y cmake.portable
+retry choco install -y ninja
+retry choco install -y llvm
+retry choco install -y zstandard --version=1.5.6 # 1.5.7 was reporting a mismatched SHA
 
 # Followed: https://docs.chocolatey.org/en-us/guides/create/recompile-packages/#how-to-internalizerecompile-an-existing-package-manually
 # From: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-mingw-w64-x86_64-arm-none-eabi.msi

@@ -86,13 +86,13 @@ Upstream Release Schedule
 The upstream releases follow a software release train model, with three release
 channels: nightly, beta, and stable.
 
-All upstream development is done on the master branch of the upstream GitHub
+All upstream development is done on the main branch of the upstream GitHub
 repository. Every night, the upstream release infrastructure takes the latest
-commit on the master branch and produces a nightly release.
+commit on the main branch and produces a nightly release.
 
 Once a stable release takes place, the upstream release infrastructure promotes
 the nightly release of that day to beta release on a beta branch. When a bug or
-a regression is fixed, the associated commit is merged into the master branch,
+a regression is fixed, the associated commit is merged into the main branch,
 and also backported into the beta branch to produce a new beta release.
 
 Every six weeks, the upstream release infrastructure promotes the last beta

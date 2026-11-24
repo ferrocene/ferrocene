@@ -441,8 +441,8 @@
 //
 // Ferrocene added lints/features:
 // tidy-alphabetical-start
+#![cfg_attr(not(windows), warn(ferrocene::unvalidated))]
 #![feature(coverage_attribute)]
-#![warn(ferrocene::unvalidated)]
 // tidy-alphabetical-end
 //
 #![default_lib_allocator]

@@ -20,6 +20,8 @@ pub(crate) fn generate(
 
     let mut num_lines_tested: f64 = 0.0;
     let mut num_lines_untested: f64 = 0.0;
+    let mut num_branches_tested: usize = 0;
+    let mut num_branches_untested: usize = 0;
     let mut fully_tested = vec![];
     let mut partially_tested = vec![];
     let mut fully_untested = vec![];
@@ -41,6 +43,9 @@ pub(crate) fn generate(
                 LineCoverageStatus::Ignored => (),
             }
         }
+
+        num_branches_tested += function.branches.tested;
+        num_branches_untested += function.branches.untested + function.branches.annotated;
     }
     assert_eq!(
         fully_tested.len() + partially_tested.len() + fully_untested.len() + fully_ignored.len(),
@@ -54,6 +59,12 @@ pub(crate) fn generate(
 
     let total_lines = num_lines_tested + num_lines_untested;
     let percentile_lines_tested = (num_lines_tested / (total_lines)) * 100.0;
+    let total_branches = num_branches_tested + num_branches_untested;
+    let percentile_branches_tested = if total_branches > 0 {
+        (num_branches_tested as f64 / total_branches as f64) * 100.0
+    } else {
+        100.0
+    };
     let summary = maud::html!(
         header {
             div class="header-title" {
@@ -67,8 +78,11 @@ pub(crate) fn generate(
             }
         }
         div class="coverage-summary" {
-            h1 {
+            h1 class="line-coverage" {
                 (format!("{percentile_lines_tested:.2}% ({num_lines_tested}/{total_lines} lines)"))
+            }
+            h1 class="branch-coverage" {
+                (format!("{percentile_branches_tested:.2}% ({num_branches_tested}/{total_branches} branches)"))
             }
         }
         div class="instructions" {
@@ -200,7 +214,7 @@ fn generate_function(
     let filename = function.relative_path.display();
     let html = maud::html!(
         details class=(class_set.into_iter().collect::<Vec<_>>().join(" ")) data-status=(function_css_class) {
-            summary tested-lines=(tested_lines) untested-lines=(untested_lines) annotated-lines=(annotated_lines) ignored-lines=(ignored_lines) {
+            summary tested-lines=(tested_lines) untested-lines=(untested_lines) annotated-lines=(annotated_lines) ignored-lines=(ignored_lines) branch-tested=(function.branches.tested) branch-untested=(function.branches.untested) branch-annotated=(function.branches.annotated) {
                 code {
                     (function.source_name)
                 }
@@ -445,7 +459,7 @@ mod tests {
     use llvm_profparser::RegionKind;
 
     use super::*;
-    use crate::RegionInfo;
+    use crate::{BranchCoverage, RegionInfo};
 
     fn range(start_col: usize, end_col: Option<usize>, tested: bool) -> ColumnRange {
         ColumnRange {
@@ -574,8 +588,7 @@ mod tests {
             lines,
             regions,
             Annotated::Not,
-            0,
-            0,
+            BranchCoverage::default(),
         );
 
         let html = generate_function(&function, &dir).unwrap().into_string();
@@ -675,8 +688,7 @@ mod tests {
             lines,
             regions,
             Annotated::Not,
-            0,
-            0,
+            BranchCoverage::default(),
         );
 
         let html = generate_function(&function, &dir).unwrap().into_string();

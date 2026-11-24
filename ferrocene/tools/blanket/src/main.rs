@@ -1,6 +1,6 @@
 // Derived from https://github.com/xd009642/llvm-profparser/blob/f12a20d33b371f62a3b63f3a19d2320c25aa48b9/src/bin/cov.rs
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -175,6 +175,13 @@ enum Annotated {
     Not,
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+struct BranchCoverage {
+    tested: usize,
+    untested: usize,
+    annotated: usize,
+}
+
 #[derive(Debug)]
 struct FunctionCoverage {
     source_name: String,
@@ -184,8 +191,7 @@ struct FunctionCoverage {
     regions: BTreeMap<usize, Vec<ColumnRange>>,
     status: FunctionCoverageStatus,
     annotated: Annotated,
-    branches_tested: usize,
-    branches_total: usize,
+    branches: BranchCoverage,
 }
 
 impl FunctionCoverage {
@@ -195,27 +201,17 @@ impl FunctionCoverage {
         lines: LineCoverage,
         regions: BTreeMap<usize, Vec<ColumnRange>>,
         annotated: Annotated,
-        branches_tested: usize,
-        branches_total: usize,
+        branches: BranchCoverage,
     ) -> Self {
         let status = FunctionCoverageStatus::new(&lines, &regions);
-        Self {
-            source_name,
-            relative_path: filename,
-            lines,
-            regions,
-            status,
-            annotated,
-            branches_tested,
-            branches_total,
-        }
+        Self { source_name, relative_path: filename, lines, regions, status, annotated, branches }
     }
 }
 
 /// Whether any branch region covering these lines has an arm
 /// that was never taken. For example:
 ///
-/// ```
+/// ```ignore
 /// fn maybe_add(mut x: u32) -> u32 {
 ///     if x > 0 {
 ///         x += 1
@@ -240,26 +236,35 @@ fn has_untested_branch(regions: &BTreeMap<usize, Vec<ColumnRange>>) -> bool {
     })
 }
 
-/// Counts branch arms (true/false, counted separately) within `lines`.
+/// Counts branch arms (true/false, counted separately) within `lines`, split
+/// into `(tested, untested, annotated)`.
+/// An untested arm counts as `annotated` instead of `untested` when it sits
+/// on a line in `annotated_lines`.
 fn count_branches(
     file_region_infos: &BTreeMap<SourceLocation, Vec<RegionInfo>>,
     lines: std::ops::RangeInclusive<usize>,
-) -> (usize, usize) {
-    let mut tested = 0;
-    let mut total = 0;
+    annotated_lines: &HashSet<usize>,
+) -> BranchCoverage {
+    let mut branches = BranchCoverage::default();
     for (loc, infos) in file_region_infos {
         if !lines.contains(&loc.line_start) {
             continue;
         }
         for info in infos {
             if matches!(info.kind, RegionKind::Branch | RegionKind::MCDCBranch) {
-                total += 2;
-                tested += (info.true_count > 0) as usize;
-                tested += (info.false_count.unwrap_or(0) > 0) as usize;
+                for arm_hit in [info.true_count > 0, info.false_count.unwrap_or(0) > 0] {
+                    if arm_hit {
+                        branches.tested += 1;
+                    } else if annotated_lines.contains(&loc.line_start) {
+                        branches.annotated += 1;
+                    } else {
+                        branches.untested += 1;
+                    }
+                }
             }
         }
     }
-    (tested, total)
+    branches
 }
 
 struct Span {
@@ -354,8 +359,7 @@ fn get_coverage(
             no_coverage,
             BTreeMap::new(),
             annotated,
-            0,
-            0,
+            BranchCoverage::default(),
         ));
     };
 
@@ -384,9 +388,15 @@ fn get_coverage(
 
     let annotated = get_annotation_status(annotations, &mut covered);
 
-    let (branches_tested, branches_total) = file_region_infos
-        .map(|infos| count_branches(infos, start_line..=end_line))
-        .unwrap_or((0, 0));
+    let annotated_lines: HashSet<usize> = covered
+        .iter()
+        .filter(|(_, status)| *status == LineCoverageStatus::Annotated)
+        .map(|(line, _)| *line)
+        .collect();
+
+    let branches = file_region_infos
+        .map(|infos| count_branches(infos, start_line..=end_line, &annotated_lines))
+        .unwrap_or_default();
 
     Ok(FunctionCoverage::new(
         source_name,
@@ -394,8 +404,7 @@ fn get_coverage(
         LineCoverage { lines: covered },
         regions,
         annotated,
-        branches_tested,
-        branches_total,
+        branches,
     ))
 }
 
@@ -756,7 +765,10 @@ mod tests {
             vec![RegionInfo { kind: RegionKind::Branch, true_count: 3, false_count: Some(0) }],
         );
 
-        assert_eq!(count_branches(&infos, 1..=5), (1, 2));
+        assert_eq!(
+            count_branches(&infos, 1..=5, &HashSet::new()),
+            BranchCoverage { tested: 1, untested: 1, annotated: 0 }
+        );
     }
 
     #[test]
@@ -767,7 +779,7 @@ mod tests {
             vec![RegionInfo { kind: RegionKind::Branch, true_count: 1, false_count: Some(1) }],
         );
 
-        assert_eq!(count_branches(&infos, 1..=5), (0, 0));
+        assert_eq!(count_branches(&infos, 1..=5, &HashSet::new()), BranchCoverage::default());
     }
 
     #[test]
@@ -780,6 +792,24 @@ mod tests {
             vec![RegionInfo { kind: RegionKind::Branch, true_count: 1, false_count: Some(1) }],
         );
 
-        assert_eq!(count_branches(&infos, 1..=5), (2, 2));
+        assert_eq!(
+            count_branches(&infos, 1..=5, &HashSet::new()),
+            BranchCoverage { tested: 2, untested: 0, annotated: 0 }
+        );
+    }
+
+    #[test]
+    fn count_branches_buckets_untested_arm_on_annotated_line_as_annotated() {
+        let mut infos = BTreeMap::new();
+        infos.insert(
+            loc(2, 2),
+            vec![RegionInfo { kind: RegionKind::Branch, true_count: 3, false_count: Some(0) }],
+        );
+        let annotated_lines: HashSet<usize> = [2].into_iter().collect();
+
+        assert_eq!(
+            count_branches(&infos, 1..=5, &annotated_lines),
+            BranchCoverage { tested: 1, untested: 0, annotated: 1 }
+        );
     }
 }

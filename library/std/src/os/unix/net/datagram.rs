@@ -722,6 +722,7 @@ impl UnixDatagram {
     /// use std::time::Duration;
     ///
     /// fn main() -> std::io::Result<()> {
+    /// #   if cfg!(skip_unsupported_miri_tests) { return Ok(()); }
     ///     let sock = UnixDatagram::unbound()?;
     ///     sock.set_read_timeout(Some(Duration::new(1, 0)))
     ///         .expect("`UnixDatagram::set_read_timeout` should not fail");
@@ -769,6 +770,7 @@ impl UnixDatagram {
     /// use std::time::Duration;
     ///
     /// fn main() -> std::io::Result<()> {
+    /// #   if cfg!(skip_unsupported_miri_tests) { return Ok(()); }
     ///     let sock = UnixDatagram::unbound()?;
     ///     sock.set_write_timeout(Some(Duration::new(1, 0)))
     ///         .expect("`UnixDatagram::set_write_timeout` should not fail");
@@ -812,6 +814,7 @@ impl UnixDatagram {
     /// use std::time::Duration;
     ///
     /// fn main() -> std::io::Result<()> {
+    /// #   if cfg!(skip_unsupported_miri_tests) { return Ok(()); }
     ///     let sock = UnixDatagram::unbound()?;
     ///     sock.set_read_timeout(Some(Duration::new(1, 0)))
     ///         .expect("`UnixDatagram::set_read_timeout` should not fail");
@@ -838,6 +841,7 @@ impl UnixDatagram {
     /// use std::time::Duration;
     ///
     /// fn main() -> std::io::Result<()> {
+    /// #   if cfg!(skip_unsupported_miri_tests) { return Ok(()); }
     ///     let sock = UnixDatagram::unbound()?;
     ///     sock.set_write_timeout(Some(Duration::new(1, 0)))
     ///         .expect("`UnixDatagram::set_write_timeout` should not fail");
@@ -860,6 +864,7 @@ impl UnixDatagram {
     /// use std::os::unix::net::UnixDatagram;
     ///
     /// fn main() -> std::io::Result<()> {
+    /// #   if cfg!(skip_unsupported_miri_tests) { return Ok(()); }
     ///     let sock = UnixDatagram::unbound()?;
     ///     sock.set_nonblocking(true).expect("`UnixDatagram::set_nonblocking` should not fail");
     ///     Ok(())

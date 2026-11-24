@@ -26,7 +26,7 @@ use crate::output_capture::ConsoleOut;
 use crate::read2::{Truncated, read2_abbreviated};
 use crate::runtest::compute_diff::{DiffLine, diff_by_lines, make_diff, write_diff};
 use crate::util::{ArgFileCommand, Utf8PathBufExt, add_dylib_path, static_regex};
-use crate::{json, stamp_file_path};
+use crate::{discovery, json};
 
 // Helper modules that implement test running logic for each test suite.
 // tidy-alphabetical-start
@@ -102,7 +102,7 @@ fn get_lib_name(name: &str, aux_type: AuxType, wasm_proc_macros: bool) -> Option
         AuxType::Lib => Some(format!("lib{name}.rlib")),
         // FIXME maybe use `rustc --print file-names` instead?
         AuxType::ProcMacro if wasm_proc_macros => Some(format!("{name}.wasm")),
-        AuxType::Dylib | AuxType::ProcMacro => Some(dylib_name(name)),
+        AuxType::Dylib | AuxType::ProcMacro | AuxType::Lint => Some(dylib_name(name)),
     }
 }
 
@@ -263,10 +263,17 @@ enum Emit {
     LinkArgsAsm,
 }
 
+<<<<<<< ferrocene/main
+||||||| b0b600668bb
+/// Indicates whether we are using `rustc` or `rustdoc` to compile an input file.
+=======
+/// Indicates whether we are using `rustc`, `rustdoc` or `compiletest-lint-driver`` to compile an input file.
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CompilerKind {
     Rustc,
     Rustdoc,
+    LintDriver,
 }
 // Ferrocene addition: have two separate consts ensures that we get a `dead_code` warning if a merge
 // conflict is resolved incorrectly and stops using this override.
@@ -1287,6 +1294,7 @@ impl<'test> TestCx<'test> {
         !self.props.aux.builds.is_empty()
             || !self.props.aux.crates.is_empty()
             || !self.props.aux.proc_macros.is_empty()
+            || !self.props.aux.lints.is_empty()
     }
 
     fn aux_output_dir(&self) -> Utf8PathBuf {
@@ -1320,12 +1328,40 @@ impl<'test> TestCx<'test> {
             self.build_auxiliary(rel_ab, &aux_dir, Some(AuxType::Bin));
         }
 
+        for lint in &self.props.aux.lints {
+            self.build_auxiliary(lint, &aux_dir, Some(AuxType::Lint));
+        }
+
         let path_to_crate_name = |path: &str| -> String {
             path.rsplit_once('/')
                 .map_or(path, |(_, tail)| tail)
                 .trim_end_matches(".rs")
                 .replace('-', "_")
         };
+
+        let lint_lib_paths = self
+            .props
+            .aux
+            .lints
+            .iter()
+            .filter_map(|p| {
+                if let Some(lib_name) = get_lib_name(
+                    &path_to_crate_name(p),
+                    AuxType::Lint,
+                    self.config.wasm_proc_macros,
+                ) {
+                    Some(aux_dir.join(lib_name).to_string())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        if !lint_lib_paths.is_empty() {
+            rustc.env(
+                "COMPILETEST_LINT_DRIVER_PATHS",
+                std::env::join_paths(lint_lib_paths).unwrap(),
+            );
+        }
 
         let add_extern = |rustc: &mut Command,
                           extern_modifiers: Option<&str>,
@@ -1471,6 +1507,8 @@ impl<'test> TestCx<'test> {
             } else {
                 aux_props.force_host = true;
             }
+        } else if aux_type == Some(AuxType::Lint) {
+            aux_props.force_host = true;
         }
         let mut aux_dir = aux_dir.to_path_buf();
         if aux_type == Some(AuxType::Bin) {
@@ -1512,6 +1550,8 @@ impl<'test> TestCx<'test> {
             (AuxType::Bin, Some("bin"))
         } else if aux_type == Some(AuxType::ProcMacro) {
             (AuxType::ProcMacro, Some("proc-macro"))
+        } else if aux_type == Some(AuxType::Lint) {
+            (AuxType::Lint, Some("dylib"))
         } else if aux_type.is_some() {
             panic!("aux_type {aux_type:?} not expected");
         } else if aux_props.no_prefer_dynamic {
@@ -1606,17 +1646,21 @@ impl<'test> TestCx<'test> {
         aux_path: Option<&Utf8Path>,
         input: Option<String>,
     ) -> ProcRes {
-        let cmdline = {
-            let cmdline = self.make_cmdline(&command, lib_path);
-            self.logv(format_args!("executing {cmdline}"));
-            cmdline
-        };
-
         command.stdout(Stdio::piped()).stderr(Stdio::piped()).stdin(Stdio::piped());
 
+        let lint_driver_path =
+            self.config.rustc_lint_driver_lib_path.as_ref().map(Utf8PathBuf::as_path);
         // Need to be sure to put both the lib_path and the aux path in the dylib
         // search path for the child.
-        add_dylib_path(&mut command, iter::once(lib_path).chain(aux_path));
+        add_dylib_path(
+            &mut command,
+            iter::once(lib_path)
+                .chain(aux_path)
+                .chain(lint_driver_path.filter(|_| !self.props.aux.lints.is_empty())),
+        );
+
+        let cmdline = format!("{command:?}");
+        self.logv(format_args!("executing {cmdline}"));
 
         let mut child = disable_error_reporting(|| command.spawn())
             .unwrap_or_else(|e| panic!("failed to exec `{command:?}`: {e:?}"));
@@ -1647,6 +1691,9 @@ impl<'test> TestCx<'test> {
     /// Choose a compiler kind (rustc or rustdoc) for compiling test files,
     /// based on the test suite being tested.
     fn compiler_kind_for_non_aux(&self) -> CompilerKind {
+        if !self.props.aux.lints.is_empty() {
+            return CompilerKind::LintDriver;
+        }
         match self.config.suite {
             TestSuite::RustdocJs | TestSuite::RustdocJson | TestSuite::RustdocUi => {
                 CompilerKind::Rustdoc
@@ -1695,6 +1742,9 @@ impl<'test> TestCx<'test> {
             CompilerKind::Rustdoc => {
                 Command::new(&self.config.rustdoc_path.clone().expect("no rustdoc built yet"))
             }
+            CompilerKind::LintDriver => Command::new(
+                self.config.rustc_lint_driver_path.as_ref().expect("no rustc lint driver provided"),
+            ),
         };
         compiler.arg(input_file);
 
@@ -1746,8 +1796,14 @@ impl<'test> TestCx<'test> {
         if !self.props.compile_flags.iter().any(|flag| flag.starts_with("--sysroot"))
             && !self.config.host_rustcflags.iter().any(|flag| flag == "--sysroot")
         {
-            // In stage 0, make sure we use `stage0-sysroot` instead of the bootstrap sysroot.
-            compiler.arg("--sysroot").arg(&self.config.sysroot_base);
+            if compiler_kind == CompilerKind::LintDriver {
+                compiler
+                    .arg("--sysroot")
+                    .arg(self.config.rustc_lint_driver_sysroot.as_ref().unwrap());
+            } else {
+                // In stage 0, make sure we use `stage0-sysroot` instead of the bootstrap sysroot.
+                compiler.arg("--sysroot").arg(&self.config.sysroot_base);
+            }
         }
 
         // If the provided codegen backend is not LLVM, we need to pass it.
@@ -2003,7 +2059,7 @@ impl<'test> TestCx<'test> {
                     // `rustdoc` uses `-o` for the output directory.
                     compiler.arg("-o").arg(path);
                 }
-                CompilerKind::Rustc => {
+                CompilerKind::Rustc | CompilerKind::LintDriver => {
                     compiler.arg("--out-dir").arg(path);
                 }
             },
@@ -2146,23 +2202,6 @@ impl<'test> TestCx<'test> {
                 })
                 .collect(),
             None => Vec::new(),
-        }
-    }
-
-    fn make_cmdline(&self, command: &Command, libpath: &Utf8Path) -> String {
-        use crate::util;
-
-        // Linux and mac don't require adjusting the library search path
-        if cfg!(unix) {
-            format!("{:?}", command)
-        } else {
-            // Build the LD_LIBRARY_PATH variable as it would be seen on the command line
-            // for diagnostic purposes
-            fn lib_path_cmd_prefix(path: &str) -> String {
-                format!("{}=\"{}\"", util::lib_path_env_var(), util::make_new_path(path))
-            }
-
-            format!("{} {:?}", lib_path_cmd_prefix(libpath.as_str()), command)
         }
     }
 
@@ -2358,11 +2397,6 @@ impl<'test> TestCx<'test> {
 
         // FIXME(jieyouxu): don't pass an empty Path
         self.compose_and_run(filecheck, Utf8Path::new(""), None, None)
-    }
-
-    fn charset() -> &'static str {
-        // FreeBSD 10.1 defaults to GDB 6.1.1 which doesn't support "auto" charset
-        if cfg!(target_os = "freebsd") { "ISO-8859-1" } else { "UTF-8" }
     }
 
     fn get_lines(&self, path: &Utf8Path, mut other_files: Option<&mut Vec<String>>) -> Vec<usize> {
@@ -3132,7 +3166,8 @@ impl<'test> TestCx<'test> {
     }
 
     fn create_stamp(&self) {
-        let stamp_file_path = stamp_file_path(&self.config, self.testpaths, self.variant);
+        let stamp_file_path =
+            discovery::stamp_file_path(&self.config, self.testpaths, self.variant);
         fs::write(&stamp_file_path, compute_stamp_hash(&self.config, self.variant)).unwrap();
     }
 
@@ -3222,6 +3257,7 @@ enum AuxType {
     Lib,
     Dylib,
     ProcMacro,
+    Lint,
 }
 
 /// Outcome of comparing a stream to a blessed file,

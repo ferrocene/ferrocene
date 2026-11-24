@@ -161,7 +161,7 @@ impl str {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_str_len", since = "1.39.0")]
     #[rustc_diagnostic_item = "str_len"]
-    #[rustc_no_implicit_autorefs]
+    #[lint::no_implicit_autorefs]
     #[must_use]
     #[inline]
     #[allow(clippy::needless_as_bytes)]
@@ -182,7 +182,7 @@ impl str {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_const_stable(feature = "const_str_is_empty", since = "1.39.0")]
-    #[rustc_no_implicit_autorefs]
+    #[lint::no_implicit_autorefs]
     #[must_use]
     #[inline]
     #[ferrocene::prevalidated]

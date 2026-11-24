@@ -405,6 +405,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_nth"]
     fn nth(&mut self, n: usize) -> Option<Self::Item>
     where
         Self::Item: [const] Destruct,
@@ -459,7 +460,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_step_by"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,
@@ -532,6 +538,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_chain"]
     fn chain<U>(self, other: U) -> Chain<Self, U::IntoIter>
     where
         Self: Sized,
@@ -651,7 +658,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_zip"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,
@@ -901,7 +913,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_for_each"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn for_each<F>(self, f: F)
     where
         Self: Sized,
@@ -1024,6 +1041,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_filter_map"]
     fn filter_map<B, F>(self, f: F) -> FilterMap<Self, F>
     where
         Self: Sized,
@@ -1208,6 +1226,7 @@ pub const trait Iterator {
     #[inline]
     #[doc(alias = "drop_while")]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_skip_while"]
     fn skip_while<P>(self, predicate: P) -> SkipWhile<Self, P>
     where
         Self: Sized,
@@ -1287,6 +1306,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "take_while"]
     fn take_while<P>(self, predicate: P) -> TakeWhile<Self, P>
     where
         Self: Sized,
@@ -1375,6 +1395,7 @@ pub const trait Iterator {
     /// [`fuse`]: Iterator::fuse
     #[inline]
     #[stable(feature = "iter_map_while", since = "1.57.0")]
+    #[rustc_diagnostic_item = "iter_map_while"]
     fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>
     where
         Self: Sized,
@@ -1405,6 +1426,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_skip"]
     fn skip(self, n: usize) -> Skip<Self>
     where
         Self: Sized,
@@ -1478,6 +1500,7 @@ pub const trait Iterator {
     #[doc(alias = "limit")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_take"]
     fn take(self, n: usize) -> Take<Self>
     where
         Self: Sized,
@@ -1525,6 +1548,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_scan"]
     fn scan<St, B, F>(self, initial_state: St, f: F) -> Scan<Self, St, F>
     where
         Self: Sized,
@@ -1564,7 +1588,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_flat_map"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
     where
         Self: Sized,
@@ -1649,6 +1678,7 @@ pub const trait Iterator {
     /// [`flat_map()`]: Iterator::flat_map
     #[inline]
     #[stable(feature = "iterator_flatten", since = "1.29.0")]
+    #[rustc_diagnostic_item = "iter_flatten"]
     fn flatten(self) -> Flatten<Self>
     where
         Self: Sized,
@@ -1796,7 +1826,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[unstable(feature = "iter_map_windows", issue = "87155")]
-    fn map_windows<F, R, #[rustc_panics_when_zero] const N: usize>(
+    fn map_windows<F, R, #[lint::panics_when_zero] const N: usize>(
         self,
         f: F,
     ) -> MapWindows<Self, F, N>
@@ -1862,6 +1892,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_fuse"]
     fn fuse(self) -> Fuse<Self>
     where
         Self: Sized,
@@ -1946,6 +1977,7 @@ pub const trait Iterator {
     /// ```
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "inspect"]
     fn inspect<F>(self, f: F) -> Inspect<Self, F>
     where
         Self: Sized,
@@ -2303,6 +2335,7 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+    #[rustc_diagnostic_item = "iter_partition"]
     fn partition<B, F>(self, f: F) -> (B, B)
     where
         Self: Sized,
@@ -2519,6 +2552,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
+    #[rustc_diagnostic_item = "iter_try_fold"]
     fn try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R
     where
         Self: Sized,
@@ -2578,7 +2612,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_try_for_each"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn try_for_each<F, R>(&mut self, f: F) -> R
     where
         Self: Sized,
@@ -2700,6 +2739,7 @@ pub const trait Iterator {
     #[doc(alias = "inject", alias = "foldl")]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_fold"]
     fn fold<B, F>(mut self, init: B, mut f: F) -> B
     where
         Self: Sized + [const] Destruct,
@@ -2738,6 +2778,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_fold_self", since = "1.51.0")]
+    #[rustc_diagnostic_item = "iter_reduce"]
     fn reduce<F>(mut self, f: F) -> Option<Self::Item>
     where
         Self: Sized + [const] Destruct,
@@ -2868,6 +2909,7 @@ pub const trait Iterator {
     #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_diagnostic_item = "iter_all"]
     fn all<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
@@ -2926,7 +2968,12 @@ pub const trait Iterator {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
+<<<<<<< ferrocene/main
     #[ferrocene::prevalidated]
+||||||| b0b600668bb
+=======
+    #[rustc_diagnostic_item = "iter_any"]
+>>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,
@@ -3652,6 +3699,7 @@ pub const trait Iterator {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
+    #[rustc_diagnostic_item = "iter_cycle"]
     fn cycle(self) -> Cycle<Self>
     where
         Self: Sized + [const] Clone,
@@ -3695,7 +3743,8 @@ pub const trait Iterator {
     /// ```
     #[track_caller]
     #[unstable(feature = "iter_array_chunks", issue = "100450")]
-    fn array_chunks<#[rustc_panics_when_zero] const N: usize>(self) -> ArrayChunks<Self, N>
+    #[rustc_diagnostic_item = "iter_array_chunks"]
+    fn array_chunks<#[lint::panics_when_zero] const N: usize>(self) -> ArrayChunks<Self, N>
     where
         Self: Sized,
     {
@@ -3732,6 +3781,7 @@ pub const trait Iterator {
     /// ```
     #[ferrocene::prevalidated]
     #[stable(feature = "iter_arith", since = "1.11.0")]
+    #[rustc_diagnostic_item = "iter_sum"]
     fn sum<S>(self) -> S
     where
         Self: Sized,
@@ -3764,6 +3814,7 @@ pub const trait Iterator {
     /// assert_eq!(factorial(5), 120);
     /// ```
     #[stable(feature = "iter_arith", since = "1.11.0")]
+    #[rustc_diagnostic_item = "iter_product"]
     fn product<P>(self) -> P
     where
         Self: Sized,

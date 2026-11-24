@@ -827,13 +827,12 @@ impl char {
     /// Basic usage:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// assert!('A'.is_cased());
     /// assert!('a'.is_cased());
     /// assert!(!'京'.is_cased());
     /// ```
     #[must_use]
-    #[unstable(feature = "titlecase", issue = "153892")]
+    #[stable(feature = "cased", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub fn is_cased(self) -> bool {
         match self {
@@ -852,7 +851,7 @@ impl char {
     /// # Examples
     ///
     /// ```
-    /// #![feature(titlecase)]
+    /// #![feature(char_case)]
     /// use core::char::CharCase;
     /// assert_eq!('a'.case(), Some(CharCase::Lower));
     /// assert_eq!('δ'.case(), Some(CharCase::Lower));
@@ -862,7 +861,7 @@ impl char {
     /// assert_eq!('中'.case(), None);
     /// ```
     #[must_use]
-    #[unstable(feature = "titlecase", issue = "153892")]
+    #[unstable(feature = "char_case", issue = "166360")]
     #[inline]
     pub fn case(self) -> Option<CharCase> {
         match self {
@@ -934,7 +933,6 @@ impl char {
     /// Basic usage:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// assert!('ǅ'.is_titlecase());
     /// assert!('ῼ'.is_titlecase());
     /// assert!(!'D'.is_titlecase());
@@ -943,7 +941,7 @@ impl char {
     /// assert!(!' '.is_titlecase());
     /// ```
     #[must_use]
-    #[unstable(feature = "titlecase", issue = "153892")]
+    #[stable(feature = "titlecase", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub fn is_titlecase(self) -> bool {
         match self {
@@ -1384,9 +1382,24 @@ impl char {
     /// [specified]: https://www.unicode.org/reports/tr44/#Case_Ignorable
     /// [`DerivedCoreProperties.txt`]: https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
     /// [`to_lowercase()`]: Self::to_lowercase()
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// assert!('.'.is_case_ignorable());
+    /// assert!('\u{AD}'.is_case_ignorable()); // SOFT HYPHEN
+    /// assert!('ʰ'.is_case_ignorable()); // MODIFIER LETTER SMALL H
+    /// assert!('\u{0300}'.is_case_ignorable()); // COMBINING GRAVE ACCENT
+    /// assert!('\u{0345}'.is_case_ignorable()); // COMBINING GREEK YPOGEGRAMMENI
+    /// assert!(!'a'.is_case_ignorable());
+    /// assert!(!' '.is_case_ignorable());
+    /// assert!(!';'.is_case_ignorable());
+    /// ```
     #[must_use]
     #[inline]
-    #[unstable(feature = "case_ignorable", issue = "154848")]
+    #[stable(feature = "case_ignorable", since = "CURRENT_RUSTC_VERSION")]
     pub fn is_case_ignorable(self) -> bool {
         if self.is_ascii() {
             matches!(self, '\'' | '.' | ':' | '^' | '`')
@@ -1552,7 +1565,6 @@ impl char {
     /// As an iterator:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// for c in 'ß'.to_titlecase() {
     ///     print!("{c}");
     /// }
@@ -1562,7 +1574,6 @@ impl char {
     /// Using `println!` directly:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// println!("{}", 'ß'.to_titlecase());
     /// ```
     ///
@@ -1575,7 +1586,6 @@ impl char {
     /// Using [`to_string`](../std/string/trait.ToString.html#tymethod.to_string):
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// assert_eq!('c'.to_titlecase().to_string(), "C");
     /// assert_eq!('ა'.to_titlecase().to_string(), "ა");
     /// assert_eq!('ǆ'.to_titlecase().to_string(), "ǅ");
@@ -1605,7 +1615,6 @@ impl char {
     /// will return the mtavruli form, but `to_titlecase()` will return the mkhedruli form.
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// let ani = 'ა'; // First letter of the Georgian alphabet, in mkhedruli form
     ///
     /// // Titlecasing mkhedruli maps it to itself...
@@ -1669,7 +1678,6 @@ impl char {
     /// Note that the lowercase dotted 'i' is the same codepoint as the Latin. Therefore:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// let upper_i = 'i'.to_titlecase().to_string();
     /// ```
     ///
@@ -1678,7 +1686,6 @@ impl char {
     /// be `"İ"`. `to_titlecase()` does not take this into account, and so:
     ///
     /// ```
-    /// #![feature(titlecase)]
     /// let upper_i = 'i'.to_titlecase().to_string();
     ///
     /// assert_eq!(upper_i, "I");
@@ -1689,7 +1696,7 @@ impl char {
     /// [`to_uppercase()`]: Self::to_uppercase()
     #[must_use = "this returns the titlecased character as a new iterator, \
                   without modifying the original"]
-    #[unstable(feature = "titlecase", issue = "153892")]
+    #[stable(feature = "titlecase", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
     pub fn to_titlecase(self) -> ToTitlecase {
         ToTitlecase(CaseMappingIter::new(conversions::to_title(self)))

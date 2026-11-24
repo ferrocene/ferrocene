@@ -45,4 +45,4 @@ fn main() {}
 // Generic Parameters
 //
 // ferrocene-annotations: fls_kgvleup5mdhq
-// Type Aliasing
+// Type Aliases

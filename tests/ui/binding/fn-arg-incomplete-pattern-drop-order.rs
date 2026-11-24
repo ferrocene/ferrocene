@@ -72,13 +72,13 @@ fn main() {
 // Destructors
 //
 // ferrocene-annotations: fls_afafmafz4hf2
-// Drop order
+// Drop Order
 //
 // ferrocene-annotations: fls_rm4ncoopcdvj
-// Drop scopes
+// Drop Scopes
 //
 // ferrocene-annotations: fls_rce8bb7nz2jy
-// Tuple pattern matching
+// Tuple Pattern Matching
 //
 // ferrocene-annotations: fls_urbr5rg9206v
-// Tuple patterns
+// Tuple Patterns

@@ -42,6 +42,6 @@ fn main() {
 // ferrocene-annotations: fls_vlrto778v49m
 // Tuple Struct Patterns
 // ferrocene-annotations: fls_asj8rgccvkoe
-// Struct Pattern Matching
+// Record Struct Pattern Matching
 // ferrocene-annotations: fls_nruvg0es3kx7
 // Record Struct Patterns

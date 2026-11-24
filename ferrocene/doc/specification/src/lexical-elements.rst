@@ -627,7 +627,7 @@ A :t:`byte string literal` is a :t:`literal` that consists of multiple
 The character sequence 0x0D 0x0A (carriage return, new line) is replaced by 0x0A
 (new line) inside of a :t:`byte string literal`.
 
-.. _fls_msbaxfC09VkK:
+.. _fls_msbaxfc09vkk:
 
 Simple Byte String Literals
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -705,7 +705,7 @@ The :t:`type` of a :t:`raw byte string literal` of size ``N`` is ``&'static
    br#""#
    br##"left #"# right"##
 
-.. _fls_U1gHCy16emVe:
+.. _fls_u1ghcy16emve:
 
 C String Literals
 ~~~~~~~~~~~~~~~~~
@@ -728,7 +728,7 @@ with an implicit 0x00 byte appended to it.
 The character sequence 0x0D 0x0A (carriage return, new line) is replaced by 0x0A
 (new line) inside of a :t:`c string literal`.
 
-.. _fls_p090c5oTnElW:
+.. _fls_p090c5otnelw:
 
 Simple C String Literals
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -775,7 +775,7 @@ The :t:`type` of a :t:`simple string literal` is :std:`&'static
    line\
    string"
 
-.. _fls_G4LdypF3rL6i:
+.. _fls_g4ldypf3rl6i:
 
 Raw C String Literals
 ^^^^^^^^^^^^^^^^^^^^^

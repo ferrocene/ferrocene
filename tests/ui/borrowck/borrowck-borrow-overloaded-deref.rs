@@ -44,7 +44,7 @@ pub fn main() {}
 
 //
 // ferrocene-annotations: fls_v5x85lt5ulva
-// Attribute export_name
+// References
 //
 // ferrocene-annotations: fls_5cm4gkt55hjh
-// Dereference Expression/ References
+// Dereference Expression

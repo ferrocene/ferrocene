@@ -34,13 +34,13 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_vpbikb73dw4k
-// Slice Type
+// Slice Types
 //
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types
 //
 // ferrocene-annotations: fls_qpwqnnxh52r3
 // Raw Pointers

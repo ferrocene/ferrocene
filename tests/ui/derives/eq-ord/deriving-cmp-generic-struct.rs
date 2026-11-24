@@ -40,7 +40,7 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
-// Struct Type
+// Struct Types
 //
 // ferrocene-annotations: fls_nsvzzbldhq53
 // Comparison Expressions

@@ -19,13 +19,13 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_1k9mkv7rbezi
-// Arithmetic expressions
+// Arithmetic Expressions
 //
 // ferrocene-annotations: fls_abp6tjbz8tpn
-// Bit expressions
+// Bit Expressions
 //
 // ferrocene-annotations: fls_wrecura8u5ar
-// Negation expressions
+// Negation Expression
 //
 // ferrocene-annotations: fls_zfibijmf8qe1
 // Arithmetic Overflow

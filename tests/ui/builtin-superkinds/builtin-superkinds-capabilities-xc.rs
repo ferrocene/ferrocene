@@ -30,7 +30,7 @@ pub fn main() {
 // Trait and Lifetime Bounds
 //
 // ferrocene-annotations: fls_gklst7joeo33
-// External Crates
+// Crate Imports
 //
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations

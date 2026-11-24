@@ -16,10 +16,10 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_airvr79xkcag
-// Function Item Type
+// Function Item Types
 //
 // ferrocene-annotations: fls_xztr1kebz8bo
-// Function Pointer Type
+// Function Pointer Types
 //
 // ferrocene-annotations: fls_dw33yt5g6m0k
 // Type Coercion

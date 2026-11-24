@@ -15,7 +15,7 @@ fn main() {
 // Rest Patterns
 //
 // ferrocene-annotations: fls_qfsfnql1t7m
-// Wildcard Patterns
+// Underscore Patterns
 //
 // ferrocene-annotations: fls_tpwp86mronn2
 // Underscore Expressions

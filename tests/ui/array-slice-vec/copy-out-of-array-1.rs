@@ -19,4 +19,4 @@ fn foo(a: [C; 4], i: usize) -> C {
 }
 
 // ferrocene-annotations: fls_77scxuomlbgs
-// Passing conventions
+// Passing Conventions

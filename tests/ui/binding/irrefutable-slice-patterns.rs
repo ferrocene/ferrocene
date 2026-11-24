@@ -14,7 +14,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_57ic33pwdvp3
-// Slice pattern matching
+// Slice Pattern Matching
 //
 // ferrocene-annotations: fls_qte70mgzpras
-// Slice patterns
+// Slice Patterns

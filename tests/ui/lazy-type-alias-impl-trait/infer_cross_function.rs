@@ -33,7 +33,7 @@ impl<R: Reader + 'static> Context<R> {
 // Implementations
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_85vx1qfa061i
 // Traits

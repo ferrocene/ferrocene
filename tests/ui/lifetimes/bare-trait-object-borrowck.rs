@@ -29,7 +29,7 @@ fn main() {
 // Borrowing
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types
 //
 // ferrocene-annotations: fls_7nv8ualeaqe3
 // Where Clauses

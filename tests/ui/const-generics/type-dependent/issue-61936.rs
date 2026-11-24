@@ -47,13 +47,13 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_e1pgdlv81vul
-// Implementation conformance
+// Implementation Conformance
 
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations
 
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 
 // ferrocene-annotations: fls_85vx1qfa061i
 // Traits

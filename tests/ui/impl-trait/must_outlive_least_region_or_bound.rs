@@ -54,7 +54,7 @@ fn main() {}
 // Closure Expressions
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types

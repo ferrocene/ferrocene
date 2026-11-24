@@ -49,7 +49,7 @@ fn in_const_in_match() {
 }
 
 // ferrocene-annotations: fls_aadan19t5006
-// async Blocks
+// Async Blocks
 //
 // ferrocene-annotations: fls_onfyolkcbeh3
 // For Loops

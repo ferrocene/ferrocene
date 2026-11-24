@@ -123,4 +123,4 @@ const BAD_WIDE_RANGE_ENUM: WideRangeDiscriminants = unsafe { mem::transmute(0_i6
 fn main() {}
 
 // ferrocene-annotations: fls_szibmtfv117b
-// Enum Type
+// Enum Types

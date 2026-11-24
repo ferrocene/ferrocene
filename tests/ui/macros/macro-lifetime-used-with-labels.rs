@@ -41,7 +41,7 @@ fn main() {
 // Infinite Loops
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_uusi0zej55is
 // Loop Labels

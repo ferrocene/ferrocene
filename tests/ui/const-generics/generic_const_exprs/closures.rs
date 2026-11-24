@@ -6,4 +6,4 @@ fn test<const N: usize>() -> [u8; N + (|| 42)()] {}
 fn main() {}
 
 // ferrocene-annotations: fls_tjyexqrx0fx5
-// Closure expressions
+// Closure Expressions

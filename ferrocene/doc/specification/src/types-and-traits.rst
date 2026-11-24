@@ -8,7 +8,7 @@
 Types and Traits
 ================
 
-.. _fls_kwsBxMQNTRnL:
+.. _fls_kwsbxmqntrnl:
 
 Types
 -----
@@ -1245,7 +1245,7 @@ An :t:`inferred type` forces a tool to deduce a :t:`type`, if possible.
 
    let values: Vec<_> = (0 .. 10).collect();
 
-.. _fls_XJCXBAJHzP3D:
+.. _fls_xjcxbajhzp3d:
 
 Type Parameters
 ~~~~~~~~~~~~~~~
@@ -2129,7 +2129,7 @@ obtained as follows:
       Continue with the next source :t:`type`.
 
 
-.. _fls_wsfw8xF3vniL:
+.. _fls_wsfw8xf3vnil:
 
 Structural Equality
 ~~~~~~~~~~~~~~~~~~~
@@ -2178,7 +2178,7 @@ be modified through :t:`[immutable reference]s`.
 A :t:`type` is subject to :t:`interior mutability` when it contains a
 :std:`core::cell::UnsafeCell`.
 
-.. _fls_mcxF9y5u66sZ:
+.. _fls_mcxf9y5u66sz:
 
 Visible Emptiness
 ~~~~~~~~~~~~~~~~~
@@ -3232,7 +3232,7 @@ It is a static error to elide a :t:`lifetime` in a position where no
 If no :t:`lifetime bound` is present, the :t:`impl trait type` is not considered
 to be bound by any :t:`lifetime`.
 
-.. _fls_HEtHxXBcg7JA:
+.. _fls_hethxxbcg7ja:
 
 Function Lifetime Elision
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3318,7 +3318,7 @@ its :t:`lifetime` :t:`elided` form is
 
    fn f <T: ToCStr>(&mut self, args: &[T]) -> &mut Command;
 
-.. _fls_u5lQkU2rS6uV:
+.. _fls_u5lqku2rs6uv:
 
 Static Lifetime Elision
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -3353,7 +3353,7 @@ its :t:`lifetime` :t:`elided` form is
 
    static S: &[&usize] = &[];
 
-.. _fls_XTBOhK2Yk4lA:
+.. _fls_xtbohk2yk4la:
 
 Trait Object Lifetime Elision
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3413,7 +3413,7 @@ its :t:`lifetime` :t:`elided` form is
 
    type T<'a> = &'a (dyn Trait + 'a);
 
-.. _fls_ZQPv1ybdDsE1:
+.. _fls_zqpv1ybddse1:
 
 Impl Header Lifetime Elision
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

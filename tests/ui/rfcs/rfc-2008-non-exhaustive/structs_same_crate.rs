@@ -32,7 +32,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_asj8rgccvkoe
-// Struct Pattern Matching
+// Record Struct Pattern Matching
 // ferrocene-annotations: fls_nruvg0es3kx7
 // Record Struct Patterns
 // ferrocene-annotations: fls_yivm43r5wnp1

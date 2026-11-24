@@ -13,4 +13,4 @@ fn nth<I: Iterator>(iter: &mut I, step: usize) -> impl FnMut() -> Option<I::Item
 // Generic Parameters
 //
 // ferrocene-annotations: fls_3xqobbu7wfsf
-// Impl Trait Type
+// Impl Trait Types

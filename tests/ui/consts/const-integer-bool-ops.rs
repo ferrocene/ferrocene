@@ -85,7 +85,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_nsvzzbldhq53
-// Comparison expressions
+// Comparison Expressions
 
 // ferrocene-annotations: fls_lstusiu2c8lu
-// Lazy boolean expressions
+// Lazy Boolean Expressions

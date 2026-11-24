@@ -27,4 +27,4 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_szibmtfv117b
-// Enum Type
+// Enum Types

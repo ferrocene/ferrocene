@@ -18,7 +18,7 @@ pub fn main() {
 // Declarative Macros
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_wjldgtio5o75
 // Macro Expansion

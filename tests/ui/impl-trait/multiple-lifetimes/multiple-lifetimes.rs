@@ -12,7 +12,7 @@ fn multiple_lifeteimes<'a, 'b, T: 'static>(x: &'a mut &'b T) -> impl X<'b> + 'a 
 fn main() {}
 
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types

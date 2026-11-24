@@ -22,7 +22,7 @@ fn main() {
 // Rest Patterns
 //
 // ferrocene-annotations: fls_qfsfnql1t7m
-// Wildcard Patterns
+// Underscore Patterns
 //
 // ferrocene-annotations: fls_burbhu22gfdu
 // Pattern Destructuring

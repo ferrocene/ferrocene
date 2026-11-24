@@ -24,13 +24,13 @@ fn expect_bound_supply_named<'x>() {
 fn main() {}
 
 // ferrocene-annotations: fls_airvr79xkcag
-// Function Item Type
+// Function Item Types
 //
 // ferrocene-annotations: fls_tjyexqrx0fx5
 // Closure Expressions
 //
 // ferrocene-annotations: fls_xd2oxlebhs14
-// Closure Type
+// Closure Types
 //
 // ferrocene-annotations: fls_exe4zodlwfez
 // Type Unification

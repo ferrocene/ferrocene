@@ -19,4 +19,4 @@ fn main() {
 // Array Expressions
 //
 // ferrocene-annotations: fls_uj0kpjwyld60
-// Array Type
+// Array Types

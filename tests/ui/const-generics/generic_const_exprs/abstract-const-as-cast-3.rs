@@ -47,7 +47,7 @@ where
 fn main() {}
 
 // ferrocene-annotations: fls_1qhsun1vyarz
-// Type cast expressions
+// Type Cast Expressions
 //
 // ferrocene-annotations: fls_izdv9i4spokw
 // Operator Expressions

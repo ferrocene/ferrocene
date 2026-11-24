@@ -52,7 +52,7 @@ fn main() {
 // Struct Patterns
 //
 // ferrocene-annotations: fls_asj8rgccvkoe
-// Struct Pattern Matching
+// Record Struct Pattern Matching
 //
 // ferrocene-annotations: fls_z7q8kbjwdc7g
 // Method Call Expressions

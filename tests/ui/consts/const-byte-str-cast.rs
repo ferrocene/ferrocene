@@ -9,10 +9,10 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_fqaffyrjob7v
-// Byte string literals
+// Byte String Literals
 
 // ferrocene-annotations: fls_1qhsun1vyarz
-// Type cast expressions
+// Type Cast Expressions
 //
 // ferrocene-annotations: fls_h0dvogc64tfh
 // Literal Expressions

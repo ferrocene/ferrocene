@@ -43,7 +43,7 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_66m4rnbssgig
-// Constant expressions
+// Constant Expressions
 
 // ferrocene-annotations: fls_xdvdl2ssnhlo
 // Statics

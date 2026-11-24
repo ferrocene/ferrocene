@@ -67,13 +67,13 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_2ifjqwnw03ms
-// Byte literals
+// Byte Literals
 //
 // ferrocene-annotations: fls_fqaffyrjob7v
-// Byte string literals
+// Byte String Literals
 //
 // ferrocene-annotations: fls_jps9102q0qfi
-// Raw byte string literals
+// Raw Byte String Literals
 //
 // ferrocene-annotations: fls_h0dvogc64tfh
 // Literal Expressions

@@ -10,4 +10,4 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_9beohh5475s2
-// Destructuring assignment
+// Destructuring Assignment

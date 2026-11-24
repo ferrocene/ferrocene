@@ -11,4 +11,4 @@ fn alpha(x: &str, y: &str) -> impl Alpha<dyn Object> { () }
 fn main() { }
 
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types

@@ -119,7 +119,7 @@ fn main() {
 // Struct Expressions
 //
 // ferrocene-annotations: fls_fmdn7n7s413d
-// Union Type
+// Union Types
 //
 // ferrocene-annotations: fls_9kjpxri0axvg
 // Weak Keywords

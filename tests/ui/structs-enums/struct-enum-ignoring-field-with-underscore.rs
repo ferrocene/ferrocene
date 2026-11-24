@@ -17,7 +17,7 @@ fn main() {
 // Let Statements
 //
 // ferrocene-annotations: fls_asj8rgccvkoe
-// Struct Pattern Matching
+// Record Struct Pattern Matching
 //
 // ferrocene-annotations: fls_yc4xm4hrfyw7
 // Underscore Pattern Matching

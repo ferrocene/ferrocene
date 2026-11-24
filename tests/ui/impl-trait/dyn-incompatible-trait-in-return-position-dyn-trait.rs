@@ -39,4 +39,4 @@ fn cat() -> Box<dyn DynIncompatible> { //~ ERROR the trait `DynIncompatible` is 
 fn main() {}
 
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types

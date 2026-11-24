@@ -12,7 +12,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_xinykul167l
-// Array expressions
+// Array Expressions
 //
 // ferrocene-annotations: fls_uj0kpjwyld60
-// Array type
+// Array Types

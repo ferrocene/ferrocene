@@ -33,7 +33,7 @@ fn foo<T: ?Sized>() {
 }
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_vpbikb73dw4k
-// Slice Type
+// Slice Types

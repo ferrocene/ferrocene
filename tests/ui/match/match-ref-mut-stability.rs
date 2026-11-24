@@ -37,10 +37,10 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types
 //
 // ferrocene-annotations: fls_1qhsun1vyarz
 // Type Cast Expressions

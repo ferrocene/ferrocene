@@ -13,10 +13,10 @@ const fn foo() {
 }
 
 // ferrocene-annotations: fls_xinykul167l
-// Array expressions
+// Array Expressions
 
 // ferrocene-annotations: fls_uj0kpjwyld60
-// Array type
+// Array Types
 
 // ferrocene-annotations: fls_vpbikb73dw4k
-// Slice type
+// Slice Types

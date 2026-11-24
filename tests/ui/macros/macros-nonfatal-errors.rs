@@ -149,4 +149,4 @@ const _: () = {
 // Attribute repr
 //
 // ferrocene-annotations: fls_qezwyridmjob
-// Macros asm and global_asm
+// Macros: asm, global_asm, and naked_asm

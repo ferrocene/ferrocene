@@ -19,10 +19,10 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_l21tjqjkkaa0
-// Associated items
+// Associated Items
 
 // ferrocene-annotations: fls_e1pgdlv81vul
-// Implementation conformance
+// Implementation Conformance
 
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations

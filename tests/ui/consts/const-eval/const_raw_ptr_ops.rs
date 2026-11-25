@@ -9,4 +9,4 @@ const X: bool = unsafe { &1 as *const i32 == &2 as *const i32 }; //~ ERROR point
 const X2: bool = unsafe { 42 as *const i32 == 43 as *const i32 }; //~ ERROR pointers cannot
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types

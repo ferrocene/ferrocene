@@ -18,7 +18,7 @@ enum myoption<T> { none, some(T), }
 pub fn main() { println!("{}", 5); }
 
 // ferrocene-annotations: fls_d44aflefat88
-// Path pattern matching
+// Path Pattern Matching
 //
 // ferrocene-annotations: fls_uloyjbaso8pz
-// Path patterns
+// Path Patterns

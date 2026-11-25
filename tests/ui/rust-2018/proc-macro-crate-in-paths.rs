@@ -19,7 +19,7 @@ pub fn derive_template(input: TokenStream) -> TokenStream {
 // Attribute crate_type
 //
 // ferrocene-annotations: fls_gklst7joeo33
-// External Crates
+// Crate Imports
 //
 // ferrocene-annotations: fls_q6qecp6e413
 // Attribute proc_macro_derive

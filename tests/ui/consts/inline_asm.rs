@@ -8,4 +8,4 @@ const _: () = unsafe { asm!("nop") };
 fn main() {}
 
 // ferrocene-annotations: fls_qezwyridmjob
-// Macros asm and global_asm
+// Macros: asm, global_asm, and naked_asm

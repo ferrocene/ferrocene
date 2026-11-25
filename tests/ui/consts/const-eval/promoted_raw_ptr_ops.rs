@@ -13,7 +13,7 @@ fn main() {
 // Constant Promotion
 //
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_cleoffpn5ew6
 // Temporaries

@@ -347,7 +347,7 @@ a :t:`value` that is unaligned.
 The invocation of a :t:`constant function` follows the dynamic semantics of a
 :t:`non-[constant function]` invocation.
 
-.. _fls_zJOAmSr3Dbqk:
+.. _fls_zjoamsr3dbqk:
 
 Diverging Expressions
 ~~~~~~~~~~~~~~~~~~~~~
@@ -779,7 +779,7 @@ the :t:`[capture target]s` of the :t:`async block expression`.
        42
    }
 
-.. _fls_G59PiNQkVUnQ:
+.. _fls_g59pinqkvunq:
 
 Const Blocks
 ~~~~~~~~~~~~
@@ -821,7 +821,7 @@ contained :t:`block expression`.
        42
    }
 
-.. _fls_0ybsR1hEo7wV:
+.. _fls_0ybsr1heo7wv:
 
 Named Blocks
 ~~~~~~~~~~~~
@@ -1001,7 +1001,7 @@ Mutable borrow.
 
    let ref_answer = &mut answer;
 
-.. _fls_vXGuvRWOLbEE:
+.. _fls_vxguvrwolbee:
 
 Raw Borrow Expression
 ~~~~~~~~~~~~~~~~~~~~~
@@ -3335,7 +3335,7 @@ a left-to-right order.
    let u1 = Union { int: 0 };
    let u2 = Union { float: 0.0 };
 
-.. _fls_mjVXiDQRIAzU:
+.. _fls_mjvxidqriazu:
 
 Invocation Expressions
 ----------------------
@@ -3557,7 +3557,7 @@ The :t:`evaluation` of a :t:`method call expression` proceeds as follows:
    let click = ClickCommand { ... };
    click.execute();
 
-.. _fls_8gPCPVc99pXJ:
+.. _fls_8gpcpvc99pxj:
 
 Call Conformance
 ~~~~~~~~~~~~~~~~
@@ -5332,7 +5332,7 @@ within the :t:`capturing expression`, as follows:
 A tool selects the first :t:`capture mode` that is compatible with the use of
 the :t:`capture target`.
 
-.. _fls_G64vdcIyB2Is:
+.. _fls_g64vdciyb2is:
 
 Capture precision
 ~~~~~~~~~~~~~~~~~
@@ -5397,7 +5397,7 @@ A :t:`closure expression` :t:`captures <capturing>` the prefix of the :t:`captur
 :dp:`fls_fITor3jpmgrl`
 Taking the address of an unaligned :t:`field` :t:`captures <capturing>` the entire :t:`struct`.
 
-.. _fls_ZfIBiJMf8qE1:
+.. _fls_zfibijmf8qe1:
 
 Arithmetic Overflow
 -------------------

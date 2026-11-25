@@ -187,7 +187,7 @@ The invocation of an :t:`unsafe function` shall require :t:`unsafe context`.
 
    fn main() {}
 
-.. _fls_mtPH3Q90xNwE:
+.. _fls_mtph3q90xnwe:
 
 Variadic Functions
 ------------------

@@ -25,6 +25,6 @@ mod baz {
 fn main() {}
 
 // ferrocene-annotations: fls_gklst7joeo33
-// External Crates
+// Crate Imports
 // ferrocene-annotations: fls_jdknpu3kf865
 // Visibility

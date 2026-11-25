@@ -15,7 +15,7 @@ fn main() {
 // Closure Expressions
 //
 // ferrocene-annotations: fls_xd2oxlebhs14
-// Closure Type
+// Closure Types
 //
 // ferrocene-annotations: fls_exe4zodlwfez
 // Type Unification

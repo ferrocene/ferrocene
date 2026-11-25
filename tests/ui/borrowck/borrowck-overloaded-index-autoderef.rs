@@ -101,7 +101,7 @@ impl<T> Fake for T { }
 // References
 //
 // ferrocene-annotations: fls_sxcr4aa098i6
-// Array and Slice Indexing Expressions
+// Indexing Expressions
 //
 // ferrocene-annotations: fls_5cm4gkt55hjh
-// Dereference Expression/ References
+// Dereference Expression

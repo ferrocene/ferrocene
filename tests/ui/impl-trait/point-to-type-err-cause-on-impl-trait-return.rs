@@ -104,7 +104,7 @@ fn main() {}
 // Implementations
 //
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types
 //
 // ferrocene-annotations: fls_85vx1qfa061i
 // Traits

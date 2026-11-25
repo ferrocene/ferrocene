@@ -1,14 +1,14 @@
 // ferrocene-annotations: fls_aadan19t5006
-// Async blocks
+// Async Blocks
 //
 // ferrocene-annotations: fls_hyrbmfmf6r8g
-// Await expressions
+// Await Expressions
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_l9ebxrlxyawd
-// Lifetime elision
+// Lifetime Elision
 //
 // ferrocene-annotations: fls_411up5z0b6n6
 // Lexical Elements

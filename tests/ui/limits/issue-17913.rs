@@ -24,7 +24,7 @@ fn main() {
 // Array Expressions
 //
 // ferrocene-annotations: fls_uj0kpjwyld60
-// Array Type
+// Array Types
 //
 // ferrocene-annotations: fls_fymvsy6ig99a
 // Attribute cfg

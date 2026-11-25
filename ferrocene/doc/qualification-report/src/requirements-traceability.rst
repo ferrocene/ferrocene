@@ -21,12 +21,15 @@ Self-tests
 
 We have tests that check the validity of the traceability suite itself.
 
-``diff-upstream``
-"""""""""""""""""
+``check-fls-annotations``
+"""""""""""""""""""""""""
 
 This tool verifies that:
 
 - All `// ferrocene-annotations` in the test suite correspond to a section in the Ferrocene Language Specification or `Traceability Matrix <../traceability-matrix.html>`_.
 - All `// ferrocene-annotations` in the test suite are either followed by the name of that section, or correspond to a CLI-only unnamed section.
 
-It can also be run manually to view all differences between the Ferrocene compiler and the upstream Rust Project compiler.
+``diff-upstream``
+"""""""""""""""""
+
+This tool can be run manually to view all differences between the Ferrocene compiler and the upstream Rust Project compiler.

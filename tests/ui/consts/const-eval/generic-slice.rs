@@ -34,7 +34,7 @@ fn main() {}
 // Generic Parameters
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_v5x85lt5ulva
 // References

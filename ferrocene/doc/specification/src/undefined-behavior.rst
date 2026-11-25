@@ -5,7 +5,7 @@
 .. default-domain:: spec
 .. informational-page::
 
-.. _fls_EBwqH60SUHiN:
+.. _fls_ebwqh60suhin:
 
 List of undefined behavior
 ==========================

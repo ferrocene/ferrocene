@@ -125,7 +125,7 @@ the :t:`constant`.
 
    const ZERO: u32 = 0;
 
-.. _fls_xOuhiItK1hK0:
+.. _fls_xouhiitk1hk0:
 
 Pointers
 --------
@@ -152,7 +152,7 @@ An :t:`original pointer` is a :t:`pointer` created via allocation.
 :dp:`fls_kaPNJ7iIHPro`
 A :t:`derived pointer` is a :t:`pointer` obtained by :t:`borrowing`, copying a :t:`pointer`, reading a stored :t:`pointer`, performing :t:`pointer` arithmetic, or :t:`casting` a :t:`pointer`.
 
-.. _fls_qPWQnNXH52R3:
+.. _fls_qpwqnnxh52r3:
 
 Raw Pointers
 ~~~~~~~~~~~~
@@ -168,7 +168,7 @@ Comparing two :t:`[raw pointer]s` compares the addresses of the :t:`[raw pointer
 :dp:`fls_k6ues2936pjq`
 Comparing a :t:`raw pointer` to a :t:`value` of a :t:`dynamically sized type` compares the data being pointed to.
 
-.. _fls_phgP8YIwpXpi:
+.. _fls_phgp8yiwpxpi:
 
 References
 ~~~~~~~~~~
@@ -192,7 +192,7 @@ A :t:`mutable reference` is a :t:`value` of a :t:`mutable reference type`.
 :dp:`fls_ezh8aq6fmdvz`
 It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be not :c:`null`.
 
-.. _fls_Dqk4eIvxHloY:
+.. _fls_dqk4eivxhloy:
 
 Provenance
 ~~~~~~~~~~

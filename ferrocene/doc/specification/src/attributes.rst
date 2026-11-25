@@ -830,7 +830,7 @@ It is undefined behavior when :t:`attribute` :c:`track_caller` is applied to an 
    fn who_called_me () {}
 
 
-.. _fls_Sd6rUmpEb355:
+.. _fls_sd6rumpeb355:
 
 Attribute ``naked``
 ^^^^^^^^^^^^^^^^^^^
@@ -1334,7 +1334,7 @@ Attribute ``link_name``
        pub fn rust_name() {}
    }
 
-.. _fls_Obik2w9gvhLN:
+.. _fls_obik2w9gvhln:
 
 Attribute ``link_ordinal``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1564,7 +1564,7 @@ related :t:`type`.
        second_field: i8
    }
 
-.. _fls_19LnTi3WabFd:
+.. _fls_19lnti3wabfd:
 
 Attribute ``unsafe``
 ^^^^^^^^^^^^^^^^^^^^
@@ -1704,7 +1704,7 @@ Attribute ``type_length_limit``
 Macros Attributes
 ~~~~~~~~~~~~~~~~~
 
-.. _fls_qyudjGHZfyJH:
+.. _fls_qyudjghzfyjh:
 
 Attribute ``collapse_debuginfo``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -42,7 +42,7 @@ fn main() {}
 // Closure Expressions
 //
 // ferrocene-annotations: fls_3xqobbu7wfsf
-// Impl Trait Type
+// Impl Trait Types
 //
 // ferrocene-annotations: fls_kgvleup5mdhq
-// Type Aliasing
+// Type Aliases

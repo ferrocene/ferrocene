@@ -24,13 +24,13 @@ fn main() {
 // Generic Arguments
 //
 // ferrocene-annotations: fls_3xqobbu7wfsf
-// Impl Trait Type
+// Impl Trait Types
 //
 // ferrocene-annotations: fls_9i5msiuuyihf
 // Paths
 //
 // ferrocene-annotations: fls_kgvleup5mdhq
-// Type Aliasing
+// Type Aliases
 //
 // ferrocene-annotations: fls_151r19d7xbgz
 // Entities

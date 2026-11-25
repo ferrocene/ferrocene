@@ -23,7 +23,7 @@ fn bar(x: &dyn for<'a, 'b> Foo<&'a u8, &'b u8>, y: &dyn for<'a> Foo<&'a u8, &'a 
 fn main() {}
 
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_jeoas4n6su4
 // Trait and Lifetime Bounds

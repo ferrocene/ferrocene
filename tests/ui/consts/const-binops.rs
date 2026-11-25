@@ -126,16 +126,16 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_1k9mkv7rbezi
-// Arithmetic expressions
+// Arithmetic Expressions
 //
 // ferrocene-annotations: fls_abp6tjbz8tpn
-// Bit expressions
+// Bit Expressions
 //
 // ferrocene-annotations: fls_nsvzzbldhq53
-// Comparison expressions
+// Comparison Expressions
 //
 // ferrocene-annotations: fls_lstusiu2c8lu
-// Lazy boolean expressions
+// Lazy Boolean Expressions
 //
 // ferrocene-annotations: fls_izdv9i4spokw
 // Operator Expressions

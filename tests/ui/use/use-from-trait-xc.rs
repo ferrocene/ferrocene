@@ -26,7 +26,7 @@ use use_from_trait_xc::Baz::new as baznew;
 fn main() {}
 
 // ferrocene-annotations: fls_gklst7joeo33
-// External Crates
+// Crate Imports
 //
 // ferrocene-annotations: fls_9gprp17h6t1q
 // Use Imports

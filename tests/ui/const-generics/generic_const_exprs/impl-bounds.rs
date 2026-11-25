@@ -25,7 +25,7 @@ impl<T> Bar<{ size_of::<T>() }> for Foo<T, 3> {
 fn main() {}
 
 // ferrocene-annotations: fls_e1pgdlv81vul
-// Implementation conformance
+// Implementation Conformance
 //
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations

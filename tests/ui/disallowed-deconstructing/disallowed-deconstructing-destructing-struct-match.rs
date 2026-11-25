@@ -22,7 +22,7 @@ fn main() {
 // Destructors
 //
 // ferrocene-annotations: fls_asj8rgccvkoe
-// Struct Pattern Matching
+// Record Struct Pattern Matching
 //
 // ferrocene-annotations: fls_7dbd5t2750ce
 // Struct Patterns

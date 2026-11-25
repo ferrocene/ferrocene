@@ -62,7 +62,7 @@ impl AssocTy for i32 {
 }
 
 // ferrocene-annotations: fls_l21tjqjkkaa0
-// Associated items
+// Associated Items
 //
 // ferrocene-annotations: fls_ixjc5jaamx84
 // Constants

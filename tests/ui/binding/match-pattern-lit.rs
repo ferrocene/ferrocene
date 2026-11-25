@@ -15,7 +15,7 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_azzf1llv3wf
-// Literal pattern matching
+// Literal Pattern Matching
 //
 // ferrocene-annotations: fls_2krxnq8q9ef1
-// Literal patterns
+// Literal Patterns

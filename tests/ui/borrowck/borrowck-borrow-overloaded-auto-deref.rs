@@ -107,7 +107,7 @@ pub fn main() {}
 // References
 //
 // ferrocene-annotations: fls_5cm4gkt55hjh
-// Dereference Expression/ References
+// Dereference Expression
 //
 // ferrocene-annotations: fls_izdv9i4spokw
 // Operator Expressions

@@ -8,7 +8,7 @@
 import string
 import random
 
-CHARS = string.ascii_letters + string.digits
+CHARS = string.ascii_lowercase + string.digits
 LENGTH = 12
 GENERATE = 10
 

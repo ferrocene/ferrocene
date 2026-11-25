@@ -21,4 +21,4 @@ fn use_dyn(v: &dyn Foo) { //~ERROR the trait `Foo` is not dyn compatible
 fn main() {}
 
 // ferrocene-annotations: fls_4ikc07mfrez5
-// Object safety
+// Object Safety

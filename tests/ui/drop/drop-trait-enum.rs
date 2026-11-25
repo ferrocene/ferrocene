@@ -97,4 +97,4 @@ pub fn main() {
 // Implementations
 //
 // ferrocene-annotations: fls_szibmtfv117b
-// Enum Type
+// Enum Types

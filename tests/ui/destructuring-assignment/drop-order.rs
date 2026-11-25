@@ -49,7 +49,7 @@ fn main() {
 // Let Statements
 //
 // ferrocene-annotations: fls_qfsfnql1t7m
-// Wildcard Patterns
+// Underscore Patterns
 //
 // ferrocene-annotations: fls_vlrto778v49m
 // Tuple Struct Patterns

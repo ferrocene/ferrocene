@@ -11,7 +11,7 @@ fn parse_type_3() -> &str { unimplemented!() }
 fn main() {}
 
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types
 //
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types

@@ -49,10 +49,10 @@ fn main() {}
 // Literal Pattern Matching
 //
 // ferrocene-annotations: fls_qfsfnql1t7m
-// Wildcard Patterns
+// Underscore Patterns
 //
 // ferrocene-annotations: fls_yc4xm4hrfyw7
-// Wildcard Pattern Matching
+// Underscore Pattern Matching
 //
 // ferrocene-annotations: fls_uloyjbaso8pz
 // Path Patterns

@@ -29,7 +29,7 @@ fn main() {}
 // Associated Items
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types
 //
 // ferrocene-annotations: fls_qa98qdi42orq
-// Trait Object Type
+// Trait Object Types

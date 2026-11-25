@@ -19,7 +19,7 @@ pub fn main() {
 // Trait and Lifetime Bounds
 //
 // ferrocene-annotations: fls_yqcygq3y6m5j
-// Lifetime
+// Lifetimes
 //
 // ferrocene-annotations: fls_nsvzzbldhq53
 // Comparison Expressions

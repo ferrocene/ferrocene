@@ -133,7 +133,7 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 
    if let core::option::Option::Some(y) = value {
 
-.. _fls_buRbhu22Gfdu:
+.. _fls_burbhu22gfdu:
 
 Pattern Destructuring
 ---------------------

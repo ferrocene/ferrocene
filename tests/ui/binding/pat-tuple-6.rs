@@ -45,16 +45,16 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_7wpgnp4kjq82
-// Rest patterns
+// Rest Patterns
 //
 // ferrocene-annotations: fls_rce8bb7nz2jy
-// Tuple pattern matching
+// Tuple Pattern Matching
 //
 // ferrocene-annotations: fls_urbr5rg9206v
-// Tuple patterns
+// Tuple Patterns
 //
 // ferrocene-annotations: fls_eexupzdsu7f
-// Tuple struct pattern matching
+// Tuple Struct Pattern Matching
 //
 // ferrocene-annotations: fls_vlrto778v49m
-// Tuple struct patterns
+// Tuple Struct Patterns

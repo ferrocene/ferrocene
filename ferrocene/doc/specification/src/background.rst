@@ -5,7 +5,7 @@
 
 .. informational-page::
 
-.. _fls_mLo6B3EWF50J:
+.. _fls_mlo6b3ewf50j:
 
 FLS Background
 ==============
@@ -33,7 +33,7 @@ text is present in the ``LICENSES/`` directory.
 .. _Ferrocene: https://ferrocene.dev
 .. _Rust Reference: https://doc.rust-lang.org/reference/
 
-.. _fls_UMsvnuLqzd99:
+.. _fls_umsvnulqzd99:
 
 Acknowledging Ferrous Systems
 -----------------------------

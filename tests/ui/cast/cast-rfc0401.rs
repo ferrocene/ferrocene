@@ -175,13 +175,13 @@ fn foo() { }
 // Subtyping and Variance
 //
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_xztr1kebz8bo
-// Function Pointer Type
+// Function Pointer Types
 //
 // ferrocene-annotations: fls_uj0kpjwyld60
-// Array Type
+// Array Types
 //
 // ferrocene-annotations: fls_vpbikb73dw4k
-// Slice Type
+// Slice Types

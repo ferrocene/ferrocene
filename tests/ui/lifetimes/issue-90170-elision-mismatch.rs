@@ -12,7 +12,7 @@ fn main() {}
 // Lifetime Elision
 //
 // ferrocene-annotations: fls_142vncdktbin
-// Reference Type
+// Reference Types
 //
 // ferrocene-annotations: fls_hethxxbcg7ja
 // Function Lifetime Elision

@@ -60,13 +60,13 @@ pub fn main() {
 }
 
 // ferrocene-annotations: fls_5loglxds6zik
-// Parenthesized pattern matching
+// Parenthesized Pattern Matching
 //
 // ferrocene-annotations: fls_1xit18et4ohh
-// Parenthesized patterns
+// Parenthesized Patterns
 //
 // ferrocene-annotations: fls_rce8bb7nz2jy
-// Tuple pattern matching
+// Tuple Pattern Matching
 //
 // ferrocene-annotations: fls_urbr5rg9206v
-// Tuple patterns
+// Tuple Patterns

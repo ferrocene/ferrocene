@@ -47,7 +47,7 @@ fn main() {
 }
 
 // ferrocene-annotations: fls_ppd1xwve3tr7
-// Raw Pointer Type
+// Raw Pointer Types
 //
 // ferrocene-annotations: fls_jep7p27kaqlp
 // Unsafety

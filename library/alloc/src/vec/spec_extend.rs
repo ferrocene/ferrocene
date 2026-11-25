@@ -10,6 +10,7 @@ pub(super) trait SpecExtend<T, I> {
     fn spec_extend(&mut self, iter: I);
 }
 
+#[ferrocene::prevalidated]
 impl<T, I, A: Allocator> SpecExtend<T, I> for Vec<T, A>
 where
     I: Iterator<Item = T>,
@@ -48,6 +49,7 @@ where
     }
 }
 
+#[ferrocene::prevalidated]
 impl<'a, T: 'a, A: Allocator> SpecExtend<&'a T, slice::Iter<'a, T>> for Vec<T, A>
 where
     T: TrivialClone,

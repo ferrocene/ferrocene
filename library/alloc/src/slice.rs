@@ -389,6 +389,7 @@ impl<T> [T] {
     /// let x = s.to_vec_in(System);
     /// // Here, `s` and `x` can be modified independently.
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[rustc_allow_incoherent_impl]
     #[inline]
@@ -441,6 +442,7 @@ impl<T> [T] {
             }
         }
 
+        #[ferrocene::prevalidated]
         impl<T: TrivialClone> ConvertVec for T {
             #[inline]
             fn to_vec<A: Allocator>(s: &[Self], alloc: A) -> Vec<Self, A> {

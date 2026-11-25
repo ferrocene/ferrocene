@@ -25,7 +25,8 @@ use crate::{assert_unsafe_precondition, fmt, mem};
 /// like this are met, use specific allocators with looser
 /// requirements, or use the more lenient `Allocator` interface.)
 #[stable(feature = "alloc_layout", since = "1.28.0")]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive(Copy, Clone, Debug, Eq, Hash)]
 #[lang = "alloc_layout"]
 #[ferrocene::prevalidated]
 pub struct Layout {
@@ -108,6 +109,7 @@ impl Layout {
     /// * `size`, when rounded up to the nearest multiple of `alignment`,
     ///   must not overflow `isize` (i.e., the rounded value must be
     ///   less than or equal to `isize::MAX`).
+    #[ferrocene::prevalidated]
     #[unstable(feature = "ptr_alignment_type", issue = "165719")]
     #[inline]
     pub const fn from_size_alignment(
@@ -262,6 +264,7 @@ impl Layout {
     ///
     /// [trait object]: ../../book/ch17-02-trait-objects.html
     /// [extern type]: ../../unstable-book/language-features/extern-types.html
+    #[ferrocene::prevalidated]
     #[stable(feature = "layout_for_ptr", since = "1.99.0")]
     #[rustc_const_stable(feature = "layout_for_ptr", since = "1.99.0")]
     #[must_use]
@@ -279,6 +282,7 @@ impl Layout {
     /// be that of a valid pointer, which means this must not be used
     /// as a "not yet initialized" sentinel value.
     /// Types that lazily allocate must track initialization by some other means.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[must_use]
@@ -358,6 +362,7 @@ impl Layout {
     ///
     /// This can return at most `Alignment::MAX` (aka `isize::MAX + 1`)
     /// because the original size is at most `isize::MAX`.
+    #[ferrocene::prevalidated]
     #[inline]
     const fn size_rounded_up_to_custom_alignment(&self, alignment: Alignment) -> usize {
         // SAFETY:
@@ -389,6 +394,7 @@ impl Layout {
     ///
     /// This is equivalent to adding the result of `padding_needed_for`
     /// to the layout's current size.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[must_use = "this returns a new `Layout`, \
@@ -504,6 +510,7 @@ impl Layout {
     /// # let u64 = Layout::new::<u64>();
     /// # assert_eq!(repr_c(&[u64, u32, u16, u32]), Ok((s, vec![0, 8, 12, 16])));
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "alloc_layout_manipulation", since = "1.44.0")]
     #[rustc_const_stable(feature = "const_alloc_layout", since = "1.85.0")]
     #[inline]
@@ -536,6 +543,7 @@ impl Layout {
     /// aligned.
     ///
     /// On arithmetic overflow, returns `LayoutError`.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[rustc_const_stable(feature = "alloc_layout_extra", since = "1.95.0")]
     #[inline]
@@ -629,5 +637,16 @@ impl Error for LayoutError {}
 impl fmt::Display for LayoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("invalid parameters to Layout::from_size_align")
+    }
+}
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "alloc_layout", since = "1.28.0")]
+impl ::core::cmp::PartialEq for Layout {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.size == other.size && self.align == other.align
     }
 }

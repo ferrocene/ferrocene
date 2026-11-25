@@ -120,6 +120,7 @@ use crate::{io, panicking};
 /// [`channels`]: crate::sync::mpsc
 /// [`join`]: JoinHandle::join
 /// [`Err`]: crate::result::Result::Err
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
@@ -165,6 +166,7 @@ where
 /// [`Mutex`]: crate::sync::Mutex
 #[stable(feature = "rust1", since = "1.0.0")]
 pub fn yield_now() {
+    #[allow(ferrocene::unvalidated, reason = "defer validating platform-specifics")]
     imp::yield_now()
 }
 

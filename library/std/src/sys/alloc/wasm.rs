@@ -16,6 +16,8 @@
 //! The crate itself provides a global allocator which on wasm has no
 //! synchronization as there are no threads!
 
+#![allow(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+
 use core::cell::SyncUnsafeCell;
 
 use crate::alloc::Layout;

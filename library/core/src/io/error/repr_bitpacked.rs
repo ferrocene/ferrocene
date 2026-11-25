@@ -165,6 +165,7 @@ impl Repr {
         res
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub(super) fn new_os(code: RawOsError) -> Self {
         let utagged = ((code as usize) << 32) | TAG_OS;
@@ -203,6 +204,7 @@ impl Repr {
         Self(ptr, PhantomData)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub(super) fn data(&self) -> ErrorData<&Custom> {
         // SAFETY: We're a Repr, decode_repr is fine.
@@ -226,6 +228,7 @@ impl Repr {
     }
 }
 
+#[ferrocene::prevalidated]
 impl Drop for Repr {
     #[inline]
     fn drop(&mut self) {
@@ -243,6 +246,7 @@ impl Drop for Repr {
 //
 // Safety: `ptr`'s bits should be encoded as described in the document at the
 // top (it should `some_repr.0`)
+#[ferrocene::prevalidated]
 #[inline]
 unsafe fn decode_repr<C, F>(ptr: NonNull<()>, make_custom: F) -> ErrorData<C>
 where

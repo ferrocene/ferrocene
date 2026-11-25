@@ -648,6 +648,7 @@ impl<T: ?Sized + AsRef<OsStr>> From<&T> for OsString {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ops::Index<ops::RangeFull> for OsString {
     type Output = OsStr;
@@ -666,6 +667,7 @@ impl ops::IndexMut<ops::RangeFull> for OsString {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl ops::Deref for OsString {
     type Target = OsStr;
@@ -876,6 +878,7 @@ impl OsStr {
         Self::from_inner(unsafe { Slice::from_encoded_bytes_unchecked(bytes) })
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_unstable(feature = "const_convert", issue = "143773")]
     const fn from_inner(inner: &Slice) -> &OsStr {
@@ -906,6 +909,7 @@ impl OsStr {
     /// let os_str = OsStr::new("foo");
     /// assert_eq!(os_str.to_str(), Some("foo"));
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]

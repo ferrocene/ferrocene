@@ -128,7 +128,9 @@ pub struct CString {
 ///
 /// let _: NulError = CString::new(b"f\0oo".to_vec()).unwrap_err();
 /// ```
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[ferrocene::prevalidated]
+// Ferrocene modification: Remove Debug and implement it manually.
+#[derive(Clone, PartialEq, Eq)]
 #[stable(feature = "alloc_c_string", since = "1.64.0")]
 pub struct NulError(usize, Vec<u8>);
 
@@ -254,6 +256,7 @@ impl CString {
     /// This function will return an error if the supplied bytes contain an
     /// internal 0 byte. The [`NulError`] returned will contain the bytes as well as
     /// the position of the nul byte.
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new<T: Into<Vec<u8>>>(t: T) -> Result<CString, NulError> {
         trait SpecNewImpl {
@@ -261,6 +264,7 @@ impl CString {
         }
 
         impl<T: Into<Vec<u8>>> SpecNewImpl for T {
+            #[ferrocene::prevalidated]
             default fn spec_new_impl(self) -> Result<CString, NulError> {
                 let bytes: Vec<u8> = self.into();
                 match memchr::memchr(0, &bytes) {
@@ -346,6 +350,7 @@ impl CString {
         unsafe { Self::_from_vec_unchecked(v) }
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn _from_vec_unchecked(mut v: Vec<u8>) -> Self {
         v.reserve_exact(1);
         v.push(0);
@@ -709,6 +714,7 @@ impl CString {
 // to prevent LLVM from optimizing it away in debug builds.
 #[stable(feature = "cstring_drop", since = "1.13.0")]
 impl Drop for CString {
+    #[ferrocene::prevalidated]
     #[inline]
     fn drop(&mut self) {
         // SAFETY: Length is always at least one.
@@ -1314,5 +1320,16 @@ impl core::error::Error for FromVecWithNulError {}
 impl core::error::Error for IntoStringError {
     fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         Some(&self.error)
+    }
+}
+
+// Ferrocene addition: Do not derive Debug because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "alloc_c_string", since = "1.64.0")]
+impl ::core::fmt::Debug for NulError {
+    #[inline]
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_tuple("NulError").field(&self.0).field(&&self.1).finish()
     }
 }

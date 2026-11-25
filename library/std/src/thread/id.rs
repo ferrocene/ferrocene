@@ -32,6 +32,7 @@ pub struct ThreadId(NonZero<u64>);
 
 impl ThreadId {
     // Generate a new unique thread ID.
+    #[ferrocene::prevalidated]
     pub(crate) fn new() -> ThreadId {
         #[cold]
         fn exhausted() -> ! {
@@ -80,9 +81,17 @@ impl ThreadId {
                 while COUNTER_LOCKED.swap(true, Ordering::Acquire) {
                     if spin <= 3 {
                         for _ in 0..(1 << spin) {
+                            #[allow(
+                                ferrocene::unvalidated,
+                                reason = "defer validating platform-specifics"
+                            )]
                             spin_loop();
                         }
                     } else {
+                        #[allow(
+                            ferrocene::unvalidated,
+                            reason = "defer validating platform-specifics"
+                        )]
                         yield_now();
                     }
                     spin += 1;

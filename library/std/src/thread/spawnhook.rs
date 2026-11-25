@@ -12,18 +12,31 @@ crate::thread_local! {
     static SPAWN_HOOKS: Cell<SpawnHooks> = const { Cell::new(SpawnHooks { first: None }) };
 }
 
+#[ferrocene::prevalidated]
 #[derive(Default, Clone)]
 struct SpawnHooks {
     first: Option<Arc<SpawnHook>>,
 }
 
 // Manually implement drop to prevent deep recursion when dropping linked Arc list.
+#[ferrocene::prevalidated]
 impl Drop for SpawnHooks {
     fn drop(&mut self) {
         let mut next = self.first.take();
-        while let Some(SpawnHook { hook, next: n }) = next.and_then(Arc::into_inner) {
-            drop(hook);
-            next = n;
+        // Ferrocene modification: Don't call `.and_then` but `match` to work around
+        // `ferrocene::unvalidated` bug.
+        // while let Some(SpawnHook { hook, next: n }) = next.and_then(Arc::into_inner) {
+        //     drop(hook);
+        //     next = n;
+        // }
+        while let Some(arc) = next {
+            match Arc::into_inner(arc) {
+                Some(SpawnHook { hook, next: n }) => {
+                    drop(hook);
+                    next = n;
+                }
+                None => break,
+            }
         }
     }
 }
@@ -116,6 +129,7 @@ where
 /// Called on the parent thread.
 ///
 /// Returns the functions to be called on the newly spawned thread.
+#[ferrocene::prevalidated]
 pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {
     // Get a snapshot of the spawn hooks.
     // (Increments the refcount to the first node.)
@@ -125,6 +139,7 @@ pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {
         snapshot
     }) {
         // Iterate over the hooks, run them, and collect the results in a vector.
+        #[allow(ferrocene::unvalidated, reason = "false-positive")]
         let to_run: Vec<_> = iter::successors(hooks.first.as_deref(), |hook| hook.next.as_deref())
             .map(|hook| (hook.hook)(thread))
             .collect();
@@ -142,6 +157,7 @@ pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {
 ///
 /// This struct is sent to the new thread.
 /// It contains the inherited hooks and the closures to be run.
+#[ferrocene::prevalidated]
 #[derive(Default)]
 pub(super) struct ChildSpawnHooks {
     hooks: SpawnHooks,
@@ -150,6 +166,7 @@ pub(super) struct ChildSpawnHooks {
 
 impl ChildSpawnHooks {
     // This is run on the newly spawned thread, directly at the start.
+    #[ferrocene::prevalidated]
     pub(super) fn inherit_and_run(self) {
         SPAWN_HOOKS.set(self.hooks);
         for run in self.to_run {

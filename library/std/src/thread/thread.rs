@@ -20,6 +20,7 @@ mod thread_name_string {
     }
 
     impl From<String> for ThreadNameString {
+        #[ferrocene::prevalidated]
         fn from(s: String) -> Self {
             Self {
                 inner: CString::new(s).expect("thread name may not contain interior null bytes"),
@@ -55,11 +56,14 @@ struct Inner {
 }
 
 impl Inner {
+    #[ferrocene::prevalidated]
     fn parker(self: Pin<&Self>) -> Pin<&Parker> {
         unsafe { Pin::map_unchecked(self, |inner| &inner.parker) }
     }
 }
 
+#[ferrocene::prevalidated]
+#[allow(ferrocene::unvalidated, reason = "false-positive in derived Clone implementation")]
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
 /// A handle to a thread.
@@ -92,8 +96,15 @@ pub struct Thread {
 }
 
 impl Thread {
+    #[ferrocene::prevalidated]
     pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {
-        let name = name.map(ThreadNameString::from);
+        // Ferrocene modification: Don't call `.map` but `match` to work around
+        // `ferrocene::unvalidated` bug.
+        // let name = name.map(ThreadNameString::from);
+        let name = match name {
+            Some(name) => Some(ThreadNameString::from(name)),
+            None => None,
+        };
 
         // We have to use `unsafe` here to construct the `Parker` in-place,
         // which is required for the UNIX implementation.
@@ -106,6 +117,7 @@ impl Thread {
             (&raw mut (*ptr).name).write(name);
             (&raw mut (*ptr).id).write(id);
             (&raw mut (*ptr).os_id).write(OnceLock::new());
+            #[expect(ferrocene::unvalidated, reason = "defer validating platform specifics")]
             Parker::new_in_place(&raw mut (*ptr).parker);
             Pin::new_unchecked(arc.assume_init())
         };
@@ -210,10 +222,15 @@ impl Thread {
     ///
     /// [`park`]: super::park
     /// [park documentation]: super::park
+    #[ferrocene::prevalidated]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[inline]
     pub fn unpark(&self) {
-        self.inner.as_ref().parker().unpark();
+        // Ferrocene modification: Split `unpark` call apart in order to skip
+        // it from validation.
+        let parker = self.inner.as_ref().parker();
+        #[expect(ferrocene::unvalidated, reason = "defer validating platform specifics")]
+        parker.unpark();
     }
 
     /// Gets the thread's unique identifier.

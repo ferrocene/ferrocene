@@ -9,11 +9,12 @@ use crate::{cmp, fmt, hash, mem, num};
 ///
 /// Note that particularly large alignments, while representable in this type,
 /// are likely not to be supported by actual allocators and linkers.
+#[ferrocene::prevalidated]
 #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(transparent)]
-#[ferrocene::prevalidated]
 pub struct Alignment {
     // This field is never used directly (nor is the enum),
     // as it's just there to convey the validity invariant.
@@ -48,6 +49,7 @@ impl Alignment {
     ///
     /// This provides the same numerical value as [`align_of`],
     /// but in an `Alignment` instead of a `usize`.
+    #[ferrocene::prevalidated]
     #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[rustc_const_stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
     #[inline]
@@ -149,6 +151,7 @@ impl Alignment {
     /// that is, the above assertion does not pass on all platforms.)
     ///
     /// [type-layout]: ../../reference/type-layout.html#r-layout.primitive
+    #[ferrocene::prevalidated]
     #[inline]
     #[must_use]
     #[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
@@ -281,6 +284,7 @@ impl Alignment {
     }
 
     // FIXME(const-hack) Remove me once `Ord::max` is usable in const
+    #[ferrocene::prevalidated]
     pub(crate) const fn max(a: Self, b: Self) -> Self {
         if a.as_usize() > b.as_usize() { a } else { b }
     }
@@ -370,11 +374,12 @@ const impl Default for Alignment {
     }
 }
 
+#[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "16")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
-#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -394,11 +399,12 @@ enum AlignmentEnum {
     _Align1Shl15 = 1 << 15,
 }
 
+#[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "32")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
-#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -434,11 +440,12 @@ enum AlignmentEnum {
     _Align1Shl31 = 1 << 31,
 }
 
+#[ferrocene::prevalidated]
 #[cfg(target_pointer_width = "64")]
 #[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+// Ferrocene modification: Remove PartialEq and implement it manually.
+#[derive_const(Clone, Eq)]
 #[repr(usize)]
-#[ferrocene::prevalidated]
 enum AlignmentEnum {
     _Align1Shl0 = 1 << 0,
     _Align1Shl1 = 1 << 1,
@@ -505,3 +512,31 @@ enum AlignmentEnum {
     _Align1Shl62 = 1 << 62,
     _Align1Shl63 = 1 << 63,
 }
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[stable(feature = "alignment_type", since = "CURRENT_RUSTC_VERSION")]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+const impl ::core::cmp::PartialEq for Alignment {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self._inner_repr_trick == other._inner_repr_trick
+    }
+}
+#[unstable(feature = "structural_match", issue = "31434")]
+impl ::core::marker::StructuralPartialEq for Alignment {}
+
+// Ferrocene addition: Do not derive PartialEq because this triggers a
+// ferrocene::unvalidated lint bug.
+#[ferrocene::prevalidated]
+#[rustc_const_unstable(feature = "const_cmp", issue = "143800")]
+const impl ::core::cmp::PartialEq for AlignmentEnum {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        ::core::intrinsics::discriminant_value(self)
+            == ::core::intrinsics::discriminant_value(other)
+    }
+}
+#[unstable(feature = "structural_match", issue = "31434")]
+impl ::core::marker::StructuralPartialEq for AlignmentEnum {}

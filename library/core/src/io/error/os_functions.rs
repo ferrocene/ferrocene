@@ -5,6 +5,7 @@ use crate::fmt;
 ///
 /// The provided reference must point to data that is entirely constant; it must
 /// not be created during runtime.
+#[ferrocene::prevalidated]
 #[inline]
 pub(super) unsafe fn set_functions(_f: &'static OsFunctions) {
     // FIXME: externally implementable items may allow for weak linkage, allowing

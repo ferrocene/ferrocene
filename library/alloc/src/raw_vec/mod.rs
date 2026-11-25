@@ -23,6 +23,7 @@ mod tests;
 // One central function responsible for reporting capacity overflows. This'll
 // ensure that the code generation related to these panics is minimal as there's
 // only one location which panics rather than a bunch throughout the module.
+#[ferrocene::prevalidated]
 #[cfg(not(no_global_oom_handling))]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never))]
 const fn capacity_overflow() -> ! {
@@ -45,6 +46,7 @@ const ZERO_CAP: Cap = unsafe { Cap::new_unchecked(0) };
 /// `Cap(cap)`, except if `T` is a ZST then `Cap::ZERO`.
 ///
 /// # Safety: cap must be <= `isize::MAX`.
+#[ferrocene::prevalidated]
 const unsafe fn new_cap<T>(cap: usize) -> Cap {
     // SAFETY: Upheld by caller.
     if T::IS_ZST { ZERO_CAP } else { unsafe { Cap::new_unchecked(cap) } }
@@ -109,6 +111,7 @@ impl<T> RawVec<T, Global> {
     /// `RawVec` with capacity `0`. If `T` is zero-sized, then it makes a
     /// `RawVec` with capacity `usize::MAX`. Useful for implementing
     /// delayed allocation.
+    #[ferrocene::prevalidated]
     #[must_use]
     pub(crate) const fn new() -> Self {
         Self::new_in(Global)
@@ -165,6 +168,7 @@ impl RawVecInner<Global> {
 //   to round up a request of less than 8 bytes to at least 8 bytes.
 // - 4 if elements are moderate-sized (<= 1 KiB).
 // - 1 otherwise, to avoid wasting too much space for very short Vecs.
+#[ferrocene::prevalidated]
 const fn min_non_zero_cap(size: usize) -> usize {
     if size == 1 {
         8
@@ -180,6 +184,7 @@ const fn min_non_zero_cap(size: usize) -> usize {
 const impl<T, A: [const] Allocator + [const] Destruct> RawVec<T, A> {
     /// Like `with_capacity`, but parameterized over the choice of
     /// allocator for the returned `RawVec`.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     pub(crate) fn with_capacity_in(capacity: usize, alloc: A) -> Self {
@@ -191,6 +196,7 @@ const impl<T, A: [const] Allocator + [const] Destruct> RawVec<T, A> {
 
     /// A specialized version of `self.reserve(len, 1)` which requires the
     /// caller to ensure `len == self.capacity()`.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline(never)]
     pub(crate) fn grow_one(&mut self) {
@@ -205,6 +211,7 @@ impl<T, A: Allocator> RawVec<T, A> {
 
     /// Like `new`, but parameterized over the choice of allocator for
     /// the returned `RawVec`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn new_in(alloc: A) -> Self {
         // Check assumption made in `current_memory`
@@ -245,6 +252,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     ///
     /// Note, that the requested capacity and `self.capacity()` could differ, as
     /// an allocator could overallocate and return a greater memory block than requested.
+    #[ferrocene::prevalidated]
     pub(crate) unsafe fn into_box(self, len: usize) -> Box<[MaybeUninit<T>], A> {
         // Sanity-check one half of the safety requirement (we cannot check the other half).
         debug_assert!(
@@ -294,6 +302,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// # Safety
     ///
     /// See [`RawVec::from_raw_parts_in`].
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     pub(crate) const unsafe fn from_nonnull_in(ptr: NonNull<T>, capacity: usize, alloc: A) -> Self {
@@ -308,11 +317,13 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// Gets a raw pointer to the start of the allocation. Note that this is
     /// `NonNull::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must
     /// be careful.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn ptr(&self) -> *mut T {
         self.inner.ptr()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn non_null(&self) -> NonNull<T> {
         self.inner.non_null()
@@ -321,12 +332,14 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// Gets the capacity of the allocation.
     ///
     /// This will always be `usize::MAX` if `T` is zero-sized.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn capacity(&self) -> usize {
         self.inner.capacity(size_of::<T>())
     }
 
     /// Returns a shared reference to the allocator backing this `RawVec`.
+    #[ferrocene::prevalidated]
     #[inline]
     pub(crate) const fn allocator(&self) -> &A {
         self.inner.allocator()
@@ -351,6 +364,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// # Aborts
     ///
     /// Aborts on OOM.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     pub(crate) fn reserve(&mut self, len: usize, additional: usize) {
@@ -385,6 +399,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// # Aborts
     ///
     /// Aborts on OOM.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     pub(crate) fn reserve_exact(&mut self, len: usize, additional: usize) {
         // SAFETY: All calls on self.inner pass T::LAYOUT as the elem_layout
@@ -411,6 +426,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     /// # Aborts
     ///
     /// Aborts on OOM.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     pub(crate) fn shrink_to_fit(&mut self, cap: usize) {
@@ -435,6 +451,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 const unsafe impl<#[may_dangle] T, A: [const] Allocator + [const] Destruct> Drop for RawVec<T, A> {
     /// Frees the memory owned by the `RawVec` *without* trying to drop its contents.
@@ -447,6 +464,7 @@ const unsafe impl<#[may_dangle] T, A: [const] Allocator + [const] Destruct> Drop
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 #[rustfmt::skip] // FIXME(fee1-dead): temporary measure before rustfmt is bumped
 const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     fn with_capacity_in(capacity: usize, alloc: A, elem_layout: Layout) -> Self {
@@ -463,6 +481,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
         }
     }
 
+    #[ferrocene::prevalidated]
     fn try_allocate_in(
         capacity: usize,
         init: AllocInit,
@@ -507,6 +526,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
     /// - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     unsafe fn grow_one(&mut self, elem_layout: Layout) {
@@ -521,6 +541,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
     /// - The sum of `len` and `additional` must be greater than the current capacity
+    #[ferrocene::prevalidated]
     unsafe fn grow_amortized(
         &mut self,
         len: usize,
@@ -561,6 +582,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
     /// - `cap` must be greater than the current capacity
     // not marked inline(never) since we want optimizers to be able to observe the specifics of this
     // function, see tests/codegen-llvm/vec-reserve-extend.rs.
+    #[ferrocene::prevalidated]
     #[cold]
     unsafe fn finish_grow(
         &self,
@@ -588,6 +610,7 @@ const impl<A: [const] Allocator + [const] Destruct> RawVecInner<A> {
 }
 
 impl<A: Allocator> RawVecInner<A> {
+    #[ferrocene::prevalidated]
     #[inline]
     const fn new_in(alloc: A, align: Alignment) -> Self {
         let ptr = NonNull::without_provenance(align.as_nonzero_usize());
@@ -619,27 +642,32 @@ impl<A: Allocator> RawVecInner<A> {
         Self { ptr: unsafe { NonNull::new_unchecked(ptr) }, cap, alloc }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     const unsafe fn from_nonnull_in(ptr: NonNull<u8>, cap: Cap, alloc: A) -> Self {
         Self { ptr, cap, alloc }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn ptr<T>(&self) -> *mut T {
         self.non_null::<T>().as_ptr()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn non_null<T>(&self) -> NonNull<T> {
         self.ptr.cast()
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn capacity(&self, elem_size: usize) -> usize {
         if elem_size == 0 { usize::MAX } else { self.cap.as_inner() }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn allocator(&self) -> &A {
         &self.alloc
@@ -649,6 +677,7 @@ impl<A: Allocator> RawVecInner<A> {
     /// - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     const unsafe fn current_memory(&self, elem_layout: Layout) -> Option<(NonNull<u8>, Layout)> {
@@ -672,6 +701,7 @@ impl<A: Allocator> RawVecInner<A> {
     /// - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     unsafe fn reserve(&mut self, len: usize, additional: usize, elem_layout: Layout) {
@@ -729,6 +759,7 @@ impl<A: Allocator> RawVecInner<A> {
     /// - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     unsafe fn reserve_exact(&mut self, len: usize, additional: usize, elem_layout: Layout) {
         // SAFETY: Precondition passed to caller
@@ -741,6 +772,7 @@ impl<A: Allocator> RawVecInner<A> {
     /// - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
+    #[ferrocene::prevalidated]
     unsafe fn try_reserve_exact(
         &mut self,
         len: usize,
@@ -766,6 +798,7 @@ impl<A: Allocator> RawVecInner<A> {
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
     /// - `cap` must be less than or equal to `self.capacity(elem_layout.size())`
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     unsafe fn shrink_to_fit(&mut self, cap: usize, elem_layout: Layout) {
@@ -790,11 +823,13 @@ impl<A: Allocator> RawVecInner<A> {
         unsafe { self.shrink(cap, elem_layout) }
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     const fn needs_to_grow(&self, len: usize, additional: usize, elem_layout: Layout) -> bool {
         additional > self.capacity(elem_layout.size()).wrapping_sub(len)
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
     const unsafe fn set_ptr_and_cap(&mut self, ptr: NonNull<[u8]>, cap: usize) {
@@ -811,6 +846,7 @@ impl<A: Allocator> RawVecInner<A> {
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
     /// - The sum of `len` and `additional` must be greater than the current capacity
+    #[ferrocene::prevalidated]
     unsafe fn grow_exact(
         &mut self,
         len: usize,
@@ -838,6 +874,7 @@ impl<A: Allocator> RawVecInner<A> {
     ///   initially construct `self`
     /// - `elem_layout`'s size must be a multiple of its alignment
     /// - `cap` must be less than or equal to `self.capacity(elem_layout.size())`
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn shrink(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         assert!(cap <= self.capacity(elem_layout.size()), "Tried to shrink to a larger capacity");
@@ -856,6 +893,7 @@ impl<A: Allocator> RawVecInner<A> {
     /// # Safety
     /// - `cap <= self.capacity()`
     /// - `elem_layout` must be valid for `self`.
+    #[ferrocene::prevalidated]
     unsafe fn shrink_unchecked(
         &mut self,
         cap: usize,
@@ -906,6 +944,7 @@ const impl<A: [const] Allocator> RawVecInner<A> {
     /// after this function returns.
     /// Ideally this function would take `self` by move, but it cannot because it exists to be
     /// called from a `Drop` impl.
+    #[ferrocene::prevalidated]
     unsafe fn deallocate(&mut self, elem_layout: Layout) {
         // SAFETY: Caller ensures `elem_layout` is correct for `self`.
         if let Some((ptr, layout)) = unsafe { self.current_memory(elem_layout) } {
@@ -919,6 +958,7 @@ const impl<A: [const] Allocator> RawVecInner<A> {
 }
 
 // Central function for reserve error handling.
+#[ferrocene::prevalidated]
 #[cfg(not(no_global_oom_handling))]
 #[cold]
 #[optimize(size)]
@@ -930,6 +970,7 @@ const fn handle_error(e: TryReserveError) -> ! {
     }
 }
 
+#[ferrocene::prevalidated]
 #[inline]
 #[rustc_const_unstable(feature = "const_heap", issue = "79597")]
 const fn layout_array(cap: usize, elem_layout: Layout) -> Result<Layout, TryReserveError> {

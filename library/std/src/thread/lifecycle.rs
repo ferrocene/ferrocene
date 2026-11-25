@@ -13,6 +13,7 @@ use crate::sync::atomic::{Atomic, AtomicUsize, Ordering};
 use crate::sys::{AsInner, IntoInner, thread as imp};
 use crate::{env, io, panic};
 
+#[ferrocene::prevalidated]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 pub(super) unsafe fn spawn_unchecked<'scope, F, T>(
     name: Option<String>,
@@ -34,7 +35,11 @@ where
             n => return n - 1,
         }
 
-        let amt = env::var_os("RUST_MIN_STACK")
+        // Ferrocene modification: Users are not allowed to use RUST_MIN_STACK
+        // to modify the stack size. This is to reduce the certification effort.
+        #[expect(ferrocene::unvalidated)]
+        let rust_min_stack = env::var_os("RUST_MIN_STACK");
+        let amt = rust_min_stack
             .and_then(|s| s.to_str().and_then(|s| s.parse().ok()))
             .unwrap_or(imp::DEFAULT_MIN_STACK_SIZE);
 
@@ -113,6 +118,7 @@ where
         // Similarly, the `sys` implementation must guarantee that no references to the closure
         // exist after the thread has terminated, which is signaled by `Thread::join`
         // returning.
+        #[expect(ferrocene::unvalidated, reason = "defer validating platform specifics")]
         native: unsafe { imp::Thread::new(stack_size, init)? },
         thread,
         packet: my_packet,

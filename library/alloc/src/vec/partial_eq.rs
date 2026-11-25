@@ -5,6 +5,7 @@ use crate::borrow::Cow;
 
 macro_rules! __impl_slice_eq1 {
     ($($const:ident, )? [$($vars:tt)*] $lhs:ty, $rhs:ty $(where $ty:ty: $bound:ident)?, $(#[$stability:meta])+ ) => {
+        #[ferrocene::prevalidated]
         $(#[$stability])+
         $($const)? impl<T, U, $($vars)*> PartialEq<$rhs> for $lhs
         where

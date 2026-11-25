@@ -296,6 +296,7 @@ impl<T: ?Sized + Unsize<U>, U: ?Sized> DispatchFromDyn<Arc<U>> for Arc<T> {}
 unsafe impl<T: ?Sized> CloneFromCell for Arc<T> {}
 
 impl<T: ?Sized> Arc<T> {
+    #[ferrocene::prevalidated]
     unsafe fn from_inner(ptr: NonNull<ArcInner<T>>) -> Self {
         // SAFETY: Upheld by caller.
         unsafe { Self::from_inner_in(ptr, Global) }
@@ -308,6 +309,7 @@ impl<T: ?Sized> Arc<T> {
 }
 
 impl<T: ?Sized, A: Allocator> Arc<T, A> {
+    #[ferrocene::prevalidated]
     #[inline]
     fn into_inner_with_allocator(this: Self) -> (NonNull<ArcInner<T>>, A) {
         let this = mem::ManuallyDrop::new(this);
@@ -315,12 +317,14 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
         (this.ptr, unsafe { ptr::read(&this.alloc) })
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     unsafe fn from_inner_in(ptr: NonNull<ArcInner<T>>, alloc: A) -> Self {
         Self { ptr, phantom: PhantomData, alloc }
     }
 
     #[inline]
+    #[ferrocene::prevalidated]
     unsafe fn from_ptr_in(ptr: *mut ArcInner<T>, alloc: A) -> Self {
         // SAFETY: Upheld by caller.
         unsafe { Self::from_inner_in(NonNull::new_unchecked(ptr), alloc) }
@@ -407,6 +411,7 @@ struct ArcInner<T: ?Sized> {
 }
 
 /// Calculate layout for `ArcInner<T>` using the inner value's layout
+#[ferrocene::prevalidated]
 fn arcinner_layout_for_value_layout(layout: Layout) -> Layout {
     // Calculate layout using the given value layout.
     // Previously, layout was calculated on the expression
@@ -432,6 +437,7 @@ impl<T> Arc<T> {
     ///
     /// let five = Arc::new(5);
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
@@ -735,6 +741,7 @@ impl<T, A: Allocator> Arc<T, A> {
     ///
     /// assert_eq!(*five, 5)
     /// ```
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     #[unstable(feature = "allocator_ext", issue = "163177", implied_by = "allocator_api")]
     #[inline]
@@ -1166,6 +1173,7 @@ impl<T, A: Allocator> Arc<T, A> {
     /// x_thread.join().unwrap();
     /// y_thread.join().unwrap();
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "arc_into_inner", since = "1.70.0")]
     pub fn into_inner(this: Self) -> Option<T> {
@@ -1490,6 +1498,7 @@ impl<T, A: Allocator> Arc<mem::MaybeUninit<T>, A> {
     ///
     /// assert_eq!(*five, 5)
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "new_uninit", since = "1.82.0")]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[inline]
@@ -2219,6 +2228,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
         unsafe { drop(Arc::from_raw_in(ptr, alloc)) };
     }
 
+    #[ferrocene::prevalidated]
     #[inline]
     fn inner(&self) -> &ArcInner<T> {
         // SAFETY: While this arc is alive we're guaranteed
@@ -2230,6 +2240,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     }
 
     // Non-inlined part of `drop`.
+    #[ferrocene::prevalidated]
     #[inline(never)]
     unsafe fn drop_slow(&mut self) {
         // Drop the weak ref collectively held by all strong references when this
@@ -2277,6 +2288,7 @@ impl<T: ?Sized> Arc<T> {
     ///
     /// The function `mem_to_arcinner` is called with the data pointer
     /// and must return back a (potentially fat)-pointer for the `ArcInner<T>`.
+    #[ferrocene::prevalidated]
     #[cfg(not(no_global_oom_handling))]
     unsafe fn allocate_for_layout(
         value_layout: Layout,
@@ -2312,14 +2324,21 @@ impl<T: ?Sized> Arc<T> {
         Ok(inner)
     }
 
+    #[ferrocene::prevalidated]
     unsafe fn initialize_arcinner(
         ptr: NonNull<[u8]>,
         layout: Layout,
         mem_to_arcinner: impl FnOnce(*mut u8) -> *mut ArcInner<T>,
     ) -> *mut ArcInner<T> {
         let inner = mem_to_arcinner(ptr.as_non_null_ptr().as_ptr());
-        // SAFETY: Upheld by caller.
-        debug_assert_eq!(unsafe { Layout::for_value_raw(inner) }, layout);
+
+        // <Layout as Clone>::clone not being validated it a false-positive. It
+        // is validated, since the Layout struct is marked as prevalidated.
+        #[allow(ferrocene::unvalidated)]
+        {
+            // SAFETY: Upheld by caller.
+            debug_assert_eq!(unsafe { Layout::for_value_raw(inner) }, layout);
+        }
 
         // ignore-tidy-undocumented-unsafe
         unsafe {
@@ -2510,6 +2529,7 @@ impl<T: ?Sized, A: AllocatorClone> Clone for Arc<T, A> {
     ///
     /// let _ = Arc::clone(&five);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     fn clone(&self) -> Arc<T, A> {
         // Using a relaxed ordering is alright here, as knowledge of the
@@ -2555,6 +2575,7 @@ impl<T: ?Sized, A: AllocatorClone> UseCloned for Arc<T, A> {}
 #[unstable(feature = "share_trait", issue = "156756")]
 impl<T: ?Sized, A: AllocatorClone> Share for Arc<T, A> {}
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized, A: Allocator> Deref for Arc<T, A> {
     type Target = T;
@@ -2854,6 +2875,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     /// }
     /// println!("{}", &*x); // Use-after-free
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[unstable(feature = "get_mut_unchecked", issue = "63292")]
     pub unsafe fn get_mut_unchecked(this: &mut Self) -> &mut T {
@@ -2951,6 +2973,7 @@ impl<T: ?Sized, A: Allocator> Arc<T, A> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "rust1", since = "1.0.0")]
 unsafe impl<#[may_dangle] T: ?Sized, A: Allocator> Drop for Arc<T, A> {
     /// Drops the `Arc`.
@@ -3508,6 +3531,7 @@ impl<T: ?Sized, A: Allocator> Weak<T, A> {
 
     /// Returns `None` when the pointer is dangling and there is no allocated `ArcInner`,
     /// (i.e., when this `Weak` was created by `Weak::new`).
+    #[ferrocene::prevalidated]
     #[inline]
     fn inner(&self) -> Option<WeakInner<'_>> {
         let ptr = self.ptr.as_ptr();
@@ -3627,6 +3651,7 @@ impl<T> Default for Weak<T> {
     }
 }
 
+#[ferrocene::prevalidated]
 #[stable(feature = "arc_weak", since = "1.4.0")]
 unsafe impl<#[may_dangle] T: ?Sized, A: Allocator> Drop for Weak<T, A> {
     /// Drops the `Weak` pointer.

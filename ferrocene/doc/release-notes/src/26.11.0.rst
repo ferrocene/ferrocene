@@ -51,6 +51,10 @@ Changes
   vulnerabilities in libssh2. In order to prevent unexpected behavioral changes, the
   `net.git-fetch-with-cli` Cargo configuration option always defaults to true.
 
+  * As a result, fetching `git+ssh` dependencies now requires a git binary in `PATH`.
+    Discussions with the upstream Rust project suggest that this change aligns with
+    future plans for upstream Cargo releases.
+
 
 Bug fixes
 ---------

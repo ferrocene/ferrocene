@@ -127,12 +127,8 @@ Patch Releases
 
 In some cases, releases may require a patch to resolve outstanding security
 vulnerabilities or to address critical bugs. In order to publish a new release,
-certified code that's been certified
-
-
-If the changes affect qualified
-tools, then that will require re-qualification; if the changes affect certified
-code, then that will require re-certification.
+certified code that's been changed requires re-certification, and qualified
+tools that have been changed require re-qualification.
 
 Patch release process
 ~~~~~~~~~~~~~~~~~~~~~

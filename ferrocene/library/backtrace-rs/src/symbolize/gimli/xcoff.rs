@@ -103,10 +103,8 @@ impl<'a> Object<'a> {
     fn get_concrete_size(file: &XcoffFile<'a, Xcoff>, sym: &XcoffSymbol<'a, '_, Xcoff>) -> u64 {
         match sym.flags() {
             SymbolFlags::Xcoff {
-                n_sclass: _,
-                x_smtyp: _,
-                x_smclas: _,
                 containing_csect: Some(index),
+                ..
             } => {
                 if let Ok(tgt_sym) = file.symbol_by_index(index) {
                     Self::get_concrete_size(file, &tgt_sym)

@@ -291,8 +291,9 @@ pub fn init() -> Result<Init, ()> {
             }
         }
         debug_assert!(!lock.is_null());
-        let r = WaitForSingleObjectEx(lock, INFINITE, FALSE);
-        debug_assert_eq!(r, 0);
+        if WaitForSingleObject(lock, INFINITE) != 0 {
+            return Err(());
+        }
         let ret = Init { lock };
 
         // Ok, phew! Now that we're all safely synchronized, let's actually

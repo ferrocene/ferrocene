@@ -381,7 +381,23 @@ impl Cache {
         }
     }
 
-    fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {
+    /// "actual virtual memory address" to "stated virtual memory address"
+    ///
+    /// "Actual" means the memory address something in an object has been "actually" loaded at.
+    /// "Stated" means the memory address something is "stated" to be at in its object file.
+    /// Object formats like to pretend they get loaded near 0, so an SVMA can be a tiny integer.
+    /// The bias (as in "biased exponent") is the offset between AVMAs and SVMAs for an object,
+    /// and will be an integer multiple of the page size.
+    ///
+    /// In Rust terms, we are reverse-engineering this:
+    /// ```rust, ignore
+    /// let avma: *const T = bias.wrapping_byte_offset(svma);
+    /// ```
+    ///
+    /// This is a safe function, so we cannot simply use `avma.byte_offset_from(bias)`.
+    /// Even if we could, we want to instead give an actual answer that both identifies
+    /// the library by its index in Libraries, and then the SVMA in that library.
+    fn avma_to_lib_and_svma(&self, addr: *const u8) -> Option<(usize, usize)> {
         self.libraries
             .iter()
             .enumerate()
@@ -410,7 +426,7 @@ impl Cache {
                 // Now that we know `lib` contains `addr`, we can offset with
                 // the bias to find the stated virtual memory address.
                 let svma = (addr as usize).wrapping_sub(lib.bias);
-                Some((i, svma as *const u8))
+                Some((i, svma))
             })
             .next()
     }
@@ -452,39 +468,42 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
 
     unsafe {
         Cache::with_global(|cache| {
-            let (lib, addr) = match cache.avma_to_svma(addr.cast_const().cast::<u8>()) {
-                Some(pair) => pair,
-                None => return,
+            let Some((lib_idx, svma)) = cache.avma_to_lib_and_svma(addr.cast_const().cast::<u8>())
+            else {
+                return;
             };
 
             // Finally, get a cached mapping or create a new mapping for this file, and
             // evaluate the DWARF info to find the file/line/name for this address.
-            let (cx, stash) = match cache.mapping_for_lib(lib) {
+            let (cx, stash) = match cache.mapping_for_lib(lib_idx) {
                 Some((cx, stash)) => (cx, stash),
                 None => return,
             };
             let mut any_frames = false;
-            if let Ok(mut frames) = cx.find_frames(stash, addr as u64) {
+            if let Ok(mut frames) = cx.find_frames(stash, svma as u64) {
                 while let Ok(Some(frame)) = frames.next() {
                     any_frames = true;
                     let name = match frame.function {
                         Some(f) => Some(f.name.slice()),
-                        None => cx.object.search_symtab(addr as u64),
+                        None => cx.object.search_symtab(svma as u64),
                     };
                     call(Symbol::Frame {
-                        addr: addr as *mut c_void,
+                        addr: svma as *mut c_void,
                         location: frame.location,
                         name,
                     });
                 }
             }
             if !any_frames {
-                if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
+                if let Some((object_cx, object_addr)) = cx.object.search_object_map(svma as u64) {
                     if let Ok(mut frames) = object_cx.find_frames(stash, object_addr) {
                         while let Ok(Some(frame)) = frames.next() {
                             any_frames = true;
+
                             call(Symbol::Frame {
-                                addr: addr as *mut c_void,
+                                // Thinking of SVMAs as pointers is something we really should never do,
+                                // but this is stable API and we don't want to break this yet.
+                                addr: svma as *mut c_void,
                                 location: frame.location,
                                 name: frame.function.map(|f| f.name.slice()),
                             });
@@ -493,7 +512,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
                 }
             }
             if !any_frames {
-                if let Some(name) = cx.object.search_symtab(addr as u64) {
+                if let Some(name) = cx.object.search_symtab(svma as u64) {
                     call(Symbol::Symtab { name });
                 }
             }

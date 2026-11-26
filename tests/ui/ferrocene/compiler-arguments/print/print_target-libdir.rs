@@ -19,6 +19,7 @@
 //@ normalize-stdout: "thumbv8m.main-ferrocene.facade-eabihf" -> "$$TARGET"
 //@ normalize-stdout: "thumbv8m.main-ferrocene.facade-eabi" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-apple-darwin" -> "$$TARGET"
+//@ normalize-stdout: "aarch64-unknown-nto-qnx710_iosock" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-nto-qnx710" -> "$$TARGET"
 //@ normalize-stdout: "aarch64-unknown-qnx" -> "$$TARGET"
 

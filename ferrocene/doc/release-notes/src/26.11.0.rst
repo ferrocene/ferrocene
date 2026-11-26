@@ -81,8 +81,10 @@ Fixed known problems
 --------------------
 
 A list of fixed known problems in this release can be found on the
-`Ferrocene 26.11 Known Problems <https://problems.ferrocene.dev/versions/26.11.html>`_
-page.
+Ferrocene 26.11 Known Problems website. There are now separate pages for
+`rustc <https://problems.ferrocene.dev/product/dev.ferrocene.release.26.11.rustc.html>`_ and
+`core <https://problems.ferrocene.dev/product/dev.ferrocene.release.26.11.core.html>`_.
+
 
 
 Rust changes

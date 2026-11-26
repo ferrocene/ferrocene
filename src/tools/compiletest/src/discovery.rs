@@ -2,6 +2,7 @@ use core::panic;
 use std::collections::HashSet;
 use std::io::{self, ErrorKind};
 use std::sync::Arc;
+use std::sync::mpsc::Sender;
 use std::time::SystemTime;
 use std::{fs, vec};
 
@@ -188,12 +189,36 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
     Ok(full_paths)
 }
 
+// Added to allow reuse by custom Ferrocene code
+#[derive(Clone)]
+enum TestHandler<'a> {
+    Sender(Sender<TestPaths>),
+    Cx(&'a TestCollectorCx),
+}
+
 /// Recursively scans a directory to find test files and create test structures
 /// that will be handed over to the executor.
 fn collect_tests_from_dir(
     cx: &TestCollectorCx,
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,
+) -> io::Result<TestCollector> {
+    find_tests_in_dir(
+        cx.config.clone(),
+        dir,
+        relative_dir_path,
+        &cx.modified_tests,
+        TestHandler::Cx(cx),
+    )
+}
+
+// Added to allow reuse by custom Ferrocene code
+fn find_tests_in_dir(
+    config: Arc<Config>,
+    dir: &Utf8Path,
+    relative_dir_path: &Utf8Path,
+    modified_tests: &Vec<Utf8PathBuf>,
+    handler: TestHandler<'_>,
 ) -> io::Result<TestCollector> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
@@ -206,26 +231,29 @@ fn collect_tests_from_dir(
         && let Some(Utf8Component::Normal(parent)) = components.next()
         && parent == "tests"
         && let Ok(backend) = backend.parse::<CodegenBackend>()
-        && backend != cx.config.default_codegen_backend
+        && backend != config.default_codegen_backend
     {
         // We ignore asm tests which don't match the current codegen backend.
         warning!(
             "Ignoring tests in `{dir}` because they don't match the configured codegen \
              backend (`{}`)",
-            cx.config.default_codegen_backend.as_str(),
+            config.default_codegen_backend.as_str(),
         );
         return Ok(TestCollector::new());
     }
 
     // For run-make tests, a "test file" is actually a directory that contains an `rmake.rs`.
-    if cx.config.mode == TestMode::RunMake {
+    if config.mode == TestMode::RunMake {
         let mut collector = TestCollector::new();
         if dir.join("rmake.rs").exists() {
             let paths = TestPaths {
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
             };
-            make_test(cx, &mut collector, &paths);
+            match &handler {
+                TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+            }
             // This directory is a test, so don't try to find other tests inside it.
             return Ok(collector);
         }
@@ -237,7 +265,7 @@ fn collect_tests_from_dir(
     // sequential loop because otherwise, if we do it in the
     // tests themselves, they race for the privilege of
     // creating the directories and sometimes fail randomly.
-    let build_dir = output_relative_path(&cx.config, relative_dir_path);
+    let build_dir = output_relative_path(&config, relative_dir_path);
     fs::create_dir_all(&build_dir).unwrap();
 
     // Add each `.rs` file as a test, and recurse further on any
@@ -252,8 +280,7 @@ fn collect_tests_from_dir(
             let file_path = Utf8PathBuf::try_from(file.path()).unwrap();
             let file_name = file_path.file_name().unwrap();
 
-            if is_test(file_name)
-                && (!cx.config.only_modified || cx.modified_tests.contains(&file_path))
+            if is_test(file_name) && (!config.only_modified || modified_tests.contains(&file_path))
             {
                 // We found a test file, so create the corresponding test structures.
                 debug!(%file_path, "found test file");
@@ -264,13 +291,22 @@ fn collect_tests_from_dir(
 
                 let paths =
                     TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
-                make_test(cx, &mut collector, &paths);
+                match &handler {
+                    TestHandler::Sender(tx) => tx.send(paths).unwrap(),
+                    TestHandler::Cx(cx) => make_test(cx, &mut collector, &paths),
+                }
             } else if file_path.is_dir() {
                 // Recurse to find more tests in a subdirectory.
                 let relative_file_path = relative_dir_path.join(file_name);
                 if file_name != "auxiliary" {
                     debug!(%file_path, "found directory");
-                    collector.merge(collect_tests_from_dir(cx, &file_path, &relative_file_path)?);
+                    collector.merge(find_tests_in_dir(
+                        config.clone(),
+                        &file_path,
+                        &relative_file_path,
+                        modified_tests,
+                        handler.clone(),
+                    )?);
                 }
             } else {
                 debug!(%file_path, "found other file/directory");

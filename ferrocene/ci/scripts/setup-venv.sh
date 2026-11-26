@@ -4,18 +4,21 @@
 
 set -xeuo pipefail
 
-if command -v uv &> /dev/null; then
-    echo "uv was already installed, skipping"
-    exit 0
+if ! command -v uv &> /dev/null; then
+    curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
 fi
 
-curl -LsSf https://astral.sh/uv/0.4.3/install.sh | sh
+if [[ -d $HOME/.cargo ]]; then
+    source $HOME/.cargo/env
+    echo "source $HOME/.cargo/env" >> $BASH_ENV
+fi
 
-source $HOME/.cargo/env
-echo "source $HOME/.cargo/env" >> $BASH_ENV
+uv venv --python 3.12 ~/.venv
 
-uv venv ~/.venv
-if [[ "${OSTYPE}" = "msys" ]]; then
+parent=$(cd $(dirname $0) && pwd)
+source "$parent/../../../src/ci/shared.sh"
+
+if isWindows; then
     source ~/.venv/Scripts/activate
     echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
 else

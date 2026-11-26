@@ -786,7 +786,6 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -821,7 +820,6 @@ jobs:
       - when:
           condition: << parameters.rebuild >>
           steps:
-            - aws-cli/install
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
@@ -1712,6 +1710,10 @@ commands:
             # Some versions of AWS CLI fail if `less` is not installed, so
             # disable pager support to suppress the error.
             set_env AWS_PAGER ""
+
+      - aws-cli/install:
+          version: 2.35.11
+          override_installed: true
 
       - run:
           name: Authenticate with AWS

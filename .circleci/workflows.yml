@@ -435,8 +435,8 @@ jobs:
 
   aarch64-darwin-llvm:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin
@@ -450,9 +450,9 @@ jobs:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
           steps:
             - ferrocene-checkout
+            - aws-oidc-auth
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
             - setup-uv
-            - aws-oidc-auth
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -460,8 +460,8 @@ jobs:
 
   aarch64-darwin-build:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -475,8 +475,8 @@ jobs:
 
   aarch64-darwin-dist:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -491,8 +491,8 @@ jobs:
 
   aarch64-darwin-dist-tools:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.large # 12 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
@@ -506,24 +506,24 @@ jobs:
 
   aarch64-darwin-self-test:
     macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.medium.gen1 # 4 cores
+      xcode: "15.4.0"
+    resource_class: m4pro.medium # 6 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
+      - aws-oidc-auth
       - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - setup-uv
-      - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
   aarch64-darwin-generic-test-runner:
     macos:
-      xcode: "15.3.0"
+      xcode: "15.4.0"
     parameters:
       job:
         type: string
@@ -1092,25 +1092,25 @@ workflows:
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.large # 12 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library
           job: test:library
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.large # 12 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-compiletest
           job: test:compiletest
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.large # 12 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library-std
           job: test:library-std
-          resource-class: macos.m1.large.gen1 # 8 cores
+          resource-class: m4pro.large # 12 cores
           requires:
             - aarch64-darwin-build
       - aarch64-darwin-self-test:
@@ -1173,6 +1173,7 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: true
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1184,7 +1185,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -1214,6 +1214,7 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
@@ -1225,7 +1226,6 @@ commands:
           steps:
             - ferrocene-setup-windows
       - setup-uv
-      - aws-oidc-auth
       - when:
           condition:  <<parameters.restore-from-job>>
           steps:
@@ -1250,13 +1250,13 @@ commands:
     steps:
       - ferrocene-checkout:
           llvm-subset: true
+      - aws-oidc-auth
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
       - setup-uv
-      - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1399,6 +1399,7 @@ commands:
     steps:
       - run:
           name: Setup Darwin environment
+          no_output_timeout: 30m
           command: ferrocene/ci/scripts/setup-darwin.sh
 
 
@@ -1524,6 +1525,10 @@ commands:
             # Some versions of AWS CLI fail if `less` is not installed, so
             # disable pager support to suppress the error.
             set_env AWS_PAGER ""
+
+      - aws-cli/install:
+          version: 2.35.11
+          override_installed: true
 
       - run:
           name: Authenticate with AWS

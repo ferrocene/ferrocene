@@ -259,6 +259,7 @@ path = [
     "src/bootstrap/src/ferrocene/**",
     "ferrocene/doc/core-certification/src/spreadsheets/*",
     "ferrocene/doc/core-certification/src/_static/**",
+    "ferrocene/patches/**",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "The Ferrocene Developers"

@@ -255,11 +255,11 @@ pub(crate) fn create_object_file(sess: &Session) -> Option<write::Object<'static
         let os_abi = elf_os_abi(sess);
         let abi_version = 0;
         // Ferrocene change:
-        // aarch64-unknown_nto_qnx710 uses GNU LD 2.32, and that version does not
+        // aarch64-unknown_nto_qnx710* uses GNU LD 2.32, and that version does not
         // support the linker section added here.
         // Adding the section makes the linker emit warnings.
-        let is_aarch64_qnx71 =
-            (architecture == Architecture::Aarch64) && (sess.target.env == Env::Nto71);
+        let is_aarch64_qnx71 = (architecture == Architecture::Aarch64)
+            && (sess.target.env == Env::Nto71 || sess.target.env == Env::Nto71IoSock);
         if !is_aarch64_qnx71 {
             add_gnu_property_note(&mut file, architecture, endianness);
         }

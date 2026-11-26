@@ -30,9 +30,9 @@ What Changed?
 -------------
 
 In Ferrocene 25.08.1, libssh2 has been entirely removed from the Cargo binary.
-In addition, `net.git-fetch-with-cli` now always defaults to true.
+In addition, ``net.git-fetch-with-cli`` now always defaults to true.
 
-As a result, fetching `git+ssh` dependencies now requires a git binary in `PATH`.
+As a result, fetching ``git+ssh`` dependencies now requires a git binary in ``PATH``.
 Discussions with the upstream Rust project suggest that this change aligns with
 future plans for upstream Cargo releases.
 

@@ -1,0 +1,40 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+Ferrocene 25.05.1
+=================
+
+This is a security release that disables libssh2 in the included Cargo
+distribution to mitigate against several libssh2 vulnerabilities. Notably,
+`CVE-2026-55200`_ and `CVE-2026-66034`_ expose clients to remote code execution
+from malicious servers.
+
+While Ferrocene customers are encouraged to only use trusted remote git servers
+for their dependencies, we still recommend customers to update to this security
+release.
+
+.. _CVE-2026-55200: https://nvd.nist.gov/vuln/detail/cve-2026-55200
+.. _CVE-2026-66034: https://nvd.nist.gov/vuln/detail/cve-2026-66034
+
+Background
+----------
+
+In Ferrocene and the upstream Rust toolchain, Cargo is distributed with a
+statically linked version of libssh2 as a dependency of libgit2 (which is also
+statically linked into Cargo).
+
+The Cargo distributed with Ferrocene 25.05.0, which is based on the upstream
+1.86.0 release, includes libssh2 v1.11.1.
+
+What Changed?
+-------------
+
+In Ferrocene 25.05.1, libssh2 has been entirely removed from the Cargo binary.
+In addition, ``net.git-fetch-with-cli`` now always defaults to true.
+
+As a result, fetching ``git+ssh`` dependencies now requires a git binary in ``PATH``.
+Discussions with the upstream Rust project suggest that this change aligns with
+future plans for upstream Cargo releases.
+
+There should be no observed behavioral differences for Ferrocene customers
+upgrading from Ferrocene 25.05.0 to 25.05.1.

@@ -8,3 +8,6 @@ impl S {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime elision

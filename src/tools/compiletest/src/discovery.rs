@@ -42,7 +42,7 @@ pub(crate) fn discover_tests(config: &Arc<Config>) -> Vec<CollectedTest> {
 }
 
 /// Read-only context data used during test collection.
-struct TestCollectorCx {
+pub(crate) struct TestCollectorCx {
     config: Arc<Config>,
     cache: DirectivesCache,
     common_inputs_stamp: Stamp,
@@ -50,7 +50,7 @@ struct TestCollectorCx {
 }
 
 /// Mutable state used during test collection.
-struct TestCollector {
+pub(crate) struct TestCollector {
     tests: Vec<CollectedTest>,
     found_path_stems: HashSet<Utf8PathBuf>,
     poisoned: bool,
@@ -191,7 +191,7 @@ fn modified_tests(config: &Config, dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>, S
 
 // Added to allow reuse by custom Ferrocene code
 #[derive(Clone)]
-enum TestHandler<'a> {
+pub(crate) enum TestHandler<'a> {
     Sender(Sender<TestPaths>),
     Cx(&'a TestCollectorCx),
 }
@@ -213,7 +213,7 @@ fn collect_tests_from_dir(
 }
 
 // Added to allow reuse by custom Ferrocene code
-fn find_tests_in_dir(
+pub(crate) fn find_tests_in_dir(
     config: Arc<Config>,
     dir: &Utf8Path,
     relative_dir_path: &Utf8Path,

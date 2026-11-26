@@ -12,7 +12,7 @@ use std::sync::mpsc::channel;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::common::{Config, TestMode, TestPaths};
-use crate::{TestHandler, find_tests_in_dir};
+use crate::discovery::{TestHandler, find_tests_in_dir};
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
 
@@ -180,6 +180,9 @@ fn sample_config() -> Config {
         host_compile_lib_path: Utf8PathBuf::default(),
         target_run_lib_path: Utf8PathBuf::default(),
         rustc_path: Utf8PathBuf::default(),
+        rustc_lint_driver_path: Default::default(),
+        rustc_lint_driver_lib_path: Default::default(),
+        rustc_lint_driver_sysroot: Default::default(),
         cargo_path: Default::default(),
         stage0_rustc_path: Default::default(),
         rustdoc_path: Default::default(),

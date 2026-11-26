@@ -51,6 +51,7 @@ dependencies = [
  "clap_complete",
  "cmake",
  "fd-lock",
+ "getrandom",
  "home",
  "ignore",
  "insta",

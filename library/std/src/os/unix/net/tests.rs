@@ -499,6 +499,9 @@ fn test_abstract_datagram_bind_send_to_addr() {
     assert_eq!(addr.as_abstract_name().unwrap(), b"ns1");
 }
 
+/// Ferrocene addition: disabled temporarily when coverage instrumentation
+/// enabled as it times out the test suite
+#[cfg(not(ferrocene_coverage))]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_abstract_datagram_connect_addr() {

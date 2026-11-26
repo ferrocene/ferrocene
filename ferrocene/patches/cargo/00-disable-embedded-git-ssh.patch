@@ -1,0 +1,47 @@
+Submodule src/tools/cargo contains modified content
+diff --git a/src/tools/cargo/Cargo.lock b/src/tools/cargo/Cargo.lock
+index a720ed6bf..b707c31a6 100644
+--- a/src/tools/cargo/Cargo.lock
++++ b/src/tools/cargo/Cargo.lock
+@@ -2781,7 +2781,6 @@ checksum = "c9b3acc4b91781bb0b3386669d325163746af5f6e4f73e6d2d630e09a35f3487"
+ dependencies = [
+  "cc",
+  "libc",
+- "libssh2-sys",
+  "libz-sys",
+  "openssl-sys",
+  "pkg-config",
+@@ -2829,20 +2828,6 @@ dependencies = [
+  "vcpkg",
+ ]
+
+-[[package]]
+-name = "libssh2-sys"
+-version = "0.3.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "220e4f05ad4a218192533b300327f5150e809b54c4ec83b5a1d91833601811b9"
+-dependencies = [
+- "cc",
+- "libc",
+- "libz-sys",
+- "openssl-sys",
+- "pkg-config",
+- "vcpkg",
+-]
+-
+ [[package]]
+ name = "libz-sys"
+ version = "1.1.23"
+diff --git a/src/tools/cargo/Cargo.toml b/src/tools/cargo/Cargo.toml
+index d3c86cef7..97a101992 100644
+--- a/src/tools/cargo/Cargo.toml
++++ b/src/tools/cargo/Cargo.toml
+@@ -47,7 +47,7 @@ curl = "0.4.49"
+ curl-sys = "=0.4.83"
+ filetime = "0.2.26"
+ flate2 = { version = "1.1.9", default-features = false, features = ["zlib-rs"] }
+-git2 = "0.20.4"
++git2 = { version = "0.20.4", default-features = false, features = ["https"] }
+ git2-curl = "0.21.0"
+ # When updating this, also see if `gix-transport` further down needs updating or some auth-related tests will fail.
+ gix = { version = "0.79.0", default-features = false, features = ["progress-tree", "parallel", "dirwalk", "status"] }

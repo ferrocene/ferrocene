@@ -457,15 +457,11 @@ pub const trait Iterator {
     /// assert_eq!(iter.next(), Some(4));
     /// assert_eq!(iter.next(), None);
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_step_by", since = "1.28.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_step_by"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn step_by(self, step: usize) -> StepBy<Self>
     where
         Self: Sized,
@@ -655,15 +651,11 @@ pub const trait Iterator {
     /// [`enumerate`]: Iterator::enumerate
     /// [`next`]: Iterator::next
     /// [`zip`]: crate::iter::zip
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_zip"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn zip<U>(self, other: U) -> Zip<Self, U::IntoIter>
     where
         Self: Sized,
@@ -910,15 +902,11 @@ pub const trait Iterator {
     ///       .filter(|&(i, x)| (i + x) % 3 == 0)
     ///       .for_each(|(i, x)| println!("{i}:{x}"));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_for_each", since = "1.21.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_for_each"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn for_each<F>(self, f: F)
     where
         Self: Sized,
@@ -1585,15 +1573,11 @@ pub const trait Iterator {
     ///                           .collect();
     /// assert_eq!(merged, "alphabetagamma");
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_flat_map"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>
     where
         Self: Sized,
@@ -2609,15 +2593,11 @@ pub const trait Iterator {
     /// });
     /// assert_eq!(r, ControlFlow::Break(17));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "iterator_try_fold", since = "1.27.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_try_for_each"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn try_for_each<F, R>(&mut self, f: F) -> R
     where
         Self: Sized,
@@ -2965,15 +2945,11 @@ pub const trait Iterator {
     /// // we can still use `iter`, as there are more elements.
     /// assert_eq!(iter.next(), Some(2));
     /// ```
+    #[ferrocene::prevalidated]
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     #[rustc_non_const_trait_method]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-||||||| b0b600668bb
-=======
     #[rustc_diagnostic_item = "iter_any"]
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
     fn any<F>(&mut self, f: F) -> bool
     where
         Self: Sized,

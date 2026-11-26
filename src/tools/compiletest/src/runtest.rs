@@ -263,12 +263,7 @@ enum Emit {
     LinkArgsAsm,
 }
 
-<<<<<<< ferrocene/main
-||||||| b0b600668bb
-/// Indicates whether we are using `rustc` or `rustdoc` to compile an input file.
-=======
 /// Indicates whether we are using `rustc`, `rustdoc` or `compiletest-lint-driver`` to compile an input file.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CompilerKind {
     Rustc,

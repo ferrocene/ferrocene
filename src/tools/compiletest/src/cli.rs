@@ -11,15 +11,10 @@ use clap::Parser;
 
 use crate::common::{CodegenBackend, CompareMode, Config, ForcePassMode, TestMode, TestSuite};
 use crate::edition::Edition;
-<<<<<<< ferrocene/main
-use crate::{debuggers, directives, early_config_check, ferrocene_annotations, run_tests};
-||||||| b0b600668bb
-use crate::{debuggers, directives, early_config_check, run_tests};
-=======
 use crate::{
-    debuggers, directives, discovery, executor, help, panic_hook, raise_fd_limit, warning,
+    debuggers, directives, discovery, executor, ferrocene_annotations, help, panic_hook,
+    raise_fd_limit, warning,
 };
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 
 pub fn main() {
     // sadly osx needs some file descriptor limits raised for running tests in

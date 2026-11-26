@@ -386,7 +386,6 @@ fn test_fmt() {
     assert_eq!(format!("{:?}", ..=1), "..=1");
     assert_eq!(format!("{:?}", ..), "..");
 }
-<<<<<<< ferrocene/main
 
 #[test]
 fn test_closure_impl_for_refs() {
@@ -397,8 +396,6 @@ fn test_closure_impl_for_refs() {
     calls_closure(&(|x: i32| x), 0);
     calls_closure(&core::convert::identity::<i32>, 0);
 }
-||||||| b0b600668bb
-=======
 
 #[test]
 fn test_range_intersect() {
@@ -482,4 +479,3 @@ fn test_range_intersect() {
         (Included(1), Excluded(5)),
     );
 }
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream

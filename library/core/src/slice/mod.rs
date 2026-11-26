@@ -1394,19 +1394,13 @@ impl<T> [T] {
     /// // let chunks: &[[_; 5]] = slice.as_chunks_unchecked() // The slice length is not a multiple of 5
     /// // let chunks: &[[_; 0]] = slice.as_chunks_unchecked() // Zero-length chunks are never allowed
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[inline]
     #[must_use]
     #[track_caller]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    pub const unsafe fn as_chunks_unchecked<#[rustc_panics_when_zero] const N: usize>(
-||||||| b0b600668bb
-    pub const unsafe fn as_chunks_unchecked<#[rustc_panics_when_zero] const N: usize>(
-=======
     pub const unsafe fn as_chunks_unchecked<#[lint::panics_when_zero] const N: usize>(
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         &self,
     ) -> &[[T; N]] {
         assert_unsafe_precondition!(
@@ -1461,19 +1455,13 @@ impl<T> [T] {
     /// };
     /// assert_eq!(chunks, &[['R', 'u'], ['s', 't']]);
     /// ```
+    #[ferrocene::prevalidated]
     #[stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[rustc_const_stable(feature = "slice_as_chunks", since = "1.88.0")]
     #[inline]
     #[track_caller]
     #[must_use]
-<<<<<<< ferrocene/main
-    #[ferrocene::prevalidated]
-    pub const fn as_chunks<#[rustc_panics_when_zero] const N: usize>(&self) -> (&[[T; N]], &[T]) {
-||||||| b0b600668bb
-    pub const fn as_chunks<#[rustc_panics_when_zero] const N: usize>(&self) -> (&[[T; N]], &[T]) {
-=======
     pub const fn as_chunks<#[lint::panics_when_zero] const N: usize>(&self) -> (&[[T; N]], &[T]) {
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
         assert!(N != 0, "chunk size must be non-zero");
         let len_rounded_down = self.len() / N * N;
         // SAFETY: The rounded-down value is always the same or smaller than the

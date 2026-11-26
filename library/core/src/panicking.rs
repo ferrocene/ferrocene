@@ -495,14 +495,8 @@ pub const fn panic_default_msg() -> ! {
     panic("explicit panic")
 }
 
-<<<<<<< ferrocene/main
-// unreachable!() without args expands to this, to generate slightly less code
-#[ferrocene::prevalidated]
-||||||| b0b600668bb
-// unreachable!() without args expands to this, to generate slightly less code
-=======
 /// `unreachable!()` without args expands to this, to generate slightly less code.
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
+#[ferrocene::prevalidated]
 #[cfg_attr(not(panic = "immediate-abort"), inline(never), cold)]
 #[cfg_attr(panic = "immediate-abort", inline)]
 #[track_caller]

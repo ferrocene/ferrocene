@@ -9,14 +9,10 @@
 //@ [NonLeaf] ignore-x86_64-apple-darwin
 //@ [NonLeaf] ignore-windows-gnu
 //@ [NonLeaf] ignore-thumb
-<<<<<<< ferrocene/main
 //@ [NonLeaf] ignore-armv7r (ferrocene addition) not supported by this architecture
-||||||| b0b600668bb
-=======
 // On s390x, -Cforce-frame-pointers emits `"backchain"` not `"frame-pointer"`.
 // Since this test passes -Zunstable-options globally, it must be skipped on s390x.
 //@ ignore-s390x
->>>>>>> rust-lang/rust/HEAD--generated-by-pull-upstream
 // result is platform-dependent based on platform's frame pointer settings
 
 #![crate_type = "lib"]

@@ -319,22 +319,8 @@ pub const trait Iterator {
             fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;
         }
 
-<<<<<<< ferrocene/release/1.101
-        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
-        const impl<I: [const] Iterator + ?Sized> SpecAdvanceBy for I
-        where
-            I::Item: [const] Destruct,
-        {
-            #[ferrocene::prevalidated]
-||||||| f47eed4a8d1
-        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
-        const impl<I: [const] Iterator + ?Sized> SpecAdvanceBy for I
-        where
-            I::Item: [const] Destruct,
-        {
-=======
         impl<I: Iterator + ?Sized> SpecAdvanceBy for I {
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+            #[ferrocene::prevalidated]
             default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 for i in 0..n {
                     if self.next().is_none() {
@@ -346,22 +332,8 @@ pub const trait Iterator {
             }
         }
 
-<<<<<<< ferrocene/release/1.101
-        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
-        const impl<I: [const] Iterator> SpecAdvanceBy for I
-        where
-            I::Item: [const] Destruct,
-        {
-            #[ferrocene::prevalidated]
-||||||| f47eed4a8d1
-        #[rustc_const_unstable(feature = "const_iter", issue = "92476")]
-        const impl<I: [const] Iterator> SpecAdvanceBy for I
-        where
-            I::Item: [const] Destruct,
-        {
-=======
         impl<I: Iterator> SpecAdvanceBy for I {
->>>>>>> rust-lang/rust/beta--generated-by-pull-upstream
+            #[ferrocene::prevalidated]
             fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {
                 let Some(n) = NonZero::new(n) else {
                     return Ok(());

@@ -108,7 +108,7 @@ impl Step for SphinxVirtualEnv {
         BootstrapCommand::from(venv.cmd("pip"))
             .args(&["install", "--require-hashes", "-r"])
             .arg(&requirements)
-            .run(builder);
+            .run_retry(builder);
         builder.copy_link(&requirements, &installed_requirements);
 
         venv

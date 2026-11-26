@@ -64,6 +64,7 @@ xz2 = "0.1"
 
 # Dependencies needed by the build-metrics feature
 sysinfo = { version = "0.31.2", default-features = false, optional = true, features = ["system"] }
+rand = "0.8"
 
 [target.'cfg(windows)'.dependencies.junction]
 version = "1.0.0"
@@ -87,7 +88,3 @@ pretty_assertions = "1.4"
 # dependencies, only bootstrap itself.
 [profile.dev]
 debug = 0
-
-[profile.dev.package]
-# Only use debuginfo=1 to further reduce compile times.
-bootstrap.debug = 1

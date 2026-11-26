@@ -117,6 +117,12 @@ fn main() -> Result<(), String> {
 
     println!("Running HTML checker...");
 
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(6)
+        .use_current_thread()
+        .build_global()
+        .map_err(|err| format!("{err}"))?;
+
     let (files_read, errors) = find_all_html_files(&Path::new(&args[1]));
     println!("Done! Read {} files...", files_read);
     if errors > 0 {

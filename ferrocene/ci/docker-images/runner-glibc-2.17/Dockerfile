@@ -152,7 +152,8 @@ RUN yum -y install \
     binutils \
     procps-ng \
     perl-core \
-    shadow-utils
+    shadow-utils \
+    ssh-pass
 
 # Install a recent NodeJS version, as the one shipped in Centos 7 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most

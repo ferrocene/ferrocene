@@ -745,6 +745,11 @@ jobs:
           source-env-script: true
       - ferrocene/restore_from_job:
           from_job: x86_64-linux-build
+      # this needs to be blocking; `background: true` results in a race condition with
+      # the next step over locking the `/build` directory
+      - run:
+          name: Build remote test server
+          command: ./x build src/tools/remote-test-server --target aarch64-unknown-nto-qnx710_iosock
       - run:
           name: Execute remote-test-server in the background
           background: true

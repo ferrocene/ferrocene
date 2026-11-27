@@ -5,6 +5,13 @@
 //@ rustc-env:RUST_BACKTRACE=0
 //@ failure-status: 101
 //
+// Ferrocene addition: The failing query stack in this test differs between panic=unwind and
+// panic=abort configurations, leading to a different set of error messages
+//
+//@ revisions: unwind abort
+//@ [unwind] needs-unwind
+//@ [abort] compile-flags: -C panic=abort
+//
 // Normalize the emitted location so this doesn't need
 // updating everytime someone adds or removes a line.
 //@ normalize-stderr: ".rs:\d+:\d+" -> ".rs:LL:CC"

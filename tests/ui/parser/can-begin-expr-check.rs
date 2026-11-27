@@ -16,7 +16,7 @@ pub fn main() {
         return break as ();
     }
 
-    return enum; //~ ERROR expected one of `;`, `}`, or an operator, found keyword `enum`
+    return enum; //~ ERROR expected one of `.`, `;`, `?`, `}`, or an operator, found keyword `enum`
 }
 
 // ferrocene-annotations: fls_8l74abhlxzdl

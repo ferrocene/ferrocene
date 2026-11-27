@@ -1515,7 +1515,7 @@ mod snapshot {
     #[test]
     fn check_compiler_no_explicit_stage() {
         let ctx = TestCtx::new();
-        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (77 crates)"]
+        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (78 crates)"]
             .assert_eq(&ctx.config("check").path("compiler").render_steps());
     }
 
@@ -1536,7 +1536,7 @@ mod snapshot {
     #[test]
     fn check_compiler_stage_1() {
         let ctx = TestCtx::new();
-        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (77 crates)"]
+        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (78 crates)"]
             .assert_eq(&ctx.config("check").path("compiler").stage(1).render_steps());
     }
 
@@ -1547,7 +1547,7 @@ mod snapshot {
             [build] llvm <host>
             [build] rustc 0 <host> -> rustc 1 <host>
             [build] rustc 1 <host> -> std 1 <host>
-            [check] rustc 1 <host> -> rustc 2 <host> (77 crates)"#]]
+            [check] rustc 1 <host> -> rustc 2 <host> (78 crates)"#]]
         .assert_eq(&ctx.config("check").path("compiler").stage(2).render_steps());
     }
 
@@ -1559,7 +1559,7 @@ mod snapshot {
             [build] rustc 0 <host> -> rustc 1 <host>
             [build] rustc 1 <host> -> std 1 <host>
             [check] rustc 1 <host> -> std 1 <target1>
-            [check] rustc 1 <host> -> rustc 2 <target1> (77 crates)
+            [check] rustc 1 <host> -> rustc 2 <target1> (78 crates)
             [check] rustc 1 <host> -> rustc 2 <target1>
             [check] rustc 1 <host> -> Rustdoc 2 <target1>
             [check] rustc 1 <host> -> Clippy 2 <target1>
@@ -1638,7 +1638,7 @@ mod snapshot {
         expect_test::expect![[""]]
             .assert_eq(&ctx.config("check").paths(&["library"]).args(&args).render_steps());
 
-        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (77 crates)"].assert_eq(
+        expect_test::expect!["[check] rustc 0 <host> -> rustc 1 <host> (78 crates)"].assert_eq(
             &ctx.config("check").paths(&["library", "compiler"]).args(&args).render_steps(),
         );
     }
@@ -1751,6 +1751,7 @@ mod snapshot {
             [test] compiletest-assembly-llvm 1 <host>
             [test] compiletest-incremental 1 <host>
             [test] compiletest-debuginfo 1 <host>
+            [build] rustc 0 <host> -> CompiletestLintDriver 1 <host>
             [test] compiletest-ui-fulldeps 1 <host>
             [build] rustdoc 1 <host>
             [test] compiletest-rustdoc-html 1 <host>
@@ -1827,6 +1828,7 @@ mod snapshot {
             [build] rustc 1 <host> -> std 1 <host>
             [build] rustc 0 <host> -> Compiletest 1 <host>
             [test] compiletest-ui 1 <host>
+            [build] rustc 0 <host> -> CompiletestLintDriver 1 <host>
             [test] compiletest-ui-fulldeps 1 <host>
             [build] rustc 0 <host> -> RunMakeSupport 1 <host>
             [build] rustdoc 1 <host>
@@ -1861,6 +1863,7 @@ mod snapshot {
             [build] rustc 0 <host> -> Compiletest 1 <host>
             [test] compiletest-ui 2 <host>
             [build] rustc 2 <host> -> rustc 3 <host>
+            [build] rustc 2 <host> -> CompiletestLintDriver 3 <host>
             [test] compiletest-ui-fulldeps 2 <host>
             [build] rustc 0 <host> -> RunMakeSupport 1 <host>
             [build] rustdoc 2 <host>
@@ -1899,6 +1902,8 @@ mod snapshot {
             [test] compiletest-ui 2 <target1>
             [build] llvm <target1>
             [build] rustc 2 <host> -> rustc 3 <target1>
+            [build] rustc 2 <host> -> rustc 3 <host>
+            [build] rustc 2 <host> -> CompiletestLintDriver 3 <host>
             [test] compiletest-ui-fulldeps 2 <target1>
             [build] rustc 0 <host> -> RunMakeSupport 1 <host>
             [build] rustdoc 2 <host>
@@ -1948,6 +1953,7 @@ mod snapshot {
             [test] compiletest-incremental 2 <host>
             [test] compiletest-debuginfo 2 <host>
             [build] rustc 2 <host> -> rustc 3 <host>
+            [build] rustc 2 <host> -> CompiletestLintDriver 3 <host>
             [test] compiletest-ui-fulldeps 2 <host>
             [build] rustdoc 2 <host>
             [test] compiletest-rustdoc-html 2 <host>
@@ -2746,7 +2752,7 @@ mod snapshot {
     #[test]
     fn fix_compiler() {
         let ctx = TestCtx::new();
-        expect_test::expect!["[fix] rustc 0 <host> -> rustc 1 <host> (77 crates)"]
+        expect_test::expect!["[fix] rustc 0 <host> -> rustc 1 <host> (78 crates)"]
             .assert_eq(&ctx.config("fix").path("compiler").render_steps());
     }
 }

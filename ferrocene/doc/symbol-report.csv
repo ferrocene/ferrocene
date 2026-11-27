@@ -1652,7 +1652,6 @@
 <core::fmt::FormattingOptions as core::cmp::Eq>::assert_fields_are_eq
 <core::fmt::FormattingOptions as core::cmp::PartialEq>::eq
 <core::fmt::FormattingOptions as core::default::Default>::default
-<core::fmt::FormattingOptions as core::fmt::Debug>::fmt
 <core::fmt::Sign as core::clone::Clone>::clone
 <core::fmt::Sign as core::cmp::PartialEq>::eq
 <core::fmt::Sign as core::fmt::Debug>::fmt

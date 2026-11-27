@@ -403,10 +403,10 @@ rustc_queries! {
     }
 
     /// The root query triggering all analysis passes like typeck or borrowck.
-    query analysis(key: ()) {
+    query required_analysis(key: ()) {
         eval_always
         desc {
-            "running analysis passes on crate `{}`",
+            "running required analysis passes on crate `{}`",
             tcx.crate_name(LOCAL_CRATE),
         }
     }
@@ -2729,7 +2729,7 @@ rustc_queries! {
         desc { "resolving instance `{}`", ty::Instance::new_raw(key.value.0, key.value.1) }
     }
 
-    query reveal_opaque_types_in_bounds(key: ty::Clauses<'tcx>) -> ty::Clauses<'tcx> {
+    query reveal_opaque_types_in_bounds(key: ty::ParamEnv<'tcx>) -> ty::ParamEnv<'tcx> {
         desc { "revealing opaque types in `{:?}`", key }
     }
 

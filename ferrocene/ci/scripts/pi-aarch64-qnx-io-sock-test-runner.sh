@@ -11,7 +11,6 @@ nto_target=aarch64-unknown-nto-qnx710_iosock
 remote_ip=172.23.4.18
 ci_dir=/sdcard/scratch/ferrocene-ci
 
-./x build src/tools/remote-test-server --target "${nto_target}"
 export SSHPASS="qnxuser"
 sshpass -e ssh qnxuser@${remote_ip} rm -rf $ci_dir
 sshpass -e ssh qnxuser@${remote_ip} mkdir $ci_dir

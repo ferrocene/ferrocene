@@ -114,6 +114,7 @@
 #![feature(allow_internal_unstable)]
 #![feature(arbitrary_self_types_pointers)]
 #![feature(auto_traits)]
+#![feature(cfg_overflow_checks)]
 #![feature(cfg_sanitize)]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_ub_checks)]
@@ -256,6 +257,9 @@ pub use crate::macros::cfg_select;
 #[macro_use]
 mod internal_macros;
 
+#[unstable(feature = "gca_min_const_items", issue = "132980", implied_by = "gca_adts")]
+pub use crate::marker::gca;
+
 #[path = "num/shells/legacy_int_modules.rs"]
 mod legacy_int_modules;
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -352,7 +356,6 @@ pub mod future;
 pub mod task;
 
 /* Heap memory allocator trait */
-#[allow(missing_docs)]
 pub mod alloc;
 
 // note: does not need to be public

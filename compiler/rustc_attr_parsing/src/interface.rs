@@ -41,6 +41,7 @@ pub struct EmitAttribute(
 /// context, through which all attributes can be lowered.
 pub struct AttributeParser<'sess> {
     pub(crate) attr_tools: Option<&'sess RegisteredTools>,
+    pub(crate) lint_tools: Option<&'sess RegisteredTools>,
     pub(crate) features: Option<&'sess Features>,
     pub(crate) sess: &'sess Session,
     pub(crate) should_emit: ShouldEmit,
@@ -116,6 +117,7 @@ impl<'sess> AttributeParser<'sess> {
             features,
             should_emit,
             None,
+            None,
         );
         assert!(parsed.len() <= 1);
         parsed.pop()
@@ -145,9 +147,7 @@ impl<'sess> AttributeParser<'sess> {
     /// This can be used for attributes that would be removed before `rustc_ast_lowering`, such as attributes on macro calls.
     ///
     /// Try to use this as little as possible. Attributes *should* be lowered during
-    /// `rustc_ast_lowering`. Some attributes require access to features to parse, which would
-    /// crash if you tried to do so through [`parse_limited_all`](Self::parse_limited_all).
-    /// Therefore, if `parse_filter` is None, then features *must* be provided.
+    /// `rustc_ast_lowering`.
     pub fn parse_limited_all(
         sess: &'sess Session,
         attrs: &[ast::Attribute],
@@ -158,8 +158,14 @@ impl<'sess> AttributeParser<'sess> {
         features: Option<&'sess Features>,
         should_emit: ShouldEmit,
         attr_tools: Option<&'sess RegisteredTools>,
+        lint_tools: Option<&'sess RegisteredTools>,
     ) -> Vec<Attribute> {
-        let mut p = AttributeParser { features, attr_tools, parse_filter, sess, should_emit };
+        // Some attributes require access to features to parse.
+        // Therefore, if `parse_filter` is None, then features *must* be provided.
+        assert!(parse_filter.is_some() || features.is_some());
+
+        let mut p =
+            AttributeParser { features, attr_tools, lint_tools, parse_filter, sess, should_emit };
         p.parse_attribute_list(
             attrs,
             target_span,
@@ -237,7 +243,14 @@ impl<'sess> AttributeParser<'sess> {
         parse_fn: fn(cx: &mut AcceptContext<'_, '_>, item: &I) -> T,
         template: &AttributeTemplate,
     ) -> T {
-        let mut parser = Self { features, attr_tools: None, parse_filter: None, sess, should_emit };
+        let mut parser = Self {
+            features,
+            attr_tools: None,
+            lint_tools: None,
+            parse_filter: None,
+            sess,
+            should_emit,
+        };
         let mut emit_lint = |lint_id: LintId, span: MultiSpan, kind: EmitAttribute| {
             sess.psess.dyn_buffer_lint_sess(lint_id.lint, span, target_node_id, kind.0)
         };
@@ -280,11 +293,13 @@ impl<'sess> AttributeParser<'sess> {
         sess: &'sess Session,
         features: &'sess Features,
         attr_tools: &'sess RegisteredTools,
+        lint_tools: &'sess RegisteredTools,
         should_emit: ShouldEmit,
     ) -> Self {
         Self {
             features: Some(features),
             attr_tools: Some(attr_tools),
+            lint_tools: Some(lint_tools),
             parse_filter: None,
             sess,
             should_emit,
@@ -372,14 +387,20 @@ impl<'sess> AttributeParser<'sess> {
                     let inner_span = lower_span(n.item.span);
 
                     let accepter = ATTRIBUTE_PARSERS.accepters.get(parts.as_slice());
+
+                    self.check_attribute_safety(
+                        &attr_path,
+                        inner_span,
+                        n.item.unsafety,
+                        if let Some(accept) = accepter {
+                            accept.safety
+                        } else {
+                            AttributeSafety::Normal
+                        },
+                        &mut emit_lint,
+                    );
+
                     if let Some(accept) = accepter {
-                        self.check_attribute_safety(
-                            &attr_path,
-                            inner_span,
-                            n.item.unsafety,
-                            accept.safety,
-                            &mut emit_lint,
-                        );
                         self.check_attribute_stability(&attr_path, attr_span, accept.stability);
                         if let [part] = parts.as_slice() {
                             debug_assert!(BUILTIN_ATTRIBUTE_SET.contains(part));
@@ -490,14 +511,6 @@ impl<'sess> AttributeParser<'sess> {
                             style: attr.style,
                             span: attr_span,
                         };
-
-                        self.check_attribute_safety(
-                            &attr_path,
-                            inner_span,
-                            n.item.unsafety,
-                            AttributeSafety::Normal,
-                            &mut emit_lint,
-                        );
 
                         if !matches!(self.should_emit, ShouldEmit::Nothing)
                             && Target::from_ast_target(&ast_target) == Target::Crate

@@ -1,5 +1,12 @@
-//@ revisions: current next
-//@[next] compile-flags: -Znext-solver
+// Ferrocene addition: The failing query stack in this test differs between panic=unwind and
+// panic=abort configurations, leading to a different set of error messages
+//
+//@ revisions: current-unwind current-abort next-unwind next-abort
+//@[current-unwind] needs-unwind
+//@[current-abort] compile-flags: -C panic=abort
+//@[next-unwind] needs-unwind
+//@[next-unwind] compile-flags: -Znext-solver
+//@[next-abort] compile-flags: -Znext-solver -C panic=abort
 //@ ignore-compare-mode-next-solver (explicit revisions)
 //@ known-bug: #139788
 

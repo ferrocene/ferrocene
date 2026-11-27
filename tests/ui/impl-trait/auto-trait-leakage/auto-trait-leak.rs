@@ -1,3 +1,10 @@
+// Ferrocene addition: The failing query stack in this test differs between panic=unwind and
+// panic=abort configurations, leading to a different set of error messages
+//
+//@ revisions: unwind abort
+//@ [unwind] needs-unwind
+//@ [abort] compile-flags: -C panic=abort
+
 use std::cell::Cell;
 use std::rc::Rc;
 //@ ignore-parallel-frontend query cycle

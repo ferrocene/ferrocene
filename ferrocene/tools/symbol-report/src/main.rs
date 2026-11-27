@@ -25,7 +25,7 @@ use rustc_middle::ty::print::{
 };
 use rustc_middle::ty::{Instance, TyCtxt};
 use rustc_session::EarlyDiagCtxt;
-use rustc_session::config::ErrorOutputType;
+use rustc_session::output::ErrorOutputType;
 use rustc_span::{Span, Symbol};
 
 static FERROCENE_ANNOTATION_PATH: LazyLock<[Symbol; 2]> =

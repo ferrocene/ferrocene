@@ -84,6 +84,7 @@ macro marker_impls {
 /// [arc]: ../../std/sync/struct.Arc.html
 /// [ub]: ../../reference/behavior-considered-undefined.html
 #[stable(feature = "rust1", since = "1.0.0")]
+#[lang = "send"]
 #[rustc_diagnostic_item = "Send"]
 #[diagnostic::on_unimplemented(
     message = "`{Self}` cannot be sent between threads safely",
@@ -1087,15 +1088,13 @@ struct HackGcaAdtsFeature;
 /// const BAR<const N: usize>: usize = gca!(N);
 /// const FOO<const N: usize>: usize = gca!(BAR::<N>);
 /// ```
-#[rustc_builtin_macro(gca)]
+#[allow_internal_unstable(internal_syntax)]
 // HACK: abuse implied_by, this should be enabled if gca_min_const_items or gca_adts is enabled,
 // neither one is more particularly special than the other
 #[unstable(feature = "gca_min_const_items", issue = "132980", implied_by = "gca_adts")]
-#[macro_export]
-macro_rules! gca {
-    ($($arg:tt)*) => {
-        /* compiler built-in */
-    };
+#[diagnostic::opaque]
+pub macro gca($($arg:tt)*) {
+    k#gca($($arg)*)
 }
 
 /// A marker for types which can be used as types of `const` generic parameters.

@@ -165,6 +165,43 @@ details.partial-annotation summary::after {
     border-radius: 2px;
 }
 
+.functions .branch-marker {
+    display: inline-flex;
+    gap: 0.2em;
+    font-size: 0.7em;
+    font-weight: bold;
+    line-height: 1;
+    vertical-align: middle;
+    cursor: help;
+    user-select: none;
+}
+.functions .branch-marker-true,
+.functions .branch-marker-false {
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+    color: white;
+}
+.functions .branch-marker-true::before {
+    content: "T";
+}
+.functions .branch-marker-false::before {
+    content: "F";
+}
+.functions .branch-marker-true.tested,
+.functions .branch-marker-false.tested {
+    background-color: var(--var-tested);
+}
+.functions .branch-marker-true.untested,
+.functions .branch-marker-false.untested {
+    background-color: var(--var-untested);
+}
+
+.functions .branch-group:hover .branch-text {
+    outline: 1px dashed currentColor;
+    outline-offset: 1px;
+    border-radius: 2px;
+}
+
 .functions .line-ignored {
     color: var(--var-ignored);
     cursor: copy;

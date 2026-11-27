@@ -75,6 +75,10 @@ pub(crate) fn instrument_coverage(
     // Tell the compiler to instrument these crates.
     cargo.rustdocflag("-Cinstrument-coverage");
     cargo.rustflag("-Cinstrument-coverage");
+    // Also emit branch coverage regions and regions for `&&` / `||` logical
+    // expressions.
+    cargo.rustdocflag("-Zcoverage-options=condition");
+    cargo.rustflag("-Zcoverage-options=condition");
     // Tell the crate that it's being instrumented.
     cargo.rustflag("--cfg=ferrocene_coverage");
     // Coverage tests must run with panic=abort, we don't certify unwinding.

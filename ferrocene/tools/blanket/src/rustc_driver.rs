@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 use anyhow::{Context as _, Result, bail};
 use build_helper::symbol_report::{Function, SymbolReport};
-use llvm_profparser::CoverageReport;
+use llvm_profparser::{CoverageReport, SourceLocation};
 
-use crate::{Annotation, FunctionCoverage, ShowCommand, Span};
+use crate::{Annotation, FunctionCoverage, RegionInfo, ShowCommand, Span};
 
 /// When a macro is defined in `core` but is used in `alloc` the resulting
 /// expanded items will have their paths in debuginfo in a form like this:
@@ -27,6 +27,7 @@ pub fn coverage(
     cmd: &ShowCommand,
     report: &CoverageReport,
     path_remapping: Option<&str>,
+    region_infos: &BTreeMap<PathBuf, BTreeMap<SourceLocation, Vec<RegionInfo>>>,
 ) -> Result<Vec<FunctionCoverage>> {
     let SymbolReport { symbols, annotations }: SymbolReport = serde_json::from_reader(
         File::open(&cmd.symbol_report)
@@ -59,6 +60,7 @@ pub fn coverage(
             &cmd.ferrocene,
             qualified_name,
             annotations,
+            region_infos,
         )?);
     }
 

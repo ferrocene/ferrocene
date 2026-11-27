@@ -46,7 +46,7 @@ pub fn coverage(
             )
         })
         .collect::<BTreeMap<_, _>>();
-    for Function { qualified_name, filename, start_line, end_line, linkage_name: _ } in symbols {
+    for Function { qualified_name, filename, start_line, end_line, linkage_name } in symbols {
         let annotations = annotations.get_mut(&filename);
         let span = Span {
             filename: remap_filename(filename.into(), path_remapping),
@@ -58,6 +58,7 @@ pub fn coverage(
             span,
             &cmd.ferrocene,
             qualified_name,
+            &linkage_name,
             annotations,
         )?);
     }

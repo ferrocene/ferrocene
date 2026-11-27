@@ -751,6 +751,11 @@ jobs:
           name: Build remote-test-server
           command: |
             SCRIPT="./x build src/tools/remote-test-server --target aarch64-unknown-nto-qnx710_iosock" ferrocene/ci/run.sh
+      # FIXME put this in the right image
+      - run:
+          name: Install sshpass
+          background: true
+          command: sudo yum -y install sshpass
       - run:
           name: Execute remote-test-server in the background
           background: true

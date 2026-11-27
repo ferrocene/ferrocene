@@ -1,40 +1,38 @@
 error[E0391]: cycle detected when computing type of opaque `cycle1::{opaque#0}`
-  --> $DIR/auto-trait-leak.rs:11:16
+  --> $DIR/auto-trait-leak.rs:18:16
    |
 LL | fn cycle1() -> impl Clone {
    |                ^^^^^^^^^^
    |
 note: ...which requires borrow-checking `cycle1`...
-  --> $DIR/auto-trait-leak.rs:11:1
+  --> $DIR/auto-trait-leak.rs:18:1
    |
 LL | fn cycle1() -> impl Clone {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^
    = note: ...which requires promoting constants in MIR for `cycle1`...
-   = note: ...which requires checking if `cycle1` contains FFI-unwind calls...
    = note: ...which requires building MIR for `cycle1`...
    = note: ...which requires match-checking `cycle1`...
 note: ...which requires type-checking `cycle1`...
-  --> $DIR/auto-trait-leak.rs:12:5
+  --> $DIR/auto-trait-leak.rs:19:5
    |
 LL |     send(cycle2().clone());
    |     ^^^^^^^^^^^^^^^^^^^^^^
    = note: ...which requires evaluating trait selection obligation `cycle2::{opaque#0}: core::marker::Send`...
 note: ...which requires computing type of opaque `cycle2::{opaque#0}`...
-  --> $DIR/auto-trait-leak.rs:17:16
+  --> $DIR/auto-trait-leak.rs:24:16
    |
 LL | fn cycle2() -> impl Clone {
    |                ^^^^^^^^^^
 note: ...which requires borrow-checking `cycle2`...
-  --> $DIR/auto-trait-leak.rs:17:1
+  --> $DIR/auto-trait-leak.rs:24:1
    |
 LL | fn cycle2() -> impl Clone {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^
    = note: ...which requires promoting constants in MIR for `cycle2`...
-   = note: ...which requires checking if `cycle2` contains FFI-unwind calls...
    = note: ...which requires building MIR for `cycle2`...
    = note: ...which requires match-checking `cycle2`...
 note: ...which requires type-checking `cycle2`...
-  --> $DIR/auto-trait-leak.rs:18:5
+  --> $DIR/auto-trait-leak.rs:25:5
    |
 LL |     send(cycle1().clone());
    |     ^^^^^^^^^^^^^^^^^^^^^^

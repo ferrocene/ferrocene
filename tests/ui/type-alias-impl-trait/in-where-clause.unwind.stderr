@@ -1,11 +1,11 @@
 error[E0391]: cycle detected when computing type of opaque `Bar::{opaque#0}`
-  --> $DIR/in-where-clause.rs:5:12
+  --> $DIR/in-where-clause.rs:12:12
    |
 LL | type Bar = impl Sized;
    |            ^^^^^^^^^^
    |
 note: ...which requires borrow-checking `foo`...
-  --> $DIR/in-where-clause.rs:9:1
+  --> $DIR/in-where-clause.rs:16:1
    |
 LL | / fn foo() -> Bar
 LL | | where
@@ -17,13 +17,13 @@ LL | |     Bar: Send,
    = note: ...which requires match-checking `foo`...
    = note: ...which requires type-checking `foo`...
 note: ...which requires computing revealed normalized predicates of `foo::{constant#0}`...
-  --> $DIR/in-where-clause.rs:13:9
+  --> $DIR/in-where-clause.rs:20:9
    |
 LL |     [0; 1 + 2]
    |         ^^^^^
    = note: ...which requires revealing opaque types in `ParamEnv { caller_bounds: [Binder { value: CompressedTrait([Alias(No, Alias { kind: Opaque { def_id: DefId(0:4 ~ in_where_clause[cb1b]::Bar::{opaque#0}) }, args: [], .. })] as SEND), bound_vars: [] }] }`...
 note: ...which requires computing type of `Bar::{opaque#0}`...
-  --> $DIR/in-where-clause.rs:5:12
+  --> $DIR/in-where-clause.rs:12:12
    |
 LL | type Bar = impl Sized;
    |            ^^^^^^^^^^

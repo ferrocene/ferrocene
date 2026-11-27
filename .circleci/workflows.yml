@@ -183,7 +183,6 @@ jobs:
           # code into the tarball we ship to customers.
           llvm_subset: false
 
-
   x86_64-linux-dist-targets:
     executor: *executor-x86_64-runner
     resource_class: ferrocene/k8s-amd64-large
@@ -733,6 +732,42 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
+  # Test on Pi
+  pi-job-test-container:
+    executor: *executor-x86_64-runner
+    resource_class: ferrocene/k8s-amd64-medium
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710_iosock
+      SCRIPT: |
+        RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.23.4.18:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call --test-variant 2021 --tests
+    steps:
+      - ferrocene/aws_oidc_auth
+      - ferrocene/checkout:
+          llvm_subset: true
+      - ferrocene/setup:
+          awscli_version: << pipeline.parameters.awscli-version >>
+      - setup-qnx-toolchain:
+          source-env-script: true
+      - ferrocene/restore_from_job:
+          from_job: x86_64-linux-build
+      # this needs to be blocking; `background: true` results in a race condition with
+      # the next step over locking the `/build` directory
+      - run:
+          name: Build remote-test-server
+          command: |
+            SCRIPT="./x build src/tools/remote-test-server --target aarch64-unknown-nto-qnx710_iosock" ferrocene/ci/run.sh
+      # FIXME put this in the right image
+      - run:
+          name: Install sshpass
+          background: true
+          command: sudo yum -y install sshpass
+      - run:
+          name: Execute remote-test-server in the background
+          background: true
+          command: ferrocene/ci/scripts/pi-aarch64-qnx-io-sock-test-runner.sh
+      - ferrocene/ci
+
   # Test VMs
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
@@ -959,6 +994,7 @@ workflows:
             - x86_64-qnx-test-library-compiletest
             - x86_64-qnx8-test-library-compiletest
             - aarch64-qnx-test-library-compiletest
+            - aarch64-qnx-iosock-test-library-compiletest
             - aarch64-qnx8-test-library-compiletest
             - aarch64-none-test-library-compiletest
             - aarch64-none-test-target-cpu-library-compiletest
@@ -1240,6 +1276,10 @@ workflows:
           requires:
             - x86_64-linux-build
             - build-docker--emulator--x86_64
+
+      - pi-job-test-container:
+          name: aarch64-qnx-iosock-test-library-compiletest
+          requires: [x86_64-linux-build]
 
       - aarch64-qnx8-generic-test-vm:
           name: aarch64-qnx8-test-library-compiletest
